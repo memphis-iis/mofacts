@@ -109,11 +109,11 @@ function defaultUnitEngine(curExperimentData) {
         if(index >= hintLevel){
           clozeMissingSyllables += syllablesArray[index];
           if (syllablesArray[index].indexOf(' ') >= 0) {
-            clozeAnswer += '__ __';
-            clozeAnswerOnlyUnderscores += '__ __';
+            clozeAnswer += '&nbsp;<u>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</u>&nbsp;<u>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</u>';
+            clozeAnswerOnlyUnderscores += '&nbsp;<u>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</u>&nbsp;<u>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</u>';
           } else {
-            clozeAnswer += '____';
-            clozeAnswerOnlyUnderscores += '____';
+            clozeAnswer += '<u>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</u>';
+            clozeAnswerOnlyUnderscores += '<u>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</u>';
           }
         } else {
           clozeAnswer += syllablesArray[index];
@@ -139,12 +139,13 @@ function defaultUnitEngine(curExperimentData) {
       // our second cloze part should be our syllables, so
       // if the answer sans underscores doesn't end in whitespace,
       // remove leading whitespace from part 3
+      
       if (clozeQuestionParts[2].trim().charAt(0) === '_' &&
                 clozeAnswerNoUnderscores.slice(-1) != ' ') {
         clozeQuestionParts[2] = clozeQuestionParts[2].trim();
       }
-
-      const clozeQuestion = question.replace(/([_]+[ ]?)+/, '<u>' + clozeAnswer.split(' ').join('</u> <u>') + '</u> ');
+      var regex = /([_]+[ ]?)+/ig;
+      const clozeQuestion = question.replaceAll(regex, '<u>' + clozeAnswer.split(' ').join('</u> <u>') + '</u> ');
       clozeQuestionParts = clozeQuestion;
 
       console.log('replaceClozeWithSyllables2:', clozeQuestion, clozeMissingSyllables, clozeQuestionParts,
@@ -198,12 +199,18 @@ function defaultUnitEngine(curExperimentData) {
       }else{
         let answerLocation = currentQuestion.indexOf(' _');
         if(answerLocation != -1){
-          let answerBlanks = ""
-          currentQuestion = currentQuestion.replaceAll("_","");
-          for(i=0;i<currentStimAnswerWordCount;i++){
-            answerBlanks += "&nbsp;<u>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</u>";
+          var regex = regex = / _/gi, result, indecies = [];
+          while ( (result = regex.exec(currentQuestion)) ) {
+            indecies.push(result.index);
           }
-          currentQuestion = currentQuestion.slice(0,answerLocation) + answerBlanks + currentQuestion.slice(answerLocation);
+          for(index in indecies){
+            let answerBlanks = ""
+            currentQuestion = currentQuestion.replaceAll("_","");
+            for(i=0;i<currentStimAnswerWordCount;i++){
+              answerBlanks += "&nbsp;<u>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</u>";
+            }
+            currentQuestion = currentQuestion.slice(0,index) + answerBlanks + currentQuestion.slice(index);
+          }
         }
       }
 
