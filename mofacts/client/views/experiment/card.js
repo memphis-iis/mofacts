@@ -438,9 +438,6 @@ Template.card.events({
     //Add dialogue to inform user that the question will not be counted
     e.preventDefault();
     $('#removalFeedback').show();
-    var t = jQuery.Event("keypress");
-    t.which = 13; //choose the one you want
-    $("#userAnswer").trigger(t);
     removeCardByUser();
     
   },
@@ -1403,14 +1400,12 @@ async function showUserFeedback(isCorrect, feedbackMessage, afterAnswerFeedbackC
         .text('Continuing in: ')
         .show();
       var countDownStart;
-      if(Session.get('wasReportedForRemoval') == false){
-        if(Session.get('isRefutation')){
-          countDownStart = new Date().getTime() + getCurrentDeliveryParams().refutationstudy;
-        }
-        else{
-          countDownStart = new Date().getTime() + getCurrentDeliveryParams().reviewstudy;
-        }
-      } 
+      if(Session.get('isRefutation')){
+        countDownStart = new Date().getTime() + getCurrentDeliveryParams().refutationstudy;
+      }
+      else{
+        countDownStart = new Date().getTime() + getCurrentDeliveryParams().reviewstudy;
+      }
       var CountdownTimerInterval = setInterval(function() {
         var now = new Date().getTime()
         var distance = countDownStart - now;
@@ -1489,7 +1484,8 @@ function doClearForceCorrect(doForceCorrect, afterAnswerFeedbackCbBound) {
   }
 }
 
-async function afterAnswerFeedbackCallback(trialEndTimeStamp, source, userAnswer, isTimeout, isCorrect) {
+async function afterAnswerFeedbackCallback(trialEndTimeStamp, source, userAnswer, isTimeout, isCorrect, isShortcut) {
+  Session.set('removeQuestionShortcut', [trialEndTimeStamp, source, userAnswer, isTimeout, isCorrect])
   const testType = getTestType();
   const deliveryParams = Session.get('currentDeliveryParams');
 
@@ -1497,13 +1493,19 @@ async function afterAnswerFeedbackCallback(trialEndTimeStamp, source, userAnswer
   if (Session.get('dialogueHistory')) {
     dialogueHistory = JSON.parse(JSON.stringify(Session.get('dialogueHistory')));
   }
-  const reviewTimeout = getReviewTimeout(testType, deliveryParams, isCorrect, dialogueHistory);
+  const reviewTimeout = isShortcut ? 0 : getReviewTimeout(testType, deliveryParams, isCorrect, dialogueHistory);
 
   // Stop previous timeout, log response data, and clear up any other vars for next question
   clearCardTimeout();
 
-  
-  prepareCard(reviewTimeout, async function() {
+  if(Session.get('unitType') == "model")
+    Session.set('engineIndices', await engine.calculateIndices());
+  else
+    Session.set('engineIndices', undefined);
+
+  const timeout = Meteor.setTimeout(async function() {
+    Session.set('removeQuestionShortcut', undefined);
+    Session.set('CurTimeoutId', undefined);
     let wasReportedForRemoval = Session.get('wasReportedForRemoval');
     let reviewEnd = Date.now()
     const answerLogRecord = gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect,
@@ -1560,13 +1562,16 @@ async function afterAnswerFeedbackCallback(trialEndTimeStamp, source, userAnswer
     }
     hideUserFeedback();
     $('#userAnswer').val('');
-  });
+    prepareCard();
+  }, reviewTimeout)
+
+  Session.set('CurTimeoutId', timeout)
 }
 
 function getReviewTimeout(testType, deliveryParams, isCorrect, dialogueHistory) {
   let reviewTimeout = 0;
-  let wasReportedForRemoval = Session.get('wasReportedForRemoval');
-  if (testType === 's' || testType === 'f' || wasReportedForRemoval) {
+
+  if (testType === 's' || testType === 'f') {
     // Just a study - note that the purestudy timeout is used for the QUESTION
     // timeout, not the display timeout after the ANSWER. However, we need a
     // timeout for our logic below so just use the minimum
@@ -1947,29 +1952,20 @@ async function cardStart() {
   }
 }
 
-async function prepareCard(reviewTimeout, cb) {
-  if(Session.get('unitType') == "model")
-    Session.set('engineIndices', await engine.calculateIndices());
-  else
+async function prepareCard() {
+  Meteor.logoutOtherClients();
+  Session.set('wasReportedForRemoval', false);
+  Session.set('displayReady', false);
+  Session.set('currentDisplay', {});
+  Session.set('clozeQuestionParts', undefined);
+  console.log('displayReadyFalse, prepareCard');
+  if (engine.unitFinished()) {
+    unitIsFinished('Unit Engine');
+  } else {
+    await engine.selectNextCard(Session.get('engineIndices'));
+    await newQuestionHandler();
     Session.set('engineIndices', undefined);
-  Meteor.setTimeout(async function() {
-    if(cb){
-      cb();
-    }
-    Meteor.logoutOtherClients();
-    Session.set('wasReportedForRemoval', false);
-    Session.set('displayReady', false);
-    Session.set('currentDisplay', {});
-    Session.set('clozeQuestionParts', undefined);
-    console.log('displayReadyFalse, prepareCard');
-    if (engine.unitFinished()) {
-      unitIsFinished('Unit Engine');
-    } else {
-      await engine.selectNextCard(Session.get('engineIndices'));
-      await newQuestionHandler();
-      Session.set('engineIndices', undefined);
-    }
-  }, reviewTimeout);
+  }
 }
 
 // TODO: this probably no longer needs to be separate from prepareCard
@@ -2870,6 +2866,8 @@ async function showRemovalButton() {
 }
 
 async function removeCardByUser() {
+  Meteor.clearTimeout(Session.get('CurTimeoutId'));
+  Session.set('CurTimeoutId', undefined)
   let clusterIndex = Session.get('clusterIndex');
   let stims = getStimCluster(clusterIndex).stims; 
   let whichStim = engine.findCurrentCardInfo().whichStim;
@@ -2887,6 +2885,9 @@ async function removeCardByUser() {
     Session.set('dialogueLoopStage', 'exit');
     dialogueContinue();
   }
+  let cbVar = Session.get('removeQuestionShortcut');
+  afterAnswerFeedbackCallback(cbVar[0], cbVar[1], cbVar[2], cbVar[3], cbVar[4], true);
+  Session.set('removeQuestionShortcut', undefined);
 }
 
 async function processUserTimesLog() {
@@ -3042,7 +3043,12 @@ async function processUserTimesLog() {
         }
       }
       console.log('RESUME FINISHED: next-question logic to commence');
-      await prepareCard(0);
+
+      if(Session.get('unitType') == "model")
+        Session.set('engineIndices', await engine.calculateIndices());
+      else
+        Session.set('engineIndices', undefined);
+      await prepareCard();
     }
   }
 }
