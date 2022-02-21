@@ -1249,7 +1249,7 @@ function modelUnitEngine() {
 
       if(indices === undefined || indices === null){
         console.log('indices unset, calculating now')
-        indices = calculateIndices();
+        indices = this.calculateIndices();
       }
 
       newClusterIndex = indices.clusterIndex;
