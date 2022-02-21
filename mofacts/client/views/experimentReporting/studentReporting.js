@@ -220,7 +220,6 @@ async function drawDashboard(studentId, selectedTdfId){
   Session.set('stimsSeen',stimsSeen);
   Session.set('curTotalAttempts',totalAttempts);
   Session.set('practiceDuration', totalPracticeDurationMinutesDisplay);
-  Session.set('itemMasteryRate', itemMasteryRate.(2));
   Session.set('itemMasteryTime',estimatedTimeMastery.toFixed(0));
   if(totalAttempts >= masteryDisplay){
     Session.set('displayItemMasteryRate',true);
