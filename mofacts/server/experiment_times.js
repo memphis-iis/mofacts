@@ -37,13 +37,20 @@ export {createExperimentExport};
 let FIELDSDS = JSON.parse(JSON.stringify(outputFields));
 
 // Helper to transform our output record into a delimited record
-function delimitedRecord(rec) {
+function delimitedRecord(rec, listOfDynamicStimTags, isHeader = false) {
   const vals = new Array(FIELDSDS.length);
   for (let i = 0; i < FIELDSDS.length; ++i) {
     vals[i] = _.trim(rec[FIELDSDS[i]])
         .replace(/\s+/gm, ' ') // Norm ws and remove non-space ws
         .slice(0, 255) // Respect len limits for data shop
         .replace(/\s+$/gm, ''); // Might have revealed embedded space at end
+  }
+  for(let i = 0; i < listOfDynamicStimTags.length; i++){
+    let record = isHeader ? `CF (${listOfDynamicStimTags[i]})` : rec[`CF (${listOfDynamicStimTags[i]})`];
+    vals.push(_.trim(record)
+      .replace(/\s+/gm, ' ') // Norm ws and remove non-space ws
+      .slice(0, 255) // Respect len limits for data shop
+      .replace(/\s+$/gm, '')); // Might have revealed embedded space at end
   }
 
   return vals.join('\t');
@@ -110,7 +117,7 @@ async function createExperimentExport(expName, isFirstInFileArray = true) {
   });
 
   if(isFirstInFileArray) {
-    record += delimitedRecord(header) + "\n";
+    record += delimitedRecord(header, listOfDynamicStimTags, true) + "\n";
   }
 
   Meteor.call('updatePerformanceData', 'utlQuery', 'experiment_times.createExperimentExport', 'SERVER_REPORT');
@@ -122,11 +129,10 @@ async function createExperimentExport(expName, isFirstInFileArray = true) {
         const stimulusKC = history.kc_default;
         history = getHistory(history);
         const dynamicStimTagValues = await getValuesOfStimTagList(expName, clusterKC, stimulusKC, listOfDynamicStimTags);
-
         for (const tag of Object.keys(dynamicStimTagValues)) {
           history["CF (" + tag + ")"] = dynamicStimTagValues[tag];
         }
-        record += await delimitedRecord(history) + "\n";
+        record += await delimitedRecord(history, listOfDynamicStimTags, false) + "\n";
       } catch (e) {
         serverConsole('There was an error populating the record - it will be skipped', e, e.stack);
       }
