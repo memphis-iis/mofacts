@@ -1383,24 +1383,19 @@ async function showUserFeedback(isCorrect, feedbackMessage, afterAnswerFeedbackC
         .addClass('text-align')
         .text('Continuing in: ')
         .show();
-      var countDownStart;
-      if(Session.get('isRefutation')){
-        countDownStart = new Date().getTime() + getCurrentDeliveryParams().refutationstudy;
+      var countDownStart = new Date().getTime();
+      if(Session.get('isRefutation') && getCurrentDeliveryParams().refutationstudy){
+        countDownStart += getCurrentDeliveryParams().refutationstudy;
       }
       else{
-        countDownStart = new Date().getTime() + getCurrentDeliveryParams().reviewstudy;
+        countDownStart += getCurrentDeliveryParams().reviewstudy;
       }
       var CountdownTimerInterval = setInterval(function() {
         var now = new Date().getTime()
         var distance = countDownStart - now;
         var seconds = Math.ceil((distance % (1000 * 60)) / 1000);
         
-        try{
-          document.getElementById("CountdownTimer").innerHTML = 'Continuing in: ' + seconds + "s";
-        }
-        catch{
-          clearInterval(CountdownTimerInterval);
-        }
+        document.getElementById("CountdownTimer").innerHTML = 'Continuing in: ' + seconds + "s";
       
         // If the count down is finished, end interval and clear CountdownTimer
         if (distance < 0) {
