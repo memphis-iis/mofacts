@@ -438,7 +438,11 @@ Template.card.events({
     //Add dialogue to inform user that the question will not be counted
     e.preventDefault();
     $('#removalFeedback').show();
+    var t = jQuery.Event("keypress");
+    t.which = 13; //choose the one you want
+    $("#userAnswer").trigger(t);
     removeCardByUser();
+    
   },
 
   'click #dialogueIntroExit': function() {
@@ -1399,13 +1403,14 @@ async function showUserFeedback(isCorrect, feedbackMessage, afterAnswerFeedbackC
         .text('Continuing in: ')
         .show();
       var countDownStart;
-      if(Session.get('isRefutation')){
-        countDownStart = new Date().getTime() + getCurrentDeliveryParams().refutationstudy;
-      }
-      else{
-        countDownStart = new Date().getTime() + getCurrentDeliveryParams().reviewstudy;
-      }
-  
+      if(Session.get('wasReportedForRemoval') == false){
+        if(Session.get('isRefutation')){
+          countDownStart = new Date().getTime() + getCurrentDeliveryParams().refutationstudy;
+        }
+        else{
+          countDownStart = new Date().getTime() + getCurrentDeliveryParams().reviewstudy;
+        }
+      } 
       var CountdownTimerInterval = setInterval(function() {
         var now = new Date().getTime()
         var distance = countDownStart - now;
@@ -1560,8 +1565,8 @@ async function afterAnswerFeedbackCallback(trialEndTimeStamp, source, userAnswer
 
 function getReviewTimeout(testType, deliveryParams, isCorrect, dialogueHistory) {
   let reviewTimeout = 0;
-
-  if (testType === 's' || testType === 'f') {
+  let wasReportedForRemoval = Session.get('wasReportedForRemoval');
+  if (testType === 's' || testType === 'f' || wasReportedForRemoval) {
     // Just a study - note that the purestudy timeout is used for the QUESTION
     // timeout, not the display timeout after the ANSWER. However, we need a
     // timeout for our logic below so just use the minimum
