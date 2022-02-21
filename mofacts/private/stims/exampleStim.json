@@ -26,7 +26,8 @@
                             "startDistance": 0,
                             "itemId": -1663641813,
                             "clozeId": -650016024,
-                            "originalItem": "__________ are found throughout the nervous system, and in the brain they greatly outnumber neurons."
+                            "originalItem": "__________ are found throughout the nervous system, and in the brain they greatly outnumber neurons.",
+                            "allowStimulusDropping": true
                         }
                     }
                 ]
