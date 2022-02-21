@@ -148,7 +148,10 @@ const defaultBehaviorRoutes = [
   'signIn',
   'signInSouthwest',
   'signUp',
-  'profileSouthwest',
+  'tabwarning',
+];
+
+const restrictedRoutes = [
   'multiTdfSelect',
   'turkWorkflow',
   'contentUpload',
@@ -163,7 +166,6 @@ const defaultBehaviorRoutes = [
   'voice',
   'feedback',
   'assetUpload',
-  'tabwarning',
 ];
 
 const getDefaultRouteAction = function(routeName) {
@@ -174,7 +176,27 @@ const getDefaultRouteAction = function(routeName) {
   };
 };
 
+const getRestrictedRouteAction = function(routeName) {
+  return function() {
+    if(Meteor.user()){
+      Session.set('curModule', routeName.toLowerCase());
+      console.log(routeName + ' ROUTE');
+      this.render(routeName);
+    } else {
+      this.redirect('/');
+    }
+  };
+};
+
+
 // set up all routes with default behavior
+for (const route of restrictedRoutes) {
+  Router.route('/' + route, {
+    name: 'client.' + route,
+    action: getRestrictedRouteAction(route),
+  });
+}
+
 for (const route of defaultBehaviorRoutes) {
   Router.route('/' + route, {
     name: 'client.' + route,
