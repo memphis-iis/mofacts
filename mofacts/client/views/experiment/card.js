@@ -110,22 +110,6 @@ turn it on, you need to set <showhistory>true</showhistory> in the
 <deliveryparams> section of the unit where you want it on.
 */
 
-//Jquery get if back button is pushed
-jQuery(document).ready(function($) {
-
-  if (window.history && window.history.pushState) {
-
-    $(window).on('popstate', function() {
-      if(Session.get('loginMode') == 'southwest'){
-        Router.go("/profileSouthwest");
-      } else {
-        Router.go("/profile");
-      }
-    });
-
-  }
-});
-
 // //////////////////////////////////////////////////////////////////////////
 // Global variables and helper functions for them
 
