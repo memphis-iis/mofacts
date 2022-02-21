@@ -94,6 +94,7 @@ function defaultUnitEngine(curExperimentData) {
       if(syllablesArray.length <= 2){
         hintLevel = 0;
       }
+      Session.set('hintLevel', hintLevel);
       let reconstructedAnswer = '';
       let clozeAnswerOnlyUnderscores = '';
       let clozeAnswerNoUnderscores = '';
@@ -291,12 +292,11 @@ function defaultUnitEngine(curExperimentData) {
       Session.set('currentAnswer', currentAnswer);
       Session.set('clozeQuestionParts', clozeQuestionParts);
       Session.set('currentQuestionPart2', currentQuestionPart2PostSylls);
-      Session.set('hintLevel',whichHintLevel);
       newExperimentState.currentAnswerSyllables = currentAnswerSyllables;
       newExperimentState.currentAnswer = currentAnswer;
       newExperimentState.clozeQuestionParts = clozeQuestionParts || null;
       newExperimentState.currentQuestionPart2 = currentQuestionPart2PostSylls;
-      newExperimentState.hintLevel = whichHintLevel;
+      newExperimentState.hintLevel = Session.get('hintLevel');
 
       if (currentDisplay.clozeText) {
         currentDisplay.clozeText = currentQuestionPostSylls;
