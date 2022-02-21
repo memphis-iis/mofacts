@@ -1505,7 +1505,7 @@ async function afterAnswerFeedbackCallback(trialEndTimeStamp, source, userAnswer
         reviewEnd, testType, deliveryParams, dialogueHistory, wasReportedForRemoval);
   
     // Give unit engine a chance to update any necessary stats
-    const practiceTime = reviewEnd - trialStartTimestamp;
+    const practiceTime = answerLogRecord.CF_End_Latency + answerLogRecord.CF_Feedback_Latency;
     await engine.cardAnswered(isCorrect, practiceTime, wasReportedForRemoval);
     const answerLogAction = isTimeout ? '[timeout]' : 'answer';
     //if dialogueStart is set that means the user went through interactive dialogue
@@ -1598,15 +1598,15 @@ function getReviewTimeout(testType, deliveryParams, isCorrect, dialogueHistory) 
 // eslint-disable-next-line max-len
 function gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect, reviewEnd, testType, deliveryParams, dialogueHistory, wasReportedForRemoval) {
   const feedbackType = deliveryParams.feedbackType || 'simple';
-  let cf_feedback_time;
+  let feedbackLatency;
   if(Session.get('dialogueTotalTime')){
-    cf_feedback_time = Session.get('dialogueTotalTime');
+    feedbackLatency = Session.get('dialogueTotalTime');
   }
   else if(userFeedbackStart){
-    cf_feedback_time = reviewEnd - userFeedbackStart;
+    feedbackLatency = reviewEnd - userFeedbackStart;
   }
   else{
-    cf_feedback_time = 0;
+    feedbackLatency = 0;
   }
 
   const firstActionTimestamp = firstKeypressTimestamp || trialEndTimeStamp;
@@ -1617,10 +1617,10 @@ function gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect,
   // Don't count test type trials in progress reporting
   if (testType === 't') {
     endLatency = 0;
-    reviewLatency = -1;
+    feedbackLatency = -1;
   } else if (testType === 's') {
     // Study - we ONLY have review latency, but it is in endLatency
-    reviewLatency = endLatency;
+    feedbackLatency = endLatency;
     endLatency = -1;
     startLatency = -1;
   }
@@ -1783,10 +1783,10 @@ function gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect,
     'CF_Display_Syllable_Indices': hintIndeces,
     'CF_Displayed_Hint_Syllables': hintsDisplayed,
     'CF_Overlearning': false,
-    'CF_Response_Time': responseDuration,
+    'CF_Response_Time': trialEndTimeStamp,
     'CF_Start_Latency': startLatency,
     'CF_End_Latency': endLatency,
-    'CF_Feedback_Latency': cf_feedback_time,
+    'CF_Feedback_Latency': feedbackLatency,
     'CF_Review_Entry': _.trim($('#userForceCorrect').val()),
     'CF_Button_Order': buttonEntries,
     'CF_Item_Removed': Session.get('wasReportedForRemoval') || false,
