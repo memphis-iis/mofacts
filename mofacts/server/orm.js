@@ -120,7 +120,6 @@ function getHistory(history) {
     'CF (Start Latency)': history.cf_start_latency,
     'CF (End Latency)': history.cf_end_latency,
     'CF (Feedback Latency)': history.cf_feedback_latency,
-    'CF (Review Latency)': history.cf_review_latency,
     'CF (Review Entry)': history.cf_review_entry,
     'CF (Button Order)': history.cf_button_order,
     'CF (Item Removed)': history.cf_item_removed,
