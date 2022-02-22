@@ -1527,7 +1527,6 @@ async function afterAnswerFeedbackCallback(trialEndTimeStamp, source, userAnswer
       try {
         await meteorCallAsync('insertHistory', answerLogRecord);
         await updateExperimentState(newExperimentState, 'card.afterAnswerFeedbackCallback');
-        updateCurStudentPerformance(isCorrect, endLatency, wasReportedForRemoval) 
       } catch (e) {
         console.log('error writing history record:', e);
         throw new Error('error inserting history/updating state:', e);
