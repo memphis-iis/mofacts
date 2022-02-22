@@ -2277,7 +2277,6 @@ Meteor.startup(async function() {
               
                 allAnswers = Array.from(allAnswers);
                 if (!cachedSyllables) {
-                  console.log('no cached syllables for this stim, calling server method to create them');
                   Meteor.call('updateStimSyllableCache', stimuliSetId, allAnswers)
                 }
                 results.result = true;
