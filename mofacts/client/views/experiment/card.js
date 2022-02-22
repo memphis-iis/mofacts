@@ -3,7 +3,6 @@ import {
   haveMeteorUser,
   getCurrentDeliveryParams,
   setStudentPerformance,
-  updateCurStudentPerformance,
   getStimCount,
   getStimCluster,
   createStimClusterMapping,
