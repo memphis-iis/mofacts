@@ -166,6 +166,7 @@ const restrictedRoutes = [
   'voice',
   'feedback',
   'assetUpload',
+  'profileSouthwest'
 ];
 
 const getDefaultRouteAction = function(routeName) {
