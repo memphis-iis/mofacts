@@ -133,8 +133,13 @@ function updateCurStudentPerformance(isCorrect, endLatency, wasReportedForRemova
 
 async function setStudentPerformance(studentID, studentUsername, tdfId) {
   console.log('setStudentPerformance:', studentID, studentUsername, tdfId);
-  const studentPerformanceDataRet = await meteorCallAsync('getStudentPerformanceByIdAndTDFId', studentID, tdfId);
   let studentPerformanceData;
+  let studentPerformanceDataRet;
+  if(Session.get('curStudentPerformance')){
+    studentPerformanceDataRet = Session.get('curStudentPerformance');
+  } else {
+    studentPerformanceDataRet = await meteorCallAsync('getStudentPerformanceByIdAndTDFId', studentID, tdfId);
+  }
   if (isEmpty(studentPerformanceDataRet)) {
     studentPerformanceData = {
       numCorrect: 0,
@@ -146,12 +151,12 @@ async function setStudentPerformance(studentID, studentUsername, tdfId) {
     };
   } else {
     studentPerformanceData = {
-      numCorrect: parseInt(studentPerformanceDataRet.numCorrect) || 0,
-      numIncorrect: parseInt(studentPerformanceDataRet.numIncorrect) || 0,
-      lastSeen: parseInt(studentPerformanceDataRet.lastSeen) || 0,
-      stimsSeen:  parseInt(studentPerformanceDataRet.stimsSeen) || 0,
-      totalStimCount: parseInt(studentPerformanceDataRet.totalStimCount) || 0,
-      totalPracticeDuration: parseInt(studentPerformanceDataRet.totalPracticeDuration) || 0,
+      numCorrect: parseInt(studentPerformanceDataRet.numCorrect),
+      numIncorrect: parseInt(studentPerformanceDataRet.numIncorrect),
+      lastSeen: parseInt(studentPerformanceDataRet.lastSeen),
+      stimsSeen:  parseInt(studentPerformanceDataRet.stimsSeen),
+      totalStimCount: parseInt(studentPerformanceDataRet.totalStimCount),
+      totalPracticeDuration: parseInt(studentPerformanceDataRet.totalPracticeDuration)
     };
   }
   const count = (parseInt(studentPerformanceData.numCorrect) + parseInt(studentPerformanceData.numIncorrect));
