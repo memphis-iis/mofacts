@@ -69,6 +69,7 @@ function sessionCleanUp() {
   Session.set('currentUnitNumber', undefined);
   Session.set('currentTdfUnit', undefined);
   Session.set('currentStimuliSet', undefined);
+  Session.set('curStudentPerformance', undefined);
   Session.set('currentDeliveryParams', {});
   Session.set('currentExperimentState', undefined);
   Session.set('displayFeedback',undefined);
