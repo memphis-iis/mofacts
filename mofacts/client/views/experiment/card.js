@@ -3,6 +3,7 @@ import {
   haveMeteorUser,
   getCurrentDeliveryParams,
   setStudentPerformance,
+  updateCurStudentPerformance,
   getStimCount,
   getStimCluster,
   createStimClusterMapping,
@@ -1526,16 +1527,7 @@ async function afterAnswerFeedbackCallback(trialEndTimeStamp, source, userAnswer
       try {
         await meteorCallAsync('insertHistory', answerLogRecord);
         await updateExperimentState(newExperimentState, 'card.afterAnswerFeedbackCallback');
-        let studentData = Session.get('curStudentPerformance')
-        console.log('rusty', studentData);
-        studentData.count++;
-        if(isCorrect){
-          studentData.numCorrect++;
-        } else {
-          studentData.numIncorrect++;
-        }
-        studentData.totalPracticeDuration+= practiceTime;
-        Session.set('curStudentPerformance', studentData);
+        updateCurStudentPerformance(isCorrect, endLatency, wasReportedForRemoval) 
       } catch (e) {
         console.log('error writing history record:', e);
         throw new Error('error inserting history/updating state:', e);
