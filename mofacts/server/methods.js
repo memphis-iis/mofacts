@@ -2261,6 +2261,25 @@ Meteor.startup(async function() {
               try {
                 const rec = {'fileName': filename, 'tdfs': json, 'ownerId': ownerId, 'source': 'upload'};
                 await upsertTDFFile(filename, rec, ownerId);
+                cachedSyllables = StimSyllables.findOne({filename: stimuliSetId});
+                const stims = await getStimuliSetById(stimuliSetId);
+                let allAnswers = new Set();
+                for (const stim of stims) {
+                  const responseParts = stim.correctResponse.toLowerCase().split(';');
+                  const answerArray = responseParts.filter(function(entry) {
+                    return entry.indexOf('incorrect') == -1;
+                  });
+                  if (answerArray.length > 0) {
+                    const singularAnswer = answerArray[0].split('~')[0];
+                    allAnswers.add(singularAnswer);
+                  }
+                }
+              
+                allAnswers = Array.from(allAnswers);
+                if (!cachedSyllables) {
+                  console.log('no cached syllables for this stim, calling server method to create them');
+                  Meteor.call('updateStimSyllableCache', stimuliSetId, allAnswers)
+                }
                 results.result = true;
               } catch (err) {
                 results.result=false;
