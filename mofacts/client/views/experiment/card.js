@@ -1129,7 +1129,7 @@ function handleUserInput(e, source, simAnswerCorrect) {
     if (!firstKeypressTimestamp) {
       firstKeypressTimestamp = Date.now();
     }
-  } else if (source === 'buttonClick' || source === 'simulation' || source === 'voice' || source === 'removal') {
+  } else if (source === 'buttonClick' || source === 'simulation' || source === 'voice') {
     // to save space we will just go ahead and act like it was a key press.
     key = ENTER_KEY;
   }
@@ -1156,7 +1156,7 @@ function handleUserInput(e, source, simAnswerCorrect) {
   let userAnswer;
   if (isTimeout) {
     userAnswer = '[timeout]';
-  } else if (source === 'keypress' || source === 'removal') {
+  } else if (source === 'keypress') {
     userAnswer = _.trim($('#userAnswer').val()).toLowerCase();
   } else if (source === 'buttonClick') {
     userAnswer = e.currentTarget.name;
