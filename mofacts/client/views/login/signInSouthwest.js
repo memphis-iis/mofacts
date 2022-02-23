@@ -10,6 +10,8 @@ Session.set('systemOverloaded', false);
 Session.set('systemDown', undefined);
 Session.set('classesByInstructorId', {});
 
+
+
 function getUrlVars() {
   const vars = []; let hash;
   if (window.location.href.indexOf('?') > 0) {
