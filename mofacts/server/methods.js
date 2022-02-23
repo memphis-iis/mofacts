@@ -1154,7 +1154,7 @@ async function getStudentPerformanceByIdAndTDFId(userId, TDFid,hintLevel=null,re
                COUNT(i.itemID) AS totalStimCount, \
                SUM(s.totalPracticeDuration) AS totalPracticeDuration, \
                COUNT(CASE WHEN (s.priorIncorrect = 1 AND s.priorCorrect = 0) OR (s.priorIncorrect = 0 AND s.priorCorrect = 1) THEN 1 END) AS stimsIntroduced \
-               FROM (SELECT * from componentState WHERE userId=$1 AND TDFId=$2 AND componentType =\'stimulus\' \ AND showitem = true  ' + hintLevelAddendunm + limitAddendum + ') AS s \
+               FROM (SELECT * from componentState WHERE userId=$1 AND TDFId=$2 AND componentType =\'stimulus\' ' + hintLevelAddendunm + limitAddendum + ') AS s \
                INNER JOIN item AS i ON i.stimulusKC = s.KCId';
   const perfRet = await db.oneOrNone(query, [userId, TDFid]);
   const query2 = 'SELECT COUNT(DISTINCT s.ItemId) AS stimsSeen \

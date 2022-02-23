@@ -59,6 +59,7 @@ export const outputFields = [
   'CF (Review Latency)', // reviewLatency
   'CF (Review Entry)', // forceCorrectFeedback
   'CF (Button Order)', // CF buttonOrder
+  'CF (Item Removed)', // item was reported by the user as wrong
   'CF (Note)', // CF note
   'Feedback Text',
   'dialogueHistory',
