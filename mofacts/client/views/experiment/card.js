@@ -419,11 +419,11 @@ Template.card.events({
   },
 
   'click #removeQuestion': function(e) {
-    //Add dialogue to inform user that the question will not be counted
-    e.preventDefault();
-    $('#removalFeedback').show();
-    removeCardByUser();
-    
+    // check if the question was already reported.
+    // This button only needs to fire if the user hasnt answered the question already.  
+    if(!Session.get('wasReportedForRemoval'))
+      Session.set('wasReportedForRemoval', true)
+      afterAnswerFeedbackCallback(Date.now(), 'removal', "", false, false);
   },
 
   'click #dialogueIntroExit': function() {
@@ -1324,7 +1324,7 @@ function afterAnswerAssessmentCb(userAnswer, isCorrect, feedbackForAnswer, after
   if (correctAndText.matchText.split(' ')[0] != 'Incorrect.' && !isCorrect && userAnswer != ''){
     Session.set('isRefutation', true);
   }
-  if(!isCorrect) showRemovalButton();
+
   const afterAnswerFeedbackCbBound = afterAnswerFeedbackCb.bind(null, isCorrect);
 
   const currentDeliveryParams = getCurrentDeliveryParams();
@@ -1390,19 +1390,27 @@ async function showUserFeedback(isCorrect, feedbackMessage, afterAnswerFeedbackC
       else{
         countDownStart += getCurrentDeliveryParams().reviewstudy;
       }
-      var CountdownTimerInterval = setInterval(function() {
+      var CountdownTimerInterval = Meteor.setInterval(function() {
         var now = new Date().getTime()
         var distance = countDownStart - now;
         var seconds = Math.ceil((distance % (1000 * 60)) / 1000);
         
-        document.getElementById("CountdownTimer").innerHTML = 'Continuing in: ' + seconds + "s";
+        try{
+          document.getElementById("CountdownTimer").innerHTML = 'Continuing in: ' + seconds + "s";
+        }
+        catch{
+          Meteor.clearInterval(CountdownTimerInterval);
+          Session.set('CurIntervalId', undefined);
+        }
       
         // If the count down is finished, end interval and clear CountdownTimer
         if (distance < 0) {
-          clearInterval(CountdownTimerInterval);
+          Meteor.clearInterval(CountdownTimerInterval);
           document.getElementById("CountdownTimer").innerHTML = "";
+          Session.set('CurIntervalId', undefined);
         }
       }, 100);
+      Session.set('CurIntervalId', CountdownTimerInterval);
     }
   }
 
@@ -1463,8 +1471,20 @@ function doClearForceCorrect(doForceCorrect, afterAnswerFeedbackCbBound) {
   }
 }
 
-async function afterAnswerFeedbackCallback(trialEndTimeStamp, source, userAnswer, isTimeout, isCorrect, isShortcut) {
-  Session.set('removeQuestionShortcut', [trialEndTimeStamp, source, userAnswer, isTimeout, isCorrect])
+async function afterAnswerFeedbackCallback(trialEndTimeStamp, source, userAnswer, isTimeout, isCorrect) {
+  const removalShortcut = afterAnswerFeedbackCallback.bind(null, trialEndTimeStamp, source, userAnswer, isTimeout, isCorrect);
+  const wasReportedForRemoval = Session.get('wasReportedForRemoval');
+
+  if(!wasReportedForRemoval){
+    $('#removeQuestion').on('click', null, null, function() {
+      Session.set('wasReportedForRemoval', true);
+      removalShortcut();
+    });
+  }
+  else{
+    removeCardByUser();
+  }
+
   const testType = getTestType();
   const deliveryParams = Session.get('currentDeliveryParams');
 
@@ -1472,20 +1492,13 @@ async function afterAnswerFeedbackCallback(trialEndTimeStamp, source, userAnswer
   if (Session.get('dialogueHistory')) {
     dialogueHistory = JSON.parse(JSON.stringify(Session.get('dialogueHistory')));
   }
-  const reviewTimeout = isShortcut ? 2000 : getReviewTimeout(testType, deliveryParams, isCorrect, dialogueHistory);
+  const reviewTimeout = wasReportedForRemoval ? 2000 : getReviewTimeout(testType, deliveryParams, isCorrect, dialogueHistory);
 
   // Stop previous timeout, log response data, and clear up any other vars for next question
   clearCardTimeout();
 
-  if(Session.get('unitType') == "model")
-    Session.set('engineIndices', await engine.calculateIndices());
-  else
-    Session.set('engineIndices', undefined);
-
   const timeout = Meteor.setTimeout(async function() {
-    Session.set('removeQuestionShortcut', undefined);
     Session.set('CurTimeoutId', undefined);
-    let wasReportedForRemoval = Session.get('wasReportedForRemoval');
     let reviewEnd = Date.now()
     const answerLogRecord = gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect,
         reviewEnd, testType, deliveryParams, dialogueHistory, wasReportedForRemoval);
@@ -1700,9 +1713,7 @@ function gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect,
   // hack
   const sessionID = (new Date(trialStartTimestamp)).toUTCString().substr(0, 16) + ' ' + Session.get('currentTdfName');
   let outcome = 'incorrect';
-  if(wasReportedForRemoval) {
-    outcome = 'removal';
-  } else if (isCorrect) {
+  if (isCorrect) {
     outcome = 'correct';
   }
   let entryPoint = 'direct'
@@ -1778,7 +1789,7 @@ function gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect,
     'CF_Feedback_Latency': feedbackLatency,
     'CF_Review_Entry': _.trim($('#userForceCorrect').val()),
     'CF_Button_Order': buttonEntries,
-    'CF_Item_Removed': Session.get('wasReportedForRemoval') || false,
+    'CF_Item_Removed': wasReportedForRemoval,
     'CF_Note': '',
     'Feedback_Text': $('#UserInteraction').text() || '',
     'feedbackType': feedbackType,
@@ -1932,6 +1943,10 @@ async function cardStart() {
 }
 
 async function prepareCard() {
+  if(Session.get('unitType') == "model")
+    Session.set('engineIndices', await engine.calculateIndices());
+  else
+    Session.set('engineIndices', undefined);
   Meteor.logoutOtherClients();
   Session.set('wasReportedForRemoval', false);
   Session.set('displayReady', false);
@@ -2840,13 +2855,14 @@ async function checkSyllableCacheForCurrentStimFile(cb) {
   }
 }
 
-async function showRemovalButton() {
-  $('#removeQuestion').show();
-}
-
 async function removeCardByUser() {
   Meteor.clearTimeout(Session.get('CurTimeoutId'));
-  Session.set('CurTimeoutId', undefined)
+  Meteor.clearInterval(Session.get('CurIntervalId'));
+  Session.set('CurTimeoutId', undefined);
+  Session.set('CurIntervalId', undefined);
+  document.getElementById("CountdownTimer").innerHTML = "";
+  $('#removalFeedback').show();
+
   let clusterIndex = Session.get('clusterIndex');
   let stims = getStimCluster(clusterIndex).stims; 
   let whichStim = engine.findCurrentCardInfo().whichStim;
@@ -2858,27 +2874,6 @@ async function removeCardByUser() {
   
   Session.set('numVisibleCards', Session.get('numVisibleCards') - 1);
   Session.set('hiddenItems', hiddenItems);
-  Session.set('wasReportedForRemoval', true);
-
-  if(Session.get('dialogueLoopStage')){
-    Session.set('dialogueLoopStage', 'exit');
-    dialogueContinue();
-  }
-  let cbVar = Session.get('removeQuestionShortcut');
-  Session.set('removeQuestionShortcut', undefined);
-  if(cbVar){
-    afterAnswerFeedbackCallback(cbVar[0], cbVar[1], cbVar[2], cbVar[3], cbVar[4], true);
-  }
-
-
-  if(Session.get('unitType') == "model")
-    Session.set('engineIndices', await engine.calculateIndices());
-  else
-    Session.set('engineIndices', undefined);
-
-  Meteor.setTimeout(async function() {
-    await prepareCard();
-  }, 2000);
 }
 
 async function processUserTimesLog() {
@@ -3035,10 +3030,6 @@ async function processUserTimesLog() {
       }
       console.log('RESUME FINISHED: next-question logic to commence');
 
-      if(Session.get('unitType') == "model")
-        Session.set('engineIndices', await engine.calculateIndices());
-      else
-        Session.set('engineIndices', undefined);
       await prepareCard();
     }
   }
