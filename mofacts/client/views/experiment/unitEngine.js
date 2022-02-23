@@ -18,6 +18,8 @@ import {Answers} from './answerAssess';
 
 export {createScheduleUnit, createModelUnit, createEmptyUnit};
 
+const blank = '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
+
 async function create(func, curExperimentData) {
   const engine = _.extend(defaultUnitEngine(curExperimentData), func());
   await engine.init();
@@ -109,11 +111,11 @@ function defaultUnitEngine(curExperimentData) {
         if(index >= hintLevel){
           clozeMissingSyllables += syllablesArray[index];
           if (syllablesArray[index].indexOf(' ') >= 0) {
-            clozeAnswer += '&nbsp;<u>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</u>&nbsp;<u>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</u>';
-            clozeAnswerOnlyUnderscores += '&nbsp;<u>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</u>&nbsp;<u>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</u>';
+            clozeAnswer += `___ ______`;
+            clozeAnswerOnlyUnderscores += `___ ______`;
           } else {
-            clozeAnswer += '<u>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</u>';
-            clozeAnswerOnlyUnderscores += '<u>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</u>';
+            clozeAnswer += `___`;
+            clozeAnswerOnlyUnderscores += `___`;
           }
         } else {
           clozeAnswer += syllablesArray[index];
@@ -131,7 +133,18 @@ function defaultUnitEngine(curExperimentData) {
           nextChar = reconstructedAnswer.length;
         }
       }
-
+      
+      clozeAnswerParts = clozeAnswer.split(' ');
+      for(let part of clozeAnswerParts.length){
+        if(part == 0 && hintLevel > 0){
+          clozeAnswerParts[part] = clozeAnswerParts[part].replace(/([_]+[ ]?)+/, `<u>${blank}</u>`);
+        }
+        else{
+          clozeAnswerParts[part] = clozeAnswerParts[part].replace(/([_]+[ ]?)+/, `<u>${blank + blank}</u>`);
+        }
+        console.log(part);
+      }
+      clozeAnswer = clozeAnswerParts.join(' ');
       // eslint-disable-next-line prefer-const
       let clozeQuestionParts = question.split(/([_]+[ ]?)+/);
 
@@ -145,7 +158,7 @@ function defaultUnitEngine(curExperimentData) {
         clozeQuestionParts[2] = clozeQuestionParts[2].trim();
       }
       var regex = /([_]+[ ]?)+/ig;
-      const clozeQuestion = question.replaceAll(regex, '<u>' + clozeAnswer.split(' ').join('</u> <u>') + '</u> ');
+      const clozeQuestion = question.replace(regex, '<u>' + clozeAnswer.split(' ').join('</u> <u>') + '</u> ');
       clozeQuestionParts = clozeQuestion;
 
       console.log('replaceClozeWithSyllables2:', clozeQuestion, clozeMissingSyllables, clozeQuestionParts,
