@@ -56,9 +56,10 @@ export const outputFields = [
   'CF (Response Time)', // answerGivenTime
   'CF (Start Latency)', // startLatency check first trial discrepancy********
   'CF (End Latency)', // endLatency
-  'CF (Review Latency)', // reviewLatency
+  'CF (Feedback Latency)', // time from user answer to end of feedback
   'CF (Review Entry)', // forceCorrectFeedback
   'CF (Button Order)', // CF buttonOrder
+  'CF (Item Removed)', // item was reported by the user as wrong
   'CF (Note)', // CF note
   'Feedback Text',
   'dialogueHistory',
