@@ -27,6 +27,14 @@
         <div class="gauge col-sm-6 col-xs-12">
           <p>Speed of Learning</p>      
             <div id="preview-textfield-custom" style="top:80px; position: relative;"></div>  
+            <div class="row" style="margin:auto; max-width:250px;">
+              <div class="col-xs-6">
+                <p>Low</p>
+              </div>
+              <div class="col-xs-6">
+                <p>High</p>
+              </div>
+            </div>
             <canvas class="dashCanvas learningSpeed" width="150" height="100" id="canvas-unit-percent-correct"></canvas>
             {{#if displayItemsMasteredPerMinute}}
               <p>Items mastered per minute: {{itemMasteryRate}}</p>
