@@ -1505,7 +1505,7 @@ async function afterAnswerFeedbackCallback(trialEndTimeStamp, source, userAnswer
   
     // Give unit engine a chance to update any necessary stats
     const practiceTime = answerLogRecord.CF_End_Latency + answerLogRecord.CF_Feedback_Latency;
-    await engine.cardAnswered(isCorrect, practiceTime, wasReportedForRemoval);
+    await engine.cardAnswered(isCorrect, practiceTime);
     const answerLogAction = isTimeout ? '[timeout]' : 'answer';
     //if dialogueStart is set that means the user went through interactive dialogue
     Session.set('dialogueTotalTime', undefined);
