@@ -199,7 +199,8 @@ async function drawDashboard(studentId, selectedTdfId){
   const {numCorrect, numIncorrect, totalStimCount, stimsSeen,  totalPracticeDuration, stimsIntroduced, stimsRemoved} = curStudentGraphData;
     // Perform calculated data
   
-  totalAttempts = parseFloat(numCorrect) + parseFloat(numIncorrect) - parseFloat(stimsRemoved);
+  totalAttempts = parseFloat(numCorrect) + parseFloat(numIncorrect);
+  totalStimCount -=  parseFloat(stimsRemoved);
   if(isNaN(totalAttempts)){
     totalAttempts = 0;
   }
