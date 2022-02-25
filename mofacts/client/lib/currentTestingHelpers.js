@@ -118,15 +118,13 @@ function updateCurStudentPerformance(isCorrect, endLatency, wasReportedForRemova
   const curUserPerformance = Session.get('curStudentPerformance');
   console.log('updateCurStudentPerformance', isCorrect, endLatency,
       JSON.parse(JSON.stringify((Session.get('curStudentPerformance')))));
-  if(!wasReportedForRemoval){
-    curUserPerformance.count = curUserPerformance.count + 1;
-    if (isCorrect) curUserPerformance.numCorrect = curUserPerformance.numCorrect + 1;
-    curUserPerformance.percentCorrect = ((curUserPerformance.numCorrect / curUserPerformance.count)*100).toFixed(2) + '%';
-    curUserPerformance.stimsSeen = parseInt(curUserPerformance.stimsSeen);
-    curUserPerformance.totalStimCount = parseInt(curUserPerformance.totalStimCount);
-    curUserPerformance.totalTime = parseInt(curUserPerformance.totalTime) + endLatency;
-    curUserPerformance.totalTimeDisplay = (curUserPerformance.totalTime / (1000*60)).toFixed(1);
-  }
+  curUserPerformance.count = curUserPerformance.count + 1;
+  if (isCorrect) curUserPerformance.numCorrect = curUserPerformance.numCorrect + 1;
+  curUserPerformance.percentCorrect = ((curUserPerformance.numCorrect / curUserPerformance.count)*100).toFixed(2) + '%';
+  curUserPerformance.stimsSeen = parseInt(curUserPerformance.stimsSeen);
+  curUserPerformance.totalStimCount = parseInt(curUserPerformance.totalStimCount);
+  curUserPerformance.totalTime = parseInt(curUserPerformance.totalTime) + endLatency;
+  curUserPerformance.totalTimeDisplay = (curUserPerformance.totalTime / (1000*60)).toFixed(1);
   Session.set('constantTotalTime',curUserPerformance.totalTimeDisplay);
   Session.set('curStudentPerformance', curUserPerformance);
 }
@@ -153,10 +151,10 @@ async function setStudentPerformance(studentID, studentUsername, tdfId) {
     studentPerformanceData = {
       numCorrect: parseInt(studentPerformanceDataRet.numCorrect) || 0,
       numIncorrect: parseInt(studentPerformanceDataRet.numIncorrect) || 0,
-      lastSeen: parseInt(studentPerformanceDataRet.lastSeen)|| 0,
-      stimsSeen:  parseInt(studentPerformanceDataRet.stimsSeen)|| 0,
+      lastSeen: parseInt(studentPerformanceDataRet.lastSeen) || 0,
+      stimsSeen:  parseInt(studentPerformanceDataRet.stimsSeen)  || 0,
       totalStimCount: parseInt(studentPerformanceDataRet.totalStimCount) || 0,
-      totalPracticeDuration: parseInt(studentPerformanceDataRet.totalPracticeDuration)|| 0
+      totalPracticeDuration: parseInt(studentPerformanceDataRet.totalPracticeDuration) || 0
     };
   }
   const count = (parseInt(studentPerformanceData.numCorrect) + parseInt(studentPerformanceData.numIncorrect));
