@@ -112,7 +112,7 @@ function haveMeteorUser() {
   return (!!Meteor.userId() && !!Meteor.user() && !!Meteor.user().username);
 }
 
-function updateCurStudentPerformance(isCorrect, endLatency, wasReportedForRemoval) {
+function updateCurStudentPerformance(isCorrect, endLatency) {
   // Update running user metrics total,
   // note this assumes curStudentPerformance has already been initialized on initial page entry
   const curUserPerformance = Session.get('curStudentPerformance');
@@ -133,11 +133,7 @@ async function setStudentPerformance(studentID, studentUsername, tdfId) {
   console.log('setStudentPerformance:', studentID, studentUsername, tdfId);
   let studentPerformanceData;
   let studentPerformanceDataRet;
-  if(Session.get('curStudentPerformance')){
-    studentPerformanceDataRet = Session.get('curStudentPerformance');
-  } else {
-    studentPerformanceDataRet = await meteorCallAsync('getStudentPerformanceByIdAndTDFId', studentID, tdfId);
-  }
+  studentPerformanceDataRet = await meteorCallAsync('getStudentPerformanceByIdAndTDFId', studentID, tdfId);
   if (isEmpty(studentPerformanceDataRet)) {
     studentPerformanceData = {
       numCorrect: 0,
