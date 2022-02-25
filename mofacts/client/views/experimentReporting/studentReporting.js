@@ -10,6 +10,7 @@ import gauge, {
 } from '../../lib/gauge.js';
 
 Session.set('studentReportingTdfs', []);
+Session.set('studentReportingTdfs', undefined);
 
 let gaugeOptionsSpeedOfLearning = {
   angle: 0,
