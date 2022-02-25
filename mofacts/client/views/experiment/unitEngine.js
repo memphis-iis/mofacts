@@ -1018,7 +1018,7 @@ function modelUnitEngine() {
             probabilityEstimate: stim.probabilityEstimate, // : stimProb ? stimProb.probability : null,
             firstSeen: stim.firstSeen,
             lastSeen: stim.lastSeen,
-            hintLevel: Session.get('hintLevel'),
+            hintLevel: Session.get('hintLevel') || null,
             priorCorrect: stim.priorCorrect,
             priorIncorrect: stim.priorIncorrect,
             priorStudy: stim.priorStudy,
