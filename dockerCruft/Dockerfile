@@ -1,4 +1,4 @@
-FROM geoffreybooth/meteor-base:1.6.1.1
+FROM geoffreybooth/meteor-base:1.12
 
 # Copy app package.json and package-lock.json into container
 COPY ./mofacts/package*.json $APP_SOURCE_FOLDER/
@@ -12,7 +12,7 @@ RUN bash $SCRIPTS_FOLDER/build-meteor-bundle.sh
 
 
 # Rather than Node 8 latest (Alpine), you can also use the specific version of Node expected by your Meteor release, per https://docs.meteor.com/changelog.html
-FROM node:8-alpine
+FROM node:12-alpine
 
 ENV APP_BUNDLE_FOLDER /opt/bundle
 ENV SCRIPTS_FOLDER /docker
