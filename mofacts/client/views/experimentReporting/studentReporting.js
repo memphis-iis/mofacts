@@ -10,7 +10,6 @@ import gauge, {
 } from '../../lib/gauge.js';
 
 Session.set('studentReportingTdfs', []);
-Session.set('curStudentPerformance', {});
 
 let gaugeOptionsSpeedOfLearning = {
   angle: 0,
@@ -199,7 +198,7 @@ async function drawDashboard(studentId, selectedTdfId){
   const {numCorrect, numIncorrect, totalStimCount, stimsSeen,  totalPracticeDuration, stimsIntroduced, stimsRemoved} = curStudentGraphData;
     // Perform calculated data
   
-  totalAttempts = parseFloat(numCorrect) + parseFloat(numIncorrect - parseFloat(stimsRemoved);
+  totalAttempts = parseFloat(numCorrect) + parseFloat(numIncorrect) - parseFloat(stimsRemoved);
   if(isNaN(totalAttempts)){
     totalAttempts = 0;
   }
