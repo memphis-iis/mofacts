@@ -423,12 +423,12 @@ async function setComponentStatesByUserIdTDFIdAndUnitNum(userId, TDFId, componen
         componentState.trialsSinceLastSeen = null;
       }
 
-      const updateQuery = `UPDATE componentstate SET probabilityEstimate=${probabilityEstimate}, \
+      const updateQuery = 'UPDATE componentstate SET probabilityEstimate=${probabilityEstimate}, \
         firstSeen=${firstSeen}, lastSeen=${lastSeen}, trialsSinceLastSeen=${trialsSinceLastSeen}, \
         priorCorrect=${priorCorrect}, priorIncorrect=${priorIncorrect}, \
         priorStudy=${priorStudy}, totalPracticeDuration=${totalPracticeDuration}, outcomeStack=${outcomeStack} \
         WHERE userId=${userId} AND TDFId=${TDFId} AND KCId=${KCId} AND componentType=${componentType} \
-        RETURNING componentStateId`;
+        RETURNING componentStateId';
       try {
         const componentStateId = await t.one(updateQuery, componentState);
         resArr.push(componentStateId);
@@ -437,12 +437,12 @@ async function setComponentStatesByUserIdTDFIdAndUnitNum(userId, TDFId, componen
         if (e.name == 'QueryResultError') {
           console.log("ComponentState didn't exist before so we'll insert it")
           console.log(componentState)
-          const componentStateId = await t.one(`INSERT INTO componentstate(userId,TDFId,KCId,componentType, \
+          const componentStateId = await t.one('INSERT INTO componentstate(userId,TDFId,KCId,componentType, \
             probabilityEstimate,hintLevel,firstSeen,lastSeen,trialsSinceLastSeen,priorCorrect,priorIncorrect,priorStudy, \
             totalPracticeDuration,outcomeStack) VALUES(${userId},${TDFId}, ${KCId}, ${componentType}, \
             ${probabilityEstimate},${hintLevel}, ${firstSeen},${lastSeen},${trialsSinceLastSeen},${priorCorrect},${priorIncorrect}, \
             ${priorStudy},${totalPracticeDuration},${outcomeStack}) \
-            RETURNING componentStateId`,
+            RETURNING componentStateId',
             componentState);
         } else {
           resArr.push('not caught error:', e);
