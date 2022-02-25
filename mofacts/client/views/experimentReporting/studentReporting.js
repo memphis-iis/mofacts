@@ -196,11 +196,10 @@ async function drawDashboard(studentId, selectedTdfId){
   const difficultyData = await meteorCallAsync('getStudentPerformanceByIdAndTDFId',studentId,selectedTdfId,null,difficultyHistory);
   console.log("difficultyData", masteryEstimateData)
   //Expand Data
-  const {numCorrect, numIncorrect, totalStimCount, stimsSeen,  totalPracticeDuration, stimsIntroduced} = curStudentGraphData;
+  const {numCorrect, numIncorrect, totalStimCount, stimsSeen,  totalPracticeDuration, stimsIntroduced, stimsRemoved} = curStudentGraphData;
     // Perform calculated data
   
-
-  totalAttempts = parseFloat(numCorrect) + parseFloat(numIncorrect);
+  totalAttempts = parseFloat(numCorrect) + parseFloat(numIncorrect - parseFloat(stimsRemoved);
   if(isNaN(totalAttempts)){
     totalAttempts = 0;
   }

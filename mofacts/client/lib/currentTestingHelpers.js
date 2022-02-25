@@ -135,7 +135,6 @@ async function setStudentPerformance(studentID, studentUsername, tdfId) {
   console.log('setStudentPerformance:', studentID, studentUsername, tdfId);
   let studentPerformanceData;
   let studentPerformanceDataRet;
-  console.log('rusty',Session.get('curStudentPerformance'));
   if(Session.get('curStudentPerformance')){
     studentPerformanceDataRet = Session.get('curStudentPerformance');
   } else {
