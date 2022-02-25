@@ -423,12 +423,12 @@ async function setComponentStatesByUserIdTDFIdAndUnitNum(userId, TDFId, componen
         componentState.trialsSinceLastSeen = null;
       }
 
-      const updateQuery = 'UPDATE componentstate SET probabilityEstimate=${probabilityEstimate}, \
+      const updateQuery = `UPDATE componentstate SET probabilityEstimate=${probabilityEstimate}, \
         firstSeen=${firstSeen}, lastSeen=${lastSeen}, trialsSinceLastSeen=${trialsSinceLastSeen}, \
         priorCorrect=${priorCorrect}, priorIncorrect=${priorIncorrect}, \
         priorStudy=${priorStudy}, totalPracticeDuration=${totalPracticeDuration}, outcomeStack=${outcomeStack} \
         WHERE userId=${userId} AND TDFId=${TDFId} AND KCId=${KCId} AND componentType=${componentType} \
-        RETURNING componentStateId';
+        RETURNING componentStateId`;
       try {
         const componentStateId = await t.one(updateQuery, componentState);
         resArr.push(componentStateId);
@@ -437,12 +437,12 @@ async function setComponentStatesByUserIdTDFIdAndUnitNum(userId, TDFId, componen
         if (e.name == 'QueryResultError') {
           console.log("ComponentState didn't exist before so we'll insert it")
           console.log(componentState)
-          const componentStateId = await t.one('INSERT INTO componentstate(userId,TDFId,KCId,componentType, \
+          const componentStateId = await t.one(`INSERT INTO componentstate(userId,TDFId,KCId,componentType, \
             probabilityEstimate,hintLevel,firstSeen,lastSeen,trialsSinceLastSeen,priorCorrect,priorIncorrect,priorStudy, \
             totalPracticeDuration,outcomeStack) VALUES(${userId},${TDFId}, ${KCId}, ${componentType}, \
-            ${probabilityEstimate},${hintLevel},  ${firstSeen},${lastSeen},${trialsSinceLastSeen},${priorCorrect},${priorIncorrect}, \
+            ${probabilityEstimate},${hintLevel}, ${firstSeen},${lastSeen},${trialsSinceLastSeen},${priorCorrect},${priorIncorrect}, \
             ${priorStudy},${totalPracticeDuration},${outcomeStack}) \
-            RETURNING componentStateId',
+            RETURNING componentStateId`,
             componentState);
         } else {
           resArr.push('not caught error:', e);
@@ -1405,6 +1405,20 @@ function findUserByName(username) {
   return null;
 }
 
+async function verifySyllableUpload(stimSetId){
+  const query = 'SELECT COUNT(DISTINCT correctresponse) FROM item WHERE stimulisetid = $1';
+  const postgresRet = await db.oneOrNone(query, stimSetId);
+  const answersCountPostgres = postgresRet.count;
+
+  const mongoRet = StimSyllables.findOne({filename: stimSetId});
+  if(mongoRet){
+    const answersCountMongo = Object.keys(mongoRet.data).length;
+    return answersCountMongo == answersCountPostgres;
+  }
+  StimSyllables.remove({filename: stimSetId});
+  return false;
+}
+
 function sendEmail(to, from, subject, text) {
   check([to, from, subject, text], [String]);
   Email.send({to, from, subject, text});
@@ -1850,31 +1864,39 @@ Meteor.startup(async function() {
       // LastStudentAnswer: Mutate this with student input you just got
     },
 
-    updateStimSyllableCache: function(stimFileName, answers) {
+    updateStimSyllableCache: async function(stimFileName, answers) {
+      let numTries = 0;
       console.log('updateStimSyllableCache');
       const curStimSyllables = StimSyllables.findOne({filename: stimFileName});
       console.log('curStimSyllables: ' + JSON.stringify(curStimSyllables));
       if (!curStimSyllables) {
-        const data = {};
-        for (const answer of answers) {
-          let syllableArray;
-          let syllableGenerationError;
-          const safeAnswer = answer.replace(/\./g, '_');
-          try {
-            syllableArray = getSyllablesForWord(safeAnswer);
-          } catch (e) {
-            console.log('error fetching syllables for ' + answer + ': ' + JSON.stringify(e));
-            syllableArray = [answer];
-            syllableGenerationError = e;
+        while(!await verifySyllableUpload(stimFileName) && numTries < 3){
+          const data = {};
+          for (const answer of answers) {
+            let syllableArray;
+            let syllableGenerationError;
+            const safeAnswer = answer.replace(/\./g, '_');
+            try {
+              syllableArray = getSyllablesForWord(safeAnswer);
+            } catch (e) {
+              console.log('error fetching syllables for ' + answer + ': ' + JSON.stringify(e));
+              syllableArray = [answer];
+              syllableGenerationError = e;
+            }
+            data[safeAnswer] = {
+              count: syllableArray.length,
+              syllables: syllableArray,
+              error: syllableGenerationError,
+            };
           }
-          data[safeAnswer] = {
-            count: syllableArray.length,
-            syllables: syllableArray,
-            error: syllableGenerationError,
-          };
+          StimSyllables.insert({filename: stimFileName, data: data});
+          console.log('after updateStimSyllableCache');
+          console.log(stimFileName);
+          numTries++;
         }
-        StimSyllables.insert({filename: stimFileName, data: data});
-        console.log('after updateStimSyllableCache');
+        if(!await verifySyllableUpload(stimFileName)){
+          throw new Error('Cannot upload stim file to mongoDB. Discrepency between postgres and mongo.');
+        }
       }
     },
 
