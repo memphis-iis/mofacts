@@ -220,7 +220,7 @@ function defaultUnitEngine(curExperimentData) {
             let answerBlanks = ""
             currentQuestion = currentQuestion.replaceAll("_","");
             for(i=0;i<currentStimAnswerWordCount;i++){
-              answerBlanks += "&nbsp;<u>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</u>";
+              answerBlanks += `&nbsp;<u>${blank + blank}</u>`;
             }
             currentQuestion = currentQuestion.slice(0,index) + answerBlanks + currentQuestion.slice(index);
           }
@@ -1058,6 +1058,17 @@ function modelUnitEngine() {
       }
       catch (error){
         console.error("Error saving componentstate.", error);
+        console.log('Component state may not have saved. Ending the trial now.');
+        alert('An unexpected error occured. Please check your internet connection and try again. The error has been reported to the administrators.');
+        const curUser = Meteor.userId();
+        const curPage = document.location.pathname;
+        const sessionVars = Session.all();
+        const userAgent = navigator.userAgent;
+        const logs = console.logs;
+        const currentExperimentState = Session.get('currentExperimentState');
+        Meteor.call('sendUserErrorReport', curUser, error, curPage, sessionVars,
+            userAgent, logs, currentExperimentState);
+        Router.go('/profile');
       }
     },
     loadComponentStates: async function() {// componentStates [{},{}]
