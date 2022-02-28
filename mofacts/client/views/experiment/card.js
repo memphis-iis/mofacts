@@ -453,6 +453,16 @@ Template.card.events({
       unitIsFinished('Skipped by admin');
     }
   },
+  'click #giveAnser': function() {
+    if(Roles.userIsInRole(Meteor.user(), ['admin',])){
+      giveAnswer();
+    }
+  },
+  'click #giveWrongAnser': function() {
+    if(Roles.userIsInRole(Meteor.user(), ['admin',])){
+      giveWrongAnswer();
+    }
+  },
   'click #confirmFeedbackSelection': function() {
     Session.set('displayFeedback', false);
     checkSyllableCacheForCurrentStimFile(processUserTimesLog);  
@@ -587,8 +597,6 @@ Template.card.helpers({
   'rawAnswer': ()=> Session.get('currentAnswer'),
 
   'currentProgress': () => Session.get('questionIndex'),
-
-  'userIsAdminOrTeacher': () => Roles.userIsInRole(Meteor.user(), ['admin', 'teacher']),
 
   'displayReady': () => Session.get('displayReady'),
 
@@ -1471,6 +1479,23 @@ function doClearForceCorrect(doForceCorrect, afterAnswerFeedbackCbBound) {
   }
 }
 
+async function giveAnswer(){
+  if(Meteor.isDevelopment){
+    curAnswer = Session.get('currentAnswer');
+    $('#userAnswer').val(curAnswer);
+    handleUserInput({keyCode: ENTER_KEY}, 'keypress');
+  }
+}
+
+async function giveWrongAnswer(){
+  if(Meteor.isDevelopment){
+    curAnswer = Session.get('currentAnswer') + '123456789321654986321';
+    $('#userAnswer').val(curAnswer);
+    Session.set('skipTimeout', true)
+    handleUserInput({keyCode: ENTER_KEY}, 'keypress');
+  }
+}
+
 async function afterAnswerFeedbackCallback(trialEndTimeStamp, source, userAnswer, isTimeout, isCorrect) {
   const removalShortcut = afterAnswerFeedbackCallback.bind(null, trialEndTimeStamp, source, userAnswer, isTimeout, isCorrect);
   const wasReportedForRemoval = Session.get('wasReportedForRemoval');
@@ -1590,7 +1615,10 @@ function getReviewTimeout(testType, deliveryParams, isCorrect, dialogueHistory) 
     // We don't know what to do since this is an unsupported test type - fail
     throw new Error('Unknown trial type was specified - no way to proceed');
   }
-
+  if(Meteor.isDevelopment && Session.get('skipTimeout')){
+    reviewTimeout = 0.001;
+    Session.set('skipTimeout', false);
+  }
   // We need at least a timeout of 1ms
   if (reviewTimeout < 0.001) throw new Error('No correct timeout specified');
 
@@ -1656,8 +1684,8 @@ function gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect,
   }
 
   let clusterIndex = Session.get('clusterIndex');
-  const {itemId, clusterKC, stimulusKC} = getStimCluster(clusterIndex).stims[0];
   let {whichStim, probabilityEstimate} = engine.findCurrentCardInfo();
+  const {itemId, clusterKC, stimulusKC} = getStimCluster(clusterIndex).stims[whichStim];
   // let curKCBase = getStimKCBaseForCurrentStimuliSet();
   // let stimulusKC = whichStim + curKCBase;
 
