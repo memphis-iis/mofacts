@@ -2301,7 +2301,7 @@ Meteor.startup(async function() {
               
                 allAnswers = Array.from(allAnswers);
                 //Update Stim Cache every upload
-                Meteor.call('updateStimSyllableCache', stimuliSetId, allAnswers)
+                Meteor.call('updateStimSyllableCache', stimuliSetId, allAnswers);
                 results.result = true;
               } catch (err) {
                 results.result=false;
