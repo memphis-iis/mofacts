@@ -2300,9 +2300,8 @@ Meteor.startup(async function() {
                 }
               
                 allAnswers = Array.from(allAnswers);
-                if (!cachedSyllables) {
-                  Meteor.call('updateStimSyllableCache', stimuliSetId, allAnswers)
-                }
+                //Update Stim Cache every upload
+                Meteor.call('updateStimSyllableCache', stimuliSetId, allAnswers)
                 results.result = true;
               } catch (err) {
                 results.result=false;
