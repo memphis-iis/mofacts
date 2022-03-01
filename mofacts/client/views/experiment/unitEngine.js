@@ -181,10 +181,19 @@ function defaultUnitEngine(curExperimentData) {
             ', this.cachedSyllables: ', this.cachedSyllables);
         const answer = currentStimAnswer.replace(/\./g, '_');
         if (!this.cachedSyllables || !this.cachedSyllables.data[answer]) {
-          console.log('no syllable index or cachedSyllables, defaulting to no subclozeanswer');
-          console.log(typeof(probFunctionParameters.hintsylls),
-              !this.cachedSyllables,
-              (probFunctionParameters.hintsylls || []).length);
+            if(!this.cachedSyllables.data[answer]){
+              console.log('no syllable data for that answer, throw error');
+              const currentStimuliSetId = Session.get('currentStimuliSetId');
+              const curAnswers = getAllCurrentStimAnswers();
+              Meteor.call('updateStimSyllableCache', currentStimuliSetId, curAnswers, function(){});
+              alert('Something went wrong generating hints. Please report this error to the administrator and restart your trial');
+          } else {
+            //We assume no hints were generated initially, meaning the tdf didn't have hints to start.
+            console.log('no syllable index or cachedSyllables, defaulting to no subclozeanswer');
+            console.log(typeof(probFunctionParameters.hintsylls),
+                !this.cachedSyllables,
+                (probFunctionParameters.hintsylls || []).length);
+          }
         } else {
           currentAnswerSyllables = {
             count: this.cachedSyllables.data[answer].count,
