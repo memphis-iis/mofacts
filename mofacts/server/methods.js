@@ -1112,7 +1112,6 @@ async function getStudentReportingData(userId, TDFid, hintLevel) {
                  WHERE componentType=\'stimulus\' AND USERId=$1 AND TDFId=$2 \
                  AND hintLevel=$3 AND showItem=true GROUP BY ordinality \
                  ORDER BY ORDINALITY ASC LIMIT 5;';
-  console.log(hintLevel)
   const dataRet = await db.manyOrNone(query, [userId, TDFid, hintLevel]);
   const correctnessAcrossRepetitions = [];
   for (const curData of dataRet) {
