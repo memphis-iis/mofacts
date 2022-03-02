@@ -1109,8 +1109,8 @@ async function getStudentReportingData(userId, TDFid, hintLevel) {
   const query = 'SELECT ordinality, SUM(CASE WHEN outcome=\'1\' THEN 1 ELSE 0 END) \
                  as numCorrect, COUNT(outcome) as numTotal FROM componentState, \
                  unnest(string_to_array(outcomestack,\',\')) WITH ORDINALITY as outcome \
-                 WHERE componentType=\'stimulus\' AND USERId=$1 AND TDFId=$2'
-                 + 'AND hintLevel=$3 AND showItem=true' + ' GROUP BY ordinality \
+                 WHERE componentType=\'stimulus\' AND USERId=$1 AND TDFId=$2 \
+                 AND hintLevel=$3 AND showItem=true GROUP BY ordinality \
                  ORDER BY ORDINALITY ASC LIMIT 5;';
   const dataRet = await db.manyOrNone(query, [userId, TDFid, hintLevel]);
   const correctnessAcrossRepetitions = [];
@@ -1162,7 +1162,7 @@ async function getStudentPerformanceByIdAndTDFId(userId, TDFid,hintLevel=null,re
     hintLevelAddendunm = "AND hintLevel=hintlevel";
   }
   if(returnRows != null){
-    hintLevelAddendunm = "ORDER BY componentstateid DESC LIMIT " + returnRows;
+    limitAddendum = "ORDER BY itemid DESC LIMIT " + returnRows;
   }
   if(stimIds != null){
     onlyLearningSession = 'AND POSITION(CAST(kcid as text) in $3)>0 '; 
@@ -1170,27 +1170,42 @@ async function getStudentPerformanceByIdAndTDFId(userId, TDFid,hintLevel=null,re
   const query = 'SELECT SUM(s.priorCorrect) AS numCorrect, \
                SUM(s.priorIncorrect) AS numIncorrect, \
                COUNT(i.itemID) AS totalStimCount, \
-               SUM(s.totalPracticeDuration) AS totalPracticeDuration, \
-               COUNT(CASE WHEN (s.priorIncorrect > 0 OR s.priorCorrect > 0) THEN 1 END) AS stimsIntroduced \
-               FROM (SELECT * from componentState WHERE userId=$1 AND TDFId=$2 AND componentType =\'stimulus\' ' + onlyLearningSession + hintLevelAddendunm + limitAddendum + ') AS s \
+               SUM(s.totalPracticeDuration) AS totalPracticeDuration \
+               FROM (SELECT * from componentState WHERE userId=$1 AND TDFId=$2 AND componentType =\'stimulus\' ' + onlyLearningSession + hintLevelAddendunm + ') AS s \
                INNER JOIN item AS i ON i.stimulusKC = s.KCId';
-
-  const perfRet = await db.oneOrNone(query, [userId, TDFid]);
-  const query2 = 'SELECT COUNT(DISTINCT s.ItemId) - COUNT(CASE WHEN s.CF_Item_Removed=TRUE THEN 1 END) AS stimsSeen, \
-
-                  COUNT(CASE WHEN s.CF_Item_Removed=TRUE THEN 1 END) AS stimsRemoved \
-                  FROM history AS s \
-                  WHERE s.userId=$1 AND s.tdfid=$2 ' + onlyLearningSession;                
+  const query2 = `SELECT COUNT(DISTINCT s.ItemId) AS stimsintroduced, 
+                  COUNT(s.ItemId) AS totalStims,
+                  COUNT(CASE WHEN s.outcome='correct' THEN 1 END) AS numCorrect,
+                  COUNT(CASE WHEN s.outcome='incorrect' THEN 1 END) AS numIncorrect,
+                  SUM(s.practiceDuration) as totalPracticeDuration
+                  FROM
+                  (
+                    SELECT itemid, outcome, cf_end_latency + cf_feedback_latency as practiceDuration
+                    from history 
+                    WHERE userId=$1 AND TDFId=$2 AND CF_Item_Removed=FALSE
+                    ${onlyLearningSession}
+                    ${limitAddendum}
+                  ) s`;
+  const query3 = `SELECT COUNT(CASE WHEN s.CF_Item_Removed=TRUE THEN 1 END) AS stimsremoved
+                  FROM 
+                  (
+                    SELECT CF_Item_Removed 
+                    FROM history
+                    WHERE userId=$1 AND TDFId=$2
+                    ${onlyLearningSession}
+                    ${limitAddendum}
+                  ) s`;
+  const perfRet = await db.oneOrNone(query, [userId, TDFid, stimIds]);
   const perfRet2 = await db.oneOrNone(query2, [userId, TDFid, stimIds]);
-  if (!perfRet || !perfRet2) return null;
+  const perfRet3 = await db.oneOrNone(query3, [userId, TDFid, stimIds]);
+  if (!perfRet || !perfRet2 || !perfRet3) return null;
   return {
-    numCorrect: perfRet.numcorrect,
-    numIncorrect: perfRet.numincorrect,
-    totalStimCount: perfRet.totalstimcount,
-    stimsSeen: perfRet2.stimsseen,
-    totalPracticeDuration: perfRet.totalpracticeduration,
-    stimsIntroduced: perfRet.stimsintroduced,
-    stimsRemoved: perfRet2.stimsremoved,
+    numCorrect: parseFloat(perfRet2.numcorrect),
+    numIncorrect: parseFloat(perfRet2.numincorrect),
+    totalStimCount: parseFloat(perfRet.totalstimcount),
+    totalPracticeDuration: parseFloat(perfRet.totalpracticeduration),
+    stimsIntroduced: parseFloat(perfRet2.stimsintroduced),
+    stimsRemoved: parseFloat(perfRet3.stimsremoved)
   };
 }
 
