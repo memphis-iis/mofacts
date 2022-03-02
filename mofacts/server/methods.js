@@ -1408,14 +1408,15 @@ function findUserByName(username) {
 }
 
 async function verifySyllableUpload(stimSetId){
-  const query = 'SELECT COUNT(DISTINCT correctresponse) FROM item WHERE stimulisetid = $1';
+  const query = 'SELECT COUNT(DISTINCT LOWER(correctresponse)) FROM item WHERE stimulisetid = $1';
   const postgresRet = await db.oneOrNone(query, stimSetId);
   const answersCountPostgres = postgresRet.count;
 
   const mongoRet = StimSyllables.findOne({filename: stimSetId});
   if(mongoRet){
     const answersCountMongo = Object.keys(mongoRet.data).length;
-    return answersCountMongo == answersCountPostgres;
+    if(answersCountMongo == answersCountPostgres)
+      return true;
   }
   StimSyllables.remove({filename: stimSetId});
   return false;
