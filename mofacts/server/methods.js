@@ -1139,29 +1139,47 @@ async function getStudentReportingData(userId, TDFid, hintLevel) {
   return {correctnessAcrossRepetitions, probEstimates};
 }
 
-async function getStudentPerformanceByIdAndTDFId(userId, TDFid,hintLevel=null,returnRows=null) {
+async function getStimSetFromLearningSessionByClusterList(stimuliSetId, clusterList){
+  const query = 'SELECT stimuluskc FROM item \
+               WHERE stimuliSetId=$1 \
+               AND POSITION(CAST(clusterkc as text) in $2)>0 \
+               ORDER BY itemId';
+  const itemRet = await db.manyOrNone(query, [stimuliSetId, clusterList]);
+
+  let items = '';
+  for (const item of itemRet) {
+    items += item.stimuluskc + ' ';
+  }
+  return items;
+}
+
+async function getStudentPerformanceByIdAndTDFId(userId, TDFid,hintLevel=null,returnRows=null, stimIds=null) {
   console.log('getStudentPerformanceByIdAndTDFId', userId, TDFid, hintLevel, returnRows);
   let hintLevelAddendunm = "";
   let limitAddendum = "";
+  let onlyLearningSession = "";
   if(hintLevel != null){
     hintLevelAddendunm = "AND hintLevel=hintlevel";
   }
   if(returnRows != null){
     hintLevelAddendunm = "ORDER BY componentstateid DESC LIMIT " + returnRows;
   }
+  if(stimIds != null){
+    onlyLearningSession = 'AND POSITION(CAST(kcid as text) in $3)>0 '; 
+  }
   const query = 'SELECT SUM(s.priorCorrect) AS numCorrect, \
                SUM(s.priorIncorrect) AS numIncorrect, \
                COUNT(i.itemID) AS totalStimCount, \
                SUM(s.totalPracticeDuration) AS totalPracticeDuration, \
-               COUNT(CASE WHEN (s.priorIncorrect = 1 AND s.priorCorrect = 0) OR (s.priorIncorrect = 0 AND s.priorCorrect = 1) THEN 1 END) AS stimsIntroduced \
-               FROM (SELECT * from componentState WHERE userId=$1 AND TDFId=$2 AND componentType =\'stimulus\' ' + hintLevelAddendunm + limitAddendum + ') AS s \
+               COUNT(CASE WHEN (s.priorIncorrect > 0 OR s.priorCorrect > 0) THEN 1 END) AS stimsIntroduced \
+               FROM (SELECT * from componentState WHERE userId=$1 AND TDFId=$2 AND componentType =\'stimulus\' ' + onlyLearningSession + hintLevelAddendunm + limitAddendum + ') AS s \
                INNER JOIN item AS i ON i.stimulusKC = s.KCId';
-  const perfRet = await db.oneOrNone(query, [userId, TDFid]);
+  const perfRet = await db.oneOrNone(query, [userId, TDFid, stimIds]);
   const query2 = 'SELECT COUNT(DISTINCT s.ItemId) AS stimsSeen, \
                   COUNT(CASE WHEN s.CF_Item_Removed=TRUE THEN 1 END) AS stimsRemoved \
                   FROM history AS s \
-                  WHERE s.userId=$1 AND s.tdfid=$2';                
-  const perfRet2 = await db.oneOrNone(query2, [userId, TDFid]);
+                  WHERE s.userId=$1 AND s.tdfid=$2 ' + onlyLearningSession;                
+  const perfRet2 = await db.oneOrNone(query2, [userId, TDFid, stimIds]);
   if (!perfRet || !perfRet2) return null;
   return {
     numCorrect: perfRet.numcorrect,
@@ -1739,7 +1757,7 @@ Meteor.startup(async function() {
 
     getAllTeachers, getTdfNamesAssignedByInstructor, getTdfsAssignedToStudent, getTdfAssignmentsByCourseIdMap,
 
-    getStudentPerformanceByIdAndTDFId, getStudentPerformanceForClassAndTdfId,
+    getStudentPerformanceByIdAndTDFId, getStudentPerformanceForClassAndTdfId, getStimSetFromLearningSessionByClusterList,
 
     getExperimentState, setExperimentState, getUserIdforUsername, insertStimTDFPair,
 
