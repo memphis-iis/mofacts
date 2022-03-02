@@ -207,7 +207,7 @@ async function drawDashboard(studentId, selectedTdfId){
   const difficultyData = await meteorCallAsync('getStudentPerformanceByIdAndTDFId',studentId,selectedTdfId,null,difficultyHistory, stimids);
   console.log("difficultyData", masteryEstimateData)
   //Expand Data
-  let {numCorrect, numIncorrect, totalStimCount, stimsSeen,  totalPracticeDuration, stimsIntroduced, stimsRemoved} = curStudentGraphData;
+  let {numCorrect, numIncorrect, totalStimCount,  totalPracticeDuration, stimsIntroduced, stimsRemoved} = curStudentGraphData;
     // Perform calculated data
   
   totalAttempts = parseFloat(numCorrect) + parseFloat(numIncorrect);
@@ -218,7 +218,7 @@ async function drawDashboard(studentId, selectedTdfId){
   percentCorrect = (parseFloat(numCorrect) / totalAttempts) * 100;
   totalPracticeDurationMinutes = totalPracticeDuration / 60000;
   totalPracticeDurationMinutesDisplay = totalPracticeDurationMinutes.toFixed();
-  percentStimsSeen = parseFloat(stimsSeen) / parseFloat(totalStimCount) * 100;
+  percentStimsSeen = parseFloat(stimsIntroduced) / parseFloat(totalStimCount) * 100;
   speedOfLearning = Math.log(1+parseFloat(speedOfLearningData.stimsIntroduced)) * 100;
   difficultyCorrectProportion = parseFloat(difficultyData.numCorrect) / (parseFloat(difficultyData.numCorrect) + parseFloat(difficultyData.numIncorrect));
   displayDifficulty =  (Math.min(Math.max(difficultyCorrectProportion - optimumDifficulty, -0.3) , 0.3) + 0.3) * 100; //Add .3 and Multiply by 100 for graph scale
@@ -228,7 +228,7 @@ async function drawDashboard(studentId, selectedTdfId){
   itemMasteryRateEstimated = parseFloat(masteryEstimateData.stimsIntroduced) / totalPracticeDurationMasteryEstMinutes
   estimatedTimeMastery = itemMasteryRateEstimated * (parseFloat(totalStimCount) - parseFloat(stimsIntroduced));
   Session.set('stimCount',parseFloat(totalStimCount));
-  Session.set('stimsSeen',stimsSeen);
+  Session.set('stimsSeen',stimsIntroduced);
   Session.set('curTotalAttempts',totalAttempts);
   Session.set('practiceDuration', totalPracticeDurationMinutesDisplay);
   Session.set('itemMasteryRate', itemMasteryRate.toFixed(2));
