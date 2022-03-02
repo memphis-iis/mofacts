@@ -8,6 +8,7 @@ import gauge, {
   TextRenderer
 
 } from '../../lib/gauge.js';
+import { _ } from 'core-js';
 
 Session.set('studentReportingTdfs', []);
 Session.set('studentReportingTdfs', undefined);
@@ -182,6 +183,15 @@ async function drawDashboard(studentId, selectedTdfId){
   // Get TDF Parameters
   selectedTdf = await meteorCallAsync('getTdfById',selectedTdfId);
   selectedTdfIdProgressReportParams = selectedTdf.content.tdfs.tutor.setspec.progressReporterParams;
+  let curStimSetId = selectedTdf.stimuliSetId;
+  let clusterlist = '';
+  for(let unit of selectedTdf.content.tdfs.tutor.unit){
+    if(unit.learningsession){
+      let list = unit.learningsession.clusterlist.split('-');
+      for(let unitNumber of _.range(parseInt(list[0]), parseInt(list[1]) + 1))
+        clusterlist += unitNumber + 10000 * curStimSetId + ' ';
+    }
+  }
   console.log('selectedTdfIdProgressReportParams',selectedTdfIdProgressReportParams);
   if(typeof selectedTdfIdProgressReportParams === "undefined"){
     selectedTdfIdProgressReportParams = [0.7,30,60,30,90,60];
@@ -189,11 +199,12 @@ async function drawDashboard(studentId, selectedTdfId){
   const [optimumDifficulty, difficultyHistory, masteryDisplay, masteryHistory, timeToMasterDisplay, timeToMasterHistory] = selectedTdfIdProgressReportParams;
   console.log('expanded params',  optimumDifficulty, difficultyHistory, masteryDisplay, masteryHistory, timeToMasterDisplay, timeToMasterHistory);
   //Get Student Data
-  const curStudentGraphData = await meteorCallAsync('getStudentPerformanceByIdAndTDFId',studentId,selectedTdfId,null,null);
-  const speedOfLearningData = await meteorCallAsync('getStudentPerformanceByIdAndTDFId',studentId,selectedTdfId,null,30);
-  const masteryRateData = await meteorCallAsync('getStudentPerformanceByIdAndTDFId',studentId,selectedTdfId,null,masteryHistory);
-  const masteryEstimateData = await meteorCallAsync('getStudentPerformanceByIdAndTDFId',studentId,selectedTdfId,null,timeToMasterHistory);
-  const difficultyData = await meteorCallAsync('getStudentPerformanceByIdAndTDFId',studentId,selectedTdfId,null,difficultyHistory);
+  const stimids = await meteorCallAsync('getStimSetFromLearningSessionByClusterList', curStimSetId, clusterlist);
+  const curStudentGraphData = await meteorCallAsync('getStudentPerformanceByIdAndTDFId',studentId,selectedTdfId,null,null, stimids);
+  const speedOfLearningData = await meteorCallAsync('getStudentPerformanceByIdAndTDFId',studentId,selectedTdfId,null,30, stimids);
+  const masteryRateData = await meteorCallAsync('getStudentPerformanceByIdAndTDFId',studentId,selectedTdfId,null,masteryHistory, stimids);
+  const masteryEstimateData = await meteorCallAsync('getStudentPerformanceByIdAndTDFId',studentId,selectedTdfId,null,timeToMasterHistory, stimids);
+  const difficultyData = await meteorCallAsync('getStudentPerformanceByIdAndTDFId',studentId,selectedTdfId,null,difficultyHistory, stimids);
   console.log("difficultyData", masteryEstimateData)
   //Expand Data
   let {numCorrect, numIncorrect, totalStimCount, stimsSeen,  totalPracticeDuration, stimsIntroduced, stimsRemoved} = curStudentGraphData;
