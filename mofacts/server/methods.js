@@ -1153,46 +1153,72 @@ async function getStimSetFromLearningSessionByClusterList(stimuliSetId, clusterL
   return items;
 }
 
-async function getStudentPerformanceByIdAndTDFId(userId, TDFid,hintLevel=null,returnRows=null, stimIds=null) {
-  console.log('getStudentPerformanceByIdAndTDFId', userId, TDFid, hintLevel, returnRows);
-  let hintLevelAddendunm = "";
-  let limitAddendum = "";
+async function getStudentPerformanceByIdAndTDFId(userId, TDFid, stimIds=null) {
+  console.log('getStudentPerformanceByIdAndTDFId', userId, TDFid);
   let onlyLearningSession = "";
-  if(hintLevel != null){
-    hintLevelAddendunm = "AND hintLevel=hintlevel";
+  if(stimIds != null){
+    onlyLearningSession = 'AND POSITION(CAST(kcid as text) in $3)>0';
   }
+  const query = `SELECT COUNT(i.itemID) AS totalStimCount,
+                 SUM(s.priorCorrect) AS numCorrect,
+                 SUM(s.priorIncorrect) AS numIncorrect,
+                 SUM(s.totalPracticeDuration) AS totalPracticeDuration,
+                 COUNT(CASE WHEN (s.priorIncorrect > 0 OR s.priorCorrect > 0) THEN 1 END) AS stimsIntroduced
+                 FROM (SELECT * from componentState WHERE userId=$1 AND TDFId=$2 AND componentType ='stimulus' ${onlyLearningSession}) AS s
+                 INNER JOIN item AS i ON i.stimulusKC = s.KCId`;
+  const perfRet = await db.oneOrNone(query, [userId, TDFid, stimIds]);
+  if (!perfRet) return null;
+  return {
+    numCorrect: parseFloat(perfRet.numcorrect),
+    numIncorrect: parseFloat(perfRet.numincorrect),
+    totalStimCount: parseFloat(perfRet.totalstimcount),
+    totalPracticeDuration: parseFloat(perfRet.totalpracticeduration), //needs to include practice done on dropped items,
+    stimsIntroduced: parseFloat(perfRet.stimsintroduced)
+  };
+}
+
+async function getStudentPerformanceByIdAndTDFIdFromHistory(userId, TDFid,returnRows=null){
+  //used to grab a limited sample of the student's performance
+  console.log('getStudentPerformanceByIdAndTDFIdFromHistory', userId, TDFid, returnRows);
+  let limitAddendum = "";
   if(returnRows != null){
     limitAddendum = "ORDER BY itemid DESC LIMIT " + returnRows;
   }
-  if(stimIds != null){
-    onlyLearningSessionComponentState = 'AND POSITION(CAST(kcid as text) in $3)>0';
-    onlyLearningSessionHistory = `AND level_unitname = 'Learning unit'`;
-  }
-  const query = `SELECT COUNT(i.itemID) AS totalStimCount,
-                 SUM(s.totalPracticeDuration) AS totalPracticeDuration
-                 FROM (SELECT * from componentState WHERE userId=$1 AND TDFId=$2 AND componentType ='stimulus' ${onlyLearningSessionComponentState} ${hintLevelAddendunm}) AS s
-                 INNER JOIN item AS i ON i.stimulusKC = s.KCId`;
-  const query2 = `SELECT COUNT(DISTINCT s.ItemId) AS stimsintroduced,
+  const query = `SELECT COUNT(DISTINCT s.ItemId) AS stimsintroduced,
                   COUNT(CASE WHEN s.outcome='correct' THEN 1 END) AS numCorrect,
-                  COUNT(CASE WHEN s.outcome='incorrect' THEN 1 END) AS numIncorrect
+                  COUNT(CASE WHEN s.outcome='incorrect' THEN 1 END) AS numIncorrect,
+                  SUM(s.trialTime) as practiceDuration
                   FROM
                   (
-                    SELECT itemid, outcome
+                    SELECT itemid, outcome, cf_end_latency + cf_feedback_latency as trialTime
                     from history 
                     WHERE userId=$1 AND TDFId=$2
-                    ${onlyLearningSessionHistory}
+                    AND level_unitname = 'Learning unit'
                     ${limitAddendum}
                   ) s`;
-  const perfRet = await db.oneOrNone(query, [userId, TDFid, stimIds]);
-  const perfRet2 = await db.oneOrNone(query2, [userId, TDFid, stimIds]);
-  if (!perfRet || !perfRet2) return null;
+  const perfRet = await db.oneOrNone(query, [userId, TDFid]);
+  if (!perfRet) return null;
   return {
-    numCorrect: parseFloat(perfRet2.numcorrect),
-    numIncorrect: parseFloat(perfRet2.numincorrect),
-    totalStimCount: parseFloat(perfRet.totalstimcount),
-    totalPracticeDuration: parseFloat(perfRet.totalpracticeduration), //needs to include practice done on dropped items
-    stimsIntroduced: parseFloat(perfRet2.stimsintroduced)
+    numCorrect: parseFloat(perfRet.numcorrect),
+    numIncorrect: parseFloat(perfRet.numincorrect),
+    practiceDuration: parseFloat(perfRet.practiceduration),
+    stimsIntroduced: parseFloat(perfRet.stimsintroduced)
   };
+}
+
+async function getNumDroppedItemsByUserIDAndTDFId(userId, TDFid){
+  //used to grab a limited sample of the student's performance
+  console.log('getNumDroppedItemsByUserIDAndTDFId', userId, TDFid);
+  const query = `select COUNT
+                (
+                  CASE WHEN CF_Item_Removed=TRUE AND 
+                  userId=$1 AND 
+                  TDFId=$2 AND 
+                  level_unitname = 'Learning unit' THEN 1 END
+                ) from history`;
+  const queryRet = await db.oneOrNone(query, [userId, TDFid]);
+  if (!queryRet) return null;
+  return queryRet.count;
 }
 
 async function getStudentPerformanceForClassAndTdfId(instructorId) {
@@ -1760,7 +1786,9 @@ Meteor.startup(async function() {
 
     getAllTeachers, getTdfNamesAssignedByInstructor, getTdfsAssignedToStudent, getTdfAssignmentsByCourseIdMap,
 
-    getStudentPerformanceByIdAndTDFId, getStudentPerformanceForClassAndTdfId, getStimSetFromLearningSessionByClusterList,
+    getStudentPerformanceByIdAndTDFId, getStudentPerformanceByIdAndTDFIdFromHistory, getNumDroppedItemsByUserIDAndTDFId,
+    
+    getStudentPerformanceForClassAndTdfId, getStimSetFromLearningSessionByClusterList,
 
     getExperimentState, setExperimentState, getUserIdforUsername, insertStimTDFPair,
 
