@@ -1165,47 +1165,33 @@ async function getStudentPerformanceByIdAndTDFId(userId, TDFid,hintLevel=null,re
     limitAddendum = "ORDER BY itemid DESC LIMIT " + returnRows;
   }
   if(stimIds != null){
-    onlyLearningSession = 'AND POSITION(CAST(kcid as text) in $3)>0 '; 
+    onlyLearningSessionComponentState = 'AND POSITION(CAST(kcid as text) in $3)>0';
+    onlyLearningSessionHistory = `AND level_unitname = 'Learning unit'`;
   }
-  const query = 'SELECT SUM(s.priorCorrect) AS numCorrect, \
-               SUM(s.priorIncorrect) AS numIncorrect, \
-               COUNT(i.itemID) AS totalStimCount, \
-               SUM(s.totalPracticeDuration) AS totalPracticeDuration \
-               FROM (SELECT * from componentState WHERE userId=$1 AND TDFId=$2 AND componentType =\'stimulus\' ' + onlyLearningSession + hintLevelAddendunm + ') AS s \
-               INNER JOIN item AS i ON i.stimulusKC = s.KCId';
-  const query2 = `SELECT COUNT(DISTINCT s.ItemId) AS stimsintroduced, 
-                  COUNT(s.ItemId) AS totalStims,
+  const query = `SELECT COUNT(i.itemID) AS totalStimCount,
+                 SUM(s.totalPracticeDuration) AS totalPracticeDuration
+                 FROM (SELECT * from componentState WHERE userId=$1 AND TDFId=$2 AND componentType ='stimulus' ${onlyLearningSessionComponentState} ${hintLevelAddendunm}) AS s
+                 INNER JOIN item AS i ON i.stimulusKC = s.KCId`;
+  const query2 = `SELECT COUNT(DISTINCT s.ItemId) AS stimsintroduced,
                   COUNT(CASE WHEN s.outcome='correct' THEN 1 END) AS numCorrect,
-                  COUNT(CASE WHEN s.outcome='incorrect' THEN 1 END) AS numIncorrect,
-                  SUM(s.practiceDuration) as totalPracticeDuration
+                  COUNT(CASE WHEN s.outcome='incorrect' THEN 1 END) AS numIncorrect
                   FROM
                   (
-                    SELECT itemid, outcome, cf_end_latency + cf_feedback_latency as practiceDuration
+                    SELECT itemid, outcome
                     from history 
-                    WHERE userId=$1 AND TDFId=$2 AND CF_Item_Removed=FALSE
-                    ${onlyLearningSession}
-                    ${limitAddendum}
-                  ) s`;
-  const query3 = `SELECT COUNT(CASE WHEN s.CF_Item_Removed=TRUE THEN 1 END) AS stimsremoved
-                  FROM 
-                  (
-                    SELECT CF_Item_Removed 
-                    FROM history
                     WHERE userId=$1 AND TDFId=$2
-                    ${onlyLearningSession}
+                    ${onlyLearningSessionHistory}
                     ${limitAddendum}
                   ) s`;
   const perfRet = await db.oneOrNone(query, [userId, TDFid, stimIds]);
   const perfRet2 = await db.oneOrNone(query2, [userId, TDFid, stimIds]);
-  const perfRet3 = await db.oneOrNone(query3, [userId, TDFid, stimIds]);
-  if (!perfRet || !perfRet2 || !perfRet3) return null;
+  if (!perfRet || !perfRet2) return null;
   return {
     numCorrect: parseFloat(perfRet2.numcorrect),
     numIncorrect: parseFloat(perfRet2.numincorrect),
     totalStimCount: parseFloat(perfRet.totalstimcount),
-    totalPracticeDuration: parseFloat(perfRet.totalpracticeduration),
-    stimsIntroduced: parseFloat(perfRet2.stimsintroduced),
-    stimsRemoved: parseFloat(perfRet3.stimsremoved)
+    totalPracticeDuration: parseFloat(perfRet.totalpracticeduration), //needs to include practice done on dropped items
+    stimsIntroduced: parseFloat(perfRet2.stimsintroduced)
   };
 }
 
