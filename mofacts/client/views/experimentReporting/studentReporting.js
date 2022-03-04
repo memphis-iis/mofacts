@@ -200,35 +200,39 @@ async function drawDashboard(studentId, selectedTdfId){
   console.log('expanded params',  optimumDifficulty, difficultyHistory, masteryDisplay, masteryHistory, timeToMasterDisplay, timeToMasterHistory);
   //Get Student Data
   const stimids = await meteorCallAsync('getStimSetFromLearningSessionByClusterList', curStimSetId, clusterlist);
-  const curStudentGraphData = await meteorCallAsync('getStudentPerformanceByIdAndTDFId',studentId,selectedTdfId,null,null, stimids);
-  const speedOfLearningData = await meteorCallAsync('getStudentPerformanceByIdAndTDFId',studentId,selectedTdfId,null,30, stimids);
-  const masteryRateData = await meteorCallAsync('getStudentPerformanceByIdAndTDFId',studentId,selectedTdfId,null,masteryHistory, stimids);
-  const masteryEstimateData = await meteorCallAsync('getStudentPerformanceByIdAndTDFId',studentId,selectedTdfId,null,timeToMasterHistory, stimids);
-  const difficultyData = await meteorCallAsync('getStudentPerformanceByIdAndTDFId',studentId,selectedTdfId,null,difficultyHistory, stimids);
-  console.log("difficultyData", masteryEstimateData)
+  const curStudentGraphData = await meteorCallAsync('getStudentPerformanceByIdAndTDFId', studentId, selectedTdfId, stimids);
+  const speedOfLearningData = await meteorCallAsync('getStudentPerformanceByIdAndTDFIdFromHistory', studentId, selectedTdfId, 30);
+  const masteryRateData = await meteorCallAsync('getStudentPerformanceByIdAndTDFIdFromHistory', studentId, selectedTdfId, masteryHistory);
+  const masteryEstimateData = await meteorCallAsync('getStudentPerformanceByIdAndTDFIdFromHistory', studentId, selectedTdfId, timeToMasterHistory);
+  const difficultyData = await meteorCallAsync('getStudentPerformanceByIdAndTDFIdFromHistory', studentId, selectedTdfId, difficultyHistory);
+  const numDroppedStims = await meteorCallAsync('getNumDroppedItemsByUserIDAndTDFId', studentId, selectedTdfId)
+  console.log("curStudentGraphData(all trials)", curStudentGraphData)
+  console.log(`speedOfLearningData(${30} trials)`, speedOfLearningData)
+  console.log(`masteryRateData(${masteryHistory} trials)`, masteryRateData)
+  console.log(`masteryEstimateData(${timeToMasterHistory} trials)`, masteryEstimateData)
+  console.log(`difficultyData(${difficultyHistory} trials)`, difficultyData)
   //Expand Data
-  let {numCorrect, numIncorrect, totalStimCount,  totalPracticeDuration, stimsIntroduced, stimsRemoved} = curStudentGraphData;
+  let {numCorrect, numIncorrect, totalStimCount,  totalPracticeDuration, stimsIntroduced} = curStudentGraphData;
     // Perform calculated data
   
   totalAttempts = parseFloat(numCorrect) + parseFloat(numIncorrect);
-  totalStimCount -=  parseFloat(stimsRemoved);
   if(isNaN(totalAttempts)){
     totalAttempts = 0;
   }
   percentCorrect = (parseFloat(numCorrect) / totalAttempts) * 100;
   totalPracticeDurationMinutes = totalPracticeDuration / 60000;
   totalPracticeDurationMinutesDisplay = totalPracticeDurationMinutes.toFixed();
-  percentStimsSeen = parseFloat(stimsIntroduced) / parseFloat(totalStimCount) * 100;
+  percentStimsSeen = parseFloat(stimsIntroduced - numDroppedStims) / parseFloat(totalStimCount - numDroppedStims) * 100;
   speedOfLearning = Math.log(1+parseFloat(speedOfLearningData.stimsIntroduced)) * 100;
   difficultyCorrectProportion = parseFloat(difficultyData.numCorrect) / (parseFloat(difficultyData.numCorrect) + parseFloat(difficultyData.numIncorrect));
   displayDifficulty =  (Math.min(Math.max(difficultyCorrectProportion - optimumDifficulty, -0.3) , 0.3) + 0.3) * 100; //Add .3 and Multiply by 100 for graph scale
-  totalPracticeDurationMasteryMinutes = masteryRateData.totalPracticeDuration / 60000;
+  totalPracticeDurationMasteryMinutes = masteryRateData.practiceDuration / 60000;
   itemMasteryRate = parseFloat(masteryRateData.stimsIntroduced) / totalPracticeDurationMasteryMinutes;
-  totalPracticeDurationMasteryEstMinutes = masteryEstimateData.totalPracticeDuration /60000;
+  totalPracticeDurationMasteryEstMinutes = masteryEstimateData.practiceDuration /60000;
   itemMasteryRateEstimated = parseFloat(masteryEstimateData.stimsIntroduced) / totalPracticeDurationMasteryEstMinutes
   estimatedTimeMastery = itemMasteryRateEstimated * (parseFloat(totalStimCount) - parseFloat(stimsIntroduced));
-  Session.set('stimCount',parseFloat(totalStimCount));
-  Session.set('stimsSeen',stimsIntroduced);
+  Session.set('stimCount',parseFloat(totalStimCount) - numDroppedStims);
+  Session.set('stimsSeen',stimsIntroduced - numDroppedStims);
   Session.set('curTotalAttempts',totalAttempts);
   Session.set('practiceDuration', totalPracticeDurationMinutesDisplay);
   Session.set('itemMasteryRate', itemMasteryRate.toFixed(2));
