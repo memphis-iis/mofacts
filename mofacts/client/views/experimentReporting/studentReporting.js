@@ -222,8 +222,8 @@ async function drawDashboard(studentId, selectedTdfId){
   percentCorrect = (parseFloat(numCorrect) / totalAttempts) * 100;
   totalPracticeDurationMinutes = totalPracticeDuration / 60000;
   totalPracticeDurationMinutesDisplay = totalPracticeDurationMinutes.toFixed();
-  percentStimsSeen = parseFloat(stimsIntroduced) / parseFloat(totalStimCount) * 100;
-  speedOfLearning = Math.log(1+parseFloat(speedOfLearningData.stimsIntroduced)) / Math.log(31) * 350;
+  percentStimsSeen = parseFloat(stimsIntroduced - numDroppedStims) / parseFloat(totalStimCount - numDroppedStims) * 100;
+  speedOfLearning = Math.log(1+parseFloat(speedOfLearningData.stimsIntroduced)) * 100;
   difficultyCorrectProportion = parseFloat(difficultyData.numCorrect) / (parseFloat(difficultyData.numCorrect) + parseFloat(difficultyData.numIncorrect));
   displayDifficulty =  (Math.min(Math.max(difficultyCorrectProportion - optimumDifficulty, -0.3) , 0.3) + 0.3) * 100; //Add .3 and Multiply by 100 for graph scale
   totalPracticeDurationMasteryMinutes = masteryRateData.practiceDuration / 60000;
@@ -231,8 +231,8 @@ async function drawDashboard(studentId, selectedTdfId){
   totalPracticeDurationMasteryEstMinutes = masteryEstimateData.practiceDuration /60000;
   itemMasteryRateEstimated = parseFloat(masteryEstimateData.stimsIntroduced) / totalPracticeDurationMasteryEstMinutes
   estimatedTimeMastery = itemMasteryRateEstimated * (parseFloat(totalStimCount) - parseFloat(stimsIntroduced));
-  Session.set('stimCount',parseFloat(totalStimCount));
-  Session.set('stimsSeen',stimsIntroduced);
+  Session.set('stimCount',parseFloat(totalStimCount) - numDroppedStims);
+  Session.set('stimsSeen',stimsIntroduced - numDroppedStims);
   Session.set('curTotalAttempts',totalAttempts);
   Session.set('practiceDuration', totalPracticeDurationMinutesDisplay);
   Session.set('itemMasteryRate', itemMasteryRate.toFixed(2));
