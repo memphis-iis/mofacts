@@ -170,7 +170,7 @@ Template.instructorReporting.events({
     const date = event.currentTarget.value;
     const dateInt = new Date(date).getTime();
     console.log('practice deadline:', dateInt);
-    if(!dateInt.isNaN()){
+    if(dateInt && !isNaN(dateInt)){
       fetchAndSetPracticeTimeIntervalsMap(dateInt, _state.get('currentTdf'));
       hideUsersByDate(dateInt, _state.get('currentTdf'));
       _state.set('userMetThresholdMap', undefined);
