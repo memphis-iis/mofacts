@@ -46,7 +46,7 @@ function setCurClassStudents(curClassId, currentTdf) {
 
 async function fetchAndSetPracticeTimeIntervalsMap(date) {
   console.log('fetch', Session.get('curClassStudentPerformance'));
-  const [studentPerformanceForClass, studentPerformanceForClassAndTdfIdMap] = await meteorCallAsync('getPracticeTimeIntervalsMap', Meteor.userId(), date);
+  const [studentPerformanceForClass, studentPerformanceForClassAndTdfIdMap] = await meteorCallAsync('getStudentPerformanceForClassAndTdfId', Meteor.userId(), date);
   Session.set('studentPerformanceForClass', studentPerformanceForClass);
   Session.set('studentPerformanceForClassAndTdfIdMap', studentPerformanceForClassAndTdfIdMap);
   setCurClassStudents(Session.get('curClass').courseId, _state.get('currentTdf'))

@@ -1014,94 +1014,6 @@ async function getStimDisplayTypeMap() {
   }
 }
 
-async function getPracticeTimeIntervalsMap(instructorId, date) {
-  console.log('getPracticeTimeIntervalsMap', date,);
-  const query = `SELECT MAX(t.TDFId) AS tdfid, 
-                MAX(c.courseId) AS courseid, 
-                MAX(s.userId) AS userid, 
-                COUNT(CASE WHEN s.outcome='correct' THEN 1 END) AS correct, 
-                COUNT(CASE WHEN s.outcome='incorrect' THEN 1 END) AS incorrect, 
-                SUM(COALESCE(s.cf_end_latency + s.cf_feedback_latency, s.cf_end_latency, s.cf_feedback_latency)) AS totalPracticeDuration,
-                sc.sectionId AS sectionId 
-                FROM history AS s 
-                INNER JOIN item AS i ON i.stimulusKC = s.KCId 
-                INNER JOIN tdf AS t ON t.stimuliSetId = i.stimuliSetId 
-                INNER JOIN assignment AS a on a.TDFId = t.TDFId 
-                INNER JOIN course AS c on c.courseId = a.courseId 
-                INNER JOIN section_user_map AS sm on sm.userId = s.userId 
-                INNER JOIN section AS sc on sc.sectionId = sm.sectionId 
-                WHERE c.semester = $1 AND c.teacherUserId = $2 AND sc.courseId = c.courseId AND s.level_unitname = 'Learning unit' AND s.recordedServerTime < $3
-                GROUP BY s.userId, t.TDFId, c.courseId, sc.sectionId;`;
-
-  const studentPerformanceRet = await db.manyOrNone(query, [curSemester, instructorId, date]);
-  console.log('studentPerformanceRet', studentPerformanceRet);
-  if (studentPerformanceRet==null) {
-    return [];
-  }
-  const studentPerformanceForClass = {};
-  const studentPerformanceForClassAndTdfIdMap = {};
-  for (const studentPerformance of studentPerformanceRet) {
-    let {courseid, userid, tdfid, correct, incorrect, totalpracticeduration} = studentPerformance;
-    let studentUsername = userIdToUsernames[userid];
-    if (!studentUsername) {
-      console.log(Meteor.users.findOne({_id: userid}).username + ', ' + userid);
-      studentUsername = Meteor.users.findOne({_id: userid}).username;
-      userIdToUsernames[userid] = studentUsername;
-    }
-
-    correct = parseInt(correct);
-    incorrect = parseInt(incorrect);
-    totalpracticeduration = parseInt(totalpracticeduration);
-
-    if (!studentPerformanceForClass[courseid]) studentPerformanceForClass[courseid] = {};
-    if (!studentPerformanceForClass[courseid][tdfid]) {
-      studentPerformanceForClass[courseid][tdfid] = {count: 0, totalTime: 0, numCorrect: 0};
-    }
-    studentPerformanceForClass[courseid][tdfid].numCorrect += correct;
-    studentPerformanceForClass[courseid][tdfid].count += correct + incorrect;
-    studentPerformanceForClass[courseid][tdfid].totalTime += totalpracticeduration;
-
-    if (!studentPerformanceForClassAndTdfIdMap[courseid]) studentPerformanceForClassAndTdfIdMap[courseid] = {};
-    if (!studentPerformanceForClassAndTdfIdMap[courseid][tdfid]) {
-      studentPerformanceForClassAndTdfIdMap[courseid][tdfid] = {};
-    }
-
-    if (!studentPerformanceForClassAndTdfIdMap[courseid][tdfid][userid]) {
-      studentPerformanceForClassAndTdfIdMap[courseid][tdfid][userid] = {
-        count: 0,
-        totalTime: 0,
-        numCorrect: 0,
-        username: studentUsername,
-        userId: userid,
-      };
-    }
-    studentPerformanceForClassAndTdfIdMap[courseid][tdfid][userid].numCorrect += correct;
-    studentPerformanceForClassAndTdfIdMap[courseid][tdfid][userid].count += correct + incorrect;
-    studentPerformanceForClassAndTdfIdMap[courseid][tdfid][userid].totalTime = totalpracticeduration;
-  }
-  console.log('studentPerformanceForClass:', JSON.stringify(studentPerformanceForClass, null, 4));
-  for (const index of Object.keys(studentPerformanceForClass)) {
-    const coursetotals = studentPerformanceForClass[index];
-    for (const index2 of Object.keys(coursetotals)) {
-      const tdftotal = coursetotals[index2];
-      tdftotal.percentCorrect = ((tdftotal.numCorrect / tdftotal.count)*100).toFixed(2) + '%',
-      tdftotal.totalTimeDisplay = (tdftotal.totalTime / (60 * 1000) ).toFixed(1); // convert to minutes from ms
-    }
-  }
-  console.log('studentPerformanceForClassAndTdfIdMap:', studentPerformanceForClassAndTdfIdMap);
-  for (const index3 of Object.keys(studentPerformanceForClassAndTdfIdMap)) {
-    const coursetotals = studentPerformanceForClassAndTdfIdMap[index3];
-    for (const index4 of Object.keys(coursetotals)) {
-      const tdftotals = coursetotals[index4];
-      for ( const studenttotal of Object.values(tdftotals)) {
-        studenttotal.percentCorrect = ((studenttotal.numCorrect / studenttotal.count)*100).toFixed(2) + '%',
-        studenttotal.totalTimeDisplay = (studenttotal.totalTime / (60 * 1000) ).toFixed(1);
-      }
-    }
-  }
-  return [studentPerformanceForClass, studentPerformanceForClassAndTdfIdMap];
-}
-
 async function getUsersByUnitUpdateDate(userIds, tdfId, date) {
   console.log('getUsersByUnitUpdateDate', userIds, tdfId, date, userIds.join(','));
   const query = "SELECT userId, SUM(CF_End_Latency) AS duration \
@@ -1293,7 +1205,11 @@ async function getNumDroppedItemsByUserIDAndTDFId(userId, TDFid){
   return queryRet.count;
 }
 
-async function getStudentPerformanceForClassAndTdfId(instructorId) {
+async function getStudentPerformanceForClassAndTdfId(instructorId, date=null) {
+  let dateAdendumn = "";
+  if(date){
+    dateAdendumn = `AND s.recordedServerTime < ${date}`
+  }
   const query = `SELECT MAX(t.TDFId) AS tdfid, 
                   MAX(c.courseId) AS courseid, 
                   MAX(s.userId) AS userid, 
@@ -1308,7 +1224,7 @@ async function getStudentPerformanceForClassAndTdfId(instructorId) {
                   INNER JOIN course AS c on c.courseId = a.courseId 
                   INNER JOIN section_user_map AS sm on sm.userId = s.userId 
                   INNER JOIN section AS sc on sc.sectionId = sm.sectionId 
-                  WHERE c.semester = $1 AND c.teacherUserId = $2 AND sc.courseId = c.courseId AND s.level_unitname = 'Learning unit'
+                  WHERE c.semester = $1 AND c.teacherUserId = $2 AND sc.courseId = c.courseId AND s.level_unitname = 'Learning unit'  ${dateAdendumn}
                   GROUP BY s.userId, t.TDFId, c.courseId, sc.sectionId;`
 
   const studentPerformanceRet = await db.manyOrNone(query, [curSemester, instructorId]);
@@ -1868,7 +1784,7 @@ Meteor.startup(async function() {
 
     getComponentStatesByUserIdTDFIdAndUnitNum, setComponentStatesByUserIdTDFIdAndUnitNum,
 
-    insertHistory, getHistoryByTDFfileName, getPracticeTimeIntervalsMap, getUsersByUnitUpdateDate,
+    insertHistory, getHistoryByTDFfileName, getUsersByUnitUpdateDate,
 
     loadStimsAndTdfsFromPrivate, getListOfStimTags, getStudentReportingData,
 
