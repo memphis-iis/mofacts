@@ -123,15 +123,7 @@ Template.instructorReporting.helpers({
   classes: () => Session.get('classes'),
   curClassPerformance: () => Session.get('curClassPerformance'),
   performanceLoading: () => Session.get('performanceLoading'),
-  replaceSpacesWithUnderscores: (string) => string.replace(' ', '_'),
-  getUserMetThresholdStatus: (userId) => {
-    console.log('getUserMetThresholdStatus:', userId);
-    if (_state.get('userMetThresholdMap')) {
-      return _state.get('userMetThresholdMap')[userId];
-    } else {
-      return 'Not set';
-    }
-  },
+  replaceSpacesWithUnderscores: (string) => string.replace(' ', '_')
 });
 
 Template.instructorReporting.events({
@@ -149,7 +141,6 @@ Template.instructorReporting.events({
     $('#tdf-select').val(INVALID);
     $('#tdf-select').prop('disabled', false);
     $('#practice-deadline-date').prop('disabled', true);
-    $('#practice-time-select').prop('disabled', true);
     _state.set('userMetThresholdMap', undefined);
   },
 
@@ -174,14 +165,7 @@ Template.instructorReporting.events({
       fetchAndSetPracticeTimeIntervalsMap(dateInt, _state.get('currentTdf'));
       hideUsersByDate(dateInt, _state.get('currentTdf'));
       _state.set('userMetThresholdMap', undefined);
-      $('#practice-time-select').val(INVALID);
-      $('#practice-time-select').prop('disabled', false);
     }
-  },
-
-  'change #practice-time-select': (event) => {
-    const threshold = event.currentTarget.value;
-    generateUserMetThresholdMap(threshold);
   },
 });
 
