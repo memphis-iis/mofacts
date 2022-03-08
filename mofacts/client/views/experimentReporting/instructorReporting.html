@@ -39,20 +39,15 @@
         <h3>Practice Deadline</h3>
         <input type="date" id="practice-deadline-date" name="practice-deadline-date-select" disabled="true">
       </div>
-      <div>
-        <h3>Practice Time Threshold (Min)</h3>
-        <input type="number" id="practice-time-select" disabled="true">
-      </div>
       <h3>Class Data</h3>
-        <table border="1">
-          <tr><th class="thWide">ID</th><th class="thWide">% Correct</th><th class="thWide">Count</th><th>Total Time (min)</th><th>Completed Before Deadline</th></tr>
+        <table border="1" style="width: 100%;">
+          <tr><th class="thWideInstReport">ID</th><th class="thWideInstReport">% Correct</th><th class="thWideInstReport">Count</th><th style="width: 10%;text-align: center;">Total Time (min)</th></tr>
           {{#each curClassStudentPerformance}}
             <tr id="{{this.userId}}">
               <td><a onclick="navigateToStudentReporting('{{this.username}}')">{{this.username}}</a></td>
               <td>{{this.percentCorrect}}</td>
               <td>{{this.count}}</td>
               <td>{{this.totalTimeDisplay}}</td>
-              <td>{{getUserMetThresholdStatus this.userId}}</td>
             </tr>
           {{/each}}
           <tr id="classReportingTotal">
