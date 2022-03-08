@@ -44,55 +44,12 @@ function setCurClassStudents(curClassId, currentTdf) {
   }
 }
 
-function fetchAndSetPracticeTimeIntervalsMap(date, tdfId) {
+async function fetchAndSetPracticeTimeIntervalsMap(date) {
   console.log('fetch', Session.get('curClassStudentPerformance'));
-  const userIds = Session.get('curClassStudentPerformance').map( (x) => x.userId );
-  Meteor.call('getPracticeTimeIntervalsMap', userIds, tdfId, date, function(err, res) {
-    if (err) {
-      throw new Error('Error fetching practice time intervals ->' + err);
-    } else {
-      console.log('getPracticeTimeIntervalsMap', res);
-      _state.set('practiceTimeIntervalsMap', res);
-    }
-  });
-}
-
-function generateUserMetThresholdMap(threshold) {
-  const practiceTimeIntervalsMap = _state.get('practiceTimeIntervalsMap');
-  const userMetThresholdMap = {};
-
-  const userIds = Session.get('curClassStudentPerformance').map((x) => x.userId );
-
-  Object.entries(practiceTimeIntervalsMap).forEach(([userId, duration]) => {
-    duration = duration / (60 * 1000); // convert back from ms to min for display
-    if (duration < threshold) {
-      userMetThresholdMap[userId] = 'NO - ' + duration.toFixed(1);
-    } else {
-      userMetThresholdMap[userId] = 'YES - ' + duration.toFixed(1);
-    }
-  });
-
-
-  userIds.forEach((uid) => {
-    let hideAllUsers = true;
-    if (!userMetThresholdMap[uid] && userMetThresholdMap[uid] != 0) {
-      userMetThresholdMap[uid] = 'NO ATTEMPT BEFORE DEADLINE';
-      $('#' + uid).hide()
-    }
-    else{
-      hideAllUsers = false;
-      $('#' + uid).show()
-    }
-    if(hideAllUsers){
-      $('#classReportingTotal').hide();
-    }
-    else{
-      $('#classReportingTotal').show();
-    }
-  });
-
-  console.log('generateUserMetThresholdMap:', threshold, userMetThresholdMap);
-  _state.set('userMetThresholdMap', userMetThresholdMap);
+  const [studentPerformanceForClass, studentPerformanceForClassAndTdfIdMap] = await meteorCallAsync('getStudentPerformanceForClassAndTdfId', Meteor.userId(), date);
+  Session.set('studentPerformanceForClass', studentPerformanceForClass);
+  Session.set('studentPerformanceForClassAndTdfIdMap', studentPerformanceForClassAndTdfIdMap);
+  setCurClassStudents(Session.get('curClass').courseId, _state.get('currentTdf'))
 }
 
 async function hideUsersByDate(date, tdfId){
@@ -123,15 +80,7 @@ Template.instructorReporting.helpers({
   classes: () => Session.get('classes'),
   curClassPerformance: () => Session.get('curClassPerformance'),
   performanceLoading: () => Session.get('performanceLoading'),
-  replaceSpacesWithUnderscores: (string) => string.replace(' ', '_'),
-  getUserMetThresholdStatus: (userId) => {
-    console.log('getUserMetThresholdStatus:', userId);
-    if (_state.get('userMetThresholdMap')) {
-      return _state.get('userMetThresholdMap')[userId];
-    } else {
-      return 'Not set';
-    }
-  },
+  replaceSpacesWithUnderscores: (string) => string.replace(' ', '_')
 });
 
 Template.instructorReporting.events({
@@ -149,7 +98,6 @@ Template.instructorReporting.events({
     $('#tdf-select').val(INVALID);
     $('#tdf-select').prop('disabled', false);
     $('#practice-deadline-date').prop('disabled', true);
-    $('#practice-time-select').prop('disabled', true);
     _state.set('userMetThresholdMap', undefined);
   },
 
@@ -171,17 +119,10 @@ Template.instructorReporting.events({
     const dateInt = new Date(date).getTime();
     console.log('practice deadline:', dateInt);
     if(dateInt && !isNaN(dateInt)){
-      fetchAndSetPracticeTimeIntervalsMap(dateInt, _state.get('currentTdf'));
-      hideUsersByDate(dateInt, _state.get('currentTdf'));
+      await fetchAndSetPracticeTimeIntervalsMap(dateInt, _state.get('currentTdf'));
+      //hideUsersByDate(dateInt, _state.get('currentTdf'));
       _state.set('userMetThresholdMap', undefined);
-      $('#practice-time-select').val(INVALID);
-      $('#practice-time-select').prop('disabled', false);
     }
-  },
-
-  'change #practice-time-select': (event) => {
-    const threshold = event.currentTarget.value;
-    generateUserMetThresholdMap(threshold);
   },
 });
 

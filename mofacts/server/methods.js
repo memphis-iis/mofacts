@@ -1014,22 +1014,6 @@ async function getStimDisplayTypeMap() {
   }
 }
 
-async function getPracticeTimeIntervalsMap(userIds, tdfId, date) {
-  console.log('getPracticeTimeIntervalsMap', userIds, tdfId, date, userIds.join(','));
-  const query = "SELECT userId, SUM(CF_End_Latency) AS duration \
-    FROM history WHERE recordedServerTime < $1 \
-    AND userId IN ('" + userIds.join(`','`) + "') AND TDFId = $2 \
-    GROUP BY userId";
-
-  const res = await db.manyOrNone(query, [date, tdfId]);
-  const practiceTimeIntervalsMap = {};
-  for (const row of res) {
-    practiceTimeIntervalsMap[row.userid] = parseInt(row.duration);
-  }
-  console.log(practiceTimeIntervalsMap)
-  return practiceTimeIntervalsMap;
-}
-
 async function getUsersByUnitUpdateDate(userIds, tdfId, date) {
   console.log('getUsersByUnitUpdateDate', userIds, tdfId, date, userIds.join(','));
   const query = "SELECT userId, SUM(CF_End_Latency) AS duration \
@@ -1221,23 +1205,27 @@ async function getNumDroppedItemsByUserIDAndTDFId(userId, TDFid){
   return queryRet.count;
 }
 
-async function getStudentPerformanceForClassAndTdfId(instructorId) {
-  const query = 'SELECT MAX(t.TDFId) AS tdfid, \
-                    MAX(c.courseId) AS courseid, \
-                    MAX(s.userId) AS userid, \
-                    SUM(s.priorCorrect) AS correct, \
-                    SUM(s.priorIncorrect) AS incorrect, \
-                    SUM(s.totalPracticeDuration) AS totalPracticeDuration,\
-                    sc.sectionId AS sectionId \
-                    FROM componentState AS s \
-                    INNER JOIN item AS i ON i.stimulusKC = s.KCId \
-                    INNER JOIN tdf AS t ON t.stimuliSetId = i.stimuliSetId \
-                    INNER JOIN assignment AS a on a.TDFId = t.TDFId \
-                    INNER JOIN course AS c on c.courseId = a.courseId \
-                    INNER JOIN section_user_map AS sm on sm.userId = s.userId \
-                    INNER JOIN section AS sc on sc.sectionId = sm.sectionId \
-                    WHERE c.semester = $1 AND c.teacherUserId = $2 AND s.componenttype = \'stimulus\' AND sc.courseId = c.courseId \
-                    GROUP BY s.userId, t.TDFId, c.courseId, sc.sectionId;'
+async function getStudentPerformanceForClassAndTdfId(instructorId, date=null) {
+  let dateAdendumn = "";
+  if(date){
+    dateAdendumn = `AND s.recordedServerTime < ${date}`
+  }
+  const query = `SELECT MAX(t.TDFId) AS tdfid, 
+                  MAX(c.courseId) AS courseid, 
+                  MAX(s.userId) AS userid, 
+                  COUNT(CASE WHEN s.outcome='correct' THEN 1 END) AS correct, 
+                  COUNT(CASE WHEN s.outcome='incorrect' THEN 1 END) AS incorrect, 
+                  SUM(COALESCE(s.cf_end_latency + s.cf_feedback_latency, s.cf_end_latency, s.cf_feedback_latency)) AS totalPracticeDuration,
+                  sc.sectionId AS sectionId 
+                  FROM history AS s 
+                  INNER JOIN item AS i ON i.stimulusKC = s.KCId 
+                  INNER JOIN tdf AS t ON t.stimuliSetId = i.stimuliSetId 
+                  INNER JOIN assignment AS a on a.TDFId = t.TDFId 
+                  INNER JOIN course AS c on c.courseId = a.courseId 
+                  INNER JOIN section_user_map AS sm on sm.userId = s.userId 
+                  INNER JOIN section AS sc on sc.sectionId = sm.sectionId 
+                  WHERE c.semester = $1 AND c.teacherUserId = $2 AND sc.courseId = c.courseId AND s.level_unitname = 'Learning unit'  ${dateAdendumn}
+                  GROUP BY s.userId, t.TDFId, c.courseId, sc.sectionId;`
 
   const studentPerformanceRet = await db.manyOrNone(query, [curSemester, instructorId]);
   console.log('studentPerformanceRet', studentPerformanceRet);
@@ -1796,7 +1784,7 @@ Meteor.startup(async function() {
 
     getComponentStatesByUserIdTDFIdAndUnitNum, setComponentStatesByUserIdTDFIdAndUnitNum,
 
-    insertHistory, getHistoryByTDFfileName, getPracticeTimeIntervalsMap, getUsersByUnitUpdateDate,
+    insertHistory, getHistoryByTDFfileName, getUsersByUnitUpdateDate,
 
     loadStimsAndTdfsFromPrivate, getListOfStimTags, getStudentReportingData,
 

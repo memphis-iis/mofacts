@@ -1,6 +1,7 @@
-.thWide {
-  width: 33%;
+.thWideInstReport {
+  width: 30%;
   padding-right: 5px;
+  text-align: center;
 }
 
 #mainContent {
