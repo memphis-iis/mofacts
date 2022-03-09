@@ -26,6 +26,7 @@ export const outputFields = [
   // "Condition Typee", //wasButtonTrial
   'Level (Unit)', // unit
   'Level (Unitname)', // unitname
+  'Level (Unittype)',
   'Problem Name', // questionValue
   'Step Name', // new field repeats questionValue
   'Time', // stimDisplayedTime

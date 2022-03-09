@@ -799,6 +799,7 @@ async function insertHistory(historyRecord) {
                             Condition_Typee, \
                             Level_Unit, \
                             Level_Unitname, \
+                            Level_Unittype, \
                             Problem_Name, \
                             Step_Name, \
                             Time, \
@@ -837,7 +838,7 @@ async function insertHistory(historyRecord) {
   query += ' VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11::text[], \
             $12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25, \
             $26,$27,$28,$29,$30,$31,$32,$33,$34,$35,$36,$37,$38,$39,$40,$41, \
-            $42,$43,$44,$45,$46,$47,$48,$49,$50,$51,$52,$53,$54,$55,$56::jsonb,$57,$58,$59,$60)';
+            $42,$43,$44,$45,$46,$47,$48,$49,$50,$51,$52,$53,$54,$55,$56,$57::jsonb,$58,$59,$60,$61)';
   const historyVals = [
     historyRecord.itemId,
     historyRecord.userId,
@@ -864,6 +865,7 @@ async function insertHistory(historyRecord) {
     historyRecord.Condition_Typee,
     historyRecord.Level_Unit,
     historyRecord.Level_Unitname,
+    historyRecord.Level_Unittype,
     historyRecord.Problem_Name,
     historyRecord.Step_Name,
     historyRecord.Time,
@@ -1141,7 +1143,7 @@ async function getStudentPerformanceByIdAndTDFId(userId, TDFid, stimIds=null) {
   console.log('getStudentPerformanceByIdAndTDFId', userId, TDFid);
   let onlyLearningSession = "";
   if(stimIds != null){
-    onlyLearningSession = 'AND POSITION(CAST(kcid as text) in $3)>0';
+    onlyLearningSession = `AND level_unittype = 'model'`;
   }
   const query = `SELECT COUNT(i.itemID) AS totalStimCount,
                  SUM(s.priorCorrect) AS numCorrect,
@@ -1177,7 +1179,7 @@ async function getStudentPerformanceByIdAndTDFIdFromHistory(userId, TDFid,return
                     SELECT itemid, outcome, cf_end_latency + cf_feedback_latency as trialTime
                     from history 
                     WHERE userId=$1 AND TDFId=$2
-                    AND level_unitname = 'Learning unit'
+                    AND level_unittype = 'model'
                     ${limitAddendum}
                   ) s`;
   const perfRet = await db.oneOrNone(query, [userId, TDFid]);
@@ -1198,7 +1200,7 @@ async function getNumDroppedItemsByUserIDAndTDFId(userId, TDFid){
                   CASE WHEN CF_Item_Removed=TRUE AND 
                   userId=$1 AND 
                   TDFId=$2 AND 
-                  level_unitname = 'Learning unit' THEN 1 END
+                  level_unittype = 'model' THEN 1 END
                 ) from history`;
   const queryRet = await db.oneOrNone(query, [userId, TDFid]);
   if (!queryRet) return null;
@@ -1224,7 +1226,7 @@ async function getStudentPerformanceForClassAndTdfId(instructorId, date=null) {
                   INNER JOIN course AS c on c.courseId = a.courseId 
                   INNER JOIN section_user_map AS sm on sm.userId = s.userId 
                   INNER JOIN section AS sc on sc.sectionId = sm.sectionId 
-                  WHERE c.semester = $1 AND c.teacherUserId = $2 AND sc.courseId = c.courseId AND s.level_unitname = 'Learning unit'  ${dateAdendumn}
+                  WHERE c.semester = $1 AND c.teacherUserId = $2 AND sc.courseId = c.courseId AND s.level_unittype = 'model'  ${dateAdendumn}
                   GROUP BY s.userId, t.TDFId, c.courseId, sc.sectionId;`
 
   const studentPerformanceRet = await db.manyOrNone(query, [curSemester, instructorId]);

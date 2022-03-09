@@ -105,6 +105,7 @@ CREATE TABLE history (
     Level_Unit INTEGER NOT NULL,
     Level_Unitname TEXT NOT NULL,
     Problem_Name TEXT NOT NULL,
+    Level_Unittype TEXT NOT NULL,
     Step_Name TEXT NOT NULL,
     Time BIGINT NOT NULL,
     Input VARCHAR(1024) NOT NULL,
