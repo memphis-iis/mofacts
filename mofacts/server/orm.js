@@ -94,6 +94,7 @@ function getHistory(history) {
     'Condition Typee': history.condition_typee,
     'Level (Unit)': history.level_unit,
     'Level (Unitname)': history.level_unitname,
+    'Level (Unittype)': history.level_unittype,
     'Problem Name': history.problem_name,
     'Step Name': history.step_name,
     'Time': history.time,

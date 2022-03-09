@@ -1784,6 +1784,7 @@ function gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect,
 
     'Level_Unit': Session.get('currentUnitNumber'),
     'Level_Unitname': unitName,
+    'Level_Unittype': Session.get('unitType'),
     'Problem_Name': problemName,
     'Step_Name': stepName, // this is no longer a valid field as we don't restore state one step at a time
     'Time': trialStartTimestamp,
@@ -2136,6 +2137,7 @@ function beginQuestionAndInitiateUserInput(delayMs, deliveryParams) {
   console.log('beginQuestionAndInitiateUserInput');
   firstKeypressTimestamp = 0;
   trialStartTimestamp = Date.now();
+  console.log(trialStartTimestamp)
   const currentDisplay = Session.get('currentDisplay');
 
   if (currentDisplay.audioSrc) {
