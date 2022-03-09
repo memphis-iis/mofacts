@@ -1143,7 +1143,7 @@ async function getStudentPerformanceByIdAndTDFId(userId, TDFid, stimIds=null) {
   console.log('getStudentPerformanceByIdAndTDFId', userId, TDFid);
   let onlyLearningSession = "";
   if(stimIds != null){
-    onlyLearningSession = `AND level_unittype = 'model'`;
+    onlyLearningSession = 'AND POSITION(CAST(kcid as text) in $3)>0';
   }
   const query = `SELECT COUNT(i.itemID) AS totalStimCount,
                  SUM(s.priorCorrect) AS numCorrect,
