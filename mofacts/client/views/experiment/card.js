@@ -1643,6 +1643,32 @@ function gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect,
   let responseDuration = trialEndTimeStamp - firstActionTimestamp;
   let startLatency = firstActionTimestamp - trialStartTimestamp;
   let endLatency = trialEndTimeStamp - trialStartTimestamp;
+  if(firstActionTimestamp == 0 || trialEndTimeStamp == 0 || trialStartTimestamp == 0 || 
+    firstActionTimestamp == null || trialEndTimeStamp == null || trialStartTimestamp == null || 
+    firstActionTimestamp == undefined || trialEndTimeStamp == undefined || trialStartTimestamp == undefined ){
+    //something broke. The user probably didnt start answering the questing in 1970.
+    alert('Something went wrong with your trial. Please restart the chapter.');
+    const errorDescription = `One or more timestamps were set to 0 or null. 
+    firstActionTimestamp: ${firstActionTimestamp}
+    trialEndTimeStamp: ${trialEndTimeStamp}
+    trialStartTimestamp: ${trialStartTimestamp}`
+    console.log(`responseDuration: ${responseDuration}
+    startLatency: ${startLatency}
+    endLatency: ${endLatency}
+    firstKeypressTimestamp: ${firstKeypressTimestamp}
+    trialEndTimeStamp: ${trialEndTimeStamp}
+    trialStartTimestamp: ${trialStartTimestamp}`)
+    const curUser = Meteor.userId();
+    const curPage = document.location.pathname;
+    const sessionVars = Session.all();
+    const userAgent = navigator.userAgent;
+    const logs = console.logs;
+    const currentExperimentState = Session.get('currentExperimentState');
+    Meteor.call('sendUserErrorReport', curUser, errorDescription, curPage, sessionVars,
+        userAgent, logs, currentExperimentState);
+    leavePage('/profile');
+    return;
+  }
 
   // Don't count test type trials in progress reporting
   if (testType === 't') {
