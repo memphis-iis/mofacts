@@ -9,7 +9,6 @@ import {createExperimentExport} from './experiment_times';
 import {getNewItemFormat} from './conversions/convert';
 import {sendScheduledTurkMessages} from './turk_methods';
 import {getItem, getComponentState, getCourse, getTdf} from './orm';
-import { FilesCollection } from 'meteor/ostrio:files';
 import { result } from 'underscore';
 
 
@@ -48,20 +47,20 @@ if (process.env.METEOR_SETTINGS_WORKAROUND) {
 }
 if (Meteor.settings.public.testLogin) {
   process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = 0;
-  console.log('dev environment, allow insecure tls');
+  serverConsole('dev environment, allow insecure tls');
 }
 
 process.env.MAIL_URL = Meteor.settings.MAIL_URL;
 const adminUsers = Meteor.settings.initRoles.admins;
 const ownerEmail = Meteor.settings.owner;
 const isProd = Meteor.settings.prod || false;
-console.log('isProd: ' + isProd);
+serverConsole('isProd: ' + isProd);
 
 const thisServerUrl = Meteor.settings.ROOT_URL;
-console.log('thisServerUrl: ' + thisServerUrl);
+serverConsole('thisServerUrl: ' + thisServerUrl);
 
 const altServerUrl = Meteor.settings.ALT_URL;
-console.log('altServerUrl: ' + altServerUrl);
+serverConsole('altServerUrl: ' + altServerUrl);
 
 const clozeGeneration = require('./lib/Process.js');
 
@@ -84,11 +83,11 @@ function getUserIdforUsername(username) {
 
 // For Southwest SSO with ADFS/SAML 2.0
 if (Meteor.settings.saml) {
-  console.log('reading SAML settings');
+  serverConsole('reading SAML settings');
   for (let i = 0; i < Meteor.settings.saml.length; i++) {
     // privateCert is weird name, I know. spCert is better one. Will need to refactor
     if (Meteor.settings.saml[i].privateKeyFile && Meteor.settings.saml[i].publicCertFile) {
-      console.log('Set keys/certs for ' + Meteor.settings.saml[i].provider);
+      serverConsole('Set keys/certs for ' + Meteor.settings.saml[i].provider);
       let privateCert = fs.readFileSync(Meteor.settings.saml[i].publicCertFile);
       if (typeof(privateCert) != 'string') {
         privateCert = privateCert.toString();
@@ -101,22 +100,22 @@ if (Meteor.settings.saml) {
       }
       Meteor.settings.saml[i].privateKey = privateKey;
     } else {
-      console.log('No keys/certs found for ' + Meteor.settings.saml[i].provider);
+      serverConsole('No keys/certs found for ' + Meteor.settings.saml[i].provider);
     }
   }
 }
 
 if (Meteor.settings.definitionalFeedbackDataLocation) {
-  console.log('reading feedbackdata');
+  serverConsole('reading feedbackdata');
   const feedbackData = fs.readFileSync(Meteor.settings.definitionalFeedbackDataLocation);
-  console.log('initializing feedback');
+  serverConsole('initializing feedback');
   // eslint-disable-next-line new-cap
   DefinitionalFeedback.Initialize(feedbackData);
 }
 
 const feedbackCacheMap = {};
 if (Meteor.settings.elaboratedFeedbackDataLocation) {
-  console.log('initializing elaborated feedback');
+  serverConsole('initializing elaborated feedback');
   const dataBuff = fs.readFileSync(Meteor.settings.elaboratedFeedbackDataLocation);
   const cacheJSON = JSON.parse(dataBuff.toString());
   for (const triple of cacheJSON) {
@@ -278,7 +277,7 @@ async function getTdfBy_id(_id) {
     const tdf = getTdf(tdfs);
     return tdf;
   } catch (e) {
-    console.log('getTdfBy_id ERROR,', _id, ',', e);
+    serverConsole('getTdfBy_id ERROR,', _id, ',', e);
     return null;
   }
 }
@@ -293,26 +292,26 @@ async function getTdfByFileName(filename) {
     const tdf = getTdf(tdfs);
     return tdf;
   } catch (e) {
-    console.log('getTdfByFileName ERROR,', filename, ',', e);
+    serverConsole('getTdfByFileName ERROR,', filename, ',', e);
     return null;
   }
 }
 
 async function getTdfByExperimentTarget(experimentTarget) {
   try {
-    console.log('getTdfByExperimentTarget:'+experimentTarget);
+    serverConsole('getTdfByExperimentTarget:'+experimentTarget);
     const queryJSON = {'tdfs': {'tutor': {'setspec': {'experimentTarget': experimentTarget}}}};
     const tdfs = await db.one('SELECT * from tdf WHERE content @> $1' + '::jsonb', [queryJSON]);
     const tdf = getTdf(tdfs);
     return tdf;
   } catch (e) {
-    console.log('getTdfByExperimentTarget ERROR,', experimentTarget, ',', e);
+    serverConsole('getTdfByExperimentTarget ERROR,', experimentTarget, ',', e);
     return null;
   }
 }
 
 async function getAllTdfs() {
-  console.log('getAllTdfs');
+  serverConsole('getAllTdfs');
   const tdfsRet = await db.any('SELECT * from tdf');
   const tdfs = [];
   for (const tdf of tdfsRet) {
@@ -322,7 +321,7 @@ async function getAllTdfs() {
 }
 
 async function getAllStims() {
-  console.log('getAllStims');
+  serverConsole('getAllStims');
   const stimRet = await db.any('SELECT DISTINCT(stimulusfilename), stimulisetid FROM item;')
   const stims = [];
   for (const stim of stimRet){
@@ -435,8 +434,8 @@ async function setComponentStatesByUserIdTDFIdAndUnitNum(userId, TDFId, componen
       } catch (e) {
       // ComponentState didn't exist before so we'll insert it
         if (e.name == 'QueryResultError') {
-          console.log("ComponentState didn't exist before so we'll insert it")
-          console.log(componentState)
+          serverConsole("ComponentState didn't exist before so we'll insert it")
+          serverConsole(componentState)
           const componentStateId = await t.one('INSERT INTO componentstate(userId,TDFId,KCId,componentType, \
             probabilityEstimate,hintLevel,firstSeen,lastSeen,trialsSinceLastSeen,priorCorrect,priorIncorrect,priorStudy, \
             totalPracticeDuration,outcomeStack) VALUES(${userId},${TDFId}, ${KCId}, ${componentType}, \
@@ -499,7 +498,7 @@ async function insertStimTDFPair(newStimJSON, wrappedTDF, sourceSentences) {
 
   const responseKCMap = await getReponseKCMap();
   const maxResponseKC = 1;
-  console.log('!!!insertStimTDFPair:', highestStimuliSetIdRet, newStimuliSetId, highestStimulusKCRet, curNewKCBase);
+  serverConsole('!!!insertStimTDFPair:', highestStimuliSetIdRet, newStimuliSetId, highestStimulusKCRet, curNewKCBase);
   let curNewResponseKC = maxResponseKC + 1;
 
   const stimulusKCTranslationMap = {};
@@ -572,33 +571,33 @@ async function getAllCourses() {
     }
     return courses;
   } catch (e) {
-    console.log('getAllCourses ERROR,', e);
+    serverConsole('getAllCourses ERROR,', e);
     return null;
   }
 }
 
 async function getAllCourseSections() {
   try {
-    console.log('getAllCourseSections');
+    serverConsole('getAllCourseSections');
     const query = 'SELECT s.sectionid, s.sectionname, c.courseid, c.coursename, c.teacheruserid, c.semester, \
         c.beginDate from course AS c INNER JOIN section AS s ON c.courseid = s.courseid WHERE c.semester=$1';
     const ret = await db.any(query, curSemester);
     return ret;
   } catch (e) {
-    console.log('getAllCourseSections ERROR,', e);
+    serverConsole('getAllCourseSections ERROR,', e);
     return null;
   }
 }
 
 async function getCourseById(courseId) {
-  console.log('getAllCoursesForInstructor:', courseId);
+  serverConsole('getAllCoursesById:', courseId);
   const query = 'SELECT * from course WHERE courseId=$1';
   const course = await db.oneOrNone(query, [courseId, curSemester]);
   return course;
 }
 
 async function getAllCoursesForInstructor(instructorId) {
-  console.log('getAllCoursesForInstructor:', instructorId);
+  serverConsole('getAllCoursesForInstructor:', instructorId);
   const query = 'SELECT *, (SELECT array_agg(section.sectionName) as sectionNames FROM section \
       WHERE courseId=course.courseId) from course WHERE teacherUserId=$1 AND semester=$2';
   const coursesRet = await db.any(query, [instructorId, curSemester]);
@@ -611,7 +610,7 @@ async function getAllCoursesForInstructor(instructorId) {
 
 async function getAllCourseAssignmentsForInstructor(instructorId) {
   try {
-    console.log('getAllCourseAssignmentsForInstructor:'+instructorId);
+    serverConsole('getAllCourseAssignmentsForInstructor:'+instructorId);
     const query = 'SELECT t.content -> \'fileName\' AS filename, c.courseName, c.courseId from assignment AS a \
                  INNER JOIN tdf AS t ON t.TDFId = a.TDFId \
                  INNER JOIN course AS c ON c.courseId = a.courseId \
@@ -620,7 +619,7 @@ async function getAllCourseAssignmentsForInstructor(instructorId) {
     const courseAssignments = await db.any(query, args);
     return courseAssignments;
   } catch (e) {
-    console.log('getAllCourseAssignmentsForInstructor ERROR,', instructorId, ',', e);
+    serverConsole('getAllCourseAssignmentsForInstructor ERROR,', instructorId, ',', e);
     return null;
   }
 }
@@ -635,7 +634,7 @@ function getSetAMinusB(arrayA, arrayB) {
 // Shape: {coursename: "Test Course", courseid: 1, 'tdfs': ['filename1']}
 async function editCourseAssignments(newCourseAssignment) {
   try {
-    console.log('editCourseAssignments:', newCourseAssignment);
+    serverConsole('editCourseAssignments:', newCourseAssignment);
     const res = await db.tx(async (t) => {
       const newTdfs = newCourseAssignment.tdfs;
       const query = 'SELECT t.content -> \'fileName\' AS filename, t.TDFId, c.courseId from assignment AS a \
@@ -656,7 +655,7 @@ async function editCourseAssignments(newCourseAssignment) {
 
       for (const tdfName of tdfsAdded) {
         const TDFId = tdfNameIDMap[tdfName];
-        console.log('editCourseAssignments tdf:', TDFId, tdfName, tdfsAdded, tdfsRemoved,
+        serverConsole('editCourseAssignments tdf:', TDFId, tdfName, tdfsAdded, tdfsRemoved,
             curCourseAssignments, existingTdfs, newTdfs);
         await t.none('INSERT INTO assignment(courseId, TDFId) VALUES($1, $2)', [newCourseAssignment.courseid, TDFId]);
       }
@@ -668,13 +667,13 @@ async function editCourseAssignments(newCourseAssignment) {
     });
     return res;
   } catch (e) {
-    console.log('editCourseAssignments ERROR,', newCourseAssignment, ',', e);
+    serverConsole('editCourseAssignments ERROR,', newCourseAssignment, ',', e);
     return null;
   }
 }
 
 async function getTdfAssignmentsByCourseIdMap(instructorId) {
-  console.log('getTdfAssignmentsByCourseIdMap', instructorId);
+  serverConsole('getTdfAssignmentsByCourseIdMap', instructorId);
   const query = 'SELECT t.content \
                  AS content, a.TDFId, a.courseId \
                  FROM assignment AS a \
@@ -682,7 +681,7 @@ async function getTdfAssignmentsByCourseIdMap(instructorId) {
                  INNER JOIN course AS c ON c.courseId = a.courseId \
                  WHERE c.semester = $1 AND c.teacherUserId=$2';
   const assignmentTdfFileNamesRet = await db.any(query, [curSemester, instructorId]);
-  console.log('assignmentTdfFileNames', assignmentTdfFileNamesRet);
+  serverConsole('assignmentTdfFileNames', assignmentTdfFileNamesRet);
   const assignmentTdfFileNamesByCourseIdMap = {};
   for (const assignment of assignmentTdfFileNamesRet) {
     if (!assignmentTdfFileNamesByCourseIdMap[assignment.courseid]) {
@@ -697,7 +696,7 @@ async function getTdfAssignmentsByCourseIdMap(instructorId) {
 }
 
 async function getTdfsAssignedToStudent(userId, curSectionId) {
-  console.log('getTdfsAssignedToStudent', userId);
+  serverConsole('getTdfsAssignedToStudent', userId);
   const query = 'SELECT t.* from TDF AS t INNER JOIN assignment AS a ON a.TDFId = t.TDFId INNER JOIN course AS c \
                  ON c.courseId = a.courseId INNER JOIN section AS s ON s.courseId = c.courseId \
                  INNER JOIN section_user_map AS m \
@@ -715,10 +714,10 @@ async function getTdfNamesAssignedByInstructor(instructorID) {
                  WHERE c.teacherUserId = $1 AND c.semester = $2';
     const assignmentTdfFileNames = await db.any(query, [instructorID, curSemester]);
     const unboxedAssignmentTdfFileNames = assignmentTdfFileNames.map((obj) => obj.filename);
-    console.log('assignmentTdfFileNames', unboxedAssignmentTdfFileNames);
+    serverConsole('assignmentTdfFileNames', unboxedAssignmentTdfFileNames);
     return unboxedAssignmentTdfFileNames;
   } catch (e) {
-    console.log('getTdfNamesAssignedByInstructor ERROR,', e);
+    serverConsole('getTdfNamesAssignedByInstructor ERROR,', e);
     return null;
   }
 }
@@ -902,7 +901,7 @@ async function insertHistory(historyRecord) {
     historyRecord.hintLevel,
     historyRecord.Entry_Point
   ];
-  console.log(historyVals.length)
+  serverConsole(historyVals.length)
   await db.none(query, historyVals);
 }
 
@@ -918,14 +917,14 @@ async function getHistoryByTDFfileName(TDFfileName) {
 function getAllTeachers(southwestOnly=false) {
   const query = {'roles': 'teacher'};
   if (southwestOnly) query['username']=/southwest[.]tn[.]edu/i;
-  console.log('getAllTeachers', query);
+  serverConsole('getAllTeachers', query);
   const allTeachers = Meteor.users.find(query).fetch();
 
   return allTeachers;
 }
 
 async function addCourse(mycourse) {
-  console.log('addCourse:' + JSON.stringify(mycourse));
+  serverConsole('addCourse:' + JSON.stringify(mycourse));
   const res = await db.tx(async (t) => {
     return t.one('INSERT INTO course(courseName, teacherUserId, semester, beginDate) \
                   VALUES(${courseName}, ${teacherUserId}, ${semester}, ${beginDate}) RETURNING courseId', mycourse)
@@ -941,22 +940,22 @@ async function addCourse(mycourse) {
 }
 
 async function editCourse(mycourse) {
-  console.log('editCourse:' + JSON.stringify(mycourse));
+  serverConsole('editCourse:' + JSON.stringify(mycourse));
   const res = await db.tx(async (t) => {
-    console.log('transaction');
+    serverConsole('transaction');
     return t.one('UPDATE course SET courseName=${coursename}, beginDate=${beginDate} \
                   WHERE courseid=${courseid} RETURNING courseId', mycourse).then(async (row) => {
       const courseId = row.courseid;
-      console.log('courseId', courseId, row);
+      serverConsole('courseId', courseId, row);
       const newSections = mycourse.sections;
       const curCourseSections = await t.many('SELECT sectionName from section WHERE courseId=$1', courseId);
       const oldSections = curCourseSections.map((section) => section.sectionname);
-      console.log('old/new', oldSections, newSections);
+      serverConsole('old/new', oldSections, newSections);
 
       const sectionsAdded = getSetAMinusB(newSections, oldSections);
       const sectionsRemoved = getSetAMinusB(oldSections, newSections);
-      console.log('sectionsAdded,', sectionsAdded);
-      console.log('sectionsRemoved,', sectionsRemoved);
+      serverConsole('sectionsAdded,', sectionsAdded);
+      serverConsole('sectionsRemoved,', sectionsRemoved);
 
       for (const sectionName of sectionsAdded) {
         await t.none('INSERT INTO section(courseId, sectionName) VALUES($1, $2)', [courseId, sectionName]);
@@ -972,14 +971,14 @@ async function editCourse(mycourse) {
 }
 
 async function addUserToTeachersClass(userid, teacherID, sectionId) {
-  console.log('addUserToTeachersClass', userid, teacherID, sectionId);
+  serverConsole('addUserToTeachersClass', userid, teacherID, sectionId);
 
   const query = 'SELECT COUNT(*) AS existingMappingCount FROM section_user_map WHERE sectionId=$1 AND userId=$2';
   const existingMappingCountRet = await db.oneOrNone(query, [sectionId, userid]);
   const existingMappingCount = existingMappingCountRet.existingmappingcount;
-  console.log('existingMapping', existingMappingCount);
+  serverConsole('existingMapping', existingMappingCount);
   if (existingMappingCount == 0) {
-    console.log('new user, inserting into section_user_mapping', [sectionId, userid]);
+    serverConsole('new user, inserting into section_user_mapping', [sectionId, userid]);
     await db.none('INSERT INTO section_user_map(sectionId, userId) VALUES($1, $2)', [sectionId, userid]);
   }
 
@@ -988,7 +987,7 @@ async function addUserToTeachersClass(userid, teacherID, sectionId) {
 
 async function getStimDisplayTypeMap() {
   try {
-    console.log('getStimDisplayTypeMap');
+    serverConsole('getStimDisplayTypeMap');
     const query = 'SELECT \
     COUNT(i.clozeStimulus) AS clozeItemCount, \
     COUNT(i.textStimulus)  AS textItemCount, \
@@ -1011,13 +1010,13 @@ async function getStimDisplayTypeMap() {
     }
     return map;
   } catch (e) {
-    console.log('getStimDisplayTypeMap ERROR,', e);
+    serverConsole('getStimDisplayTypeMap ERROR,', e);
     return null;
   }
 }
 
 async function getUsersByUnitUpdateDate(userIds, tdfId, date) {
-  console.log('getUsersByUnitUpdateDate', userIds, tdfId, date, userIds.join(','));
+  serverConsole('getUsersByUnitUpdateDate', userIds, tdfId, date, userIds.join(','));
   const query = "SELECT userId, SUM(CF_End_Latency) AS duration \
     FROM history WHERE recordedServerTime < $1 \
     AND userId IN ('" + userIds.join(`','`) + "') AND TDFId = $2 \
@@ -1028,7 +1027,7 @@ async function getUsersByUnitUpdateDate(userIds, tdfId, date) {
   for (const row of res) {
     practiceTimeIntervalsMap[row.userid] = parseInt(row.duration);
   }
-  console.log(practiceTimeIntervalsMap)
+  serverConsole(practiceTimeIntervalsMap)
   return practiceTimeIntervalsMap;
 }
 
@@ -1088,7 +1087,7 @@ async function getItemsByFileName(stimFileName) {
   for (const item of itemRet) {
     items.push(getItem(item));
   }
-  console.log(items[0]);
+  serverConsole(items[0]);
   return items;
 }
 async function getStudentReportingData(userId, TDFid, hintLevel) {
@@ -1140,7 +1139,7 @@ async function getStimSetFromLearningSessionByClusterList(stimuliSetId, clusterL
 }
 
 async function getStudentPerformanceByIdAndTDFId(userId, TDFid, stimIds=null) {
-  console.log('getStudentPerformanceByIdAndTDFId', userId, TDFid);
+  serverConsole('getStudentPerformanceByIdAndTDFId', userId, TDFid);
   let onlyLearningSession = "";
   if(stimIds != null){
     onlyLearningSession = 'AND POSITION(CAST(kcid as text) in $3)>0';
@@ -1165,7 +1164,7 @@ async function getStudentPerformanceByIdAndTDFId(userId, TDFid, stimIds=null) {
 
 async function getStudentPerformanceByIdAndTDFIdFromHistory(userId, TDFid,returnRows=null){
   //used to grab a limited sample of the student's performance
-  console.log('getStudentPerformanceByIdAndTDFIdFromHistory', userId, TDFid, returnRows);
+  serverConsole('getStudentPerformanceByIdAndTDFIdFromHistory', userId, TDFid, returnRows);
   let limitAddendum = "";
   if(returnRows != null){
     limitAddendum = "ORDER BY itemid DESC LIMIT " + returnRows;
@@ -1194,7 +1193,7 @@ async function getStudentPerformanceByIdAndTDFIdFromHistory(userId, TDFid,return
 
 async function getNumDroppedItemsByUserIDAndTDFId(userId, TDFid){
   //used to grab a limited sample of the student's performance
-  console.log('getNumDroppedItemsByUserIDAndTDFId', userId, TDFid);
+  serverConsole('getNumDroppedItemsByUserIDAndTDFId', userId, TDFid);
   const query = `select COUNT
                 (
                   CASE WHEN CF_Item_Removed=TRUE AND 
@@ -1230,7 +1229,7 @@ async function getStudentPerformanceForClassAndTdfId(instructorId, date=null) {
                   GROUP BY s.userId, t.TDFId, c.courseId, sc.sectionId;`
 
   const studentPerformanceRet = await db.manyOrNone(query, [curSemester, instructorId]);
-  console.log('studentPerformanceRet', studentPerformanceRet);
+  serverConsole('studentPerformanceRet', studentPerformanceRet);
   if (studentPerformanceRet==null) {
     return [];
   }
@@ -1240,7 +1239,7 @@ async function getStudentPerformanceForClassAndTdfId(instructorId, date=null) {
     let {courseid, userid, tdfid, correct, incorrect, totalpracticeduration} = studentPerformance;
     let studentUsername = userIdToUsernames[userid];
     if (!studentUsername) {
-      console.log(Meteor.users.findOne({_id: userid}).username + ', ' + userid);
+      serverConsole(Meteor.users.findOne({_id: userid}).username + ', ' + userid);
       studentUsername = Meteor.users.findOne({_id: userid}).username;
       userIdToUsernames[userid] = studentUsername;
     }
@@ -1275,7 +1274,7 @@ async function getStudentPerformanceForClassAndTdfId(instructorId, date=null) {
     studentPerformanceForClassAndTdfIdMap[courseid][tdfid][userid].count += correct + incorrect;
     studentPerformanceForClassAndTdfIdMap[courseid][tdfid][userid].totalTime = totalpracticeduration;
   }
-  console.log('studentPerformanceForClass:', JSON.stringify(studentPerformanceForClass, null, 4));
+  serverConsole('studentPerformanceForClass:', JSON.stringify(studentPerformanceForClass, null, 4));
   for (const index of Object.keys(studentPerformanceForClass)) {
     const coursetotals = studentPerformanceForClass[index];
     for (const index2 of Object.keys(coursetotals)) {
@@ -1284,7 +1283,7 @@ async function getStudentPerformanceForClassAndTdfId(instructorId, date=null) {
       tdftotal.totalTimeDisplay = (tdftotal.totalTime / (60 * 1000) ).toFixed(1); // convert to minutes from ms
     }
   }
-  console.log('studentPerformanceForClassAndTdfIdMap:', studentPerformanceForClassAndTdfIdMap);
+  serverConsole('studentPerformanceForClassAndTdfIdMap:', studentPerformanceForClassAndTdfIdMap);
   for (const index3 of Object.keys(studentPerformanceForClassAndTdfIdMap)) {
     const coursetotals = studentPerformanceForClassAndTdfIdMap[index3];
     for (const index4 of Object.keys(coursetotals)) {
@@ -1470,7 +1469,7 @@ function hasGeneratedTdfs(TDFjson) {
 
 // TODO rework for input in a new format as well as the current assumption of the old format
 async function upsertStimFile(stimFilename, stimJSON, ownerId) {
-  console.log('upsertStimFile', stimFilename);
+  serverConsole('upsertStimFile', stimFilename);
   const oldStimFormat = {
     'fileName': stimFilename,
     'stimuli': stimJSON,
@@ -1485,12 +1484,12 @@ async function upsertStimFile(stimFilename, stimJSON, ownerId) {
     let stimuliSetId;
     if (associatedStimSetIdRet) {
       stimuliSetId = associatedStimSetIdRet.stimulisetid;
-      console.log('stimuliSetId1:', stimuliSetId, associatedStimSetIdRet);
+      serverConsole('stimuliSetId1:', stimuliSetId, associatedStimSetIdRet);
     } else {
       const highestStimuliSetId = await t.oneOrNone('SELECT MAX(stimuliSetId) AS stimuliSetId FROM item');
       stimuliSetId = highestStimuliSetId && highestStimuliSetId.stimulisetid ?
           parseInt(highestStimuliSetId.stimulisetid) + 1 : 1;
-      console.log('stimuliSetId2:', stimuliSetId, highestStimuliSetId);
+      serverConsole('stimuliSetId2:', stimuliSetId, highestStimuliSetId);
     }
 
     const newFormatItems = getNewItemFormat(oldStimFormat, stimFilename, stimuliSetId, responseKCMap);
@@ -1502,7 +1501,7 @@ async function upsertStimFile(stimFilename, stimJSON, ownerId) {
         stimulusKC = newStim.stimulusKC;
         let matchingStim = existingStims.find((x) => x.stimuluskc == stimulusKC);
         if (!matchingStim) {
-          console.log('matchingstims')
+          serverConsole('matchingstims')
           newStims.push(newStim);
           continue;
         }
@@ -1525,7 +1524,7 @@ async function upsertStimFile(stimFilename, stimJSON, ownerId) {
     } else {
       newStims = newFormatItems;
     }
-    console.log('!!!newStims:', newStims);
+    serverConsole('!!!newStims:', newStims);
     for (const stim of newStims) {
       if (stim.alternateDisplays) stim.alternateDisplays = JSON.stringify(stim.alternateDisplays);
       await t.none('INSERT INTO item(stimuliSetId, stimulusFilename, stimulusKC, clusterKC, responseKC, params, \
@@ -1544,7 +1543,7 @@ async function upsertStimFile(stimFilename, stimJSON, ownerId) {
 
 
 async function upsertTDFFile(tdfFilename, tdfJSON, ownerId) {
-  console.log('upsertTDFFile', tdfFilename);
+  serverConsole('upsertTDFFile', tdfFilename);
   const prev = await getTdfByFileName(tdfFilename);
   let stimFileName;
   let skipStimSet = false;
@@ -1601,7 +1600,7 @@ async function upsertTDFFile(tdfFilename, tdfJSON, ownerId) {
 
 async function loadStimsAndTdfsFromPrivate(adminUserId) {
   if (!isProd) {
-    console.log('loading stims and tdfs from asset dir');
+    serverConsole('loading stims and tdfs from asset dir');
     serverConsole('start stims');
     const stimFilenames = _.filter(fs.readdirSync('./assets/app/stims/'), (fn) => {
       return fn.indexOf('.json') >= 0;
@@ -1632,7 +1631,7 @@ function getSyllablesForWord(word) {
   const syllablesURL = baseSyllableURL + word;
   const result = HTTP.call('GET', syllablesURL);
   const syllableArray = result.content.replace(/\[|\]/g, '').split(',').map((x) => x.trim());
-  console.log('syllables for word, ' + word + ': ' + stringifyIfExists(syllableArray) );
+  serverConsole('syllables for word, ' + word + ': ' + stringifyIfExists(syllableArray) );
   return syllableArray;
 }
 
@@ -1761,7 +1760,7 @@ Meteor.startup(async function() {
 
   // Set the global logout time for all users
   Accounts.config({
-    loginExpirationInDays: 0.5
+    loginExpirationInDays: 90
   })
 
   // Set up our server-side methods
@@ -1887,7 +1886,7 @@ Meteor.startup(async function() {
     getSimpleFeedbackForAnswer: function(userAnswer, correctAnswer) {
       // eslint-disable-next-line new-cap
       const result = ElaboratedFeedback.GenerateFeedback(userAnswer, correctAnswer);
-      console.log('result: ' + JSON.stringify(result));
+      serverConsole('result: ' + JSON.stringify(result));
       return result;
     },
 
@@ -1908,9 +1907,9 @@ Meteor.startup(async function() {
 
     updateStimSyllableCache: async function(stimFileName, answers) {
       let numTries = 0;
-      console.log('updateStimSyllableCache');
+      serverConsole('updateStimSyllableCache');
       const curStimSyllables = StimSyllables.findOne({filename: stimFileName});
-      console.log('curStimSyllables: ' + JSON.stringify(curStimSyllables));
+      serverConsole('curStimSyllables: ' + JSON.stringify(curStimSyllables));
       if (!curStimSyllables) {
         while(!await verifySyllableUpload(stimFileName) && numTries < 3){
           const data = {};
@@ -1921,7 +1920,7 @@ Meteor.startup(async function() {
             try {
               syllableArray = getSyllablesForWord(safeAnswer);
             } catch (e) {
-              console.log('error fetching syllables for ' + answer + ': ' + JSON.stringify(e));
+              serverConsole('error fetching syllables for ' + answer + ': ' + JSON.stringify(e));
               syllableArray = [answer];
               syllableGenerationError = e;
             }
@@ -1932,8 +1931,8 @@ Meteor.startup(async function() {
             };
           }
           StimSyllables.insert({filename: stimFileName, data: data});
-          console.log('after updateStimSyllableCache');
-          console.log(stimFileName);
+          serverConsole('after updateStimSyllableCache');
+          serverConsole(stimFileName);
           numTries++;
         }
         if(!await verifySyllableUpload(stimFileName)){
@@ -1983,7 +1982,7 @@ Meteor.startup(async function() {
     },
 
     getClozesAndSentencesForText: function(rawText) {
-      console.log('rawText!!!: ' + rawText);
+      serverConsole('rawText!!!: ' + rawText);
       // eslint-disable-next-line new-cap
       return clozeGeneration.GetClozeAPI(null, null, null, rawText);
     },
@@ -1991,7 +1990,7 @@ Meteor.startup(async function() {
     serverLog: function(data) {
       if (Meteor.user()) {
         const logData = 'User:' + Meteor.user()._id + ', log:' + data;
-        console.log(logData);
+        serverConsole(logData);
       }
     },
 
@@ -2100,7 +2099,7 @@ Meteor.startup(async function() {
         };
       } catch (e) {
         result = false;
-        console.log(e);
+        serverConsole(e);
         errmsg = e;
       }
     },
@@ -2223,7 +2222,7 @@ Meteor.startup(async function() {
 
     //handle file deletions
     deleteStimFile: async function(stimFilename) {
-      console.log('delete Stim File', stimFilename);
+      serverConsole('delete Stim File', stimFilename);
       stimSet = await getStimuliSetByFilename(stimFilename);
       stimSetId = stimSet[0].stimuliSetId;
       const query1 = 'SELECT tdfid FROM tdf WHERE stimulisetid = $1';
@@ -2248,9 +2247,9 @@ Meteor.startup(async function() {
     },
 
     deleteTDFFile: async function(tdfFileName){
-      console.log("Remove TDF File:", tdfFileName);
+      serverConsole("Remove TDF File:", tdfFileName);
       const toRemove = await getTdfByFileName(tdfFileName);
-      console.log(toRemove);
+      serverConsole(toRemove);
       if(toRemove.TDFId){
         tdf = toRemove.TDFId;
         const querya = 'DELETE FROM componentstate WHERE tdfid = $1'
@@ -2431,7 +2430,7 @@ Meteor.startup(async function() {
     toggleTdfPresence: async function(tdfIds, mode) {
       await db.tx(async (t) => {
         tdfIds.forEach((tdfid) => {
-          console.log('!!!toggleTdfPresence:', [mode, tdfid]);
+          serverConsole('!!!toggleTdfPresence:', [mode, tdfid]);
           t.none('UPDATE tdf SET visibility = $1 WHERE TDFId=$2', [mode, tdfid]);
         });
       });
