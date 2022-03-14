@@ -1499,12 +1499,23 @@ async function giveWrongAnswer(){
 async function afterAnswerFeedbackCallback(trialEndTimeStamp, source, userAnswer, isTimeout, isCorrect) {
   const removalShortcut = afterAnswerFeedbackCallback.bind(null, trialEndTimeStamp, source, userAnswer, isTimeout, isCorrect);
   const wasReportedForRemoval = Session.get('wasReportedForRemoval');
+  Session.set("reviewTimeoutCompletedFirst", false);
 
   if(!wasReportedForRemoval){
     $('#removeQuestion').on('click', null, null, function() {
       Session.set('wasReportedForRemoval', true);
       removalShortcut();
     });
+    Session.set('engineIndices', undefined);
+    if(Session.get('unitType') == "model")
+      engine.calculateIndices().then(function(res){
+        Session.set('engineIndices', res);
+        if(Session.get("reviewTimeoutCompletedFirst"))
+        {
+          console.log("reviewTimeoutCompletedFirst")
+          prepareCard();
+        }
+      });
   }
   else{
     removeCardByUser();
@@ -1524,7 +1535,7 @@ async function afterAnswerFeedbackCallback(trialEndTimeStamp, source, userAnswer
 
   const timeout = Meteor.setTimeout(async function() {
     Session.set('CurTimeoutId', undefined);
-    let reviewEnd = Date.now()
+    let reviewEnd = Date.now();
     const answerLogRecord = gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect,
         reviewEnd, testType, deliveryParams, dialogueHistory, wasReportedForRemoval);
   
@@ -1579,7 +1590,13 @@ async function afterAnswerFeedbackCallback(trialEndTimeStamp, source, userAnswer
     }
     hideUserFeedback();
     $('#userAnswer').val('');
-    prepareCard();
+    if(Session.get("engineIndices")){
+      console.log("engineIndicesCompletedFirst");
+      prepareCard();
+    }
+    else{
+      Session.set("reviewTimeoutCompletedFirst", true);
+    }
   }, reviewTimeout)
 
   Session.set('CurTimeoutId', timeout)
@@ -1998,10 +2015,6 @@ async function cardStart() {
 }
 
 async function prepareCard() {
-  if(Session.get('unitType') == "model")
-    Session.set('engineIndices', await engine.calculateIndices());
-  else
-    Session.set('engineIndices', undefined);
   Meteor.logoutOtherClients();
   Session.set('wasReportedForRemoval', false);
   Session.set('displayReady', false);
@@ -3086,6 +3099,10 @@ async function processUserTimesLog() {
       }
       console.log('RESUME FINISHED: next-question logic to commence');
 
+      if(Session.get('unitType') == "model")
+        Session.set('engineIndices', await engine.calculateIndices());
+      else
+        Session.set('engineIndices', undefined);
       await prepareCard();
     }
   }
