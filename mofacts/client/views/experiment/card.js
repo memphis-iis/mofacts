@@ -523,7 +523,7 @@ Template.card.helpers({
     
   }, 
   'isImpersonating': function(){
-    return Meteor.user().profile.impersonating;
+    return Meteor.user() && Meteor.user().profile ? Meteor.user().profile.impersonating : false;
   },
 
   'voiceTranscriptionPromptMsg': function() {
