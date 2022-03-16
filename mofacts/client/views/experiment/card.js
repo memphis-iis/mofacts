@@ -1590,7 +1590,7 @@ async function afterAnswerFeedbackCallback(trialEndTimeStamp, source, userAnswer
     }
     hideUserFeedback();
     $('#userAnswer').val('');
-    if(Session.get("engineIndices")){
+    if(Session.get('unitType') != "model" || Session.get("engineIndices")){
       console.log("engineIndicesCompletedFirst");
       prepareCard();
     }
