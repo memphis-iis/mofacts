@@ -2,8 +2,8 @@ module.exports = {
   servers: {
     one: {
       host: '<target ip>',
-      username: 'rusty',
-      pem: '~/.ssh/id_rsa'
+      username: '<server username>',
+      pem: '<server pem path>'
     }
   },
   app: {
