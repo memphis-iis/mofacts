@@ -7,7 +7,7 @@
       "clientId": "<copy from settings json>",
       "secret": "<copy from settings json>"
   },
-  "owner": "rustyhaner@gmail.com", 
+  "owner": "<your gmail>, 
   "initRoles": {
       "admins": ["<your gmail>","vagrant@vagrant-ubuntu-trusty-64"], 
       "teachers": []
