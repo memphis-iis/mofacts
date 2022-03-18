@@ -46,12 +46,10 @@ is located on the server, and target IP address.
 Edit the clientId, secrent, owner, admins, teachers, and the feedbackfile (don't change the /feedback/*)
 
 ## 2 Install Meteor Up (should be installed after new vagrant enviorments)
-....
 $ npm install -g mup
-....
+
 
 ## 3 Setup server enviorment
-....
 $ cd .deploy
 $ mup setup
 
