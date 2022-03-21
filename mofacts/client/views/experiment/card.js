@@ -1140,6 +1140,7 @@ function handleUserInput(e, source, simAnswerCorrect) {
   } else if (source === 'buttonClick' || source === 'simulation' || source === 'voice') {
     // to save space we will just go ahead and act like it was a key press.
     key = ENTER_KEY;
+    Session.set('userAnswerSubmitTimestamp', Date.now());
   }
 
   // If we haven't seen the correct keypress, then we want to reset our
@@ -1386,40 +1387,6 @@ async function showUserFeedback(isCorrect, feedbackMessage, afterAnswerFeedbackC
         .addClass(isCorrect ? 'alert-success' : 'alert-danger')
         .text(feedbackMessage)
         .show();
-    if(!isCorrect){
-      $('#CountdownTimer')
-        .addClass('text-align')
-        .text('Continuing in: ')
-        .show();
-      var countDownStart = new Date().getTime();
-      if(Session.get('isRefutation') && getCurrentDeliveryParams().refutationstudy){
-        countDownStart += getCurrentDeliveryParams().refutationstudy;
-      }
-      else{
-        countDownStart += getCurrentDeliveryParams().reviewstudy;
-      }
-      var CountdownTimerInterval = Meteor.setInterval(function() {
-        var now = new Date().getTime()
-        var distance = countDownStart - now;
-        var seconds = Math.ceil((distance % (1000 * 60)) / 1000);
-        
-        try{
-          document.getElementById("CountdownTimer").innerHTML = 'Continuing in: ' + seconds + "s";
-        }
-        catch{
-          Meteor.clearInterval(CountdownTimerInterval);
-          Session.set('CurIntervalId', undefined);
-        }
-      
-        // If the count down is finished, end interval and clear CountdownTimer
-        if (distance < 0) {
-          Meteor.clearInterval(CountdownTimerInterval);
-          document.getElementById("CountdownTimer").innerHTML = "";
-          Session.set('CurIntervalId', undefined);
-        }
-      }, 100);
-      Session.set('CurIntervalId', CountdownTimerInterval);
-    }
   }
 
   speakMessageIfAudioPromptFeedbackEnabled(feedbackMessage, 'feedback');
@@ -1506,16 +1473,6 @@ async function afterAnswerFeedbackCallback(trialEndTimeStamp, source, userAnswer
       Session.set('wasReportedForRemoval', true);
       removalShortcut();
     });
-    Session.set('engineIndices', undefined);
-    if(Session.get('unitType') == "model")
-      engine.calculateIndices().then(function(res){
-        Session.set('engineIndices', res);
-        if(Session.get("reviewTimeoutCompletedFirst"))
-        {
-          console.log("reviewTimeoutCompletedFirst")
-          prepareCard();
-        }
-      });
   }
   else{
     removeCardByUser();
@@ -1529,10 +1486,40 @@ async function afterAnswerFeedbackCallback(trialEndTimeStamp, source, userAnswer
     dialogueHistory = JSON.parse(JSON.stringify(Session.get('dialogueHistory')));
   }
   const reviewTimeout = wasReportedForRemoval ? 2000 : getReviewTimeout(testType, deliveryParams, isCorrect, dialogueHistory);
+  
+  if(!isCorrect && !wasReportedForRemoval){
+    $('#CountdownTimer')
+      .addClass('text-align')
+      .text('Continuing in: ')
+      .show();
+    var countDownStart = new Date().getTime() + reviewTimeout;
+    var CountdownTimerInterval = Meteor.setInterval(function() {
+      var now = new Date().getTime()
+      var distance = countDownStart - now;
+      var seconds = Math.ceil((distance % (1000 * 60)) / 1000);
+      
+      try{
+        document.getElementById("CountdownTimer").innerHTML = 'Continuing in: ' + seconds + "s";
+      }
+      catch{
+        Meteor.clearInterval(CountdownTimerInterval);
+        Session.set('CurIntervalId', undefined);
+      }
+    
+      // If the count down is finished, end interval and clear CountdownTimer
+      if (distance < 0) {
+        Meteor.clearInterval(CountdownTimerInterval);
+        document.getElementById("CountdownTimer").innerHTML = "";
+        Session.set('CurIntervalId', undefined);
+      }
+    }, 100);
+    Session.set('CurIntervalId', CountdownTimerInterval);
+  }
 
   // Stop previous timeout, log response data, and clear up any other vars for next question
   clearCardTimeout();
 
+  Session.set('feedbackTimeoutBegins', Date.now())
   const timeout = Meteor.setTimeout(async function() {
     Session.set('CurTimeoutId', undefined);
     let reviewEnd = Date.now();
@@ -1590,6 +1577,7 @@ async function afterAnswerFeedbackCallback(trialEndTimeStamp, source, userAnswer
     }
     hideUserFeedback();
     $('#userAnswer').val('');
+    Session.set('feedbackTimeoutEnds', Date.now())
     if(Session.get('unitType') != "model" || Session.get("engineIndices")){
       console.log("engineIndicesCompletedFirst");
       prepareCard();
@@ -1600,6 +1588,14 @@ async function afterAnswerFeedbackCallback(trialEndTimeStamp, source, userAnswer
   }, reviewTimeout)
 
   Session.set('CurTimeoutId', timeout)
+  
+  if(!wasReportedForRemoval){
+    Session.set('engineIndexCalculations', Date.now());
+    if(Session.get('unitType') == "model")
+      Session.set('engineIndices', await engine.calculateIndices());
+    else
+      Session.set('engineIndices', undefined);
+  }
 }
 
 function getReviewTimeout(testType, deliveryParams, isCorrect, dialogueHistory) {
