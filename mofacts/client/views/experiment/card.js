@@ -1387,40 +1387,6 @@ async function showUserFeedback(isCorrect, feedbackMessage, afterAnswerFeedbackC
         .addClass(isCorrect ? 'alert-success' : 'alert-danger')
         .text(feedbackMessage)
         .show();
-    if(!isCorrect){
-      $('#CountdownTimer')
-        .addClass('text-align')
-        .text('Continuing in: ')
-        .show();
-      var countDownStart = new Date().getTime();
-      if(Session.get('isRefutation') && getCurrentDeliveryParams().refutationstudy){
-        countDownStart += getCurrentDeliveryParams().refutationstudy;
-      }
-      else{
-        countDownStart += getCurrentDeliveryParams().reviewstudy;
-      }
-      var CountdownTimerInterval = Meteor.setInterval(function() {
-        var now = new Date().getTime()
-        var distance = countDownStart - now;
-        var seconds = Math.ceil((distance % (1000 * 60)) / 1000);
-        
-        try{
-          document.getElementById("CountdownTimer").innerHTML = 'Continuing in: ' + seconds + "s";
-        }
-        catch{
-          Meteor.clearInterval(CountdownTimerInterval);
-          Session.set('CurIntervalId', undefined);
-        }
-      
-        // If the count down is finished, end interval and clear CountdownTimer
-        if (distance < 0) {
-          Meteor.clearInterval(CountdownTimerInterval);
-          document.getElementById("CountdownTimer").innerHTML = "";
-          Session.set('CurIntervalId', undefined);
-        }
-      }, 100);
-      Session.set('CurIntervalId', CountdownTimerInterval);
-    }
   }
 
   speakMessageIfAudioPromptFeedbackEnabled(feedbackMessage, 'feedback');
@@ -1520,6 +1486,35 @@ async function afterAnswerFeedbackCallback(trialEndTimeStamp, source, userAnswer
     dialogueHistory = JSON.parse(JSON.stringify(Session.get('dialogueHistory')));
   }
   const reviewTimeout = wasReportedForRemoval ? 2000 : getReviewTimeout(testType, deliveryParams, isCorrect, dialogueHistory);
+  
+  if(!isCorrect && !wasReportedForRemoval){
+    $('#CountdownTimer')
+      .addClass('text-align')
+      .text('Continuing in: ')
+      .show();
+    var countDownStart = new Date().getTime() + reviewTimeout;
+    var CountdownTimerInterval = setInterval(function() {
+      var now = new Date().getTime()
+      var distance = countDownStart - now;
+      var seconds = Math.ceil((distance % (1000 * 60)) / 1000);
+      
+      try{
+        document.getElementById("CountdownTimer").innerHTML = 'Continuing in: ' + seconds + "s";
+      }
+      catch{
+        clearInterval(CountdownTimerInterval);
+        Session.set('CurIntervalId', undefined);
+      }
+    
+      // If the count down is finished, end interval and clear CountdownTimer
+      if (distance < 0) {
+        clearInterval(CountdownTimerInterval);
+        document.getElementById("CountdownTimer").innerHTML = "";
+        Session.set('CurIntervalId', undefined);
+      }
+    }, 100);
+    Session.set('CurIntervalId', CountdownTimerInterval);
+  }
 
   // Stop previous timeout, log response data, and clear up any other vars for next question
   clearCardTimeout();
