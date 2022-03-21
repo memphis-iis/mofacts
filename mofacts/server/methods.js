@@ -180,6 +180,90 @@ Meteor.publish('allUsers', function() {
   return Meteor.users.find({}, opts);
 });
 
+async function migration(){
+  const tdf = "select * from tdf"
+  const tdfret = await db.any(tdf);
+  console.log(tdfret);
+  for(let t of tdfret){
+    console.log(t);
+    //Tdfs.insert(t);
+  }
+
+  const assignments = "select * from assignment"
+  const assignmentsRet = await db.any(assignments);
+  console.log(assignmentsRet);
+  for(let t of assignmentsRet){
+    console.log(t);
+    Assignments.insert(t);
+  }
+
+  const course = "select * from course"
+  const courseRet = await db.any(course);
+  console.log(courseRet);
+  for(let t of courseRet){
+    console.log(t);
+    Courses.insert(t);
+  }
+
+  const componentstate = "select * from componentstate"
+  const componentstateret = await db.any(componentstate);
+  console.log(componentstateret);
+  for(let t of componentstateret){
+    console.log(t);
+    ComponentStates.insert(t);
+  }
+
+  const history = "select * from history"
+  const historyret = await db.any(history);
+  console.log(historyret);
+  for(let t of historyret){
+    console.log(t);
+    Histories.insert(t);
+  }
+
+  const item = "select * from item"
+  const itemret = await db.any(item);
+  console.log(itemret);
+  for(let t of itemret){
+    console.log(t);
+    Items.insert(t);
+  }
+
+  const iSS = "select * from itemSourceSentences"
+  const iSSret = await db.any(iSS);
+  console.log(iSSret);
+  for(let t of iSSret){
+    console.log(t);
+    itemSourceSentences.insert(t);
+  }
+
+  const section = "select * from section"
+  const sectionret = await db.any(section);
+  console.log(sectionret);
+  for(let t of sectionret){
+    console.log(t);
+    Sections.insert(t);
+  }
+
+  const sum = "select * from section_user_map"
+  const sumret = await db.any(sum);
+  console.log(sumret);
+  for(let t of sumret){
+    console.log(t);
+    SectionUserMap.insert(t);
+  }
+
+  const globalExperimentState = "select * from globalExperimentState"
+  const globalExperimentStateret = await db.any(globalExperimentState);
+  console.log(globalExperimentStateret);
+  for(let t of globalExperimentStateret){
+    console.log(t);
+    GlobalExperimentStates.insert(t);
+  }
+}
+
+//migration();
+
 // Config for scheduled jobs - the start command is at the end of
 // Meteor.startup below
 SyncedCron.config({
@@ -226,6 +310,7 @@ async function getTdfQueryNames(tdfFileName) {
   let tdfQueryNames = [];
   if (tdfFileName === ALL_TDFS) {
     const tdfsRet = await db.any('SELECT content -> \'fileName\' AS filename from tdf');
+    const mongoCollection = tdfs.find({},{ "fileName": 1 }).fetch();
     for (const tdfFileName of tdfsRet) {
       tdfQueryNames.push(tdfFileName);
     }
