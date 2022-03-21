@@ -494,7 +494,6 @@ function modelUnitEngine() {
   function findMinProbCardAndHintLevel(cards, hiddenItems) {
     console.log('findMinProbCard');
     let currentMin = 1.00001;
-    let currentHintLevelMin = 1.00001;
     let clusterIndex=-1;
     let stimIndex=-1;
     let hintLevelIndex=-1;
@@ -511,6 +510,17 @@ function modelUnitEngine() {
             currentMin = stim.probabilityEstimate;
             clusterIndex=i;
             stimIndex=j;
+            hintLevelIndex=0;
+          }
+          if(getStimCluster(clusterIndex).stims[stimIndex].textStimulus || getStimCluster(clusterIndex).stims[stimIndex].clozeStimulus){
+            for(let k=0; k<stim.hintLevelProbabilites.length; k++){
+              if(stim.hintLevelProbabilites[k] <= currentMin){
+                currentMin = stim.hintLevelProbabilites[k];
+                hintLevelIndex = k;
+                stimIndex = j;
+                clusterIndex=i;
+              }
+            }
           }
         }
       }
@@ -529,6 +539,17 @@ function modelUnitEngine() {
               currentMin = stim.probabilityEstimate;
               stimIndex = j;
               clusterIndex=i;
+              hintLevelIndex=0;
+            }
+            if(getStimCluster(clusterIndex).stims[stimIndex].textStimulus || getStimCluster(clusterIndex).stims[stimIndex].clozeStimulus){
+              for(let k=0; k<stim.hintLevelProbabilites.length; k++){
+                if(stim.hintLevelProbabilites[k] <= currentMin){
+                  currentMin = stim.hintLevelProbabilites[k];
+                  hintLevelIndex = k;
+                  stimIndex = j;
+                  clusterIndex=i;
+                }
+              }
             }
           }
         }
@@ -536,21 +557,13 @@ function modelUnitEngine() {
     }
     const stim = cards[clusterIndex].stims[stimIndex]
 
-    if(getStimCluster(clusterIndex).stims[stimIndex].textStimulus || getStimCluster(clusterIndex).stims[stimIndex].clozeStimulus){
-      for(let k=0; k<stim.hintLevelProbabilites.length; k++){
-        if(stim.hintLevelProbabilites[k] <= currentHintLevelMin){
-          currentHintLevelMin = stim.hintLevelProbabilites[k];
-          hintLevelIndex = k;
-        }
-      }
-    }
+
     return {clusterIndex, stimIndex, hintLevelIndex};
   }
 
   function findMaxProbCardAndHintLevel(cards, ceiling, hiddenItems) {
     console.log('findMaxProbCardAndHintLevel');
     let currentMax = 0;
-    let currentHintLevelMax = 0;
     let clusterIndex=-1;
     let stimIndex=-1;
     let hintLevelIndex=-1;
@@ -567,27 +580,29 @@ function modelUnitEngine() {
             currentMax = stim.probabilityEstimate;
             clusterIndex=i;
             stimIndex=j;
+            hintLevelIndex = 0;
+          }
+          if(getStimCluster(clusterIndex).stims[stimIndex].textStimulus || getStimCluster(clusterIndex).stims[stimIndex].clozeStimulus){
+            for(let k=0; k<stim.hintLevelProbabilites.length; k++){
+              if(stim.hintLevelProbabilites[k] > currentMax && stim.hintLevelProbabilites[k] < ceiling ){
+                currentMax = stim.hintLevelProbabilites[k];
+                clusterIndex=i;
+                stimIndex=j;
+                hintLevelIndex = k;
+              }
+            }
           }
         }
       }
     }
     const stim = cards[clusterIndex].stims[stimIndex];
 
-    if(getStimCluster(clusterIndex).stims[stimIndex].textStimulus || getStimCluster(clusterIndex).stims[stimIndex].clozeStimulus){
-      for(let k=0; k<stim.hintLevelProbabilites.length; k++){
-        if(stim.hintLevelProbabilites[k] > currentHintLevelMax && stim.hintLevelProbabilites[k] < ceiling ){
-          currentHintLevelMax = stim.hintLevelProbabilites[k];
-          hintLevelIndex = k;
-        }
-      }
-    }
     return {clusterIndex, stimIndex, hintLevelIndex};
   }
 
   function findMinProbDistCard(cards, hiddenItems) {
     console.log('findMinProbDistCard');
     let currentMin = 50.0;
-    let currentHintLevelMin = 50.0;
     let clusterIndex=-1;
     let stimIndex=-1;
     let hintLevelIndex=-1;
@@ -612,22 +627,23 @@ function modelUnitEngine() {
             currentMin = dist;
             clusterIndex=i;
             stimIndex=j;
+            hintLevelIndex = 0;
           }
-          
+          if(getStimCluster(clusterIndex).stims[stimIndex].textStimulus || getStimCluster(clusterIndex).stims[stimIndex].clozeStimulus){
+            for(let k=0; k<Math.min(stim.hintLevelProbabilites.length, 3); k++){
+              let hintDist = Math.abs(Math.log(stim.hintLevelProbabilites[k]/(1-stim.hintLevelProbabilites[k])) - optimalProb);
+              if(hintDist < currentMin){
+                currentMin = hintDist;
+                clusterIndex=i;
+                stimIndex=j;
+                hintLevelIndex = k;
+              }
+            }
+          }
         }
       }
     }
     const stim = cards[clusterIndex].stims[stimIndex];
-
-    if(getStimCluster(clusterIndex).stims[stimIndex].textStimulus || getStimCluster(clusterIndex).stims[stimIndex].clozeStimulus){
-      for(let k=0; k<Math.min(stim.hintLevelProbabilites.length, 3); k++){
-        let hintDist = Math.abs(Math.log(stim.hintLevelProbabilites[k]/(1-stim.hintLevelProbabilites[k])) - optimalProb);
-        if(hintDist < currentHintLevelMin){
-          currentHintLevelMin = hintDist;
-          hintLevelIndex = k;
-        }
-      }
-    }
 
     return {clusterIndex, stimIndex, hintLevelIndex};
   }
@@ -637,7 +653,6 @@ function modelUnitEngine() {
     let currentMax = 0;
     let clusterIndex=-1;
     let stimIndex=-1;
-    let currentHintLevelMax = 0;
     let hintLevelIndex=-1;
 
     for (let i=0; i<cards.length; i++) {
@@ -658,19 +673,22 @@ function modelUnitEngine() {
             currentMax = stim.probabilityEstimate;
             clusterIndex=i;
             stimIndex=j;
+            hintLevelIndex=0;
+          }
+          if(getStimCluster(clusterIndex).stims[stimIndex].textStimulus || getStimCluster(clusterIndex).stims[stimIndex].clozeStimulus){
+            for(let k=0; k<stim.hintLevelProbabilites.length; k++){
+              if(stim.hintLevelProbabilites[k] > currentMax && stim.hintLevelProbabilites[k] < thresholdCeiling ){
+                currentMax = stim.hintLevelProbabilites[k];
+                clusterIndex=i;
+                stimIndex=j;
+                hintLevelIndex = k;
+              }
+            }
           }
         }
       }
     }
     const stim = cards[clusterIndex].stims[stimIndex];
-    if(getStimCluster(clusterIndex).stims[stimIndex].textStimulus || getStimCluster(clusterIndex).stims[stimIndex].clozeStimulus){
-      for(let k=0; k<stim.hintLevelProbabilites.length; k++){
-        if(stim.hintLevelProbabilites[k] > currentHintLevelMax && stim.hintLevelProbabilites[k] < thresholdCeiling ){
-          currentHintLevelMax = stim.hintLevelProbabilites[k];
-          hintLevelIndex = k;
-        }
-      }
-    }
 
     return {clusterIndex, stimIndex, hintLevelIndex};
   }
