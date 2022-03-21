@@ -1493,7 +1493,7 @@ async function afterAnswerFeedbackCallback(trialEndTimeStamp, source, userAnswer
       .text('Continuing in: ')
       .show();
     var countDownStart = new Date().getTime() + reviewTimeout;
-    var CountdownTimerInterval = setInterval(function() {
+    var CountdownTimerInterval = Meteor.setInterval(function() {
       var now = new Date().getTime()
       var distance = countDownStart - now;
       var seconds = Math.ceil((distance % (1000 * 60)) / 1000);
@@ -1502,13 +1502,13 @@ async function afterAnswerFeedbackCallback(trialEndTimeStamp, source, userAnswer
         document.getElementById("CountdownTimer").innerHTML = 'Continuing in: ' + seconds + "s";
       }
       catch{
-        clearInterval(CountdownTimerInterval);
+        Meteor.clearInterval(CountdownTimerInterval);
         Session.set('CurIntervalId', undefined);
       }
     
       // If the count down is finished, end interval and clear CountdownTimer
       if (distance < 0) {
-        clearInterval(CountdownTimerInterval);
+        Meteor.clearInterval(CountdownTimerInterval);
         document.getElementById("CountdownTimer").innerHTML = "";
         Session.set('CurIntervalId', undefined);
       }
