@@ -1607,16 +1607,16 @@ async function upsertStimFile(stimFilename, stimJSON, ownerId) {
         matchingStim = getItem(matchingStim);
         const mergedStim = Object.assign(matchingStim, newStim);
         if (mergedStim.alternateDisplays) mergedStim.alternateDisplays = JSON.stringify(mergedStim.alternateDisplays);
-        await t.none('UPDATE item SET stimuliSetId = ${stimuliSetId}, \
-                      parentStimulusFileName = ${parentStimulusFileName}, stimulusKC = ${stimulusKC}, \
-                      clusterKC = ${clusterKC}, responseKC = ${responseKC}, params = ${params}, \
-                      optimalProb = ${optimalProb}, correctResponse = ${correctResponse}, \
-                      incorrectResponses = ${incorrectResponses}, itemResponseType = ${itemResponseType}, \
-                      speechHintExclusionList = ${speechHintExclusionList}, clozeStimulus = ${clozeStimulus}, \
-                      textStimulus = ${textStimulus}, audioStimulus = ${audioStimulus}, \
-                      imageStimulus = ${imageStimulus}, videoStimulus = ${videoStimulus}, \
-                      alternateDisplays = ${alternateDisplays}, tags = ${tags} \
-                      WHERE stimulusFilename = ${stimulusFilename} AND stimulusKC = ${stimulusKC}', mergedStim);
+        //await t.none('UPDATE item SET stimuliSetId = ${stimuliSetId}, \
+        //              parentStimulusFileName = ${parentStimulusFileName}, stimulusKC = ${stimulusKC}, \
+        //              clusterKC = ${clusterKC}, responseKC = ${responseKC}, params = ${params}, \
+        //             optimalProb = ${optimalProb}, correctResponse = ${correctResponse}, \
+        //              incorrectResponses = ${incorrectResponses}, itemResponseType = ${itemResponseType}, \
+        //              speechHintExclusionList = ${speechHintExclusionList}, clozeStimulus = ${clozeStimulus}, \
+        //              textStimulus = ${textStimulus}, audioStimulus = ${audioStimulus}, \
+        //              imageStimulus = ${imageStimulus}, videoStimulus = ${videoStimulus}, \
+        //              alternateDisplays = ${alternateDisplays}, tags = ${tags} \
+        //              WHERE stimulusFilename = ${stimulusFilename} AND stimulusKC = ${stimulusKC}', mergedStim);
       }
       // PostgresReversion Staged
       Items.update({$and: {stimulusFilename: stimulusFilename, stimulusKC: stimulusKC}},{$set: {
