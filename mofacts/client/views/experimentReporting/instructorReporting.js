@@ -7,51 +7,51 @@ const _state = new ReactiveDict('instructorReportingState');
 let curTdf = INVALID;
 
 navigateToStudentReporting = async function(studentUsername) {
-  console.log('navigateToStudentReporting:', studentUsername);
+  // console.log('navigateToStudentReporting:', studentUsername);
   Session.set('studentUsername', studentUsername);
   Session.set('instructorSelectedTdf', curTdf);
 
   if (studentUsername.indexOf('@') == -1) studentUsername = studentUsername.toUpperCase();
   const userIdRet = await meteorCallAsync('getUserIdforUsername', studentUsername);
-  console.log('student,', studentUsername, userIdRet);
+  // console.log('student,', studentUsername, userIdRet);
   Session.set('curStudentID', userIdRet);
   Session.set('curStudentPerformance', Session.get('studentPerformanceForClassAndTdfIdMap')[userIdRet]);
   Router.go('/studentReporting');
 };
 
 function setCurClassStudents(curClassId, currentTdf) {
-  console.log('setCurClassStudents', curClassId, currentTdf);
+  // console.log('setCurClassStudents', curClassId, currentTdf);
   if (_.isEmpty(Session.get('studentPerformanceForClassAndTdfIdMap')) ||
         _.isEmpty(Session.get('studentPerformanceForClassAndTdfIdMap')[curClassId]) ||
         _.isEmpty(Session.get('studentPerformanceForClassAndTdfIdMap')[curClassId][currentTdf])) {
-    console.log('curClassStudentPerformance:is empty');
+    // console.log('curClassStudentPerformance:is empty');
     Session.set('curClassStudentPerformance', [{percentCorrect: 'No attempts for this tdf'}]);
   } else {
     const curClassStudentPerformance = Session.get('studentPerformanceForClassAndTdfIdMap')[curClassId][currentTdf];
     Session.set('curClassStudentPerformance', Object.values(curClassStudentPerformance));// PER STUDENT
-    console.log('curClassStudentPerformance:', Object.values(curClassStudentPerformance));
+    // console.log('curClassStudentPerformance:', Object.values(curClassStudentPerformance));
   }
 
   if (_.isEmpty(Session.get('studentPerformanceForClass')) ||
         _.isEmpty(Session.get('studentPerformanceForClass')[curClassId]) ||
         _.isEmpty(Session.get('studentPerformanceForClass')[curClassId][currentTdf])) {
-    console.log('studentPerformanceForClass:is empty');
+    // console.log('studentPerformanceForClass:is empty');
     Session.set('curClassPerformance', {});// AGGREGATED BY CLASS
   } else {
     const curClassPerformance = Session.get('studentPerformanceForClass')[curClassId][currentTdf];
     Session.set('curClassPerformance', curClassPerformance);// AGGREGATED BY CLASS
-    console.log('curClassPerformance:', curClassPerformance);
+    // console.log('curClassPerformance:', curClassPerformance);
   }
 }
 
 function fetchAndSetPracticeTimeIntervalsMap(date, tdfId) {
-  console.log('fetch', Session.get('curClassStudentPerformance'));
+  // console.log('fetch', Session.get('curClassStudentPerformance'));
   const userIds = Session.get('curClassStudentPerformance').map( (x) => x.userId );
   Meteor.call('getPracticeTimeIntervalsMap', userIds, tdfId, date, function(err, res) {
     if (err) {
       throw new Error('Error fetching practice time intervals ->' + err);
     } else {
-      console.log('getPracticeTimeIntervalsMap', res);
+      // console.log('getPracticeTimeIntervalsMap', res);
       _state.set('practiceTimeIntervalsMap', res);
     }
   });
@@ -91,7 +91,7 @@ function generateUserMetThresholdMap(threshold) {
     }
   });
 
-  console.log('generateUserMetThresholdMap:', threshold, userMetThresholdMap);
+  // console.log('generateUserMetThresholdMap:', threshold, userMetThresholdMap);
   _state.set('userMetThresholdMap', userMetThresholdMap);
 }
 
@@ -125,7 +125,7 @@ Template.instructorReporting.helpers({
   performanceLoading: () => Session.get('performanceLoading'),
   replaceSpacesWithUnderscores: (string) => string.replace(' ', '_'),
   getUserMetThresholdStatus: (userId) => {
-    console.log('getUserMetThresholdStatus:', userId);
+    // console.log('getUserMetThresholdStatus:', userId);
     if (_state.get('userMetThresholdMap')) {
       return _state.get('userMetThresholdMap')[userId];
     } else {
@@ -142,7 +142,7 @@ Template.instructorReporting.events({
     const curClass = Session.get('classes').find((x) => x.courseId == curClassId);
     Session.set('curClass', curClass);
     const curClassTdfs = Session.get('instructorReportingTdfs')[curClassId];
-    console.log('change class-select, curClass: ', curClass, curClassTdfs);
+    // console.log('change class-select, curClass: ', curClass, curClassTdfs);
     Session.set('curInstructorReportingTdfs', curClassTdfs);
 
     curTdf = INVALID;
@@ -156,7 +156,7 @@ Template.instructorReporting.events({
   'change #tdf-select': function(event) {
     curTdf = parseInt($(event.currentTarget).val());
     _state.set('currentTdf', curTdf);
-    console.log('tdf change: ', curTdf, Session.get('curClass').courseId);
+    // console.log('tdf change: ', curTdf, Session.get('curClass').courseId);
     if (Session.get('curClass')) {
       setCurClassStudents(Session.get('curClass').courseId, curTdf);
     } else {
@@ -169,7 +169,7 @@ Template.instructorReporting.events({
   'change #practice-deadline-date': async (event) => {
     const date = event.currentTarget.value;
     const dateInt = new Date(date).getTime();
-    console.log('practice deadline:', dateInt);
+    // console.log('practice deadline:', dateInt);
     fetchAndSetPracticeTimeIntervalsMap(dateInt, _state.get('currentTdf'));
     hideUsersByDate(dateInt, _state.get('currentTdf'));
     _state.set('userMetThresholdMap', undefined);
@@ -184,7 +184,7 @@ Template.instructorReporting.events({
 });
 
 Template.instructorReporting.onRendered(async function() {
-  console.log('instructorReporting rendered', Meteor.userId());
+  // console.log('instructorReporting rendered', Meteor.userId());
   Session.set('curClass', undefined);
   Session.set('curStudentID', undefined);
   Session.set('studentUsername', undefined);
@@ -211,5 +211,5 @@ Template.instructorReporting.onRendered(async function() {
 
   Session.set('performanceLoading', false);
 
-  console.log('instructorReporting rendered:', studentPerformance, instructorReportingTdfs, courses);
+  // console.log('instructorReporting rendered:', studentPerformance, instructorReportingTdfs, courses);
 });

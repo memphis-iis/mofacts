@@ -70,7 +70,7 @@ function VAD(options) {
 
   const DEBUG = true;
   if (DEBUG) {
-    console.log(
+    // console.log(
         'Vad' +
       ' | sampleRate: ' + this.options.context.sampleRate +
       ' | hertzPerBin: ' + this.hertzPerBin +
@@ -119,7 +119,7 @@ function VAD(options) {
   // Setup local storage of the Linear FFT data
   this.floatFrequencyDataLinear = new Float32Array(this.floatFrequencyData.length);
 
-  // console.log("connecting vad to source");
+  // // console.log("connecting vad to source");
   // Connect this.analyser
   this.options.source.connect(this.analyser);
 
@@ -154,7 +154,7 @@ function VAD(options) {
   this.log = function(msg) {
     if (this.logging && this.log_i < this.log_limit) {
       this.log_i++;
-      console.log(msg);
+      // console.log(msg);
     } else {
       this.logging = false;
     }

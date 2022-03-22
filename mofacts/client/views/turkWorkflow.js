@@ -31,7 +31,7 @@ function turkLogRefresh(exp) {
 
     if (typeof error !== 'undefined') {
       const disp = 'Failed to retrieve log entries. Error:' + error;
-      console.log(disp);
+      // console.log(disp);
       alert(disp);
       return;
     }
@@ -50,7 +50,7 @@ function turkLogRefresh(exp) {
 function turkLogButtonToRec(element) {
   const target = $(element);
   const idx = _.intval(target.data('idx'), -1);
-  console.log('Pay event for', target, 'Found index', idx);
+  // console.log('Pay event for', target, 'Found index', idx);
 
   if (idx < 0) {
     return null;
@@ -156,7 +156,7 @@ Template.turkWorkflow.events({
     event.preventDefault();
     const workerid = $('#turk-workerid').val();
     const msgtext = $('#turk-msg').val();
-    console.log('Sending to', workerid, 'Msg:', msgtext);
+    // console.log('Sending to', workerid, 'Msg:', msgtext);
     $('#turkModal').modal('show');
     Meteor.call('turkSendMessage', workerid, msgtext, function(error, result) {
       $('#turkModal').modal('hide');
@@ -166,7 +166,7 @@ Template.turkWorkflow.events({
       } else {
         disp = 'Server returned:' + JSON.stringify(result, null, 2);
       }
-      console.log(disp);
+      // console.log(disp);
       alert(disp);
     });
   },
@@ -184,7 +184,7 @@ Template.turkWorkflow.events({
   // Admin/Teachers - filter Turk log results by trials seen
   'keyup #turklog-filt': function(event) {
     Session.set('turkLogFilterTrials', _.intval($('#turklog-filt').val()));
-    console.log('Filtering for', Session.get('turkLogFilterTrials'), 'trials');
+    // console.log('Filtering for', Session.get('turkLogFilterTrials'), 'trials');
   },
 
   // Admin/Teachers - approve/pay a user in the Turk log view
@@ -218,10 +218,10 @@ Template.turkWorkflow.events({
       if (error) {
         rec.turkpay = 'FAIL';
         rec.turkpayDetails.details = error;
-        console.log('turkPay failure:', error);
+        // console.log('turkPay failure:', error);
         alert('There was a server failure of some kind: ' + error);
       } else if (result) {
-        console.log('turkPay error:', result);
+        // console.log('turkPay error:', result);
         rec.turkpay = 'FAIL';
         rec.turkpayDetails.details = result;
         alert('There was a problem with the approval/payment: ' + result);
@@ -265,12 +265,12 @@ Template.turkWorkflow.events({
       if (error) {
         rec.turkbonus = 'FAIL';
         rec.turkbonusDetails.details = error;
-        console.log('turkBonus failure:', error);
+        // console.log('turkBonus failure:', error);
         alert('There was a server failure of some kind: ' + error);
       } else if (result) {
         rec.turkbonus = 'FAIL';
         rec.turkbonusDetails.details = result;
-        console.log('turkBonus error:', result);
+        // console.log('turkBonus error:', result);
         alert('There was a problem with the bonus: ' + result);
       } else {
         rec.turkbonus = 'Complete';

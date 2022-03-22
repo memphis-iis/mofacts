@@ -260,7 +260,7 @@ function checkAnswer(userAnswer, correctAnswer, originalAnswer, lfparameter) {
       isCorrect = true;
       matchText = 'Close enough to the correct answer \''+ dispAnswer + '\'.';
     } else {
-      console.log('MATCH ERROR: something fails in our comparison');
+      // console.log('MATCH ERROR: something fails in our comparison');
       isCorrect = false;
       matchText = '';
     }
@@ -321,17 +321,17 @@ const Answers = {
       switch (feedbackType) {
         case 'refutational':
           Meteor.call('getSimpleFeedbackForAnswer', userInput, answerToCheck, function(err, res) {
-            console.log('simpleFeedback, err: ', err, ', res: ', res);
+            // console.log('simpleFeedback, err: ', err, ', res: ', res);
             if (typeof(err) != 'undefined') {
-              console.log('error with refutational feedback, meteor call: ', err);
-              console.log(res);
+              // console.log('error with refutational feedback, meteor call: ', err);
+              // console.log(res);
               callback(fullTextIsCorrect);
             } else if (res.tag != 0) {
-              console.log('error with refutational feedback, feedback call: ' + res.name);
-              console.log(res);
+              // console.log('error with refutational feedback, feedback call: ' + res.name);
+              // console.log(res);
               callback(fullTextIsCorrect);
             } else if (res.tag == 0) {
-              console.log('refutationalFeedback,return:', res);
+              // console.log('refutationalFeedback,return:', res);
               const refutationalFeedback = res.fields[0].feedback;
 
               if (typeof(refutationalFeedback) != 'undefined' && refutationalFeedback != null) {

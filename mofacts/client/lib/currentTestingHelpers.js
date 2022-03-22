@@ -115,7 +115,7 @@ function updateCurStudentPerformance(isCorrect, endLatency, wasReportedForRemova
   // Update running user metrics total,
   // note this assumes curStudentPerformance has already been initialized on initial page entry
   const curUserPerformance = Session.get('curStudentPerformance');
-  console.log('updateCurStudentPerformance', isCorrect, endLatency,
+  // console.log('updateCurStudentPerformance', isCorrect, endLatency,
       JSON.parse(JSON.stringify((Session.get('curStudentPerformance')))));
   if(!wasReportedForRemoval){
     curUserPerformance.count = curUserPerformance.count + 1;
@@ -131,7 +131,7 @@ function updateCurStudentPerformance(isCorrect, endLatency, wasReportedForRemova
 }
 
 async function setStudentPerformance(studentID, studentUsername, tdfId) {
-  console.log('setStudentPerformance:', studentID, studentUsername, tdfId);
+  // console.log('setStudentPerformance:', studentID, studentUsername, tdfId);
   const studentPerformanceDataRet = await meteorCallAsync('getStudentPerformanceByIdAndTDFId', studentID, tdfId);
   let studentPerformanceData;
   if (isEmpty(studentPerformanceDataRet)) {
@@ -167,7 +167,7 @@ async function setStudentPerformance(studentID, studentUsername, tdfId) {
     'totalTimeDisplay': (studentPerformanceData.totalPracticeDuration / (60 * 1000)).toFixed(1),
   };
   Session.set('curStudentPerformance', studentPerformance);
-  console.log('setStudentPerformance,output:', studentPerformanceData, studentPerformance);
+  // console.log('setStudentPerformance,output:', studentPerformanceData, studentPerformance);
 }
 
 // Return the total number of stim clusters
@@ -309,7 +309,7 @@ function getAllCurrentStimAnswers(removeExcludedPhraseHints) {
   const stims = Session.get('currentStimuliSet');
   let allAnswers = new Set();
 
-  console.log(stims);
+  // console.log(stims);
   for (const stim of stims) {
     const responseParts = stim.correctResponse.toLowerCase().split(';');
     const answerArray = responseParts.filter(function(entry) {
@@ -351,7 +351,7 @@ function getCurrentDeliveryParams() {
 
   const isLearningSession = Session.get('unitType') == MODEL_UNIT;
 
-  console.log('getCurrentDeliveryParams:', currUnit, isLearningSession);
+  // console.log('getCurrentDeliveryParams:', currUnit, isLearningSession);
 
   // Note that we will only extract values that have a specified default
   // value here.

@@ -29,7 +29,7 @@ let finalDidYouReadQuestion = undefined;
 
 function recordClozeEditHistory(oldCloze, newCloze) {
   const timestamp = Date.now();
-  console.log(new Date(timestamp).toString() + ':' + JSON.stringify(oldCloze) + '|' + JSON.stringify(newCloze));
+  // console.log(new Date(timestamp).toString() + ':' + JSON.stringify(oldCloze) + '|' + JSON.stringify(newCloze));
   clozeEdits.push({startingCloze: oldCloze, endingCloze: newCloze, timestamp: timestamp});
 }
 
@@ -65,7 +65,7 @@ async function setAllTdfs(ownerMapCallback) {
 function getTdfOwnersMap(ownerIds) {
   Meteor.call('getTdfOwnersMap', ownerIds, function(err, res) {
     if (err) {
-      console.log(err);
+      // console.log(err);
     } else {
       Session.set('tdfOwnersMap', res);
     }
@@ -73,7 +73,7 @@ function getTdfOwnersMap(ownerIds) {
 }
 
 async function setClozesFromStimObject(stimObject, isMultiTdf) {
-  console.log('setClozesFromStimObject');
+  // console.log('setClozesFromStimObject');
   const MULTITDF_MAIN_CLUSTER_UNIT = 2;
   const LOWER_BOUND_RANDOM = -9999999999;
   const UPPER_BOUND_RANDOM = 9999999999;
@@ -123,7 +123,7 @@ async function setClozesFromStimObject(stimObject, isMultiTdf) {
       if (isMultiTdf) {
         // do nothing, multitdfs ignore a lot of mapping
       } else {
-        console.log('no stim unit mappings for index:', index, stimUnitMappings[index]);
+        // console.log('no stim unit mappings for index:', index, stimUnitMappings[index]);
         continue;
       }
     } else {
@@ -232,9 +232,9 @@ function saveEditHistory(originalClozes, newClozes) {
   };
   Meteor.call('insertClozeEditHistory', history, function(err, result) {
     if (err) {
-      console.log('error saving cloze edit history: ', err);
+      // console.log('error saving cloze edit history: ', err);
     } else {
-      console.log('saving cloze edit history results: ', result);
+      // console.log('saving cloze edit history results: ', result);
     }
   });
 
@@ -245,7 +245,7 @@ function generateAndSubmitTDFAndStimFiles() {
   // It's important to keep items in the same order to preserve cluster index/clusterKC relation
   sortClozes('originalOrderIndex');
   const clozes = Session.get('clozeSentencePairs').clozes;
-  console.log('Generating TDF with clozes: ', clozes);
+  // console.log('Generating TDF with clozes: ', clozes);
   const displayName = $('#tdfDisplayNameTextBox').val();
   const curUserName = Meteor.user().username.split('@')[0].replace(/[.]/g, '_');
   const curDate = new Date();
@@ -287,14 +287,14 @@ function generateAndSubmitTDFAndStimFiles() {
     clusterListMappings[unitIndex].new = undefined;
   }
 
-  console.log('!!!generateAndSubmitTDFAndStimFiles', newStimJSON, wrappedTDF, sourceSentences);
+  // console.log('!!!generateAndSubmitTDFAndStimFiles', newStimJSON, wrappedTDF, sourceSentences);
   Meteor.call('insertStimTDFPair', newStimJSON, wrappedTDF, sourceSentences, function(err, res) {
     if (err) {
-      console.log('Error inserting stim/tdf pair: ' + err);
+      // console.log('Error inserting stim/tdf pair: ' + err);
       alert('Error creating content: ' + err);
     } else {
       const tdfid = res;
-      console.log('Inserting stim/tdf pair result: ' + res);
+      // console.log('Inserting stim/tdf pair result: ' + res);
       saveEditHistory(originalClozes, clozes);
 
       const displayDate = (curDate.getMonth() + 1) + '/' + curDate.getDate() + '/' + curDate.getFullYear();
@@ -373,7 +373,7 @@ function getStimForCloze(stimulusKC, stimulusFilename, parentStimulusFileName) {
 }
 
 function generateStimJSON(clozes, isMultiTdf, stimulusFilename, parentStimulusFileName) {
-  console.log('generateStimJSON:', isMultiTdf, clozes, stimulusFilename);
+  // console.log('generateStimJSON:', isMultiTdf, clozes, stimulusFilename);
   const origStim = tdfIdToStimuliSetMap[origTdfId];
   const curStim = [];
 
@@ -407,7 +407,7 @@ function generateStimJSON(clozes, isMultiTdf, stimulusFilename, parentStimulusFi
     }
   }
 
-  console.log('!!!generateStimJSON', curClusterIndex, completedClusterKCs, curStim);
+  // console.log('!!!generateStimJSON', curClusterIndex, completedClusterKCs, curStim);
 
   // Add back assessment session/non learning session clusters
   if (!isMultiTdf) {
@@ -437,8 +437,8 @@ function generateStimJSON(clozes, isMultiTdf, stimulusFilename, parentStimulusFi
 }
 
 function generateTDFJSON(tdfFileName, displayName, stimulusFilename, newStimJSON) {
-  console.log('generateTDFJSON:', tdfFileName, displayName, stimulusFilename, newStimJSON);
-  console.log('clusterListMappings: ', clusterListMappings);
+  // console.log('generateTDFJSON:', tdfFileName, displayName, stimulusFilename, newStimJSON);
+  // console.log('clusterListMappings: ', clusterListMappings);
   let curTdf = undefined;
 
   if (clozesComeFromTemplate) {
@@ -461,7 +461,7 @@ function generateTDFJSON(tdfFileName, displayName, stimulusFilename, newStimJSON
     const lastStim = newStimJSON.length - 1; // [{},{}]
     curTdf.tdfs.tutor.unit[1].assessmentsession[0].clusterlist = [lastStim + '-' + lastStim];
 
-    console.log('curTdf.subTdfs: ', curTdf.subTdfs);
+    // console.log('curTdf.subTdfs: ', curTdf.subTdfs);
   } else {
     for (const unitIndex in clusterListMappings) {
       const isLearningSession = clusterListMappings[unitIndex].unitType === MODEL_UNIT;
@@ -489,7 +489,7 @@ function generateTDFJSON(tdfFileName, displayName, stimulusFilename, newStimJSON
 }
 
 function updateLookupMaps(stimulusKC, clusterKC, paraphraseId, oldCloze, newCloze) {
-  console.log('updateLookupMaps: ', oldCloze, newCloze);
+  // console.log('updateLookupMaps: ', oldCloze, newCloze);
   recordClozeEditHistory(oldCloze, newCloze);
   stimulusKCtoClozesMap[stimulusKC] = stimulusKCtoClozesMap[stimulusKC].filter((clozeItem) =>{
     clozeItem.stimulusKC == stimulusKC && clozeItem.paraphraseId != paraphraseId;
@@ -530,14 +530,14 @@ function updateLookupMaps(stimulusKC, clusterKC, paraphraseId, oldCloze, newCloz
 }
 
 function deleteCloze(stimulusKC, clusterKC, paraphraseId) {
-  console.log('deleteCloze', stimulusKC, clusterKC, paraphraseId);
+  // console.log('deleteCloze', stimulusKC, clusterKC, paraphraseId);
   const oldCloze = JSON.parse(JSON.stringify(stimulusKCtoClozesMap[stimulusKC].find(
       (elem) => elem.paraphraseId == paraphraseId)));
   updateLookupMaps(stimulusKC, clusterKC, paraphraseId, oldCloze, {});
 }
 
 function sortClozes(sortingMethod) {
-  console.log('sorting clozes by: ' + sortingMethod);
+  // console.log('sorting clozes by: ' + sortingMethod);
   const clozeSentencePairs = JSON.parse(JSON.stringify(Session.get('clozeSentencePairs')));
   let clozes = clozeSentencePairs.clozes;
 
@@ -602,7 +602,7 @@ Template.contentGeneration.onRendered(async function() {
   clozesComeFromTemplate = undefined;
   finalDidYouReadQuestion = undefined;
 
-  console.log('contentGeneration rendered');
+  // console.log('contentGeneration rendered');
   setAllTdfs(getTdfOwnersMap);
 
   // eslint-disable-next-line no-invalid-this
@@ -674,17 +674,17 @@ Template.contentGeneration.events({
   'click #submit-btn': function(event) {
     clozesComeFromTemplate = false;
     const inputText = $('#source-text').val();
-    console.log('inputText: ' + inputText);
+    // console.log('inputText: ' + inputText);
     Meteor.call('getClozesFromText', inputText, function(err, result) {
       if (typeof(err) !== 'undefined') {
-        console.log('Error getting clozes, mofacts side: ', err);
+        // console.log('Error getting clozes, mofacts side: ', err);
         alert('Couldn\'t generate clozes from source material: ', err);
       } else if (result.tag != 0) {
         const error = result.fields[0];
-        console.log('Error getting clozes, content gen side: ' + error);
+        // console.log('Error getting clozes, content gen side: ' + error);
         alert('Couldn\'t generate clozes from source material: ' + error);
       } else {
-        console.log(result);
+        // console.log(result);
         alert('Successfully generated clozes!');
         origTdfId = '';
         const sentences = result.fields[0].sentences;
@@ -711,7 +711,7 @@ Template.contentGeneration.events({
   },
 
   'click #editClozeSaveButton': function(event) {
-    console.log(event);
+    // console.log(event);
     const newClozeText = $('#clozeTextEdit').val();
     const correctResponse = $('#clozeResponseEdit').val();
     const editingCloze = Session.get('editingCloze');
@@ -769,7 +769,7 @@ Template.contentGeneration.events({
     const clusterKC = parseInt(event.currentTarget.getAttribute('clusterKC'));
     const curParaphraseId = parseInt(event.currentTarget.getAttribute('paraphrase-id'));
 
-    console.log('stimulusKC: ', stimulusKC, ', clusterKC: ', clusterKC, ', curParaphraseId: ', curParaphraseId);
+    // console.log('stimulusKC: ', stimulusKC, ', clusterKC: ', clusterKC, ', curParaphraseId: ', curParaphraseId);
 
     Session.set('curClozeSentencePairClusterKC', clusterKC);
     Session.set('editingClozeUID', stimulusKC);
@@ -779,7 +779,7 @@ Template.contentGeneration.events({
     for (const cloze of stimulusKCtoClozesMap[stimulusKC]) {
       if (cloze.paraphraseId == curParaphraseId) {
         curCloze = cloze;
-        console.log('edit cloze:', curCloze);
+        // console.log('edit cloze:', curCloze);
         break;
       }
     }
@@ -843,9 +843,9 @@ Template.contentGeneration.events({
     clusterListMappings = {};
     stimUnitMappings = {};
     origTdfId = $(event.currentTarget).val();
-    console.log('origTdfId: ' + origTdfId);
+    // console.log('origTdfId: ' + origTdfId);
     const stimObject = tdfIdToStimuliSetMap[origTdfId];
-    console.log('stimObject: ', stimObject);
+    // console.log('stimObject: ', stimObject);
     const tdfObject = tdfIdToTdfFileMap[origTdfId];
     const units = tdfObject.tdfs.tutor.unit;
     // NOTE: We are currently assuming that multiTdfs will have only three units:
@@ -907,13 +907,13 @@ Template.contentGeneration.helpers({
   isCoreference: function(paraphraseId) {
     const cloze = !!Session.get('clozeSentencePairs') && Session.get('clozeSentencePairs').clozes ?
         Session.get('clozeSentencePairs').clozes.find((cloze) => cloze.paraphraseId == paraphraseId) : undefined;
-    if (!cloze) console.log('isCoreference, not found: ' + paraphraseId);
+    if (!cloze) // console.log('isCoreference, not found: ' + paraphraseId);
     return cloze ? cloze.isCoreference : false;
   },
 
   isCorefReverted: function(paraphraseId) {
     const cloze = Session.get('clozeSentencePairs').clozes.find((cloze) => cloze.paraphraseId == paraphraseId);
-    if (!cloze) console.log('isCorefReverted, not found: ' + paraphraseId);
+    if (!cloze) // console.log('isCorefReverted, not found: ' + paraphraseId);
     return cloze ? !(cloze.tags.originalItem) : false;
   },
 

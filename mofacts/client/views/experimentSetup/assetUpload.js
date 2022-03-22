@@ -33,7 +33,7 @@ Template.assetUpload.events({
           alert(`Error during upload: ${error}`);
         } else {
           alert(`File "${fileObj.name}" successfully uploaded`);
-          console.log(DynamicAssets.link(fileObj));
+          // console.log(DynamicAssets.link(fileObj));
           Session.set('assetLink',DynamicAssets.link(fileObj));
         }
         template.currentUpload.set(false);

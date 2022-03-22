@@ -293,12 +293,12 @@ function PostAPI(input$$1, endpoint) {
       }
 
     });
-    console.log("!!!requestData:" + JSON.stringify(requestData));
+    // console.log("!!!requestData:" + JSON.stringify(requestData));
     var test3 = ((0, _Http.Http$$$header)((0, _Http.Headers$$$contentType)("application/json"), (0, _Http.Http$$$content)(new _Types2.BodyContent(1, "Text", requestData), (0, _Http.Http$$$method)(new _Types2.HttpMethod(1, "POST"), (0, _Http.Http$$$request)(endpoint)))));
-    console.log("test3!!!:" + JSON.stringify(test3));
+    // console.log("test3!!!:" + JSON.stringify(test3));
     return _AsyncBuilder.singleton.Bind((0, _Http.Http$$$send)((0, _Http.Http$$$header)((0, _Http.Headers$$$contentType)("application/json"), (0, _Http.Http$$$content)(new _Types2.BodyContent(1, "Text", requestData), (0, _Http.Http$$$method)(new _Types2.HttpMethod(1, "POST"), (0, _Http.Http$$$request)(endpoint))))), function (_arg1) {
       const response = _arg1;
-      console.log("!!!response:" + JSON.stringify(response));
+      // console.log("!!!response:" + JSON.stringify(response));
       return _AsyncBuilder.singleton.Return([response.statusCode, response.responseText]);
     });
   }));
@@ -318,10 +318,10 @@ function GetDependencyParse(input$$4) {
 
 function GetSentences(input$$5) {
   var test2 = PostAPI(new TextRequest(input$$5, "en"), endpoints.SentenceSplitter);
-  console.log("endpoints.sentencesplitter!!!:" + JSON.stringify(endpoints.SentenceSplitter));
-  console.log("text request:" + JSON.stringify(new TextRequest(input$$5, "en")));
+  // console.log("endpoints.sentencesplitter!!!:" + JSON.stringify(endpoints.SentenceSplitter));
+  // console.log("text request:" + JSON.stringify(new TextRequest(input$$5, "en")));
 
-  console.log("test2!!!:" + JSON.stringify(test2));
+  // console.log("test2!!!:" + JSON.stringify(test2));
   return test2;
 }
 
@@ -342,9 +342,9 @@ function Split(pattern$$1, input$$7) {
 }
 
 function CleanText(input$$8) {
-  console.log("input$$8!!!:" + JSON.stringify(input$$8));
+  // console.log("input$$8!!!:" + JSON.stringify(input$$8));
   var test = transliteration.transliterate(RegexReplace(" \\.$", ".", RegexReplace("\\s+", " ", RegexReplace("\\([^\\)]+\\)", "", RegexReplace("\\(note[^\\)]+\\)", "", RegexReplace("\\(see[^\\)]+\\)", "", RegexReplace("\\(fig[^\\)]+\\)", "", RegexReplace("Page[ 0-9]+", "", input$$8))))))));
-  console.log("test!!!:" + JSON.stringify(test));
+  // console.log("test!!!:" + JSON.stringify(test));
   return test;
 }
 
@@ -388,7 +388,7 @@ function GetAcronymMap(input$$16) {
 function GetNLP(input$$18) {
   return (0, _Promise.PromiseBuilder$$Run$$212F1D4B)(_PromiseImpl.promise, (0, _Promise.PromiseBuilder$$Delay$$62FBFDE1)(_PromiseImpl.promise, function () {
     return GetSentences(CleanText(input$$18)).then(function a$$1($arg$$5) {
-      console.log("$arg$$5!!!:" + JSON.stringify($arg$$5));
+      // console.log("$arg$$5!!!:" + JSON.stringify($arg$$5));
       return (0, _Decode.Auto$$$unsafeFromString$$Z33228D48)($arg$$5[1], null, null, {
         ResolveType() {
           return (0, _Reflection.array)(_Reflection.string);
@@ -702,13 +702,13 @@ function MakeItem(sa, cl) {
 }
 
 function GetClozeAPI(nlpOption, sentenceCountOption, itemCountOption, input$$27) {
-  console.log("!!!nlpOPtion:" + JSON.stringify(nlpOption)+",sentenceCountOption:" + JSON.stringify(sentenceCountOption) +",itemCountOption:" + JSON.stringify(itemCountOption)+"input:" + JSON.stringify(input$$27));
+  // console.log("!!!nlpOPtion:" + JSON.stringify(nlpOption)+",sentenceCountOption:" + JSON.stringify(sentenceCountOption) +",itemCountOption:" + JSON.stringify(itemCountOption)+"input:" + JSON.stringify(input$$27));
   return (0, _Promise.PromiseBuilder$$Run$$212F1D4B)(_PromiseImpl.promise, (0, _Promise.PromiseBuilder$$Delay$$62FBFDE1)(_PromiseImpl.promise, function () {
     return GetInternalAPI(nlpOption, input$$27).then(function a$$5(tuple$$12) {
       return tuple$$12[1];
     }).then(function (_arg1$$5) {
       const internalAPIJson = _arg1$$5;
-      console.log("internalAPIJson!!!:" + JSON.stringify(internalAPIJson));
+      // console.log("internalAPIJson!!!:" + JSON.stringify(internalAPIJson));
       const internalAPI = (0, _Decode.Auto$$$unsafeFromString$$Z33228D48)(internalAPIJson, null, null, {
         ResolveType() {
           return InternalAPI$reflection();

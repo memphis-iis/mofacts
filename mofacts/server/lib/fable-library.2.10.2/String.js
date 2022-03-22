@@ -253,7 +253,7 @@ function printf(input) {
 function toConsole(arg) {
   // Don't remove the lambda here, see #1357
   return arg.cont(x => {
-    console.log(x);
+    // console.log(x);
   });
 }
 

@@ -27,7 +27,7 @@ Template.dataDownload.onRendered(async function() {
 
     Meteor.call('getClozeEditAuthors', function(err, res) {
       if (err) {
-        console.log('error getting cloze edit authors: ', err);
+        // console.log('error getting cloze edit authors: ', err);
       } else {
         const authors = res;
 
@@ -224,7 +224,7 @@ Template.dataDownload.events({
 
 function createData(error, result, fileName){
   if (error){
-    console.log(error);
+    // console.log(error);
     alert(error.message.replace('[', '').replace(']', ''));
     return;
   }

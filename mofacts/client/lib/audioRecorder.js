@@ -41,10 +41,10 @@ DEALINGS IN THE SOFTWARE.
 
     this.node.onaudioprocess = function(e){
       if (!recording){
-        //console.log("audio recorder, not recording");
+        //// console.log("audio recorder, not recording");
         return;
       }
-      //console.log("audio recorder, posting data to worker");
+      //// console.log("audio recorder, posting data to worker");
       worker.postMessage({
         command: 'record',
         buffer: [

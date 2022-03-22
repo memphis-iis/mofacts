@@ -65,7 +65,7 @@ function redoCardImage() {
 
 Meteor.startup(function() {
   console.logs = [];
-  console.defaultLog = console.log.bind(console);
+  console.defaultLog = // console.log.bind(console);
   console.log = function(...args) {
     const convertedArgs = [];
     for (const index in args) {
@@ -79,9 +79,12 @@ Meteor.startup(function() {
         }
       }
     }
-    console.logs = console.logs.concat(convertedArgs);
-    console.logs = console.logs.slice(0, 100000);
-    console.defaultLog.apply(null, args);
+
+    console.logs = // console.logs.concat(convertedArgs);
+    console.logs = // console.logs.slice(0, 100000);
+    if((Meteor.isProduction && args[args.length - 1] == "verbose") || Meteor.isDevelopment){
+      console.defaultLog.apply(null, args);
+    }
   };
   Session.set('debugging', true);
   sessionCleanUp();
@@ -94,7 +97,7 @@ Meteor.startup(function() {
 
 Template.body.onRendered(function() {
   $('#errorReportingModal').on('hidden.bs.modal', function() {
-    console.log('error reporting modal hidden');
+    // console.log('error reporting modal hidden');
     restartMainCardTimeoutIfNecessary();
   });
 
@@ -104,12 +107,12 @@ Template.body.onRendered(function() {
     if (key == ENTER_KEY && e.target.tagName != 'INPUT') {
       window.keypressEvent = e;
       const curPage = document.location.pathname;
-      console.log('global enter key, curPage: ' + curPage);
-      console.log(e);
+      // console.log('global enter key, curPage: ' + curPage);
+      // console.log(e);
 
       if (!Session.get('enterKeyLock')) {
         Session.set('enterKeyLock', true);
-        console.log('grabbed enterKeyLock on global enter handler');
+        // console.log('grabbed enterKeyLock on global enter handler');
         switch (curPage) {
           case '/instructions':
             e.preventDefault();
@@ -171,13 +174,13 @@ Template.body.events({
   }, 
   'click #errorReportingSaveButton': function(event) {
     event.preventDefault();
-    console.log('save error reporting button pressed');
+    // console.log('save error reporting button pressed');
     const errorDescription = $('#errorDescription').val();
     const curUser = Meteor.userId();
     const curPage = document.location.pathname;
     const sessionVars = Session.all();
     const userAgent = navigator.userAgent;
-    const logs = console.logs;
+    const logs = // console.logs;
     const currentExperimentState = Session.get('currentExperimentState');
     Meteor.call('sendUserErrorReport', curUser, errorDescription, curPage, sessionVars,
         userAgent, logs, currentExperimentState);
@@ -194,7 +197,7 @@ Template.body.events({
     Meteor.logout( function(error) {
       if (typeof error !== 'undefined') {
         // something happened during logout
-        console.log('User:', Meteor.user(), 'Error:', error);
+        // console.log('User:', Meteor.user(), 'Error:', error);
       } else {
         sessionCleanUp();
         routeToSignin();
