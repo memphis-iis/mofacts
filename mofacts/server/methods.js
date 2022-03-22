@@ -2687,16 +2687,25 @@ Meteor.startup(async function() {
       serverConsole(toRemove);
       if(toRemove.TDFId){
         tdf = toRemove.TDFId;
-        const querya = 'DELETE FROM componentstate WHERE tdfid = $1'
-        await db.none(querya, [tdf]);
-        const queryb = 'DELETE FROM assignment WHERE tdfid = $1'
-        await db.none(queryb, [tdf]);
-        const queryc = 'DELETE FROM history WHERE tdfid = $1'
-        await db.none(queryc, [tdf]);
-        const query2 = 'DELETE FROM globalexperimentstate WHERE TDFId=$1'
-        await db.none(query2, [toRemove.TDFId]);
-        const query1 = 'DELETE FROM tdf WHERE TDFId=$1';
-        await db.none(query1, [toRemove.TDFId]);
+        //Postgres Reversion
+        // const querya = 'DELETE FROM componentstate WHERE tdfid = $1'
+        // await db.none(querya, [tdf]);
+        componentStates.remove({tdfid: tdf});
+        //Postgres Reversion
+        // const queryb = 'DELETE FROM assignment WHERE tdfid = $1'
+        Assignments.remove({tdfid: tdf});
+        //Postgres Reversion
+        // const queryc = 'DELETE FROM history WHERE tdfid = $1'
+        // await db.none(queryc, [tdf]);
+        Histories.remove({tdfid: tdf});
+        //Postgres Reversion
+        // const query2 = 'DELETE FROM globalexperimentstate WHERE TDFId=$1'
+        // await db.none(query2, [toRemove.TDFId]);
+        globalExperimentStates.remove({tdfid: tdf});
+        //Postgres Reversion
+        // const query1 = 'DELETE FROM tdf WHERE TDFId=$1';
+        // await db.none(query1, [toRemove.TDFId]);
+        Tdfs.remove({tdfid: tdf});
       } else {
         result = 'No matching tdf file found';
         return result;
@@ -2749,8 +2758,10 @@ Meteor.startup(async function() {
 
             return results;
           } else {
-            const query = 'SELECT stimuliSetId FROM item WHERE stimulusFilename = $1 LIMIT 1';
-            const associatedStimSetIdRet = await db.oneOrNone(query, stimFileName);
+            //Postgres Reversion
+            // const query = 'SELECT stimuliSetId FROM item WHERE stimulusFilename = $1 LIMIT 1';
+            // const associatedStimSetIdRet = await db.oneOrNone(query, stimFileName);
+            const associatedStimSetIdRet = Items.findOne({stimulusFileName: stimFileName});
             const stimuliSetId = associatedStimSetIdRet ? associatedStimSetIdRet.stimulisetid : null;
             if (isEmpty(stimuliSetId)) {
               results.result = false;
