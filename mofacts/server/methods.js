@@ -1618,8 +1618,31 @@ async function upsertStimFile(stimFilename, stimJSON, ownerId) {
                       alternateDisplays = ${alternateDisplays}, tags = ${tags} \
                       WHERE stimulusFilename = ${stimulusFilename} AND stimulusKC = ${stimulusKC}', mergedStim);
       }
+      // PostgresReversion Staged
+      Items.update({$and: {stimulusFilename: stimulusFilename, stimulusKC: stimulusKC}},{$set: {
+        stimuliSetId: stimuliSetId,
+        parentStimulusFileName: parentStimulusFileName,
+        stimulusKC: stimulusKC,
+        clusterKC: clusterKC,
+        responseKC: responsKC,
+        params: params,
+        optimalProb: optimalProb,
+        correctResponse: correctResponse,
+        incorrectResponses: incorrectResponses,
+        itemResponseType: itemResponseType,
+        speechHintExclusionList: speechHintExclusionList,
+        clozeStimulus: clozeStimulus,
+        textStimulus: textStimulus,
+        audioStimulus: audioStimulus,
+        imageStimulus: imageStimulus,
+        videoStimulus: videoStimulus,
+        aleternateDisplays, aleternateDisplays,
+        tags: tags
+      }})
       //if we get here we might have more stims in the old file than in the new. Need to remove them from the db.
-      await t.none(`DELETE FROM item WHERE stimulusKC > ${stimulusKC} and stimulusKC < ${stimuliSetId + 1} * 10000;`);
+      // PostgresReversion Staged
+      Items.remove({$and: [{stimulusKC: {$gt: stimulusKC},{stimulusKC: {$lt: stimulusKC + 1 * 10000}}]});
+      // await t.none(`DELETE FROM item WHERE stimulusKC > ${stimulusKC} and stimulusKC < ${stimuliSetId + 1} * 10000;`);
     } else {
       newStims = newFormatItems;
     }
