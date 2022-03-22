@@ -752,13 +752,50 @@ async function getAllCoursesForInstructor(instructorId) {
 
 async function getAllCourseAssignmentsForInstructor(instructorId) {
   try {
+    //Postgres Reversion
     serverConsole('getAllCourseAssignmentsForInstructor:'+instructorId);
-    const query = 'SELECT t.content -> \'fileName\' AS filename, c.courseName, c.courseId from assignment AS a \
-                 INNER JOIN tdf AS t ON t.TDFId = a.TDFId \
-                 INNER JOIN course AS c ON c.courseId = a.courseId \
-                 WHERE c.teacherUserId = $1 AND c.semester = $2';
-    const args = [instructorId, curSemester];
-    const courseAssignments = await db.any(query, args);
+    //const query = 'SELECT t.content -> \'fileName\' AS filename, c.courseName, c.courseId from assignment AS a \
+    //             INNER JOIN tdf AS t ON t.TDFId = a.TDFId \
+    //             INNER JOIN course AS c ON c.courseId = a.courseId \
+    //             WHERE c.teacherUserId = $1 AND c.semester = $2';
+    //const args = [instructorId, curSemester];
+    //const courseAssignments = await db.any(query, args);
+    const courseAssignmentsRet = await Assignments.aggregate([{
+      $lookup:{
+        from: "tdf",
+        localField: "TDFId",
+        foreignField: "TDFId",
+        as: "TDFId"
+      }
+    },
+    {
+      $unwind: "$TDFId"
+    },
+    {
+      $lookup:{
+        from: "course",
+        localField: "courseId",
+        foreignField: "courseId",
+        as: "courseId"
+      }
+    },
+    {
+      $unwind: "$courseId"
+    },
+    {
+      $match: {
+        teacherUserId: instructorId,
+        semester: curSemester
+      }
+    },
+    {
+      $project:{
+        filename: $content.fileName,
+        courseName: 1,
+        courseId: 1
+      }
+    }
+  ]);
     return courseAssignments;
   } catch (e) {
     serverConsole('getAllCourseAssignmentsForInstructor ERROR,', instructorId, ',', e);
@@ -779,11 +816,44 @@ async function editCourseAssignments(newCourseAssignment) {
     serverConsole('editCourseAssignments:', newCourseAssignment);
     const res = await db.tx(async (t) => {
       const newTdfs = newCourseAssignment.tdfs;
-      const query = 'SELECT t.content -> \'fileName\' AS filename, t.TDFId, c.courseId from assignment AS a \
-                  INNER JOIN tdf AS t ON t.TDFId = a.TDFId \
-                  INNER JOIN course AS c ON c.courseId = a.courseId \
-                  WHERE c.courseid = $1';
-      const curCourseAssignments = await db.manyOrNone(query, newCourseAssignment.courseid);
+      //Postgres Reversion
+      // const query = 'SELECT t.content -> \'fileName\' AS filename, t.TDFId, c.courseId from assignment AS a \
+      //            INNER JOIN tdf AS t ON t.TDFId = a.TDFId \
+      //            INNER JOIN course AS c ON c.courseId = a.courseId \
+      //            WHERE c.courseid = $1';
+      // const curCourseAssignments = await db.manyOrNone(query, newCourseAssignment.courseid);
+      const courseAssignmentsRet = await Assignments.aggregate([{
+        $lookup:{
+          from: "tdf",
+          localField: "TDFId",
+          foreignField: "TDFId",
+          as: "TDFId"
+        }
+      },
+      {
+        $lookup:{
+          from: "course",
+          localField: "courseId",
+          foreignField: "courseId",
+          as: "courseId"
+        }
+      },
+      {
+        $unwind: "$courseId"
+      },
+      {
+        $match: {
+          courseId: newCourseAssignment.courseid,
+        }
+      },
+      {
+        $project:{
+          filename: $content.fileName,
+          TDFId: 1,
+          courseId: 1
+        }
+      }
+    ]);
       const existingTdfs = curCourseAssignments.map((courseAssignment) => courseAssignment.filename);
 
       const tdfsAdded = getSetAMinusB(newTdfs, existingTdfs);
