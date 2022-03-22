@@ -309,8 +309,9 @@ function createAwsHmac(secretKey, dataString) {
 async function getTdfQueryNames(tdfFileName) {
   let tdfQueryNames = [];
   if (tdfFileName === ALL_TDFS) {
-    const tdfsRet = await db.any('SELECT content -> \'fileName\' AS filename from tdf');
-    const mongoCollection = tdfs.find({},{ "fileName": 1 }).fetch();
+    // Postgres Reversion
+    // const tdfsRet = await db.any('SELECT content -> \'fileName\' AS filename from tdf');
+    const tdfsRet = tdfs.find({},{ "fileName": 1 }).fetch();
     for (const tdfFileName of tdfsRet) {
       tdfQueryNames.push(tdfFileName);
     }
@@ -338,7 +339,9 @@ async function getLearningSessionItems(tdfFileName) {
 }
 
 async function getTdfIdByStimSetIdAndFileName(stimuliSetId, fileName){
-  const ret = await db.many('SELECT * FROM tdf WHERE stimulisetid =$1', stimuliSetId);
+  //Postgres Reversion
+  // const ret = await db.many('SELECT * FROM tdf WHERE stimulisetid =$1', stimuliSetId);
+  ret = Tdfs.find({stimulisetId: stimuliSetId}).fetch();
   const shortFileName = fileName.replace('.json', '').replace('.xml', '');
   for(let tdf in ret){
     serverConsole("fileName param : " + fileName + " | fileName querey: " + ret[tdf].content.fileName);
@@ -349,7 +352,7 @@ async function getTdfIdByStimSetIdAndFileName(stimuliSetId, fileName){
 }
 
 async function getTdfById(TDFId) {
-  const tdfs = await db.one('SELECT * from tdf WHERE TDFId=$1', TDFId);
+  //const tdfs = await db.one('SELECT * from tdf WHERE TDFId=$1', TDFId);
   //PostgresReversion
   const tdfs = Tdfs.find({tdfID: tdfID}).fetch();
   // const tdf = getTdf(tdfs);
@@ -359,8 +362,10 @@ async function getTdfById(TDFId) {
 // eslint-disable-next-line camelcase
 async function getTdfBy_id(_id) {
   try {
-    const queryJSON = {'_id': _id};
-    const tdfs = await db.one('SELECT * from tdf WHERE content @> $1' + '::jsonb', [queryJSON]);
+    //Postgres Reversion
+    tdfs = TDFs.find({_id: _id}).fetch();
+    // const queryJSON = {'_id': _id};
+    // const tdfs = await db.one('SELECT * from tdf WHERE content @> $1' + '::jsonb', [queryJSON]);
     const tdf = getTdf(tdfs);
     return tdf;
   } catch (e) {
@@ -371,8 +376,10 @@ async function getTdfBy_id(_id) {
 
 async function getTdfByFileName(filename) {
   try {
-    const queryJSON = {'fileName': filename};
-    const tdfs = await db.oneOrNone('SELECT * from tdf WHERE content @> $1::jsonb', [queryJSON]);
+    //Postgres Reversion
+    // const queryJSON = {'fileName': filename};
+    // const tdfs = await db.oneOrNone('SELECT * from tdf WHERE content @> $1::jsonb', [queryJSON]);
+    const tdfs = Tdfs.findOne({fileName: filename});
     if (!tdfs) {
       return null;
     }
@@ -387,8 +394,10 @@ async function getTdfByFileName(filename) {
 async function getTdfByExperimentTarget(experimentTarget) {
   try {
     serverConsole('getTdfByExperimentTarget:'+experimentTarget);
-    const queryJSON = {'tdfs': {'tutor': {'setspec': {'experimentTarget': experimentTarget}}}};
-    const tdfs = await db.one('SELECT * from tdf WHERE content @> $1' + '::jsonb', [queryJSON]);
+    //PostgresReversion
+    // const queryJSON = {'tdfs': {'tutor': {'setspec': {'experimentTarget': experimentTarget}}}};
+    // const tdfs = await db.one('SELECT * from tdf WHERE content @> $1' + '::jsonb', [queryJSON]);
+    tdfs = Tdfs.findOne({content: {tdfs: {tutor: {setspec: {experimentTarget: experimentTarget}}}}});
     const tdf = getTdf(tdfs);
     return tdf;
   } catch (e) {
@@ -411,7 +420,23 @@ async function getAllTdfs() {
 
 async function getAllStims() {
   serverConsole('getAllStims');
-  const stimRet = await db.any('SELECT DISTINCT(stimulusfilename), stimulisetid FROM item;')
+  //PostgresReversion
+  // const stimRet = await db.any('SELECT DISTINCT(stimulusfilename), stimulisetid FROM item;')
+  const stimRet = Items.aggregate([
+    {
+      $group: {
+        _id: {
+          stimulusFileName: "$stimulusfilename"
+        }
+      },
+    },
+    {
+      $project:{
+        stimulusFileName: $_id.stimulusFileName,
+        stimulisetid: 1
+      }
+    }
+  ])
   const stims = [];
   for (const stim of stimRet){
     stims.push(stim);
@@ -421,8 +446,10 @@ async function getAllStims() {
 
 async function getStimuliSetsForIdSet(stimuliSetIds) {
   const stimSetsStr = stimuliSetIds.join(',');
-  const query = 'SELECT * FROM ITEM WHERE stimuliSetId IN (' + stimSetsStr + ') ORDER BY itemId';
-  const stimSets = await db.many(query);
+  //Postgres Reversion
+  // const query = 'SELECT * FROM ITEM WHERE stimuliSetId IN (' + stimSetsStr + ') ORDER BY itemId';
+  // const stimSets = await db.many(query);
+  const stimSets = Items.find({stimuliSetId: {$in: [stimSetsStr]}});
   const ret = [];
   for (const stim of stimSets) {
     ret.push(getItem(stim));
@@ -454,8 +481,11 @@ async function getProbabilityEstimatesByKCId(relevantKCIds) { // {clusterIndex:[
 
 // by currentTdfId, not currentRootTDFId
 async function getOutcomeHistoryByUserAndTDFfileName(userId, TDFfileName) {
-  const tdfRet = await db.one('SELECT TDFId from tdf WHERE content @> $1' + '::jsonb', {'fileName': TDFfileName});
-  const TDFId = tdfRet[0].tdfid;
+  //PostgresReversion
+  //const tdfRet = await db.one('SELECT TDFId from tdf WHERE content @> $1' + '::jsonb', {'fileName': TDFfileName});
+  const tdfRet = Tdf.findOne({content: {fileName: TDFfileName}});
+  // const TDFId = tdfRet[0].tdfid;
+  const TDFId = tdfRet.tdfid;
   const query = 'SELECT array_agg(outcome) AS outcomeHistory FROM history \
     WHERE userId=$1 AND TDFId=$2 GROUP BY TDFId ORDER BY eventId';
   const ret = await db.manyOrNone(query, [userId, TDFId]);
