@@ -350,7 +350,9 @@ async function getTdfIdByStimSetIdAndFileName(stimuliSetId, fileName){
 
 async function getTdfById(TDFId) {
   const tdfs = await db.one('SELECT * from tdf WHERE TDFId=$1', TDFId);
-  const tdf = getTdf(tdfs);
+  //PostgresReversion
+  const tdfs = Tdfs.find({tdfID: tdfID}).fetch();
+  // const tdf = getTdf(tdfs);
   return tdf;
 }
 
@@ -397,7 +399,9 @@ async function getTdfByExperimentTarget(experimentTarget) {
 
 async function getAllTdfs() {
   serverConsole('getAllTdfs');
-  const tdfsRet = await db.any('SELECT * from tdf');
+  //PostgresReversion
+  const tdfsRet = Tdfs.find({}).fetch();
+  // const tdfsRet = await db.any('SELECT * from tdf');
   const tdfs = [];
   for (const tdf of tdfsRet) {
     tdfs.push(getTdf(tdf));
@@ -474,8 +478,10 @@ async function getReponseKCMap() {
 
 // by currentTdfId, not currentRootTDFId
 async function getComponentStatesByUserIdTDFIdAndUnitNum(userId, TDFId) {
-  const query = 'SELECT * FROM componentState WHERE userId = $1 AND TDFId = $2 ORDER BY componentStateId';
-  const componentStatesRet = await db.manyOrNone(query, [userId, TDFId]);
+  //PostgresReversion
+  const componentStateRet = componentStates.find($and: [{userId: userId},{TDFId: TDFId}], {$sort:{componentStateId:1}});
+  // const query = 'SELECT * FROM componentState WHERE userId = $1 AND TDFId = $2 ORDER BY componentStateId';
+  // const componentStatesRet = await db.manyOrNone(query, [userId, TDFId]);
   const componentStates = [];
   for (const componentState of componentStatesRet) {
     componentStates.push(getComponentState(componentState));
@@ -506,28 +512,56 @@ async function setComponentStatesByUserIdTDFIdAndUnitNum(userId, TDFId, componen
       if (!componentState.trialsSinceLastSeen) {
         componentState.trialsSinceLastSeen = null;
       }
-
-      const updateQuery = 'UPDATE componentstate SET probabilityEstimate=${probabilityEstimate}, \
-        firstSeen=${firstSeen}, lastSeen=${lastSeen}, trialsSinceLastSeen=${trialsSinceLastSeen}, \
-        priorCorrect=${priorCorrect}, priorIncorrect=${priorIncorrect}, \
-        priorStudy=${priorStudy}, totalPracticeDuration=${totalPracticeDuration}, outcomeStack=${outcomeStack} \
-        WHERE userId=${userId} AND TDFId=${TDFId} AND KCId=${KCId} AND componentType=${componentType} \
-        RETURNING componentStateId';
+      //PostgresReversion
+      // const updateQuery = 'UPDATE componentstate SET probabilityEstimate=${probabilityEstimate}, \
+      //   firstSeen=${firstSeen}, lastSeen=${lastSeen}, trialsSinceLastSeen=${trialsSinceLastSeen}, \
+      //  priorCorrect=${priorCorrect}, priorIncorrect=${priorIncorrect}, \
+      //  priorStudy=${priorStudy}, totalPracticeDuration=${totalPracticeDuration}, outcomeStack=${outcomeStack} \
+      //  WHERE userId=${userId} AND TDFId=${TDFId} AND KCId=${KCId} AND componentType=${componentType} \
+      //  RETURNING componentStateId';
       try {
-        const componentStateId = await t.one(updateQuery, componentState);
+        // const componentStateId = await t.one(updateQuery, componentState);
+        componentStates.update({$and: [{userId: userId},{TDFId: TDFId}, {KCId: KCId}, {componentType: componentType}]},{$set:{
+          probabilityEstimate: probabilityEstimate,
+          firstSeen: firstSeen, 
+          lastSeen: lastSeen,
+          trialsSinceLastSeen: trialsSinceLastSeen,
+          priorCorrect: priorCorrect,
+          priorIncorrect: priorIncorrect,
+          priorStudy: priorStudy,
+          totalPracticeDuration: totalPracticeDuration,
+          outcomeStack: outcomeStack
+        }});
         resArr.push(componentStateId);
       } catch (e) {
       // ComponentState didn't exist before so we'll insert it
         if (e.name == 'QueryResultError') {
           serverConsole("ComponentState didn't exist before so we'll insert it")
           serverConsole(componentState)
-          const componentStateId = await t.one('INSERT INTO componentstate(userId,TDFId,KCId,componentType, \
-            probabilityEstimate,hintLevel,firstSeen,lastSeen,trialsSinceLastSeen,priorCorrect,priorIncorrect,priorStudy, \
-            totalPracticeDuration,outcomeStack) VALUES(${userId},${TDFId}, ${KCId}, ${componentType}, \
-            ${probabilityEstimate},${hintLevel}, ${firstSeen},${lastSeen},${trialsSinceLastSeen},${priorCorrect},${priorIncorrect}, \
-            ${priorStudy},${totalPracticeDuration},${outcomeStack}) \
-            RETURNING componentStateId',
-            componentState);
+           //PostgresReversion
+           const componentStateId = componentStates.insert({
+            userId: userId,
+            TDFId: TDFId,
+            KCId: KCId,
+            componentType: componentType,
+            probabilityEstimate: probabilityEstimate,
+            hintLevel: hintLevel,
+            firstSeen: firstSeen,
+            lastSeen: lastSeen,
+            trialsSinceLastSeen: trialsSinceLastSeen,
+            priorCorrect: priorCorrect,
+            priorIncorrect: priorIncorrect,
+            priorStudy: priorStudy,
+            totalPracticeDuration: totalPracticeDuration,
+            outcomeStack: outcomeStack
+           });
+          //const componentStateId = await t.one('INSERT INTO componentstate(userId,TDFId,KCId,componentType, \
+          //  probabilityEstimate,hintLevel,firstSeen,lastSeen,trialsSinceLastSeen,priorCorrect,priorIncorrect,priorStudy, \
+          //  totalPracticeDuration,outcomeStack) VALUES(${userId},${TDFId}, ${KCId}, ${componentType}, \
+          //  ${probabilityEstimate},${hintLevel}, ${firstSeen},${lastSeen},${trialsSinceLastSeen},${priorCorrect},${priorIncorrect}, \
+          //  ${priorStudy},${totalPracticeDuration},${outcomeStack}) \
+          //  RETURNING componentStateId',
+          //  componentState);
         } else {
           resArr.push('not caught error:', e);
         }
@@ -569,13 +603,19 @@ function _branchingCorrectText(answer) {
 
 // TODO: move this to function through existing upsert functions
 async function insertStimTDFPair(newStimJSON, wrappedTDF, sourceSentences) {
-  const highestStimuliSetIdRet = await db.oneOrNone('SELECT MAX(stimuliSetId) AS stimuliSetId FROM item');
+  //PostgresReversion
+  const maxStimuliSetId = Items.find().sort({stimuliSetId: -1}).limit(1);
+  const highestStimuliSetIdRet = {stimuliSetId: maxStimuliSetId};
+  // const highestStimuliSetIdRet = await db.oneOrNone('SELECT MAX(stimuliSetId) AS stimuliSetId FROM item');
   const newStimuliSetId = highestStimuliSetIdRet.stimulisetid + 1;
   wrappedTDF.stimuliSetId = newStimuliSetId;
   for (const stim of newStimJSON) {
     stim.stimuliSetId = newStimuliSetId;
   }
-  const highestStimulusKCRet = await db.oneOrNone('SELECT MAX(stimulusKC) AS stimulusKC FROM item');
+  //PostgresReversion
+  const maxStimulusKC = Items.find().sort({stimulusKC: -1}).limit(1);
+  const highestStimulusKCRet = {stimuliSetId: maxStimulusKC};
+  // const highestStimulusKCRet = await db.oneOrNone('SELECT MAX(stimulusKC) AS stimulusKC FROM item');
   const curNewKCBase = (Math.floor(highestStimulusKCRet.stimuluskc / KC_MULTIPLE) * KC_MULTIPLE) + KC_MULTIPLE;// + 1
 
   let curNewStimulusKC = curNewKCBase;
@@ -642,8 +682,10 @@ async function insertStimTDFPair(newStimJSON, wrappedTDF, sourceSentences) {
 }
 
 async function getSourceSentences(stimuliSetId) {
-  const query = 'SELECT sourceSentences FROM itemSourceSentences WHERE stimuliSetId=$1';
-  const sourceSentencesRet = await db.manyOrNone(query, stimuliSetId);
+  //PostgresReversion
+  // const query = 'SELECT sourceSentences FROM itemSourceSentences WHERE stimuliSetId=$1';
+  // const sourceSentencesRet = await db.manyOrNone(query, stimuliSetId);
+  const sourceSentencesRet = itemSourceSentences.find({stimuliSetId: stimuliSetId});
   return sourceSentencesRet.sourceSentences;
 }
 
@@ -666,9 +708,20 @@ async function getAllCourses() {
 async function getAllCourseSections() {
   try {
     serverConsole('getAllCourseSections');
-    const query = 'SELECT s.sectionid, s.sectionname, c.courseid, c.coursename, c.teacheruserid, c.semester, \
-        c.beginDate from course AS c INNER JOIN section AS s ON c.courseid = s.courseid WHERE c.semester=$1';
-    const ret = await db.any(query, curSemester);
+    //PostgresReversion Staged
+    ret =  await Courses.aggregate([
+      {
+        $lookup: {
+          from: "section",
+          localField: "courseid",
+          foreignField: "courseid",
+          as: "courses"
+        }
+      }
+    ]).courses;
+    // const query = 'SELECT s.sectionid, s.sectionname, c.courseid, c.coursename, c.teacheruserid, c.semester, \
+    //     c.beginDate from course AS c INNER JOIN section AS s ON c.courseid = s.courseid WHERE c.semester=$1';
+    // const ret = await db.any(query, curSemester);
     return ret;
   } catch (e) {
     serverConsole('getAllCourseSections ERROR,', e);
@@ -678,8 +731,10 @@ async function getAllCourseSections() {
 
 async function getCourseById(courseId) {
   serverConsole('getAllCoursesById:', courseId);
-  const query = 'SELECT * from course WHERE courseId=$1';
-  const course = await db.oneOrNone(query, [courseId, curSemester]);
+  //PostgresReversion Staged
+  // const query = 'SELECT * from course WHERE courseId=$1';
+  // const course = await db.oneOrNone(query, [courseId, curSemester]);
+  const course = Courses.findOne({courseId: courseId});
   return course;
 }
 
@@ -744,11 +799,15 @@ async function editCourseAssignments(newCourseAssignment) {
         const TDFId = tdfNameIDMap[tdfName];
         serverConsole('editCourseAssignments tdf:', TDFId, tdfName, tdfsAdded, tdfsRemoved,
             curCourseAssignments, existingTdfs, newTdfs);
-        await t.none('INSERT INTO assignment(courseId, TDFId) VALUES($1, $2)', [newCourseAssignment.courseid, TDFId]);
+        //PostgresReversion Staged
+        Assignments.insert({courseId: newCourseAssignment.courseId, TDFId: TDFId});
+        // await t.none('INSERT INTO assignment(courseId, TDFId) VALUES($1, $2)', [newCourseAssignment.courseid, TDFId]);
       }
       for (const tdfName of tdfsRemoved) {
         const TDFId = tdfNameIDMap[tdfName];
-        await t.none('DELETE FROM assignment WHERE courseId=$1 AND TDFId=$2', [newCourseAssignment.courseid, TDFId]);
+        //PostgresReversion Staged
+        Assignment.remove({$and: [{courseId: newCourseAssignment.courseid}, {TDFId: tdfId}]});
+        // await t.none('DELETE FROM assignment WHERE courseId=$1 AND TDFId=$2', [newCourseAssignment.courseid, TDFId]);
       }
       return newCourseAssignment;
     });
@@ -810,8 +869,10 @@ async function getTdfNamesAssignedByInstructor(instructorID) {
 }
 
 async function getExperimentState(UserId, TDFId) { // by currentRootTDFId, not currentTdfId
-  const query = 'SELECT experimentState FROM globalExperimentState WHERE userId = $1 AND TDFId = $2';
-  const experimentStateRet = await db.oneOrNone(query, [UserId, TDFId]);
+  //PostgresReversion Staged
+  // const query = 'SELECT experimentState FROM globalExperimentState WHERE userId = $1 AND TDFId = $2';
+  // const experimentStateRet = await db.oneOrNone(query, [UserId, TDFId]);
+  const experimentStateRet = GlobalExperimentStates.findOne({userId: userId, TDFId: TDFId});
   const experimentState = experimentStateRet.experimentstate;
   return experimentState;
 }
@@ -819,8 +880,10 @@ async function getExperimentState(UserId, TDFId) { // by currentRootTDFId, not c
 // UPSERT not INSERT
 async function setExperimentState(UserId, TDFId, newExperimentState, where) { // by currentRootTDFId, not currentTdfId
   serverConsole('setExperimentState:', where, UserId, TDFId, newExperimentState);
-  const query = 'SELECT experimentState FROM globalExperimentState WHERE userId = $1 AND TDFId = $2';
-  const experimentStateRet = await db.oneOrNone(query, [UserId, TDFId]);
+  //PostgresReversion Staged
+  // const query = 'SELECT experimentState FROM globalExperimentState WHERE userId = $1 AND TDFId = $2';
+  // const experimentStateRet = await db.oneOrNone(query, [UserId, TDFId]);
+  const experimentStateRet = globalExperimentStates.findOne({userId: userId, TDFId: TDFId});
 
   if (experimentStateRet != null) {
     const updatedExperimentState = Object.assign(experimentStateRet.experimentstate, newExperimentState);
@@ -828,21 +891,26 @@ async function setExperimentState(UserId, TDFId, newExperimentState, where) { //
     await db.none(updateQuery, [updatedExperimentState, UserId, TDFId]);
     return updatedExperimentState;
   }
-
-  const insertQuery = 'INSERT INTO globalExperimentState (experimentState, userId, TDFId) VALUES ($1, $2, $3)';
-  await db.query(insertQuery, [{}, UserId, TDFId]);
+  //PostgresReversion Staged
+  // const insertQuery = 'INSERT INTO globalExperimentState (experimentState, userId, TDFId) VALUES ($1, $2, $3)';
+  // await db.query(insertQuery, [{}, UserId, TDFId]);
+  globalExperimentStates.insert({userId: UserId, TDFId: TDFId});
 
   return TDFId;
 }
 
 async function insertHiddenItem(userId, stimulusKC, tdfId) {
-  let query = "UPDATE componentstate SET showitem = FALSE WHERE userid = $1  AND tdfid = $2 AND kcid = $3 AND componenttype = 'stimulus'";
-  await db.manyOrNone(query, [userId, tdfId, stimulusKC]);
+  //PostgresReversion Staged
+  //let query = "UPDATE componentstate SET showitem = FALSE WHERE userid = $1  AND tdfid = $2 AND kcid = $3 AND componenttype = 'stimulus'";
+  //await db.manyOrNone(query, [userId, tdfId, stimulusKC]);
+  componentStates.update({userid: userId, tdfid: tdfId, kcid: stimulusKC, componenttype: "stimulus"});
 }
 
 async function getHiddenItems(userId, tdfId) {
-  let query = "SELECT kcid FROM componentstate WHERE userid = $1 AND tdfid = $2 AND showitem = false AND componenttype = 'stimulus'";
-  const res = await db.manyOrNone(query, [userId, tdfId]);
+  //PostgresReversion Staged
+  // let query = "SELECT kcid FROM componentstate WHERE userid = $1 AND tdfid = $2 AND showitem = false AND componenttype = 'stimulus'";
+  // const res = await db.manyOrNone(query, [userId, tdfId]);
+  const res = componentStates.find({userid: userId, tdfid: tdfId, componenttype = 'stimulus'}).fetch();
   let hiddenItems = [];
   for(let item in res){
     hiddenItems.push(res[item].kcid);
@@ -850,8 +918,10 @@ async function getHiddenItems(userId, tdfId) {
   return hiddenItems;
 }
 async function getUserLastFeedbackTypeFromHistory(tdfID) {
-  const query = "SELECT feedbackType FROM HISTORY WHERE TDFId = $1 AND userId = $2 ORDER BY eventid DESC LIMIT 1";
-  const feedbackType = await db.oneOrNone(query, [tdfID, Meteor.userId]);
+  //PostgresReversion Staged
+  // const query = "SELECT feedbackType FROM HISTORY WHERE TDFId = $1 AND userId = $2 ORDER BY eventid DESC LIMIT 1";
+  // const feedbackType = await db.oneOrNone(query, [tdfID, Meteor.userId]);
+  const feedbackType = Histories.findOne({TDFId: tdfID, userId: Meteor.userId});
   return feedbackType;
 }
 async function insertHistory(historyRecord) {
@@ -1708,8 +1778,14 @@ async function upsertTDFFile(tdfFilename, tdfJSON, ownerId) {
     } else {
       tdfJSONtoUpsert = JSON.stringify(tdfJSON);
     }
-    const query = 'UPDATE tdf SET ownerId=$1, stimuliSetId=$2, content=$3::jsonb WHERE TDFId=$4';
-    await db.none(query, [ownerId, prev.stimuliSetId, tdfJSONtoUpsert, prev.TDFId]);
+    // PostgresReversion Staged
+    Tdfs.update({TDFId: prev.TDFId},{$set:{
+      ownerId: ownerId,
+      stimuliSetId: stimuliSetId,
+      content: tdfJSONtoUpsert
+    }});
+    // const query = 'UPDATE tdf SET ownerId=$1, stimuliSetId=$2, content=$3::jsonb WHERE TDFId=$4';
+    // await db.none(query, [ownerId, prev.stimuliSetId, tdfJSONtoUpsert, prev.TDFId]);
   } else {
     let tdfJSONtoUpsert;
     if (hasGeneratedTdfs(tdfJSON)) {
@@ -1724,8 +1800,10 @@ async function upsertTDFFile(tdfFilename, tdfJSON, ownerId) {
       let stimuliSetId;
       if (tdfJSON.tdfs.tutor.setspec.stimulusfile) {
         const stimFileName = tdfJSON.tdfs.tutor.setspec.stimulusfile;
-        const stimuliSetIdQuery = 'SELECT stimuliSetId FROM item WHERE stimulusFilename = $1 LIMIT 1';
-        const associatedStimSetIdRet = await t.oneOrNone(stimuliSetIdQuery, stimFileName);
+        // PostgresReversion Staged
+        const associatedStimSetIdRet = Items.find({stimulusFilename: stimFileName}).limit(1).fetch();
+        // const stimuliSetIdQuery = 'SELECT stimuliSetId FROM item WHERE stimulusFilename = $1 LIMIT 1';
+        // const associatedStimSetIdRet = await t.oneOrNone(stimuliSetIdQuery, stimFileName);
         if (associatedStimSetIdRet) {
           stimuliSetId = associatedStimSetIdRet.stimulisetid;
         } else {
@@ -1734,8 +1812,10 @@ async function upsertTDFFile(tdfFilename, tdfJSON, ownerId) {
       } else {
         stimuliSetId = null; // Root condition tdfs have no stimulisetid
       }
-      const query = 'INSERT INTO tdf(ownerId, stimuliSetId, content) VALUES($1, $2, $3::jsonb)';
-      await t.none(query, [ownerId, stimuliSetId, tdfJSONtoUpsert]);
+      // PostgresReversion Staged
+      TDFs.insert({$set: {ownerID: ownerId, stimuliSetId: stimuliSetId, content: tdfJSONtoUpsert}});
+      // const query = 'INSERT INTO tdf(ownerId, stimuliSetId, content) VALUES($1, $2, $3::jsonb)';
+      // await t.none(query, [ownerId, stimuliSetId, tdfJSONtoUpsert]);
     });
   }
 }
