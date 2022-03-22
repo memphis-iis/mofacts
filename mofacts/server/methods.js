@@ -262,7 +262,7 @@ async function migration(){
   }
 }
 
-//migration();
+migration();
 
 // Config for scheduled jobs - the start command is at the end of
 // Meteor.startup below
@@ -649,7 +649,9 @@ async function getSourceSentences(stimuliSetId) {
 
 async function getAllCourses() {
   try {
-    const coursesRet = await db.any('SELECT * from course');
+    //PostgresReversion Staged
+    let coursesRet = Courses.find().fetch();
+    // coursesRet = await db.any('SELECT * from course');
     const courses = [];
     for (const course of coursesRet) {
       courses.push(getCourse(course));
@@ -1143,11 +1145,12 @@ async function getStimuliSetByFilename(stimFilename) {
 }
 
 async function getStimuliSetById(stimuliSetId) {
-  const query = 'SELECT * FROM item \
-               WHERE stimuliSetId=$1 \
-               ORDER BY itemId';
-  const itemRet = await db.manyOrNone(query, stimuliSetId);
-
+  // PostgresReversion Staged
+  // const query = 'SELECT * FROM item \
+  //             WHERE stimuliSetId=$1 \
+  //             ORDER BY itemId';
+  // const itemRet = await db.manyOrNone(query, stimuliSetId);
+  const itemRet = Items.find({stimuliSetId: stimuliSetId}).fetch();
   const items = [];
   for (const item of itemRet) {
     items.push(getItem(item));
@@ -1156,18 +1159,21 @@ async function getStimuliSetById(stimuliSetId) {
 }
 
 async function getStimCountByStimuliSetId(stimuliSetId) {
-  const query = 'SELECT COUNT(*) FROM item \
-               WHERE stimuliSetId=$1 \
-               ORDER BY itemId';
-  const ret = await db.one(query, stimuliSetId);
+  // PostgresReversion Staged
+  let ret = Items.find({$count: {stimuliSetId: stimuliSetId}, $sort: {itemId: 1}}).fetch();
+  // const query = 'SELECT COUNT(*) FROM item \
+  //             WHERE stimuliSetId=$1 \
+  //             ORDER BY itemId';
+  // ret = await db.one(query, stimuliSetId);
   return ret.count;
 }
 async function getItemsByFileName(stimFileName) {
-  const query = 'SELECT * FROM item \
-               WHERE stimulusfilename=$1 \
-               ORDER BY itemId';
-  const itemRet = await db.manyOrNone(query, stimFileName);
-
+  // PostgresReversion Staged
+  let itemRet = Items.find({stimulusfilename: stimFileName}, {$sort: {itemId: 1}}).fetch();
+  // const query = 'SELECT * FROM item \
+  //            WHERE stimulusfilename=$1 \
+  //            ORDER BY itemId';
+  // itemRet = await db.manyOrNone(query, stimFileName);
   const items = [];
   for (const item of itemRet) {
     items.push(getItem(item));
@@ -1529,8 +1535,10 @@ function findUserByName(username) {
 }
 
 async function verifySyllableUpload(stimSetId){
-  const query = 'SELECT COUNT(DISTINCT LOWER(correctresponse)) FROM item WHERE stimulisetid = $1';
-  const postgresRet = await db.oneOrNone(query, stimSetId);
+  // const query = 'SELECT COUNT(DISTINCT LOWER(correctresponse)) FROM item WHERE stimulisetid = $1';
+  // PostgresReversion Staged
+  let postgresRet = Items.find();
+  // postgresRet = await db.oneOrNone(query, stimSetId);
   const answersCountPostgres = postgresRet.count;
 
   const mongoRet = StimSyllables.findOne({filename: stimSetId});
@@ -1563,22 +1571,28 @@ async function upsertStimFile(stimFilename, stimJSON, ownerId) {
   };
   await db.tx(async (t) => {
     const responseKCMap = await getReponseKCMap();
-    const query = 'SELECT stimuliSetId FROM item WHERE stimulusFilename = $1 LIMIT 1';
-    const associatedStimSetIdRet = await t.oneOrNone(query, stimFilename);
+    // PostgresReversion Staged
+    // const query = 'SELECT stimuliSetId FROM item WHERE stimulusFilename = $1 LIMIT 1';
+    const associatedStimSetIdRet = Items.findOne({stimulusFilename: stimFilename}).limit(1).stimuliSetId
+    // const associatedStimSetIdRet = await t.oneOrNone(query, stimFilename);
     serverConsole('getAssociatedStimSetIdForStimFile', stimFilename, associatedStimSetIdRet);
     let stimuliSetId;
     if (associatedStimSetIdRet) {
       stimuliSetId = associatedStimSetIdRet.stimulisetid;
       serverConsole('stimuliSetId1:', stimuliSetId, associatedStimSetIdRet);
     } else {
-      const highestStimuliSetId = await t.oneOrNone('SELECT MAX(stimuliSetId) AS stimuliSetId FROM item');
+      // PostgresReversion Staged
+      // const highestStimuliSetId = await t.oneOrNone('SELECT MAX(stimuliSetId) AS stimuliSetId FROM item');
+      const highestStimuliSetId = Items.find().sort({stimuliSetId: -1}).limit(1);
       stimuliSetId = highestStimuliSetId && highestStimuliSetId.stimulisetid ?
           parseInt(highestStimuliSetId.stimulisetid) + 1 : 1;
       serverConsole('stimuliSetId2:', stimuliSetId, highestStimuliSetId);
     }
 
     const newFormatItems = getNewItemFormat(oldStimFormat, stimFilename, stimuliSetId, responseKCMap);
-    const existingStims = await t.manyOrNone('SELECT * FROM item WHERE stimulusFilename = $1', stimFilename);
+    // PostgresReversion Staged
+    // const existingStims = await t.manyOrNone('SELECT * FROM item WHERE stimulusFilename = $1', stimFilename);
+    const existingStims = await Items.find({stimulusFilename: stimFilename});
     let newStims = [];
     let stimulusKC;
     if (existingStims && existingStims.length > 0) {
