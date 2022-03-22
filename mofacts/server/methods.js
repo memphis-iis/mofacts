@@ -1649,15 +1649,36 @@ async function upsertStimFile(stimFilename, stimJSON, ownerId) {
     serverConsole('!!!newStims:', newStims);
     for (const stim of newStims) {
       if (stim.alternateDisplays) stim.alternateDisplays = JSON.stringify(stim.alternateDisplays);
-      await t.none('INSERT INTO item(stimuliSetId, stimulusFilename, stimulusKC, clusterKC, responseKC, params, \
-        optimalProb, correctResponse, incorrectResponses, itemResponseType, speechHintExclusionList, clozeStimulus, \
-        textStimulus, audioStimulus, imageStimulus, videoStimulus, alternateDisplays, tags) \
-      VALUES(${stimuliSetId}, ${stimulusFilename}, ${stimulusKC}, ${clusterKC}, ${responseKC}, ${params}, \
-        ${optimalProb}, ${correctResponse}, ${incorrectResponses}, ${itemResponseType}, ${speechHintExclusionList}, \
-        ${clozeStimulus}, ${textStimulus}, ${audioStimulus}, ${imageStimulus}, ${videoStimulus}, \
-        ${alternateDisplays}::jsonb, ${tags})', stim);
+      // PostgresReversion Staged
+      Items.insert({
+        stimuliSetId: stimuliSetId,
+        stimulusFilename: stimuliSetId,
+        stimulusKC: stimulusKC,
+        clusterKC: clusterKC,
+        responseKC: responseKC,
+        params: params,
+        optimalProb: optimalProb,
+        correctResponse: correctResponse,
+        incorrectResponses: incorrectResponses,
+        itemResponseType: itemResponseType,
+        speechHintExclusionList: speechHintExclusionList,
+        clozeStimulus: clozeStimulus,
+        textStimulus: textStimulus,
+        audioStimulus: audioStimulus,
+        imageStimulus: imageStimulus,
+        videoStimulus: videoStimulus,
+        alternateDisplays: alternateDisplays,
+        tags: tags
+      });
+      // await t.none('INSERT INTO item(stimuliSetId, stimulusFilename, stimulusKC, clusterKC, responseKC, params, \
+      //   optimalProb, correctResponse, incorrectResponses, itemResponseType, speechHintExclusionList, clozeStimulus, \
+      //  textStimulus, audioStimulus, imageStimulus, videoStimulus, alternateDisplays, tags) \
+      // VALUES(${stimuliSetId}, ${stimulusFilename}, ${stimulusKC}, ${clusterKC}, ${responseKC}, ${params}, \
+      //   ${optimalProb}, ${correctResponse}, ${incorrectResponses}, ${itemResponseType}, ${speechHintExclusionList}, \
+      //  ${clozeStimulus}, ${textStimulus}, ${audioStimulus}, ${imageStimulus}, ${videoStimulus}, \
+      //  ${alternateDisplays}::jsonb, ${tags})', stim);
     }
-
+    
     return {ownerId};
   });
 }
