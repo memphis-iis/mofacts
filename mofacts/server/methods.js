@@ -1402,7 +1402,9 @@ async function getListOfStimTags(tdfFileName) {
 }
 
 async function getStimuliSetByFilename(stimFilename) {
-  const idRet = await db.oneOrNone('SELECT stimuliSetId FROM item WHERE stimulusFilename = $1 LIMIT 1', stimFilename);
+  //Postgres Reversion
+  // const idRet = await db.oneOrNone('SELECT stimuliSetId FROM item WHERE stimulusFilename = $1 LIMIT 1', stimFilename);
+  idRet = Items.findOne({stimulusFilename: stimFilename});
   const stimuliSetId = idRet ? idRet.stimulisetid : null;
   if (isEmpty(stimuliSetId)) return null;
   return await getStimuliSetById(stimuliSetId);
@@ -1653,8 +1655,10 @@ async function getStudentPerformanceForClassAndTdfId(instructorId, date=null) {
 }
 
 async function getTdfIDsAndDisplaysAttemptedByUserId(userId, onlyWithLearningSessions=true) {
-  const query = 'SELECT TDFId from globalExperimentState WHERE userId = $1';
-  const tdfRet = await db.manyOrNone(query, userId);
+  //Postgres Reversion 
+  // const query = 'SELECT TDFId from globalExperimentState WHERE userId = $1';
+  // const tdfRet = await db.manyOrNone(query, userId);
+  const tdfRet = globalExperimentStates.find({userId: userId}).fetch();
   const allTdfs = await getAllTdfs();
 
   const tdfsAttempted = [];
@@ -2643,22 +2647,36 @@ Meteor.startup(async function() {
       stimSet = await getStimuliSetByFilename(stimFilename);
       stimSetId = stimSet[0].stimuliSetId;
       const query1 = 'SELECT tdfid FROM tdf WHERE stimulisetid = $1';
-      tdfIds = await db.manyOrNone(query1, [stimSetId]);
+      //Postgres Reversion
+      //tdfIds = await db.manyOrNone(query1, [stimSetId]);
+      tdfIds = TDFs.find({stimulisetid: stimSetId});
       for(i=0; i < tdfIds.length; i++){
           tdf = tdfIds[i].tdfid;
-          const querya = 'DELETE FROM globalexperimentstate WHERE TDFId=$1'
-          await db.none(querya, [tdf]);
-          const queryb = 'DELETE FROM componentstate WHERE tdfid = $1'
-          await db.none(queryb, [tdf]);
-          const queryc = 'DELETE FROM assignment WHERE tdfid = $1'
-          await db.none(queryc, [tdf]);
-          const queryd = 'DELETE FROM history WHERE tdfid = $1'
-          await db.none(queryd, [tdf]);
+          //Postgres Reversion
+          //const querya = 'DELETE FROM globalexperimentstate WHERE TDFId=$1'
+          GlobalExperimentStates.remove({TDFId: tdf});
+          //await db.none(querya, [tdf]);
+          //Postgres Reversion
+          //const queryb = 'DELETE FROM componentstate WHERE tdfid = $1'
+          //await db.none(queryb, [tdf]);
+          componentStates.remove({tdfid: tdf});
+          //Postgres Reversion
+          //const queryc = 'DELETE FROM assignment WHERE tdfid = $1'
+          //await db.none(queryc, [tdf]);
+          Assignments.remove({tdfid: tdf});
+          //Postgres Reversion
+          //const queryd = 'DELETE FROM history WHERE tdfid = $1'
+          //await db.none(queryd, [tdf]);
+          Histories.remove({tdfid: tdf});
       }
-      const query2 = 'DELETE FROM item WHERE stimulusFilename = $1';
-      await db.none(query2, [stimFilename]);
-      const query3 = 'DELETE FROM tdf WHERE stimulisetid = $1';
-      await db.none(query3, [stimSetId]);
+      //Postgres Reversion
+      // const query2 = 'DELETE FROM item WHERE stimulusFilename = $1';
+      // await db.none(query2, [stimFilename]);
+      Items.remove({stimulusFilename: stimFilename});
+      //Postgres Reversion
+      // const query3 = 'DELETE FROM tdf WHERE stimulisetid = $1';
+      // await db.none(query3, [stimSetId]);
+      Tdfs.remove({stimulisetid: stimSetId});
       res = "Stim and related TDFS deleted.";
       return res;
     },
