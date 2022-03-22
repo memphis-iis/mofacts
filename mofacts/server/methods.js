@@ -859,7 +859,12 @@ async function editCourseAssignments(newCourseAssignment) {
       const tdfsAdded = getSetAMinusB(newTdfs, existingTdfs);
       const tdfsRemoved = getSetAMinusB(existingTdfs, newTdfs);
 
-      const tdfNamesAndIDs = await t.manyOrNone('SELECT TDFId, content -> \'fileName\' AS filename from tdf');
+      // const tdfNamesAndIDs = await t.manyOrNone('SELECT TDFId, content -> \'fileName\' AS filename from tdf');
+      const tdfNamesAndIDs = await TDFs.aggregate({
+      $project:{
+        filename: $content.fileName,
+        TDFId: 1,
+      }});
       const tdfNameIDMap = {};
       for (const tdfNamesAndID of tdfNamesAndIDs) {
         tdfNameIDMap[tdfNamesAndID.filename] = tdfNamesAndID.tdfid;
@@ -890,13 +895,47 @@ async function editCourseAssignments(newCourseAssignment) {
 
 async function getTdfAssignmentsByCourseIdMap(instructorId) {
   serverConsole('getTdfAssignmentsByCourseIdMap', instructorId);
-  const query = 'SELECT t.content \
-                 AS content, a.TDFId, a.courseId \
-                 FROM assignment AS a \
-                 INNER JOIN tdf AS t ON t.TDFId = a.TDFId \
-                 INNER JOIN course AS c ON c.courseId = a.courseId \
-                 WHERE c.semester = $1 AND c.teacherUserId=$2';
-  const assignmentTdfFileNamesRet = await db.any(query, [curSemester, instructorId]);
+  // Postgres Reversion
+  // const query = 'SELECT t.content \
+  //               AS content, a.TDFId, a.courseId \
+  //               FROM assignment AS a \
+  //               INNER JOIN tdf AS t ON t.TDFId = a.TDFId \
+  //               INNER JOIN course AS c ON c.courseId = a.courseId \
+  //               WHERE c.semester = $1 AND c.teacherUserId=$2';
+  // const assignmentTdfFileNamesRet = await db.any(query, [curSemester, instructorId]);
+  const assignmentTdfFileNamesRet = await Assignments.aggregate([{
+    $lookup:{
+      from: "tdf",
+      localField: "TDFId",
+      foreignField: "TDFId",
+      as: "TDFId"
+    }
+  },
+  {
+    $lookup:{
+      from: "course",
+      localField: "courseId",
+      foreignField: "courseId",
+      as: "courseId"
+    }
+  },
+  {
+    $unwind: "$courseId"
+  },
+  {
+    $match: {
+      semester: curSemester,
+      teacherUserId: instructorId
+    }
+  },
+  {
+    $project:{
+      content: 1,
+      TDFId: 1,
+      courseId: 1
+    }
+  }
+]);
   serverConsole('assignmentTdfFileNames', assignmentTdfFileNamesRet);
   const assignmentTdfFileNamesByCourseIdMap = {};
   for (const assignment of assignmentTdfFileNamesRet) {
@@ -913,22 +952,107 @@ async function getTdfAssignmentsByCourseIdMap(instructorId) {
 
 async function getTdfsAssignedToStudent(userId, curSectionId) {
   serverConsole('getTdfsAssignedToStudent', userId);
-  const query = 'SELECT t.* from TDF AS t INNER JOIN assignment AS a ON a.TDFId = t.TDFId INNER JOIN course AS c \
-                 ON c.courseId = a.courseId INNER JOIN section AS s ON s.courseId = c.courseId \
-                 INNER JOIN section_user_map AS m \
-                 ON m.sectionId = s.sectionId WHERE m.userId = $1 AND c.semester = $2 AND s.sectionId = $3';
-  const tdfs = await db.manyOrNone(query, [userId, curSemester, curSectionId]);
+  // Postgres Reversion
+  // const query = 'SELECT t.* from TDF AS t INNER JOIN assignment AS a ON a.TDFId = t.TDFId INNER JOIN course AS c \
+  //               ON c.courseId = a.courseId INNER JOIN section AS s ON s.courseId = c.courseId \
+  //               INNER JOIN section_user_map AS m \
+  //               ON m.sectionId = s.sectionId WHERE m.userId = $1 AND c.semester = $2 AND s.sectionId = $3';
+  // const tdfs = await db.manyOrNone(query, [userId, curSemester, curSectionId]);
+  const tdfs = await TDFs.aggregate([{
+    $lookup:{
+      from: "assignment",
+      localField: "TDFId",
+      foreignField: "TDFId",
+      as: "TDFId"
+    }
+  },
+  {
+    $lookup:{
+      from: "course",
+      localField: "courseId",
+      foreignField: "courseId",
+      as: "courseId"
+    }
+  },
+  {
+    $unwind: "$courseId"
+  },
+  {
+    $lookup:{
+      from: "section",
+      localField: "courseId",
+      foreignField: "courseId",
+      as: "courseId"
+    }
+  },
+  {
+    $unwind: "$courseId"
+  },
+  {
+    $lookup:{
+      from: "section_user_map",
+      localField: "userId",
+      foreignField: "sectionId",
+      as: "sectionId"
+    }
+  },
+  {
+    $unwind: "$sectionId"
+  },
+  {
+    $match: {
+      semester: curSemester,
+      teacherUserId: instructorId,
+      sectionId: curSectionId
+    }
+  }
+]);
   const formattedTdfs = tdfs.map((x) => getTdf(x));
   return formattedTdfs;
 }
 
 async function getTdfNamesAssignedByInstructor(instructorID) {
   try {
-    const query = 'SELECT t.content -> \'fileName\' AS filename from course AS c \
-                 INNER JOIN assignment AS a ON a.courseId = c.courseId\
-                 INNER JOIN tdf AS t ON t.TDFId = a.TDFId \
-                 WHERE c.teacherUserId = $1 AND c.semester = $2';
-    const assignmentTdfFileNames = await db.any(query, [instructorID, curSemester]);
+    // Postgres Reversion
+    // const query = 'SELECT t.content -> \'fileName\' AS filename from course AS c \
+    //             INNER JOIN assignment AS a ON a.courseId = c.courseId\
+    //             INNER JOIN tdf AS t ON t.TDFId = a.TDFId \
+    //             WHERE c.teacherUserId = $1 AND c.semester = $2';
+    // const assignmentTdfFileNames = await db.any(query, [instructorID, curSemester]);
+    const assignmentTdfFileNames = await Courses.aggregate([{
+      $lookup:{
+        from: "assignment",
+        localField: "courseId",
+        foreignField: "courseId",
+        as: "courseId"
+      }
+    },
+    {
+      $unwind: "$courseId"
+    },
+    {
+      $lookup:{
+        from: "tdf",
+        localField: "TDFId",
+        foreignField: "TDFId",
+        as: "TDFId"
+      }
+    },
+    {
+      $unwind: "$TDFId"
+    },
+    {
+      $match: {
+        semester: curSemester,
+        teacherUserId: instructorId
+      }
+    },
+    {
+      $project:{
+        filename: $content.fileName
+      }
+    }
+  ]);
     const unboxedAssignmentTdfFileNames = assignmentTdfFileNames.map((obj) => obj.filename);
     serverConsole('assignmentTdfFileNames', unboxedAssignmentTdfFileNames);
     return unboxedAssignmentTdfFileNames;
