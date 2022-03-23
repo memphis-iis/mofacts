@@ -11,7 +11,7 @@ import {
   updateCurStudentPerformance,
   getAllCurrentStimAnswers
 } from '../../lib/currentTestingHelpers';
-import {updateExperimentState} from './card';
+import {updateExperimentState, updateExperimentStateSync} from './card';
 import {MODEL_UNIT, SCHEDULE_UNIT} from '../../../common/Definitions';
 import {meteorCallAsync} from '../../index';
 import {displayify} from '../../../common/globalHelpers';
@@ -1026,6 +1026,94 @@ function modelUnitEngine() {
       // calculateCardProbabilities();
     },
 
+    saveComponentStatesSync: function() {
+      const userId = Meteor.userId();
+      const TDFId = Session.get('currentTdfId');
+      const componentStates = [];
+      for (let cardIndex=0; cardIndex<cardProbabilities.cards.length; cardIndex++) {
+        const card = cardProbabilities.cards[cardIndex];
+        const cardState = {
+          userId,
+          TDFId,
+          KCId: card.clusterKC,
+          componentType: 'cluster',
+          probabilityEstimate: null, // probabilityEstimates only exist for stimuli, not clusters or responses
+          firstSeen: card.firstSeen,
+          lastSeen: card.lastSeen,
+          hintLevel: null,
+          trialsSinceLastSeen: card.trialsSinceLastSeen,
+          priorCorrect: card.priorCorrect,
+          priorIncorrect: card.priorIncorrect,
+          priorStudy: card.priorStudy,
+          totalPracticeDuration: card.totalPracticeDuration,
+          outcomeStack: card.outcomeStack.join(','),
+          instructionQuestionResult: Session.get('instructionQuestionResult'),
+        };
+        componentStates.push(cardState);
+        for (let stimIndex=0; stimIndex<card.stims.length; stimIndex++) {
+          const stim = card.stims[stimIndex];
+          const stimState = {
+            userId,
+            TDFId,
+            KCId: stim.stimulusKC,
+            componentType: 'stimulus',
+            probabilityEstimate: stim.probabilityEstimate, // : stimProb ? stimProb.probability : null,
+            firstSeen: stim.firstSeen,
+            lastSeen: stim.lastSeen,
+            hintLevel: Session.get('hintLevel') || null,
+            priorCorrect: stim.priorCorrect,
+            priorIncorrect: stim.priorIncorrect,
+            priorStudy: stim.priorStudy,
+            totalPracticeDuration: stim.totalPracticeDuration,
+            outcomeStack: stim.outcomeStack.join(','),
+            instructionQuestionResult: null,
+          };
+          componentStates.push(stimState);
+        }
+      }
+
+      for (const [responseText, response] of Object.entries(cardProbabilities.responses)) {
+        const responseState = {
+          userId,
+          TDFId,
+          hintLevel: null,
+          componentType: 'response',
+          probabilityEstimate: null, // probabilityEstimates only exist for stimuli, not clusters or responses
+          firstSeen: response.firstSeen,
+          lastSeen: response.lastSeen,
+          priorCorrect: response.priorCorrect,
+          priorIncorrect: response.priorIncorrect,
+          priorStudy: response.priorStudy,
+          totalPracticeDuration: response.totalPracticeDuration,
+          outcomeStack: response.outcomeStack.join(','),
+          responseText, // not actually in db, need to lookup/assign kcid when loading
+          instructionQuestionResult: null,
+        };
+        componentStates.push(responseState);
+      }
+      console.log('saveComponentStates', componentStates);
+      try{
+        if(!Meteor.user().profile.impersonating){
+          Meteor.call('setComponentStatesByUserIdTDFIdAndUnitNum',
+              Meteor.userId(), Session.get('currentTdfId'), componentStates);
+        }
+      }
+      catch (error){
+        console.error("Error saving componentstate.", error);
+        console.log('Component state may not have saved. Ending the trial now.');
+        alert('An unexpected error occured. Please check your internet connection and try again. The error has been reported to the administrators.');
+        const curUser = Meteor.userId();
+        const curPage = document.location.pathname;
+        const sessionVars = Session.all();
+        const userAgent = navigator.userAgent;
+        const logs = console.logs;
+        const currentExperimentState = Session.get('currentExperimentState');
+        Meteor.call('sendUserErrorReport', curUser, error, curPage, sessionVars,
+            userAgent, logs, currentExperimentState);
+        Router.go('/profile');
+      }
+    },
+
     saveComponentStates: async function() {
       const userId = Meteor.userId();
       const TDFId = Session.get('currentTdfId');
@@ -1422,8 +1510,8 @@ function modelUnitEngine() {
       });
 
       try {
-        await this.saveComponentStates();
-        await updateExperimentState(newExperimentState, 'unitEngine.modelUnitEngine.selectNextCard');
+        this.saveComponentStatesSync();
+        updateExperimentState(newExperimentState, 'unitEngine.modelUnitEngine.selectNextCard');
       } catch (e) {
         console.log('error in select next card server calls:', e);
         throw new Error('error in select next card server calls:', e);
@@ -1509,7 +1597,7 @@ function modelUnitEngine() {
             displayify(cardProbabilities.responses));
       }
 
-      await this.saveComponentStates();
+      this.saveComponentStatesSync();
     },
 
     unitFinished: function() {
@@ -1940,7 +2028,7 @@ function scheduleUnitEngine() {
           'whichStim:', curStimIndex,
       );
 
-      await updateExperimentState(newExperimentState, 'question');
+      updateExperimentStateSync(newExperimentState, 'question');
     },
 
     findCurrentCardInfo: function() {
