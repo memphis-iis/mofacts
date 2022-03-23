@@ -25,6 +25,7 @@ export {
   stopRecording,
   getExperimentState,
   updateExperimentState,
+  updateExperimentStateSync,
   restartMainCardTimeoutIfNecessary,
   getCurrentClusterAndStimIndices,
 };
@@ -130,7 +131,6 @@ let trialStartTimestamp = 0;
 let firstKeypressTimestamp = 0;
 let currentSound = null; // See later in this file for sound functions
 let userFeedbackStart = null;
-
 // We need to track the name/ID for clear and reset. We need the function and
 // delay used for reset
 let timeoutName = null;
@@ -1149,6 +1149,9 @@ function handleUserInput(e, source, simAnswerCorrect) {
     resetMainCardTimeout();
     return;
   }
+
+  if(Meteor.isDevelopment)
+    Meteor.call('captureProfile', 10000, 'answerTrial');
   
   // Stop current timeout and stop user input
   stopUserInput();
@@ -1387,6 +1390,40 @@ async function showUserFeedback(isCorrect, feedbackMessage, afterAnswerFeedbackC
         .addClass(isCorrect ? 'alert-success' : 'alert-danger')
         .text(feedbackMessage)
         .show();
+        if(!isCorrect){
+          $('#CountdownTimer')
+            .addClass('text-align')
+            .text('Continuing in: ')
+            .show();
+          var countDownStart = new Date().getTime();
+          if(Session.get('isRefutation') && getCurrentDeliveryParams().refutationstudy){
+            countDownStart += getCurrentDeliveryParams().refutationstudy;
+          }
+          else{
+            countDownStart += getCurrentDeliveryParams().reviewstudy;
+          }
+          var CountdownTimerInterval = Meteor.setInterval(function() {
+            var now = new Date().getTime()
+            var distance = countDownStart - now;
+            var seconds = Math.ceil((distance % (1000 * 60)) / 1000);
+    
+            try{
+              document.getElementById("CountdownTimer").innerHTML = 'Continuing in: ' + seconds + "s";
+            }
+            catch{
+              Meteor.clearInterval(CountdownTimerInterval);
+              Session.set('CurIntervalId', undefined);
+            }
+    
+            // If the count down is finished, end interval and clear CountdownTimer
+            if (distance < 0) {
+              Meteor.clearInterval(CountdownTimerInterval);
+              document.getElementById("CountdownTimer").innerHTML = "";
+              Session.set('CurIntervalId', undefined);
+            }
+          }, 100);
+          Session.set('CurIntervalId', CountdownTimerInterval);
+        }
   }
 
   speakMessageIfAudioPromptFeedbackEnabled(feedbackMessage, 'feedback');
@@ -1486,35 +1523,6 @@ async function afterAnswerFeedbackCallback(trialEndTimeStamp, source, userAnswer
     dialogueHistory = JSON.parse(JSON.stringify(Session.get('dialogueHistory')));
   }
   const reviewTimeout = wasReportedForRemoval ? 2000 : getReviewTimeout(testType, deliveryParams, isCorrect, dialogueHistory);
-  
-  if(!isCorrect && !wasReportedForRemoval){
-    $('#CountdownTimer')
-      .addClass('text-align')
-      .text('Continuing in: ')
-      .show();
-    var countDownStart = new Date().getTime() + reviewTimeout;
-    var CountdownTimerInterval = Meteor.setInterval(function() {
-      var now = new Date().getTime()
-      var distance = countDownStart - now;
-      var seconds = Math.ceil((distance % (1000 * 60)) / 1000);
-      
-      try{
-        document.getElementById("CountdownTimer").innerHTML = 'Continuing in: ' + seconds + "s";
-      }
-      catch{
-        Meteor.clearInterval(CountdownTimerInterval);
-        Session.set('CurIntervalId', undefined);
-      }
-    
-      // If the count down is finished, end interval and clear CountdownTimer
-      if (distance < 0) {
-        Meteor.clearInterval(CountdownTimerInterval);
-        document.getElementById("CountdownTimer").innerHTML = "";
-        Session.set('CurIntervalId', undefined);
-      }
-    }, 100);
-    Session.set('CurIntervalId', CountdownTimerInterval);
-  }
 
   // Stop previous timeout, log response data, and clear up any other vars for next question
   clearCardTimeout();
@@ -1547,7 +1555,7 @@ async function afterAnswerFeedbackCallback(trialEndTimeStamp, source, userAnswer
     if(Meteor.user().profile === undefined || !Meteor.user().profile.impersonating){
       try {
         await meteorCallAsync('insertHistory', answerLogRecord);
-        await updateExperimentState(newExperimentState, 'card.afterAnswerFeedbackCallback');
+        updateExperimentStateSync(newExperimentState, 'card.afterAnswerFeedbackCallback');
       } catch (e) {
         console.log('error writing history record:', e);
         throw new Error('error inserting history/updating state:', e);
@@ -1724,7 +1732,9 @@ function gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect,
 
   let clusterIndex = Session.get('clusterIndex');
   let {whichStim, probabilityEstimate} = engine.findCurrentCardInfo();
-  const {itemId, clusterKC, stimulusKC} = getStimCluster(clusterIndex).stims[whichStim];
+  const cluster = getStimCluster(clusterIndex);
+  const {itemId, clusterKC, stimulusKC} = cluster.stims[whichStim];
+  const responseType = ('' + cluster.stims[0].itemResponseType || 'text').toLowerCase()
   // let curKCBase = getStimKCBaseForCurrentStimuliSet();
   // let stimulusKC = whichStim + curKCBase;
 
@@ -1750,7 +1760,6 @@ function gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect,
       }
     }
   } else {
-    const cluster = getStimCluster(clusterIndex);
     shufIndex = cluster.shufIndex;
   }
   const originalAnswer = Session.get('originalAnswer');
@@ -1800,7 +1809,7 @@ function gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect,
     'TDFId': Session.get('currentTdfId'),
     'outcome': outcome,
     'probabilityEstimate': probabilityEstimate,
-    'typeOfResponse': getResponseType(),
+    'typeOfResponse': responseType,
     'responseValue': _.trim(userAnswer),
     'displayedStimulus': Session.get('currentDisplay'),
 
@@ -1996,7 +2005,6 @@ async function cardStart() {
 
   // Always hide the final instructions box
   $('#finalInstructionsDlg').modal('hide');
-
   // the card loads frequently, but we only want to set this the first time
   if (Session.get('inResume')) {
     Session.set('buttonTrial', false);
@@ -2022,6 +2030,7 @@ async function prepareCard() {
   } else {
     await engine.selectNextCard(Session.get('engineIndices'));
     await newQuestionHandler();
+    Session.set('cardStartTimestamp', Date.now());
     Session.set('engineIndices', undefined);
   }
 }
@@ -2061,7 +2070,7 @@ async function newQuestionHandler() {
     const clozeQuestionFilledIn = Answers.clozeStudy(currentDisplay.clozeText, Session.get('currentAnswer'));
     currentDisplay.clozeText = clozeQuestionFilledIn;
     const newExperimentState = {currentDisplayEngine: currentDisplay};
-    await updateExperimentState(newExperimentState, 'card.newQuestionHandler');
+    updateExperimentStateSync(newExperimentState, 'card.newQuestionHandler');
     Session.set('currentDisplayEngine', currentDisplay);
   }
 
@@ -2691,6 +2700,20 @@ async function updateExperimentState(newState, codeCallLocation) {
   return res;
 }
 
+function updateExperimentStateSync(newState, codeCallLocation) {
+  const test = Session.get('currentExperimentState');
+  console.log('updateExperimentStateSync:', test);
+  if (!Session.get('currentExperimentState')) {
+    Session.set('currentExperimentState', {});
+  }
+  const oldExperimentState = Session.get('currentExperimentState') || {};
+  const newExperimentState = Object.assign(JSON.parse(JSON.stringify(oldExperimentState)), newState);
+  Meteor.call('setExperimentState',
+      Meteor.userId(), Session.get('currentRootTdfId'), newExperimentState, 'card.updateExperimentState');
+  Session.set('currentExperimentState', newExperimentState);
+  console.log('updateExperimentStateSync', codeCallLocation, 'old:', oldExperimentState, '\nnew:', newExperimentState);
+}
+
 // Re-initialize our User Progress and Card Probabilities internal storage
 // from the user times log. Note that most of the logic will be in
 // processUserTimesLog This function just does some initial set up, insures
@@ -2881,7 +2904,7 @@ async function resumeFromComponentState() {
     newExperimentState.questionIndex = 0;
   }
 
-  await updateExperimentState(newExperimentState, 'card.resumeFromComponentState');
+  updateExperimentStateSync(newExperimentState, 'card.resumeFromComponentState');
 
   if (Session.get('feedbackUnset')){
     getFeedbackParameters();
@@ -3054,7 +3077,7 @@ async function processUserTimesLog() {
     Session.set('currentDeliveryParams', getCurrentDeliveryParams());
     Session.set('scoringEnabled', Session.get('currentDeliveryParams').scoringEnabled);
 
-    await updateExperimentState(newExperimentState, 'card.processUserTimesLog');
+    updateExperimentStateSync(newExperimentState, 'card.processUserTimesLog');
     await engine.loadComponentStates();
 
     // If we make it here, then we know we won't need a resume until something
