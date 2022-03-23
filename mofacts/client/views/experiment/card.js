@@ -130,7 +130,6 @@ let trialStartTimestamp = 0;
 let firstKeypressTimestamp = 0;
 let currentSound = null; // See later in this file for sound functions
 let userFeedbackStart = null;
-
 // We need to track the name/ID for clear and reset. We need the function and
 // delay used for reset
 let timeoutName = null;
@@ -1149,6 +1148,9 @@ function handleUserInput(e, source, simAnswerCorrect) {
     resetMainCardTimeout();
     return;
   }
+
+  if(Meteor.isDevelopment)
+    Meteor.call('captureProfile', 10000, 'answerTrial');
   
   // Stop current timeout and stop user input
   stopUserInput();
