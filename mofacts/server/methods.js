@@ -1491,6 +1491,10 @@ async function upsertStimFile(stimFilename, stimJSON, ownerId) {
           parseInt(highestStimuliSetId.stimulisetid) + 1 : 1;
       serverConsole('stimuliSetId2:', stimuliSetId, highestStimuliSetId);
     }
+    
+    //Need to clear the syllable cache so that it no longer gets out of sync during a file upload
+    //This will force the system to regenerate the syllable cache.
+    StimSyllables.remove({'filename': stimuliSetId});
 
     const newFormatItems = getNewItemFormat(oldStimFormat, stimFilename, stimuliSetId, responseKCMap);
     const existingStims = await t.manyOrNone('SELECT * FROM item WHERE stimulusFilename = $1', stimFilename);
@@ -1911,7 +1915,8 @@ Meteor.startup(async function() {
       const curStimSyllables = StimSyllables.findOne({filename: stimFileName});
       serverConsole('curStimSyllables: ' + JSON.stringify(curStimSyllables));
       if (!curStimSyllables) {
-        while(!await verifySyllableUpload(stimFileName) && numTries < 3){
+        let syllablesUploadedSuccessfully = await verifySyllableUpload(stimFileName);
+        while(!syllablesUploadedSuccessfully && numTries < 3){
           const data = {};
           for (const answer of answers) {
             let syllableArray;
@@ -1934,8 +1939,9 @@ Meteor.startup(async function() {
           serverConsole('after updateStimSyllableCache');
           serverConsole(stimFileName);
           numTries++;
+          syllablesUploadedSuccessfully = await verifySyllableUpload(stimFileName);
         }
-        if(!await verifySyllableUpload(stimFileName)){
+        if(!syllablesUploadedSuccessfully){
           throw new Error('Cannot upload stim file to mongoDB. Discrepency between postgres and mongo.');
         }
       }
