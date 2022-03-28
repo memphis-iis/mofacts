@@ -1540,6 +1540,22 @@ async function upsertStimFile(stimFilename, stimJSON, ownerId) {
         ${alternateDisplays}::jsonb, ${tags})', stim);
     }
 
+    const stims = await getStimuliSetById(stimuliSetId);
+    let allAnswers = new Set();
+    for (const stim of stims) {
+      const responseParts = stim.correctResponse.toLowerCase().split(';');
+      const answerArray = responseParts.filter(function(entry) {
+        return entry.indexOf('incorrect') == -1;
+      });
+      if (answerArray.length > 0) {
+        const singularAnswer = answerArray[0].split('~')[0];
+        allAnswers.add(singularAnswer);
+      }
+    }
+    allAnswers = Array.from(allAnswers);
+    //Update Stim Cache every upload
+    Meteor.call('updateStimSyllableCache', stimuliSetId, allAnswers);
+
     return {ownerId};
   });
 }
