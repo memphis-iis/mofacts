@@ -728,7 +728,7 @@ Template.card.helpers({
     return (disp.minSecs > 0 || disp.maxSecs > 0);
   },
 
-  'inResume': () => Session.get('inResume'),
+  'inResume': () => Session.get('inResume') && !Session.get('displayReady'),
 
   'audioEnabled': () => Session.get('audioEnabled'),
 
@@ -2292,7 +2292,7 @@ function speakMessageIfAudioPromptFeedbackEnabled(msg, audioPromptSource) {
       Session.set('recordingLocked', true);
       // Replace underscores with blank so that we don't get awkward UNDERSCORE UNDERSCORE
       // UNDERSCORE...speech from literal reading of text
-      msg = msg.replace(/_+/g, 'blank');
+      msg = msg.replace(/(&nbsp;)+/g, 'blank');
       // Remove all HTML
       msg = msg.replace( /(<([^>]+)>)/ig, '');
       let ttsAPIKey = '';
