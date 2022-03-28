@@ -102,6 +102,9 @@ echo "module.exports = {
         'RUN echo \"host all  all    0.0.0.0/0  md5\" >> /etc/postgresql/9.3/main/pg_hba.conf',
         'RUN echo \"listen_addresses=\'*\'\" >> /etc/postgresql/9.3/main/postgresql.conf',
         'EXPOSE 5432',
+        'EXPOSE 5432',
+        'EXPOSE 27017',
+        'EXPOSE 80'
         'VOLUME  [\"/etc/postgresql\", \"/var/log/postgresql\", \"/var/lib/postgresql\"]'
       ]
     },
@@ -113,7 +116,8 @@ echo "module.exports = {
     },
     env: {
       ROOT_URL: 'http://"$TARGET_IP"',
-      MONGO_URL: 'mongodb://localhost/mofacts'
+      MONGO_URL: 'mongodb://localhost:27017/MoFaCT',
+      PORT: 80
     }
   },
   mongo: {
