@@ -513,7 +513,7 @@ function modelUnitEngine() {
             stimIndex=j;
             hintLevelIndex=0;
           }
-          if(stimCluster.stims[stimIndex].textStimulus || stimCluster.stims[stimIndex].clozeStimulus){
+          if(stimCluster.stims[j].textStimulus || stimCluster.stims[j].clozeStimulus){
             for(let k=0; k<stim.hintLevelProbabilites.length; k++){
               if(stim.hintLevelProbabilites[k] <= currentMin){
                 currentMin = stim.hintLevelProbabilites[k];
@@ -543,7 +543,7 @@ function modelUnitEngine() {
               clusterIndex=i;
               hintLevelIndex=0;
             }
-            if(stimCluster.stims[stimIndex].textStimulus || stimCluster.stims[stimIndex].clozeStimulus){
+            if(stimCluster.stims[j].textStimulus || stimCluster.stims[j].clozeStimulus){
               for(let k=0; k<stim.hintLevelProbabilites.length; k++){
                 if(stim.hintLevelProbabilites[k] <= currentMin){
                   currentMin = stim.hintLevelProbabilites[k];
@@ -585,7 +585,7 @@ function modelUnitEngine() {
             stimIndex=j;
             hintLevelIndex = 0;
           }
-          if(stimCluster.stims[stimIndex].textStimulus || stimCluster.stims[stimIndex].clozeStimulus){
+          if(stimCluster.stims[j].textStimulus || stimCluster.stims[j].clozeStimulus){
             for(let k=0; k<stim.hintLevelProbabilites.length; k++){
               if(stim.hintLevelProbabilites[k] > currentMax && stim.hintLevelProbabilites[k] < ceiling ){
                 currentMax = stim.hintLevelProbabilites[k];
@@ -633,7 +633,7 @@ function modelUnitEngine() {
             stimIndex=j;
             hintLevelIndex = 0;
           }
-          if(stimCluster.stims[stimIndex].textStimulus || stimCluster.stims[stimIndex].clozeStimulus){
+          if(stimCluster.stims[j].textStimulus || stimCluster.stims[j].clozeStimulus){
             for(let k=0; k<Math.min(stim.hintLevelProbabilites.length, 3); k++){
               let hintDist = Math.abs(Math.log(stim.hintLevelProbabilites[k]/(1-stim.hintLevelProbabilites[k])) - optimalProb);
               if(hintDist < currentMin){
@@ -680,7 +680,7 @@ function modelUnitEngine() {
             stimIndex=j;
             hintLevelIndex=0;
           }
-          if(stimCluster.stims[stimIndex].textStimulus || stimCluster.stims[stimIndex].clozeStimulus){
+          if(stimCluster.stims[j].textStimulus || stimCluster.stims[j].clozeStimulus){
             for(let k=0; k<stim.hintLevelProbabilites.length; k++){
               if(stim.hintLevelProbabilites[k] > currentMax && stim.hintLevelProbabilites[k] < thresholdCeiling ){
                 currentMax = stim.hintLevelProbabilites[k];
