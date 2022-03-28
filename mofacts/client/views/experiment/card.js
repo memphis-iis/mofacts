@@ -728,7 +728,7 @@ Template.card.helpers({
     return (disp.minSecs > 0 || disp.maxSecs > 0);
   },
 
-  'inResume': () => Session.get('inResume'),
+  'inResume': () => Session.get('inResume') && !Session.get('displayReady'),
 
   'audioEnabled': () => Session.get('audioEnabled'),
 
