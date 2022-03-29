@@ -1485,9 +1485,8 @@ function doClearForceCorrect(doForceCorrect, afterAnswerFeedbackCbBound) {
 
 async function giveAnswer(){
   if(Meteor.isDevelopment){
-    curAnswer = Session.get('currentAnswer');
-    $('#userAnswer').val(curAnswer);
-    handleUserInput({keyCode: ENTER_KEY}, 'keypress');
+    curAnswer = Session.get('currentAnswer').split('~')[0];
+    handleUserInput({keyCode: ENTER_KEY, currentTarget: { name: curAnswer } }, 'buttonClick');
   }
 }
 
