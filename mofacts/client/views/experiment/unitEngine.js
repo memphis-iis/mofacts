@@ -424,6 +424,7 @@ function modelUnitEngine() {
   function initCardProbs(overrideData) {
     let initVals = {
       numQuestionsAnswered: 0,
+      numQuestionsAnsweredCurrentSession: 0,
       numCorrectAnswers: 0,
       cards: [],
     };
@@ -943,6 +944,8 @@ function modelUnitEngine() {
           hintLevel: null,
           priorCorrect: 0,
           priorIncorrect: 0,
+          curSessionPriorCorrect: 0,
+          curSessionPriorIncorrect: 0,
           hasBeenIntroduced: false,
           outcomeStack: [],
           lastSeen: 0,
@@ -971,6 +974,8 @@ function modelUnitEngine() {
             hintLevel: 0,
             priorCorrect: 0,
             priorIncorrect: 0,
+            curSessionPriorCorrect: 0,
+            curSessionPriorIncorrect: 0,
             hasBeenIntroduced: false,
             outcomeStack: [],
             lastSeen: 0,
@@ -999,6 +1004,8 @@ function modelUnitEngine() {
               hintLevel: null,
               priorCorrect: 0,
               priorIncorrect: 0,
+              curSessionPriorCorrect: 0,
+              curSessionPriorIncorrect: 0,
               firstSeen: 0,
               lastSeen: 0,
               totalPracticeDuration: 0,
@@ -1044,6 +1051,8 @@ function modelUnitEngine() {
           trialsSinceLastSeen: card.trialsSinceLastSeen,
           priorCorrect: card.priorCorrect,
           priorIncorrect: card.priorIncorrect,
+          curSessionPriorCorrect: 0,
+          curSessionPriorIncorrect: 0,
           priorStudy: card.priorStudy,
           totalPracticeDuration: card.totalPracticeDuration,
           outcomeStack: card.outcomeStack.join(','),
@@ -1063,6 +1072,8 @@ function modelUnitEngine() {
             hintLevel: Session.get('hintLevel') || null,
             priorCorrect: stim.priorCorrect,
             priorIncorrect: stim.priorIncorrect,
+            curSessionPriorCorrect: stim.curSessionPriorCorrect,
+            curSessionPriorIncorrect: stim.curSessionPriorIncorrect,
             priorStudy: stim.priorStudy,
             totalPracticeDuration: stim.totalPracticeDuration,
             outcomeStack: stim.outcomeStack.join(','),
@@ -1083,6 +1094,8 @@ function modelUnitEngine() {
           lastSeen: response.lastSeen,
           priorCorrect: response.priorCorrect,
           priorIncorrect: response.priorIncorrect,
+          curSessionPriorCorrect: 0,
+          curSessionPriorIncorrect: 0,
           priorStudy: response.priorStudy,
           totalPracticeDuration: response.totalPracticeDuration,
           outcomeStack: response.outcomeStack.join(','),
@@ -1113,98 +1126,11 @@ function modelUnitEngine() {
         Router.go('/profile');
       }
     },
-
-    saveComponentStates: async function() {
-      const userId = Meteor.userId();
-      const TDFId = Session.get('currentTdfId');
-      const componentStates = [];
-      for (let cardIndex=0; cardIndex<cardProbabilities.cards.length; cardIndex++) {
-        const card = cardProbabilities.cards[cardIndex];
-        const cardState = {
-          userId,
-          TDFId,
-          KCId: card.clusterKC,
-          componentType: 'cluster',
-          probabilityEstimate: null, // probabilityEstimates only exist for stimuli, not clusters or responses
-          firstSeen: card.firstSeen,
-          lastSeen: card.lastSeen,
-          hintLevel: null,
-          trialsSinceLastSeen: card.trialsSinceLastSeen,
-          priorCorrect: card.priorCorrect,
-          priorIncorrect: card.priorIncorrect,
-          priorStudy: card.priorStudy,
-          totalPracticeDuration: card.totalPracticeDuration,
-          outcomeStack: card.outcomeStack.join(','),
-          instructionQuestionResult: Session.get('instructionQuestionResult'),
-        };
-        componentStates.push(cardState);
-        for (let stimIndex=0; stimIndex<card.stims.length; stimIndex++) {
-          const stim = card.stims[stimIndex];
-          const stimState = {
-            userId,
-            TDFId,
-            KCId: stim.stimulusKC,
-            componentType: 'stimulus',
-            probabilityEstimate: stim.probabilityEstimate, // : stimProb ? stimProb.probability : null,
-            firstSeen: stim.firstSeen,
-            lastSeen: stim.lastSeen,
-            hintLevel: Session.get('hintLevel') || null,
-            priorCorrect: stim.priorCorrect,
-            priorIncorrect: stim.priorIncorrect,
-            priorStudy: stim.priorStudy,
-            totalPracticeDuration: stim.totalPracticeDuration,
-            outcomeStack: stim.outcomeStack.join(','),
-            instructionQuestionResult: null,
-          };
-          componentStates.push(stimState);
-        }
-      }
-
-      for (const [responseText, response] of Object.entries(cardProbabilities.responses)) {
-        const responseState = {
-          userId,
-          TDFId,
-          hintLevel: null,
-          componentType: 'response',
-          probabilityEstimate: null, // probabilityEstimates only exist for stimuli, not clusters or responses
-          firstSeen: response.firstSeen,
-          lastSeen: response.lastSeen,
-          priorCorrect: response.priorCorrect,
-          priorIncorrect: response.priorIncorrect,
-          priorStudy: response.priorStudy,
-          totalPracticeDuration: response.totalPracticeDuration,
-          outcomeStack: response.outcomeStack.join(','),
-          responseText, // not actually in db, need to lookup/assign kcid when loading
-          instructionQuestionResult: null,
-        };
-        componentStates.push(responseState);
-      }
-      console.log('saveComponentStates', componentStates);
-      try{
-        if(!Meteor.user().profile.impersonating){
-          await meteorCallAsync('setComponentStatesByUserIdTDFIdAndUnitNum',
-              Meteor.userId(), Session.get('currentTdfId'), componentStates);
-        }
-      }
-      catch (error){
-        console.error("Error saving componentstate.", error);
-        console.log('Component state may not have saved. Ending the trial now.');
-        alert('An unexpected error occured. Please check your internet connection and try again. The error has been reported to the administrators.');
-        const curUser = Meteor.userId();
-        const curPage = document.location.pathname;
-        const sessionVars = Session.all();
-        const userAgent = navigator.userAgent;
-        const logs = console.logs;
-        const currentExperimentState = Session.get('currentExperimentState');
-        Meteor.call('sendUserErrorReport', curUser, error, curPage, sessionVars,
-            userAgent, logs, currentExperimentState);
-        Router.go('/profile');
-      }
-    },
     loadComponentStates: async function() {// componentStates [{},{}]
       console.log('loadComponentStates start');
 
       let numQuestionsAnswered = 0;
+      let numQuestionsAnsweredCurrentSession = 0;
       let numCorrectAnswers = 0;
       const probsMap = {};
       const cards = cardProbabilities.cards;
@@ -1268,7 +1194,7 @@ function modelUnitEngine() {
             const stimulusKC = componentStim.KCId;
             const stimIndex = cards[cardIndex].stims.findIndex((x) => x.stimulusKC == stimulusKC);
             const componentStimData = _.pick(componentStim,
-                ['firstSeen', 'lastSeen', 'outcomeStack','hintLevel', 'priorCorrect', 'priorIncorrect', 'priorStudy',
+                ['firstSeen', 'lastSeen', 'outcomeStack','hintLevel', 'priorCorrect', 'priorIncorrect', 'curSessionPriorCorrect', 'curSessionPriorIncorrect', 'priorStudy',
                   'totalPracticeDuration']);
             Object.assign(cards[cardIndex].stims[stimIndex], componentStimData);
             cards[cardIndex].stims[stimIndex].hasBeenIntroduced = componentStim.firstSeen > 0;
@@ -1280,6 +1206,7 @@ function modelUnitEngine() {
             probsMap[cardIndex][stimIndex] = componentStimData.probabilityEstimate;
             numCorrectAnswers += componentStimData.priorCorrect;
             numQuestionsAnswered += componentStimData.priorCorrect + componentStimData.priorIncorrect;
+            numQuestionsAnsweredCurrentSession += componentStimData.curSessionPriorCorrect + componentStimData.curSessionPriorIncorrect;
           }
         }
         for (let cardIndex=0; cardIndex<cards.length; cardIndex++) {
@@ -1326,6 +1253,7 @@ function modelUnitEngine() {
 
       Object.assign(cardProbabilities, {
         numQuestionsAnswered,
+        numQuestionsAnsweredCurrentSession,
         numCorrectAnswers,
       });
       const cardIndex = Session.get('currentExperimentState').shufIndex;
@@ -1554,12 +1482,13 @@ function modelUnitEngine() {
       // the only place we call it after init *and* something might have
       // changed during question selection
       if (getTestType() === 's') {
-        await this.saveComponentStates();
+        this.saveComponentStatesSync();
         return;
       }
 
       // "Global" stats
       cardProbabilities.numQuestionsAnswered += 1;
+      cardProbabilities.numQuestionsAnsweredCurrentSession += 1;
       if (wasCorrect) {
         cardProbabilities.numCorrectAnswers += 1;
       }
@@ -1574,8 +1503,14 @@ function modelUnitEngine() {
 
       card.outcomeStack.push(wasCorrect ? 1 : 0);
 
-      if (wasCorrect) stim.priorCorrect += 1;
-      else stim.priorIncorrect += 1;
+      if (wasCorrect) {
+        stim.priorCorrect += 1;
+        stim.curSessionPriorCorrect += 1;
+      }
+      else {
+        stim.priorIncorrect += 1;
+        stim.curSessionPriorIncorrect += 1;
+      }
 
       // This is called from processUserTimesLog() so this both works in memory and restoring from userTimesLog
       stim.outcomeStack.push(wasCorrect ? 1 : 0);
@@ -1605,9 +1540,10 @@ function modelUnitEngine() {
       const minSecs = session.displayminseconds || 0;
       const maxSecs = session.displaymaxseconds || 0;
       const maxTrials = parseInt(session.maxTrials || 0);
-      const numTrialsSoFar = cardProbabilities.numQuestionsAnswered;
+      const numTrialsSoFar = cardProbabilities.numQuestionsAnsweredCurrentSession || 0;
 
       if (maxTrials > 0 && numTrialsSoFar >= maxTrials) {
+        Meteor.call('resetCurSessionTrialsCount', Meteor.userId(), Session.get('currentTdfId'))
         return true;
       }
 
