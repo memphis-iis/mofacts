@@ -421,11 +421,12 @@ async function setComponentStatesByUserIdTDFIdAndUnitNum(userId, TDFId, componen
       if (!componentState.trialsSinceLastSeen) {
         componentState.trialsSinceLastSeen = null;
       }
-
+      serverConsole(componentState)
       const updateQuery = 'UPDATE componentstate SET probabilityEstimate=${probabilityEstimate}, \
         firstSeen=${firstSeen}, lastSeen=${lastSeen}, trialsSinceLastSeen=${trialsSinceLastSeen}, \
         priorCorrect=${priorCorrect}, priorIncorrect=${priorIncorrect}, \
-        priorStudy=${priorStudy}, totalPracticeDuration=${totalPracticeDuration}, outcomeStack=${outcomeStack} \
+        priorStudy=${priorStudy}, totalPracticeDuration=${totalPracticeDuration}, outcomeStack=${outcomeStack}, \
+        curSessionPriorCorrect=${curSessionPriorCorrect}, curSessionPriorIncorrect=${curSessionPriorIncorrect}\
         WHERE userId=${userId} AND TDFId=${TDFId} AND KCId=${KCId} AND componentType=${componentType} \
         RETURNING componentStateId';
       try {
@@ -438,13 +439,14 @@ async function setComponentStatesByUserIdTDFIdAndUnitNum(userId, TDFId, componen
           serverConsole(componentState)
           const componentStateId = await t.one('INSERT INTO componentstate(userId,TDFId,KCId,componentType, \
             probabilityEstimate,hintLevel,firstSeen,lastSeen,trialsSinceLastSeen,priorCorrect,priorIncorrect,priorStudy, \
-            totalPracticeDuration,outcomeStack) VALUES(${userId},${TDFId}, ${KCId}, ${componentType}, \
+            totalPracticeDuration,outcomeStack, curSessionPriorCorrect, curSessionPriorIncorrect) VALUES(${userId},${TDFId}, ${KCId}, ${componentType}, \
             ${probabilityEstimate},${hintLevel}, ${firstSeen},${lastSeen},${trialsSinceLastSeen},${priorCorrect},${priorIncorrect}, \
-            ${priorStudy},${totalPracticeDuration},${outcomeStack}) \
+            ${priorStudy},${totalPracticeDuration},${outcomeStack}, \
+            ${curSessionPriorCorrect}, ${curSessionPriorIncorrect}) \
             RETURNING componentStateId',
             componentState);
         } else {
-          resArr.push('not caught error:', e);
+          resArr.push(componentState + '\nnot caught error:', e);
         }
       }
     }
@@ -1697,6 +1699,10 @@ Meteor.methods({
     }
 
     return await createExperimentExport(exp);
+  },
+
+  resetCurSessionTrialsCount: async function(userId, tdfID) {
+    await db.none('UPDATE componentstate SET cursessionpriorcorrect = 0, cursessionpriorincorrect = 0 WHERE userid = $1 AND TDFId = $2', [userId, tdfID])
   },
 
   createTeacherDataFile: async function(teacherID) {
