@@ -119,5 +119,9 @@ function sessionCleanUp() {
   Session.set('feedbackParamsSet', undefined);
   Session.set('instructionQuestionResult', undefined);
   Session.set('hintLevel', undefined);
+  if(window.audioContext && window.audioContext.state != "closed"){
+    window.audioContext.close();
+    window.audioContext = null;
+  }
 }
 
