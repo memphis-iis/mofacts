@@ -31,6 +31,7 @@ export {
 // for creating some MongoDB queries
 
 const fs = Npm.require('fs');
+const https = require('https')
 
 if (Meteor.isClient) {
   Meteor.subscribe('files.assets.all');
@@ -267,6 +268,18 @@ async function getTdfById(TDFId) {
   const tdfs = await db.one('SELECT * from tdf WHERE TDFId=$1', TDFId);
   const tdf = getTdf(tdfs);
   return tdf;
+}
+
+async function getTdfTTSAPIKey(TDFId) {
+  const tdfs = await db.one('SELECT * from tdf WHERE TDFId=$1', TDFId);
+  const textToSpeechAPIKey = tdfs.content.tdfs.tutor.setspec.textToSpeechAPIKey;
+  return textToSpeechAPIKey;
+}
+
+async function getTdfSpeachAPIKey(TDFId) {
+  const tdfs = await db.one(`SELECT * from tdf WHERE TDFId=${TDFId}`);
+  const speechAPIKey = tdfs.content.tdfs.tutor.setspec.speechAPIKey;
+  return speechAPIKey;
 }
 
 // eslint-disable-next-line camelcase
@@ -1648,6 +1661,28 @@ async function loadStimsAndTdfsFromPrivate(adminUserId) {
   }
 }
 
+async function makeHTTPSrequest(options, request){
+  return new Promise((resolve, reject) => {
+    let chunks = []
+    const req = https.request(options, res => {        
+      res.on('data', d => {
+          chunks.push(d);
+      })
+      res.on('end', function() {
+          console.log(Buffer.concat(chunks).toString());
+          resolve(Buffer.concat(chunks));
+      })
+    })
+    
+    req.on('error', (e) => {
+      reject(e.message);
+    });
+
+    req.write(request)
+    req.end()
+  });
+}
+
 const baseSyllableURL = 'http://localhost:4567/syllables/';
 function getSyllablesForWord(word) {
   const syllablesURL = baseSyllableURL + word;
@@ -1686,6 +1721,43 @@ Meteor.methods({
   insertHiddenItem, getHiddenItems, getUserLastFeedbackTypeFromHistory,
 
   getTdfIdByStimSetIdAndFileName, getItemsByFileName,
+
+  makeGoogleTTSApiCall: async function(TDFId, message, audioPromptSpeakingRate, audioVolume) {
+    const ttsAPIKey = await getTdfTTSAPIKey(TDFId);
+    const request = JSON.stringify({
+        input: {text: message},
+        voice: {languageCode: 'en-US', ssmlGender: 'FEMALE'},
+        audioConfig: {audioEncoding: 'MP3', speakingRate: audioPromptSpeakingRate, volumeGainDb: audioVolume},
+    });
+    const options = {
+        hostname: 'texttospeech.googleapis.com',
+        path: '/v1/text:synthesize?key=' + ttsAPIKey,
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json; charset=utf-8'
+        }
+    }
+    return await makeHTTPSrequest(options, request).then(data => {
+        response = JSON.parse(data.toString('utf-8'))
+        const audioDataEncoded = response.audioContent;
+        return audioDataEncoded;
+    });
+  },
+  
+  makeGoogleSpeechAPICall: async function(TDFId, speechAPIKey = '', request, answerGrammar){
+    console.log(request)
+    if(speechAPIKey == ''){
+      speechAPIKey = await getTdfTTSAPIKey(TDFId);
+    }
+    const options = {
+      hostname: 'speech.googleapis.com',
+      path: '/v1/speech:recognize?key=' + speechAPIKey,
+      method: 'POST'
+    }
+    return await makeHTTPSrequest(options, JSON.stringify(request)).then(data => {
+      return [answerGrammar, JSON.parse(data.toString('utf-8'))]
+    });
+  },
 
   createExperimentDataFile: async function(exp) {
     if(!Meteor.userId()){
