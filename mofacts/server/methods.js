@@ -1725,22 +1725,24 @@ Meteor.methods({
   makeGoogleTTSApiCall: async function(TDFId, message, audioPromptSpeakingRate, audioVolume) {
     const ttsAPIKey = await getTdfTTSAPIKey(TDFId);
     const request = JSON.stringify({
-        input: {text: message},
-        voice: {languageCode: 'en-US', ssmlGender: 'FEMALE'},
-        audioConfig: {audioEncoding: 'MP3', speakingRate: audioPromptSpeakingRate, volumeGainDb: audioVolume},
+      input: {text: message},
+      voice: {languageCode: 'en-US', ssmlGender: 'FEMALE'},
+      audioConfig: {audioEncoding: 'MP3', speakingRate: audioPromptSpeakingRate, volumeGainDb: audioVolume},
     });
     const options = {
-        hostname: 'texttospeech.googleapis.com',
-        path: '/v1/text:synthesize?key=' + ttsAPIKey,
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json; charset=utf-8'
-        }
+      hostname: 'texttospeech.googleapis.com',
+      path: '/v1/text:synthesize?key=' + ttsAPIKey,
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json; charset=utf-8'
+      }
     }
-    return await makeHTTPSrequest(options, request).then(data => {
-        response = JSON.parse(data.toString('utf-8'))
-        const audioDataEncoded = response.audioContent;
-        return audioDataEncoded;
+    return await makeHTTPSrequest(options, request).then(data, error => {
+      if(error)
+        throw new Meteor.Error('Error with Google TTS API call: ' + error);
+      response = JSON.parse(data.toString('utf-8'))
+      const audioDataEncoded = response.audioContent;
+      return audioDataEncoded;
     });
   },
   
@@ -1754,7 +1756,9 @@ Meteor.methods({
       path: '/v1/speech:recognize?key=' + speechAPIKey,
       method: 'POST'
     }
-    return await makeHTTPSrequest(options, JSON.stringify(request)).then(data => {
+    return await makeHTTPSrequest(options, JSON.stringify(request)).then(data, error => {
+      if(error)
+        throw new Meteor.Error('Error with Google SR API call: ' + error);
       return [answerGrammar, JSON.parse(data.toString('utf-8'))]
     });
   },
