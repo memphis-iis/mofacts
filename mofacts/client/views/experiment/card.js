@@ -2413,8 +2413,9 @@ function speachAPICallback(err, data){
 
   // If we get back an error status make sure to inform the user so they at
   // least have a hint at what went wrong
-  if (response['statusCode'] != 200) {
-    const content = JSON.parse(response.content);
+  if (err) {
+    const content = JSON.parse(response);
+    console.log(err);
     transcript = 'I did not get that. Please try again.';
     ignoredOrSilent = true;
   } else if (response['results']) {
