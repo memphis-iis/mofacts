@@ -2,6 +2,7 @@ import {ReactiveDict} from 'meteor/reactive-dict';
 
 const _state = new ReactiveDict('dialogueSelectState');
 const _availableDialogueTypes = ['simple', 'refutational', 'dialogue'];
+const localMongo = new Mongo.Collection(null); // local-only - no database
 
 const _randomizeSelectedDialogueType = () => {
   const rIdx = Math.floor(Math.random() * Math.floor(_availableDialogueTypes.length));
@@ -11,10 +12,10 @@ const _randomizeSelectedDialogueType = () => {
 
 Template.profileDialogueToggles.created = function() {
   // _randomizeSelectedDialogueType();
-  let feedbackTypeDefault = Session.get('currentTdfFile').tdfs.tutor.unit[Session.get('currentUnitNumber')].deliveryparams.feedbackType || "simple";
+  let feedbackTypeDefault = localMongo.findOne({}).currentTdfFile.tdfs.tutor.unit[localMongo.findOne({}).currentUnitNumber].deliveryparams.feedbackType || "simple";
   //If the user is allowed to choose a feedback type then default to the last type chosen by this user for this tdf. 
-  if(Session.get('currentTdfFile').tdfs.tutor.unit[Session.get('currentUnitNumber')].deliveryparams.allowFeedbackTypeSelect){
-    _state.set('selectedDialogueType', Session.get('feedbackTypeFromHistory') || feedbackTypeDefault);
+  if(localMongo.findOne({}).currentTdfFile.tdfs.tutor.unit[localMongo.findOne({}).currentUnitNumber].deliveryparams.allowFeedbackTypeSelect){
+    _state.set('selectedDialogueType', localMongo.findOne({}).feedbackTypeFromHistory || feedbackTypeDefault);
   }
   else{
     _state.set('selectedDialogueType', feedbackTypeDefault);
@@ -25,7 +26,7 @@ Template.profileDialogueToggles.events({
   'click .dialogueSelectRadio': (event) => {
     _state.set('selectedDialogueType',
         event.currentTarget.getAttribute('data-dialogue-type'));
-    Session.set('feedbackTypeFromHistory', _state.get('selectedDialogueType'));
+    data = localMongo.findOne({}) || {}; data.feedbackTypeFromHistory =  _state.get('selectedDialogueType'); localMongo.update({},{$set:data});
   },
 
 });

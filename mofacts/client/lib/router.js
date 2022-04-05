@@ -65,10 +65,18 @@ a cookie scheme to insure experimental participants stay in experiment mode:
 
 // Note that these three session variables aren't touched by the helpers in
 // lib/sessionUtils.js. They are only set here in our client-side routing
+const localMongo = new Mongo.Collection(null); // local-only - no database
+data = localMongo.findOne({}) || {};
+data.loginMode = 'normal';
+data.experimentTarget = '';
+data.experimentXCond = '';
+data.clusterMapping = '';
+localMongo.update({},{$set: data});
 Session.set('loginMode', 'normal');
 Session.set('experimentTarget', '');
 Session.set('experimentXCond', '');
 Session.set('clusterMapping', '');
+
 
 
 function routeToSignin() {
@@ -77,22 +85,22 @@ function routeToSignin() {
   // handles an experimental participant refreshing the browser
   const expCookie = _.chain(Cookie.get('isExperiment')).trim().intval().value();
   if (expCookie) {
-    Session.set('loginMode', 'experiment');
-    Session.set('experimentTarget', Cookie.get('experimentTarget'));
-    Session.set('experimentXCond', Cookie.get('experimentXCond'));
+    data = localMongo.findOne({}) || {}; data.loginMode =  'experiment'; localMongo.update({},{$set:data});
+    data = localMongo.findOne({}) || {}; data.experimentTarget =  Cookie.get('experimentTarget'); localMongo.update({},{$set:data});
+    data = localMongo.findOne({}) || {}; data.experimentXCond =  Cookie.get('experimentXCond'); localMongo.update({},{$set:data});
   }
 
-  const loginMode = Session.get('loginMode');
+  const loginMode = localMongo.findOne({}).loginMode;
   console.log('loginMode: ' + loginMode);
 
   if (loginMode === 'experiment') {
     console.log('loginMode === experiment');
     const routeParts = ['/experiment'];
 
-    const target = Session.get('experimentTarget');
+    const target = localMongo.findOne({}).experimentTarget;
     if (target) {
       routeParts.push(target);
-      const xcond = Session.get('experimentXCond');
+      const xcond = localMongo.findOne({}).experimentXCond;
       if (xcond) {
         routeParts.push(xcond);
       }
@@ -114,7 +122,7 @@ function routeToSignin() {
 Router.route('/experiment/:target?/:xcond?', {
   name: 'client.experiment',
   action: async function() {
-    Session.set('curModule', 'experiment');
+    data = localMongo.findOne({}) || {}; data.curModule =  'experiment'; localMongo.update({},{$set:data});
     // We set our session variable and also set a cookie (so that we still
     // know they're an experimental participant after browser refresh)
     const target = this.params.target || '';
@@ -123,6 +131,7 @@ Router.route('/experiment/:target?/:xcond?', {
     Session.set('loginMode', 'experiment');
     Session.set('experimentTarget', target);
     Session.set('experimentXCond', xcond);
+
 
     Cookie.set('isExperiment', '1', 21); // 21 days
     Cookie.set('experimentTarget', target, 21);
@@ -133,12 +142,12 @@ Router.route('/experiment/:target?/:xcond?', {
       console.log('tdf found');
       const experimentPasswordRequired = tdf.content.tdfs.tutor.setspec.experimentPasswordRequired ?
           eval(tdf.content.tdfs.tutor.setspec.experimentPasswordRequired) : false;
-      Session.set('experimentPasswordRequired', experimentPasswordRequired);
+      data = localMongo.findOne({}) || {}; data.experimentPasswordRequired =  experimentPasswordRequired; localMongo.update({},{$set:data});
       console.log('experimentPasswordRequired:' + experimentPasswordRequired);
 
       console.log('EXPERIMENT target:', target, 'xcond', xcond);
 
-      Session.set('clusterMapping', '');
+      data = localMongo.findOne({}) || {}; data.clusterMapping =  ''; localMongo.update({},{$set:data});
       this.render('signIn');
     }
   },
@@ -171,7 +180,9 @@ const restrictedRoutes = [
 
 const getDefaultRouteAction = function(routeName) {
   return function() {
-    Session.set('curModule', routeName.toLowerCase());
+    
+    data = localMongo.findOne({})  || {}; data.curModule =  routeName.toLowerCase(); localMongo.update({},{$set:data});
+    console.log("Variables \n =================== \n", localMongo.findOne({}));
     console.log(routeName + ' ROUTE');
     this.render(routeName);
   };
@@ -180,7 +191,8 @@ const getDefaultRouteAction = function(routeName) {
 const getRestrictedRouteAction = function(routeName) {
   return function() {
     if(Meteor.user()){
-      Session.set('curModule', routeName.toLowerCase());
+      data = localMongo.findOne({}) || {}; data.curModule =  routeName.toLowerCase(); localMongo.update({},{$set:data});
+      console.log("Variables \n =================== \n", localMongo.findOne({}));
       console.log(routeName + ' ROUTE');
       this.render(routeName);
     } else {
@@ -208,6 +220,11 @@ for (const route of defaultBehaviorRoutes) {
 Router.route('/', {
   name: 'client.index',
   action: function() {
+    const localMongo = new Mongo.Collection(null); // local-only - no database
+  data = localMongo.findOne({}) || {}; data.loginMode =  'normal'; localMongo.update({},{$set:data});
+  data = localMongo.findOne({}) || {}; data.experimentTarget =  ''; localMongo.update({},{$set:data});
+  data = localMongo.findOne({}) || {}; data.experimentXCond =  ''; localMongo.update({},{$set:data});
+  data = localMongo.findOne({}) || {}; data.clusterMapping =  ''; localMongo.update({},{$set:data});
     if(Meteor.user()){
       this.redirect('/profile');
     } else {
@@ -217,6 +234,7 @@ Router.route('/', {
       Cookie.set('experimentTarget', '', 1);
       Cookie.set('experimentXCond', '', 1);
       Session.set('curModule', 'signinoauth');
+      data = localMongo.findOne({}) || {}; data.curModule =  'signinoauth'; localMongo.update({},{$set:data});
       this.render('signInOauth');
     }
   },
@@ -234,11 +252,11 @@ Router.route('/profile', {
 
       if (loginMode === 'southwest') {
         console.log('southwest login, routing to southwest profile');
-        Session.set('curModule', 'profileSouthwest');
+        data = localMongo.findOne({}) || {}; data.curModule =  'profileSouthwest'; localMongo.update({},{$set:data});
         this.render('/profileSouthwest');
       } else { // Normal login mode
         console.log('else, progress');
-        Session.set('curModule', 'profile');
+        data = localMongo.findOne({}) || {}; data.curModule =  'profile'; localMongo.update({},{$set:data});
         this.render('profile');
       }
     } else {
@@ -251,7 +269,7 @@ Router.route('/card', {
   name: 'client.card',
   action: function() {
     if (Meteor.user()) {
-      Session.set('curModule', 'card');
+      data = localMongo.findOne({}) || {}; data.curModule =  'card'; localMongo.update({},{$set:data});
       this.render('card');
     } else {
       this.redirect('/');
@@ -261,14 +279,14 @@ Router.route('/card', {
 
 // We track the start time for instructions, which means we need to track
 // them here at the instruction route level
-Session.set('instructionClientStart', 0);
+data = localMongo.findOne({}) || {}; data.instructionClientStart =  0; localMongo.update({},{$set:data});
 Router.route('/instructions', {
   name: 'client.instructions',
   action: function() {
-    Session.set('instructionClientStart', Date.now());
-    Session.set('curModule', 'instructions');
-    Session.set('fromInstructions', true);
-    Session.set('curUnitInstructionsSeen', true);
+    data = localMongo.findOne({}) || {}; data.instructionClientStart =  Date.now(); localMongo.update({},{$set:data});
+    data = localMongo.findOne({}) || {}; data.curModule =  'instructions'; localMongo.update({},{$set:data});
+    data = localMongo.findOne({}) || {}; data.fromInstructions =  true; localMongo.update({},{$set:data});
+    data = localMongo.findOne({}) || {}; data.curUnitInstructionsSeen =  true; localMongo.update({},{$set:data});
     this.render('instructions');
   },
   onAfterAction: function() {
@@ -279,7 +297,7 @@ Router.route('/instructions', {
     if (!haveMeteorUser()) {
       console.log('No one logged in - allowing template to handle');
     } else {
-      const unit = Session.get('currentTdfUnit');
+      const unit = localMongo.findOne({}).currentTdfUnit;
       const txt = unit.unitinstructions ? unit.unitinstructions.trim() : undefined;
       const pic = unit.picture ? unit.picture.trim() : undefined;
       const instructionsq = unit.unitinstructionsquestion ? unit.unitinstructionsquestion.trim() : undefined;

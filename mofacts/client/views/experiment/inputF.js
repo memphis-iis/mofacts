@@ -1,12 +1,14 @@
 import {DialogueUtils} from './dialogueUtils';
 
+const localMongo = new Mongo.Collection(null); // local-only - no database
+
 Template.inputF.rendered = function() {
   this.$('input').focus();
 };
 
 Template.inputF.helpers({
   'fontSizeClass': function() {
-    return 'h' + Session.get('currentDeliveryParams').fontsize.toString(); // Bootstrap classes
+    return 'h' + localMongo.findOne({}).currentDeliveryParams.fontsize.toString(); // Bootstrap classes
   },
 
   'inDialogueLoop': function() {
@@ -24,6 +26,6 @@ Template.inputForceCorrect.rendered = function() {
 
 Template.inputForceCorrect.helpers({
   'fontSizeClass': function() {
-    return 'h' + Session.get('currentDeliveryParams').fontsize.toString(); // Bootstrap classes
+    return 'h' + localMongo.findOne({}).currentDeliveryParams.fontsize.toString(); // Bootstrap classes
   },
 });

@@ -3,12 +3,13 @@ import {blankPassword} from '../../lib/currentTestingHelpers';
 import {sessionCleanUp} from '../../lib/sessionUtils';
 import {displayify} from '../../../common/globalHelpers';
 
-Session.set('teachers', []);
-Session.set('curTeacher', {});
-Session.set('curClass', {});
-Session.set('systemOverloaded', false);
-Session.set('systemDown', undefined);
-Session.set('classesByInstructorId', {});
+const localMongo = new Mongo.Collection(null); // local-only - no database
+data = localMongo.findOne({})  || {}; data.teachers =  []; localMongo.update({},{$set:data});
+data = localMongo.findOne({})  || {}; data.curTeacher =  {}; localMongo.update({},{$set:data});
+data = localMongo.findOne({})  || {}; data.curClass =  {}; localMongo.update({},{$set:data});
+data = localMongo.findOne({})  || {}; data.systemOverloaded =  false; localMongo.update({},{$set:data});
+data = localMongo.findOne({})  || {}; data.systemDown =  undefined; localMongo.update({},{$set:data});
+data = localMongo.findOne({})  || {}; data.classesByInstructorId =  {}; localMongo.update({},{$set:data});
 
 
 
@@ -57,7 +58,7 @@ function testLogin() {
 
     const newUserId = result;
 
-    Meteor.call('addUserToTeachersClass', newUserId, Session.get('curTeacher')._id, Session.get('curClass').sectionid,
+    Meteor.call('addUserToTeachersClass', newUserId, localMongo.findOne({}).curTeacher._id, localMongo.findOne({}).curClass.sectionid,
         function(err, result) {
           if (err) {
             console.log('error adding user to teacher class: ' + err);
@@ -77,7 +78,7 @@ function testLogin() {
               alert('It appears that you couldn\'t be logged in as ' + testUserName);
               $('#signInButton').prop('disabled', false);
             } else {
-              if (Session.get('debugging')) {
+              if (localMongo.findOne({}).debugging) {
                 const currentUser = Meteor.users.findOne({_id: Meteor.userId()}).username;
                 console.log(currentUser + ' was test logged in successfully! Current route is ',
                     Router.current().route.getName());
@@ -95,17 +96,17 @@ function testLogin() {
 // eslint-disable-next-line no-undef
 setTeacher = function(teacher) { // Shape: {_id:'{{this._id}}',username:'{{this.username}}'}
   console.log(teacher);
-  Session.set('curTeacher', teacher);
+  data = localMongo.findOne({}) || {}; data.curTeacher =  teacher; localMongo.update({},{$set:data});
   $('#initialInstructorSelection').prop('hidden', 'true');
-  const curClasses = Session.get('classesByInstructorId')[teacher._id];
-  console.log('setTeacher', Session.get('classesByInstructorId'), teacher._id, teacher);
+  const curClasses = localMongo.findOne({}).classesByInstructorId[teacher._id];
+  console.log('setTeacher', localMongo.findOne({}).classesByInstructorId, teacher._id, teacher);
 
   if (curClasses == undefined) {
     $('#initialInstructorSelection').prop('hidden', '');
     alert('Your instructor hasn\'t set up their classes yet.  Please contact them and check back in at a later time.');
-    Session.set('curTeacher', {});
+    data = localMongo.findOne({}) || {}; data.curTeacher =  {}; localMongo.update({},{$set:data});
   } else {
-    Session.set('curTeacherClasses', curClasses);
+    data = localMongo.findOne({}) || {}; data.curTeacherClasses =  curClasses; localMongo.update({},{$set:data});
     $('#classSelection').prop('hidden', '');
   }
 };
@@ -114,27 +115,28 @@ setTeacher = function(teacher) { // Shape: {_id:'{{this._id}}',username:'{{this.
 setClass = function(curClassID) {
   console.log(curClassID);
   $('#classSelection').prop('hidden', 'true');
-  const allClasses = Session.get('curTeacherClasses');
+  const allClasses = localMongo.findOne({}).curTeacherClasses;
   const curClass = allClasses.find((aClass) => aClass.sectionid == curClassID);
-  Session.set('curClass', curClass);
-  Session.set('curSectionId', curClass.sectionid)
+  data = localMongo.findOne({}) || {}; data.curClass =  curClass; localMongo.update({},{$set:data});
+  data = localMongo.findOne({}) || {}; data.curSectionId = curClass.sectionid; localMongo.update({},{$set:data});
+  
   $('.login').prop('hidden', '');
 };
 
 Template.signInSouthwest.onCreated(async function() {
-  Session.set('loginMode', 'southwest');
+  data = localMongo.findOne({}) || {}; data.loginMode =  'southwest'; localMongo.update({},{$set:data});
   Meteor.call('isSystemDown', function(err, systemDown) {
     console.log('SYSTEM_DOWN:', systemDown);
-    Session.set('systemDown', systemDown);
+    data = localMongo.findOne({}) || {}; data.systemDown =  systemDown; localMongo.update({},{$set:data});
   });
   Meteor.call('isCurrentServerLoadTooHigh', function(err, res) {
     console.log('systemOverloaded?', res, err);
-    Session.set('systemOverloaded', (typeof(err) != 'undefined' || res));
+    data = localMongo.findOne({}) || {}; data.systemOverloaded =  (typeof(err) != 'undefined' || res); localMongo.update({},{$set:data});
   });
   Meteor.call('getAltServerUrl', function(err, res) {
     if (!(err || !res)) {
       console.log('altServerUrl: ' + res);
-      Session.set('altServerUrl', res);
+      data = localMongo.findOne({}) || {}; data.altServerUrl =  res; localMongo.update({},{$set:data});
     } else {
       console.log('can\'t get alt server url:', err, res);
     }
@@ -152,7 +154,7 @@ Template.signInSouthwest.onCreated(async function() {
   console.log('got teachers');
   const urlVars = getUrlVars();
   if (!urlVars['showTestLogins']) {
-    Session.set('showTestLogins', false);
+    data = localMongo.findOne({}) || {}; data.showTestLogins =  false; localMongo.update({},{$set:data});
     const testLogins = [
       'olney@southwest.tn.edu',
       'pavlik@southwest.tn.edu',
@@ -162,12 +164,12 @@ Template.signInSouthwest.onCreated(async function() {
     verifiedTeachers = verifiedTeachers.filter((x) => testLogins.indexOf(x.username) == -1);
     console.log('verifiedTeachers2', verifiedTeachers);
   } else {
-    Session.set('showTestLogins', true);
+    data = localMongo.findOne({}) || {}; data.showTestLogins =  true; localMongo.update({},{$set:data});
   }
   if (urlVars['showDialogueHints']) {
-    Session.set('showDialogueHints', true);
+    data = localMongo.findOne({}) || {}; data.showDialogueHints =  true; localMongo.update({},{$set:data});
   }
-  Session.set('teachers', verifiedTeachers);
+  data = localMongo.findOne({}) || {}; data.teachers =  verifiedTeachers; localMongo.update({},{$set:data});
 });
 
 Template.signInSouthwest.onRendered(async function() {
@@ -180,13 +182,13 @@ Template.signInSouthwest.onRendered(async function() {
     }
     classesByInstructorId[coursesection.teacheruserid].push(coursesection);
   }
-  Session.set('classesByInstructorId', classesByInstructorId);
+  data = localMongo.findOne({}) || {}; data.classesByInstructorId =  classesByInstructorId; localMongo.update({},{$set:data});
 
   window.onpopstate = function(event) {
     console.log('window popstate signin southwest');
     if (document.location.pathname == '/signInSouthwest') {
-      Session.set('curTeacher', {});
-      Session.set('curClass', {});
+      data = localMongo.findOne({}) || {}; data.curTeacher =  {}; localMongo.update({},{$set:data});
+      data = localMongo.findOne({}) || {}; data.curClass =  {}; localMongo.update({},{$set:data});
       $('#initialInstructorSelection').prop('hidden', '');
       $('#classSelection').prop('hidden', 'true');
       $('.login').prop('hidden', 'true');
@@ -195,23 +197,23 @@ Template.signInSouthwest.onRendered(async function() {
 });
 
 Template.signInSouthwest.helpers({
-  'altServerUrl': () => Session.get('altServerUrl'),
+  'altServerUrl': () => localMongo.findOne({}).altServerUrl,
 
   'readingServerStatus': function() {
-    return Session.get('systemDown') == undefined;
+    return localMongo.findOne({}).systemDown == undefined;
   },
 
   'systemDown': function() {
-    return Session.get('systemDown') && !Session.get('showTestLogins');
+    return localMongo.findOne({}).systemDown && !localMongo.findOne({}).showTestLogins;
   },
 
-  'systemOverloaded': () => Session.get('systemOverloaded') && !Session.get('showTestLogins'),
+  'systemOverloaded': () => localMongo.findOne({}).systemOverloaded && !localMongo.findOne({}).showTestLogins,
 
-  'showTestLogins': () => Session.get('showTestLogins'),
+  'showTestLogins': () => localMongo.findOne({}).showTestLogins,
 
-  'teachers': () => Session.get('teachers'),
+  'teachers': () => localMongo.findOne({}).teachers,
 
-  'curTeacherClasses': () => Session.get('curTeacherClasses'),
+  'curTeacherClasses': () => localMongo.findOne({}).curTeacherClasses,
 
   'checkSectionExists': (sectionName) => sectionName != undefined && sectionName.length > 0,
 });
@@ -232,8 +234,8 @@ Template.signInSouthwest.events({
       if (!!data && !!data.error) {
         alert('Problem logging in: ' + data.error);
       } else {
-        Meteor.call('addUserToTeachersClass', Meteor.userId(), Session.get('curTeacher')._id,
-            Session.get('curClass').sectionid,
+        Meteor.call('addUserToTeachersClass', Meteor.userId(), localMongo.findOne({}).curTeacher._id,
+            localMongo.findOne({}).curClass.sectionid,
             function(err, result) {
               if (err) {
                 console.log('error adding user to teacher class: ' + err);

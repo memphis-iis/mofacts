@@ -8,6 +8,8 @@ import {instructContinue} from './views/experiment/instructions.js';
 import {routeToSignin} from './lib/router.js';
 import { init } from "meteor/simonsimcity:client-session-timeout";
 
+const localMongo = new Mongo.Collection(null); // local-only - no database
+
 //Prevents new tab
 
 
@@ -36,7 +38,7 @@ const meteorCallAsync = Promise.promisify(Meteor.call);
 //   const promisedMeteorCall = Promise.promisify(Meteor.call);
 //   return promisedMeteorCall.apply(null, [funcName, rest]);
 // }
-Session.set('enterKeyLock', false);
+data = localMongo.findOne({}) || {}; data.enterKeyLock =  false; localMongo.update({},{$set:data});
 
 // This will be setup for window resize, but is made global so that the
 // card template page can hook it up as well
@@ -64,6 +66,8 @@ function redoCardImage() {
 }
 
 Meteor.startup(function() {
+  const localMongo = new Mongo.Collection(null); // local-only - no database
+  var localMongoObserver = new PersistentMinimongo2(localMongo, 'MoFACTs');
   console.logs = [];
   console.defaultLog = console.log.bind(console);
   console.log = function(...args) {
@@ -83,7 +87,7 @@ Meteor.startup(function() {
     console.logs = console.logs.slice(0, 100000);
     console.defaultLog.apply(null, args);
   };
-  Session.set('debugging', true);
+  data={debugging: true};localMongo.upsert(data);
   sessionCleanUp();
 
   // Include any special jQuery handling we need
@@ -107,8 +111,8 @@ Template.body.onRendered(function() {
       console.log('global enter key, curPage: ' + curPage);
       console.log(e);
 
-      if (!Session.get('enterKeyLock')) {
-        Session.set('enterKeyLock', true);
+      if (!localMongo.findOne({}).enterKeyLock) {
+        data = localMongo.findOne({}) || {}; data.enterKeyLock =  true; localMongo.update({},{$set:data});
         console.log('grabbed enterKeyLock on global enter handler');
         switch (curPage) {
           case '/instructions':
@@ -131,7 +135,7 @@ Template.body.events({
     if (window.currentAudioObj) {
       window.currentAudioObj.pause();
     }
-    if(Session.get('loginMode') == 'southwest'){
+    if(localMongo.findOne({}).loginMode == 'southwest'){
       Router.go('/profileSouthwest')
     } else {
       Router.go('/profile');
@@ -145,27 +149,27 @@ Template.body.events({
     }
     // Clear out studentUsername in case we are a teacher/admin who previously
     // navigated to this page for a particular student and want to see our own progress
-    Session.set('studentUsername', null);
-    Session.set('curStudentID', undefined);
-    Session.set('curStudentPerformance', undefined);
-    Session.set('curClass', undefined);
-    Session.set('instructorSelectedTdf', undefined);
-    Session.set('curClassPerformance', undefined);
+    data = localMongo.findOne({}) || {}; data.studentUsername =  null; localMongo.update({},{$set:data});
+    data = localMongo.findOne({}) || {}; data.curStudentID =  undefined; localMongo.update({},{$set:data});
+    data = localMongo.findOne({}) || {}; data.curStudentPerformance =  undefined; localMongo.update({},{$set:data});
+    data = localMongo.findOne({}) || {}; data.curClass =  undefined; localMongo.update({},{$set:data});
+    data = localMongo.findOne({}) || {}; data.instructorSelectedTdf =  undefined; localMongo.update({},{$set:data});
+    data = localMongo.findOne({}) || {}; data.curClassPerformance =  undefined; localMongo.update({},{$set:data});
     Router.go('/studentReporting');
   },
 
   'click #errorReportButton': function(event) {
     event.preventDefault();
-    Session.set('pausedLocks', Session.get('pausedLocks')+1);
-    Session.set('errorReportStart', new Date());
+    data = localMongo.findOne({}) || {}; data.pausedLocks =  localMongo.findOne({}).pausedLocks+1; localMongo.update({},{$set:data});
+    data = localMongo.findOne({}) || {}; data.errorReportStart =  new Date(); localMongo.update({},{$set:data});
     $('#errorReportingModal').modal('show');
   },
 
   'click #resetFeedbackSettingsButton': function(event) {
     event.preventDefault();
-    Session.set('pausedLocks', Session.get('pausedLocks')+1);
-    Session.set('displayFeedback', true);
-    Session.set('resetFeedbackSettingsFromIndex', true);
+    data = localMongo.findOne({}) || {}; data.pausedLocks =  localMongo.findOne({}).pausedLocks+1; localMongo.update({},{$set:data});
+    data = localMongo.findOne({}) || {}; data.displayFeedback =  true; localMongo.update({},{$set:data});
+    data = localMongo.findOne({}) || {}; data.resetFeedbackSettingsFromIndex =  true; localMongo.update({},{$set:data});
   }, 
   'click #wikiButton': function(event) {
     window.open(
@@ -182,7 +186,7 @@ Template.body.events({
     const sessionVars = Session.all();
     const userAgent = navigator.userAgent;
     const logs = console.logs;
-    const currentExperimentState = Session.get('currentExperimentState');
+    const currentExperimentState = localMongo.findOne({}).currentExperimentState
     Meteor.call('sendUserErrorReport', curUser, errorDescription, curPage, sessionVars,
         userAgent, logs, currentExperimentState);
     $('#errorReportingModal').modal('hide');
@@ -191,8 +195,8 @@ Template.body.events({
 
   'click #logoutButton': function(event) {
     Meteor.call('clearImpersonation',Meteor.userId());
-    Session.set('curUnitInstructionsSeen', undefined);
-    Session.set('curSectionId', undefined);
+    data = localMongo.findOne({}) || {}; data.curUnitInstructionsSeen =  undefined; localMongo.update({},{$set:data});
+    data = localMongo.findOne({}) || {}; data.curSectionId =  undefined; localMongo.update({},{$set:data});
     event.preventDefault();
     if (window.currentAudioObj) {
       window.currentAudioObj.pause();
@@ -202,8 +206,8 @@ Template.body.events({
         // something happened during logout
         console.log('User:', Meteor.user(), 'Error:', error);
       } else {
-        Session.set('curTeacher', undefined);
-        Session.set('curClass', undefined);
+        data = localMongo.findOne({}) || {}; data.curTeacher =  undefined; localMongo.update({},{$set:data});
+        data = localMongo.findOne({}) || {}; data.curClass =  undefined; localMongo.update({},{$set:data});
         sessionCleanUp();
         routeToSignin();
       }
@@ -217,26 +221,26 @@ Template.registerHelper('isLoggedIn', function() {
 });
 
 Template.registerHelper('showPerformanceDetails', function() {
-  return (Session.get('curModule') == 'card' || Session.get('curModule') == 'instructions') && Session.get('scoringEnabled');
+  return (localMongo.findOne({}).curModule == 'card' || localMongo.findOne({}).curModule == 'instructions') && localMongo.findOne({}).scoringEnabled
 });
 
 Template.registerHelper('currentScore', function() {
-  return Session.get('currentScore');
+  return localMongo.findOne({}).currentScore
 });
 
 Template.registerHelper('isNormal', function() {
-  return Session.get('loginMode') !== 'experiment';
+  return localMongo.findOne({}).loginMode !== 'experiment';
 });
 
 Template.registerHelper('curStudentPerformance', function() {
-  return Session.get('curStudentPerformance');
+  return localMongo.findOne({}).curStudentPerformance;
 });
 
 Template.registerHelper('showFeedbackResetButton', function() {
-  return Session.get('curModule') == 'card' && Session.get('currentTdfFile').tdfs.tutor.unit[Session.get('currentUnitNumber')].deliveryparams.allowFeedbackTypeSelect
+  return localMongo.findOne({}).curModule == 'card' && localMongo.findOne({}).currentTdfFile.tdfs.tutor.unit[localMongo.findOne({}).currentUnitNumber].deliveryparams.allowFeedbackTypeSelect;
 });
 Template.registerHelper('isInSession', function() {
-  return (Session.get('curModule') == 'profile');
+  return (localMongo.findOne({}).curModule == 'profile');
 })
 Template.registerHelper('and',(a,b)=>{
   return a && b;
@@ -244,4 +248,3 @@ Template.registerHelper('and',(a,b)=>{
 Template.registerHelper('or',(a,b)=>{
   return a || b;
 });
-

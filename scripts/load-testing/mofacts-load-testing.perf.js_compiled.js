@@ -1,3 +1,4 @@
+const localMongo = new Mongo.Collection(null); // local-only - no database
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
 		module.exports = factory(require("@flood/element"));
@@ -139,7 +140,7 @@ const settings = {
 
 	_flood_element__WEBPACK_IMPORTED_MODULE_0__["step"].repeat(1000, 'Trials', async browser => {
 		await browser.wait(_flood_element__WEBPACK_IMPORTED_MODULE_0__["Until"].elementIsVisible(_flood_element__WEBPACK_IMPORTED_MODULE_0__["By"].css('#userAnswer')))
-		let correctAnswer = await browser.evaluate(() => Session.get('currentAnswer'))
+		let correctAnswer = await browser.evaluate(() => localMongo.findOne({}).currentAnswer)
 		let rand = Math.floor(Math.random() * 11)
 		let answer = rand >= 5 ? correctAnswer : 'an incorrect answer'
 		await browser.type(_flood_element__WEBPACK_IMPORTED_MODULE_0__["By"].css('#userAnswer'), answer)

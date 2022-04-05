@@ -23,6 +23,7 @@ export {
   getTestType,
   getCurrentDeliveryParams,
 };
+const localMongo = new Mongo.Collection(null); // local-only - no database
 
 // Given a user ID, return the "dummy" password that stands in for a blank
 // password. This is because we REALLY do want to use blanks passwords for
@@ -115,9 +116,9 @@ function haveMeteorUser() {
 function updateCurStudentPerformance(isCorrect, endLatency) {
   // Update running user metrics total,
   // note this assumes curStudentPerformance has already been initialized on initial page entry
-  const curUserPerformance = Session.get('curStudentPerformance');
+  const curUserPerformance = localMongo.findOne({}).curStudentPerformance;
   console.log('updateCurStudentPerformance', isCorrect, endLatency,
-      JSON.parse(JSON.stringify((Session.get('curStudentPerformance')))));
+      JSON.parse(JSON.stringify((localMongo.findOne({}).curStudentPerformance))));
   curUserPerformance.count = curUserPerformance.count + 1;
   if (isCorrect) curUserPerformance.numCorrect = curUserPerformance.numCorrect + 1;
   curUserPerformance.percentCorrect = ((curUserPerformance.numCorrect / curUserPerformance.count)*100).toFixed(2) + '%';
@@ -125,8 +126,8 @@ function updateCurStudentPerformance(isCorrect, endLatency) {
   curUserPerformance.totalStimCount = parseInt(curUserPerformance.totalStimCount);
   curUserPerformance.totalTime = parseInt(curUserPerformance.totalTime) + endLatency;
   curUserPerformance.totalTimeDisplay = (curUserPerformance.totalTime / (1000*60)).toFixed(1);
-  Session.set('constantTotalTime',curUserPerformance.totalTimeDisplay);
-  Session.set('curStudentPerformance', curUserPerformance);
+  data = localMongo.findOne({}) || {}; data.constantTotalTime =  curUserPerformance.totalTimeDisplay; localMongo.update({},{$set:data});
+  data = localMongo.findOne({}) || {}; data.curStudentPerformance =  curUserPerformance; localMongo.update({},{$set:data});
 }
 
 async function setStudentPerformance(studentID, studentUsername, tdfId) {
@@ -166,13 +167,13 @@ async function setStudentPerformance(studentID, studentUsername, tdfId) {
     // convert from ms to min
     'totalTimeDisplay': (studentPerformanceData.totalPracticeDuration / (60 * 1000)).toFixed(0),
   };
-  Session.set('curStudentPerformance', studentPerformance);
+  data = localMongo.findOne({}) || {}; data.curStudentPerformance =  studentPerformance; localMongo.update({},{$set:data});
   console.log('setStudentPerformance,output:', studentPerformanceData, studentPerformance);
 }
 
 // Return the total number of stim clusters
 function getStimCount() {
-  const stimSet = Session.get('currentStimuliSet');
+  const stimSet = localMongo.findOne({}).currentStimuliSet;
   let numClusters = 0;
   const seenClusters = {};
   for (const stim of stimSet) {
@@ -188,8 +189,8 @@ function getStimCount() {
 // current sessions cluster mapping.
 // Note that the cluster mapping goes from current session index to raw index in order of the stim file
 function getStimCluster(clusterMappedIndex=0) {
-  const isLearningSession = Session.get('unitType') == MODEL_UNIT;
-  const clusterMapping = Session.get('clusterMapping');
+  const isLearningSession = localMongo.findOne({}).unitType == MODEL_UNIT;
+  const clusterMapping = localMongo.findOne({}).clusterMapping;
   const rawIndex = isLearningSession ?
       clusterMapping[clusterMappedIndex] : clusterMappedIndex; // Only learning sessions use cluster mapping
   const cluster = {
@@ -197,7 +198,7 @@ function getStimCluster(clusterMappedIndex=0) {
     clusterIndex: rawIndex,
     stims: [],
   };
-  for (const stim of Session.get('currentStimuliSet')) {
+  for (const stim of localMongo.findOne({}).currentStimuliSet) {
     if (stim.clusterKC % KC_MULTIPLE == rawIndex) {
       cluster.stims.push(stim);
     }
@@ -207,9 +208,9 @@ function getStimCluster(clusterMappedIndex=0) {
 }
 
 function getStimKCBaseForCurrentStimuliSet() {
-  if (Session.get('currentStimuliSet')) {
+  if (localMongo.findOne({}).currentStimuliSet) {
     const oneOrderOfMagnitudeLess = (KC_MULTIPLE / 10);
-    return Math.round((Session.get('currentStimuliSet')[0].clusterKC) / oneOrderOfMagnitudeLess) *
+    return Math.round((localMongo.findOne({}).currentStimuliSet[0].clusterKC) / oneOrderOfMagnitudeLess) *
        oneOrderOfMagnitudeLess;
   }
 }
@@ -306,7 +307,7 @@ function createStimClusterMapping(stimCount, shuffleclusters, swapclusters, star
 
 function getAllCurrentStimAnswers(removeExcludedPhraseHints) {
   const {curClusterIndex, curStimIndex} = getCurrentClusterAndStimIndices();
-  const stims = Session.get('currentStimuliSet');
+  const stims = localMongo.findOne({}).currentStimuliSet;
   let allAnswers = new Set();
 
   console.log(stims);
@@ -335,7 +336,7 @@ function getAllCurrentStimAnswers(removeExcludedPhraseHints) {
 }
 
 function getTestType() {
-  return _.trim(Session.get('testType')).toLowerCase();
+  return _.trim(localMongo.findOne({}).testType).toLowerCase();
 }
 
 // Return the delivery parms for the current unit. Note that we provide default
@@ -347,9 +348,9 @@ function getTestType() {
 // IMPORTANT: we also support selecting one of multiple delivery params via
 // experimentXCond (which can be specified in the URL or system-assigned)
 function getCurrentDeliveryParams() {
-  const currUnit = Session.get('currentTdfUnit');
+  const currUnit = localMongo.findOne({}).currentTdfUnit;
 
-  const isLearningSession = Session.get('unitType') == MODEL_UNIT;
+  const isLearningSession = localMongo.findOne({}).unitType == MODEL_UNIT;
 
   console.log('getCurrentDeliveryParams:', currUnit, isLearningSession);
 
@@ -433,7 +434,7 @@ function getCurrentDeliveryParams() {
     }
   } else {
     // No unit - we look for the top-level deliveryparams
-    const tdf = Session.get('currentTdfFile');
+    const tdf = localMongo.findOne({}).currentTdfFile;
     if (tdf && typeof tdf.tdfs.tutor.deliveryparams !== 'undefined') {
       sourceDelParams = tdf.tdfs.tutor.deliveryparams;
     }
@@ -442,7 +443,7 @@ function getCurrentDeliveryParams() {
   if (sourceDelParams) {
     // Note that if there is no XCond or if they specify something
     // wacky we'll just go with index 0
-    let xcondIndex = _.intval(Session.get('experimentXCond'));
+    let xcondIndex = _.intval(localMongo.findOne({}).experimentXCond);
     if (xcondIndex < 0 || xcondIndex >= sourceDelParams.length) {
       xcondIndex = 0; // Incorrect index gets 0
     }
