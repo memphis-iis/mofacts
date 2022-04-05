@@ -37,3 +37,5 @@ natestrauser:select2
 fourseven:scss@4.12.0
 ostrio:files
 simonsimcity:client-session-timeout
+reactive-var
+frozeman:persistent-minimongo2

@@ -19,6 +19,7 @@ import {Answers} from './answerAssess';
 import {VAD} from '../../lib/vad';
 import {sessionCleanUp} from '../../lib/sessionUtils';
 
+
 export {
   speakMessageIfAudioPromptFeedbackEnabled,
   startRecording,
@@ -113,17 +114,19 @@ turn it on, you need to set <showhistory>true</showhistory> in the
 
 // //////////////////////////////////////////////////////////////////////////
 // Global variables and helper functions for them
-
 let engine = null; // The unit engine for display (i.e. model or schedule)
-Session.set('buttonList', []);
-const scrollList = new Mongo.Collection(null); // local-only - no database
-Session.set('scrollListCount', 0);
-Session.set('currentDeliveryParams', {});
-Session.set('inResume', false);
-Session.set('wasReportedForRemoval', false);
-Session.set('hiddenItems', []);
-Session.set('numVisibleCards', 0);
-Session.set('recordingLocked', false);
+const localMongo = new Mongo.Collection(null); // local-only - no database
+data = {
+  buttonList: [],
+  scrollListCount: 0,
+  currentDeliveryParams: {},
+  inResume: false,
+  wasReportedForRemoval: false,
+  hiddenItems: [],
+  numVisibleCards: 0,
+  recordingLocked: false
+}
+localMongo.update({},{$set: data});
 let cachedSyllables = null;
 let speechTranscriptionTimeoutsSeen = 0;
 let timeoutsSeen = 0; // Reset to zero on resume or non-timeout
@@ -142,7 +145,7 @@ let simTimeoutName = null;
 // Helper - return elapsed seconds since unit started. Note that this is
 // technically seconds since unit RESUME began (when we set currentUnitStartTime)
 function elapsedSecs() {
-  return (Date.now() - Session.get('currentUnitStartTime')) / 1000.0;
+  return (Date.now() - localMongo.findOne({}).currentUnitStartTime) / 1000.0;
 }
 
 function nextChar(c) {
@@ -179,7 +182,7 @@ function beginMainCardTimeout(delay, func) {
   clearCardTimeout();
 
   timeoutFunc = function() {
-    const numRemainingLocks = Session.get('pausedLocks');
+    const numRemainingLocks = localMongo.findOne({}).pausedLocks;
     if (numRemainingLocks > 0) {
       console.log('timeout reached but there are ' + numRemainingLocks + ' locks outstanding');
     } else {
@@ -196,7 +199,10 @@ function beginMainCardTimeout(delay, func) {
   };
   timeoutDelay = delay;
   const mainCardTimeoutStart = new Date();
-  Session.set('mainCardTimeoutStart', mainCardTimeoutStart);
+  data = {
+    mainCardTimeoutStart: mainCardTimeoutStart,
+  }
+  localMongo.update({},{$set: data});
   console.log('mainCardTimeoutStart', mainCardTimeoutStart);
   timeoutName = Meteor.setTimeout(timeoutFunc, timeoutDelay);
   varLenTimeoutName = Meteor.setInterval(varLenDisplayTimeout, 400);
@@ -211,7 +217,10 @@ function resetMainCardTimeout() {
   timeoutFunc = savedFunc;
   timeoutDelay = savedDelay;
   const mainCardTimeoutStart = new Date();
-  Session.set('mainCardTimeoutStart', mainCardTimeoutStart);
+  data = {
+    mainCardTimeoutStart: mainCardTimeoutStart,
+  }
+  localMongo.update({},{$set: data});
   console.log('reset, mainCardTimeoutStart:', mainCardTimeoutStart);
   timeoutName = Meteor.setTimeout(savedFunc, savedDelay);
   varLenTimeoutName = Meteor.setInterval(varLenDisplayTimeout, 400);
@@ -221,22 +230,35 @@ function resetMainCardTimeout() {
 // re-entering a tdf for the first trial
 function restartMainCardTimeoutIfNecessary() {
   console.log('restartMainCardTimeoutIfNecessary');
-  const mainCardTimeoutStart = Session.get('mainCardTimeoutStart');
+  const mainCardTimeoutStart = localMongo.findOne({}).mainCardTimeoutStart
   if (!mainCardTimeoutStart) {
-    const numRemainingLocks = Session.get('pausedLocks')-1;
-    Session.set('pausedLocks', numRemainingLocks);
+    const numRemainingLocks = localMongo.findOne({}).pausedLocks-1;
+    data = {
+      pausedLocks: numRemainingLocks,
+    }
+    localMongo.update({},{$set: data});
     return;
   }
-  const errorReportStart = Session.get('errorReportStart');
-  Session.set('errorReportStart', null);
+  const errorReportStart = localMongo.findOne({}).errorReportStart;
+  const numRemainingLocks = localMongo.findOne({}).pausedLocks-1;
+  data = {
+    errorReportStart: null,
+  }
+  localMongo.update({},{$set: data});
   const usedDelayTime = errorReportStart - mainCardTimeoutStart;
   const remainingDelay = timeoutDelay - usedDelayTime;
   timeoutDelay = remainingDelay;
   const rightNow = new Date();
-  Session.set('mainCardTimeoutStart', rightNow);
+  data = {
+    mainCardTimeoutStart: rightNow,
+  }
+  localMongo.update({},{$set: data});
   function wrappedTimeout() {
-    const numRemainingLocks = Session.get('pausedLocks')-1;
-    Session.set('pausedLocks', numRemainingLocks);
+    const numRemainingLocks = localMongo.findOne({}).pausedLocks-1;
+    data = {
+      pausedLocks: numRemainingLocks,
+    }
+    localMongo.update({},{$set: data});
     if (numRemainingLocks <= 0) {
       if (timeoutFunc) timeoutFunc();
     } else {
@@ -249,12 +271,12 @@ function restartMainCardTimeoutIfNecessary() {
 
 // Set a special timeout to handle simulation if necessary
 function checkSimulation() {
-  if (!Session.get('runSimulation') ||
+  if (!localMongo.findOne({}).runSimulation ||
         !Roles.userIsInRole(Meteor.user(), ['admin', 'teacher'])) {
     return;
   }
 
-  const setspec = Session.get('currentTdfFile').tdfs.tutor.setspec;
+  const setspec = localMongo.findOne({}).currentTdfFile.tdfs.tutor.setspec;
 
   const simTimeout = parseInt(setspec.simTimeout || 0);
   const simCorrectProb = parseFloat(setspec.simCorrectProb || 0);
@@ -278,7 +300,7 @@ function checkSimulation() {
 // the screen forward.  This is nearly identical to the function of the same
 // name in instructions.js (where we use two similar parameters)
 function getDisplayTimeouts() {
-  const curUnit = Session.get('currentTdfUnit');
+  const curUnit = localMongo.findOne({}).currentTdfUnit;
   const session = curUnit.learningsession || null;
   return {
     'minSecs': parseInt((session ? session.displayminseconds : 0) || 0),
@@ -341,7 +363,10 @@ function leavePage(dest) {
   console.log('leaving page for dest: ' + dest);
   if (dest != '/card' && dest != '/instructions' && dest != '/voice' && document.location.pathname != '/instructions') {
     console.log('resetting subtdfindex, dest: ' + dest);
-    Session.set('subTdfIndex', null);
+    data = {
+      subTdfIndex: null
+    }
+    localMongo.update({},{$set: data});
     sessionCleanUp();
     if (window.AudioContext) {
       console.log('closing audio context');
@@ -368,33 +393,39 @@ Template.card.rendered = async function() {
       leavePage('/card');
     }
   };
-  Session.set('scoringEnabled', undefined);
+  data = {
+    scoringEnabled: undefined
+  }
+  localMongo.update({},{$set: data});
 
-  if (!Session.get('stimDisplayTypeMap')) {
+  if (!localMongo.findOne({}).stimDisplayTypeMap) {
     const stimDisplayTypeMap = await meteorCallAsync('getStimDisplayTypeMap');
-    Session.set('stimDisplayTypeMap', stimDisplayTypeMap);
+    data = localMongo.findOne({}) || {}; data.stimDisplayTypeMap =  stimDisplayTypeMap; localMongo.update({},{$set:data});
   }
 
-  const audioInputEnabled = Session.get('audioEnabled');
+  const audioInputEnabled = localMongo.findOne({}).audioEnabled;
   if (audioInputEnabled) {
-    if (!Session.get('audioInputSensitivity')) {
+    if (!localMongo.findOne({}).audioInputSensitivity) {
       // Default to 20 in case tdf doesn't specify and we're in an experiment
-      const audioInputSensitivity = parseInt(Session.get('currentTdfFile').tdfs.tutor.setspec.audioInputSensitivity) || 20;
-      Session.set('audioInputSensitivity', audioInputSensitivity);
+      const audioInputSensitivity = parseInt(localMongo.findOne({}).currentTdfFile.tdfs.tutor.setspec.audioInputSensitivity) || 20;
+      data = localMongo.findOne({}) || {}; data.audioInputSensitivity =  audioInputSensitivity; localMongo.update({},{$set:data});
     }
   }
 
-  const audioOutputEnabled = Session.get('enableAudioPromptAndFeedback');
+  const audioOutputEnabled = localMongo.findOne({}).enableAudioPromptAndFeedback;
   if (audioOutputEnabled) {
-    if (!Session.get('audioPromptSpeakingRate')) {
+    if (!localMongo.findOne({}).audioPromptSpeakingRate) {
       // Default to 1 in case tdf doesn't specify and we're in an experiment
-      const audioPromptSpeakingRate = parseFloat(Session.get('currentTdfFile').tdfs.tutor.setspec.audioPromptSpeakingRate) || 1;
-      Session.set('audioPromptSpeakingRate', audioPromptSpeakingRate);
+      const audioPromptSpeakingRate = parseFloat(localMongo.findOne({}).currentTdfFile.tdfs.tutor.setspec.audioPromptSpeakingRate) || 1;
+      data={
+        audioPromptSpeakingRate: audioPromptSpeakingRate};localMongo.update({},{$set: data})
+        ;
     }
   }
   //Gets the list of hidden items from the db on load of card. 
-  Session.set('hiddenItems', await meteorCallAsync('getHiddenItems', Meteor.userId(), Session.get('currentTdfId')));
-  const audioInputDetectionInitialized = Session.get('VADInitialized');
+  hiddenItems = await meteorCallAsync('getHiddenItems', Meteor.userId(), localMongo.findOne({}).currentTdfId);
+  data={hiddenItems: hiddenItems};
+  const audioInputDetectionInitialized = localMongo.findOne({}).VADInitialized;
 
   window.AudioContext = window.webkitAudioContext || window.AudioContext;
   window.URL = window.URL || window.webkitURL;
@@ -421,8 +452,8 @@ Template.card.events({
   'click #removeQuestion': function(e) {
     // check if the question was already reported.
     // This button only needs to fire if the user hasnt answered the question already.  
-    if(!Session.get('wasReportedForRemoval'))
-      Session.set('wasReportedForRemoval', true)
+    if(!localMongo.findOne({}).wasReportedForRemoval)
+      data = localMongo.findOne({}) || {}; data.wasReportedForRemoval = true; localMongo.update({},{$set:data});
       afterAnswerFeedbackCallback(Date.now(), 'removal', "", false, false);
   },
 
@@ -433,8 +464,8 @@ Template.card.events({
   'keypress #dialogueUserAnswer': function(e) {
     const key = e.keyCode || e.which;
     if (key == ENTER_KEY) {
-      if (!Session.get('enterKeyLock')) {
-        Session.set('enterKeyLock', true);
+      if (!localMongo.findOne({}).enterKeyLock) {
+        data = localMongo.findOne({}) || {}; data.enterKeyLock =  true; localMongo.update({},{$set:data});
         $('#dialogueUserAnswer').prop('disabled', true);
         const answer = JSON.parse(JSON.stringify(_.trim($('#dialogueUserAnswer').val()).toLowerCase()));
         $('#dialogueUserAnswer').val('');
@@ -464,13 +495,13 @@ Template.card.events({
     }
   },
   'click #confirmFeedbackSelection': function() {
-    Session.set('displayFeedback', false);
+    data = localMongo.findOne({}) || {}; data.displayFeedback =  false; localMongo.update({},{$set:data});
     checkSyllableCacheForCurrentStimFile(processUserTimesLog);  
   },
   'click #confirmFeedbackSelectionFromIndex': function(){
-    Session.set('displayFeedback', false);
-    Session.set('pausedLocks', Session.get('pausedLocks')-1);
-    Session.set('resetFeedbackSettingsFromIndex', false);
+    data = localMongo.findOne({}) || {}; data.displayFeedback =  false; localMongo.update({},{$set:data});
+    data = localMongo.findOne({}) || {}; data.pausedLocks =  localMongo.findOne({}).pausedLocks-1; localMongo.update({},{$set:data});
+    data = localMongo.findOne({}) || {}; data.resetFeedbackSettingsFromIndex =  false; localMongo.update({},{$set:data});
   },
   'click #overlearningButton': function(event) {
     event.preventDefault();
@@ -490,7 +521,7 @@ Template.card.events({
   'click .instructModalDismiss': function(event) {
     event.preventDefault();
     $('#finalInstructionsDlg').modal('hide');
-    if (Session.get('loginMode') === 'experiment') {
+    if (localMongo.findOne({}).loginMode === 'experiment') {
       // Experiment user - no where to go?
       leavePage(routeToSignin);
     } else {
@@ -506,14 +537,14 @@ Template.card.events({
 });
 
 Template.card.helpers({
-  'isExperiment': () => Session.get('loginMode') === 'experiment',
+  'isExperiment': () => localMongo.findOne({}).loginMode === 'experiment',
 
-  'isNormal': () => Session.get('loginMode') !== 'experiment',
+  'isNormal': () => localMongo.findOne({}).loginMode !== 'experiment',
 
-  'isNotInDialogueLoopStageIntroOrExit': () => Session.get('dialogueLoopStage') != 'intro' && Session.get('dialogueLoopStage') != 'exit',
+  'isNotInDialogueLoopStageIntroOrExit': () => localMongo.findOne({}).dialogueLoopStage != 'intro' && localMongo.findOne({}).dialogueLoopStage != 'exit',
 
   'voiceTranscriptionImgSrc': function() {
-    if(Session.get('recording')){
+    if(localMongo.findOne({}).recording){
       //Change graphic path;
       return 'images/mic_on.png';
     } else {
@@ -527,11 +558,11 @@ Template.card.helpers({
   },
 
   'voiceTranscriptionPromptMsg': function() {
-    if(!Session.get('recording')){
-      if(Session.get('buttonTrial')){
+    if(!localMongo.findOne({}).recording){
+      if(localMongo.findOne({}).buttonTrial){
         return 'Let me select that.';
       } else {
-        if(Session.get('recordingLocked')){
+        if(localMongo.findOne({}).recordingLocked){
           return 'I am waiting for audio to finish. Please do not speak until I am ready.';
         } else {
         return 'Let me transcribe that.';
@@ -543,9 +574,9 @@ Template.card.helpers({
 
   'interTrialMessage': () => getCurrentDeliveryParams().intertrialmessage,
 
-  'displayFeedback': () => Session.get('displayFeedback') && getCurrentDeliveryParams().allowFeedbackTypeSelect,
+  'displayFeedback': () => localMongo.findOne({}).displayFeedback && getCurrentDeliveryParams().allowFeedbackTypeSelect,
 
-  'resetFeedbackSettingsFromIndex': () => Session.get('resetFeedbackSettingsFromIndex'),
+  'resetFeedbackSettingsFromIndex': () => localMongo.findOne({}).resetFeedbackSettingsFromIndex,
 
   'username': function() {
     if (!haveMeteorUser()) {
@@ -556,28 +587,27 @@ Template.card.helpers({
     }
   },
 
-  'ReviewStudyCountdown': () => Session.get('ReviewStudyCountdown'),
+  'ReviewStudyCountdown': () => localMongo.findOne({}).ReviewStudyCountdown,
 
   'subWordClozeCurrentQuestionExists': function() {
-    console.log('subWordClozeCurrentQuestionExists: ' + (typeof(Session.get('clozeQuestionParts')) != 'undefined'));
-    return typeof(Session.get('clozeQuestionParts')) != 'undefined' && Session.get('clozeQuestionParts') !== null;
+    return typeof(localMongo.findOne({}).clozeQuestionParts != 'undefined' && localMongo.findOne({}).clozeQuestionParts !== null);
   },
 
   // For now we're going to assume syllable hints are contiguous. TODO: make this more generalizable
-  'subWordParts': () => Session.get('clozeQuestionParts'),
+  'subWordParts': () => localMongo.findOne({}).clozeQuestionParts,
 
   'clozeText': function() {
-    const clozeText = Session.get('currentDisplay') ? Session.get('currentDisplay').clozeText : undefined;
+    const clozeText = localMongo.findOne({}).currentDisplay ? localMongo.findOne({}).currentDisplay.clozeText : undefined;
     return clozeText;
   },
 
   'text': function() {
-    const text = Session.get('currentDisplay') ? Session.get('currentDisplay').text : undefined;
+    const text = localMongo.findOne({}).currentDisplay ? localMongo.findOne({}).currentDisplay.text : undefined;
     return text;
   },
 
   'curImgSrc': function() {
-    const curImgSrc = Session.get('currentDisplay') ? Session.get('currentDisplay').imgSrc : undefined;
+    const curImgSrc = localMongo.findOne({}).currentDisplay ? localMongo.findOne({}).currentDisplay.imgSrc : undefined;
     if (curImgSrc) {
       return imagesDict[curImgSrc].src;
     } else {
@@ -586,66 +616,70 @@ Template.card.helpers({
   },
 
   'curVideoSrc': function() {
-    const curVideoSrc = Session.get('currentDisplay') ? Session.get('currentDisplay').videoSrc : undefined;
+    const curVideoSrc = localMongo.findOne({}).currentDisplay ? localMongo.findOne({}).currentDisplay.videoSrc : undefined;
     return curVideoSrc;
   },
 
   'displayAnswer': function() {
-    return Answers.getDisplayAnswerText(Session.get('currentAnswer'));
+
+    return Answers.getDisplayAnswerText(currentAnswer);
   },
 
-  'rawAnswer': ()=> Session.get('currentAnswer'),
+  'rawAnswer': function(){
 
-  'currentProgress': () => Session.get('questionIndex'),
+    return currentAnswer
+  },
 
-  'displayReady': () => Session.get('displayReady'),
+  'currentProgress': () => localMongo.findOne({}).questionIndex,
+
+  'displayReady': () => localMongo.findOne({}).displayReady,
 
   'displayReadyConverter': function(displayReady) {
     return displayReady ? '' : 'none';
   },
 
   'textCard': function() {
-    return !!(Session.get('currentDisplay')) && !!(Session.get('currentDisplay').text);
+    return !!(localMongo.findOne({}).currentDisplay && !!localMongo.findOne({}).currentDisplay.text);
   },
 
   'audioCard': function() {
-    return !!(Session.get('currentDisplay')) && !!(Session.get('currentDisplay').audioSrc);
+    return !!(localMongo.findOne({}).currentDisplay && !!localMongo.findOne({}).currentDisplay.audioSrc);
   },
 
   'speakerCardPosition': function() {
     //centers the speaker icon if there are no displays. 
-    if(Session.get('currentDisplay') && 
-        !Session.get('currentDisplay').imgSrc && 
-        !Session.get('currentDisplay').videoSrc && 
-        !Session.get('currentDisplay').clozeText && 
-        !Session.get('currentDisplay').text)
+    if(localMongo.findOne({}).currentDisplay && 
+        !localMongo.findOne({}).currentDisplay.imgSrc && 
+        !localMongo.findOne({}).currentDisplay.videoSrc && 
+        !localMongo.findOne({}).currentDisplay.clozeText && 
+        !localMongo.findOne({}).currentDisplay.text)
       return `col-md-12 text-center`;
     return `col-md-1`
   },
 
   'imageCard': function() {
-    return !!(Session.get('currentDisplay')) && !!(Session.get('currentDisplay').imgSrc);
+    return !!(localMongo.findOne({}).currentDisplay && !!localMongo.findOne({}).currentDisplay.imgSrc);
   },
 
   'videoCard': function() {
-    return !!(Session.get('currentDisplay')) && !!(Session.get('currentDisplay').videoSrc);
+    return !!(localMongo.findOne({}).currentDisplay && !!localMongo.findOne({}).currentDisplay.videoSrc);
   },
 
   'clozeCard': function() {
-    return !!(Session.get('currentDisplay')) && !!(Session.get('currentDisplay').clozeText);
+    return !!(localMongo.findOne({}).currentDisplay && !!localMongo.findOne({}).currentDisplay.clozeText);
   },
 
   'textOrClozeCard': function() {
-    return !!(Session.get('currentDisplay')) &&
-      (!!(Session.get('currentDisplay').text) || !!(Session.get('currentDisplay').clozeText));
+    return !!(localMongo.findOne({}).currentDisplay) &&
+      (!!(localMongo.findOne({}).currentDisplay.text) || !!localMongo.findOne({}).currentDisplay.clozeText);
   },
 
   'anythingButAudioCard': function() {
-    return !!(Session.get('currentDisplay')) &&
-            (!!(Session.get('currentDisplay').text) ||
-            !!(Session.get('currentDisplay').clozeText) ||
-            !!(Session.get('currentDisplay').imgSrc) ||
-            !!(Session.get('currentDisplay').videoSrc));
+    return !!(localMongo.findOne({}).currentDisplay) &&
+            (!!(localMongo.findOne({}).currentDisplay.text) ||
+            !!(localMongo.findOne({}).currentDisplay.clozeText) ||
+            !!(localMongo.findOne({}).currentDisplay.imgSrc) ||
+            !!(localMongo.findOne({}).currentDisplay.videoSrc));
   },
 
   'imageResponse': function() {
@@ -683,23 +717,23 @@ Template.card.helpers({
 
   'fontSizeClass': function() {
     // Take advantage of Bootstrap h1-h5 classes
-    const hSize = Session.get('currentDeliveryParams') ? Session.get('currentDeliveryParams').fontsize.toString() : 2;
+    const hSize = localMongo.findOne({}).currentDeliveryParams ? localMongo.findOne({}).currentDeliveryParams.fontsize.toString() : 2;
     return 'h' + hSize;
   },
 
-  'skipstudy': () => Session.get('currentDeliveryParams').skipstudy,
+  'skipstudy': () => localMongo.findOne({}).currentDeliveryParams.skipstudy,
 
-  'buttonTrial': () => Session.get('buttonTrial'),
+  'buttonTrial': () => localMongo.findOne({}).buttonTrial,
 
-  'notButtonTrialOrInDialogueLoop': () => !Session.get('buttonTrial') || DialogueUtils.isUserInDialogueLoop(),
+  'notButtonTrialOrInDialogueLoop': () => !localMongo.findOne({}).buttonTrial || DialogueUtils.isUserInDialogueLoop(),
 
   'buttonList': function() {
-    return Session.get('buttonList');
+    return localMongo.findOne({}).buttonList;
   },
 
   'buttonListImageRows': function() {
-    const items = Session.get('buttonList');
-    const numColumns = Session.get('currentDeliveryParams').numButtonListImageColumns;
+    const items = localMongo.findOne({}).buttonList;
+    const numColumns = localMongo.findOne({}).currentDeliveryParams.numButtonListImageColumns;
     const numRows = Math.ceil(items.length / numColumns);
     const arrayHolder = [];
     for (let i=0; i<numRows; i++) {
@@ -714,34 +748,35 @@ Template.card.helpers({
   },
 
   'haveScrollList': function() {
-    return _.intval(Session.get('scrollListCount')) > 0;
+    return _.intval(localMongo.findOne({}).scrollListCount) > 0;
   },
 
   'scrollList': function() {
-    return scrollList.find({'temp': 1, 'justAdded': 0}, {sort: {idx: 1}});
+
+    return localMongo.find({'scrollList.temp': 1, 'scrollList.justAdded': 0}, {sort: {idx: 1}}).scrollList;
   },
 
-  'currentScore': () => Session.get('currentScore'),
+  'currentScore': () => localMongo.findOne({}).currentScore,
 
   'haveDispTimeout': function() {
     const disp = getDisplayTimeouts();
     return (disp.minSecs > 0 || disp.maxSecs > 0);
   },
 
-  'inResume': () => Session.get('inResume') && !Session.get('displayReady'),
+  'inResume': () => localMongo.findOne({}).inResume && localMongo.findOne({}).displayReady,
 
-  'audioEnabled': () => Session.get('audioEnabled'),
+  'audioEnabled': () => localMongo.findOne({}).audioEnabled,
 
-  'showDialogueHints': () => Session.get('showDialogueHints'),
+  'showDialogueHints': () => localMongo.findOne({}).showDialogueHints,
 
-  'dialogueCacheHint': () => Session.get('dialogueCacheHint'),
+  'dialogueCacheHint': () => localMongo.findOne({}).dialogueCacheHint,
 
-  'questionIsRemovable': () => Session.get('numVisibleCards') > 3 && getCurrentDeliveryParams().allowstimulusdropping,
+  'questionIsRemovable': () => localMongo.findOne({}).numVisibleCards > 3 && getCurrentDeliveryParams().allowstimulusdropping,
 });
 
 function getResponseType() {
   // If we get called too soon, we just use the first cluster
-  const clusterIndex = Session.get('clusterIndex') || 0;
+  const clusterIndex = localMongo.findOne({}).clusterIndex || 0;
   const cluster = getStimCluster(clusterIndex);
   const type = cluster.stims[0].itemResponseType || 'text';
 
@@ -778,12 +813,12 @@ function clearAudioContextAndRelatedVariables() {
   streamSource = null;
   Meteor.clearInterval(pollMediaDevicesInterval);
   pollMediaDevicesInterval = null;
-  Session.get('VADInitialized', false);
+  localMongo.findOne({}).VADInitialized = false;
 }
 
 function reinitializeMediaDueToDeviceChange() {
   // This will be decremented on startUserMedia and the main card timeout will be reset due to card being reloaded
-  Session.set('pausedLocks', Session.get('pausedLocks')+1);
+  data = localMongo.findOne({}) || {}; data.pausedLocks =  localMongo.findOne({}).pausedLocks+1; localMongo.update({},{$set:data});
   clearAudioContextAndRelatedVariables();
   const errMsg = 'It appears you may have unplugged your microphone.  \
     Please plug it back then click ok to reinitialize audio input.';
@@ -884,7 +919,7 @@ function preloadImages() {
 
 function getCurrentStimDisplaySources(filterPropertyName='clozeStimulus') {
   const displaySrcs = [];
-  const stims = Session.get('currentStimuliSet');
+  const stims = localMongo.findOne({}).currentStimuliSet;
   for (const stim of stims) {
     if (stim[filterPropertyName]) {
       displaySrcs.push(stim[filterPropertyName]);
@@ -910,23 +945,23 @@ function preloadStimuliFiles() {
 }
 
 function checkUserAudioConfigCompatability(){
-  const audioPromptMode = Session.get('audioPromptMode');
+  const audioPromptMode = localMongo.findOne({}).audioPromptMode;
   if (curStimHasImageDisplayType() && ((audioPromptMode == 'all' || audioPromptMode == 'question'))) {
-    console.log('PANIC: Unable to process TTS for image response', Session.get('currentRootTdfId'));
+    console.log('PANIC: Unable to process TTS for image response', localMongo.findOne({}).currentRootTdfId);
     alert('Question reading not supported on this TDF. Please disable and try again.');
     leavePage('/profile');
   }
 }
 
 function curStimHasSoundDisplayType() {
-  const currentStimuliSetId = Session.get('currentStimuliSetId');
-  const stimDisplayTypeMap = Session.get('stimDisplayTypeMap');
+  const currentStimuliSetId = localMongo.findOne({}).currentStimuliSetId;
+  const stimDisplayTypeMap = localMongo.findOne({}).stimDisplayTypeMap;
   return currentStimuliSetId && stimDisplayTypeMap ? stimDisplayTypeMap[currentStimuliSetId].hasAudio : false;
 }
 
 function curStimHasImageDisplayType() {
-  const currentStimuliSetId = Session.get('currentStimuliSetId');
-  const stimDisplayTypeMap = Session.get('stimDisplayTypeMap');
+  const currentStimuliSetId = localMongo.findOne({}).currentStimuliSetId;
+  const stimDisplayTypeMap = localMongo.findOne({}).stimDisplayTypeMap;
   return currentStimuliSetId && stimDisplayTypeMap ? stimDisplayTypeMap[currentStimuliSetId].hasImage : false;
 }
 
@@ -942,8 +977,8 @@ function curStimHasImageDisplayType() {
 // 3. wrongButtonLimit - The number of WRONG buttons to display (so final
 //    button is wrongButtonLimit + 1 for the correct answer).
 function setUpButtonTrial() {
-  const currUnit = Session.get('currentTdfUnit');
-  const deliveryParams = Session.get('currentDeliveryParams');
+  const currUnit = localMongo.findOne({}).currentTdfUnit;
+  const deliveryParams = localMongo.findOne({}).currentDeliveryParams;
   let buttonChoices = [];
   const buttonOrder = currUnit.buttonorder ? currUnit.buttonorder.trim().toLowerCase() : "";
   const buttonOptions = currUnit.buttonOptions ? currUnit.buttonOptions.trim() : "";
@@ -966,7 +1001,7 @@ function setUpButtonTrial() {
     throw new Error('Bad TDF/Stim file - no buttonOptions and no false responses');
   }
 
-  const currentAnswer = Session.get('originalAnswer');
+  const currentAnswer = localMongo.findOne({}).originalAnswer;
   const correctAnswer = Answers.getDisplayAnswerText(currentAnswer);
   const wrongButtonLimit = deliveryParams.falseAnswerLimit;
   if (wrongButtonLimit) {
@@ -1013,7 +1048,7 @@ function setUpButtonTrial() {
     });
     curChar = nextChar(curChar);
   });
-  Session.set('buttonList', curButtonList);
+  data = localMongo.findOne({}) || {}; data.buttonList =  curButtonList; localMongo.update({},{$set:data});
 }
 
 // Return the list of false responses corresponding to the current question/answer
@@ -1037,8 +1072,8 @@ function getCurrentClusterAndStimIndices() {
   console.log('getCurrentClusterAndStimIndices: ' + !engine);
 
   if (!engine) {
-    console.log('getCurrentClusterAndStimIndices, no engine: ' + Session.get('clusterIndex'));
-    curClusterIndex = Session.get('clusterIndex');
+    console.log('getCurrentClusterAndStimIndices, no engine: ' + localMongo.findOne({}).clusterIndex);
+    curClusterIndex = localMongo.findOne({}).clusterIndex;
   } else {
     const currentQuest = engine.findCurrentCardInfo();
     curClusterIndex = currentQuest.clusterIndex;
@@ -1066,7 +1101,7 @@ function playCurrentSound(onEndCallback) {
   // We currently only play one sound at a time
   clearPlayingSound();
 
-  const currentAudioSrc = Session.get('currentDisplay').audioSrc;
+  const currentAudioSrc = localMongo.findOne({}).currentDisplay.audioSrc;
   console.log('currentAudioSrc: ' + currentAudioSrc);
 
   // Reset sound and play it
@@ -1102,8 +1137,10 @@ function handleUserForceCorrectInput(e, source) {
       }
     } else {
       console.log('force correct non n type test');
-      const answer = Answers.getDisplayAnswerText(Session.get('currentAnswer')).toLowerCase();
-      const originalAnswer = Answers.getDisplayAnswerText(Session.get('originalAnswer')).toLowerCase();
+      const t = Template.instance();
+      currentAnswer = t.curAnswer.get();
+      const answer = Answers.getDisplayAnswerText(currentAnswer).toLowerCase();
+      const originalAnswer = Answers.getDisplayAnswerText(localMongo.findOne({}).originalAnswer).toLowerCase();
       if (entry === answer || entry === originalAnswer) {
         console.log('force correct, correct answer');
         const afterUserFeedbackForceCorrectCbHolder = afterUserFeedbackForceCorrectCb;
@@ -1140,7 +1177,7 @@ function handleUserInput(e, source, simAnswerCorrect) {
   } else if (source === 'buttonClick' || source === 'simulation' || source === 'voice') {
     // to save space we will just go ahead and act like it was a key press.
     key = ENTER_KEY;
-    Session.set('userAnswerSubmitTimestamp', Date.now());
+    data = localMongo.findOne({}) || {}; data.userAnswerSubmitTimestamp =  Date.now(); localMongo.update({},{$set:data});
   }
 
   // If we haven't seen the correct keypress, then we want to reset our
@@ -1158,9 +1195,9 @@ function handleUserInput(e, source, simAnswerCorrect) {
   // We've entered input before the timeout, meaning we need to decrement the pausedLocks before we lose
   // track of the fact that we were counting down to a recalculated delay after being on the error report modal
   if (timeoutName) {
-    if (Session.get('pausedLocks')>0) {
-      const numRemainingLocks = Session.get('pausedLocks')-1;
-      Session.set('pausedLocks', numRemainingLocks);
+    if (localMongo.findOne({}).pausedLocks>0) {
+      const numRemainingLocks = localMongo.findOne({}).pausedLocks-1;
+      data = localMongo.findOne({}) || {}; data.pausedLocks =  numRemainingLocks; localMongo.update({},{$set:data});
     }
   }
   clearCardTimeout();
@@ -1197,7 +1234,7 @@ function handleUserInput(e, source, simAnswerCorrect) {
 // it is true or false we know this is part of a simulation call
 async function userAnswerFeedback(userAnswer, isTimeout, simCorrect, afterAnswerFeedbackCb) {
   const isButtonTrial = getButtonTrial();
-  const setspec = !isButtonTrial ? Session.get('currentTdfFile').tdfs.tutor.setspec : undefined;
+  const setspec = !isButtonTrial ? localMongo.findOne({}).currentTdfFile.tdfs.tutor.setspec : undefined;
   let isCorrectAccumulator = null;
   let feedbackForAnswer = null;
   let userAnswerWithTimeout = null;
@@ -1225,17 +1262,17 @@ async function userAnswerFeedback(userAnswer, isTimeout, simCorrect, afterAnswer
 
   const afterAnswerFeedbackCbWithTimeout = afterAnswerFeedbackCb.bind(null, isTimeout);
   const afterAnswerAssessmentCbWithArgs = afterAnswerAssessmentCb.bind(null,
-      userAnswer, isCorrectAccumulator, feedbackForAnswer, afterAnswerFeedbackCbWithTimeout);
+      userAnswer, isCorrectAccumulator, feedbackForAnswer, afterAnswerFeedbackCbWithTimeout );
 
   // Answer assessment ->
   if (userAnswerWithTimeout != null) {
     displayAnswer = "";
-    if(Session.get('hintLevel') && Session.get('currentAnswerSyllables')){
-      displayedHintLevel = Session.get('hintLevel') || 0;
-      answerSyllables = Session.get('currentAnswerSyllables').syllableArray || "";
+    if(localMongo.findOne({}).hintLevel && localMongo.findOne({}).currentAnswerSyllables){
+      displayedHintLevel = localMongo.findOne({}).hintLevel || 0;
+      answerSyllables = localMongo.findOne({}).currentAnswerSyllables.syllableArray || "";
       displayAnswer = answerSyllables.slice(0, displayedHintLevel).join("");
     }
-    Answers.answerIsCorrect(userAnswerWithTimeout, Session.get('currentAnswer'), Session.get('originalAnswer'),
+    Answers.answerIsCorrect(userAnswerWithTimeout, currentAnswer, localMongo.findOne({}).originalAnswer,
     displayAnswer,setspec, afterAnswerAssessmentCbWithArgs);
   } else {
     afterAnswerAssessmentCbWithArgs(null);
@@ -1244,7 +1281,7 @@ async function userAnswerFeedback(userAnswer, isTimeout, simCorrect, afterAnswer
 
 async function writeCurrentToScrollList(userAnswer, isTimeout, simCorrect, justAdded) {
   // We only store scroll history if it has been turned on in the TDF
-  const params = Session.get('currentDeliveryParams');
+  const params = localMongo.findOne({}).currentDeliveryParams;
   if (!params.showhistory) {
     return;
   }
@@ -1255,10 +1292,11 @@ async function writeCurrentToScrollList(userAnswer, isTimeout, simCorrect, justA
 
   let setspec = null;
   if (!getButtonTrial()) {
-    setspec = Session.get('currentTdfFile').tdfs.tutor.setspec;
+    setspec = localMongo.findOne({}).currentTdfFile.tdfs.tutor.setspec;
   }
-
-  const trueAnswer = Answers.getDisplayAnswerText(Session.get('currentAnswer'));
+  const t = Template.instance();
+  currentAnswer = t.curAnswer.get();
+  const trueAnswer = Answers.getDisplayAnswerText(currentAnswer);
 
   let userAnswerWithTimeout = null;
 
@@ -1276,7 +1314,8 @@ async function writeCurrentToScrollList(userAnswer, isTimeout, simCorrect, justA
     // Simulation! We know what they did
     isCorrect = simCorrect;
     historyUserAnswer = 'Simulated answer where correct==' + simCorrect;
-    historyCorrectMsg = Answers.getDisplayAnswerText(Session.get('currentAnswer'));
+
+    historyCorrectMsg = Answers.getDisplayAnswerText(currentAnswer);
   } else {
     // "Regular" answers
     userAnswerWithTimeout = userAnswer;
@@ -1294,28 +1333,32 @@ async function writeCurrentToScrollList(userAnswer, isTimeout, simCorrect, justA
       }
     }
 
-    const currCount = _.intval(Session.get('scrollListCount'));
-    const currentQuestion = Session.get('currentDisplay').text || Session.get('currentDisplay').clozeText;
-
-    scrollList.insert({
-      'temp': 1, // Deleted when clearing
-      'justAdded': justAdded, // All 1's set to 0 on next question
-      'idx': currCount, // Our ordering field
-      'userAnswer': historyUserAnswer,
-      'answer': trueAnswer,
-      'shownToUser': historyCorrectMsg,
-      'question': currentQuestion,
-      'userCorrect': isCorrect,
+    const currCount = _.intval(localMongo.findOne({}).scrollListCount);
+    const currentQuestion = localMongo.findOne({}).currentDisplay.text ||localMongo.findOne({}).currentDisplay.clozeText;
+    data = {
+      scrollList: {
+        'temp': 1, // Deleted when clearing
+        'justAdded': justAdded, // All 1's set to 0 on next question
+        'idx': currCount, // Our ordering field
+        'userAnswer': historyUserAnswer,
+        'answer': trueAnswer,
+        'shownToUser': historyCorrectMsg,
+        'question': currentQuestion,
+        'userCorrect': isCorrect,
+      }
+    }
+    localMongo.insert({data  
     }, function(err) {
       if (err) {
         console.log('ERROR inserting scroll list member:', displayify(err));
       }
-      Session.set('scrollListCount', currCount + 1);
+      data = localMongo.findOne({}) || {}; data.scrollListCount =  currCount + 1; localMongo.update({},{$set:data});
     });
   };
 
   if (userAnswerWithTimeout != null) {
-    Answers.answerIsCorrect(userAnswerWithTimeout, Session.get('currentAnswer'), Session.get('originalAnswer'),
+
+    Answers.answerIsCorrect(userAnswerWithTimeout, currentAnswer, localMongo.findOne({}).originalAnswer,
         setspec, afterAnswerAssessment);
   } else {
     afterAnswerAssessment(null);
@@ -1323,18 +1366,18 @@ async function writeCurrentToScrollList(userAnswer, isTimeout, simCorrect, justA
 }
 
 function clearScrollList() {
-  scrollList.remove({'temp': 1});
-  Session.set('scrollListCount', 0);
+  localMongo.remove({'scrollList.temp': 1});
+  data = localMongo.findOne({}) || {}; data.scrollListCount =  0; localMongo.update({},{$set:data});
 }
 
 
 function afterAnswerAssessmentCb(userAnswer, isCorrect, feedbackForAnswer, afterAnswerFeedbackCb, correctAndText) {
-  Session.set('isRefutation', undefined);
+  data = localMongo.findOne({}) || {}; data.isRefutation =  undefined; localMongo.update({},{$set:data});
   if (isCorrect == null && correctAndText != null) {
     isCorrect = correctAndText.isCorrect;
   }
   if (correctAndText.matchText.split(' ')[0] != 'Incorrect.' && !isCorrect && userAnswer != ''){
-    Session.set('isRefutation', true);
+    data = localMongo.findOne({}) || {}; data.isRefutation =  true; localMongo.update({},{$set:data});
   }
 
   const afterAnswerFeedbackCbBound = afterAnswerFeedbackCb.bind(null, isCorrect);
@@ -1345,9 +1388,9 @@ function afterAnswerAssessmentCb(userAnswer, isCorrect, feedbackForAnswer, after
     // copy it to the Session object for template updates
     const {correctscore, incorrectscore} = currentDeliveryParams;
 
-    const oldScore = Session.get('currentScore');
+    const oldScore = localMongo.findOne({}).currentScore;
     const newScore = oldScore + (isCorrect ? correctscore : -incorrectscore);
-    Session.set('currentScore', newScore);
+    data = localMongo.findOne({}) || {}; data.currentScore =  newScore; localMongo.update({},{$set:data});
   }
   const testType = getTestType();
   const isDrill = (testType === 'd' || testType === 'm' || testType === 'n');
@@ -1360,7 +1403,9 @@ function afterAnswerAssessmentCb(userAnswer, isCorrect, feedbackForAnswer, after
     };
     if (currentDeliveryParams.feedbackType == 'dialogue' && !isCorrect) {
       speechTranscriptionTimeoutsSeen = 0;
-      initiateDialogue(userAnswer, afterAnswerFeedbackCbBound, showUserFeedbackBound);
+      const t = Template.instance();
+      currentAnswer = t.currentAnswer.get();
+      initiateDialogue(userAnswer, afterAnswerFeedbackCbBound, showUserFeedbackBound, currentAnswer);
     } else {
       showUserFeedbackBound();
     }
@@ -1378,7 +1423,7 @@ async function showUserFeedback(isCorrect, feedbackMessage, afterAnswerFeedbackC
   if (!isCorrect && isButtonTrial && getResponseType() == 'image') {
     $('#UserInteraction').removeClass('text-align alert alert-success alert-danger').html('');
     const buttonImageFeedback = 'Incorrect.  The correct response is displayed below.';
-    const correctImageSrc = Session.get('originalAnswer');
+    const correctImageSrc = localMongo.findOne({}).originalAnswer;
     $('#UserInteraction').html('<p class="text-align alert alert-danger">' + buttonImageFeedback +
       '</p><img style="background: url(' + correctImageSrc +
       '); background-size:100%; background-repeat: no-repeat;" disabled="" \
@@ -1396,7 +1441,7 @@ async function showUserFeedback(isCorrect, feedbackMessage, afterAnswerFeedbackC
             .text('Continuing in: ')
             .show();
           var countDownStart = new Date().getTime();
-          if(Session.get('isRefutation') && getCurrentDeliveryParams().refutationstudy){
+          if(localMongo.findOne({}).isRefutation && getCurrentDeliveryParams().refutationstudy){
             countDownStart += getCurrentDeliveryParams().refutationstudy;
           }
           else{
@@ -1412,17 +1457,17 @@ async function showUserFeedback(isCorrect, feedbackMessage, afterAnswerFeedbackC
             }
             catch{
               Meteor.clearInterval(CountdownTimerInterval);
-              Session.set('CurIntervalId', undefined);
+              data = localMongo.findOne({}) || {}; data.CurIntervalId =  undefined; localMongo.update({},{$set:data});
             }
     
             // If the count down is finished, end interval and clear CountdownTimer
             if (distance < 0) {
               Meteor.clearInterval(CountdownTimerInterval);
               document.getElementById("CountdownTimer").innerHTML = "";
-              Session.set('CurIntervalId', undefined);
+              data = localMongo.findOne({}) || {}; data.CurIntervalId =  undefined; localMongo.update({},{$set:data});
             }
           }, 100);
-          Session.set('CurIntervalId', CountdownTimerInterval);
+          data = localMongo.findOne({}) || {}; data.CurIntervalId =  CountdownTimerInterval; localMongo.update({},{$set:data});
         }
   }
 
@@ -1430,11 +1475,11 @@ async function showUserFeedback(isCorrect, feedbackMessage, afterAnswerFeedbackC
 
   // If incorrect answer for a drill on a sound not after a dialogue loop,
   // we need to replay the sound, after the optional audio feedback delay time
-  if (!!(Session.get('currentDisplay').audioSrc) && !isCorrect) {
+  if (!!(localMongo.findOne({}).currentDisplay.audioSrc) && !isCorrect) {
     setTimeout(function() {
       console.log('playing sound after timeuntilaudiofeedback', new Date());
       playCurrentSound();
-    }, Session.get('currentDeliveryParams').timeuntilaudiofeedback);
+    }, localMongo.findOne({}).currentDeliveryParams.timeuntilaudiofeedback);
   }
 
   // forceCorrection is now part of user interaction - we always clear the
@@ -1445,8 +1490,8 @@ async function showUserFeedback(isCorrect, feedbackMessage, afterAnswerFeedbackC
   // * we are NOT in a sim
 
   const isForceCorrectTrial = getTestType() === 'm' || getTestType() === 'n';
-  const doForceCorrect = (!isCorrect && !Session.get('runSimulation') &&
-    (Session.get('currentDeliveryParams').forceCorrection || isForceCorrectTrial));
+  const doForceCorrect = (!isCorrect && !localMongo.findOne({}).runSimulation &&
+    (localMongo.findOne({}).currentDeliveryParams.forceCorrection || isForceCorrectTrial));
   const doClearForceCorrectBound = doClearForceCorrect.bind(null, doForceCorrect, afterAnswerFeedbackCbBound);
   Tracker.afterFlush(doClearForceCorrectBound);
 }
@@ -1458,11 +1503,11 @@ function doClearForceCorrect(doForceCorrect, afterAnswerFeedbackCbBound) {
     $('#forceCorrectionEntry').show();
 
     if (getTestType() === 'n') {
-      const prompt = Session.get('currentDeliveryParams').forcecorrectprompt;
+      const prompt = localMongo.findOne({}).currentDeliveryParams.forcecorrectprompt;
       $('#forceCorrectGuidance').text(prompt);
       speakMessageIfAudioPromptFeedbackEnabled(prompt, 'feedback');
 
-      const forcecorrecttimeout = Session.get('currentDeliveryParams').forcecorrecttimeout;
+      const forcecorrecttimeout = localMongo.findOne({}).currentDeliveryParams.forcecorrecttimeout;
       beginMainCardTimeout(forcecorrecttimeout, afterAnswerFeedbackCbBound);
     } else {
       const prompt = 'Please enter the correct answer to continue';
@@ -1485,28 +1530,30 @@ function doClearForceCorrect(doForceCorrect, afterAnswerFeedbackCbBound) {
 
 async function giveAnswer(){
   if(Meteor.isDevelopment){
-    curAnswer = Session.get('currentAnswer').split('~')[0];
+
+    curAnswer = currentAnswer.split('~')[0];
     handleUserInput({keyCode: ENTER_KEY, currentTarget: { name: curAnswer } }, 'buttonClick');
   }
 }
 
 async function giveWrongAnswer(){
   if(Meteor.isDevelopment){
-    curAnswer = Session.get('currentAnswer') + '123456789321654986321';
+
+    curAnswer = currentAnswer + '123456789321654986321';
     $('#userAnswer').val(curAnswer);
-    Session.set('skipTimeout', true)
+    data = localMongo.findOne({}) || {}; data.skipTimeout =  true; localMongo.update({},{$set:data});
     handleUserInput({keyCode: ENTER_KEY}, 'keypress');
   }
 }
 
 async function afterAnswerFeedbackCallback(trialEndTimeStamp, source, userAnswer, isTimeout, isCorrect) {
   const removalShortcut = afterAnswerFeedbackCallback.bind(null, trialEndTimeStamp, source, userAnswer, isTimeout, isCorrect);
-  const wasReportedForRemoval = Session.get('wasReportedForRemoval');
-  Session.set("reviewTimeoutCompletedFirst", false);
+  const wasReportedForRemoval = localMongo.findOne({}).wasReportedForRemoval;
+  data = localMongo.findOne({}) || {}; data.reviewTimeoutCompletedFirst =  false; localMongo.update({},{$set:data});
 
   if(!wasReportedForRemoval){
     $('#removeQuestion').on('click', null, null, function() {
-      Session.set('wasReportedForRemoval', true);
+      data = localMongo.findOne({}) || {}; data.wasReportedForRemoval =  true; localMongo.update({},{$set:data});
       removalShortcut();
     });
   }
@@ -1515,20 +1562,20 @@ async function afterAnswerFeedbackCallback(trialEndTimeStamp, source, userAnswer
   }
 
   const testType = getTestType();
-  const deliveryParams = Session.get('currentDeliveryParams');
+  const deliveryParams = localMongo.findOne({}).currentDeliveryParams;
 
   let dialogueHistory;
-  if (Session.get('dialogueHistory')) {
-    dialogueHistory = JSON.parse(JSON.stringify(Session.get('dialogueHistory')));
+  if (localMongo.findOne({}).dialogueHistory) {
+    dialogueHistory = JSON.parse(JSON.stringify(localMongo.findOne({}).dialogueHistory));
   }
   const reviewTimeout = wasReportedForRemoval ? 2000 : getReviewTimeout(testType, deliveryParams, isCorrect, dialogueHistory);
 
   // Stop previous timeout, log response data, and clear up any other vars for next question
   clearCardTimeout();
 
-  Session.set('feedbackTimeoutBegins', Date.now())
+  data = localMongo.findOne({}) || {}; data.feedbackTimeoutBegins =  Date.now(); localMongo.update({},{$set:data});
   const timeout = Meteor.setTimeout(async function() {
-    Session.set('CurTimeoutId', undefined);
+    data = localMongo.findOne({}) || {}; data.CurTimeoutId =  undefined; localMongo.update({},{$set:data});
     let reviewEnd = Date.now();
     const answerLogRecord = gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect,
         reviewEnd, testType, deliveryParams, dialogueHistory, wasReportedForRemoval);
@@ -1538,17 +1585,17 @@ async function afterAnswerFeedbackCallback(trialEndTimeStamp, source, userAnswer
     await engine.cardAnswered(isCorrect, practiceTime);
     const answerLogAction = isTimeout ? '[timeout]' : 'answer';
     //if dialogueStart is set that means the user went through interactive dialogue
-    Session.set('dialogueTotalTime', undefined);
-    Session.set('dialogueHistory', undefined);
+    data = localMongo.findOne({}) || {}; data.dialogueTotalTime =  undefined; localMongo.update({},{$set:data});
+    data = localMongo.findOne({}) || {}; data.dialogueHistory =  undefined; localMongo.update({},{$set:data});
     const newExperimentState = {
       lastAction: answerLogAction,
       lastActionTimeStamp: Date.now(),
     };
     if (getTestType() !== 'i') {
-      const overallOutcomeHistory = Session.get('overallOutcomeHistory');
+      const overallOutcomeHistory = localMongo.findOne({}).overallOutcomeHistory;
       overallOutcomeHistory.push(isCorrect ? 1 : 0);
       newExperimentState.overallOutcomeHistory = overallOutcomeHistory;
-      Session.set('overallOutcomeHistory', overallOutcomeHistory);
+      data = localMongo.findOne({}) || {}; data.overallOutcomeHistory =  overallOutcomeHistory; localMongo.update({},{$set:data});
     }
     console.log('writing answerLogRecord to history:', answerLogRecord);
     if(Meteor.user().profile === undefined || !Meteor.user().profile.impersonating){
@@ -1584,24 +1631,24 @@ async function afterAnswerFeedbackCallback(trialEndTimeStamp, source, userAnswer
     }
     hideUserFeedback();
     $('#userAnswer').val('');
-    Session.set('feedbackTimeoutEnds', Date.now())
-    if(Session.get('unitType') != "model" || Session.get("engineIndices")){
+    data = localMongo.findOne({}) || {}; data.feedbackTimeoutEnds =  Date.now(); localMongo.update({},{$set:data});
+    if(localMongo.findOne({}).unitType != "model" || localMongo.findOne({}).engineIndices){
       console.log("engineIndicesCompletedFirst");
       prepareCard();
     }
     else{
-      Session.set("reviewTimeoutCompletedFirst", true);
+      data = localMongo.findOne({}) || {}; data.reviewTimeoutCompletedFirst =  true; localMongo.update({},{$set:data});
     }
   }, reviewTimeout)
 
-  Session.set('CurTimeoutId', timeout)
+  data = localMongo.findOne({}) || {}; data.CurTimeoutId =  timeout; localMongo.update({},{$set:data});
   
   if(!wasReportedForRemoval){
-    Session.set('engineIndexCalculations', Date.now());
-    if(Session.get('unitType') == "model")
-      Session.set('engineIndices', await engine.calculateIndices());
-    else
-      Session.set('engineIndices', undefined);
+    data = localMongo.findOne({}) || {}; data.engineIndexCalculations =  Date.now(); localMongo.update({},{$set:data});
+    if(localMongo.findOne({}).unitType == "model")
+      data = localMongo.findOne({}) || {}; data.engineIndices =  await engine.calculateIndices(); localMongo.update({},{$set:data});
+  } else {
+      data = localMongo.findOne({}) || {}; data.engineIndices =  undefined; localMongo.update({},{$set:data});
   }
 }
 
@@ -1625,7 +1672,7 @@ function getReviewTimeout(testType, deliveryParams, isCorrect, dialogueHistory) 
       // Fast forward through feedback if we already did a dialogue feedback session
       if (deliveryParams.feedbackType == 'dialogue' && dialogueHistory && dialogueHistory.LastStudentAnswer) {
         reviewTimeout = 0.001;
-      } else if(Session.get('isRefutation')) {
+      } else if(localMongo.findOne({}).isRefutation) {
         reviewTimeout = _.intval(deliveryParams.refutationstudy) || _.intval(deliveryParams.reviewstudy);
       } else {
         reviewTimeout = _.intval(deliveryParams.reviewstudy);
@@ -1635,9 +1682,9 @@ function getReviewTimeout(testType, deliveryParams, isCorrect, dialogueHistory) 
     // We don't know what to do since this is an unsupported test type - fail
     throw new Error('Unknown trial type was specified - no way to proceed');
   }
-  if(Meteor.isDevelopment && Session.get('skipTimeout')){
+  if(Meteor.isDevelopment && localMongo.findOne({}).skipTimeout){
     reviewTimeout = 0.001;
-    Session.set('skipTimeout', false);
+    data = localMongo.findOne({}) || {}; data.skipTimeout =  false; localMongo.update({},{$set:data});
   }
   // We need at least a timeout of 1ms
   if (reviewTimeout < 0.001) throw new Error('No correct timeout specified');
@@ -1649,8 +1696,8 @@ function getReviewTimeout(testType, deliveryParams, isCorrect, dialogueHistory) 
 function gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect, reviewEnd, testType, deliveryParams, dialogueHistory, wasReportedForRemoval) {
   const feedbackType = deliveryParams.feedbackType || 'simple';
   let feedbackLatency;
-  if(Session.get('dialogueTotalTime')){
-    feedbackLatency = Session.get('dialogueTotalTime');
+  if(localMongo.findOne({}).dialogueTotalTime){
+    feedbackLatency = localMongo.findOne({}).dialogueTotalTime;
   }
   else if(userFeedbackStart){
     feedbackLatency = reviewEnd - userFeedbackStart;
@@ -1683,7 +1730,7 @@ function gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect,
     const sessionVars = Session.all();
     const userAgent = navigator.userAgent;
     const logs = console.logs;
-    const currentExperimentState = Session.get('currentExperimentState');
+    const currentExperimentState = localMongo.findOne({}).currentExperimentState;
     Meteor.call('sendUserErrorReport', curUser, errorDescription, curPage, sessionVars,
         userAgent, logs, currentExperimentState);
     leavePage('/profile');
@@ -1703,16 +1750,16 @@ function gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect,
 
   // Figure out button trial entries
   let buttonEntries = '';
-  const wasButtonTrial = !!Session.get('buttonTrial');
+  const wasButtonTrial = !!localMongo.findOne({}).buttonTrial;
   if (wasButtonTrial) {
     const wasDrill = (testType === 'd' || testType === 'm' || testType === 'n');
     // If we had a dialogue interaction restore this from the session variable as the screen was wiped
     if (getCurrentDeliveryParams().feedbackType == 'dialogue' && !isCorrect && wasDrill) {
-      buttonEntries = JSON.parse(JSON.stringify(Session.get('buttonEntriesTemp')));
+      buttonEntries = JSON.parse(JSON.stringify(localMongo.findOne({}).buttonEntriesTemp));
     } else {
-      buttonEntries = _.map(Session.get('buttonList'), (val) => val.buttonValue).join(',');
+      buttonEntries = _.map(localMongo.findOne({}).buttonList, (val) => val.buttonValue).join(',');
     }
-    Session.set('buttonEntriesTemp', undefined);
+    data = localMongo.findOne({}) || {}; data.buttonEntriesTemp =  undefined; localMongo.update({},{$set:data});
   }
 
   let currentAnswerSyllables = {
@@ -1720,7 +1767,7 @@ function gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect,
     count: 0,
     displaySyllableIndices: [],
   };
-  const sessCurrentAnswerSyllables = Session.get('currentAnswerSyllables');
+  const sessCurrentAnswerSyllables = localMongo.findOne({}).currentAnswerSyllables;
   if (typeof(sessCurrentAnswerSyllables) != 'undefined') {
     currentAnswerSyllables = {
       syllableArray: sessCurrentAnswerSyllables.syllableArray,
@@ -1729,7 +1776,7 @@ function gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect,
     };
   }
 
-  let clusterIndex = Session.get('clusterIndex');
+  let clusterIndex = localMongo.findOne({}).clusterIndex;
   let {whichStim, probabilityEstimate} = engine.findCurrentCardInfo();
   const cluster = getStimCluster(clusterIndex);
   const {itemId, clusterKC, stimulusKC} = cluster.stims[whichStim];
@@ -1737,10 +1784,10 @@ function gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect,
   // let curKCBase = getStimKCBaseForCurrentStimuliSet();
   // let stimulusKC = whichStim + curKCBase;
 
-  const curTdf = Session.get('currentTdfFile');
-  const unitName = _.trim(curTdf.tdfs.tutor.unit[Session.get('currentUnitNumber')].unitname);
+  const curTdf = localMongo.findOne({}).currentTdfFile;
+  const unitName = _.trim(curTdf.tdfs.tutor.unit[localMongo.findOne({}).currentUnitNumber].unitname);
 
-  const problemName = stringifyIfExists(Session.get('originalDisplay'));
+  const problemName = stringifyIfExists(localMongo.findOne({}).originalDisplay);
   const stepName = problemName;
   // let stepCount = (state.stepNameSeen[stepName] || 0) + 1;
   // state.stepNameSeen[stepName] = stepCount;
@@ -1749,9 +1796,9 @@ function gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect,
   let shufIndex;
   let schedCondition = 'N/A';
   if (engine.unitType == SCHEDULE_UNIT) {
-    const sched = Session.get('schedule');
+    const sched = localMongo.findOne({}).schedule;
     if (sched && sched.q && sched.q.length) {
-      const schedItemIndex = Session.get('questionIndex') - 1;
+      const schedItemIndex = localMongo.findOne({}).questionIndex - 1;
       clusterIndex = schedItemIndex;
       if (schedItemIndex >= 0 && schedItemIndex < sched.q.length) {
         schedCondition = parseSchedItemCondition(sched.q[schedItemIndex].condition);
@@ -1761,14 +1808,15 @@ function gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect,
   } else {
     shufIndex = cluster.shufIndex;
   }
-  const originalAnswer = Session.get('originalAnswer');
-  const currentAnswer = Session.get('currentAnswer');
+  const originalAnswer = localMongo.findOne({}).originalAnswer;
+  const t = Template.instance();
+  currentAnswer = t.curAnswer.get();
   const fullAnswer = (typeof(originalAnswer) == 'undefined' || originalAnswer == '') ? currentAnswer : originalAnswer;
   const temp = _.trim((fullAnswer || '')).split('~');
   const correctAnswer = temp[0];
-  const whichHintLevel = parseInt(Session.get('hintLevel')) || 0;
+  const whichHintLevel = parseInt(localMongo.findOne({}).hintLevel) || 0;
 
-  const filledInDisplay = JSON.parse(JSON.stringify(Session.get('currentDisplay')));
+  const filledInDisplay = JSON.parse(JSON.stringify(localMongo.findOne({}).currentDisplay));
   let hintsDisplayed = "";
   let hintIndeces = null;
    
@@ -1786,52 +1834,52 @@ function gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect,
   }
 
   // hack
-  const sessionID = (new Date(trialStartTimestamp)).toUTCString().substr(0, 16) + ' ' + Session.get('currentTdfName');
+  const sessionID = (new Date(trialStartTimestamp)).toUTCString().substr(0, 16) + ' ' + localMongo.findOne({}).currentTdfName;
   let outcome = 'incorrect';
   if (isCorrect) {
     outcome = 'correct';
   }
   let entryPoint = 'direct'
-  if(Session.get('curTeacher') && Session.get('curClass') && Session.get('curTeacher').username){
-    if(typeof Session.get('curClass').sectionname === "undefined"){
+  if(localMongo.findOne({}).curTeacher && localMongo.findOne({}).curClass && localMongo.findOne({}).curTeacher.username){
+    if(typeof localMongo.findOne({}).curClass.sectionname === "undefined"){
       sectionname = ""
     } else {
-      sectionname = "/" + Session.get('curClass').sectionname;
+      sectionname = "/" + localMongo.findOne({}).curClass.sectionname;
     }
-    entryPoint = Session.get('curTeacher').username + '/' + Session.get('curClass').coursename + sectionname;
+    entryPoint = localMongo.findOne({}).curTeacher.username + '/' + localMongo.findOne({}).curClass.coursename + sectionname;
   }
   const answerLogRecord = {
     'itemId': itemId,
     'KCId': stimulusKC,
-    'hintLevel': parseInt(Session.get('hintLevel')) || 0,
+    'hintLevel': parseInt(localMongo.findOne({}).hintLevel) || 0,
     'userId': Meteor.userId(),
-    'TDFId': Session.get('currentTdfId'),
+    'TDFId': localMongo.findOne({}).currentTdfId,
     'outcome': outcome,
     'probabilityEstimate': probabilityEstimate,
     'typeOfResponse': responseType,
     'responseValue': _.trim(userAnswer),
-    'displayedStimulus': Session.get('currentDisplay'),
+    'displayedStimulus': localMongo.findOne({}).currentDisplay,
 
     'Anon_Student_Id': Meteor.user().username,
     'Session_ID': sessionID,
 
     'Condition_Namea': 'tdf file',
     // Note: we use this to enrich the history record server side, change both places if at all
-    'Condition_Typea': Session.get('currentTdfName'),
+    'Condition_Typea': localMongo.findOne({}).currentTdfName,
     'Condition_Nameb': 'xcondition',
-    'Condition_Typeb': Session.get('experimentXCond'),
+    'Condition_Typeb': localMongo.findOne({}).experimentXCond,
     'Condition_Namec': 'schedule condition',
     'Condition_Typec': schedCondition,
     'Condition_Named': 'how answered',
     'Condition_Typed': _.trim(source),
     'Condition_Namee': 'section',
-    'Condition_Typee': Session.get('curClass') ? Session.get('curTeacher').username + '/' + Session.get('curClass').sectionname : undefined,
+    'Condition_Typee': localMongo.findOne({}).curClass ? localMongo.findOne({}).curTeacher.username + '/' + localMongo.findOne({}).curClass.sectionname : undefined,
 
     'responseDuration': responseDuration,
 
-    'Level_Unit': Session.get('currentUnitNumber'),
+    'Level_Unit': localMongo.findOne({}).currentUnitNumber,
     'Level_Unitname': unitName,
-    'Level_Unittype': Session.get('unitType'),
+    'Level_Unittype': localMongo.findOne({}).unitType,
     'Problem_Name': problemName,
     'Step_Name': stepName, // this is no longer a valid field as we don't restore state one step at a time
     'Time': trialStartTimestamp,
@@ -1846,12 +1894,12 @@ function gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect,
     'KC_Category_Default': '',
     'KC_Cluster': clusterKC,
     'KC_Category_Cluster': '',
-    'CF_Audio_Input_Enabled': Session.get('audioEnabled'),
-    'CF_Audio_Output_Enabled': Session.get('enableAudioPromptAndFeedback'),
-    'CF_Display_Order': Session.get('questionIndex'),
+    'CF_Audio_Input_Enabled': localMongo.findOne({}).audioEnabled,
+    'CF_Audio_Output_Enabled': localMongo.findOne({}).enableAudioPromptAndFeedback,
+    'CF_Display_Order': localMongo.findOne({}).questionIndex,
     'CF_Stim_File_Index': clusterIndex,
     'CF_Set_Shuffled_Index': shufIndex || clusterIndex,
-    'CF_Alternate_Display_Index': Session.get('alternateDisplayIndex'),
+    'CF_Alternate_Display_Index': localMongo.findOne({}).alternateDisplayIndex,
     'CF_Stimulus_Version': whichStim,
     'CF_Correct_Answer': correctAnswer,
     'CF_Correct_Answer_Syllables': currentAnswerSyllables.syllableArray,
@@ -1870,7 +1918,7 @@ function gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect,
     'Feedback_Text': $('#UserInteraction').text() || '',
     'feedbackType': feedbackType,
     'dialogueHistory': dialogueHistory,
-    'instructionQuestionResult': Session.get('instructionQuestionResult'),
+    'instructionQuestionResult': localMongo.findOne({}).instructionQuestionResult,
     'hintLevel': whichHintLevel,
     'Entry_Point': entryPoint
   };
@@ -1898,7 +1946,7 @@ function parseSchedItemCondition(cond) {
 }
 
 function findQTypeSimpified() {
-  const currentDisplay = Session.get('currentDisplay');
+  const currentDisplay = localMongo.findOne({}).currentDisplay;
   let QTypes = '';
 
   if (currentDisplay.text) QTypes = QTypes + 'T'; // T for Text
@@ -1926,20 +1974,20 @@ function hideUserFeedback() {
 async function unitIsFinished(reason) {
   clearCardTimeout();
 
-  const curTdf = Session.get('currentTdfFile');
-  const curUnitNum = Session.get('currentUnitNumber');
+  const curTdf = localMongo.findOne({}).currentTdfFile;
+  const curUnitNum = localMongo.findOne({}).currentUnitNumber;
   const newUnitNum = curUnitNum + 1;
   const curTdfUnit = curTdf.tdfs.tutor.unit[newUnitNum];
 
-  Session.set('questionIndex', 0);
-  Session.set('clusterIndex', undefined);
-  Session.set('currentUnitNumber', newUnitNum);
-  Session.set('currentTdfUnit', curTdfUnit);
-  Session.set('currentDeliveryParams', getCurrentDeliveryParams());
-  Session.set('currentUnitStartTime', Date.now());
-  Session.set('feedbackUnset', true);
-  Session.set('feedbackTypeFromHistory', undefined);
-  Session.set('curUnitInstructionsSeen', false);
+  data = localMongo.findOne({}) || {}; data.questionIndex =  0; localMongo.update({},{$set:data});
+  data = localMongo.findOne({}) || {}; data.clusterIndex =  undefined; localMongo.update({},{$set:data});
+  data = localMongo.findOne({}) || {}; data.currentUnitNumber =  newUnitNum; localMongo.update({},{$set:data});
+  data = localMongo.findOne({}) || {}; data.currentTdfUnit =  curTdfUnit; localMongo.update({},{$set:data});
+  data = localMongo.findOne({}) || {}; data.currentDeliveryParams =  getCurrentDeliveryParams(); localMongo.update({},{$set:data});
+  data = localMongo.findOne({}) || {}; data.currentUnitStartTime =  Date.now(); localMongo.update({},{$set:data});
+  data = localMongo.findOne({}) || {}; data.feedbackUnset =  true; localMongo.update({},{$set:data});
+  data = localMongo.findOne({}) || {}; data.feedbackTypeFromHistory =  undefined; localMongo.update({},{$set:data});
+  data = localMongo.findOne({}) || {}; data.curUnitInstructionsSeen =  false; localMongo.update({},{$set:data});
 
   let leaveTarget;
   if (newUnitNum < curTdf.tdfs.tutor.unit.length) {
@@ -1977,7 +2025,7 @@ async function unitIsFinished(reason) {
 }
 
 function getButtonTrial() {
-  const curUnit = Session.get('currentTdfUnit');
+  const curUnit = localMongo.findOne({}).currentTdfUnit;
   // Default to value given in the unit
   let isButtonTrial = 'true' === (curUnit.buttontrial ? curUnit.buttontrial.toLowerCase() : "");
 
@@ -1987,7 +2035,7 @@ function getButtonTrial() {
     isButtonTrial = true;
   } else {
     // An entire schedule can override a button trial
-    const schedButtonTrial = Session.get('schedule') ? Session.get('schedule').isButtonTrial : false;
+    const schedButtonTrial = localMongo.findOne({}).schedule ? localMongo.findOne({}).schedule.isButtonTrial : false;
     if (schedButtonTrial) {
       isButtonTrial = true; // Entire schedule is a button trial
     }
@@ -2005,32 +2053,32 @@ async function cardStart() {
   // Always hide the final instructions box
   $('#finalInstructionsDlg').modal('hide');
   // the card loads frequently, but we only want to set this the first time
-  if (Session.get('inResume')) {
-    Session.set('buttonTrial', false);
-    Session.set('buttonList', []);
+  if (localMongo.findOne({}).inResume) {
+    data = localMongo.findOne({}) || {}; data.buttonTrial =  false; localMongo.update({},{$set:data});
+    data = localMongo.findOne({}) || {}; data.buttonList =  []; localMongo.update({},{$set:data});
 
     console.log('cards template rendered => Performing resume');
-    Session.set('showOverlearningText', false);
+    data = localMongo.findOne({}) || {}; data.showOverlearningText =  false; localMongo.update({},{$set:data});
 
-    Session.set('inResume', false); // Turn this off to keep from re-resuming
+    data = localMongo.findOne({}) || {}; data.inResume =  false; localMongo.update({},{$set:data}); // Turn this off to keep from re-resuming
     resumeFromComponentState();
   }
 }
 
 async function prepareCard() {
   Meteor.logoutOtherClients();
-  Session.set('wasReportedForRemoval', false);
-  Session.set('displayReady', false);
-  Session.set('currentDisplay', {});
-  Session.set('clozeQuestionParts', undefined);
+  data = localMongo.findOne({}) || {}; data.wasReportedForRemoval =  false; localMongo.update({},{$set:data});
+  data = localMongo.findOne({}) || {}; data.displayReady =  false; localMongo.update({},{$set:data});
+  data = localMongo.findOne({}) || {}; data.currentDisplay =  {}; localMongo.update({},{$set:data});
+  data = localMongo.findOne({}) || {}; data.clozeQuestionParts =  undefined; localMongo.update({},{$set:data});
   console.log('displayReadyFalse, prepareCard');
   if (engine.unitFinished()) {
     unitIsFinished('Unit Engine');
   } else {
-    await engine.selectNextCard(Session.get('engineIndices'));
+    await engine.selectNextCard(localMongo.findOne({}).engineIndices);
     await newQuestionHandler();
-    Session.set('cardStartTimestamp', Date.now());
-    Session.set('engineIndices', undefined);
+    data = localMongo.findOne({}) || {}; data.cardStartTimestamp =  Date.now(); localMongo.update({},{$set:data});
+    data = localMongo.findOne({}) || {}; data.engineIndices =  undefined; localMongo.update({},{$set:data});
   }
 }
 
@@ -2038,19 +2086,19 @@ async function prepareCard() {
 async function newQuestionHandler() {
   console.log('newQuestionHandler - Secs since unit start:', elapsedSecs());
 
-  scrollList.update(
-      {'justAdded': 1},
-      {'$set': {'justAdded': 0}},
-      {'multi': true},
+  localMongo.update(
+      {'scrollList.justAdded': 1},
+      {'$set': {'scrollList.justAdded': 0}},
+      {'scrollList.multi': true},
       function(err, numrecs) {
         if (err) console.log('UDPATE ERROR:', displayify(err));
       },
   );
 
-  Session.set('buttonList', []);
+  data = localMongo.findOne({}) || {}; data.buttonList =  []; localMongo.update({},{$set:data});
   speechTranscriptionTimeoutsSeen = 0;
   const isButtonTrial = getButtonTrial();
-  Session.set('buttonTrial', isButtonTrial);
+  data = localMongo.findOne({}) || {}; data.buttonTrial =  isButtonTrial; localMongo.update({},{$set:data});
   console.log('newQuestionHandler, isButtonTrial', isButtonTrial);
 
   if (isButtonTrial) {
@@ -2064,19 +2112,20 @@ async function newQuestionHandler() {
   // construct the question to display the actual information. Note that we
   // use a regex so that we can do a global(all matches) replace on 3 or
   // more underscores
-  if ((getTestType() === 's' || getTestType() === 'f') && !!(Session.get('currentDisplayEngine').clozeText)) {
-    const currentDisplay = Session.get('currentDisplayEngine');
-    const clozeQuestionFilledIn = Answers.clozeStudy(currentDisplay.clozeText, Session.get('currentAnswer'));
+  if ((getTestType() === 's' || getTestType() === 'f') && !!(localMongo.findOne({}).currentDisplayEngine.clozeText)) {
+    const currentDisplay = localMongo.findOne({}).currentDisplayEngine;
+
+    const clozeQuestionFilledIn = Answers.clozeStudy(currentDisplay.clozeText, currentAnswer);
     currentDisplay.clozeText = clozeQuestionFilledIn;
     const newExperimentState = {currentDisplayEngine: currentDisplay};
     updateExperimentStateSync(newExperimentState, 'card.newQuestionHandler');
-    Session.set('currentDisplayEngine', currentDisplay);
+    data = localMongo.findOne({}) || {}; data.currentDisplayEngine =  currentDisplay; localMongo.update({},{$set:data});
   }
 
   startQuestionTimeout();
   checkSimulation();
 
-  if (Session.get('showOverlearningText')) {
+  if (localMongo.findOne({}).showOverlearningText) {
     $('#overlearningRow').show();
   }
 }
@@ -2085,7 +2134,7 @@ function startQuestionTimeout() {
   stopUserInput(); // No user input (re-enabled below) and reset keypress timestamp.
   clearCardTimeout(); // No previous timeout now
 
-  const deliveryParams = Session.get('currentDeliveryParams');
+  const deliveryParams = localMongo.findOne({}).currentDeliveryParams;
   if (!deliveryParams) {
     throw new Error('No delivery params');
   }
@@ -2103,13 +2152,13 @@ function startQuestionTimeout() {
   }
 
   // We do this little shuffle of session variables so the display will update all at the same time
-  const currentDisplayEngine = Session.get('currentDisplayEngine');
-  const closeQuestionParts = Session.get('clozeQuestionParts');
+  const currentDisplayEngine = localMongo.findOne({}).currentDisplayEngine;
+  const closeQuestionParts = localMongo.findOne({}).clozeQuestionParts;
 
   console.log('startQuestionTimeout, closeQuestionParts', closeQuestionParts);
 
-  Session.set('displayReady', false);
-  Session.set('clozeQuestionParts', undefined);
+  data = localMongo.findOne({}) || {}; data.displayReady =  false; localMongo.update({},{$set:data});
+  data = localMongo.findOne({}) || {}; data.clozeQuestionParts =  undefined; localMongo.update({},{$set:data});
   console.log('++++ CURRENT DISPLAY ++++');
   console.log(currentDisplayEngine);
   console.log('-------------------------');
@@ -2123,15 +2172,15 @@ function startQuestionTimeout() {
 function checkAndDisplayPrestimulus(deliveryParams, nextStageCb) {
   console.log('checking for prestimulus display');
   // we'll [0], if it exists
-  const prestimulusDisplay = Session.get('currentTdfFile').tdfs.tutor.setspec.prestimulusDisplay;
+  const prestimulusDisplay = localMongo.findOne({}).currentTdfFile.tdfs.tutor.setspec.prestimulusDisplay;
   console.log('prestimulusDisplay:', prestimulusDisplay);
 
   if (prestimulusDisplay) {
     const prestimulusDisplayWrapper = {'text': prestimulusDisplay};
     console.log('prestimulusDisplay detected, displaying', prestimulusDisplayWrapper);
-    Session.set('currentDisplay', prestimulusDisplayWrapper);
-    Session.set('clozeQuestionParts', undefined);
-    Session.set('displayReady', true);
+    data = localMongo.findOne({}) || {}; data.currentDisplay =  prestimulusDisplayWrapper; localMongo.update({},{$set:data});
+    data = localMongo.findOne({}) || {}; data.clozeQuestionParts =  undefined; localMongo.update({},{$set:data});
+    data = localMongo.findOne({}) || {}; data.displayReady =  true; localMongo.update({},{$set:data});
     const prestimulusdisplaytime = deliveryParams.prestimulusdisplaytime;
     console.log('delaying for ' + prestimulusdisplaytime + ' ms then starting question', new Date());
     setTimeout(function() {
@@ -2146,14 +2195,14 @@ function checkAndDisplayPrestimulus(deliveryParams, nextStageCb) {
 
 function checkAndDisplayTwoPartQuestion(deliveryParams, currentDisplayEngine, closeQuestionParts, nextStageCb) {
   // In either case we want to set up the current display now
-  Session.set('displayReady', false);
-  Session.set('currentDisplay', currentDisplayEngine);
-  Session.set('clozeQuestionParts', closeQuestionParts);
-  Session.set('displayReady', true);
+  data = localMongo.findOne({}) || {}; data.displayReady =  false; localMongo.update({},{$set:data});
+  data = localMongo.findOne({}) || {}; data.currentDisplay =  currentDisplayEngine; localMongo.update({},{$set:data});
+  data = localMongo.findOne({}) || {}; data.clozeQuestionParts =  closeQuestionParts; localMongo.update({},{$set:data});
+  data = localMongo.findOne({}) || {}; data.displayReady =  true; localMongo.update({},{$set:data});
 
   console.log('checking for two part questions');
   // Handle two part questions
-  const currentQuestionPart2 = Session.get('currentQuestionPart2');
+  const currentQuestionPart2 = localMongo.findOne({}).currentQuestionPart2;
   if (currentQuestionPart2) {
     console.log('two part question detected, displaying first part');
     const twoPartQuestionWrapper = {'text': currentQuestionPart2};
@@ -2161,12 +2210,12 @@ function checkAndDisplayTwoPartQuestion(deliveryParams, currentDisplayEngine, cl
     console.log('two part question detected, delaying for ' + initialviewTimeDelay + ' ms then continuing');
     setTimeout(function() {
       console.log('after timeout, displaying question part two', new Date());
-      Session.set('displayReady', false);
-      Session.set('currentDisplay', twoPartQuestionWrapper);
-      Session.set('clozeQuestionParts', undefined);
-      Session.set('displayReady', true);
+      data = localMongo.findOne({}) || {}; data.displayReady =  false; localMongo.update({},{$set:data});
+      data = localMongo.findOne({}) || {}; data.currentDisplay =  twoPartQuestionWrapper; localMongo.update({},{$set:data});
+      data = localMongo.findOne({}) || {}; data.clozeQuestionParts =  undefined; localMongo.update({},{$set:data});
+      data = localMongo.findOne({}) || {}; data.displayReady =  true; localMongo.update({},{$set:data});
       console.log('displayReadyTrue, checkAndDisplayTwoPartQuestion');
-      Session.set('currentQuestionPart2', undefined);
+      data = localMongo.findOne({}) || {}; data.currentQuestionPart2 =  undefined; localMongo.update({},{$set:data});
       redoCardImage();
       nextStageCb();
     }, initialviewTimeDelay);
@@ -2181,7 +2230,7 @@ function beginQuestionAndInitiateUserInput(delayMs, deliveryParams) {
   firstKeypressTimestamp = 0;
   trialStartTimestamp = Date.now();
   console.log(trialStartTimestamp)
-  const currentDisplay = Session.get('currentDisplay');
+  const currentDisplay = localMongo.findOne({}).currentDisplay;
 
   if (currentDisplay.audioSrc) {
     const timeuntilaudio = deliveryParams.timeuntilaudio;
@@ -2202,7 +2251,7 @@ function beginQuestionAndInitiateUserInput(delayMs, deliveryParams) {
     // Only speak the prompt if the question type makes sense
     if (questionToSpeak) {
       console.log('text to speak playing prompt: ', new Date());
-      let buttons = Session.get('buttonList');
+      let buttons = localMongo.findOne({}).buttonList;
       let buttonsToSpeak = '';
       if(buttons){
         for(button in buttons){
@@ -2284,33 +2333,33 @@ function stopUserInput() {
 
 // Audio prompt/feedback
 function speakMessageIfAudioPromptFeedbackEnabled(msg, audioPromptSource) {
-  const enableAudioPromptAndFeedback = Session.get('enableAudioPromptAndFeedback');
-  const audioPromptMode = Session.get('audioPromptMode');
+  const enableAudioPromptAndFeedback = localMongo.findOne({}).enableAudioPromptAndFeedback;
+  const audioPromptMode = localMongo.findOne({}).audioPromptMode;
   if (enableAudioPromptAndFeedback) {
     if (audioPromptSource === audioPromptMode || audioPromptMode === 'all') {
-      Session.set('recordingLocked', true);
+      data = localMongo.findOne({}) || {}; data.recordingLocked =  true; localMongo.update({},{$set:data});
       // Replace underscores with blank so that we don't get awkward UNDERSCORE UNDERSCORE
       // UNDERSCORE...speech from literal reading of text
       msg = msg.replace(/(&nbsp;)+/g, 'blank');
       // Remove all HTML
       msg = msg.replace( /(<([^>]+)>)/ig, '');
       let ttsAPIKey = '';
-      if (Session.get('currentTdfFile').tdfs.tutor.setspec.textToSpeechAPIKey) {
-        ttsAPIKey = Session.get('currentTdfFile').tdfs.tutor.setspec.textToSpeechAPIKey;
-        let audioPromptSpeakingRate = Session.get('audioPromptFeedbackSpeakingRate');
-        let audioPromptVolume = Session.get('audioPromptFeedbackVolume')
+      if (localMongo.findOne({}).currentTdfFile.tdfs.tutor.setspec.textToSpeechAPIKey) {
+        ttsAPIKey = localMongo.findOne({}).currentTdfFile.tdfs.tutor.setspec.textToSpeechAPIKey;
+        let audioPromptSpeakingRate = localMongo.findOne({}).audioPromptFeedbackSpeakingRate;
+        let audioPromptVolume = localMongo.findOne({}).audioPromptFeedbackVolume
         if (audioPromptSource == 'question'){
-          audioPromptSpeakingRate = Session.get('audioPromptQuestionSpeakingRate');
-          audioPromptVolume = Session.get('audioPromptQuestionVolume')
+          audioPromptSpeakingRate = localMongo.findOne({}).audioPromptQuestionSpeakingRate;
+          audioPromptVolume = localMongo.findOne({}).audioPromptQuestionVolume
         }
         makeGoogleTTSApiCall(msg, ttsAPIKey, audioPromptSpeakingRate, audioPromptVolume, function(audioObj) {
-          Session.set('recordingLocked', true);
+          data = localMongo.findOne({}) || {}; data.recordingLocked =  true; localMongo.update({},{$set:data});
           if (window.currentAudioObj) {
             window.currentAudioObj.pause();
           }
           window.currentAudioObj = audioObj;
           audioObj.addEventListener('ended', (event) => {
-            Session.set('recordingLocked', false);
+            data = localMongo.findOne({}) || {}; data.recordingLocked =  false; localMongo.update({},{$set:data});
             startRecording();
           });
           console.log('inside callback, playing audioObj:');
@@ -2367,8 +2416,8 @@ async function processLINEAR16(data) {
 
   if (userAnswer || isButtonTrial || DialogueUtils.isUserInDialogueLoop()) {
     speechTranscriptionTimeoutsSeen += 1;
-    const sampleRate = Session.get('sampleRate');
-    const setSpec = Session.get('currentTdfFile').tdfs.tutor.setspec;
+    const sampleRate = localMongo.findOne({}).sampleRate;
+    const setSpec = localMongo.findOne({}).currentTdfFile.tdfs.tutor.setspec;
     let speechRecognitionLanguage = setSpec.speechRecognitionLanguage;
     if (!speechRecognitionLanguage) {
       console.log('no speechRecognitionLanguage in set spec, defaulting to en-US');
@@ -2406,7 +2455,7 @@ async function processLINEAR16(data) {
       answerGrammar = getAllCurrentStimAnswers(false);
     }
 
-    const tdfSpeechAPIKey = Session.get('currentTdfFile').tdfs.tutor.setspec.speechAPIKey;
+    const tdfSpeechAPIKey = localMongo.findOne({}).currentTdfFile.tdfs.tutor.setspec.speechAPIKey;
     // Make the actual call to the google speech api with the audio data for transcription
     if (tdfSpeechAPIKey && tdfSpeechAPIKey != '') {
       console.log('tdf key detected');
@@ -2415,7 +2464,7 @@ async function processLINEAR16(data) {
     // NOTE: we shouldn't be able to get here if there is no user key
     } else {
       console.log('no tdf key, using user provided key');
-      makeGoogleSpeechAPICall(request, Session.get('speechAPIKey'), answerGrammar);
+      makeGoogleSpeechAPICall(request, localMongo.findOne({}).speechAPIKey, answerGrammar);
     }
   } else {
     console.log('processLINEAR16 userAnswer not defined');
@@ -2451,9 +2500,8 @@ function makeGoogleSpeechAPICall(request, speechAPIKey, answerGrammar) {
   HTTP.call('POST', speechURL, {'data': request}, function(err, response) {
     console.log(response);
     let transcript = '';
-    const ignoreOutOfGrammarResponses = Session.get('ignoreOutOfGrammarResponses');
+    const ignoreOutOfGrammarResponses = localMongo.findOne({}).ignoreOutOfGrammarResponses;
     const speechOutOfGrammarFeedback = 'Please try again or press enter or say skip';
-    // Session.get("speechOutOfGrammarFeedback");//TODO: change this in tdfs and not hardcoded
     let ignoredOrSilent = false;
 
     // If we get back an error status make sure to inform the user so they at
@@ -2503,7 +2551,7 @@ function makeGoogleSpeechAPICall(request, speechAPIKey, answerGrammar) {
       userAnswer.value = transcript;
     }
 
-    if (speechTranscriptionTimeoutsSeen >= Session.get('currentDeliveryParams').autostopTranscriptionAttemptLimit) {
+    if (speechTranscriptionTimeoutsSeen >= localMongo.findOne({}).currentDeliveryParams.autostopTranscriptionAttemptLimit) {
       ignoredOrSilent = false; // Force out of a silence loop if we've tried enough
       const transcriptionMsg = ' transcription attempts which is over autostopTranscriptionAttemptLimit, \
           forcing incorrect answer to move things along.';
@@ -2572,7 +2620,7 @@ function startUserMedia(stream) {
   // Firefox hack https://support.mozilla.org/en-US/questions/984179
   window.firefox_audio_hack = input;
   // Capture the sampling rate for later use in google speech api as input
-  Session.set('sampleRate', input.context.sampleRate);
+  data = localMongo.findOne({}) || {}; data.sampleRate =  input.context.sampleRate; localMongo.update({},{$set:data});
   const audioRecorderConfig = {errorCallback: function(x) {
     console.log('Error from recorder: ' + x);
   }};
@@ -2584,7 +2632,7 @@ function startUserMedia(stream) {
   recorder.setProcessCallback(processLINEAR16);
 
   // Set up options for voice activity detection code (vad.js)
-  const energyOffsetExp = 60 - Session.get('audioInputSensitivity');
+  const energyOffsetExp = 60 - localMongo.findOne({}).audioInputSensitivity;
   const energyOffset = parseFloat('1e+' + energyOffsetExp);
   const options = {
     source: input,
@@ -2594,18 +2642,18 @@ function startUserMedia(stream) {
     voice_stop: function() {
       // This will hopefully only be fired once while we're still on the voice.html interstitial,
       // once VAD.js loads we should navigate back to card to start the practice set
-      if (!Session.get('VADInitialized')) {
+      if (!localMongo.findOne({}).VADInitialized) {
         console.log('VAD previously not initialized, now initialized');
-        Session.set('VADInitialized', true);
+        data = localMongo.findOne({}) || {}; data.VADInitialized =  true; localMongo.update({},{$set:data});
         $('#voiceDetected').value = 'Voice detected, refreshing now...';
-        Session.set('inResume', true);
-        if (Session.get('pausedLocks')>0) {
-          const numRemainingLocks = Session.get('pausedLocks')-1;
-          Session.set('pausedLocks', numRemainingLocks);
+        data = localMongo.findOne({}) || {}; data.inResume =  true; localMongo.update({},{$set:data});
+        if (localMongo.findOne({}).pausedLocks>0) {
+          const numRemainingLocks = localMongo.findOne({}).pausedLocks-1;
+          data = localMongo.findOne({}) || {}; data.pausedLocks =  numRemainingLocks; localMongo.update({},{$set:data});
         }
         Router.go('/card');
         return;
-      } else if (!Session.get('recording') || Session.get('pausedLocks')>0) {
+      } else if (!localMongo.findOne({}).recording || localMongo.findOne({}).pausedLocks>0) {
         if (document.location.pathname != '/card' && document.location.pathname != '/instructions') {
           leavePage(function() {
             console.log('cleaning up page after nav away from card, voice_stop');
@@ -2618,18 +2666,18 @@ function startUserMedia(stream) {
       } else {
         console.log('VOICE STOP');
         recorder.stop();
-        Session.set('recording', false);
+        data = localMongo.findOne({}) || {}; data.recording =  false; localMongo.update({},{$set:data});
         recorder.exportToProcessCallback();
       }
     },
     voice_start: function() {
-      if (!Session.get('recording')) {
+      if (!localMongo.findOne({}).recording) {
         console.log('NOT RECORDING, VOICE START');
         return;
       } else {
         console.log('VOICE START');
         if (resetMainCardTimeout && timeoutFunc) {
-          if (Session.get('recording')) {
+          if (localMongo.findOne({}).recording) {
             console.log('voice_start resetMainCardTimeout');
             resetMainCardTimeout();
           } else {
@@ -2642,7 +2690,7 @@ function startUserMedia(stream) {
     },
   };
   const vad = new VAD(options);
-  Session.set('VADInitialized', false);
+  data = localMongo.findOne({}) || {}; data.VADInitialized =  false; localMongo.update({},{$set:data});
 
   console.log('Audio recorder ready');
 
@@ -2652,8 +2700,8 @@ function startUserMedia(stream) {
 }
 
 function startRecording() {
-  if (recorder && !Session.get('recordingLocked') && Session.get('audioEnabledView')) {
-    Session.set('recording', true);
+  if (recorder && !localMongo.findOne({}).recordingLocked && localMongo.findOne({}).audioEnabledView) {
+    data = localMongo.findOne({}) || {}; data.recording =  true; localMongo.update({},{$set:data});
     recorder.record();
     console.log('RECORDING START');
   } else {
@@ -2662,10 +2710,10 @@ function startRecording() {
 }
 
 function stopRecording() {
-  console.log('stopRecording', recorder, Session.get('recording'));
-  if (recorder && Session.get('recording')) {
+  console.log('stopRecording', recorder, localMongo.findOne({}).recording);
+  if (recorder && localMongo.findOne({}).recording) {
     recorder.stop();
-    Session.set('recording', false);
+    data = localMongo.findOne({}) || {}; data.recording =  false; localMongo.update({},{$set:data});
 
     recorder.clear();
     console.log('RECORDING END');
@@ -2676,40 +2724,43 @@ function stopRecording() {
 
 async function getExperimentState() {
   const curExperimentState = await meteorCallAsync('getExperimentState',
-      Meteor.userId(), Session.get('currentRootTdfId'));
-  const sessExpState = Session.get('currentExperimentState');
+      Meteor.userId(), localMongo.findOne({}).currentRootTdfId);
+  const sessExpState = localMongo.findOne({}).currentExperimentState;
   console.log('getExperimentState:', curExperimentState, sessExpState);
   Meteor.call('updatePerformanceData', 'utlQuery', 'card.getExperimentState', Meteor.userId());
-  Session.set('currentExperimentState', curExperimentState);
+  data = localMongo.findOne({}) || {}; data.currentExperimentState =  curExperimentState; localMongo.update({},{$set:data});
   return curExperimentState || {};
 }
 
 async function updateExperimentState(newState, codeCallLocation) {
-  const test = Session.get('currentExperimentState');
+  const test = localMongo.findOne({}).currentExperimentState;
   console.log('currentExperimentState:', test);
-  if (!Session.get('currentExperimentState')) {
-    Session.set('currentExperimentState', {});
+  if (!localMongo.findOne({}).currentExperimentState) {
+    data = localMongo.findOne({}) || {}; data.currentExperimentState =  {}; localMongo.update({},{$set:data});
   }
-  const oldExperimentState = Session.get('currentExperimentState') || {};
+  const oldExperimentState = localMongo.findOne({}).currentExperimentState || {};
   const newExperimentState = Object.assign(JSON.parse(JSON.stringify(oldExperimentState)), newState);
   const res = await meteorCallAsync('setExperimentState',
-      Meteor.userId(), Session.get('currentRootTdfId'), newExperimentState, 'card.updateExperimentState');
-  Session.set('currentExperimentState', newExperimentState);
+      Meteor.userId(), localMongo.findOne({}).currentRootTdfId, newExperimentState, 'card.updateExperimentState');
+  data = localMongo.findOne({}) || {}; data.currentExperimentState =  newExperimentState; localMongo.update({},{$set:data});
   console.log('updateExperimentState', codeCallLocation, 'old:', oldExperimentState, '\nnew:', newExperimentState);
   return res;
 }
 
 function updateExperimentStateSync(newState, codeCallLocation) {
-  const test = Session.get('currentExperimentState');
-  console.log('updateExperimentStateSync:', test);
-  if (!Session.get('currentExperimentState')) {
-    Session.set('currentExperimentState', {});
+  console.log('Rusty: ', localMongo.find().fetch());
+  // const test = localMongo.findOne({}).currentExperimentState;
+  // console.log('updateExperimentStateSync:', test);
+  if (typeof localMongo.findOne({}) === 'undefined') {
+    experimentState = {};
+    data = localMongo.findOne({}) || {}; data.currentExperimentState =  experimentState; localMongo.update({},{$set:data});
   }
-  const oldExperimentState = Session.get('currentExperimentState') || {};
+  console.log('Rusty: ', localMongo.find().fetch());
+  const oldExperimentState = localMongo.findOne({}).currentExperimentState || {};
   const newExperimentState = Object.assign(JSON.parse(JSON.stringify(oldExperimentState)), newState);
   Meteor.call('setExperimentState',
-      Meteor.userId(), Session.get('currentRootTdfId'), newExperimentState, 'card.updateExperimentState');
-  Session.set('currentExperimentState', newExperimentState);
+      Meteor.userId(), localMongo.findOne({}).currentRootTdfId, newExperimentState, 'card.updateExperimentState');
+  data = localMongo.findOne({}) || {}; data.currentExperimentState =  newExperimentState; localMongo.update({},{$set:data});
   console.log('updateExperimentStateSync', codeCallLocation, 'old:', oldExperimentState, '\nnew:', newExperimentState);
 }
 
@@ -2721,11 +2772,11 @@ function updateExperimentStateSync(newState, codeCallLocation) {
 // sure our server-side call regarding experimental conditions has completed
 // before continuing to resume the session
 async function resumeFromComponentState() {
-  if (Session.get('inResume')) {
+  if (localMongo.findOne({}).inResume) {
     console.log('RESUME DENIED - already running in resume');
     return;
   }
-  Session.set('inResume', true);
+  data = localMongo.findOne({}) || {}; data.inResume =  true; localMongo.update({},{$set:data});
 
   console.log('Resuming from previous componentState info (if any)');
 
@@ -2745,10 +2796,10 @@ async function resumeFromComponentState() {
   // condition selection. It will be our responsibility to update
   // currentTdfId and currentStimuliSetId based on experimental conditions
   // (if necessary)
-  const rootTDFBoxed = await meteorCallAsync('getTdfById', Session.get('currentRootTdfId'));
+  const rootTDFBoxed = await meteorCallAsync('getTdfById', localMongo.findOne({}).currentRootTdfId);
   const rootTDF = rootTDFBoxed.content;
   if (!rootTDF) {
-    console.log('PANIC: Unable to load the root TDF for learning', Session.get('currentRootTdfId'));
+    console.log('PANIC: Unable to load the root TDF for learning', localMongo.findOne({}).currentRootTdfId);
     alert('Unfortunately, something is broken and this lesson cannot continue');
     leavePage('/profile');
     return;
@@ -2773,7 +2824,7 @@ async function resumeFromComponentState() {
     } else {
       // Select condition and save it
       console.log('No previous experimental condition: Selecting from ' + setspec.condition.length);
-      conditionTdfId = await meteorCallAsync("getTdfIdByStimSetIdAndFileName", Session.get('currentStimuliSetId'), _.sample(setspec.condition));// Transform from tdffilename to tdfid
+      conditionTdfId = await meteorCallAsync("getTdfIdByStimSetIdAndFileName", localMongo.findOne({}).currentStimuliSetId, _.sample(setspec.condition));// Transform from tdffilename to tdfid
       newExperimentState.conditionTdfId = conditionTdfId;
       newExperimentState.conditionNote = 'Selected from ' + _.display(setspec.condition.length) + ' conditions';
       console.log('Exp Condition', conditionTdfId, newExperimentState.conditionNote);
@@ -2787,32 +2838,32 @@ async function resumeFromComponentState() {
     }
 
     // Now we have a different current TDF (but root stays the same)
-    Session.set('currentTdfId', conditionTdfId);
+    data = localMongo.findOne({}) || {}; data.currentTdfId =  conditionTdfId; localMongo.update({},{$set:data});
 
     const curTdf = await meteorCallAsync('getTdfById', conditionTdfId);
-    Session.set('currentTdfFile', curTdf.content);
-    Session.set('currentTdfName', curTdf.content.fileName);
+    data = localMongo.findOne({}) || {}; data.currentTdfFile =  curTdf.content; localMongo.update({},{$set:data});
+    data = localMongo.findOne({}) || {}; data.currentTdfName =  curTdf.content.fileName; localMongo.update({},{$set:data});
 
     // Also need to read new stimulus file (and note that we allow an exception
     // to kill us if the current tdf is broken and has no stimulus file)
-    Session.set('currentStimuliSetId', curTdf.stimuliSetId);
+    data = localMongo.findOne({}) || {}; data.currentStimuliSetId =  curTdf.stimuliSetId; localMongo.update({},{$set:data});
     console.log('condition stimuliSetId', curTdf);
   } else {
-    Session.set('currentTdfFile', rootTDF);
-    Session.set('currentTdfName', rootTDF.fileName);
-    Session.set('currentTdfId', Session.get('currentRootTdfId'));
-    Session.set('currentStimuliSetId', rootTDFBoxed.stimuliSetId);
+    data = localMongo.findOne({}) || {}; data.currentTdfFile =  rootTDF; localMongo.update({},{$set:data});
+    data = localMongo.findOne({}) || {}; data.currentTdfName =  rootTDF.fileName; localMongo.update({},{$set:data});
+    data = localMongo.findOne({}) || {}; data.currentTdfId =  localMongo.findOne({}).currentRootTdfId; localMongo.update({},{$set:data});
+    data = localMongo.findOne({}) || {}; data.currentStimuliSetId =  rootTDFBoxed.stimuliSetId; localMongo.update({},{$set:data});
 
     // Just notify that we're skipping
     console.log('No Experimental condition is required: continuing', rootTDFBoxed);
   }
 
-  const stimuliSetId = Session.get('currentStimuliSetId');
+  const stimuliSetId = localMongo.findOne({}).currentStimuliSetId;
   const stimuliSet = await meteorCallAsync('getStimuliSetById', stimuliSetId);
 
-  Session.set('currentStimuliSet', stimuliSet);
-  Session.set('feedbackUnset', Session.get('fromInstructions') || Session.get('feedbackUnset'));
-  Session.set('fromInstructions', false);
+  data = localMongo.findOne({}) || {}; data.currentStimuliSet =  stimuliSet; localMongo.update({},{$set:data});
+  data={feedbackUnset: localMongo.findOne({}).fromInstructions || localMongo.findOne({}).feedbackUnset}
+  data = localMongo.findOne({}) || {}; data.fromInstructions =  false; localMongo.update({},{$set:data});
 
   preloadStimuliFiles();
   checkUserAudioConfigCompatability();
@@ -2839,7 +2890,7 @@ async function resumeFromComponentState() {
     }
 
     console.log('Setting XCond from sys-selection', experimentXCond);
-    Session.set('experimentXCond', experimentXCond);
+    data = localMongo.findOne({}) || {}; data.experimentXCond =  experimentXCond; localMongo.update({},{$set:data});
   }
 
   // Find previous cluster mapping (or create if it's missing)
@@ -2851,7 +2902,7 @@ async function resumeFromComponentState() {
     // No cluster mapping! Need to create it and store for resume
     // We process each pair of shuffle/swap together and keep processing
     // until we have nothing left
-    const setSpec = Session.get('currentTdfFile').tdfs.tutor.setspec;
+    const setSpec = localMongo.findOne({}).currentTdfFile.tdfs.tutor.setspec;
 
     // Note our default of a single no-op to insure we at least build a
     // default cluster mapping
@@ -2882,38 +2933,38 @@ async function resumeFromComponentState() {
     throw new Error('The cluster mapping is invalid - can not continue');
   }
   // Go ahead and save the cluster mapping we found/created
-  Session.set('clusterMapping', clusterMapping);
+  data = localMongo.findOne({}) || {}; data.clusterMapping =  clusterMapping; localMongo.update({},{$set:data});
 
   if (experimentState.currentUnitNumber) {
-    Session.set('currentUnitNumber', experimentState.currentUnitNumber);
+    data = localMongo.findOne({}) || {}; data.currentUnitNumber =  experimentState.currentUnitNumber; localMongo.update({},{$set:data});
   } else {
-    Session.set('currentUnitNumber', 0);
+    data = localMongo.findOne({}) || {}; data.currentUnitNumber =  0; localMongo.update({},{$set:data});
     newExperimentState.currentUnitNumber = 0;
     newExperimentState.lastUnitStarted = 0;
   }
 
-  const curTdfUnit = Session.get('currentTdfFile').tdfs.tutor.unit[Session.get('currentUnitNumber')];
-  Session.set('currentTdfUnit', curTdfUnit);
+  const curTdfUnit = localMongo.findOne({}).currentTdfFile.tdfs.tutor.unit[localMongo.findOne({}).currentUnitNumber];
+  data = localMongo.findOne({}) || {}; data.currentTdfUnit =  curTdfUnit; localMongo.update({},{$set:data});
   console.log('resume, currentTdfUnit:', curTdfUnit);
 
   if (experimentState.questionIndex) {
-    Session.set('questionIndex', experimentState.questionIndex);
+    data = localMongo.findOne({}) || {}; data.questionIndex =  experimentState.questionIndex; localMongo.update({},{$set:data});
   } else {
-    Session.set('questionIndex', 0);
+    data = localMongo.findOne({}) || {}; data.questionIndex =  0; localMongo.update({},{$set:data});
     newExperimentState.questionIndex = 0;
   }
 
   updateExperimentStateSync(newExperimentState, 'card.resumeFromComponentState');
 
-  if (Session.get('feedbackUnset')){
+  if (localMongo.findOne({}).feedbackUnset){
     getFeedbackParameters();
-    Session.set('feedbackUnset', false);
+    data = localMongo.findOne({}) || {}; data.feedbackUnset =  false; localMongo.update({},{$set:data});
   }
   
   // Notice that no matter what, we log something about condition data
   // ALSO NOTICE that we'll be calling processUserTimesLog after the server
   // returns and we know we've logged what happened
-  if(!Session.get('displayFeedback')){
+  if(!localMongo.findOne({}).displayFeedback){
     checkSyllableCacheForCurrentStimFile(processUserTimesLog);
   }
 }
@@ -2921,12 +2972,12 @@ async function resumeFromComponentState() {
 
 async function getFeedbackParameters(){
   if(getCurrentDeliveryParams().allowFeedbackTypeSelect){
-    Session.set('displayFeedback',true);
+    data = localMongo.findOne({}) || {}; data.displayFeedback = true; localMongo.update({},{$set:data});
   } 
 }
 
 async function checkSyllableCacheForCurrentStimFile(cb) {
-  const currentStimuliSetId = Session.get('currentStimuliSetId');
+  const currentStimuliSetId = localMongo.findOne({}).currentStimuliSetId;
   cachedSyllables = StimSyllables.findOne({filename: currentStimuliSetId});
   console.log('cachedSyllables start: ', cachedSyllables);
   if (!cachedSyllables) {
@@ -2943,66 +2994,65 @@ async function checkSyllableCacheForCurrentStimFile(cb) {
 }
 
 async function removeCardByUser() {
-  Meteor.clearTimeout(Session.get('CurTimeoutId'));
-  Meteor.clearInterval(Session.get('CurIntervalId'));
-  Session.set('CurTimeoutId', undefined);
-  Session.set('CurIntervalId', undefined);
+  Meteor.clearTimeout(localMongo.findOne({}).CurTimeoutId);
+  Meteor.clearInterval(localMongo.findOne({}).CurIntervalId);
+  data = localMongo.findOne({}) || {}; data.CurTimeoutId =  undefined; localMongo.update({},{$set:data});
+  data = localMongo.findOne({}) || {}; data.CurIntervalId =  undefined; localMongo.update({},{$set:data});
   document.getElementById("CountdownTimer").innerHTML = "";
   $('#removalFeedback').show();
 
-  let clusterIndex = Session.get('clusterIndex');
+  let clusterIndex = localMongo.findOne({}).clusterIndex;
   let stims = getStimCluster(clusterIndex).stims; 
   let whichStim = engine.findCurrentCardInfo().whichStim;
   const userId = Meteor.userId();
-  const tdfId = Session.get('currentTdfId');
+  const tdfId = localMongo.findOne({}).currentTdfId;
   await meteorCallAsync('insertHiddenItem', userId, stims[whichStim].stimulusKC, tdfId);
-  let hiddenItems = Session.get('hiddenItems');
+  let hiddenItems = localMongo.findOne({}).hiddenItems;
   hiddenItems.push(stims[whichStim].stimulusKC);
   
-  Session.set('numVisibleCards', Session.get('numVisibleCards') - 1);
-  Session.set('hiddenItems', hiddenItems);
+  data = localMongo.findOne({}) || {}; data.numVisibleCards =  localMongo.findOne({}).numVisibleCards - 1; localMongo.update({},{$set:data});
+  data = localMongo.findOne({}) || {}; data.hiddenItems =  hiddenItems; localMongo.update({},{$set:data});
 }
 
 async function processUserTimesLog() {
-  const experimentState = Session.get('currentExperimentState');
+  const experimentState = localMongo.findOne({}).currentExperimentState;
   // Get TDF info
-  const tdfFile = Session.get('currentTdfFile');
+  const tdfFile = localMongo.findOne({}).currentTdfFile;
   console.log('tdfFile', tdfFile);
 
-  Session.set('overallOutcomeHistory', experimentState.overallOutcomeHistory || []);
+  data = localMongo.findOne({}) || {}; data.overallOutcomeHistory =  experimentState.overallOutcomeHistory || []; localMongo.update({},{$set:data});
 
-  Session.set('schedule', experimentState.schedule);
-  Session.set('currentUnitStartTime', Date.now());
+  data = localMongo.findOne({}) || {}; data.schedule =  experimentState.schedule; localMongo.update({},{$set:data});
+  data = localMongo.findOne({}) || {}; data.currentUnitStartTime =  Date.now(); localMongo.update({},{$set:data});
 
   // shufIndex is mapped, clusterIndex is raw
   if(typeof experimentState.shufIndex !== "undefined"){
-      Session.set('clusterIndex', experimentState.shufIndex);
+      data = localMongo.findOne({}) || {}; data.clusterIndex =  experimentState.shufIndex; localMongo.update({},{$set:data});
   } else {
-      Session.set('clusterIndex', experimentState.clusterIndex);  
+      data = localMongo.findOne({}) || {}; data.clusterIndex =  experimentState.clusterIndex; localMongo.update({},{$set:data});  
   } 
 
-  Session.set('currentDisplayEngine', experimentState.currentDisplayEngine);
-  Session.set('currentQuestionPart2', experimentState.currentQuestionPart2);
-  Session.set('currentAnswer', experimentState.currentAnswer);
-  Session.set('currentAnswerSyllables', experimentState.currentAnswerSyllables);
-  Session.set('clozeQuestionParts', experimentState.clozeQuestionParts || undefined);
-  Session.set('showOverlearningText', experimentState.showOverlearningText);
-  Session.set('testType', experimentState.testType);
-  Session.set('originalDisplay', experimentState.originalDisplay);
-  Session.set('originalAnswer', experimentState.originalAnswer);
-  Session.set('originalQuestion', experimentState.originalQuestion);
-  Session.set('originalQuestion2', experimentState.originalQuestion2);
+  data = localMongo.findOne({}) || {}; data.currentDisplayEngine =  experimentState.currentDisplayEngine; localMongo.update({},{$set:data});
+  data = localMongo.findOne({}) || {}; data.currentQuestionPart2 =  experimentState.currentQuestionPart2; localMongo.update({},{$set:data});
+  data = localMongo.findOne({}) || {}; data.currentAnswerSyllables =  experimentState.currentAnswerSyllables; localMongo.update({},{$set:data});
+  data = localMongo.findOne({}) || {}; data.clozeQuestionParts =  experimentState.clozeQuestionParts || undefined; localMongo.update({},{$set:data});
+  data = localMongo.findOne({}) || {}; data.showOverlearningText =  experimentState.showOverlearningText; localMongo.update({},{$set:data});
+  data = localMongo.findOne({}) || {}; data.testType =  experimentState.testType; localMongo.update({},{$set:data});
+  data = localMongo.findOne({}) || {}; data.originalDisplay =  experimentState.originalDisplay; localMongo.update({},{$set:data});
+  data = localMongo.findOne({}) || {}; data.originalAnswer =  experimentState.originalAnswer; localMongo.update({},{$set:data});
+  data = localMongo.findOne({}) || {}; data.originalQuestion =  experimentState.originalQuestion; localMongo.update({},{$set:data});
+  data = localMongo.findOne({}) || {}; data.originalQuestion2 =  experimentState.originalQuestion2; localMongo.update({},{$set:data});
 
-  Session.set('subTdfIndex', experimentState.subTdfIndex);
-  Session.set('alternateDisplayIndex', experimentState.alternateDisplayIndex);
+  data = localMongo.findOne({}) || {}; data.subTdfIndex =  experimentState.subTdfIndex; localMongo.update({},{$set:data});
+  data = localMongo.findOne({}) || {}; data.alternateDisplayIndex =  experimentState.alternateDisplayIndex; localMongo.update({},{$set:data});
 
-  Session.set('currentDisplay', undefined);
+  data = localMongo.findOne({}) || {}; data.currentDisplay =  undefined; localMongo.update({},{$set:data});
 
   let resumeToQuestion = false;
 
   // prepareCard will handle whether or not new units see instructions, but
   // it will miss instructions for the very first unit.
-  let needFirstUnitInstructions = !Session.get('curUnitInstructionsSeen'); 
+  let needFirstUnitInstructions = !localMongo.findOne({}).curUnitInstructionsSeen; 
 
   // It's possible that they clicked Continue on a final unit, so we need to
   // know to act as if we're done
@@ -3028,7 +3078,7 @@ async function processUserTimesLog() {
 
   const newExperimentState = {};
   const newUnitNum = experimentState.currentUnitNumber;
-  const checkUnit = Session.get('currentUnitNumber');
+  const checkUnit = localMongo.findOne({}).currentUnitNumber;
   const lastUnitCompleted = experimentState.lastUnitCompleted;
 
   switch (experimentState.lastAction) {
@@ -3061,7 +3111,7 @@ async function processUserTimesLog() {
   if (moduleCompleted) {
     // They are DONE!
     console.log('TDF already completed - leaving for profile page.');
-    if (Session.get('loginMode') === 'experiment') {
+    if (localMongo.findOne({}).loginMode === 'experiment') {
       // Experiment users don't *have* a normal page
       leavePage(routeToSignin);
     } else {
@@ -3069,12 +3119,12 @@ async function processUserTimesLog() {
       leavePage('/profile');
     }
   } else {
-    await resetEngine(Session.get('currentUnitNumber'));
+    await resetEngine(localMongo.findOne({}).currentUnitNumber);
     newExperimentState.unitType = engine.unitType;
 
     // Depends on unitType being set in initialized unit engine
-    Session.set('currentDeliveryParams', getCurrentDeliveryParams());
-    Session.set('scoringEnabled', Session.get('currentDeliveryParams').scoringEnabled);
+    data = localMongo.findOne({}) || {}; data.currentDeliveryParams =  getCurrentDeliveryParams(); localMongo.update({},{$set:data});
+    data = localMongo.findOne({}) || {}; data.scoringEnabled =  localMongo.findOne({}).currentDeliveryParams.scoringEnabled; localMongo.update({},{$set:data});
 
     updateExperimentStateSync(newExperimentState, 'card.processUserTimesLog');
     await engine.loadComponentStates();
@@ -3082,12 +3132,12 @@ async function processUserTimesLog() {
     // If we make it here, then we know we won't need a resume until something
     // else happens
 
-    Session.set('inResume', false);
+    data = localMongo.findOne({}) || {}; data.inResume =  false; localMongo.update({},{$set:data});
 
     // Initialize client side student performance
     const curUser = Meteor.user();
-    const currentTdfId = Session.get('currentTdfId');
-    const curTdf = Session.get('currentTdfFile');
+    const currentTdfId = localMongo.findOne({}).currentTdfId;
+    const curTdf = localMongo.findOne({}).currentTdfFile;
     const curTdfUnit = curTdf.tdfs.tutor.unit[0];
     await setStudentPerformance(curUser._id, curUser.username, currentTdfId);
 
@@ -3104,9 +3154,9 @@ async function processUserTimesLog() {
       // we might need to stick with the instructions *IF AND ONLY IF* the
       // lockout period hasn't finished (which prepareCard won't handle)
       if (engine.unitFinished()) {
-        const lockoutMins = Session.get('currentDeliveryParams').lockoutminutes;
+        const lockoutMins = localMongo.findOne({}).currentDeliveryParams.lockoutminutes;
         if (lockoutMins > 0) {
-          const unitStartTimestamp = Session.get('currentUnitStartTime');
+          const unitStartTimestamp = localMongo.findOne({}).currentUnitStartTime;
           const lockoutFreeTime = unitStartTimestamp + (lockoutMins * (60 * 1000)); // minutes to ms
           if (Date.now() < lockoutFreeTime && (typeof curTdfUnit.unitinstructions !== 'undefined') ){
             console.log('RESUME FINISHED: showing lockout instructions');
@@ -3117,11 +3167,15 @@ async function processUserTimesLog() {
       }
       console.log('RESUME FINISHED: next-question logic to commence');
 
-      if(Session.get('unitType') == "model")
-        Session.set('engineIndices', await engine.calculateIndices());
-      else
-        Session.set('engineIndices', undefined);
-      await prepareCard();
+      if(localMongo.findOne({}).unitType == "model"){
+        engineIndices = await engine.calculateIndices()
+        data = localMongo.findOne({}) || {};
+        data.engineIncices = await engine.calculateIndices();
+        localMongo.update({},{$set: data});
+    }else{
+        data = localMongo.findOne({}) || {}; data.engineIndices =  undefined; localMongo.update({},{$set:data});
+        await prepareCard();
+      }
     }
   }
 }

@@ -46,6 +46,8 @@ function leavePage(dest) {
 // //////////////////////////////////////////////////////////////////////////
 // Utility functions used below
 
+
+const localMongo = new Mongo.Collection(null); // local-only - no database
 // Added because the LOCKOUT call overwhelms the console - so we throttle to one
 // call every 1000ms (1 second)
 const logLockout = _.throttle(
@@ -57,7 +59,7 @@ const logLockout = _.throttle(
 
 // Return current TDF unit's lockout minutes (or 0 if none-specified)
 function currLockOutMinutes() {
-  const lockoutminutes = parseInt(Session.get('currentDeliveryParams').lockoutminutes || 0);
+  const lockoutminutes = parseInt(localMongo.findOne({}).currentDeliveryParams.lockoutminutes || 0);
   logLockout(lockoutminutes);
   return lockoutminutes;
 }
@@ -77,7 +79,7 @@ function lockoutKick() {
 // the screen forward. HOWEVER, the lockout functionality currently overrides
 // this functionality (i.e. we don't check this stuff while we are locked out)
 function getDisplayTimeouts() {
-  const unit = Session.get('currentTdfUnit');
+  const unit = localMongo.findOne({}).currentTdfUnit;
   return {
     'minSecs': parseInt((unit ? unit.instructionminseconds : 0) || 0),
     'maxSecs': parseInt((unit ? unit.instructionmaxseconds : 0) || 0),
@@ -95,7 +97,7 @@ function setDispTimeoutText(txt) {
 // Called intermittently to see if we are still locked out
 function lockoutPeriodicCheck() {
   if (!lockoutFreeTime) {
-    const unitStartTimestamp = Session.get('currentUnitStartTime');
+    const unitStartTimestamp = localMongo.findOne({}).currentUnitStartTime;
     const lockoutMins = currLockOutMinutes();
     if (lockoutMins) {
       lockoutFreeTime = unitStartTimestamp + lockoutMins * (60 * 1000); // Minutes to millisecs
@@ -131,13 +133,13 @@ function lockoutPeriodicCheck() {
     // we only need to call it once
     if (serverNotify === null) {
       serverNotify = function() {
-        if (Session.get('loginMode') !== 'experiment') {
+        if (localMongo.findOne({}).loginMode !== 'experiment') {
           return; // Nothing to do
         }
 
         // We're in experiment mode and locked out - if they should get a Turk email,
         // now is the time to let the server know we've shown a lockout msg
-        const currUnit = Session.get('currentTdfUnit');
+        const currUnit = localMongo.findOne({}).currentTdfUnit;
         const turkemail = _.trim(_.safefirst(currUnit.turkemail));
         const subject = _.trim(_.safefirst(currUnit.turkemailsubject));
 
@@ -145,7 +147,7 @@ function lockoutPeriodicCheck() {
           return; // No message to show
         }
 
-        const experimentId = Session.get('currentRootTdfId');
+        const experimentId = localMongo.findOne({}).currentRootTdfId;
 
         Meteor.call('turkScheduleLockoutMessage', experimentId, lockoutFreeTime + 1, subject, turkemail,
             function(error) {
@@ -217,14 +219,14 @@ function lockoutPeriodicCheck() {
 function getUnitsRemaining() {
   let unitsLeft = 0;
 
-  const thisTdf = Session.get('currentTdfFile');
+  const thisTdf = localMongo.findOne({}).currentTdfFile;
   if (thisTdf) {
     let unitCount = 0;
     if (typeof thisTdf.tdfs.tutor.unit !== 'undefined' && thisTdf.tdfs.tutor.unit.length) {
       unitCount = thisTdf.tdfs.tutor.unit.length;
     }
     if (unitCount > 0) {
-      const unitIdx = Session.get('currentUnitNumber') || 0;
+      const unitIdx = localMongo.findOne({}).currentUnitNumber || 0;
       unitsLeft = (unitCount - unitIdx) - 1;
       if (unitsLeft < 0) {
         unitsLeft = 0;
@@ -240,7 +242,7 @@ function getUnitsRemaining() {
 // must only reference visible from anywhere on the client AND we take great
 // pains to not modify anything reactive until this function has returned
 function instructContinue() {
-  const curUnit = Session.get('currentTdfUnit');
+  const curUnit = localMongo.findOne({}).currentTdfUnit;
 
   let feedbackText = curUnit.unitinstructions && curUnit.unitinstructions.length > 0 ?
     curUnit.unitinstructions.trim() : '';
@@ -255,8 +257,8 @@ function instructContinue() {
     // Get the start time for instructions (set in router.js). IMPORTANT: we
     // wait until here to do this in case instructContinue was called from a
     // reactive function
-    const instructionClientStart = _.intval(Session.get('instructionClientStart'));
-    Session.set('instructionClientStart', 0);
+    const instructionClientStart = _.intval(localMongo.findOne({}).instructionClientStart);
+    data={instructionClientStart: 0};localMongo.update({},{$set: data});
 
     const newExperimentState = {
       instructionClientStart: instructionClientStart,
@@ -268,10 +270,10 @@ function instructContinue() {
     const res = await updateExperimentState(newExperimentState, 'instructions.instructContinue');
     console.log('instructions,new experiment state:', newExperimentState);
     console.log('instructContinue', res);
-    Session.set('inResume', true);
+    data={inResume: true};localMongo.update({},{$set: data});
     leavePage('/card');
-    Session.set('fromInstructions', true);
-    Session.set('enterKeyLock', false);
+    data={fromInstructions: true};localMongo.update({},{$set: data});
+    data={enterKeyLock: false};localMongo.update({},{$set: data});
     console.log('releasing enterKeyLock in instructContinue');
   }, 1);
 }
@@ -279,15 +281,15 @@ function instructContinue() {
 
 Template.instructions.helpers({
   isExperiment: function() {
-    return Session.get('loginMode') === 'experiment';
+    return localMongo.findOne({}).loginMode === 'experiment';
   },
 
   isNormal: function() {
-    return Session.get('loginMode') !== 'experiment';
+    return localMongo.findOne({}).loginMode !== 'experiment';
   },
 
   backgroundImage: function() {
-    const currUnit = Session.get('currentTdfUnit');
+    const currUnit = localMongo.findOne({}).currentTdfUnit;
     let img = '';
 
     if (currUnit && currUnit.picture) {
@@ -298,15 +300,15 @@ Template.instructions.helpers({
   },
 
   instructionText: function() {
-    return Session.get('currentTdfUnit').unitinstructions;
+    return localMongo.findOne({}).currentTdfUnit.unitinstructions;
   },
 
   instructionQuestion: function(){
-    return Session.get('currentTdfUnit').unitinstructionsquestion;
+    return localMongo.findOne({}).currentTdfUnit.unitinstructionsquestion;
   },
 
   displayContinueButton: function(){
-    if(typeof Session.get('instructionQuestionResults') === "undefined" && typeof Session.get('currentTdfFile').tdfs.tutor.unit[0].unitinstructionsquestion !== "undefined"){
+    if(typeof localMongo.findOne({}).instructionQuestionResults === "undefined" && typeof localMongo.findOne({}).currentTdfFile.tdfs.tutor.unit[0].unitinstructionsquestion !== "undefined"){
       return false;
     } else {
       return true;
@@ -332,7 +334,7 @@ Template.instructions.helpers({
   allowcontinue: function() {
     // If we're in experiment mode, they can only continue if there are
     // units left.
-    if (Session.get('loginMode') === 'experiment') {
+    if (localMongo.findOne({}).loginMode === 'experiment') {
       return getUnitsRemaining() > 0;
     } else {
       return true;
@@ -343,7 +345,7 @@ Template.instructions.helpers({
 Template.instructions.rendered = function() {
   // Make sure lockout interval timer is running
   lockoutKick();
-  if(typeof Session.get('currentTdfFile').tdfs.tutor.unit[0].unitinstructions !== "undefined"){
+  if(typeof localMongo.findOne({}).currentTdfFile.tdfs.tutor.unit[0].unitinstructions !== "undefined"){
     $('#continueBar').show();
   }
 };
@@ -357,11 +359,11 @@ Template.instructions.events({
     instructContinue();
   },
   'click #instructionQuestionAffrimative': function() {
-    Session.set('instructionQuestionResults',true);
+    data={instructionQuestionResults:true};localMongo.update({},{$set: data});
     $('#instructionQuestion').hide();
   },
   'click #instructionQuestionNegative': function() {
-    Session.set('instructionQuestionResults',false);
+    data={instructionQuestionResults:false};localMongo.update({},{$set: data});
     $('#instructionQuestion').hide();
   }
 });

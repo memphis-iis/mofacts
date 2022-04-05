@@ -21,6 +21,7 @@ Template.profile.created = function() {
   this.showTdfAdminInfo = new ReactiveVar([]);
   this.tdfOwnersMap = new ReactiveVar({});
 };
+const localMongo = new Mongo.Collection(null); // local-only - no database
 
 // //////////////////////////////////////////////////////////////////////////
 // Template storage and helpers
@@ -35,7 +36,7 @@ Template.profile.helpers({
   },
 
   simulationChecked: function() {
-    return Session.get('runSimulation');
+    return localMongo.findOne({}).runSimulation;
   },
 
   showTdfs: () => {
@@ -86,8 +87,8 @@ Template.profile.events({
 
   'click #simulation': function(event, template) {
     const checked = template.$('#simulation').prop('checked');
-    Session.set('runSimulation', checked);
-    console.log('runSimulation', Session.get('runSimulation'));
+    data = localMongo.findOne({}) || {}; data.runSimulation =  checked; localMongo.update({},{$set:data});
+    console.log('runSimulation', localMongo.findOne({}).runSimulation);
   },
 
   'click #mechTurkButton': function(event) {
@@ -243,14 +244,14 @@ function toggleTdfPresence(instance, mode) {
 
 // We'll use this in card.js if audio input is enabled and user has provided a
 // speech API key
-Session.set('speechAPIKey', null);
+data = localMongo.findOne({})  || {}; data.speechAPIKey =  null; localMongo.update({},{$set:data});
 
 Template.profile.rendered = async function() {
   sessionCleanUp();
-  Session.set('showSpeechAPISetup', true);
+  data = localMongo.findOne({})  || {}; data.showSpeechAPISetup =  true; localMongo.update({},{$set:data});
   const allTdfs = await meteorCallAsync('getAllTdfs');
   console.log('allTdfs', allTdfs, typeof(allTdfs));
-  Session.set('allTdfs', allTdfs);
+  data = localMongo.findOne({})  || {}; data.allTdfs =  allTdfs; localMongo.update({},{$set:data});
 
   $('#expDataDownloadContainer').html('');
 
@@ -385,10 +386,6 @@ Template.profile.rendered = async function() {
 // Actual logic for selecting and starting a TDF
 // eslint-disable-next-line max-len
 async function selectTdf(currentTdfId, lessonName, currentStimuliSetId, ignoreOutOfGrammarResponses, speechOutOfGrammarFeedback, how, isMultiTdf, fromSouthwest) {
-  console.log('Starting Lesson', lessonName, currentTdfId,
-      'currentStimuliSetId:', currentStimuliSetId, 'isMultiTdf:', isMultiTdf);
-
-  const audioPromptFeedbackView = Session.get('audioPromptFeedbackView');
 
   // make sure session variables are cleared from previous tests
   sessionCleanUp();
@@ -397,42 +394,43 @@ async function selectTdf(currentTdfId, lessonName, currentStimuliSetId, ignoreOu
   // Note that we assume the root and current TDF names are the same.
   // The resume logic in the the card template will determine if the
   // current TDF should be changed due to an experimental condition
-  Session.set('currentRootTdfId', currentTdfId);
-  Session.set('currentTdfId', currentTdfId);
+  data = localMongo.findOne({}) || {}; data.currentRootTdfId =  currentTdfId; localMongo.update({},{$set:data});
+  data = localMongo.findOne({}) || {}; data.currentTdfId =  currentTdfId; localMongo.update({},{$set:data});
   const tdfResponse = await meteorCallAsync('getTdfById', currentTdfId);
   const curTdfContent = tdfResponse.content;
-  Session.set('currentTdfFile', curTdfContent);
-  Session.set('currentTdfName', curTdfContent.fileName);
-  Session.set('currentStimuliSetId', currentStimuliSetId);
-  Session.set('ignoreOutOfGrammarResponses', ignoreOutOfGrammarResponses);
-  Session.set('speechOutOfGrammarFeedback', speechOutOfGrammarFeedback);
+  data = localMongo.findOne({}) || {}; data.currentTdfFile =  curTdfContent; localMongo.update({},{$set:data});
+  data = localMongo.findOne({}) || {}; data.currentTdfName =  curTdfContent.fileName; localMongo.update({},{$set:data});
+  data = localMongo.findOne({}) || {}; data.currentStimuliSetId =  currentStimuliSetId; localMongo.update({},{$set:data});
+  data = localMongo.findOne({}) || {}; data.ignoreOutOfGrammarResponses =  ignoreOutOfGrammarResponses; localMongo.update({},{$set:data});
+  data = localMongo.findOne({}) || {}; data.speechOutOfGrammarFeedback =  speechOutOfGrammarFeedback; localMongo.update({},{$set:data});
 
   // Record state to restore when we return to this page
   const audioPromptMode = getAudioPromptModeFromPage();
-  Session.set('audioPromptMode', audioPromptMode);
-  Session.set('audioPromptFeedbackView', audioPromptMode);
+  data = localMongo.findOne({}) || {}; data.audioPromptMode =  audioPromptMode; localMongo.update({},{$set:data});
+  const audioPromptFeedbackView = audioPromptMode;
+  data = localMongo.findOne({}) || {}; data.audioPromptFeedbackView =  audioPromptMode; localMongo.update({},{$set:data});
   const audioInputEnabled = getAudioInputFromPage();
-  Session.set('audioEnabledView', audioInputEnabled);
+  data = localMongo.findOne({}) || {}; data.audioEnabledView =  audioInputEnabled; localMongo.update({},{$set:data});
   const audioPromptFeedbackSpeakingRate = document.getElementById('audioPromptFeedbackSpeakingRate').value;
-  Session.set('audioPromptFeedbackSpeakingRateView', audioPromptFeedbackSpeakingRate);
+  data = localMongo.findOne({}) || {}; data.audioPromptFeedbackSpeakingRateView =  audioPromptFeedbackSpeakingRate; localMongo.update({},{$set:data});
   const audioPromptQuestionSpeakingRate = document.getElementById('audioPromptQuestionSpeakingRate').value;
-  Session.set('audioPromptQuestionSpeakingRateView', audioPromptQuestionSpeakingRate);
+  data = localMongo.findOne({}) || {}; data.audioPromptQuestionSpeakingRateView =  audioPromptQuestionSpeakingRate; localMongo.update({},{$set:data});
   const audioInputSensitivity = document.getElementById('audioInputSensitivity').value;
-  Session.set('audioInputSensitivityView', audioInputSensitivity);
+  data = localMongo.findOne({}) || {}; data.audioInputSensitivityView =  audioInputSensitivity; localMongo.update({},{$set:data});
   const audioPromptQuestionVolume = document.getElementById('audioPromptQuestionVolume').value;
-  Session.set('audioPromptQuestionVolume', audioPromptQuestionVolume);
+  data = localMongo.findOne({}) || {}; data.audioPromptQuestionVolume =  audioPromptQuestionVolume; localMongo.update({},{$set:data});
   const audioPromptFeedbackVolume = document.getElementById('audioPromptFeedbackVolume').value;
-  Session.set('audioPromptFeedbackVolume', audioPromptFeedbackVolume);
+  data = localMongo.findOne({}) || {}; data.audioPromptFeedbackVolume =  audioPromptFeedbackVolume; localMongo.update({},{$set:data});
   const feedbackType = await meteorCallAsync('getUserLastFeedbackTypeFromHistory', currentTdfId);
-  if(feedbackType)
-    Session.set('feedbackTypeFromHistory', feedbackType.feedbacktype)
-  else
-    Session.set('feedbackTypeFromHistory', null);
-
+  if(feedbackType){
+    data = localMongo.findOne({}) || {}; data.feedbackTypeFromHistory =  feedbackType.feedbacktype; localMongo.update({},{$set:data});
+  }else{
+    data = localMongo.findOne({}) || {}; data.feedbackTypeFromHistory =  null; localMongo.update({},{$set:data});
+  }
   // Set values for card.js to use later, in experiment mode we'll default to the values in the tdf
-  Session.set('audioPromptFeedbackSpeakingRate', audioPromptFeedbackSpeakingRate);
-  Session.set('audioPromptQuestionSpeakingRate', audioPromptQuestionSpeakingRate);
-  Session.set('audioInputSensitivity', audioInputSensitivity);
+  data = localMongo.findOne({}) || {}; data.audioPromptFeedbackSpeakingRate =  audioPromptFeedbackSpeakingRate; localMongo.update({},{$set:data});
+  data = localMongo.findOne({}) || {}; data.audioPromptQuestionSpeakingRate =  audioPromptQuestionSpeakingRate; localMongo.update({},{$set:data});
+  data = localMongo.findOne({}) || {}; data.audioInputSensitivity =  audioInputSensitivity; localMongo.update({},{$set:data});
 
   // Get some basic info about the current user's environment
   let userAgent = '[Could not read user agent string]';
@@ -453,7 +451,7 @@ async function selectTdf(currentTdfId, lessonName, currentStimuliSetId, ignoreOu
   const audioPromptTTSAPIKeyAvailable = !!curTdfContent.tdfs.tutor.setspec.textToSpeechAPIKey &&
       !!curTdfContent.tdfs.tutor.setspec.textToSpeechAPIKey;
   let audioPromptFeedbackEnabled = undefined;
-  if (Session.get('experimentTarget')) {
+  if (typeof localMongo.findOne({}).experimentTarget !== 'undefined') {
     audioPromptFeedbackEnabled = tdfAudioPromptFeedbackEnabled;
   } else if (fromSouthwest) {
     audioPromptFeedbackEnabled = tdfAudioPromptFeedbackEnabled &&
@@ -461,24 +459,24 @@ async function selectTdf(currentTdfId, lessonName, currentStimuliSetId, ignoreOu
   } else {
     audioPromptFeedbackEnabled = tdfAudioPromptFeedbackEnabled && userAudioPromptFeedbackToggled;
   }
-  Session.set('enableAudioPromptAndFeedback', audioPromptFeedbackEnabled);
+  data = localMongo.findOne({}) || {}; data.enableAudioPromptAndFeedback =  audioPromptFeedbackEnabled; localMongo.update({},{$set:data});
 
   // If we're in experiment mode and the tdf file defines whether audio input is enabled
   // forcibly use that, otherwise go with whatever the user set the audio input toggle to
   const userAudioToggled = audioInputEnabled;
   const tdfAudioEnabled = curTdfContent.tdfs.tutor.setspec.audioInputEnabled ?
       curTdfContent.tdfs.tutor.setspec.audioInputEnabled == 'true' : false;
-  const audioEnabled = !Session.get('experimentTarget') ? (tdfAudioEnabled && userAudioToggled) : tdfAudioEnabled;
-  Session.set('audioEnabled', audioEnabled);
+  const audioEnabled = !localMongo.findOne({}).experimentTarget ? (tdfAudioEnabled && userAudioToggled) : tdfAudioEnabled;
+  data = localMongo.findOne({}) || {}; data.audioEnabled =  audioEnabled; localMongo.update({},{$set:data});
 
   let continueToCard = true;
 
-  if (Session.get('audioEnabled')) {
+  if (localMongo.findOne({}).audioEnabled) {
     // Check if the tdf or user has a speech api key defined, if not show the modal form
     // for them to input one.  If so, actually continue initializing web audio
     // and going to the practice set
     Meteor.call('getUserSpeechAPIKey', function(error, key) {
-      Session.set('speechAPIKey', key);
+      data = localMongo.findOne({}) || {}; data.speechAPIKey =  key; localMongo.update({},{$set:data});
       const tdfKeyPresent = !!curTdfContent.tdfs.tutor.setspec.speechAPIKey &&
           !!curTdfContent.tdfs.tutor.setspec.speechAPIKey;
       if (!key && !tdfKeyPresent) {
@@ -507,7 +505,7 @@ async function selectTdf(currentTdfId, lessonName, currentStimuliSetId, ignoreOu
     };
     updateExperimentStateSync(newExperimentState, 'profile.selectTdf');
 
-    Session.set('inResume', true);
+    data = localMongo.findOne({}) || {}; data.inResume =  true; localMongo.update({},{$set:data});
     if (isMultiTdf) {
       navigateForMultiTdf();
     } else {

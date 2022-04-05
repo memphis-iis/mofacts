@@ -4,13 +4,14 @@ import {DynamicTdfGenerator} from '../../../common/DynamicTdfGenerator';
 import {rangeVal} from '../../lib/currentTestingHelpers';
 import {meteorCallAsync} from '../..';
 
-Session.set('curClozeSentencePairClusterKC', '');
-Session.set('clozeSentencePairs', {});
-Session.set('clozeHistory', []);
-Session.set('selectedForDelete', []);
-Session.set('editingSentence', {});
-Session.set('editingCloze', {});
-Session.set('tdfOwnersMap', {});
+const localMongo = new Mongo.Collection(null); // local-only - no database
+data = localMongo.findOne({}) || {}; data.curClozeSentencePairClusterKC =  ''; localMongo.update({},{$set:data});
+data = localMongo.findOne({})  || {}; data.clozeSentencePairs =  {}; localMongo.update({},{$set:data});
+data = localMongo.findOne({})  || {}; data.clozeHistory =  []; localMongo.update({},{$set:data});
+data = localMongo.findOne({})  || {}; data.selectedForDelete =  []; localMongo.update({},{$set:data});
+data = localMongo.findOne({})  || {}; data.editingSentence =  {}; localMongo.update({},{$set:data});
+data = localMongo.findOne({})  || {}; data.editingCloze =  {}; localMongo.update({},{$set:data});
+data = localMongo.findOne({})  || {}; data.tdfOwnersMap =  {}; localMongo.update({},{$set:data});
 let clusterKCtoSentenceMap = {};
 let clusterKCtoClozesMap = {};
 let stimulusKCtoClozesMap = {};
@@ -36,10 +37,10 @@ function recordClozeEditHistory(oldCloze, newCloze) {
 async function setAllTdfs(ownerMapCallback) {
   const allTdfs = [];
   const ownerIds = [];
-  let stimSetIds = Session.get('allTdfs').map((x) => x.stimuliSetId).filter((x) => x!=null);
+  let stimSetIds = localMongo.findOne({}).allTdfs.map((x) => x.stimuliSetId).filter((x) => x!=null);
   stimSetIds = Array.from(new Set(stimSetIds));
   const allStims = await meteorCallAsync('getStimuliSetsForIdSet', stimSetIds);
-  Session.get('allTdfs').forEach(function(tdf) {
+  localMongo.findOne({}).allTdfs.forEach(function(tdf) {
     if (tdf.content.fileName.indexOf(curSemester) == -1) return;
 
     const tdfid = tdf.TDFId;
@@ -59,7 +60,7 @@ async function setAllTdfs(ownerMapCallback) {
     allTdfs.push({tdfid, displayName, ownerId, displayDate});
   });
   ownerMapCallback(ownerIds);
-  Session.set('contentGenerationAllTdfs', allTdfs);
+  data = localMongo.findOne({}) || {}; data.contentGenerationAllTdfs =  allTdfs; localMongo.update({},{$set:data});
 }
 
 function getTdfOwnersMap(ownerIds) {
@@ -67,7 +68,7 @@ function getTdfOwnersMap(ownerIds) {
     if (err) {
       console.log(err);
     } else {
-      Session.set('tdfOwnersMap', res);
+      data = localMongo.findOne({}) || {}; data.tdfOwnersMap =  res; localMongo.update({},{$set:data});
     }
   });
 }
@@ -187,10 +188,12 @@ async function setClozesFromStimObject(stimObject, isMultiTdf) {
     }
   }
 
-  Session.set('clozeSentencePairs', {
-    'sentences': sourceSentences,
-    'clozes': allClozes,
-  });
+  data = localMongo.findOne({}) || {}; data.clozeSentencePairs = 
+  {
+    sentences: sourceSentences,
+     clozes:  allClozes
+  };
+  localMongo.update({},{$set:data});
   originalClozes = JSON.parse(JSON.stringify(allClozes));
   fillOutItemLookupMaps(allClozes);
 }
@@ -244,7 +247,7 @@ function saveEditHistory(originalClozes, newClozes) {
 function generateAndSubmitTDFAndStimFiles() {
   // It's important to keep items in the same order to preserve cluster index/clusterKC relation
   sortClozes('originalOrderIndex');
-  const clozes = Session.get('clozeSentencePairs').clozes;
+  const clozes = localMongo.findOne({}).clozeSentencePairs.clozes;
   console.log('Generating TDF with clozes: ', clozes);
   const displayName = $('#tdfDisplayNameTextBox').val();
   const curUserName = Meteor.user().username.split('@')[0].replace(/[.]/g, '_');
@@ -280,7 +283,7 @@ function generateAndSubmitTDFAndStimFiles() {
     content: newTDFJSON,
   };
 
-  const sourceSentences = Session.get('clozeSentencePairs').sentences;
+  const sourceSentences = localMongo.findOne({}).clozeSentencePairs.sentences;
 
   // Clean up after ourselves
   for (const unitIndex in clusterListMappings) {
@@ -300,11 +303,11 @@ function generateAndSubmitTDFAndStimFiles() {
       const displayDate = (curDate.getMonth() + 1) + '/' + curDate.getDate() + '/' + curDate.getFullYear();
       const ownerId = Meteor.userId();
       const newTdfInfo = {tdfid, displayName, ownerId, displayDate};
-      Session.set('contentGenerationAllTdfs', Session.get('contentGenerationAllTdfs').concat(newTdfInfo));
+      data = localMongo.findOne({}) || {}; data.contentGenerationAllTdfs =  localMongo.findOne({}).contentGenerationAllTdfs.concat(newTdfInfo); localMongo.update({},{$set:data});
 
-      const tempTdfOwnersMap = Session.get('tdfOwnersMap');
+      const tempTdfOwnersMap = localMongo.findOne({}).tdfOwnersMap;
       tempTdfOwnersMap[ownerId] = Meteor.user().username;
-      Session.set('tdfOwnersMap', tempTdfOwnersMap);
+      data = localMongo.findOne({}) || {}; data.tdfOwnersMap =  tempTdfOwnersMap; localMongo.update({},{$set:data});
 
       tdfIdToTdfFileMap[tdfid] = newTDFJSON;
       tdfIdToStimuliSetMap[tdfid] = newStimJSON;
@@ -498,7 +501,7 @@ function updateLookupMaps(stimulusKC, clusterKC, paraphraseId, oldCloze, newCloz
     clozeItem.stimulusKC == stimulusKC && clozeItem.paraphraseId != paraphraseId;
   });
 
-  const prevClozeSentencePairs = Session.get('clozeSentencePairs');
+  const prevClozeSentencePairs = localMongo.findOne({}).clozeSentencePairs;
   let newSentences = prevClozeSentencePairs.sentences;
   const newClozes = prevClozeSentencePairs.clozes;
   const curClozeIndex = prevClozeSentencePairs.clozes.findIndex(function(c) {
@@ -523,11 +526,15 @@ function updateLookupMaps(stimulusKC, clusterKC, paraphraseId, oldCloze, newCloz
     });
   }
 
-  Session.set('clozeSentencePairs', {
-    'sentences': newSentences,
-    'clozes': newClozes,
-  });
+  data = localMongo.findOne({}) || {};
+  data.clozeSentencePairs = 
+  {
+    sentences: newSentences,
+    clozes: newClozes
+  };
+  localMongo.update({},{$set:data});
 }
+
 
 function deleteCloze(stimulusKC, clusterKC, paraphraseId) {
   console.log('deleteCloze', stimulusKC, clusterKC, paraphraseId);
@@ -538,7 +545,7 @@ function deleteCloze(stimulusKC, clusterKC, paraphraseId) {
 
 function sortClozes(sortingMethod) {
   console.log('sorting clozes by: ' + sortingMethod);
-  const clozeSentencePairs = JSON.parse(JSON.stringify(Session.get('clozeSentencePairs')));
+  const clozeSentencePairs = JSON.parse(JSON.stringify(localMongo.findOne({}).clozeSentencePairs));
   let clozes = clozeSentencePairs.clozes;
 
   switch (sortingMethod) {
@@ -575,18 +582,18 @@ function sortClozes(sortingMethod) {
   }
 
   clozeSentencePairs.clozes = clozes;
-  Session.set('clozeSentencePairs', clozeSentencePairs);
+  data = localMongo.findOne({}) || {}; data.clozeSentencePairs =  clozeSentencePairs; localMongo.update({},{$set:data});
 }
 
 Template.contentGeneration.onRendered(async function() {
   $('html,body').scrollTop(0);
-  Session.set('curClozeSentencePairClusterKC', '');
-  Session.set('clozeSentencePairs', {});
-  Session.set('clozeHistory', []);
-  Session.set('selectedForDelete', []);
-  Session.set('editingSentence', {});
-  Session.set('editingCloze', {});
-  Session.set('tdfOwnersMap', {});
+  data = localMongo.findOne({}) || {}; data.curClozeSentencePairClusterKC =  ''; localMongo.update({},{$set:data});
+  data = localMongo.findOne({}) || {}; data.clozeSentencePairs =  {}; localMongo.update({},{$set:data});
+  data = localMongo.findOne({}) || {}; data.clozeHistory =  []; localMongo.update({},{$set:data});
+  data = localMongo.findOne({}) || {}; data.selectedForDelete =  []; localMongo.update({},{$set:data});
+  data = localMongo.findOne({}) || {}; data.editingSentence =  {}; localMongo.update({},{$set:data});
+  data = localMongo.findOne({}) || {}; data.editingCloze =  {}; localMongo.update({},{$set:data});
+  data = localMongo.findOne({}) || {}; data.tdfOwnersMap =  {}; localMongo.update({},{$set:data});
   clusterKCtoSentenceMap = {};
   clusterKCtoClozesMap = {};
   stimulusKCtoClozesMap = {};
@@ -608,7 +615,7 @@ Template.contentGeneration.onRendered(async function() {
   // eslint-disable-next-line no-invalid-this
   const template = this;
   template.autorun(() => {
-    Session.get('clozeSentencePairs');
+    localMongo.findOne({}).clozeSentencePairs;
     Tracker.afterFlush(() => {
       $('.cloze-checkbox').shiftSelectable();
     });
@@ -622,7 +629,7 @@ Template.contentGeneration.events({
     const stimulusKC = parseInt(event.currentTarget.getAttribute('stimulusKC'));
     const clusterKC = parseInt(event.currentTarget.getAttribute('clusterKC'));
     const curParaphraseId = parseInt(event.currentTarget.getAttribute('paraphrase-id'));
-    const clozeSentencePairs = Session.get('clozeSentencePairs');
+    const clozeSentencePairs = localMongo.findOne({}).clozeSentencePairs;
 
     const oldCloze = clozeSentencePairs.clozes.find((cloze) => cloze.paraphraseId == curParaphraseId);
     const newCloze = JSON.parse(JSON.stringify(oldCloze));
@@ -638,7 +645,7 @@ Template.contentGeneration.events({
     const stimulusKC = parseInt(event.currentTarget.getAttribute('stimulusKC'));
     const clusterKC = parseInt(event.currentTarget.getAttribute('clusterKC'));
     const curParaphraseId = parseInt(event.currentTarget.getAttribute('paraphrase-id'));
-    const clozeSentencePairs = Session.get('clozeSentencePairs');
+    const clozeSentencePairs = localMongo.findOne({}).clozeSentencePairs;
 
     const oldCloze = JSON.parse(JSON.stringify(clozeSentencePairs.clozes.find(
         (cloze) => cloze.paraphraseId == curParaphraseId)));
@@ -653,7 +660,7 @@ Template.contentGeneration.events({
 
   'click #cloze': function(event) {
     const clusterKC = parseInt(event.currentTarget.getAttribute('clusterKC'));
-    Session.set('curClozeSentencePairClusterKC', clusterKC);
+    data = localMongo.findOne({}) || {}; data.curClozeSentencePairClusterKC =  clusterKC; localMongo.update({},{$set:data});
     const parsedSentencesMatchingSentence = $('#parsed-sentences').find('[clusterKC=' + clusterKC + ']').get(0);
     if (parsedSentencesMatchingSentence) {
       parsedSentencesMatchingSentence.scrollIntoView();
@@ -667,7 +674,7 @@ Template.contentGeneration.events({
 
   'click .sentence-with-cloze': function(event) {
     const clusterKC = parseInt(event.currentTarget.getAttribute('clusterKC'));
-    Session.set('curClozeSentencePairClusterKC', clusterKC);
+    data = localMongo.findOne({}) || {}; data.curClozeSentencePairClusterKC =  clusterKC; localMongo.update({},{$set:data});
     $('#extracted-clozes').find('[clusterKC=' + clusterKC + ']').get(0).scrollIntoView();
   },
 
@@ -697,10 +704,13 @@ Template.contentGeneration.events({
             orig: 0,
           },
         };
-        Session.set('clozeSentencePairs', {
-          'sentences': sentences,
-          'clozes': clozes,
-        });
+        data = localMongo.findOne({}) || {};
+        data.clozeSentencePairs = 
+        {
+          sentences: sentences,
+          clozes: clozes
+        };
+        localMongo.update({},{$set:data});
         originalClozes = JSON.parse(JSON.stringify(clozes));
         fillOutItemLookupMaps(sentences, clozes);
         clozeEdits = [];
@@ -714,7 +724,7 @@ Template.contentGeneration.events({
     console.log(event);
     const newClozeText = $('#clozeTextEdit').val();
     const correctResponse = $('#clozeResponseEdit').val();
-    const editingCloze = Session.get('editingCloze');
+    const editingCloze = localMongo.findOne({}).editingCloze;
 
     const clusterKC = editingCloze.clusterKC;
     const stimulusKC = editingCloze.stimulusKC;
@@ -743,13 +753,13 @@ Template.contentGeneration.events({
           (clozeItem) => clozeItem.paraphraseId != paraphraseId);
       stimulusKCtoClozesMap[stimulusKC].push(newCloze);
 
-      const clozeSentencePairs = Session.get('clozeSentencePairs');
+      const clozeSentencePairs = localMongo.findOne({}).clozeSentencePairs;
       const editingClozeIndex = clozeSentencePairs.clozes.findIndex(
           (cloze) => cloze.stimulusKC == stimulusKC && cloze.paraphraseId == paraphraseId);
       clozeSentencePairs.clozes.splice(editingClozeIndex, 1, newCloze);
       // clozeSentencePairs.clozes = clozeSentencePairs.clozes.filter((cloze) => cloze.stimulusKC != stimulusKC);
       // clozeSentencePairs.clozes.push(newCloze);
-      Session.set('clozeSentencePairs', clozeSentencePairs);
+      data = localMongo.findOne({}) || {}; data.clozeSentencePairs =  clozeSentencePairs; localMongo.update({},{$set:data});
 
       $('#edit-modal').modal('hide');
       $('#clozeResponseEdit').val('');
@@ -771,8 +781,8 @@ Template.contentGeneration.events({
 
     console.log('stimulusKC: ', stimulusKC, ', clusterKC: ', clusterKC, ', curParaphraseId: ', curParaphraseId);
 
-    Session.set('curClozeSentencePairClusterKC', clusterKC);
-    Session.set('editingClozeUID', stimulusKC);
+    data = localMongo.findOne({}) || {}; data.curClozeSentencePairClusterKC =  clusterKC; localMongo.update({},{$set:data});
+    data = localMongo.findOne({}) || {}; data.editingClozeUID =  stimulusKC; localMongo.update({},{$set:data});
 
     let curCloze;
 
@@ -785,18 +795,18 @@ Template.contentGeneration.events({
     }
 
     const curSentence = clusterKCtoSentenceMap[clusterKC];
-    Session.set('editingCloze', curCloze);
+    data = localMongo.findOne({}) || {}; data.editingCloze =  curCloze; localMongo.update({},{$set:data});
     if (curSentence) {
-      Session.set('editingSentence', curSentence);
+      data = localMongo.findOne({}) || {}; data.editingSentence =  curSentence; localMongo.update({},{$set:data});
     } else {
       $('#clozeTextEdit').val('');
-      Session.set('editingSentence', {});
+      data = localMongo.findOne({}) || {}; data.editingSentence =  {}; localMongo.update({},{$set:data});
     }
     $('#edit-modal').modal('show');
   },
 
   'change #select-delete': function(event) {
-    let selectedForDelete = Session.get('selectedForDelete') || [];
+    let selectedForDelete = localMongo.findOne({}).selectedForDelete || [];
 
     const selectedCloze = {
       stimulusKC: parseInt(event.target.getAttribute('stimulusKC')),
@@ -812,11 +822,11 @@ Template.contentGeneration.events({
       });
     }
 
-    Session.set('selectedForDelete', selectedForDelete);
+    data = localMongo.findOne({}) || {}; data.selectedForDelete =  selectedForDelete; localMongo.update({},{$set:data});
   },
 
   'click #delete-selected': function(event) {
-    const selectedForDelete = Session.get('selectedForDelete');
+    const selectedForDelete = localMongo.findOne({}).selectedForDelete;
 
     selectedForDelete.forEach(function(selectedCloze) {
       const stimulusKC = selectedCloze.stimulusKC;
@@ -825,7 +835,7 @@ Template.contentGeneration.events({
       deleteCloze(stimulusKC, clusterKC, curParaphraseId);
     });
 
-    Session.set('selectedForDelete', []);
+    data = localMongo.findOne({}) || {}; data.selectedForDelete =  []; localMongo.update({},{$set:data});
 
     $('input:checkbox').removeAttr('checked');
   },
@@ -891,28 +901,28 @@ Template.contentGeneration.events({
 });
 
 Template.contentGeneration.helpers({
-  sentences: () => Session.get('clozeSentencePairs').sentences,
-  clozes: () => Session.get('clozeSentencePairs').clozes,
-  clozesSelected: () => Session.get('selectedForDelete').length > 0,
-  editingCloze: () => Session.get('editingCloze').clozeStimulus,
-  editingClozeResponse: () => Session.get('editingCloze').correctResponse,
-  editingSentence: () => Session.get('editingSentence').sentence,
-  contentGenerationAllTdfs: () => Session.get('contentGenerationAllTdfs'),
-  tdfOwnersMap: (ownerId) => Session.get('tdfOwnersMap')[ownerId],
+  sentences: () => localMongo.findOne({}).clozeSentencePairs.sentences,
+  clozes: () => localMongo.findOne({}).clozeSentencePairs.clozes,
+  clozesSelected: () => localMongo.findOne({}).selectedForDelete.length > 0,
+  editingCloze: () => localMongo.findOne({}).editingCloze.clozeStimulus,
+  editingClozeResponse: () => localMongo.findOne({}).editingCloze.correctResponse,
+  editingSentence: () => localMongo.findOne({}).editingSentence.sentence,
+  contentGenerationAllTdfs: () => localMongo.findOne({}).contentGenerationAllTdfs,
+  tdfOwnersMap: (ownerId) => localMongo.findOne({}).tdfOwnersMap[ownerId],
 
   isCurrentPair: function(clusterKC) {
-    return clusterKC === Session.get('curClozeSentencePairClusterKC');
+    return clusterKC === localMongo.findOne({}).curClozeSentencePairClusterKC;
   },
 
   isCoreference: function(paraphraseId) {
-    const cloze = !!Session.get('clozeSentencePairs') && Session.get('clozeSentencePairs').clozes ?
-        Session.get('clozeSentencePairs').clozes.find((cloze) => cloze.paraphraseId == paraphraseId) : undefined;
+    const cloze = !!localMongo.findOne({}).clozeSentencePairs && localMongo.findOne({}).clozeSentencePairs.clozes ?
+        localMongo.findOne({}).clozeSentencePairs.clozes.find((cloze) => cloze.paraphraseId == paraphraseId) : undefined;
     if (!cloze) console.log('isCoreference, not found: ' + paraphraseId);
     return cloze ? cloze.isCoreference : false;
   },
 
   isCorefReverted: function(paraphraseId) {
-    const cloze = Session.get('clozeSentencePairs').clozes.find((cloze) => cloze.paraphraseId == paraphraseId);
+    const cloze = localMongo.findOne({}).clozeSentencePairs.clozes.find((cloze) => cloze.paraphraseId == paraphraseId);
     if (!cloze) console.log('isCorefReverted, not found: ' + paraphraseId);
     return cloze ? !(cloze.tags.originalItem) : false;
   },
@@ -922,9 +932,9 @@ Template.contentGeneration.helpers({
   },
 
   currentCloze: function() {
-    const curClozeClusterKC = Session.get('curClozeSentencePairClusterKC');
+    const curClozeClusterKC = localMongo.findOne({}).curClozeSentencePairClusterKC;
     let curClozeText;
-    _.map(Session.get('clozeSentencePairs').clozes, function(c) {
+    _.map(localMongo.findOne({}).clozeSentencePairs.clozes, function(c) {
       if (c.clusterKC === curClozeClusterKC) {
         curClozeText = c.clozeStimulus;
       }

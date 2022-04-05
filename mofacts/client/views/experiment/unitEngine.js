@@ -20,6 +20,7 @@ import {Answers} from './answerAssess';
 export {createScheduleUnit, createModelUnit, createEmptyUnit};
 
 const blank = '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
+const localMongo = new Mongo.Collection(null); // local-only - no database
 
 async function create(func, curExperimentData) {
   const engine = _.extend(defaultUnitEngine(curExperimentData), func());
@@ -97,7 +98,7 @@ function defaultUnitEngine(curExperimentData) {
       if(syllablesArray.length <= 2){
         hintLevel = 0;
       }
-      Session.set('hintLevel', hintLevel);
+      data={hintLevel:hintLevel};localMongo.update({},{$set: data});
       let reconstructedAnswer = '';
       let clozeAnswerOnlyUnderscores = '';
       let clozeAnswerNoUnderscores = '';
@@ -184,7 +185,7 @@ function defaultUnitEngine(curExperimentData) {
         if (!this.cachedSyllables || !this.cachedSyllables.data[answer]) {
             if(!this.cachedSyllables.data[answer]){
               console.log('no syllable data for that answer, throw error');
-              const currentStimuliSetId = Session.get('currentStimuliSetId');
+              const currentStimuliSetId = localMongo.findOne({}).currentStimuliSetId
               const curAnswers = getAllCurrentStimAnswers();
               Meteor.call('updateStimSyllableCache', currentStimuliSetId, curAnswers, function(){});
               alert('Something went wrong generating hints. Please report this error to the administrator and restart your trial');
@@ -245,7 +246,7 @@ function defaultUnitEngine(curExperimentData) {
 
     setUpCardQuestionAndAnswerGlobals: async function(cardIndex, whichStim, whichHintLevel = 0, probFunctionParameters) {
       const newExperimentState = {};
-      Session.set('alternateDisplayIndex', undefined);
+      data={alternateDisplayIndex:undefined};localMongo.update({},{$set: data});
       const cluster = getStimCluster(cardIndex);
       console.log('setUpCardQuestionAndAnswerGlobals', cardIndex, whichStim, probFunctionParameters,
           cluster, cluster.stims[whichStim], whichHintLevel);
@@ -261,7 +262,7 @@ function defaultUnitEngine(curExperimentData) {
         const numPotentialDisplays = curStim.alternateDisplays.length + 1;
         const displayIndex = Math.floor(numPotentialDisplays * Math.random());
         if (displayIndex < curStim.alternateDisplays.length) {
-          Session.set('alternateDisplayIndex', displayIndex);
+          data={alternateDisplayIndex:displayIndex};localMongo.update({},{$set: data});
           newExperimentState.alternateDisplayIndex = displayIndex;
           const curAltDisplay = curStim.alternateDisplays[displayIndex];
           currentDisplay = JSON.parse(JSON.stringify({
@@ -274,7 +275,7 @@ function defaultUnitEngine(curExperimentData) {
         }
       }
       const originalDisplay = JSON.parse(JSON.stringify(currentDisplay));
-      Session.set('originalDisplay', originalDisplay);
+      data={originalDisplay:originalDisplay};localMongo.update({},{$set: data});
       newExperimentState.originalDisplay = originalDisplay;
 
       let currentQuestion = currentDisplay.clozeText || currentDisplay.text;
@@ -283,9 +284,9 @@ function defaultUnitEngine(curExperimentData) {
 
       const correctAnswer = Answers.getDisplayAnswerText(currentStimAnswer);
       const cacheWords = await meteorCallAsync('getMatchingDialogueCacheWordsForAnswer', correctAnswer);
-      Session.set('dialogueCacheHint', cacheWords.join(','));
+      data={dialogueCacheHint:cacheWords.join(',')};localMongo.update({},{$set: data});
 
-      Session.set('originalAnswer', currentStimAnswer);
+      data={originalAnswer:currentStimAnswer};localMongo.update({},{$set: data});
       newExperimentState.originalAnswer = currentStimAnswer;
       currentStimAnswer = currentStimAnswer.toLowerCase();
 
@@ -295,8 +296,8 @@ function defaultUnitEngine(curExperimentData) {
         currentQuestion = prompts[0];
         currentQuestionPart2 = prompts[1];
       }
-      Session.set('originalQuestion', currentQuestion);
-      Session.set('originalQuestion2', currentQuestionPart2);
+      data={originalQuestion:currentQuestion};localMongo.update({},{$set: data});
+      data={originalQuestion2:currentQuestionPart2};localMongo.update({},{$set: data});
       newExperimentState.originalQuestion = currentQuestion;
       newExperimentState.originalQuestion2 = currentQuestionPart2;
 
@@ -318,15 +319,15 @@ function defaultUnitEngine(curExperimentData) {
         curStim.hintLevel = whichHintLevel;
       }
 
-      Session.set('currentAnswerSyllables', currentAnswerSyllables);
-      Session.set('currentAnswer', currentAnswer);
-      Session.set('clozeQuestionParts', clozeQuestionParts);
-      Session.set('currentQuestionPart2', currentQuestionPart2PostSylls);
+      data={currentAnswerSyllables:currentAnswerSyllables};localMongo.update({},{$set: data});
+      data={currentAnswer:currentAnswer};localMongo.update({},{$set: data});
+      data={clozeQuestionParts:clozeQuestionParts};localMongo.update({},{$set: data});
+      data={currentQuestionPart2:currentQuestionPart2PostSylls};localMongo.update({},{$set: data});
       newExperimentState.currentAnswerSyllables = currentAnswerSyllables;
       newExperimentState.currentAnswer = currentAnswer;
       newExperimentState.clozeQuestionParts = clozeQuestionParts || null;
       newExperimentState.currentQuestionPart2 = currentQuestionPart2PostSylls;
-      newExperimentState.hintLevel = Session.get('hintLevel');
+      newExperimentState.hintLevel = localMongo.findOne({}).hintLevel
 
       if (currentDisplay.clozeText) {
         currentDisplay.clozeText = currentQuestionPostSylls;
@@ -334,7 +335,7 @@ function defaultUnitEngine(curExperimentData) {
         currentDisplay.text = currentQuestionPostSylls;
       }
 
-      Session.set('currentDisplayEngine', currentDisplay);
+      data={currentDisplayEngine:currentDisplay};localMongo.update({},{$set: data});
       newExperimentState.currentDisplayEngine = currentDisplay;
 
       return newExperimentState;
@@ -480,7 +481,7 @@ function modelUnitEngine() {
   }
 
   // See if they specified a probability function
-  const unit = Session.get('currentTdfUnit');
+  const unit = localMongo.findOne({}).currentTdfUnit
   let probFunction = undefined;
   if (unit.learningsession) 
     probFunction = unit.learningsession.calculateProbability ? unit.learningsession.calculateProbability.trim() : undefined;
@@ -705,7 +706,7 @@ function modelUnitEngine() {
     const responseText = stripSpacesAndLowerCase(Answers.getDisplayAnswerText(getStimAnswer(cardIndex, whichStim)));
 
     // Record instructions answer to card
-    cardProbabilities.instructionQuestionResult = Session.get('instructionQuestionResults');
+    cardProbabilities.instructionQuestionResult = localMongo.findOne({}).instructionQuestionResults
     
     // About to show a card - record any times necessary
     card.lastSeen = Date.now();
@@ -757,7 +758,7 @@ function modelUnitEngine() {
         for (let j=0; j<card.stims.length; j++) {
           const stim = card.stims[j];
           const hintLevelProbabilities = [];
-          const currentStimuliSetId = Session.get('currentStimuliSetId');
+          const currentStimuliSetId = localMongo.findOne({}).currentStimuliSetId
           const stimAnswer = stimCluster.stims[j].correctResponse
           let answerText = Answers.getDisplayAnswerText(stimAnswer).toLowerCase();
           //Detect Hint Levels
@@ -837,7 +838,7 @@ function modelUnitEngine() {
       const stimAnswer = stimCluster.stims[stimIndex].correctResponse;
       let answerText = Answers.getDisplayAnswerText(stimAnswer).toLowerCase();
       p.stimResponseText = stripSpacesAndLowerCase(answerText); // Yes, lowercasing here is redundant. TODO: fix/cleanup
-      const currentStimuliSetId = Session.get('currentStimuliSetId');
+      const currentStimuliSetId = localMongo.findOne({}).currentStimuliSetId
       answerText = answerText.replace(/\./g, '_');
       p.answerText = answerText;
 
@@ -867,7 +868,7 @@ function modelUnitEngine() {
       p.stimPreviousCalculatedProbabilities = JSON.parse(JSON.stringify(stim.previousCalculatedProbabilities));
       p.stimOutcomeHistory = JSON.parse(JSON.stringify(stim.outcomeStack));
 
-      p.overallOutcomeHistory = Session.get('overallOutcomeHistory');
+      p.overallOutcomeHistory = localMongo.findOne({}).overallOutcomeHistory
 
       if (p.i<15) {
         console.log('cardProbability parameters:', JSON.parse(JSON.stringify(p)));
@@ -877,18 +878,18 @@ function modelUnitEngine() {
 
     // TODO: do this function without side effects on cards
     setUpClusterList: function setUpClusterList(cards) {
-      const currentTdfFile = Session.get('currentTdfFile');
+      const currentTdfFile = localMongo.findOne({}).currentTdfFile
       const isMultiTdf = currentTdfFile.isMultiTdf;
       const clusterList = [];
 
       if (isMultiTdf) {
-        const curUnitNumber = Session.get('currentUnitNumber');
+        const curUnitNumber = localMongo.findOne({}).currentUnitNumber
 
         // NOTE: We are currently assuming that multiTdfs will have only three units:
         // an instruction unit, an assessment session with exactly one question which is the last
         // item in the stim file, and a unit with all clusters specified in the generated subtdfs array
         if (curUnitNumber == 2) {
-          const subTdfIndex = Session.get('subTdfIndex');
+          const subTdfIndex = localMongo.findOne({}).subTdfIndex
           if (typeof(subTdfIndex) == 'undefined') {
             console.log('assuming we are in studentReporting, therefore ignoring the clusterlists'); // TODO, make this an explicit argument and error when it happens if we don't pass in the argument
           } else {
@@ -899,7 +900,7 @@ function modelUnitEngine() {
           throw new Error('We shouldn\'t ever get here, dynamic tdf cluster list error');
         }
       } else {
-          const sessCurUnit = JSON.parse(JSON.stringify(Session.get('currentTdfUnit')));
+          const sessCurUnit = JSON.parse(JSON.stringify(localMongo.findOne({}).currentTdfUnit));
           // Figure out which cluster numbers that they want
           console.log('setupclusterlist:', this.curUnit, sessCurUnit);
           let unitClusterList = "";
@@ -1035,7 +1036,7 @@ function modelUnitEngine() {
 
     saveComponentStatesSync: function() {
       const userId = Meteor.userId();
-      const TDFId = Session.get('currentTdfId');
+      const TDFId = localMongo.findOne({}).currentTdfId
       const componentStates = [];
       for (let cardIndex=0; cardIndex<cardProbabilities.cards.length; cardIndex++) {
         const card = cardProbabilities.cards[cardIndex];
@@ -1056,7 +1057,7 @@ function modelUnitEngine() {
           priorStudy: card.priorStudy,
           totalPracticeDuration: card.totalPracticeDuration,
           outcomeStack: card.outcomeStack.join(','),
-          instructionQuestionResult: Session.get('instructionQuestionResult'),
+          instructionQuestionResult: localMongo.findOne({}).instructionQuestionResult,
         };
         componentStates.push(cardState);
         for (let stimIndex=0; stimIndex<card.stims.length; stimIndex++) {
@@ -1069,7 +1070,7 @@ function modelUnitEngine() {
             probabilityEstimate: stim.probabilityEstimate, // : stimProb ? stimProb.probability : null,
             firstSeen: stim.firstSeen,
             lastSeen: stim.lastSeen,
-            hintLevel: Session.get('hintLevel') || null,
+            hintLevel: localMongo.findOne({}).hintLevel || null,
             priorCorrect: stim.priorCorrect,
             priorIncorrect: stim.priorIncorrect,
             curSessionPriorCorrect: stim.curSessionPriorCorrect,
@@ -1108,7 +1109,7 @@ function modelUnitEngine() {
       try{
         if(!Meteor.user().profile.impersonating){
           Meteor.call('setComponentStatesByUserIdTDFIdAndUnitNum',
-              Meteor.userId(), Session.get('currentTdfId'), componentStates);
+              Meteor.userId(), localMongo.findOne({}).currentTdfId, componentStates);
         }
       }
       catch (error){
@@ -1120,7 +1121,7 @@ function modelUnitEngine() {
         const sessionVars = Session.all();
         const userAgent = navigator.userAgent;
         const logs = console.logs;
-        const currentExperimentState = Session.get('currentExperimentState');
+        const currentExperimentState = localMongo.findOne({}).currentExperimentState
         Meteor.call('sendUserErrorReport', curUser, error, curPage, sessionVars,
             userAgent, logs, currentExperimentState);
         Router.go('/profile');
@@ -1134,11 +1135,11 @@ function modelUnitEngine() {
       let numCorrectAnswers = 0;
       const probsMap = {};
       const cards = cardProbabilities.cards;
-      let hiddenItems = Session.get('hiddenItems');
+      let hiddenItems = localMongo.findOne({}).hiddenItems
       if (hiddenItems === undefined) hiddenItems = []
 
       const componentStates = await meteorCallAsync('getComponentStatesByUserIdTDFIdAndUnitNum',
-          Meteor.userId(), Session.get('currentTdfId'));
+          Meteor.userId(), localMongo.findOne({}).currentTdfId);
       console.log('loadComponentStates,componentStates:', componentStates);
 
       const clusterStimKCs = {};
@@ -1249,16 +1250,16 @@ function modelUnitEngine() {
           numVisibleCards += cardProbabilities.cards[i].stims.length;
         }
       }
-      Session.set('numVisibleCards', numVisibleCards - hiddenItems.length);
+      data={numVisibleCards:numVisibleCards - hiddenItems.length};localMongo.update({},{$set: data});
 
       Object.assign(cardProbabilities, {
         numQuestionsAnswered,
         numQuestionsAnsweredCurrentSession,
         numCorrectAnswers,
       });
-      const cardIndex = Session.get('currentExperimentState').shufIndex;
-      const whichStim = Session.get('currentExperimentState').whichStim;
-      const whichHintLevel = Session.get('currentExperimentState').whichHintLevel;
+      const cardIndex = localMongo.findOne({}).currentExperimentState.shufIndex;
+      const whichStim = localMongo.findOne({}).currentExperimentState.whichStim;
+      const whichHintLevel = localMongo.findOne({}).currentExperimentState.whichHintLevel;
       setCurrentCardInfo(cardIndex, whichStim, whichHintLevel);
     },
     getCardProbabilitiesNoCalc: function() {
@@ -1275,10 +1276,10 @@ function modelUnitEngine() {
 
     unitType: MODEL_UNIT,
 
-    curUnit: (() => JSON.parse(JSON.stringify(Session.get('currentTdfUnit'))))(),
+    curUnit: (() => JSON.parse(JSON.stringify(localMongo.findOne({}).currentTdfUnit)))(),
 
     unitMode: (function() {
-      const unit = Session.get('currentTdfUnit');
+      const unit = localMongo.findOne({}).currentTdfUnit
       let unitMode = 'default';
       if(unit.learningsession && unit.learningsession.unitMode){
         unitMode = unit.learningsession.unitMode.trim();
@@ -1288,13 +1289,13 @@ function modelUnitEngine() {
     })(),
 
     initImpl: async function() {
-      Session.set('unitType', MODEL_UNIT);
+      data={unitType:MODEL_UNIT};localMongo.update({},{$set: data});
       await this.initializeActRModel();
     },
 
     calculateIndices: async function() {
       this.calculateCardProbabilities();
-      const hiddenItems = Session.get('hiddenItems');
+      const hiddenItems = localMongo.findOne({}).hiddenItems
       const cards = cardProbabilities.cards;
       switch (this.unitMode) {
         case 'thresholdCeiling':
@@ -1355,9 +1356,9 @@ function modelUnitEngine() {
 
       // Save the card selection
       // Note that we always take the first stimulus and it's always a drill
-      Session.set('clusterIndex', cardIndex);
+      data={clusterIndex:cardIndex};localMongo.update({},{$set: data});
 
-      const clusterMapping = Session.get('clusterMapping');
+      const clusterMapping = localMongo.findOne({}).clusterMapping
       const unmappedIndex = clusterMapping.indexOf(cardIndex);
       let newExperimentState = {
         clusterIndex: cardIndex,
@@ -1376,20 +1377,20 @@ function modelUnitEngine() {
 
       const stateChanges = await this.setUpCardQuestionAndAnswerGlobals(cardIndex, whichStim, whichHintLevel,
           stim.probFunctionParameters);
-      console.log('selectNextCard,', Session.get('clozeQuestionParts'), stateChanges);
+      console.log('selectNextCard,', localMongo.findOne({}).clozeQuestionParts, stateChanges);
       newExperimentState = Object.assign(newExperimentState, stateChanges);// Find objects we'll be touching
 
       let testType = 'd';
-      if (Session.get('currentDeliveryParams').studyFirst && card.priorStudy == 0) {
+      if (localMongo.findOne({}).currentDeliveryParams.studyFirst && card.priorStudy == 0) {
         console.log('STUDY FOR FIRST TRIAL !!!');
         testType = 's';
       }
-      Session.set('testType', testType);
+      data={testType:testType};localMongo.update({},{$set: data});
       newExperimentState.testType = testType;
       newExperimentState.questionIndex = 1;
 
-      Session.set('questionIndex', 0); // questionIndex doesn't have any meaning for a model
-      Session.set('showOverlearningText', false);
+      data={questionIndex:0};localMongo.update({},{$set: data}); // questionIndex doesn't have any meaning for a model
+      data={showOverlearningText:false};localMongo.update({},{$set: data});
 
       updateCardAndStimData(cardIndex, whichStim);
 
@@ -1449,7 +1450,7 @@ function modelUnitEngine() {
     cardAnswered: async function(wasCorrect, practiceTime) {
       // Get info we need for updates and logic below
       const cards = cardProbabilities.cards;
-      const cluster = getStimCluster(Session.get('clusterIndex'));
+      const cluster = getStimCluster(localMongo.findOne({}).clusterIndex);
       const card = _.prop(cards, cluster.shufIndex);
       console.log('cardAnswered, card: ', card, 'cluster.shufIndex: ', cluster.shufIndex);
 
@@ -1543,7 +1544,7 @@ function modelUnitEngine() {
       const numTrialsSoFar = cardProbabilities.numQuestionsAnsweredCurrentSession || 0;
 
       if (maxTrials > 0 && numTrialsSoFar >= maxTrials) {
-        Meteor.call('resetCurSessionTrialsCount', Meteor.userId(), Session.get('currentTdfId'))
+        Meteor.call('resetCurSessionTrialsCount', Meteor.userId(), localMongo.findOne({}).currentTdfId)
         return true;
       }
 
@@ -1558,7 +1559,7 @@ function modelUnitEngine() {
 
       // TODO: we should probably remove this as it's been superceded by displayminseconds/displaymaxseconds
       // If we're still here, check practice seconds
-      const practiceSeconds = Session.get('currentDeliveryParams').practiceseconds;
+      const practiceSeconds = localMongo.findOne({}).currentDeliveryParams.practiceseconds;
       if (practiceSeconds < 1.0) {
         // Less than a second is an error or a missing values
         console.log('No Practice Time Found and display timer: user must quit with Continue button');
@@ -1858,12 +1859,12 @@ function scheduleUnitEngine() {
     // done, we know our schedule size
     settings.scheduleSize = settings.initialPositions.length;
 
-    const currentTdfFile = Session.get('currentTdfFile');
+    const currentTdfFile = localMongo.findOne({}).currentTdfFile
     const isMultiTdf = currentTdfFile.isMultiTdf;
     let unitClusterList;
 
     if (isMultiTdf) {
-      const curUnitNumber = Session.get('currentUnitNumber');
+      const curUnitNumber = localMongo.findOne({}).currentUnitNumber
 
       // NOTE: We are currently assuming that multiTdfs will have only three units:
       // an instruction unit, an assessment session with exactly one question which is the last
@@ -1872,7 +1873,7 @@ function scheduleUnitEngine() {
         const lastClusterIndex = getStimCount() - 1;
         unitClusterList = lastClusterIndex + '-' + lastClusterIndex;
       } else {
-        const subTdfIndex = Session.get('subTdfIndex');
+        const subTdfIndex = localMongo.findOne({}).subTdfIndex
         unitClusterList = currentTdfFile.subTdfs[subTdfIndex].clusterList;
       }
     } else {
@@ -1897,10 +1898,10 @@ function scheduleUnitEngine() {
 
     initImpl: async function() {
       // Retrieve current schedule
-      Session.set('unitType', SCHEDULE_UNIT);
+      data={unitType:SCHEDULE_UNIT};localMongo.update({},{$set: data});
 
-      const curUnitNum = Session.get('currentUnitNumber');
-      const file = Session.get('currentTdfFile');
+      const curUnitNum = localMongo.findOne({}).currentUnitNumber
+      const file = localMongo.findOne({}).currentTdfFile
       const setSpec = file.tdfs.tutor.setspec;
       const currUnit = file.tdfs.tutor.unit[curUnitNum];
 
@@ -1912,7 +1913,7 @@ function scheduleUnitEngine() {
       }
 
       // We save the current schedule and also log it to the UserTime collection
-      Session.set('schedule', schedule);
+      data={schedule:schedule};localMongo.update({},{$set: data});
 
       const newExperimentState = {schedule};
       await updateExperimentState(newExperimentState, 'unitEngine.getSchedule');
@@ -1931,7 +1932,7 @@ function scheduleUnitEngine() {
     },
 
     selectNextCard: async function() {
-      const questionIndex = Session.get('questionIndex');
+      const questionIndex = localMongo.findOne({}).questionIndex
       const sched = this.getSchedule();
       const questInfo = sched.q[questionIndex];
       console.log('schedule selectNextCard', questionIndex, questInfo);
@@ -1950,14 +1951,14 @@ function scheduleUnitEngine() {
 
       // Set current Q/A info, type of test (drill, test, study), and then
       // increment the session's question index number
-      Session.set('clusterIndex', curClusterIndex);
+      data={clusterIndex:curClusterIndex};localMongo.update({},{$set: data});
 
       const stateChanges = await this.setUpCardQuestionAndAnswerGlobals(curClusterIndex, curStimIndex, 0 ,undefined);
       newExperimentState = Object.assign(newExperimentState, stateChanges);
 
-      Session.set('testType', questInfo.testType);
-      Session.set('questionIndex', questionIndex + 1);
-      Session.set('showOverlearningText', false); // No overlearning in a schedule
+      data={testType:questInfo.testType};localMongo.update({},{$set: data});
+      data={questionIndex:questionIndex + 1};localMongo.update({},{$set: data});
+      data={showOverlearningText:false};localMongo.update({},{$set: data}); // No overlearning in a schedule
 
       console.log('SCHEDULE UNIT card selection => ',
           'cluster-idx-unmapped:', curClusterIndex,
@@ -1970,7 +1971,7 @@ function scheduleUnitEngine() {
     findCurrentCardInfo: function() {
       // selectNextCard increments questionIndex after setting all card
       // info, so we need to use -1 for this info
-      const questionIndex = Math.max(Session.get('questionIndex')-1, 0);
+      const questionIndex = Math.max(localMongo.findOne({}).questionIndex-1, 0);
       return this.getSchedule().q[questionIndex];
     },
 
@@ -1979,10 +1980,10 @@ function scheduleUnitEngine() {
     },
 
     unitFinished: function() {
-      const questionIndex = Session.get('questionIndex');
-      const curUnitNum = Session.get('currentUnitNumber');
+      const questionIndex = localMongo.findOne({}).questionIndex
+      const curUnitNum = localMongo.findOne({}).currentUnitNumber
       let schedule = null;
-      if (curUnitNum < Session.get('currentTdfFile').tdfs.tutor.unit.length) {
+      if (curUnitNum < localMongo.findOne({}).currentTdfFile.tdfs.tutor.unit.length) {
         schedule = this.getSchedule();
       }
 
