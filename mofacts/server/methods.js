@@ -421,7 +421,6 @@ async function setComponentStatesByUserIdTDFIdAndUnitNum(userId, TDFId, componen
       if (!componentState.trialsSinceLastSeen) {
         componentState.trialsSinceLastSeen = null;
       }
-      serverConsole(componentState)
       const updateQuery = 'UPDATE componentstate SET probabilityEstimate=${probabilityEstimate}, \
         firstSeen=${firstSeen}, lastSeen=${lastSeen}, trialsSinceLastSeen=${trialsSinceLastSeen}, \
         priorCorrect=${priorCorrect}, priorIncorrect=${priorIncorrect}, \
@@ -436,7 +435,6 @@ async function setComponentStatesByUserIdTDFIdAndUnitNum(userId, TDFId, componen
       // ComponentState didn't exist before so we'll insert it
         if (e.name == 'QueryResultError') {
           serverConsole("ComponentState didn't exist before so we'll insert it")
-          serverConsole(componentState)
           const componentStateId = await t.one('INSERT INTO componentstate(userId,TDFId,KCId,componentType, \
             probabilityEstimate,hintLevel,firstSeen,lastSeen,trialsSinceLastSeen,priorCorrect,priorIncorrect,priorStudy, \
             totalPracticeDuration,outcomeStack, curSessionPriorCorrect, curSessionPriorIncorrect) VALUES(${userId},${TDFId}, ${KCId}, ${componentType}, \
