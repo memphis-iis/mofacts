@@ -953,7 +953,12 @@ function setUpButtonTrial() {
   let correctButtonPopulated = null;
 
   if (buttonOptions) {
-    buttonChoices = buttonOptions.split(',');
+    if(typeof buttonOptions == "object"){
+      buttonChoices = buttonOptions
+    }
+    else{
+      buttonChoices = buttonOptions.split(',');
+    }
     correctButtonPopulated = true;
     console.log('buttonChoices==buttonOptions', buttonChoices);
   } else {
