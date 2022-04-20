@@ -55,6 +55,11 @@ Template.userAdmin.events({
     $('#users-file-info').html(input.val());
   },
 
+  'click #resetAllSecretKeys': function(event) {
+    event.preventDefault();
+    Meteor.call('resetAllSecretKeys');
+  },
+
   // Need admin and teacher buttons
   'click .btn-user-change': function(event) {
     event.preventDefault();
