@@ -222,9 +222,11 @@ function makeDataDownloadAPICall(path){
     else{
       HTTP.call('GET', path, {'headers': {'x-user-id': res[0], 'x-auth-token': res[1]}}, function(err, response) {
         if (response.statusCode != 200) {
-          console.log('err: ', response);
-          alert(`${response.statusCode}: ${response.content}`);
-        } else {
+          console.error(response);
+        } else if(err) {
+          console.error(err)
+        }
+        else {
           createData(response)
         }
       });
@@ -238,7 +240,7 @@ function createData(result){
   document.body.appendChild(a);
   a.style = "display: none";
   a.href = window.URL.createObjectURL(blob);
-  a.download = result.headers['content-disposition'].split('filename=')[1];
+  a.download = result.headers['File-Name']
   a.click();
   document.body.removeChild(a);
   window.URL.revokeObjectURL(blob);
