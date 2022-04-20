@@ -2535,53 +2535,47 @@ Router.route('data-by-teacher', {
     const uid = this.params.uid;
     const response = this.response;
     
-    try{
-      if(!userId || !loginToken){
-        response.writeHead(403);
-        response.end('Unauthorized');
-        return;
-      }
-      else if (!uid) {
-        response.writeHead(404);
-        response.end('No user ID specified');
-        return;
-      }
-
-      const tdfNames = await getTdfNamesAssignedByInstructor(uid);
-
-      if (!tdfNames.length > 0) {
-        response.writeHead(404);
-        response.end('No tdfs found for any classes');
-        return;
-      }
-
-      const user = Meteor.users.findOne({'_id': uid});
-      let userName = user.username;
-      // eslint-disable-next-line no-useless-escape
-      userName = userName.replace('/[/\\?%*:|"<>\s]/g', '_');
-
-      const fileName = 'mofacts_' + userName + '_all_tdf_data.txt';
-
-      response.writeHead(200, {
-        'Content-Type': 'text/tab-separated-values',
-        'Content-Disposition': 'attachment; filename=' + fileName,
-      });
-
-      for(tdfName of tdfNames){
-        response.write(await createExperimentExport(tdfName));
-        response.write('\r\n');
-      }
-
-      tdfNames.forEach(function(tdf) {
-        serverConsole('Sent all  data for', tdf, 'as file', fileName);
-      });
-
-      response.end('');
+    if(!userId || !loginToken){
+      response.writeHead(403);
+      response.end('Unauthorized');
+      return;
     }
-    catch{
+    else if (!uid) {
       response.writeHead(404);
-      response.end();
+      response.end('No user ID specified');
+      return;
     }
+
+    const tdfNames = await getTdfNamesAssignedByInstructor(uid);
+
+    if (!tdfNames.length > 0) {
+      response.writeHead(404);
+      response.end('No tdfs found for any classes');
+      return;
+    }
+
+    const user = Meteor.users.findOne({'_id': uid});
+    let userName = user.username;
+    // eslint-disable-next-line no-useless-escape
+    userName = userName.replace('/[/\\?%*:|"<>\s]/g', '_');
+
+    const fileName = 'mofacts_' + userName + '_all_tdf_data.txt';
+
+    response.writeHead(200, {
+      'Content-Type': 'text/tab-separated-values',
+      'File-Name': fileName
+    });
+
+    for(tdfName of tdfNames){
+      response.write(await createExperimentExport(tdfName));
+      response.write('\r\n');
+    }
+
+    tdfNames.forEach(function(tdf) {
+      serverConsole('Sent all  data for', tdf, 'as file', fileName);
+    });
+
+    response.end('');
   },
 });
 
@@ -2596,66 +2590,60 @@ Router.route('data-by-class', {
     const classId = this.params.classid;
     const response = this.response;
     
-    try{
-      if(!userId || !loginToken){
-        response.writeHead(403);
-        response.end('Unauthorized');
-        return;
-      }
-      else if (Meteor.users.findOne({_id: userId}).secretKey != loginToken){
-        response.writeHead(403);
-        response.end('Unauthorized');
-        return;
-      }
-      else if (!classId) {
-        response.writeHead(404);
-        response.end('No class ID specified');
-        return;
-      }
-      else if (!classId) {
-        throw new Meteor.Error('No class ID specified');
-      }
-
-      const foundClass = await getCourseById(classId);
-
-      if (!foundClass) {
-        response.writeHead(404);
-        response.end('No classes found for the specified class ID');
-        return;
-      }
-
-      const tdfFileNames = await getTdfAssignmentsByCourseIdMap(classId);
-
-      if (!tdfFileNames || tdfFileNames.length == 0) {
-        response.writeHead(404);
-        response.end('No tdfs found for any classes');
-        return;
-      }
-
-      // eslint-disable-next-line no-useless-escape
-      const className = foundClass.coursename.replace('/[/\\?%*:|"<>\s]/g', '_');
-      const fileName = 'mofacts_' + className + '_all_class_data.txt';
-
-      response.writeHead(200, {
-        'Content-Type': 'text/tab-separated-values',
-        'Content-Disposition': 'attachment; filename=' + fileName,
-      });
-
-      for(tdfName of tdfFileNames){
-        response.write(await createExperimentExport(tdfName));
-        response.write('\r\n');
-      }
-
-      tdfFileNames.forEach(function(tdf) {
-        serverConsole('Sent all  data for', tdf, 'as file', fileName, 'with record-count:', recCount);
-      });
-
-      response.end('');
+    if(!userId || !loginToken){
+      response.writeHead(403);
+      response.end('Unauthorized');
+      return;
     }
-    catch{
+    else if (Meteor.users.findOne({_id: userId}).secretKey != loginToken){
+      response.writeHead(403);
+      response.end('Unauthorized');
+      return;
+    }
+    else if (!classId) {
       response.writeHead(404);
-      response.end();
+      response.end('No class ID specified');
+      return;
     }
+    else if (!classId) {
+      throw new Meteor.Error('No class ID specified');
+    }
+
+    const foundClass = await getCourseById(classId);
+
+    if (!foundClass) {
+      response.writeHead(404);
+      response.end('No classes found for the specified class ID');
+      return;
+    }
+
+    const tdfFileNames = await getTdfAssignmentsByCourseIdMap(classId);
+
+    if (!tdfFileNames || tdfFileNames.length == 0) {
+      response.writeHead(404);
+      response.end('No tdfs found for any classes');
+      return;
+    }
+
+    // eslint-disable-next-line no-useless-escape
+    const className = foundClass.coursename.replace('/[/\\?%*:|"<>\s]/g', '_');
+    const fileName = 'mofacts_' + className + '_all_class_data.txt';
+
+    response.writeHead(200, {
+      'Content-Type': 'text/tab-separated-values',
+      'Content-Disposition': 'attachment; filename=' + fileName,
+    });
+
+    for(tdfName of tdfFileNames){
+      response.write(await createExperimentExport(tdfName));
+      response.write('\r\n');
+    }
+
+    tdfFileNames.forEach(function(tdf) {
+      serverConsole('Sent all  data for', tdf, 'as file', fileName, 'with record-count:', recCount);
+    });
+
+    response.end('');
   },
 });
 
@@ -2670,44 +2658,38 @@ Router.route('data-by-file', {
     const exp = this.params.exp;
     const response = this.response;
     let path = this.url;
-
-    try{
-      if(!userId || !loginToken){
-        response.writeHead('403');
-        response.end();
-      }
-      else if (Meteor.users.findOne({_id: userId}).secretKey != loginToken){
-        response.writeHead(403);
-        response.end('Unauthorized');
-        return;
-      }
-      else if (path.includes('..')){ //user is trying to do some naughty stuff
-        response.writeHead('404');
-        response.end();
-        return;
-      }
-      else if (!exp) {
-        response.writeHead(404);
-        response.end('No experiment specified');
-        return;
-      }
-
-      const fileName = exp.split('.json')[0] + '-data.txt';;
-
-      response.writeHead(200, {
-        'Content-Type': 'text/tab-separated-values',
-        'Content-Disposition': 'attachment; filename=' + fileName,
-      });
-
-      response.write(await createExperimentExport(exp));
-      response.end('');
-
-      serverConsole('Sent all  data for', exp, 'as file', fileName);
-    }
-    catch{
-      response.writeHead(404);
+    
+    if(!userId || !loginToken){
+      response.writeHead('403');
       response.end();
     }
+    else if (Meteor.users.findOne({_id: userId}).secretKey != loginToken){
+      response.writeHead(403);
+      response.end('Unauthorized');
+      return;
+    }
+    else if (path.includes('..')){ //user is trying to do some naughty stuff
+      response.writeHead('404');
+      response.end();
+      return;
+    }
+    else if (!exp) {
+      response.writeHead(404);
+      response.end('No experiment specified');
+      return;
+    }
+
+    const fileName = exp.split('.json')[0] + '-data.txt';;
+
+    response.writeHead(200, {
+      'Content-Type': 'text/tab-separated-values',
+      'Content-Disposition': 'attachment; filename=' + fileName,
+    });
+
+    response.write(await createExperimentExport(exp));
+    response.end('');
+
+    serverConsole('Sent all  data for', exp, 'as file', fileName);
   }
 });
 
@@ -2720,42 +2702,36 @@ Router.route('clozeEditHistory', {
     const loginToken = this.request.headers['x-auth-token'];
     const uid = this.params.uid;
     const response = this.response;
-
-    try{
-      if(!userId || !loginToken){
-        response.writeHead('403');
-        response.end();
-      }
-      else if (Meteor.users.findOne({_id: userId}).secretKey != loginToken){
-        response.writeHead(403);
-        response.end('Unauthorized');
-        return;
-      }
-      else if (!uid) {
-        response.writeHead(404);
-        response.end('No user id specified');
-        return;
-      }
-      const filename = uid + '-clozeEditHistory.json';
-
-      response.writeHead(200, {
-        'Content-Type': 'application/json',
-        'Content-Disposition': 'attachment; filename=' + filename,
-      });
-
-      let recCount = 0;
-      ClozeEditHistory.find({'user': uid}).forEach(function(record) {
-        recCount += 1;
-        response.write(JSON.stringify(record));
-        response.write('\r\n');
-      });
-      response.end('');
-
-      serverConsole('Sent all  data for', uid, 'as file', filename, 'with record-count:', recCount);
-    }
-    catch{
-      response.writeHead(404);
+    
+    if(!userId || !loginToken){
+      response.writeHead('403');
       response.end();
     }
+    else if (Meteor.users.findOne({_id: userId}).secretKey != loginToken){
+      response.writeHead(403);
+      response.end('Unauthorized');
+      return;
+    }
+    else if (!uid) {
+      response.writeHead(404);
+      response.end('No user id specified');
+      return;
+    }
+    const filename = uid + '-clozeEditHistory.json';
+
+    response.writeHead(200, {
+      'Content-Type': 'application/json',
+      'Content-Disposition': 'attachment; filename=' + filename,
+    });
+
+    let recCount = 0;
+    ClozeEditHistory.find({'user': uid}).forEach(function(record) {
+      recCount += 1;
+      response.write(JSON.stringify(record));
+      response.write('\r\n');
+    });
+    response.end('');
+
+    serverConsole('Sent all  data for', uid, 'as file', filename, 'with record-count:', recCount);
   },
 });
