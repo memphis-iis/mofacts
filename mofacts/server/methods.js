@@ -17,6 +17,7 @@ export {
   getTdfBy_id,
   getHistoryByTDFfileName,
   getListOfStimTags,
+  getListOfStimTagsFromStims,
   getStimuliSetById,
   getDisplayAnswerText,
   serverConsole,
@@ -1038,6 +1039,20 @@ async function getListOfStimTags(tdfFileName) {
   const stimuliSetId = tdf.stimuliSetId;
   serverConsole('getListOfStimTags, stimuliSetId: ' + stimuliSetId);
   const stims = await getStimuliSetById(stimuliSetId);
+  const allTagsInStimFile = new Set();
+
+  for (const stim of stims) {
+    if (stim.tags) {
+      for (const tagName of Object.keys(stim.tags)) {
+        allTagsInStimFile.add(tagName);
+      }
+    }
+  }
+
+  return Array.from(allTagsInStimFile);
+}
+
+async function getListOfStimTagsFromStims(stims) {
   const allTagsInStimFile = new Set();
 
   for (const stim of stims) {
@@ -2530,6 +2545,7 @@ Router.route('data-by-teacher', {
   where: 'server',
   path: '/data-by-teacher/:uid',
   action: async function() {
+    console.time('data-by-teacher')
     const userId = this.request.headers['x-user-id'];
     const loginToken = this.request.headers['x-auth-token'];
     const uid = this.params.uid;
@@ -2574,7 +2590,7 @@ Router.route('data-by-teacher', {
     tdfNames.forEach(function(tdf) {
       serverConsole('Sent all  data for', tdf, 'as file', fileName);
     });
-
+    console.timeEnd('data-by-teacher')
     response.end('');
   },
 });
@@ -2631,7 +2647,7 @@ Router.route('data-by-class', {
 
     response.writeHead(200, {
       'Content-Type': 'text/tab-separated-values',
-      'Content-Disposition': 'attachment; filename=' + fileName,
+      'File-Name': fileName
     });
 
     for(tdfName of tdfFileNames){
@@ -2683,7 +2699,7 @@ Router.route('data-by-file', {
 
     response.writeHead(200, {
       'Content-Type': 'text/tab-separated-values',
-      'Content-Disposition': 'attachment; filename=' + fileName,
+      'File-Name': fileName
     });
 
     response.write(await createExperimentExport(exp));
@@ -2721,7 +2737,7 @@ Router.route('clozeEditHistory', {
 
     response.writeHead(200, {
       'Content-Type': 'application/json',
-      'Content-Disposition': 'attachment; filename=' + filename,
+      'File-Name': filename
     });
 
     let recCount = 0;

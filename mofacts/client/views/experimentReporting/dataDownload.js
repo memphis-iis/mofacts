@@ -240,7 +240,7 @@ function createData(result){
   document.body.appendChild(a);
   a.style = "display: none";
   a.href = window.URL.createObjectURL(blob);
-  a.download = result.headers['File-Name']
+  a.download = result.headers['file-name']
   a.click();
   document.body.removeChild(a);
   window.URL.revokeObjectURL(blob);
