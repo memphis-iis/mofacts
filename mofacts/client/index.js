@@ -8,19 +8,28 @@ import {instructContinue} from './views/experiment/instructions.js';
 import {routeToSignin} from './lib/router.js';
 import { init } from "meteor/simonsimcity:client-session-timeout";
 
-//Prevents new tab
+try{
+  //Prevents new tab
+  const channel = new BroadcastChannel('tab');
 
+  channel.postMessage('another-tab');
+  // note that listener is added after posting the message
 
-const channel = new BroadcastChannel('tab');
-
-channel.postMessage('another-tab');
-// note that listener is added after posting the message
-
-channel.addEventListener('message', (msg) => {
-  if (msg.data === 'another-tab') {
-    Router.go('/tabwarning');
-  }
-});
+  channel.addEventListener('message', (msg) => {
+    if (msg.data === 'another-tab') {
+      Router.go('/tabwarning');
+    }
+  });
+}
+catch{
+  //IE + Safari 3.1 - 15.3 support
+  localStorage.openpages = Date.now();
+  window.addEventListener('storage', function (e) {
+    if(e.key == 'openpages') {
+      Router.go('/tabwarning');
+    }
+  }, false);
+}
 
 
 //Set checks if user is inactive

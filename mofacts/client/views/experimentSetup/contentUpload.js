@@ -103,6 +103,7 @@ Template.contentUpload.events({
 
   // Admin/Teachers - upload a Stimulus file
   'click #doUploadStim': async function(event) {
+    $('#stimUploadLoadingSymbol').show()
     event.preventDefault();
     await doFileUpload('#upload-stim', 'stim', 'Stimlus');
     userFilesRefresh();
@@ -254,6 +255,9 @@ async function doFileUpload(fileElementSelector, fileType, fileDescrip) {
       }
     }
   }
+
+  $('#stimUploadLoadingSymbol').hide()
+  
   if (errorStack.length == 0) {
     alert(count.toString() + ' files saved successfully');
   } else {

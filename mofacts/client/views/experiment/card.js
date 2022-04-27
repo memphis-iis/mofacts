@@ -25,6 +25,7 @@ export {
   stopRecording,
   getExperimentState,
   updateExperimentState,
+  updateExperimentStateSync,
   restartMainCardTimeoutIfNecessary,
   getCurrentClusterAndStimIndices,
 };
@@ -130,7 +131,6 @@ let trialStartTimestamp = 0;
 let firstKeypressTimestamp = 0;
 let currentSound = null; // See later in this file for sound functions
 let userFeedbackStart = null;
-
 // We need to track the name/ID for clear and reset. We need the function and
 // delay used for reset
 let timeoutName = null;
@@ -398,7 +398,10 @@ Template.card.rendered = async function() {
 
   window.AudioContext = window.webkitAudioContext || window.AudioContext;
   window.URL = window.URL || window.webkitURL;
-  audioContext = new AudioContext();
+  const audioContextConfig = {
+    sampleRate: 48000,
+  }
+  audioContext = new AudioContext(audioContextConfig);
   // If user has enabled audio input initialize web audio (this takes a bit)
   // (this will eventually call cardStart after we redirect through the voice
   // interstitial and get back here again)
@@ -728,7 +731,7 @@ Template.card.helpers({
     return (disp.minSecs > 0 || disp.maxSecs > 0);
   },
 
-  'inResume': () => Session.get('inResume'),
+  'inResume': () => Session.get('inResume') && !Session.get('displayReady'),
 
   'audioEnabled': () => Session.get('audioEnabled'),
 
@@ -764,7 +767,6 @@ function pollMediaDevices() {
 }
 
 function clearAudioContextAndRelatedVariables() {
-  audioContext.close();
   if (streamSource) {
     streamSource.disconnect();
   }
@@ -784,6 +786,7 @@ function clearAudioContextAndRelatedVariables() {
 function reinitializeMediaDueToDeviceChange() {
   // This will be decremented on startUserMedia and the main card timeout will be reset due to card being reloaded
   Session.set('pausedLocks', Session.get('pausedLocks')+1);
+  audioContext.close();
   clearAudioContextAndRelatedVariables();
   const errMsg = 'It appears you may have unplugged your microphone.  \
     Please plug it back then click ok to reinitialize audio input.';
@@ -950,7 +953,12 @@ function setUpButtonTrial() {
   let correctButtonPopulated = null;
 
   if (buttonOptions) {
-    buttonChoices = buttonOptions.split(',');
+    if(typeof buttonOptions == "object"){
+      buttonChoices = buttonOptions
+    }
+    else{
+      buttonChoices = buttonOptions.split(',');
+    }
     correctButtonPopulated = true;
     console.log('buttonChoices==buttonOptions', buttonChoices);
   } else {
@@ -1140,6 +1148,7 @@ function handleUserInput(e, source, simAnswerCorrect) {
   } else if (source === 'buttonClick' || source === 'simulation' || source === 'voice') {
     // to save space we will just go ahead and act like it was a key press.
     key = ENTER_KEY;
+    Session.set('userAnswerSubmitTimestamp', Date.now());
   }
 
   // If we haven't seen the correct keypress, then we want to reset our
@@ -1148,6 +1157,9 @@ function handleUserInput(e, source, simAnswerCorrect) {
     resetMainCardTimeout();
     return;
   }
+
+  if(Meteor.isDevelopment)
+    Meteor.call('captureProfile', 10000, 'answerTrial');
   
   // Stop current timeout and stop user input
   stopUserInput();
@@ -1386,40 +1398,40 @@ async function showUserFeedback(isCorrect, feedbackMessage, afterAnswerFeedbackC
         .addClass(isCorrect ? 'alert-success' : 'alert-danger')
         .text(feedbackMessage)
         .show();
-    if(!isCorrect){
-      $('#CountdownTimer')
-        .addClass('text-align')
-        .text('Continuing in: ')
-        .show();
-      var countDownStart = new Date().getTime();
-      if(Session.get('isRefutation') && getCurrentDeliveryParams().refutationstudy){
-        countDownStart += getCurrentDeliveryParams().refutationstudy;
-      }
-      else{
-        countDownStart += getCurrentDeliveryParams().reviewstudy;
-      }
-      var CountdownTimerInterval = Meteor.setInterval(function() {
-        var now = new Date().getTime()
-        var distance = countDownStart - now;
-        var seconds = Math.ceil((distance % (1000 * 60)) / 1000);
-        
-        try{
-          document.getElementById("CountdownTimer").innerHTML = 'Continuing in: ' + seconds + "s";
+        if(!isCorrect){
+          $('#CountdownTimer')
+            .addClass('text-align')
+            .text('Continuing in: ')
+            .show();
+          var countDownStart = new Date().getTime();
+          if(Session.get('isRefutation') && getCurrentDeliveryParams().refutationstudy){
+            countDownStart += getCurrentDeliveryParams().refutationstudy;
+          }
+          else{
+            countDownStart += getCurrentDeliveryParams().reviewstudy;
+          }
+          var CountdownTimerInterval = Meteor.setInterval(function() {
+            var now = new Date().getTime()
+            var distance = countDownStart - now;
+            var seconds = Math.ceil((distance % (1000 * 60)) / 1000);
+    
+            try{
+              document.getElementById("CountdownTimer").innerHTML = 'Continuing in: ' + seconds + "s";
+            }
+            catch{
+              Meteor.clearInterval(CountdownTimerInterval);
+              Session.set('CurIntervalId', undefined);
+            }
+    
+            // If the count down is finished, end interval and clear CountdownTimer
+            if (distance < 0) {
+              Meteor.clearInterval(CountdownTimerInterval);
+              document.getElementById("CountdownTimer").innerHTML = "";
+              Session.set('CurIntervalId', undefined);
+            }
+          }, 100);
+          Session.set('CurIntervalId', CountdownTimerInterval);
         }
-        catch{
-          Meteor.clearInterval(CountdownTimerInterval);
-          Session.set('CurIntervalId', undefined);
-        }
-      
-        // If the count down is finished, end interval and clear CountdownTimer
-        if (distance < 0) {
-          Meteor.clearInterval(CountdownTimerInterval);
-          document.getElementById("CountdownTimer").innerHTML = "";
-          Session.set('CurIntervalId', undefined);
-        }
-      }, 100);
-      Session.set('CurIntervalId', CountdownTimerInterval);
-    }
   }
 
   speakMessageIfAudioPromptFeedbackEnabled(feedbackMessage, 'feedback');
@@ -1481,9 +1493,8 @@ function doClearForceCorrect(doForceCorrect, afterAnswerFeedbackCbBound) {
 
 async function giveAnswer(){
   if(Meteor.isDevelopment){
-    curAnswer = Session.get('currentAnswer');
-    $('#userAnswer').val(curAnswer);
-    handleUserInput({keyCode: ENTER_KEY}, 'keypress');
+    curAnswer = Session.get('currentAnswer').split('~')[0];
+    handleUserInput({keyCode: ENTER_KEY, currentTarget: { name: curAnswer } }, 'buttonClick');
   }
 }
 
@@ -1506,16 +1517,6 @@ async function afterAnswerFeedbackCallback(trialEndTimeStamp, source, userAnswer
       Session.set('wasReportedForRemoval', true);
       removalShortcut();
     });
-    Session.set('engineIndices', undefined);
-    if(Session.get('unitType') == "model")
-      engine.calculateIndices().then(function(res){
-        Session.set('engineIndices', res);
-        if(Session.get("reviewTimeoutCompletedFirst"))
-        {
-          console.log("reviewTimeoutCompletedFirst")
-          prepareCard();
-        }
-      });
   }
   else{
     removeCardByUser();
@@ -1533,6 +1534,7 @@ async function afterAnswerFeedbackCallback(trialEndTimeStamp, source, userAnswer
   // Stop previous timeout, log response data, and clear up any other vars for next question
   clearCardTimeout();
 
+  Session.set('feedbackTimeoutBegins', Date.now())
   const timeout = Meteor.setTimeout(async function() {
     Session.set('CurTimeoutId', undefined);
     let reviewEnd = Date.now();
@@ -1560,7 +1562,7 @@ async function afterAnswerFeedbackCallback(trialEndTimeStamp, source, userAnswer
     if(Meteor.user().profile === undefined || !Meteor.user().profile.impersonating){
       try {
         await meteorCallAsync('insertHistory', answerLogRecord);
-        await updateExperimentState(newExperimentState, 'card.afterAnswerFeedbackCallback');
+        updateExperimentStateSync(newExperimentState, 'card.afterAnswerFeedbackCallback');
       } catch (e) {
         console.log('error writing history record:', e);
         throw new Error('error inserting history/updating state:', e);
@@ -1590,6 +1592,7 @@ async function afterAnswerFeedbackCallback(trialEndTimeStamp, source, userAnswer
     }
     hideUserFeedback();
     $('#userAnswer').val('');
+    Session.set('feedbackTimeoutEnds', Date.now())
     if(Session.get('unitType') != "model" || Session.get("engineIndices")){
       console.log("engineIndicesCompletedFirst");
       prepareCard();
@@ -1600,6 +1603,14 @@ async function afterAnswerFeedbackCallback(trialEndTimeStamp, source, userAnswer
   }, reviewTimeout)
 
   Session.set('CurTimeoutId', timeout)
+  
+  if(!wasReportedForRemoval){
+    Session.set('engineIndexCalculations', Date.now());
+    if(Session.get('unitType') == "model")
+      Session.set('engineIndices', await engine.calculateIndices());
+    else
+      Session.set('engineIndices', undefined);
+  }
 }
 
 function getReviewTimeout(testType, deliveryParams, isCorrect, dialogueHistory) {
@@ -1728,7 +1739,9 @@ function gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect,
 
   let clusterIndex = Session.get('clusterIndex');
   let {whichStim, probabilityEstimate} = engine.findCurrentCardInfo();
-  const {itemId, clusterKC, stimulusKC} = getStimCluster(clusterIndex).stims[whichStim];
+  const cluster = getStimCluster(clusterIndex);
+  const {itemId, clusterKC, stimulusKC} = cluster.stims[whichStim];
+  const responseType = ('' + cluster.stims[0].itemResponseType || 'text').toLowerCase()
   // let curKCBase = getStimKCBaseForCurrentStimuliSet();
   // let stimulusKC = whichStim + curKCBase;
 
@@ -1754,7 +1767,6 @@ function gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect,
       }
     }
   } else {
-    const cluster = getStimCluster(clusterIndex);
     shufIndex = cluster.shufIndex;
   }
   const originalAnswer = Session.get('originalAnswer');
@@ -1804,7 +1816,7 @@ function gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect,
     'TDFId': Session.get('currentTdfId'),
     'outcome': outcome,
     'probabilityEstimate': probabilityEstimate,
-    'typeOfResponse': getResponseType(),
+    'typeOfResponse': responseType,
     'responseValue': _.trim(userAnswer),
     'displayedStimulus': Session.get('currentDisplay'),
 
@@ -2000,7 +2012,6 @@ async function cardStart() {
 
   // Always hide the final instructions box
   $('#finalInstructionsDlg').modal('hide');
-
   // the card loads frequently, but we only want to set this the first time
   if (Session.get('inResume')) {
     Session.set('buttonTrial', false);
@@ -2026,6 +2037,7 @@ async function prepareCard() {
   } else {
     await engine.selectNextCard(Session.get('engineIndices'));
     await newQuestionHandler();
+    Session.set('cardStartTimestamp', Date.now());
     Session.set('engineIndices', undefined);
   }
 }
@@ -2065,7 +2077,7 @@ async function newQuestionHandler() {
     const clozeQuestionFilledIn = Answers.clozeStudy(currentDisplay.clozeText, Session.get('currentAnswer'));
     currentDisplay.clozeText = clozeQuestionFilledIn;
     const newExperimentState = {currentDisplayEngine: currentDisplay};
-    await updateExperimentState(newExperimentState, 'card.newQuestionHandler');
+    updateExperimentStateSync(newExperimentState, 'card.newQuestionHandler');
     Session.set('currentDisplayEngine', currentDisplay);
   }
 
@@ -2287,7 +2299,7 @@ function speakMessageIfAudioPromptFeedbackEnabled(msg, audioPromptSource) {
       Session.set('recordingLocked', true);
       // Replace underscores with blank so that we don't get awkward UNDERSCORE UNDERSCORE
       // UNDERSCORE...speech from literal reading of text
-      msg = msg.replace(/_+/g, 'blank');
+      msg = msg.replace(/(&nbsp;)+/g, 'blank');
       // Remove all HTML
       msg = msg.replace( /(<([^>]+)>)/ig, '');
       let ttsAPIKey = '';
@@ -2551,7 +2563,7 @@ function makeGoogleSpeechAPICall(request, speechAPIKey, answerGrammar) {
 
 let recorder = null;
 let audioContext = null;
-window.audioContext1 = audioContext;
+window.audioContext = audioContext;
 let selectedInputDevice = null;
 let userMediaStream = null;
 let streamSource = null;
@@ -2564,6 +2576,7 @@ function startUserMedia(stream) {
   pollMediaDevicesInterval = Meteor.setInterval(pollMediaDevices, 2000);
   console.log('START USER MEDIA');
   const input = audioContext.createMediaStreamSource(stream);
+  window.audioContext = audioContext;
   streamSource = input;
   // Firefox hack https://support.mozilla.org/en-US/questions/984179
   window.firefox_audio_hack = input;
@@ -2693,6 +2706,20 @@ async function updateExperimentState(newState, codeCallLocation) {
   Session.set('currentExperimentState', res);
   console.log('updateExperimentState', codeCallLocation, 'old:', oldExperimentState, '\nnew:', newExperimentState);
   return res;
+}
+
+function updateExperimentStateSync(newState, codeCallLocation) {
+  const test = Session.get('currentExperimentState');
+  console.log('updateExperimentStateSync:', test);
+  if (!Session.get('currentExperimentState')) {
+    Session.set('currentExperimentState', {});
+  }
+  const oldExperimentState = Session.get('currentExperimentState') || {};
+  const newExperimentState = Object.assign(JSON.parse(JSON.stringify(oldExperimentState)), newState);
+  Meteor.call('setExperimentState',
+      Meteor.userId(), Session.get('currentRootTdfId'), newExperimentState, 'card.updateExperimentState');
+  Session.set('currentExperimentState', newExperimentState);
+  console.log('updateExperimentStateSync', codeCallLocation, 'old:', oldExperimentState, '\nnew:', newExperimentState);
 }
 
 // Re-initialize our User Progress and Card Probabilities internal storage
@@ -2885,7 +2912,7 @@ async function resumeFromComponentState() {
     newExperimentState.questionIndex = 0;
   }
 
-  await updateExperimentState(newExperimentState, 'card.resumeFromComponentState');
+  updateExperimentStateSync(newExperimentState, 'card.resumeFromComponentState');
 
   if (Session.get('feedbackUnset')){
     getFeedbackParameters();
@@ -3058,7 +3085,7 @@ async function processUserTimesLog() {
     Session.set('currentDeliveryParams', getCurrentDeliveryParams());
     Session.set('scoringEnabled', Session.get('currentDeliveryParams').scoringEnabled);
 
-    await updateExperimentState(newExperimentState, 'card.processUserTimesLog');
+    updateExperimentStateSync(newExperimentState, 'card.processUserTimesLog');
     await engine.loadComponentStates();
 
     // If we make it here, then we know we won't need a resume until something

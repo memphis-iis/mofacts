@@ -37,6 +37,8 @@ function getComponentState(componentState) {
     lastSeen: parseInt(componentState.lastseen),
     priorCorrect: componentState.priorcorrect,
     priorIncorrect: componentState.priorincorrect,
+    curSessionPriorCorrect: componentState.cursessionpriorcorrect,
+    curSessionPriorIncorrect: componentState.cursessionpriorincorrect,
     priorStudy: componentState.priorstudy,
     totalPracticeDuration: componentState.totalpracticeduration,
     outcomeStack: componentState.outcomestack.split(',').filter((x) => x!=='').map((x) => parseInt(x)),

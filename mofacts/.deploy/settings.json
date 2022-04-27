@@ -1,0 +1,19 @@
+{   
+  "logNotice": "Test Config",
+  "public": {
+      "testLogin": false
+  },
+  "google": {
+      "clientId": "<copy from settings json>",
+      "secret": "<copy from settings json>"
+  },
+  "owner": "<your gmail>, 
+  "initRoles": {
+      "admins": ["<your gmail>","vagrant@vagrant-ubuntu-trusty-64"], 
+      "teachers": []
+  },
+  "definitionalFeedbackDataLocation":"/feedback/feedbackfile", 
+  "elaboratedFeedbackDataLocation":"/feedback/feedbackfile", 
+  "debug":true
+}  
+

@@ -27,6 +27,34 @@ $ git clone https://github.com/memphis-iis/mofacts-ies.git
 $ cd mofacts/mofacts
 $ ./run_meteor
 ````
+# Deploying Using Meteor Up
+
+Meteor Up (mup) can be used as a deployment solution for postgres based MoFACTs. To implement this,
+use the following workflow.
+
+Open your vagrant development enviorment using the most recent MoFACTs release
+and run the following workflow in the project folder.
+
+If you have installed mofacts development enviorment recently, it should already be installed.
+
+## 1 Use an editor to configure MUP
+/.deploy/mup.js
+Edit the host, username, pem authentication path, server feedback location (where the elaborated feedback
+is located on the server, and target IP address.
+
+/.depoloy/settings.json
+Edit the clientId, secrent, owner, admins, teachers, and the feedbackfile (don't change the /feedback/*)
+
+## 2 Install Meteor Up (should be installed after new vagrant enviorments)
+$ npm install -g mup
+
+
+## 3 Setup server enviorment
+$ cd .deploy
+$ mup setup
+
+## 4 Deploy to server
+$ mup deploy --verbose
 
 # Using Vagrant
 

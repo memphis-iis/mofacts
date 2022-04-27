@@ -1,6 +1,6 @@
 import {ReactiveVar} from 'meteor/reactive-var';
 import {haveMeteorUser} from '../../lib/currentTestingHelpers';
-import {getExperimentState, updateExperimentState} from '../experiment/card';
+import {getExperimentState, updateExperimentStateSync} from '../experiment/card';
 import {DISABLED, ENABLED, MODEL_UNIT, SCHEDULE_UNIT} from '../../../common/Definitions';
 import {meteorCallAsync} from '../..';
 import {sessionCleanUp} from '../../lib/sessionUtils';
@@ -505,7 +505,7 @@ async function selectTdf(currentTdfId, lessonName, currentStimuliSetId, ignoreOu
       currentTdfName: curTdfContent.fileName,
       currentStimuliSetId: currentStimuliSetId,
     };
-    await updateExperimentState(newExperimentState, 'profile.selectTdf');
+    updateExperimentStateSync(newExperimentState, 'profile.selectTdf');
 
     Session.set('inResume', true);
     if (isMultiTdf) {

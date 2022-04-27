@@ -11,7 +11,7 @@ import {
   updateCurStudentPerformance,
   getAllCurrentStimAnswers
 } from '../../lib/currentTestingHelpers';
-import {updateExperimentState} from './card';
+import {updateExperimentState, updateExperimentStateSync} from './card';
 import {MODEL_UNIT, SCHEDULE_UNIT} from '../../../common/Definitions';
 import {meteorCallAsync} from '../../index';
 import {displayify} from '../../../common/globalHelpers';
@@ -424,6 +424,7 @@ function modelUnitEngine() {
   function initCardProbs(overrideData) {
     let initVals = {
       numQuestionsAnswered: 0,
+      numQuestionsAnsweredCurrentSession: 0,
       numCorrectAnswers: 0,
       cards: [],
     };
@@ -494,7 +495,6 @@ function modelUnitEngine() {
   function findMinProbCardAndHintLevel(cards, hiddenItems) {
     console.log('findMinProbCard');
     let currentMin = 1.00001;
-    let currentHintLevelMin = 1.00001;
     let clusterIndex=-1;
     let stimIndex=-1;
     let hintLevelIndex=-1;
@@ -504,6 +504,7 @@ function modelUnitEngine() {
       if (!card.canUse || !(card.trialsSinceLastSeen > 1)) {
         continue;
       } else {
+        const stimCluster = getStimCluster(i);
         for (let j=0; j<card.stims.length; j++) {
           const stim = card.stims[j];
           if (hiddenItems.includes(stim.stimulusKC)) continue;
@@ -511,6 +512,17 @@ function modelUnitEngine() {
             currentMin = stim.probabilityEstimate;
             clusterIndex=i;
             stimIndex=j;
+            hintLevelIndex=0;
+          }
+          if(stimCluster.stims[j].textStimulus || stimCluster.stims[j].clozeStimulus){
+            for(let k=0; k<stim.hintLevelProbabilites.length; k++){
+              if(stim.hintLevelProbabilites[k] <= currentMin){
+                currentMin = stim.hintLevelProbabilites[k];
+                hintLevelIndex = k;
+                stimIndex = j;
+                clusterIndex=i;
+              }
+            }
           }
         }
       }
@@ -522,6 +534,7 @@ function modelUnitEngine() {
         if (!card.canUse) {
           continue;
         } else {
+          const stimCluster = getStimCluster(i);
           for (let j=0; j<card.stims.length; j++) {
             const stim = card.stims[j];
             if (hiddenItems.includes(stim.stimulusKC)) continue;
@@ -529,6 +542,17 @@ function modelUnitEngine() {
               currentMin = stim.probabilityEstimate;
               stimIndex = j;
               clusterIndex=i;
+              hintLevelIndex=0;
+            }
+            if(stimCluster.stims[j].textStimulus || stimCluster.stims[j].clozeStimulus){
+              for(let k=0; k<stim.hintLevelProbabilites.length; k++){
+                if(stim.hintLevelProbabilites[k] <= currentMin){
+                  currentMin = stim.hintLevelProbabilites[k];
+                  hintLevelIndex = k;
+                  stimIndex = j;
+                  clusterIndex=i;
+                }
+              }
             }
           }
         }
@@ -536,21 +560,13 @@ function modelUnitEngine() {
     }
     const stim = cards[clusterIndex].stims[stimIndex]
 
-    if(getStimCluster(clusterIndex).stims[stimIndex].textStimulus || getStimCluster(clusterIndex).stims[stimIndex].clozeStimulus){
-      for(let k=0; k<stim.hintLevelProbabilites.length; k++){
-        if(stim.hintLevelProbabilites[k] <= currentHintLevelMin){
-          currentHintLevelMin = stim.hintLevelProbabilites[k];
-          hintLevelIndex = k;
-        }
-      }
-    }
+
     return {clusterIndex, stimIndex, hintLevelIndex};
   }
 
   function findMaxProbCardAndHintLevel(cards, ceiling, hiddenItems) {
     console.log('findMaxProbCardAndHintLevel');
     let currentMax = 0;
-    let currentHintLevelMax = 0;
     let clusterIndex=-1;
     let stimIndex=-1;
     let hintLevelIndex=-1;
@@ -560,6 +576,7 @@ function modelUnitEngine() {
       if (!card.canUse || !(card.trialsSinceLastSeen > 1)) {
         continue;
       } else {
+        const stimCluster = getStimCluster(i);
         for (let j=0; j<card.stims.length; j++) {
           const stim = card.stims[j];
           if (hiddenItems.includes(stim.stimulusKC)) continue;
@@ -567,27 +584,29 @@ function modelUnitEngine() {
             currentMax = stim.probabilityEstimate;
             clusterIndex=i;
             stimIndex=j;
+            hintLevelIndex = 0;
+          }
+          if(stimCluster.stims[j].textStimulus || stimCluster.stims[j].clozeStimulus){
+            for(let k=0; k<stim.hintLevelProbabilites.length; k++){
+              if(stim.hintLevelProbabilites[k] > currentMax && stim.hintLevelProbabilites[k] < ceiling ){
+                currentMax = stim.hintLevelProbabilites[k];
+                clusterIndex=i;
+                stimIndex=j;
+                hintLevelIndex = k;
+              }
+            }
           }
         }
       }
     }
     const stim = cards[clusterIndex].stims[stimIndex];
 
-    if(getStimCluster(clusterIndex).stims[stimIndex].textStimulus || getStimCluster(clusterIndex).stims[stimIndex].clozeStimulus){
-      for(let k=0; k<stim.hintLevelProbabilites.length; k++){
-        if(stim.hintLevelProbabilites[k] > currentHintLevelMax && stim.hintLevelProbabilites[k] < ceiling ){
-          currentHintLevelMax = stim.hintLevelProbabilites[k];
-          hintLevelIndex = k;
-        }
-      }
-    }
     return {clusterIndex, stimIndex, hintLevelIndex};
   }
 
   function findMinProbDistCard(cards, hiddenItems) {
     console.log('findMinProbDistCard');
     let currentMin = 50.0;
-    let currentHintLevelMin = 50.0;
     let clusterIndex=-1;
     let stimIndex=-1;
     let hintLevelIndex=-1;
@@ -598,6 +617,7 @@ function modelUnitEngine() {
       if (!card.canUse || !(card.trialsSinceLastSeen > 1)) {
         continue;
       } else {
+        const stimCluster = getStimCluster(i);
         for (let j=0; j<card.stims.length; j++) {
           const stim = card.stims[j];
           if (hiddenItems.includes(stim.stimulusKC)) continue;
@@ -612,22 +632,23 @@ function modelUnitEngine() {
             currentMin = dist;
             clusterIndex=i;
             stimIndex=j;
+            hintLevelIndex = 0;
           }
-          
+          if(stimCluster.stims[j].textStimulus || stimCluster.stims[j].clozeStimulus){
+            for(let k=0; k<Math.min(stim.hintLevelProbabilites.length, 3); k++){
+              let hintDist = Math.abs(Math.log(stim.hintLevelProbabilites[k]/(1-stim.hintLevelProbabilites[k])) - optimalProb);
+              if(hintDist < currentMin){
+                currentMin = hintDist;
+                clusterIndex=i;
+                stimIndex=j;
+                hintLevelIndex = k;
+              }
+            }
+          }
         }
       }
     }
     const stim = cards[clusterIndex].stims[stimIndex];
-
-    if(getStimCluster(clusterIndex).stims[stimIndex].textStimulus || getStimCluster(clusterIndex).stims[stimIndex].clozeStimulus){
-      for(let k=0; k<Math.min(stim.hintLevelProbabilites.length, 3); k++){
-        let hintDist = Math.abs(Math.log(stim.hintLevelProbabilites[k]/(1-stim.hintLevelProbabilites[k])) - optimalProb);
-        if(hintDist < currentHintLevelMin){
-          currentHintLevelMin = hintDist;
-          hintLevelIndex = k;
-        }
-      }
-    }
 
     return {clusterIndex, stimIndex, hintLevelIndex};
   }
@@ -637,7 +658,6 @@ function modelUnitEngine() {
     let currentMax = 0;
     let clusterIndex=-1;
     let stimIndex=-1;
-    let currentHintLevelMax = 0;
     let hintLevelIndex=-1;
 
     for (let i=0; i<cards.length; i++) {
@@ -645,6 +665,7 @@ function modelUnitEngine() {
       if (!card.canUse || !(card.trialsSinceLastSeen > 1)) {
         continue;
       } else {
+        const stimCluster = getStimCluster(i);
         for (let j=0; j<card.stims.length; j++) {
           const stim = card.stims[j];
           if (hiddenItems.includes(stim.stimulusKC)) continue;
@@ -658,19 +679,22 @@ function modelUnitEngine() {
             currentMax = stim.probabilityEstimate;
             clusterIndex=i;
             stimIndex=j;
+            hintLevelIndex=0;
+          }
+          if(stimCluster.stims[j].textStimulus || stimCluster.stims[j].clozeStimulus){
+            for(let k=0; k<stim.hintLevelProbabilites.length; k++){
+              if(stim.hintLevelProbabilites[k] > currentMax && stim.hintLevelProbabilites[k] < thresholdCeiling ){
+                currentMax = stim.hintLevelProbabilites[k];
+                clusterIndex=i;
+                stimIndex=j;
+                hintLevelIndex = k;
+              }
+            }
           }
         }
       }
     }
     const stim = cards[clusterIndex].stims[stimIndex];
-    if(getStimCluster(clusterIndex).stims[stimIndex].textStimulus || getStimCluster(clusterIndex).stims[stimIndex].clozeStimulus){
-      for(let k=0; k<stim.hintLevelProbabilites.length; k++){
-        if(stim.hintLevelProbabilites[k] > currentHintLevelMax && stim.hintLevelProbabilites[k] < thresholdCeiling ){
-          currentHintLevelMax = stim.hintLevelProbabilites[k];
-          hintLevelIndex = k;
-        }
-      }
-    }
 
     return {clusterIndex, stimIndex, hintLevelIndex};
   }
@@ -729,11 +753,13 @@ function modelUnitEngine() {
       const tdfDebugLog=[];
       for (let i=0; i<cardProbabilities.cards.length; i++) {
         const card = cardProbabilities.cards[i];
+        const stimCluster = getStimCluster(i);
         for (let j=0; j<card.stims.length; j++) {
           const stim = card.stims[j];
           const hintLevelProbabilities = [];
           const currentStimuliSetId = Session.get('currentStimuliSetId');
-          let answerText = Answers.getDisplayAnswerText(getStimAnswer(i, j)).toLowerCase();
+          const stimAnswer = stimCluster.stims[j].correctResponse
+          let answerText = Answers.getDisplayAnswerText(stimAnswer).toLowerCase();
           //Detect Hint Levels
           if (!this.cachedSyllables.data || !this.cachedSyllables.data[answerText]) {
             hintLevelIndex = 1;
@@ -743,12 +769,12 @@ function modelUnitEngine() {
             hintLevelIndex = stimSyllableData.count;
             console.log('syllables detected for: ' + currentStimuliSetId + ' | ' + answerText + '. hintlevel index is ' + hintLevelIndex);
           }
-          parms = this.calculateSingleProb(i, j, 0, count);
+          parms = this.calculateSingleProb(i, j, 0, count, stimCluster);
           tdfDebugLog.push(parms.debugLog);
           
-          if(getStimCluster(i).stims[j].textStimulus || getStimCluster(i).stims[j].clozeStimulus){
+          if(stimCluster.stims[j].textStimulus || stimCluster.stims[j].clozeStimulus){
             for(let k=0; k<Math.min(hintLevelIndex, 3); k++){
-              let hintLevelParms = this.calculateSingleProb(i, j, k, count);
+              let hintLevelParms = this.calculateSingleProb(i, j, k, count, stimCluster);
               hintLevelProbabilities.push(hintLevelParms.probability);
               console.log('cluster: ' + i + ', card: ' + j + ', input hintlevel: ' + k + ', output hintLevel: ' + hintLevelParms.hintLevel + ', output probability: ' + hintLevelParms.probability) + ', debug message:' + hintLevelParms.debugLog;
             }
@@ -770,7 +796,7 @@ function modelUnitEngine() {
     // Given a single item from the cardProbabilities, calculate the
     // current probability. IMPORTANT: this function only returns ALL parameters
     // used which include probability. The caller is responsible for storing it.
-    calculateSingleProb: function calculateSingleProb(cardIndex, stimIndex, hintLevel, i) {
+    calculateSingleProb: function calculateSingleProb(cardIndex, stimIndex, hintLevel, i, stimCluster) {
       const card = cardProbabilities.cards[cardIndex];
       const stim = card.stims[stimIndex];
 
@@ -808,7 +834,8 @@ function modelUnitEngine() {
       p.stimSuccessCount = stim.priorCorrect;
       p.stimFailureCount = stim.priorIncorrect;
       p.stimStudyTrialCount = stim.priorStudy;
-      let answerText = Answers.getDisplayAnswerText(getStimAnswer(cardIndex, stimIndex)).toLowerCase();
+      const stimAnswer = stimCluster.stims[stimIndex].correctResponse;
+      let answerText = Answers.getDisplayAnswerText(stimAnswer).toLowerCase();
       p.stimResponseText = stripSpacesAndLowerCase(answerText); // Yes, lowercasing here is redundant. TODO: fix/cleanup
       const currentStimuliSetId = Session.get('currentStimuliSetId');
       answerText = answerText.replace(/\./g, '_');
@@ -832,7 +859,7 @@ function modelUnitEngine() {
       p.responseSecsSinceLastShown = elapsed(p.resp.lastSeen);
       p.responseStudyTrialCount = p.resp.priorStudy;
 
-      p.stimParameters = getStimParameterArray(cardIndex, stimIndex);
+      p.stimParameters = stimCluster.stims[stimIndex].params.split(',').map((x) => _.floatval(x));
 
       p.clusterPreviousCalculatedProbabilities = JSON.parse(JSON.stringify(card.previousCalculatedProbabilities));
       p.clusterOutcomeHistory = JSON.parse(JSON.stringify(card.outcomeStack));
@@ -917,6 +944,8 @@ function modelUnitEngine() {
           hintLevel: null,
           priorCorrect: 0,
           priorIncorrect: 0,
+          curSessionPriorCorrect: 0,
+          curSessionPriorIncorrect: 0,
           hasBeenIntroduced: false,
           outcomeStack: [],
           lastSeen: 0,
@@ -945,6 +974,8 @@ function modelUnitEngine() {
             hintLevel: 0,
             priorCorrect: 0,
             priorIncorrect: 0,
+            curSessionPriorCorrect: 0,
+            curSessionPriorIncorrect: 0,
             hasBeenIntroduced: false,
             outcomeStack: [],
             lastSeen: 0,
@@ -973,6 +1004,8 @@ function modelUnitEngine() {
               hintLevel: null,
               priorCorrect: 0,
               priorIncorrect: 0,
+              curSessionPriorCorrect: 0,
+              curSessionPriorIncorrect: 0,
               firstSeen: 0,
               lastSeen: 0,
               totalPracticeDuration: 0,
@@ -1000,7 +1033,7 @@ function modelUnitEngine() {
       // calculateCardProbabilities();
     },
 
-    saveComponentStates: async function() {
+    saveComponentStatesSync: function() {
       const userId = Meteor.userId();
       const TDFId = Session.get('currentTdfId');
       const componentStates = [];
@@ -1018,6 +1051,8 @@ function modelUnitEngine() {
           trialsSinceLastSeen: card.trialsSinceLastSeen,
           priorCorrect: card.priorCorrect,
           priorIncorrect: card.priorIncorrect,
+          curSessionPriorCorrect: 0,
+          curSessionPriorIncorrect: 0,
           priorStudy: card.priorStudy,
           totalPracticeDuration: card.totalPracticeDuration,
           outcomeStack: typeof card.outcomeStack == 'string' ?  card.outcomeStack.split(', '):  card.outcomeStack,
@@ -1037,6 +1072,8 @@ function modelUnitEngine() {
             hintLevel: Session.get('hintLevel') || null,
             priorCorrect: stim.priorCorrect,
             priorIncorrect: stim.priorIncorrect,
+            curSessionPriorCorrect: stim.curSessionPriorCorrect,
+            curSessionPriorIncorrect: stim.curSessionPriorIncorrect,
             priorStudy: stim.priorStudy,
             totalPracticeDuration: stim.totalPracticeDuration,
             outcomeStack: typeof stim.outcomeStack == 'string' ?  stim.outcomeStack.split(', '):  stim.outcomeStack,
@@ -1057,6 +1094,8 @@ function modelUnitEngine() {
           lastSeen: response.lastSeen,
           priorCorrect: response.priorCorrect,
           priorIncorrect: response.priorIncorrect,
+          curSessionPriorCorrect: 0,
+          curSessionPriorIncorrect: 0,
           priorStudy: response.priorStudy,
           totalPracticeDuration: response.totalPracticeDuration,
           outcomeStack: typeof response.outcomeStack == 'string' ?  response.outcomeStack.split(', '):  response.outcomeStack,
@@ -1068,7 +1107,7 @@ function modelUnitEngine() {
       console.log('saveComponentStates', componentStates);
       try{
         if(!Meteor.user().profile.impersonating){
-          await meteorCallAsync('setComponentStatesByUserIdTDFIdAndUnitNum',
+          Meteor.call('setComponentStatesByUserIdTDFIdAndUnitNum',
               Meteor.userId(), Session.get('currentTdfId'), componentStates);
         }
       }
@@ -1091,6 +1130,7 @@ function modelUnitEngine() {
       console.log('loadComponentStates start');
 
       let numQuestionsAnswered = 0;
+      let numQuestionsAnsweredCurrentSession = 0;
       let numCorrectAnswers = 0;
       const probsMap = {};
       const cards = cardProbabilities.cards;
@@ -1154,7 +1194,7 @@ function modelUnitEngine() {
             const stimulusKC = componentStim.KCId;
             const stimIndex = cards[cardIndex].stims.findIndex((x) => x.stimulusKC == stimulusKC);
             const componentStimData = _.pick(componentStim,
-                ['firstSeen', 'lastSeen', 'outcomeStack','hintLevel', 'priorCorrect', 'priorIncorrect', 'priorStudy',
+                ['firstSeen', 'lastSeen', 'outcomeStack','hintLevel', 'priorCorrect', 'priorIncorrect', 'curSessionPriorCorrect', 'curSessionPriorIncorrect', 'priorStudy',
                   'totalPracticeDuration']);
             Object.assign(cards[cardIndex].stims[stimIndex], componentStimData);
             cards[cardIndex].stims[stimIndex].hasBeenIntroduced = componentStim.firstSeen > 0;
@@ -1166,6 +1206,7 @@ function modelUnitEngine() {
             probsMap[cardIndex][stimIndex] = componentStimData.probabilityEstimate;
             numCorrectAnswers += componentStimData.priorCorrect;
             numQuestionsAnswered += componentStimData.priorCorrect + componentStimData.priorIncorrect;
+            numQuestionsAnsweredCurrentSession += componentStimData.curSessionPriorCorrect + componentStimData.curSessionPriorIncorrect;
           }
         }
         for (let cardIndex=0; cardIndex<cards.length; cardIndex++) {
@@ -1212,6 +1253,7 @@ function modelUnitEngine() {
 
       Object.assign(cardProbabilities, {
         numQuestionsAnswered,
+        numQuestionsAnsweredCurrentSession,
         numCorrectAnswers,
       });
       const cardIndex = Session.get('currentExperimentState').shufIndex;
@@ -1296,7 +1338,7 @@ function modelUnitEngine() {
 
       if(indices === undefined || indices === null){
         console.log('indices unset, calculating now')
-        indices = this.calculateIndices();
+        indices = await this.calculateIndices();
       }
 
       newClusterIndex = indices.clusterIndex;
@@ -1396,8 +1438,8 @@ function modelUnitEngine() {
       });
 
       try {
-        await this.saveComponentStates();
-        await updateExperimentState(newExperimentState, 'unitEngine.modelUnitEngine.selectNextCard');
+        this.saveComponentStatesSync();
+        updateExperimentState(newExperimentState, 'unitEngine.modelUnitEngine.selectNextCard');
       } catch (e) {
         console.log('error in select next card server calls:', e);
         throw new Error('error in select next card server calls:', e);
@@ -1440,12 +1482,13 @@ function modelUnitEngine() {
       // the only place we call it after init *and* something might have
       // changed during question selection
       if (getTestType() === 's') {
-        await this.saveComponentStates();
+        this.saveComponentStatesSync();
         return;
       }
 
       // "Global" stats
       cardProbabilities.numQuestionsAnswered += 1;
+      cardProbabilities.numQuestionsAnsweredCurrentSession += 1;
       if (wasCorrect) {
         cardProbabilities.numCorrectAnswers += 1;
       }
@@ -1460,8 +1503,14 @@ function modelUnitEngine() {
 
       card.outcomeStack.push(wasCorrect ? 1 : 0);
 
-      if (wasCorrect) stim.priorCorrect += 1;
-      else stim.priorIncorrect += 1;
+      if (wasCorrect) {
+        stim.priorCorrect += 1;
+        stim.curSessionPriorCorrect += 1;
+      }
+      else {
+        stim.priorIncorrect += 1;
+        stim.curSessionPriorIncorrect += 1;
+      }
 
       // This is called from processUserTimesLog() so this both works in memory and restoring from userTimesLog
       stim.outcomeStack.push(wasCorrect ? 1 : 0);
@@ -1483,7 +1532,7 @@ function modelUnitEngine() {
             displayify(cardProbabilities.responses));
       }
 
-      await this.saveComponentStates();
+      this.saveComponentStatesSync();
     },
 
     unitFinished: function() {
@@ -1491,9 +1540,10 @@ function modelUnitEngine() {
       const minSecs = session.displayminseconds || 0;
       const maxSecs = session.displaymaxseconds || 0;
       const maxTrials = parseInt(session.maxTrials || 0);
-      const numTrialsSoFar = cardProbabilities.numQuestionsAnswered;
+      const numTrialsSoFar = cardProbabilities.numQuestionsAnsweredCurrentSession || 0;
 
       if (maxTrials > 0 && numTrialsSoFar >= maxTrials) {
+        Meteor.call('resetCurSessionTrialsCount', Meteor.userId(), Session.get('currentTdfId'))
         return true;
       }
 
@@ -1914,7 +1964,7 @@ function scheduleUnitEngine() {
           'whichStim:', curStimIndex,
       );
 
-      await updateExperimentState(newExperimentState, 'question');
+      updateExperimentStateSync(newExperimentState, 'question');
     },
 
     findCurrentCardInfo: function() {
