@@ -162,6 +162,8 @@ CREATE TABLE componentState (
     trialsSinceLastSeen INTEGER,
     priorCorrect INTEGER NOT NULL,
     priorIncorrect INTEGER NOT NULL,
+    curSessionPriorCorrect INTEGER NOT NULL,
+    curSessionPriorIncorrect INTEGER NOT NULL,
     priorStudy INTEGER NOT NULL,
     totalPracticeDuration INTEGER NOT NULL,
     outcomeStack TEXT
