@@ -42,7 +42,7 @@ async function setAllTdfs(ownerMapCallback) {
   Session.get('allTdfs').forEach(function(tdf) {
     if (tdf.content.fileName.indexOf(curSemester) == -1) return;
 
-    const tdfid = tdf.TDFId;
+    const tdfid = tdf._id;
     const tdfStimSetId = tdf.stimuliSetId;
     const tdfFile = tdf.content;
     tdfIdToTdfFileMap[tdfid] = tdfFile;

@@ -65,7 +65,7 @@ Template.profileSouthwest.rendered = async function() {
     console.log('assignedTdfs: ', assignedTdfs);
     // Check all the valid TDF's
     assignedTdfs.forEach( function(tdf) {
-      const TDFId = tdf.TDFId;
+      const TDFId = tdf._id;
       console.log('assignedTdfs', tdf);
       const tdfObject = tdf.content;
       const isMultiTdf = tdfObject.isMultiTdf;

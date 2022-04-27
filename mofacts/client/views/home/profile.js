@@ -270,7 +270,7 @@ Template.profile.rendered = async function() {
 
   // Check all the valid TDF's
   for (const tdf of allTdfs) {
-    const TDFId = tdf.TDFId;
+    const TDFId = tdf._id;
     const tdfObject = tdf.content;
     const isMultiTdf = tdfObject.isMultiTdf;
     const currentStimuliSetId = tdf.stimuliSetId;
