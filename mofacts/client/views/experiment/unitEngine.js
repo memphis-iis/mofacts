@@ -1020,7 +1020,7 @@ function modelUnitEngine() {
           priorIncorrect: card.priorIncorrect,
           priorStudy: card.priorStudy,
           totalPracticeDuration: card.totalPracticeDuration,
-          outcomeStack: card.outcomeStack.join(','),
+          outcomeStack: typeof card.outcomeStack == 'string' ?  card.outcomeStack.split(', '):  card.outcomeStack,
           instructionQuestionResult: Session.get('instructionQuestionResult'),
         };
         componentStates.push(cardState);
@@ -1039,7 +1039,7 @@ function modelUnitEngine() {
             priorIncorrect: stim.priorIncorrect,
             priorStudy: stim.priorStudy,
             totalPracticeDuration: stim.totalPracticeDuration,
-            outcomeStack: stim.outcomeStack.join(','),
+            outcomeStack: typeof stim.outcomeStack == 'string' ?  stim.outcomeStack.split(', '):  stim.outcomeStack,
             instructionQuestionResult: null,
           };
           componentStates.push(stimState);
@@ -1059,7 +1059,7 @@ function modelUnitEngine() {
           priorIncorrect: response.priorIncorrect,
           priorStudy: response.priorStudy,
           totalPracticeDuration: response.totalPracticeDuration,
-          outcomeStack: response.outcomeStack.join(','),
+          outcomeStack: typeof response.outcomeStack == 'string' ?  response.outcomeStack.split(', '):  response.outcomeStack,
           responseText, // not actually in db, need to lookup/assign kcid when loading
           instructionQuestionResult: null,
         };

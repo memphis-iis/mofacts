@@ -5,16 +5,7 @@
 
 
 StimSyllables = new Meteor.Collection('stimuli_syllables');
-Tdfs = new Meteor.Collection('tdfs')
-Assignments = new Meteor.Collection('assessments');
-ComponentStates = new Meteor.Collection('component_state');
-Courses = new Meteor.Collection('course');
-GlobalExperimentStates = new Meteor.Collection('global_experiment_state');
-Histories = new Meteor.Collection('history');
-Items = new Meteor.Collection('item');
-itemSourceSentences = new Meteor.Collection('item_source_sentences');
-Sections = new Meteor.Collection('section');
-SectionUserMap = new Meteor.Collection('section_user_map');
+
 ScheduledTurkMessages = new Mongo.Collection('scheduledTurkMessages');
 GoogleSpeechAPIKeys = new Mongo.Collection('googleSpeechAPIKeys');
 ClozeEditHistory = new Mongo.Collection('clozeEditHistory');

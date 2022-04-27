@@ -184,12 +184,12 @@ async function drawDashboard(studentId, selectedTdfId){
   selectedTdf = await meteorCallAsync('getTdfById',selectedTdfId);
   selectedTdfIdProgressReportParams = selectedTdf.content.tdfs.tutor.setspec.progressReporterParams;
   let curStimSetId = selectedTdf.stimuliSetId;
-  let clusterlist = '';
+  let clusterlist = [];
   for(let unit of selectedTdf.content.tdfs.tutor.unit){
     if(unit.learningsession){
       let list = unit.learningsession.clusterlist.split('-');
       for(let unitNumber of _.range(parseInt(list[0]), parseInt(list[1]) + 1))
-        clusterlist += unitNumber + 10000 * curStimSetId + ' ';
+        clusterlist.push(unitNumber + 10000 * curStimSetId)
     }
   }
   console.log('selectedTdfIdProgressReportParams',selectedTdfIdProgressReportParams);

@@ -2690,7 +2690,7 @@ async function updateExperimentState(newState, codeCallLocation) {
   const newExperimentState = Object.assign(JSON.parse(JSON.stringify(oldExperimentState)), newState);
   const res = await meteorCallAsync('setExperimentState',
       Meteor.userId(), Session.get('currentRootTdfId'), newExperimentState, 'card.updateExperimentState');
-  Session.set('currentExperimentState', newExperimentState);
+  Session.set('currentExperimentState', res);
   console.log('updateExperimentState', codeCallLocation, 'old:', oldExperimentState, '\nnew:', newExperimentState);
   return res;
 }
@@ -3070,7 +3070,7 @@ async function processUserTimesLog() {
     const curUser = Meteor.user();
     const currentTdfId = Session.get('currentTdfId');
     const curTdf = Session.get('currentTdfFile');
-    const curTdfUnit = curTdf.tdfs.tutor.unit[0];
+    const curTdfUnit = curTdf.tdfs.tutor.unit[Session.get('currentUnitNumber')];
     await setStudentPerformance(curUser._id, curUser.username, currentTdfId);
 
     if (needFirstUnitInstructions && typeof curTdfUnit.unitinstructions !== 'undefined') {
