@@ -27,7 +27,7 @@ import {
   getTdfByFileName,
   getStimuliSetById,
   getHistoryByTDFfileName,
-  getListOfStimTags,
+  getListOfStimTagsFromStims,
   serverConsole} from './methods';
 import {outputFields} from '../common/Definitions';
 import {getHistory} from '../server/orm';
@@ -56,19 +56,13 @@ function delimitedRecord(rec, listOfDynamicStimTags, isHeader = false) {
   return vals.join('\t');
 }
 
-async function getValuesOfStimTagList(tdfFileName, clusterKC, stimulusKC, tagList) {
-  serverConsole('getValuesOfStimTagList:', tdfFileName, clusterKC, stimulusKC, tagList);
-  const tdf = await getTdfByFileName(tdfFileName);
-  const stimuliSetId = tdf.stimuliSetId;
-  const stimuliSet = await getStimuliSetById(stimuliSetId);
+async function getValuesOfStimTagList(stimuliSet, clusterKC, stimulusKC, tagList) {
   const curStimSet = stimuliSet.find((x) => x.clusterKC==clusterKC && x.stimulusKC==stimulusKC);
-  serverConsole('getValuesOfStimTagList:', typeof(curStimSet), Object.keys(curStimSet || {}), curStimSet);
   const valueDict = {};
 
   for (const tag of tagList) {
     if (!valueDict[tag] && curStimSet.tags) {
       valueDict[tag] = curStimSet.tags[tag] || '';
-      console.log("valueDict[" + tag + "]: " + valueDict[tag]);
     } else {
       valueDict[tag] = '';
     }
@@ -80,6 +74,10 @@ async function getValuesOfStimTagList(tdfFileName, clusterKC, stimulusKC, tagLis
 // for expName in datashop format. We do NOT terminate our records.
 // We return the number of records written
 async function createExperimentExport(expName, isFirstInFileArray = true) {
+  const tdf = await getTdfByFileName(expName);
+  const stimuliSetId = tdf.stimuliSetId;
+  const stims = await getStimuliSetById(stimuliSetId);
+  
   let record = '';
   const header = {};
   let expNames = [];
@@ -90,7 +88,7 @@ async function createExperimentExport(expName, isFirstInFileArray = true) {
     expNames = expName;
   }
   
-  const listOfDynamicStimTags = await getListOfStimTags(expName);
+  const listOfDynamicStimTags = await getListOfStimTagsFromStims(stims);
   const listOfDynamicStimTagsWithColumnNames = [];
   for (const tag of listOfDynamicStimTags) {
     let renamedField = 'CF (' + tag + ')';
@@ -121,14 +119,19 @@ async function createExperimentExport(expName, isFirstInFileArray = true) {
   }
 
   Meteor.call('updatePerformanceData', 'utlQuery', 'experiment_times.createExperimentExport', 'SERVER_REPORT');
+  let expIndex = 1; 
+  let expCount = expNames.length;
   for(expName of expNames){
     const histories = await getHistoryByTDFfileName(expName);
+    let hisIndex = 1; 
+    let hisCount = histories.length;
     for (let history of histories) {
+      console.log(`Experiment: ${expIndex} / ${expCount} | History: ${hisIndex} / ${hisCount}`)
       try {
         const clusterKC = history.kc_cluster;
         const stimulusKC = history.kc_default;
         history = getHistory(history);
-        const dynamicStimTagValues = await getValuesOfStimTagList(expName, clusterKC, stimulusKC, listOfDynamicStimTags);
+        const dynamicStimTagValues = await getValuesOfStimTagList(stims, clusterKC, stimulusKC, listOfDynamicStimTags);
         for (const tag of Object.keys(dynamicStimTagValues)) {
           history["CF (" + tag + ")"] = dynamicStimTagValues[tag];
         }
@@ -136,7 +139,9 @@ async function createExperimentExport(expName, isFirstInFileArray = true) {
       } catch (e) {
         serverConsole('There was an error populating the record - it will be skipped', e, e.stack);
       }
+      hisIndex++
     }
+    expIndex++
   }
   return record;
 }
