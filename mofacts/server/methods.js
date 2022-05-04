@@ -17,6 +17,7 @@ export {
   getTdfBy_id,
   getHistoryByTDFfileName,
   getListOfStimTags,
+  getListOfStimTagsFromStims,
   getStimuliSetById,
   getDisplayAnswerText,
   serverConsole,
@@ -31,6 +32,7 @@ export {
 // for creating some MongoDB queries
 
 const fs = Npm.require('fs');
+const { randomBytes } = require('crypto');
 
 if (Meteor.isClient) {
   Meteor.subscribe('files.assets.all');
@@ -1050,6 +1052,20 @@ async function getListOfStimTags(tdfFileName) {
   return Array.from(allTagsInStimFile);
 }
 
+async function getListOfStimTagsFromStims(stims) {
+  const allTagsInStimFile = new Set();
+
+  for (const stim of stims) {
+    if (stim.tags) {
+      for (const tagName of Object.keys(stim.tags)) {
+        allTagsInStimFile.add(tagName);
+      }
+    }
+  }
+
+  return Array.from(allTagsInStimFile);
+}
+
 async function getStimuliSetByFilename(stimFilename) {
   const idRet = await db.oneOrNone('SELECT stimuliSetId FROM item WHERE stimulusFilename = $1 LIMIT 1', stimFilename);
   const stimuliSetId = idRet ? idRet.stimulisetid : null;
@@ -1423,6 +1439,30 @@ function userProfileSave(id, profile) {
   }
 }
 
+// used to generate teacher/admin secret keys for api calls
+function generateKey(size = 32, format = 'base64') {
+  const buffer = crypto.randomBytes(size);
+  return buffer.toString(format);
+}
+
+//only if we dont already have a secret for this user. 
+function createUserSecretKey(targetUserId){
+  if(!Meteor.users.findOne({_id: targetUserId}).secretKey){
+    Meteor.users.update({_id: targetUserId}, { $set: { secretKey: generateKey() }});
+  }
+}
+
+function updateUserSecretKey(targetUserId){
+  if(Roles.userIsInRole(targetUserId, ['admin', 'teacher']))
+    Meteor.users.update({_id: targetUserId}, { $set: { secretKey: generateKey() }});
+}
+
+// Only removes secret key if the user is no longer an admin or teacher
+function removeUserSecretKey(targetUserId){
+  if(!Roles.userIsInRole(targetUserId, ['admin', 'teacher']))
+    Meteor.users.update({_id: targetUserId}, { $set: { secretKey: '' }});
+}
+
 // Return the user object matching the user. We use Meteor's provided search
 // function to attempt to locate the user. We will attempt to find the user
 // by username *and* by email.
@@ -1685,92 +1725,33 @@ Meteor.methods({
 
   getTdfIdByStimSetIdAndFileName, getItemsByFileName,
 
-  createExperimentDataFile: async function(exp) {
+  getUIDAndSecretForCurrentUser: async function(){
     if(!Meteor.userId()){
       throw new Meteor.Error('Unauthorized: No user login');
     }
     else if(!Roles.userIsInRole(Meteor.userId(), ['teacher', 'admin'])){
       throw new Meteor.Error('Unauthorized: You do not have permission to this data');
     }
-    else if (!exp) {
-      throw new Meteor.Error('No experiment specified');
-    }
-
-    return await createExperimentExport(exp);
+    return [Meteor.userId(), Meteor.user().secretKey]
   },
 
   resetCurSessionTrialsCount: async function(userId, tdfID) {
     await db.none('UPDATE componentstate SET cursessionpriorcorrect = 0, cursessionpriorincorrect = 0 WHERE userid = $1 AND TDFId = $2', [userId, tdfID])
   },
 
-  createTeacherDataFile: async function(teacherID) {
-    const uid = teacherID || Meteor.userId();
-
-    if(!Meteor.userId()){
-      throw new Meteor.Error('Unauthorized: No user login');
-    }
-    else if(!Roles.userIsInRole(Meteor.userId(), ['teacher', 'admin'])){
-      throw new Meteor.Error('Unauthorized: You do not have permission to this data');
-    }
-
-    const tdfNames = await getTdfNamesAssignedByInstructor(uid);
-    
-    if (!tdfNames.length > 0) {
-      throw new Meteor.Error('No tdfs found for any classes for: ' + Meteor.user().username);
-    }
-    let experimentExport = await createExperimentExport(tdfNames.shift(), true);
-    for (let tdfName of tdfNames){
-      experimentExport += await createExperimentExport(tdfName, false)
-    }
-    return experimentExport;
-  },
-
-  createClassDataFile: async function(classId) {
-    if(!Meteor.userId()){
-      throw new Meteor.Error('Unauthorized: No user login');
-    }
-    else if(!Roles.userIsInRole(Meteor.userId(), ['teacher', 'admin'])){
-      throw new Meteor.Error('Unauthorized: You do not have permission to this data');
-    }
-    else if (!classId) {
-      throw new Meteor.Error('No class ID specified');
-    }
-
-    const foundClass = await getCourseById(classId);
-
-    if (!foundClass) {
-      throw new Meteor.Error('No classes found for the specified class ID: ' + classId);
-    }
-
-    const tdfFileNames = await getTdfAssignmentsByCourseIdMap(classId);
-
-    if (!tdfFileNames || tdfFileNames.length == 0) {
-      throw new Meteor.Error('No tdfs found for any classes');
-    }
-    return await createExperimentExport(tdfFileNames);
-  },
-
-  createClozeEditHistoryDataFile: async function(authorID) {
-    let response = '';
-    if(!Meteor.userId()){
-      throw new Meteor.Error('Unauthorized: No user login');
-    }
-    else if(!Roles.userIsInRole(Meteor.userId(), ['teacher', 'admin'])){
-      throw new Meteor.Error('Unauthorized: You do not have permission to this data');
-    }
-    else if (!authorID) {
-      throw new Meteor.Error('No user id specified');
-    }
-
-    for(let record of ClozeEditHistory.find({'user': authorID})){
-      response += JSON.stringify(record);
-      response += '\r\n';
-    }
-    return response;
-  },
-
   getAltServerUrl: function() {
     return altServerUrl;
+  },
+
+  resetAllSecretKeys: function() {
+    if(Meteor.userId() && Roles.userIsInRole(Meteor.userId(), ['admin'])){
+      serverConsole('resetting user secrets');
+      const users = Meteor.users.find({$or: [{roles: "teacher"}, {roles: "admin"}]}).fetch();
+      for(user of users){
+        serverConsole(`resetting user secret for ${user._id}`)
+        updateUserSecretKey(user._id);
+      }
+    }
   },
 
   getClozesFromText: function(inputText) {
@@ -2081,8 +2062,10 @@ Meteor.methods({
 
     if (roleAction === 'add') {
       Roles.addUsersToRoles(targetUserId, [roleName]);
+      createUserSecretKey(targetUserId);
     } else if (roleAction === 'remove') {
       Roles.removeUsersFromRoles(targetUserId, [roleName]);
+      removeUserSecretKey(targetUserId);
     } else {
       throw new Error('Serious logic error: please report this');
     }
@@ -2555,4 +2538,216 @@ Router.route('/dynamic-assets/:tdfid?/:filetype?/:filename?', {
     this.response.write(content);
     this.response.end();
   }
+});
+// Serves data file containing all TDF data for single teacher
+Router.route('data-by-teacher', {
+  name: 'server.teacherData',
+  where: 'server',
+  path: '/data-by-teacher/:uid',
+  action: async function() {
+    console.time('data-by-teacher')
+    const userId = this.request.headers['x-user-id'];
+    const loginToken = this.request.headers['x-auth-token'];
+    const uid = this.params.uid;
+    const response = this.response;
+    
+    if(!userId || !loginToken){
+      response.writeHead(403);
+      response.end('Unauthorized');
+      return;
+    }
+    else if (!uid) {
+      response.writeHead(404);
+      response.end('No user ID specified');
+      return;
+    }
+
+    const tdfNames = await getTdfNamesAssignedByInstructor(uid);
+
+    if (!tdfNames.length > 0) {
+      response.writeHead(404);
+      response.end('No tdfs found for any classes');
+      return;
+    }
+
+    const user = Meteor.users.findOne({'_id': uid});
+    let userName = user.username;
+    // eslint-disable-next-line no-useless-escape
+    userName = userName.replace('/[/\\?%*:|"<>\s]/g', '_');
+
+    const fileName = 'mofacts_' + userName + '_all_tdf_data.txt';
+
+    response.writeHead(200, {
+      'Content-Type': 'text/tab-separated-values',
+      'File-Name': fileName
+    });
+
+    for(tdfName of tdfNames){
+      response.write(await createExperimentExport(tdfName));
+      response.write('\r\n');
+    }
+
+    tdfNames.forEach(function(tdf) {
+      serverConsole('Sent all  data for', tdf, 'as file', fileName);
+    });
+    console.timeEnd('data-by-teacher')
+    response.end('');
+  },
+});
+
+// Serves data file containing all TDF data for all classes for a teacher
+Router.route('data-by-class', {
+  name: 'server.classData',
+  where: 'server',
+  path: '/data-by-class/:classid/',
+  action: async function() {
+    const userId = this.request.headers['x-user-id'];
+    const loginToken = this.request.headers['x-auth-token'];
+    const classId = this.params.classid;
+    const response = this.response;
+    
+    if(!userId || !loginToken){
+      response.writeHead(403);
+      response.end('Unauthorized');
+      return;
+    }
+    else if (Meteor.users.findOne({_id: userId}).secretKey != loginToken){
+      response.writeHead(403);
+      response.end('Unauthorized');
+      return;
+    }
+    else if (!classId) {
+      response.writeHead(404);
+      response.end('No class ID specified');
+      return;
+    }
+    else if (!classId) {
+      throw new Meteor.Error('No class ID specified');
+    }
+
+    const foundClass = await getCourseById(classId);
+
+    if (!foundClass) {
+      response.writeHead(404);
+      response.end('No classes found for the specified class ID');
+      return;
+    }
+
+    const tdfFileNames = await getTdfAssignmentsByCourseIdMap(classId);
+
+    if (!tdfFileNames || tdfFileNames.length == 0) {
+      response.writeHead(404);
+      response.end('No tdfs found for any classes');
+      return;
+    }
+
+    // eslint-disable-next-line no-useless-escape
+    const className = foundClass.coursename.replace('/[/\\?%*:|"<>\s]/g', '_');
+    const fileName = 'mofacts_' + className + '_all_class_data.txt';
+
+    response.writeHead(200, {
+      'Content-Type': 'text/tab-separated-values',
+      'File-Name': fileName
+    });
+
+    for(tdfName of tdfFileNames){
+      response.write(await createExperimentExport(tdfName));
+      response.write('\r\n');
+    }
+
+    tdfFileNames.forEach(function(tdf) {
+      serverConsole('Sent all  data for', tdf, 'as file', fileName, 'with record-count:', recCount);
+    });
+
+    response.end('');
+  },
+});
+
+// We use a special server-side route for our experimental data download
+Router.route('data-by-file', {
+  name: 'server.data',
+  where: 'server',
+  path: '/data-by-file/:exp',
+  action: async function() {
+    const userId = this.request.headers['x-user-id'];
+    const loginToken = this.request.headers['x-auth-token'];
+    const exp = this.params.exp;
+    const response = this.response;
+    let path = this.url;
+    
+    if(!userId || !loginToken){
+      response.writeHead('403');
+      response.end();
+    }
+    else if (Meteor.users.findOne({_id: userId}).secretKey != loginToken){
+      response.writeHead(403);
+      response.end('Unauthorized');
+      return;
+    }
+    else if (path.includes('..')){ //user is trying to do some naughty stuff
+      response.writeHead('404');
+      response.end();
+      return;
+    }
+    else if (!exp) {
+      response.writeHead(404);
+      response.end('No experiment specified');
+      return;
+    }
+
+    const fileName = exp.split('.json')[0] + '-data.txt';;
+
+    response.writeHead(200, {
+      'Content-Type': 'text/tab-separated-values',
+      'File-Name': fileName
+    });
+
+    response.write(await createExperimentExport(exp));
+    response.end('');
+
+    serverConsole('Sent all  data for', exp, 'as file', fileName);
+  }
+});
+
+Router.route('clozeEditHistory', {
+  name: 'server.clozeData',
+  where: 'server',
+  path: '/clozeEditHistory/:uid',
+  action: function() {
+    const userId = this.request.headers['x-user-id'];
+    const loginToken = this.request.headers['x-auth-token'];
+    const uid = this.params.uid;
+    const response = this.response;
+    
+    if(!userId || !loginToken){
+      response.writeHead('403');
+      response.end();
+    }
+    else if (Meteor.users.findOne({_id: userId}).secretKey != loginToken){
+      response.writeHead(403);
+      response.end('Unauthorized');
+      return;
+    }
+    else if (!uid) {
+      response.writeHead(404);
+      response.end('No user id specified');
+      return;
+    }
+    const filename = uid + '-clozeEditHistory.json';
+
+    response.writeHead(200, {
+      'Content-Type': 'application/json',
+      'File-Name': filename
+    });
+
+    let recCount = 0;
+    ClozeEditHistory.find({'user': uid}).forEach(function(record) {
+      recCount += 1;
+      response.write(JSON.stringify(record));
+      response.write('\r\n');
+    });
+    response.end('');
+
+    serverConsole('Sent all  data for', uid, 'as file', filename, 'with record-count:', recCount);
+  },
 });
