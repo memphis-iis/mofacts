@@ -140,6 +140,15 @@ function getHistory(history) {
 }
 
 function getHistoryForMongo(history) {
+  if (history.cf_displayed_hint_syllables && history.cf_displayed_hint_syllables != '{}' && history.cf_displayed_hint_syllables.includes('{')
+  && history.cf_displayed_hint_syllables.includes('}')){
+    history.cf_displayed_hint_syllables = history.cf_displayed_hint_syllables.split('{')[1];
+    history.cf_displayed_hint_syllables = history.cf_displayed_hint_syllables.split('}')[0];
+    history.cf_displayed_hint_syllables = history.cf_displayed_hint_syllables.split(',');
+  }
+  else{
+    history.cf_displayed_hint_syllables == null;
+  }
   return {
     eventId: history.eventid,
     userId: history.userid,
@@ -155,7 +164,7 @@ function getHistoryForMongo(history) {
     userIdTDFId: history.useridtdfid,
     KCId: history.kcid,
     responseDuration: history.responseduration,
-    probabilityEstimate: history.probabilityestimate,
+    probabilityEstimate: parseFloat(history.probabilityestimate) || null,
     typeOfResponse: history.typeofresponse,
     responseValue: history.responsevalue,
     displayedStimulus: JSON.parse(history.displayedstimulus),
@@ -176,7 +185,7 @@ function getHistoryForMongo(history) {
     levelUnitType: history.level_unittype,
     problemName: JSON.parse(history.problem_name),
     stepName: JSON.parse(history.step_name),
-    time: history.time,
+    time: Number(history.time),
     input: history.input,
     outcome: history.outcome,
     studentResponseType: history.student_response_type,
@@ -192,21 +201,21 @@ function getHistoryForMongo(history) {
     CFAlternateDisplayIndex: history.cf_alternate_display_index,
     CFStimulusVersion: history.cf_stimulus_version,
     CFCorrectAnswer: history.cf_correct_answer,
-    CFCorrectAnswerSyllables: history.cf_correct_answer_syllables,
+    CFCorrectAnswerSyllables: history.cf_correct_answer_syllables.split('{')[1].split('}')[0].split(','),
     CFCorrectAnswerSyllablesCount: history.cf_correct_answer_syllables_count,
-    CFDisplaySyllableIndices: history.cf_display_syllable_indices,
+    CFDisplaySyllableIndices: history.cf_display_syllable_indices ? history.cf_display_syllable_indices.split('{')[1].split('}')[0].split(',') : null,
     CFDisplayedHintSyllables: history.cf_displayed_hint_syllables,
-    CFResponseTime: history.cf_response_time,
-    CFStartLatency: history.cf_start_latency,
-    CFEndLatency: history.cf_end_latency,
-    CFFeedbackLatency: history.cf_feedback_latency,
+    CFResponseTime: Number(history.cf_response_time),
+    CFStartLatency: Number(history.cf_start_latency),
+    CFEndLatency: Number(history.cf_end_latency),
+    CFFeedbackLatency: Number(history.cf_feedback_latency),
     CFReviewEntry: history.cf_review_entry,
     CFButtonOrder: history.cf_button_order,
     CFItemRemoved: history.cf_item_removed,
     feedbackText: history.feedback_text,
-    feedbackType: history.feedbackType,
+    feedbackType: history.feedbacktype,
     dynamicTagFields: history.dynamictagfields,
-    recordedServerTime: history.recordedServerTime,
+    recordedServerTime: Number(history.recordedservertime),
     hintLevel:history.hintlevel,
     instructionQuestionResult: history.instructionquestionresult,
     entryPoint: history.entry_point

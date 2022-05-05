@@ -33,19 +33,8 @@ Template.classEdit.onRendered(async function() {
   const courseSections = await meteorCallAsync('getAllCourseSections');
   const classes = {};
   for (const courseSection of courseSections) {
-    if (courseSection.teacheruserid != Meteor.userId()) continue;
-    if (!classes[courseSection.courseid]) {
-      classes[courseSection.courseid] = {
-        courseId: courseSection.courseid,
-        courseName: courseSection.coursename,
-        teacherUserId: courseSection.teacheruserid,
-        semester: courseSection.semester,
-        beginDate: courseSection.begindate,
-        sections: [courseSection.sectionname],
-      };
-    } else {
-      classes[courseSection.courseid].sections.push(courseSection.sectionname);
-    }
+    if (courseSection.teacherUserId != Meteor.userId()) continue;
+    classes[courseSection.courseId] = courseSection
   }
   console.log('classesFromCourseSections:', classes, courseSections);
 

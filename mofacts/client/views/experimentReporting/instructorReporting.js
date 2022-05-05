@@ -87,8 +87,8 @@ Template.instructorReporting.events({
   'change #class-select': function(event) {
     Session.set('curClassStudentPerformance', []);
     Session.set('curClassPerformance', undefined);
-    const curClassId = parseInt($(event.currentTarget).val());
-    const curClass = Session.get('classes').find((x) => x.courseId == curClassId);
+    const curClassId = $(event.currentTarget).val();
+    const curClass = Session.get('classes').find((x) => x._id == curClassId);
     Session.set('curClass', curClass);
     const curClassTdfs = Session.get('instructorReportingTdfs')[curClassId];
     console.log('change class-select, curClass: ', curClass, curClassTdfs);
@@ -102,11 +102,11 @@ Template.instructorReporting.events({
   },
 
   'change #tdf-select': function(event) {
-    curTdf = parseInt($(event.currentTarget).val());
+    curTdf = $(event.currentTarget).val();
     _state.set('currentTdf', curTdf);
-    console.log('tdf change: ', curTdf, Session.get('curClass').courseId);
+    console.log('tdf change: ', curTdf, Session.get('curClass')._id);
     if (Session.get('curClass')) {
-      setCurClassStudents(Session.get('curClass').courseId, curTdf);
+      setCurClassStudents(Session.get('curClass')._id, curTdf);
     } else {
       alert('Please select a class');
     }
@@ -120,7 +120,7 @@ Template.instructorReporting.events({
     console.log('practice deadline:', dateInt);
     if(dateInt && !isNaN(dateInt)){
       await fetchAndSetPracticeTimeIntervalsMap(dateInt, _state.get('currentTdf'));
-      //hideUsersByDate(dateInt, _state.get('currentTdf'));
+      hideUsersByDate(dateInt, _state.get('currentTdf'));
       _state.set('userMetThresholdMap', undefined);
     }
   },

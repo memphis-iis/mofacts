@@ -10,6 +10,7 @@ import {getNewItemFormat} from './conversions/convert';
 import {sendScheduledTurkMessages} from './turk_methods';
 import {getItem, getComponentState, getCourse, getTdf, getHistoryForMongo} from './orm';
 import { result } from 'underscore';
+import { Mongo } from 'meteor/mongo'
 
 
 export {
@@ -251,7 +252,7 @@ async function migration(){
   for(let t of sumret){
     console.log(`sum: ${sumret.indexOf(t) + 1}/${sumret.length}`)
     t = {
-      sectionId: Sections.findOne({sectionId: t.sectionId})._id,
+      sectionId: Sections.findOne({sectionId: t.sectionid})._id,
       userId: t.userid
     };
     SectionUserMap.insert(t);
@@ -287,34 +288,55 @@ async function migration(){
 }
 
 async function migration2(){
-  for(let t of Sections.find().fetch()){
-    let oldEntry = t;
-    delete t.sectionId;
-    Sections.update(oldEntry, t);
+  const sections = Sections.find().fetch()
+  for(let t in sections){
+    console.log(`sections: ${t}/${sections.length}`)
+    let oldEntry = sections[t];
+    delete sections[t].sectionId;
+    Sections.update(oldEntry, sections[t]);
   }
 
-  for(let t of Tdfs.find().fetch()){
-    let oldEntry = t;
-    delete t.TDFId;
-    Tdfs.update(oldEntry, t);
+  const tdfs = Tdfs.find().fetch()
+  for(let t in tdfs){
+    console.log(`tdfs: ${t}/${tdfs.length}`)
+    let oldEntry = tdfs[t];
+    delete tdfs[t].TDFId;
+    Tdfs.update(oldEntry, tdfs[t]);
   }
 
-  for(let t of ComponentStates.find().fetch()){
-    let oldEntry = t;
-    delete t.componentStateId;
-    ComponentStates.update(oldEntry, t);
+  const componentStates = ComponentStates.find().fetch()
+  for(let t in componentStates){
+    console.log(`componentStates: ${t}/${componentStates.length}`)
+    let oldEntry = componentStates[t];
+    delete componentStates[t].componentStateId;
+    ComponentStates.update(oldEntry, componentStates[t]);
   }
 
-  for(let t of Items.find().fetch()){
-    let oldEntry = t;
-    delete t.itemId;
-    Items.update(oldEntry, t);
+  const stimuli = Items.find().fetch();
+  const stimuli_syllables = StimSyllables.find().fetch();
+  for(let t in stimuli){
+    console.log(`stimuli: ${t}/${stimuli.length}`)
+    let oldEntry = stimuli[t];
+    let oldId = oldEntry._id;
+    const curStimSetSylls = stimuli_syllables.find(s => s.filename == oldEntry.stimuliSetId).data
+    let response = oldEntry.correctResponse
+    if(response.includes('~'))
+      response = response.split('~')[0];
+    const sylls = curStimSetSylls && response ? curStimSetSylls[response.toLowerCase()].syllables : null;
+
+    delete stimuli[t].itemId;
+    stimuli[t].syllables = sylls;
+    Items.update({_id: oldId}, stimuli[t]);
+    console.error(oldEntry.correctResponse, curStimSetSylls)
+    console.error(e)
   }
 
-  for(let t of Courses.find().fetch()){
-    let oldEntry = t;
-    delete t.courseId;
-    Courses.update(oldEntry, t);
+  const courses = Courses.find().fetch()
+  for(let t in courses){
+    console.log(`courses: ${t}/${courses.length}`)
+    let oldEntry = courses[t];
+    delete courses[t].courseId;
+    Courses.update(oldEntry, courses[t]);
   }
 }
 
@@ -500,23 +522,30 @@ async function getStimuliSetsForIdSet(stimuliSetIds) {
 }
 
 async function getProbabilityEstimatesByKCId(relevantKCIds) { // {clusterIndex:[stimKCId,stimKCId],...}
-  const clusterQuery = 'SELECT array_agg(probabilityEstimate ORDER BY eventId) AS probabilityEstimates \
-    FROM history WHERE KCId = ANY($1) AND probabilityEstimate IS NOT NULL';
+  //theres gotta be a more efficient way to do this
+  let allKCIDs = []
+  for(let kcidIndex in relevantKCIds){
+    for(let kcid of relevantKCIds[kcidIndex]){
+      allKCIDs.push(kcid);
+    }
+  }
+  const histories = Histories.find({KCId: { $in: allKCIDs }}, {sort: { time: 1 }}).fetch();
   const clusterProbs = {};
-  let individualStimKCs = [];
+  const individualStimProbs = {};
   // eslint-disable-next-line guard-for-in
   for (const clusterIndex in relevantKCIds) {
+    clusterProbs[clusterIndex] = [];
     const clusterKCs = relevantKCIds[clusterIndex];
-    const ret = await db.oneOrNone(clusterQuery, [clusterKCs]);
-    clusterProbs[clusterIndex] = ret.probabilityestimates;
-    individualStimKCs = individualStimKCs.concat(clusterKCs);
-  }
-  const query = 'SELECT KCId, array_agg(probabilityEstimate ORDER BY eventId) AS probabilityEstimates \
-    FROM history WHERE KCId = ANY($1) AND probabilityEstimate IS NOT NULL GROUP BY KCId';
-  const ret = await db.manyOrNone(query, [individualStimKCs]);
-  const individualStimProbs = {};
-  for (const pair of ret) {
-    individualStimProbs[pair.kcid] = pair.probabilityestimates;
+    const ret = histories.filter(h => clusterKCs.includes(h.KCId));
+    if(ret){
+      for(const pair of ret){
+        if(pair.probabilityEstimate){
+          clusterProbs[clusterIndex].push(pair.probabilityEstimate);
+          if(individualStimProbs[pair.KCId]) individualStimProbs[pair.KCId].push(pair.probabilityEstimate);
+          else individualStimProbs[pair.KCId] = [pair.probabilityEstimate];
+        }
+      }
+    }
   }
   return {clusterProbs, individualStimProbs};
 }
@@ -555,87 +584,38 @@ async function getComponentStatesByUserIdTDFIdAndUnitNum(userId, TDFId) {
   return componentStates;
 }
 
-async function setComponentStatesByUserIdTDFIdAndUnitNum(userId, TDFId, componentStates, hintLevel) {
+async function setComponentStatesByUserIdTDFIdAndUnitNum(userId, TDFId, componentStates) {
   serverConsole('setComponentStatesByUserIdTDFIdAndUnitNum, ', userId, TDFId);
-  const res = await db.tx(async (t) => {
-    const responseKCMap = await getReponseKCMap();
-    const newResponseKCRet = await t.one('SELECT MAX(responseKC) AS responseKC from ITEM');
-    let newResponseKC = newResponseKCRet.responsekc + 1;
-    let componentStateCount = ComponentStates.find({}).count()
-    for (const componentState of componentStates) {
-      componentState.userId = userId;
-      componentState.TDFId = TDFId;
-      if (componentState.componentType == 'response') {
-        if (!isEmpty(responseKCMap[componentState.responseText])) {
-          componentState.KCId = responseKCMap[componentState.responseText];
-        } else {
-          componentState.KCId = newResponseKC;
-          newResponseKC += 1;
-        }
-        delete componentState.responseText;
+  const responseKCMap = await getReponseKCMap();
+  const newResponseKCRet = Items.find({}, {sort: {responseKC: -1}, limit: 1}).fetch();//await t.one('SELECT MAX(responseKC) AS responseKC from ITEM');
+  let newResponseKC = newResponseKCRet.responsekc + 1;
+  let c = ComponentStates.find({userId: userId, TDFId: TDFId}).fetch();
+  for (const componentState of componentStates) {
+    componentState.userId = userId;
+    componentState.TDFId = TDFId;
+    if (componentState.componentType == 'response') {
+      if (!isEmpty(responseKCMap[componentState.responseText])) {
+        componentState.KCId = responseKCMap[componentState.responseText];
+      } else {
+        componentState.KCId = newResponseKC;
+        newResponseKC += 1;
       }
-      if (!componentState.trialsSinceLastSeen) {
-        componentState.trialsSinceLastSeen = null;
-      }
-      //PostgresReversion
-      // const updateQuery = 'UPDATE componentstate SET probabilityEstimate=${probabilityEstimate}, \
-      //   firstSeen=${firstSeen}, lastSeen=${lastSeen}, trialsSinceLastSeen=${trialsSinceLastSeen}, \
-      //  priorCorrect=${priorCorrect}, priorIncorrect=${priorIncorrect}, \
-      //  priorStudy=${priorStudy}, totalPracticeDuration=${totalPracticeDuration}, outcomeStack=${outcomeStack} \
-      //  WHERE userId=${userId} AND TDFId=${TDFId} AND KCId=${KCId} AND componentType=${componentType} \
-      //  RETURNING componentStateId';
-      // const componentStateId = await t.one(updateQuery, componentState);
-      let c = ComponentStates.find({userId: userId, TDFId: TDFId, KCId: componentState.KCId, componentType: componentState.componentType});
-      if(c._id){
-        ComponentStates.update({_id: c._id} , { $set: {
-          probabilityEstimate: componentState.probabilityEstimate,
-          firstSeen: componentState.firstSeen, 
-          lastSeen: componentState.lastSeen,
-          trialsSinceLastSeen: componentState.trialsSinceLastSeen,
-          priorCorrect: componentState.priorCorrect,
-          priorIncorrect: componentState.priorIncorrect,
-          priorStudy: componentState.priorStudy,
-          totalPracticeDuration: componentState.totalPracticeDuration,
-          outcomeStack: componentState.outcomeStack
-        }});
-      }
-      // ComponentState didn't exist before so we'll insert it
-      else {
-        serverConsole("ComponentState didn't exist before so we'll insert it")
-        serverConsole(componentState)
-        const componentStateId = componentStateCount + 1
-        componentStateCount += 1;
-        ComponentStates.insert({
-          componentStateId: componentStateId,
-          userId: componentState.userId,
-          TDFId: componentState.TDFId,
-          KCId: componentState.KCId,
-          componentType: componentState.componentType,
-          probabilityEstimate: componentState.probabilityEstimate,
-          hintLevel: componentState.hintLevel,
-          firstSeen: componentState.firstSeen,
-          lastSeen: componentState.lastSeen,
-          trialsSinceLastSeen: componentState.trialsSinceLastSeen,
-          priorCorrect: componentState.priorCorrect,
-          priorIncorrect: componentState.priorIncorrect,
-          priorStudy: componentState.priorStudy,
-          totalPracticeDuration: componentState.totalPracticeDuration,
-          outcomeStack: componentState.outcomeStack
-          });
-        //PostgresReversion
-        //const componentStateId = await t.one('INSERT INTO componentstate(userId,TDFId,KCId,componentType, \
-        //  probabilityEstimate,hintLevel,firstSeen,lastSeen,trialsSinceLastSeen,priorCorrect,priorIncorrect,priorStudy, \
-        //  totalPracticeDuration,outcomeStack) VALUES(${userId},${TDFId}, ${KCId}, ${componentType}, \
-        //  ${probabilityEstimate},${hintLevel}, ${firstSeen},${lastSeen},${trialsSinceLastSeen},${priorCorrect},${priorIncorrect}, \
-        //  ${priorStudy},${totalPracticeDuration},${outcomeStack}) \
-        //  RETURNING componentStateId',
-        //  componentState);
-      }
+      delete componentState.responseText;
     }
-    return {userId, TDFId};
-  });
-  serverConsole('res:', res);
-  return res;
+    if (!componentState.trialsSinceLastSeen) {
+      componentState.trialsSinceLastSeen = null;
+    }
+    const curComponentState = c.find(cs => cs.KCId == componentState.KCId && cs.componentType == componentState.componentType)
+    if(curComponentState){
+      ComponentStates.update({_id: curComponentState._id}, componentState);
+    }
+    else{
+      serverConsole("ComponentState didn't exist before so we'll insert it")
+      ComponentStates.insert(componentState);
+    }
+  }
+  serverConsole('res:', {userId, TDFId});
+  return {userId, TDFId};
 }
 
 function stripSpacesAndLowerCase(input) {
@@ -670,26 +650,23 @@ function _branchingCorrectText(answer) {
 async function insertStimTDFPair(newStimJSON, wrappedTDF, sourceSentences) {
   //PostgresReversion
   const maxStimuliSetId = Items.find().sort({stimuliSetId: -1}).limit(1);
-  const highestStimuliSetIdRet = {stimuliSetId: maxStimuliSetId};
   // const highestStimuliSetIdRet = await db.oneOrNone('SELECT MAX(stimuliSetId) AS stimuliSetId FROM item');
-  const newStimuliSetId = highestStimuliSetIdRet.stimulisetid + 1;
+  const newStimuliSetId = maxStimuliSetId + 1;
   wrappedTDF.stimuliSetId = newStimuliSetId;
-  wrappedTDF.TDFId = Tdfs.find().count();
   for (const stim of newStimJSON) {
     stim.stimuliSetId = newStimuliSetId;
   }
   //PostgresReversion
-  const maxStimulusKC = Items.find().sort({stimulusKC: -1}).limit(1);
-  const highestStimulusKCRet = {stimuliSetId: maxStimulusKC};
+  const maxStimulusKC = Items.find({}, { sort: {stimulusKC: -1}}).limit(1).stimulusKC;
   // const highestStimulusKCRet = await db.oneOrNone('SELECT MAX(stimulusKC) AS stimulusKC FROM item');
-  const curNewKCBase = (Math.floor(highestStimulusKCRet.stimuluskc / KC_MULTIPLE) * KC_MULTIPLE) + KC_MULTIPLE;// + 1
+  const curNewKCBase = (Math.floor(maxStimulusKC / KC_MULTIPLE) * KC_MULTIPLE) + KC_MULTIPLE;// + 1
 
   let curNewStimulusKC = curNewKCBase;
   let curNewClusterKC = curNewKCBase;
 
   const responseKCMap = await getReponseKCMap();
   const maxResponseKC = 1;
-  serverConsole('!!!insertStimTDFPair:', highestStimuliSetIdRet, newStimuliSetId, highestStimulusKCRet, curNewKCBase);
+  serverConsole('!!!insertStimTDFPair:', maxStimuliSetId, newStimuliSetId, maxStimulusKC, curNewKCBase);
   let curNewResponseKC = maxResponseKC + 1;
 
   const stimulusKCTranslationMap = {};
@@ -712,40 +689,15 @@ async function insertStimTDFPair(newStimJSON, wrappedTDF, sourceSentences) {
     stim.stimulusKC = stimulusKCTranslationMap[stim.stimulusKC];
     stim.responseKC = responseKCMap[stimAnswerText];
     stim.clusterKC = clusterKCTranslationMap[stim.clusterKC];
+    if (!stim.incorrectResponses) stim.incorrectResponses = null;
+    if (!stim.alternateDisplays) stim.alternateDisplays = null;
+    Items.insert(stim);
   }
-  Tdfs.insert(wrappedTDF);
-  const res = await db.tx(async (t) => {
-    const query = 'INSERT INTO tdf(ownerId, stimuliSetId, visibility, content) \
-        VALUES(${ownerId}, ${stimuliSetId}, ${visibility}, ${content}) RETURNING TDFId';
-    return t.one(query, wrappedTDF)
-        .then(async (row) => {
-          const TDFId = row.tdfid;
-          for (const stim of newStimJSON) {
-            if (!stim.incorrectResponses) stim.incorrectResponses = null;
-            if (!stim.alternateDisplays) {
-              stim.alternateDisplays = null;
-            } else {
-              stim.alternateDisplays = JSON.stringify(stim.alternateDisplays);
-            }
-
-            const query2 = 'INSERT INTO item(stimuliSetId, stimulusFilename, parentStimulusFileName, stimulusKC, \
-                clusterKC, responseKC, params, correctResponse, incorrectResponses, itemResponseType, \
-                speechHintExclusionList, clozeStimulus, textStimulus, audioStimulus, imageStimulus, videoStimulus, \
-                alternateDisplays, tags) \
-                VALUES(${stimuliSetId}, ${stimulusFilename}, ${parentStimulusFileName}, ${stimulusKC}, ${clusterKC}, \
-                ${responseKC}, ${params}, ${correctResponse}, ${incorrectResponses}, ${itemResponseType}, \
-                ${speechHintExclusionList}, ${clozeStimulus}, ${textStimulus}, ${audioStimulus}, ${imageStimulus},\
-                ${videoStimulus}, ${alternateDisplays}::jsonb, ${tags})';
-            await t.none(query2, stim);
-          }
-          if (sourceSentences) {
-            const query3 = 'INSERT INTO itemSourceSentences (stimuliSetId, sourceSentences) VALUES($1,$2)';
-            await t.none(query3, [newStimuliSetId, sourceSentences]);
-          }
-          return TDFId;
-        });
-  });
-  return res;
+  const newTDFId = Tdfs.insert(wrappedTDF);
+  if (sourceSentences) {
+    itemSourceSentences.insert({stimuliSetId: newStimuliSetId, sourceSentences: sourceSentences});
+  }
+  return newTDFId;
 }
 
 async function getSourceSentences(stimuliSetId) {
@@ -778,14 +730,32 @@ async function getAllCourseSections() {
     //PostgresReversion Staged
     ret =  await Courses.rawCollection().aggregate([
       {
+        $match: {semester: curSemester}
+      },
+      {
         $lookup: {
           from: "section",
-          localField: "courseid",
-          foreignField: "courseid",
-          as: "courses"
+          localField: "_id",
+          foreignField: "courseId",
+          as: "section"
+        }
+      },
+      {
+        $unwind: {path: "$section"}
+      },
+      {
+        $project: {
+          _id: 0,
+          sectionName: "$section.sectionName",
+          courseId: "$_id",
+          courseName: 1,
+          teacherUserId: 1,
+          semester: 1,
+          beginDate: 1,
+          sectionId: "$section._id"
         }
       }
-    ]).courses;
+    ]).toArray();
     // const query = 'SELECT s.sectionid, s.sectionname, c.courseid, c.coursename, c.teacheruserid, c.semester, \
     //     c.beginDate from course AS c INNER JOIN section AS s ON c.courseid = s.courseid WHERE c.semester=$1';
     // const ret = await db.any(query, curSemester);
@@ -824,42 +794,43 @@ async function getAllCourseAssignmentsForInstructor(instructorId) {
     //             WHERE c.teacherUserId = $1 AND c.semester = $2';
     //const args = [instructorId, curSemester];
     //const courseAssignments = await db.any(query, args);
-    const courseAssignments = await Assignments.rawCollection().aggregate([{
-      $lookup:{
-        from: "tdf",
+    const courseAssignments = await Assignments.rawCollection().aggregate([{ //from assignment
+      $lookup:{ //INNER JOIN tdf AS t ON t.TDFId = a.TDFId
+        from: "tdfs",
         localField: "TDFId",
-        foreignField: "TDFId",
-        as: "TDFId"
+        foreignField: "_id",
+        as: "TDF"
       }
     },
     {
-      $unwind: "$TDFId"
+      $unwind: { path: "$TDF" }
     },
     {
-      $lookup:{
+      $lookup:{ //INNER JOIN course AS c ON c.courseId = a.courseId
         from: "course",
         localField: "courseId",
         foreignField: "courseId",
-        as: "courseId"
+        as: "course"
       }
     },
     {
-      $unwind: "$courseId"
+      $unwind: { path: "$course" }
     },
-    {
-      $match: {
-        teacherUserId: instructorId,
-        semester: curSemester
+    { 
+      $match: { //WHERE c.teacherUserId = instructorId AND c.semester = curSemester
+        "course.teacherUserId": instructorId,
+        "course.semester": curSemester
       }
     },
     {
-      $project:{
-        filename: $content.fileName,
-        courseName: 1,
-        courseId: 1
+      $project:{ //SELECT t.content -> \'fileName\' AS filename, c.courseName, c.courseId
+        _id: 0,
+        fileName: "$TDF.content.fileName",
+        courseName: "$course.courseName",
+        courseId: "$course._id"
       }
     }
-  ]);
+  ]).toArray();
     return courseAssignments;
   } catch (e) {
     serverConsole('getAllCourseAssignmentsForInstructor ERROR,', instructorId, ',', e);
@@ -878,79 +849,74 @@ function getSetAMinusB(arrayA, arrayB) {
 async function editCourseAssignments(newCourseAssignment) {
   try {
     serverConsole('editCourseAssignments:', newCourseAssignment);
-    const res = await db.tx(async (t) => {
-      const newTdfs = newCourseAssignment.tdfs;
-      //Postgres Reversion
-      // const query = 'SELECT t.content -> \'fileName\' AS filename, t.TDFId, c.courseId from assignment AS a \
-      //            INNER JOIN tdf AS t ON t.TDFId = a.TDFId \
-      //            INNER JOIN course AS c ON c.courseId = a.courseId \
-      //            WHERE c.courseid = $1';
-      // const curCourseAssignments = await db.manyOrNone(query, newCourseAssignment.courseid);
-      const courseAssignmentsRet = await Assignments.rawCollection().aggregate([{
-        $lookup:{
-          from: "tdf",
-          localField: "TDFId",
-          foreignField: "TDFId",
-          as: "TDFId"
-        }
-      },
-      {
-        $lookup:{
-          from: "course",
-          localField: "courseId",
-          foreignField: "courseId",
-          as: "courseId"
-        }
-      },
-      {
-        $unwind: "$courseId"
-      },
-      {
-        $match: {
-          courseId: newCourseAssignment.courseid,
-        }
-      },
-      {
-        $project:{
-          filename: $content.fileName,
-          TDFId: 1,
-          courseId: 1
-        }
+    const newTdfs = newCourseAssignment.tdfs;
+    //Postgres Reversion
+    // const query = 'SELECT t.content -> \'fileName\' AS filename, t.TDFId, c.courseId from assignment AS a \
+    //            INNER JOIN tdf AS t ON t.TDFId = a.TDFId \
+    //            INNER JOIN course AS c ON c.courseId = a.courseId \
+    //            WHERE c.courseid = $1';
+    // const curCourseAssignments = await db.manyOrNone(query, newCourseAssignment.courseid);
+    const curCourseAssignments = await Assignments.rawCollection().aggregate([{
+      $lookup:{ //INNER JOIN tdf AS t ON t.TDFId = a.TDFId
+        from: "tdf",
+        localField: "TDFId",
+        foreignField: "_id",
+        as: "TDF"
       }
-    ]);
-      const existingTdfs = curCourseAssignments.map((courseAssignment) => courseAssignment.filename);
+    },
+    {
+      $lookup:{ //INNER JOIN course AS c ON c.courseId = a.courseId
+        from: "course",
+        localField: "courseId",
+        foreignField: "_id",
+        as: "course"
+      }
+    },
+    {
+      $unwind: "$course"
+    },
+    {
+      $unwind: "$TDF"
+    },
+    {
+      $match: { //WHERE c.courseid = $1
+        "course._id": newCourseAssignment.courseid,
+      }
+    },
+    {
+      $project:{ //SELECT t.content -> \'fileName\' AS filename, t.TDFId, c.courseId
+        fileName: "$TDF.content.fileName",
+        TDFId: "$TDF._id",
+        courseId: "$course._id"
+      }
+    }]).toArray();
+    const existingTdfs = curCourseAssignments.map((courseAssignment) => courseAssignment.fileName);
 
-      const tdfsAdded = getSetAMinusB(newTdfs, existingTdfs);
-      const tdfsRemoved = getSetAMinusB(existingTdfs, newTdfs);
+    const tdfsAdded = getSetAMinusB(newTdfs, existingTdfs);
+    const tdfsRemoved = getSetAMinusB(existingTdfs, newTdfs);
 
-      // const tdfNamesAndIDs = await t.manyOrNone('SELECT TDFId, content -> \'fileName\' AS filename from tdf');
-      const tdfNamesAndIDs = await TDFs.rawCollection().aggregate({
-      $project:{
-        filename: $content.fileName,
-        TDFId: 1,
-      }});
-      const tdfNameIDMap = {};
-      for (const tdfNamesAndID of tdfNamesAndIDs) {
-        tdfNameIDMap[tdfNamesAndID.filename] = tdfNamesAndID.tdfid;
-      }
+    // const tdfNamesAndIDs = await t.manyOrNone('SELECT TDFId, content -> \'fileName\' AS filename from tdf');
+    const tdfNamesAndIDs = Tdfs.find().fetch();
+    const tdfNameIDMap = {};
+    for (const tdfNamesAndID of tdfNamesAndIDs) {
+      tdfNameIDMap[tdfNamesAndID.content.fileName] = tdfNamesAndID._id;
+    }
 
-      for (const tdfName of tdfsAdded) {
-        const TDFId = tdfNameIDMap[tdfName];
-        serverConsole('editCourseAssignments tdf:', TDFId, tdfName, tdfsAdded, tdfsRemoved,
-            curCourseAssignments, existingTdfs, newTdfs);
-        //PostgresReversion Staged
-        Assignments.insert({courseId: newCourseAssignment.courseId, TDFId: TDFId});
-        // await t.none('INSERT INTO assignment(courseId, TDFId) VALUES($1, $2)', [newCourseAssignment.courseid, TDFId]);
-      }
-      for (const tdfName of tdfsRemoved) {
-        const TDFId = tdfNameIDMap[tdfName];
-        //PostgresReversion Staged
-        Assignment.remove({$and: [{courseId: newCourseAssignment.courseid}, {TDFId: tdfId}]});
-        // await t.none('DELETE FROM assignment WHERE courseId=$1 AND TDFId=$2', [newCourseAssignment.courseid, TDFId]);
-      }
-      return newCourseAssignment;
-    });
-    return res;
+    for (const tdfName of tdfsAdded) {
+      const TDFId = tdfNameIDMap[tdfName];
+      serverConsole('editCourseAssignments tdf:', tdfNamesAndIDs, TDFId, tdfName, tdfsAdded, tdfsRemoved,
+          curCourseAssignments, existingTdfs, newTdfs);
+      //PostgresReversion Staged
+      Assignments.insert({courseId: newCourseAssignment.courseid, TDFId: TDFId});
+      // await t.none('INSERT INTO assignment(courseId, TDFId) VALUES($1, $2)', [newCourseAssignment.courseid, TDFId]);
+    }
+    for (const tdfName of tdfsRemoved) {
+      const TDFId = tdfNameIDMap[tdfName];
+      //PostgresReversion Staged
+      Assignment.remove({$and: [{courseId: newCourseAssignment.courseid}, {TDFId: TDFId}]});
+      // await t.none('DELETE FROM assignment WHERE courseId=$1 AND TDFId=$2', [newCourseAssignment.courseid, TDFId]);
+    }
+    return newCourseAssignment;
   } catch (e) {
     serverConsole('editCourseAssignments ERROR,', newCourseAssignment, ',', e);
     return null;
@@ -971,33 +937,65 @@ async function getTdfAssignmentsByCourseIdMap(instructorId) {
     $lookup:{
       from: "course",
       localField: "courseId",
-      foreignField: "courseId",
-      as: "courseId"
+      foreignField: "_id",
+      as: "course"
     }
   },
   {
     $match: {
-      "courseId.semester": curSemester,
-      "courseId.teacherUserId": instructorId
+      "course.semester": curSemester,
+      "course.teacherUserId": instructorId
+    }
+  },
+  {
+    $lookup:{
+      from: 'tdfs',
+      localField: 'TDFId',
+      foreignField: '_id',
+      as: 'TDF'
+    }
+  },
+  {
+    $unwind: {
+      path: "$TDF",
+      preserveNullAndEmptyArrays: true
     }
   },
   {
     $project:{
-      content: 1,
+      _id: 0,
+      content: "$TDF.content",
       TDFId: 1,
       courseId: 1
     }
-  }
-]).toArray();
+  }]).toArray();
+  console.log(assignmentTdfFileNamesRet)
+  // const courses = Courses.find({teacherUserId: instructorId}).fetch();
+  // const assignments = Assignments.find().fetch();
+  // let assignmentTdfFileNamesRet = []
+  // let assignedTDFId = []
+
+  // for(let course of courses){
+  //   let assigns = assignments.filter(a => a.courseId == course._id);
+  //   for(let assi of assigns){
+  //     if(!assignedTDFId.find(assi.TDFId))
+  //       assignedTDFId.push(assi.TDFId);
+  //   }
+  // }
+  // for(let TDFId of assignedTDFId){
+  //   assignmentTdfFileNamesRet.push({
+  //     con
+  //   })
+  // }
   serverConsole('assignmentTdfFileNames', assignmentTdfFileNamesRet);
   const assignmentTdfFileNamesByCourseIdMap = {};
   for (const assignment of assignmentTdfFileNamesRet) {
-    if (!assignmentTdfFileNamesByCourseIdMap[assignment.courseid]) {
-      assignmentTdfFileNamesByCourseIdMap[assignment.courseid] = [];
+    if (!assignmentTdfFileNamesByCourseIdMap[assignment.courseId]) {
+      assignmentTdfFileNamesByCourseIdMap[assignment.courseId] = [];
     }
-    assignmentTdfFileNamesByCourseIdMap[assignment.courseid].push({
-      tdfid: assignment.tdfid,
-      displayname: assignment.content.tdfs.tutor.setspec.lessonname,
+    assignmentTdfFileNamesByCourseIdMap[assignment.courseId].push({
+      TDFId: assignment.TDFId,
+      displayName: assignment.content.tdfs.tutor.setspec.lessonname,
     });
   }
   return assignmentTdfFileNamesByCourseIdMap;
@@ -1013,53 +1011,53 @@ async function getTdfsAssignedToStudent(userId, curSectionId) {
   // const tdfs = await db.manyOrNone(query, [userId, curSemester, curSectionId]);
   const tdfs = await TDFs.rawCollection().aggregate([{
     $lookup:{
-      from: "assignment",
-      localField: "TDFId",
+      from: "assessments",
+      localField: "_id",
       foreignField: "TDFId",
-      as: "TDFId"
+      as: "assessment"
     }
+  },
+  {
+    $unwind: {  path: "$assessment" }
   },
   {
     $lookup:{
       from: "course",
-      localField: "courseId",
-      foreignField: "courseId",
-      as: "courseId"
+      localField: "assessment.courseId",
+      foreignField: "_id",
+      as: "course"
     }
   },
   {
-    $unwind: "$courseId"
+    $unwind: {  path: "$course" }
   },
   {
     $lookup:{
       from: "section",
-      localField: "courseId",
+      localField: "assessment.courseId",
       foreignField: "courseId",
-      as: "courseId"
+      as: "section"
     }
   },
   {
-    $unwind: "$courseId"
+    $unwind: {  path: "$section" }
   },
   {
     $lookup:{
       from: "section_user_map",
-      localField: "userId",
+      localField: "section._id",
       foreignField: "sectionId",
-      as: "sectionId"
+      as: "users"
     }
-  },
-  {
-    $unwind: "$sectionId"
   },
   {
     $match: {
-      semester: curSemester,
-      teacherUserId: instructorId,
-      sectionId: curSectionId
+      "course.semester": curSemester,
+      "course.teacherUserId": instructorId,
+      "section._id": curSectionId
     }
   }
-]);
+]).toArray();
   const formattedTdfs = tdfs.map((x) => getTdf(x));
   return formattedTdfs;
 }
@@ -1074,38 +1072,38 @@ async function getTdfNamesAssignedByInstructor(instructorID) {
     // const assignmentTdfFileNames = await db.any(query, [instructorID, curSemester]);
     const assignmentTdfFileNames = await Courses.rawCollection().aggregate([{
       $lookup:{
-        from: "assignment",
-        localField: "courseId",
+        from: "assessments",
+        localField: "_id",
         foreignField: "courseId",
-        as: "courseId"
+        as: "assessment"
       }
     },
     {
-      $unwind: "$courseId"
+      $unwind: {  path: "$assessment" }
     },
     {
       $lookup:{
-        from: "tdf",
-        localField: "TDFId",
-        foreignField: "TDFId",
-        as: "TDFId"
+        from: "tdfs",
+        localField: "assessment.TDFId",
+        foreignField: "_id",
+        as: "TDF"
       }
     },
     {
-      $unwind: "$TDFId"
+      $unwind: {  path: "$TDF" }
     },
     {
       $match: {
-        "courseId.semester": curSemester,
-        "courseId.teacherUserId": instructorID
+        "semester": curSemester,
+        "teacherUserId": instructorID
       }
     },
     {
       $project:{
-        filename: $content.fileName
+        fileName: "$TDF.content.fileName"
       }
     }
-  ]);
+  ]).toArray();
     const unboxedAssignmentTdfFileNames = assignmentTdfFileNames.map((obj) => obj.filename);
     serverConsole('assignmentTdfFileNames', unboxedAssignmentTdfFileNames);
     return unboxedAssignmentTdfFileNames;
@@ -1172,8 +1170,6 @@ async function insertHistory(historyRecord) {
   const dynamicTagFields = await getListOfStimTags(tdfFileName);
   historyRecord.dynamicTagFields = dynamicTagFields || [];
   historyRecord.recordedServerTime = (new Date()).getTime();
-  historyRecord.eventId = Histories.find({}).count() + 1;
-  console.log(historyRecord.eventId);
   Histories.insert(historyRecord)
 }
 
@@ -1198,61 +1194,48 @@ function getAllTeachers(southwestOnly=false) {
 
 async function addCourse(mycourse) {
   serverConsole('addCourse:' + JSON.stringify(mycourse));
-  const res = await db.tx(async (t) => {
-    return t.one('INSERT INTO course(courseName, teacherUserId, semester, beginDate) \
-                  VALUES(${courseName}, ${teacherUserId}, ${semester}, ${beginDate}) RETURNING courseId', mycourse)
-        .then(async (row) => {
-          const courseId = row.courseid;
-          for (const sectionName of mycourse.sections) {
-            await t.none('INSERT INTO section(courseId, sectionName) VALUES($1, $2)', [courseId, sectionName]);
-          }
-          return courseId;
-        });
-  });
-  return res;
+  const courseId = Courses.insert(mycourse);
+  for (const sectionName of mycourse.sections) {
+    Sections.insert({courseId: courseId, sectionName: sectionName})
+  }
+  return courseId;
 }
 
 async function editCourse(mycourse) {
   serverConsole('editCourse:' + JSON.stringify(mycourse));
-  const res = await db.tx(async (t) => {
-    serverConsole('transaction');
-    return t.one('UPDATE course SET courseName=${coursename}, beginDate=${beginDate} \
-                  WHERE courseid=${courseid} RETURNING courseId', mycourse).then(async (row) => {
-      const courseId = row.courseid;
-      serverConsole('courseId', courseId, row);
-      const newSections = mycourse.sections;
-      const curCourseSections = await t.many('SELECT sectionName from section WHERE courseId=$1', courseId);
-      const oldSections = curCourseSections.map((section) => section.sectionname);
-      serverConsole('old/new', oldSections, newSections);
+  const courseId = Courses.update({_id: mycourse.courseId}, mycourse);
+  serverConsole('courseId', courseId, row);
+  const newSections = mycourse.sections;
+  const curCourseSections = Sections.find({courseId: courseId}).fetch()
+  const oldSections = curCourseSections.map((section) => section.sectionName);
+  serverConsole('old/new', oldSections, newSections);
 
-      const sectionsAdded = getSetAMinusB(newSections, oldSections);
-      const sectionsRemoved = getSetAMinusB(oldSections, newSections);
-      serverConsole('sectionsAdded,', sectionsAdded);
-      serverConsole('sectionsRemoved,', sectionsRemoved);
+  const sectionsAdded = getSetAMinusB(newSections, oldSections);
+  const sectionsRemoved = getSetAMinusB(oldSections, newSections);
+  serverConsole('sectionsAdded,', sectionsAdded);
+  serverConsole('sectionsRemoved,', sectionsRemoved);
 
-      for (const sectionName of sectionsAdded) {
-        await t.none('INSERT INTO section(courseId, sectionName) VALUES($1, $2)', [courseId, sectionName]);
-      }
-      for (const sectionName of sectionsRemoved) {
-        await t.none('DELETE FROM section WHERE courseId=$1 AND sectionName=$2', [courseId, sectionName]);
-      }
+  for (const sectionName of sectionsAdded) {
+    Sections.insert({courseId: courseId, sectionName: sectionName});
+  }
+  for (const sectionName of sectionsRemoved) {
+    Sections.remove({courseId: courseId, sectionName: sectionName});
+  }
 
-      return courseId;
-    });
-  });
   return res;
 }
 
 async function addUserToTeachersClass(userid, teacherID, sectionId) {
   serverConsole('addUserToTeachersClass', userid, teacherID, sectionId);
 
-  const query = 'SELECT COUNT(*) AS existingMappingCount FROM section_user_map WHERE sectionId=$1 AND userId=$2';
-  const existingMappingCountRet = await db.oneOrNone(query, [sectionId, userid]);
-  const existingMappingCount = existingMappingCountRet.existingmappingcount;
+  //const query = 'SELECT COUNT(*) AS existingMappingCount FROM section_user_map WHERE sectionId=$1 AND userId=$2';
+  //await db.oneOrNone(query, [sectionId, userid]);
+  const existingMappingCount = SectionUserMap.find({sectionId: sectionId, userId: userId}).count();
   serverConsole('existingMapping', existingMappingCount);
   if (existingMappingCount == 0) {
     serverConsole('new user, inserting into section_user_mapping', [sectionId, userid]);
-    await db.none('INSERT INTO section_user_map(sectionId, userId) VALUES($1, $2)', [sectionId, userid]);
+    //await db.none('INSERT INTO section_user_map(sectionId, userId) VALUES($1, $2)', [sectionId, userid]);
+    SectionUserMap.insert({sectionId: sectionId, userId: userId});
   }
 
   return true;
@@ -1261,25 +1244,47 @@ async function addUserToTeachersClass(userid, teacherID, sectionId) {
 async function getStimDisplayTypeMap() {
   try {
     serverConsole('getStimDisplayTypeMap');
-    const query = 'SELECT \
-    COUNT(i.clozeStimulus) AS clozeItemCount, \
-    COUNT(i.textStimulus)  AS textItemCount, \
-    COUNT(i.audioStimulus) AS audioItemCount, \
-    COUNT(i.imageStimulus) AS imageItemCount, \
-    COUNT(i.videoStimulus) AS videoItemCount, \
-    i.stimuliSetId \
-    FROM item AS i \
-    GROUP BY i.stimuliSetId;';
-    const counts = await db.many(query);
-    const map = {};
-    for (const count of counts) {
-      map[count.stimulisetid] = {
-        hasCloze: parseInt(count.clozeitemcount) > 0,
-        hasText: parseInt(count.textitemcount) > 0,
-        hasAudio: parseInt(count.audioitemcount) > 0,
-        hasImage: parseInt(count.imageitemcount) > 0,
-        hasVideo: parseInt(count.videoitemcount) > 0,
-      };
+    // const query = 'SELECT \
+    // COUNT(i.clozeStimulus) AS clozeItemCount, \
+    // COUNT(i.textStimulus)  AS textItemCount, \
+    // COUNT(i.audioStimulus) AS audioItemCount, \
+    // COUNT(i.imageStimulus) AS imageItemCount, \
+    // COUNT(i.videoStimulus) AS videoItemCount, \
+    // i.stimuliSetId \
+    // FROM item AS i \
+    // GROUP BY i.stimuliSetId;';
+    //const counts = await db.many(query);
+    const items = Items.find().fetch();
+    let map = {};
+    for(let item of items){
+      if(!map[item.stimuliSetId]){
+        map[item.stimuliSetId] = {
+          hasCloze: false,
+          hasText: false,
+          hasAudio: false,
+          hasImage: false,
+          hasVideo: false
+        }
+      }
+      else if(map[item.stimuliSetId].hasCloze && map[item.stimuliSetId].hasText && map[item.stimuliSetId].hasAudio &&
+              map[item.stimuliSetId].hasImage && map[item.stimuliSetId].hasVideo){
+        continue;
+      }
+      if(!map[item.stimuliSetId].hasCloze && item.clozeStimulus){
+        map[item.stimuliSetId].hasCloze = true;
+      }
+      if(!map[item.stimuliSetId].hasText && item.textStimulus){
+        map[item.stimuliSetId].hasText = true;
+      }
+      if(!map[item.stimuliSetId].hasAudio && item.audioStimulus){
+        map[item.stimuliSetId].hasAudio = true;
+      }
+      if(!map[item.stimuliSetId].hasImage && item.imageStimulus){
+        map[item.stimuliSetId].hasImage = true;
+      }
+      if(!map[item.stimuliSetId].hasVideo && item.videoStimulus){
+        map[item.stimuliSetId].hasVideo = true;
+      }
     }
     return map;
   } catch (e) {
@@ -1290,15 +1295,16 @@ async function getStimDisplayTypeMap() {
 
 async function getUsersByUnitUpdateDate(userIds, tdfId, date) {
   serverConsole('getUsersByUnitUpdateDate', userIds, tdfId, date, userIds.join(','));
-  const query = "SELECT userId, SUM(CF_End_Latency) AS duration \
-    FROM history WHERE recordedServerTime < $1 \
-    AND userId IN ('" + userIds.join(`','`) + "') AND TDFId = $2 \
-    GROUP BY userId";
+  // const query = "SELECT userId, SUM(CF_End_Latency) AS duration \
+  //   FROM history WHERE recordedServerTime < $1 \
+  //   AND userId IN ('" + userIds.join(`','`) + "') AND TDFId = $2 \
+  //   GROUP BY userId";
 
-  const res = await db.manyOrNone(query, [date, tdfId]);
+  //const res = await db.manyOrNone(query, [date, tdfId]);
+  const res = Histories.find({userId: {$in: userIds}, TDFId: tdfId, recordedServerTime: {$lt: date}});
   const practiceTimeIntervalsMap = {};
   for (const row of res) {
-    practiceTimeIntervalsMap[row.userid] = parseInt(row.duration);
+    practiceTimeIntervalsMap[row.userId] = parseInt(row.duration);
   }
   serverConsole(practiceTimeIntervalsMap)
   return practiceTimeIntervalsMap;
@@ -1535,28 +1541,75 @@ async function getNumDroppedItemsByUserIDAndTDFId(userId, TDFId){
 }
 
 async function getStudentPerformanceForClassAndTdfId(instructorId, date=null) {
-  let dateAdendumn = "";
-  if(date){
-    dateAdendumn = `AND s.recordedServerTime < ${date}`
-  }
-  const query = `SELECT MAX(t.TDFId) AS tdfid, 
-                  MAX(c.courseId) AS courseid, 
-                  MAX(s.userId) AS userid, 
-                  COUNT(CASE WHEN s.outcome='correct' THEN 1 END) AS correct, 
-                  COUNT(CASE WHEN s.outcome='incorrect' THEN 1 END) AS incorrect, 
-                  SUM(COALESCE(s.cf_end_latency + s.cf_feedback_latency, s.cf_end_latency, s.cf_feedback_latency)) AS totalPracticeDuration,
-                  sc.sectionId AS sectionId 
-                  FROM history AS s 
-                  INNER JOIN item AS i ON i.stimulusKC = s.KCId 
-                  INNER JOIN tdf AS t ON t.stimuliSetId = i.stimuliSetId 
-                  INNER JOIN assignment AS a on a.TDFId = t.TDFId 
-                  INNER JOIN course AS c on c.courseId = a.courseId 
-                  INNER JOIN section_user_map AS sm on sm.userId = s.userId 
-                  INNER JOIN section AS sc on sc.sectionId = sm.sectionId 
-                  WHERE c.semester = $1 AND c.teacherUserId = $2 AND sc.courseId = c.courseId AND s.level_unittype = 'model'  ${dateAdendumn}
-                  GROUP BY s.userId, t.TDFId, c.courseId, sc.sectionId;`
+  // let dateAdendumn = "";
+  // if(date){
+  //   dateAdendumn = `AND s.recordedServerTime < ${date}`
+  // }
+  // const query = `SELECT MAX(t.TDFId) AS tdfid, 
+  //                 MAX(c.courseId) AS courseid, 
+  //                 MAX(s.userId) AS userid, 
+  //                 COUNT(CASE WHEN s.outcome='correct' THEN 1 END) AS correct, 
+  //                 COUNT(CASE WHEN s.outcome='incorrect' THEN 1 END) AS incorrect, 
+  //                 SUM(COALESCE(s.cf_end_latency + s.cf_feedback_latency, s.cf_end_latency, s.cf_feedback_latency)) AS totalPracticeDuration,
+  //                 sc.sectionId AS sectionId 
+  //                 FROM history AS s 
+  //                 INNER JOIN item AS i ON i.stimulusKC = s.KCId 
+  //                 INNER JOIN tdf AS t ON t.stimuliSetId = i.stimuliSetId 
+  //                 INNER JOIN assignment AS a on a.TDFId = t.TDFId 
+  //                 INNER JOIN course AS c on c.courseId = a.courseId 
+  //                 INNER JOIN section_user_map AS sm on sm.userId = s.userId 
+  //                 INNER JOIN section AS sc on sc.sectionId = sm.sectionId 
+  //                 WHERE c.semester = $1 AND c.teacherUserId = $2 AND sc.courseId = c.courseId AND s.level_unittype = 'model'  ${dateAdendumn}
+  //                 GROUP BY s.userId, t.TDFId, c.courseId, sc.sectionId;`
 
-  const studentPerformanceRet = await db.manyOrNone(query, [curSemester, instructorId]);
+  //const studentPerformanceRet = await db.manyOrNone(query, [curSemester, instructorId]);
+  let studentPerformanceRet = [];
+  let hist;
+  if(date){
+    hist = Histories.find({levelUnitType: "model", recordedServerTime: {$lt: date}}).fetch();
+  }
+  else {
+    hist = Histories.find({levelUnitType: "model"}).fetch();
+  }
+
+  const courses = Courses.find({teacherUserId: instructorId}).fetch();
+  const sections = Sections.find({courseId: {$in: courses.map(x => x._id)}}).fetch();
+  const userMap = SectionUserMap.find().fetch();
+
+  for(let history of hist){
+    let sectionsRet = userMap.filter(u => u.userId == history.userId); //find all the sections that the user is in
+    for(section of sectionsRet){
+      let sectionId = section.sectionId;
+      let courseId = sections.find(s => s._id == sectionId).courseId; //find the courseID of each section
+      let course = courses.find(c => c._id == courseId);
+      if(course.teacherUserId == instructorId){
+        let foundIndex = studentPerformanceRet.findIndex( entry => 
+          entry.TDFId == history.TDFId && 
+          entry.userId == history.userId && 
+          entry.courseId == courseId
+        )
+        const correct = history.outcome == 'correct'
+        if(foundIndex > 0){
+          //entry exists
+          const studentPerf = studentPerformanceRet[foundIndex];
+          studentPerformanceRet[foundIndex].correct = studentPerf.correct + (correct ? 1 : 0);
+          studentPerformanceRet[foundIndex].incorrect = studentPerf.incorrect + (correct ? 0 : 1);
+          studentPerformanceRet[foundIndex].totalPracticeDuration = studentPerf.totalPracticeDuration + history.CFEndLatency + history.CFFeedbackLatency;
+        }
+        else{
+          studentPerformanceRet.push({
+            TDFId: history.TDFId,
+            courseId: courseId,
+            userId: history.userId,
+            correct: correct ? 1 : 0,
+            incorrect: correct ? 0 : 1,
+            totalPracticeDuration: history.CFEndLatency + history.CFFeedbackLatency,
+            sectionId: sectionId
+          })
+        }
+      }
+    }
+  }
   serverConsole('studentPerformanceRet', studentPerformanceRet);
   if (studentPerformanceRet==null) {
     return [];
@@ -1564,43 +1617,43 @@ async function getStudentPerformanceForClassAndTdfId(instructorId, date=null) {
   const studentPerformanceForClass = {};
   const studentPerformanceForClassAndTdfIdMap = {};
   for (const studentPerformance of studentPerformanceRet) {
-    let {courseid, userid, tdfid, correct, incorrect, totalpracticeduration} = studentPerformance;
-    let studentUsername = userIdToUsernames[userid];
+    let {courseId, userId, TDFId, correct, incorrect, totalPracticeDuration} = studentPerformance;
+    let studentUsername = userIdToUsernames[userId];
     if (!studentUsername) {
-      serverConsole(Meteor.users.findOne({_id: userid}).username + ', ' + userid);
-      studentUsername = Meteor.users.findOne({_id: userid}).username;
-      userIdToUsernames[userid] = studentUsername;
+      serverConsole(Meteor.users.findOne({_id: userId}).username + ', ' + userId);
+      studentUsername = Meteor.users.findOne({_id: userId}).username;
+      userIdToUsernames[userId] = studentUsername;
     }
 
     correct = parseInt(correct);
     incorrect = parseInt(incorrect);
-    totalpracticeduration = parseInt(totalpracticeduration);
+    totalPracticeDuration = parseInt(totalPracticeDuration);
 
-    if (!studentPerformanceForClass[courseid]) studentPerformanceForClass[courseid] = {};
-    if (!studentPerformanceForClass[courseid][tdfid]) {
-      studentPerformanceForClass[courseid][tdfid] = {count: 0, totalTime: 0, numCorrect: 0};
+    if (!studentPerformanceForClass[courseId]) studentPerformanceForClass[courseId] = {};
+    if (!studentPerformanceForClass[courseId][TDFId]) {
+      studentPerformanceForClass[courseId][TDFId] = {count: 0, totalTime: 0, numCorrect: 0};
     }
-    studentPerformanceForClass[courseid][tdfid].numCorrect += correct;
-    studentPerformanceForClass[courseid][tdfid].count += correct + incorrect;
-    studentPerformanceForClass[courseid][tdfid].totalTime += totalpracticeduration;
+    studentPerformanceForClass[courseId][TDFId].numCorrect += correct;
+    studentPerformanceForClass[courseId][TDFId].count += correct + incorrect;
+    studentPerformanceForClass[courseId][TDFId].totalTime += totalPracticeDuration;
 
-    if (!studentPerformanceForClassAndTdfIdMap[courseid]) studentPerformanceForClassAndTdfIdMap[courseid] = {};
-    if (!studentPerformanceForClassAndTdfIdMap[courseid][tdfid]) {
-      studentPerformanceForClassAndTdfIdMap[courseid][tdfid] = {};
+    if (!studentPerformanceForClassAndTdfIdMap[courseId]) studentPerformanceForClassAndTdfIdMap[courseId] = {};
+    if (!studentPerformanceForClassAndTdfIdMap[courseId][TDFId]) {
+      studentPerformanceForClassAndTdfIdMap[courseId][TDFId] = {};
     }
 
-    if (!studentPerformanceForClassAndTdfIdMap[courseid][tdfid][userid]) {
-      studentPerformanceForClassAndTdfIdMap[courseid][tdfid][userid] = {
+    if (!studentPerformanceForClassAndTdfIdMap[courseId][TDFId][userId]) {
+      studentPerformanceForClassAndTdfIdMap[courseId][TDFId][userId] = {
         count: 0,
         totalTime: 0,
         numCorrect: 0,
         username: studentUsername,
-        userId: userid,
+        userId: userId,
       };
     }
-    studentPerformanceForClassAndTdfIdMap[courseid][tdfid][userid].numCorrect += correct;
-    studentPerformanceForClassAndTdfIdMap[courseid][tdfid][userid].count += correct + incorrect;
-    studentPerformanceForClassAndTdfIdMap[courseid][tdfid][userid].totalTime = totalpracticeduration;
+    studentPerformanceForClassAndTdfIdMap[courseId][TDFId][userId].numCorrect += correct;
+    studentPerformanceForClassAndTdfIdMap[courseId][TDFId][userId].count += correct + incorrect;
+    studentPerformanceForClassAndTdfIdMap[courseId][TDFId][userId].totalTime = totalPracticeDuration;
   }
   serverConsole('studentPerformanceForClass:', JSON.stringify(studentPerformanceForClass, null, 4));
   for (const index of Object.keys(studentPerformanceForClass)) {
@@ -1961,27 +2014,25 @@ async function upsertTDFFile(tdfFilename, tdfJSON, ownerId) {
       tdfJSON.createdAt = new Date();
       tdfJSONtoUpsert = JSON.stringify(tdfJSON);
     }
-    await db.tx(async (t) => {
-      let stimuliSetId;
-      if (tdfJSON.tdfs.tutor.setspec.stimulusfile) {
-        const stimFileName = tdfJSON.tdfs.tutor.setspec.stimulusfile;
-        // PostgresReversion Staged
-        const associatedStimSetIdRet = Items.find({stimulusFilename: stimFileName}).limit(1).fetch();
-        // const stimuliSetIdQuery = 'SELECT stimuliSetId FROM item WHERE stimulusFilename = $1 LIMIT 1';
-        // const associatedStimSetIdRet = await t.oneOrNone(stimuliSetIdQuery, stimFileName);
-        if (associatedStimSetIdRet) {
-          stimuliSetId = associatedStimSetIdRet.stimulisetid;
-        } else {
-          throw new Error('No matching stimulus file found');
-        }
-      } else {
-        stimuliSetId = null; // Root condition tdfs have no stimulisetid
-      }
+    let stimuliSetId;
+    if (tdfJSON.tdfs.tutor.setspec.stimulusfile) {
+      const stimFileName = tdfJSON.tdfs.tutor.setspec.stimulusfile;
       // PostgresReversion Staged
-      TDFs.insert({$set: {ownerID: ownerId, stimuliSetId: stimuliSetId, content: tdfJSONtoUpsert}});
-      // const query = 'INSERT INTO tdf(ownerId, stimuliSetId, content) VALUES($1, $2, $3::jsonb)';
-      // await t.none(query, [ownerId, stimuliSetId, tdfJSONtoUpsert]);
-    });
+      const associatedStimSetIdRet = Items.find({stimulusFilename: stimFileName}).limit(1).fetch();
+      // const stimuliSetIdQuery = 'SELECT stimuliSetId FROM item WHERE stimulusFilename = $1 LIMIT 1';
+      // const associatedStimSetIdRet = await t.oneOrNone(stimuliSetIdQuery, stimFileName);
+      if (associatedStimSetIdRet) {
+        stimuliSetId = associatedStimSetIdRet.stimulisetid;
+      } else {
+        throw new Error('No matching stimulus file found');
+      }
+    } else {
+      stimuliSetId = null; // Root condition tdfs have no stimulisetid
+    }
+    // PostgresReversion Staged
+    TDFs.insert({$set: {ownerID: ownerId, stimuliSetId: stimuliSetId, content: tdfJSONtoUpsert}});
+    // const query = 'INSERT INTO tdf(ownerId, stimuliSetId, content) VALUES($1, $2, $3::jsonb)';
+    // await t.none(query, [ownerId, stimuliSetId, tdfJSONtoUpsert]);
   }
 }
 
@@ -2067,8 +2118,9 @@ Meteor.methods({
     return await createExperimentExport(exp);
   },
 
-  resetCurSessionTrialsCount: async function(userId, tdfID) {
-    await db.none('UPDATE componentstate SET cursessionpriorcorrect = 0, cursessionpriorincorrect = 0 WHERE userid = $1 AND TDFId = $2', [userId, tdfID])
+  resetCurSessionTrialsCount: async function(userId, TDFId) {
+    //await db.none('UPDATE componentstate SET cursessionpriorcorrect = 0, cursessionpriorincorrect = 0 WHERE userId = $1 AND TDFId = $2', [userId, TDFId])
+    ComponentStates.update({userId: userId, TDFId: TDFId}, {$set: {curSessionPriorCorrect: 0, curSessionPriorIncorrect: 0}});
   },
 
   createTeacherDataFile: async function(teacherID) {
@@ -2876,7 +2928,7 @@ Meteor.startup(async function() {
   Accounts.config({
     loginExpirationInDays: 90
   })
-  
+
   // Create any helpful indexes for queries we run
   ScheduledTurkMessages._ensureIndex({'sent': 1, 'scheduled': 1});
 
