@@ -1542,7 +1542,7 @@ async function afterAnswerFeedbackCallback(trialEndTimeStamp, source, userAnswer
         reviewEnd, testType, deliveryParams, dialogueHistory, wasReportedForRemoval);
   
     // Give unit engine a chance to update any necessary stats
-    const practiceTime = answerLogRecord.CF_End_Latency + answerLogRecord.CF_Feedback_Latency;
+    const practiceTime = answerLogRecord.CFEndLatency + answerLogRecord.CFFeedbackLatency;
     await engine.cardAnswered(isCorrect, practiceTime);
     const answerLogAction = isTimeout ? '[timeout]' : 'answer';
     //if dialogueStart is set that means the user went through interactive dialogue
@@ -1740,7 +1740,7 @@ function gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect,
   let clusterIndex = Session.get('clusterIndex');
   let {whichStim, probabilityEstimate} = engine.findCurrentCardInfo();
   const cluster = getStimCluster(clusterIndex);
-  const {itemId, clusterKC, stimulusKC} = cluster.stims[whichStim];
+  const {_id, clusterKC, stimulusKC} = cluster.stims[whichStim];
   const responseType = ('' + cluster.stims[0].itemResponseType || 'text').toLowerCase()
   // let curKCBase = getStimKCBaseForCurrentStimuliSet();
   // let stimulusKC = whichStim + curKCBase;
@@ -1748,7 +1748,7 @@ function gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect,
   const curTdf = Session.get('currentTdfFile');
   const unitName = _.trim(curTdf.tdfs.tutor.unit[Session.get('currentUnitNumber')].unitname);
 
-  const problemName = stringifyIfExists(Session.get('originalDisplay'));
+  const problemName = Session.get('originalDisplay');
   const stepName = problemName;
   // let stepCount = (state.stepNameSeen[stepName] || 0) + 1;
   // state.stepNameSeen[stepName] = stepCount;
@@ -1809,7 +1809,7 @@ function gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect,
     entryPoint = Session.get('curTeacher').username + '/' + Session.get('curClass').coursename + sectionname;
   }
   const answerLogRecord = {
-    'itemId': itemId,
+    'itemId': _id,
     'KCId': stimulusKC,
     'hintLevel': parseInt(Session.get('hintLevel')) || 0,
     'userId': Meteor.userId(),
@@ -1820,67 +1820,68 @@ function gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect,
     'responseValue': _.trim(userAnswer),
     'displayedStimulus': Session.get('currentDisplay'),
 
-    'Anon_Student_Id': Meteor.user().username,
-    'Session_ID': sessionID,
+    'anonStudentId': Meteor.user().username,
+    'sessionID': sessionID,
 
-    'Condition_Namea': 'tdf file',
+    'conditionNameA': 'tdf file',
     // Note: we use this to enrich the history record server side, change both places if at all
-    'Condition_Typea': Session.get('currentTdfName'),
-    'Condition_Nameb': 'xcondition',
-    'Condition_Typeb': Session.get('experimentXCond'),
-    'Condition_Namec': 'schedule condition',
-    'Condition_Typec': schedCondition,
-    'Condition_Named': 'how answered',
-    'Condition_Typed': _.trim(source),
-    'Condition_Namee': 'section',
-    'Condition_Typee': Session.get('curClass') ? Session.get('curTeacher').username + '/' + Session.get('curClass').sectionname : undefined,
+    'conditionTypeA': Session.get('currentTdfName'),
+    'conditionNameB': 'xcondition',
+    'conditionTypeB': Session.get('experimentXCond') || null,
+    'conditionNameC': 'schedule condition',
+    'conditionTypeC': schedCondition,
+    'conditionNameD': 'how answered',
+    'conditionTypeD': _.trim(source),
+    'conditionNameE': 'section',
+    'conditionTypeE': Session.get('curClass') && Session.get('curTeacher') &&
+    Session.get('curTeacher').username && Session.get('curClass').sectionName ? 
+    Session.get('curTeacher').username + '/' + Session.get('curClass').sectionName : null,
 
     'responseDuration': responseDuration,
 
-    'Level_Unit': Session.get('currentUnitNumber'),
-    'Level_Unitname': unitName,
-    'Level_Unittype': Session.get('unitType'),
-    'Problem_Name': problemName,
-    'Step_Name': stepName, // this is no longer a valid field as we don't restore state one step at a time
-    'Time': trialStartTimestamp,
-    'Selection': '',
-    'Action': '',
-    'Input': _.trim(userAnswer),
-    'Student_Response_Type': isStudy ? 'HINT_REQUEST' : 'ATTEMPT',
-    'Student_Response_Subtype': _.trim(findQTypeSimpified()),
-    'Tutor_Response_Type': isStudy ? 'HINT_MSG' : 'RESULT',
-    'Tutor_Response_Subtype': '',
-    'KC_Default': stimulusKC,
-    'KC_Category_Default': '',
-    'KC_Cluster': clusterKC,
-    'KC_Category_Cluster': '',
-    'CF_Audio_Input_Enabled': Session.get('audioEnabled'),
-    'CF_Audio_Output_Enabled': Session.get('enableAudioPromptAndFeedback'),
-    'CF_Display_Order': Session.get('questionIndex'),
-    'CF_Stim_File_Index': clusterIndex,
-    'CF_Set_Shuffled_Index': shufIndex || clusterIndex,
-    'CF_Alternate_Display_Index': Session.get('alternateDisplayIndex'),
-    'CF_Stimulus_Version': whichStim,
-    'CF_Correct_Answer': correctAnswer,
-    'CF_Correct_Answer_Syllables': currentAnswerSyllables.syllableArray,
-    'CF_Correct_Answer_Syllables_Count': currentAnswerSyllables.count,
-    'CF_Display_Syllable_Indices': hintIndeces,
-    'CF_Displayed_Hint_Syllables': hintsDisplayed,
-    'CF_Overlearning': false,
-    'CF_Response_Time': trialEndTimeStamp,
-    'CF_Start_Latency': startLatency,
-    'CF_End_Latency': endLatency,
-    'CF_Feedback_Latency': feedbackLatency,
-    'CF_Review_Entry': _.trim($('#userForceCorrect').val()),
-    'CF_Button_Order': buttonEntries,
-    'CF_Item_Removed': wasReportedForRemoval,
-    'CF_Note': '',
-    'Feedback_Text': $('#UserInteraction').text() || '',
+    'levelUnit': Session.get('currentUnitNumber'),
+    'levelUnitName': unitName,
+    'levelUnitType': Session.get('unitType'),
+    'problemName': problemName,
+    'stepName': stepName, // this is no longer a valid field as we don't restore state one step at a time
+    'time': trialStartTimestamp,
+    'selection': '',
+    'action': '',
+    'input': _.trim(userAnswer),
+    'studentResponseType': isStudy ? 'HINT_REQUEST' : 'ATTEMPT',
+    'studentResponseSubtype': _.trim(findQTypeSimpified()),
+    'tutorResponseType': isStudy ? 'HINT_MSG' : 'RESULT',
+    'KCDefault': stimulusKC,
+    'KCCategoryDefault': '',
+    'KCCluster': clusterKC,
+    'KCCategoryCluster': '',
+    'CFAudioInputEnabled': Session.get('audioEnabled'),
+    'CFAudioOutputEnabled': Session.get('enableAudioPromptAndFeedback'),
+    'CFDisplayOrder': Session.get('questionIndex'),
+    'CFStimFileIndex': clusterIndex,
+    'CFSetShuffledIndex': shufIndex || clusterIndex,
+    'CFAlternateDisplayIndex': Session.get('alternateDisplayIndex') || null,
+    'CFStimulusVersion': whichStim,
+    'CFCorrectAnswer': correctAnswer,
+    'CFCorrectAnswerSyllables': currentAnswerSyllables.syllableArray,
+    'CFCorrectAnswerSyllablesCount': currentAnswerSyllables.count,
+    'CFDisplaySyllableIndices': hintIndeces,
+    'CFDisplayedHintSyllables': hintsDisplayed,
+    'CFOverlearning': false,
+    'CFResponseTime': trialEndTimeStamp,
+    'CFStartLatency': startLatency,
+    'CFEndLatency': endLatency,
+    'CFFeedbackLatency': feedbackLatency,
+    'CFReviewEntry': _.trim($('#userForceCorrect').val()),
+    'CFButtonOrder': buttonEntries,
+    'CFItemRemoved': wasReportedForRemoval,
+    'CFNote': '',
+    'feedbackText': $('#UserInteraction').text() || '',
     'feedbackType': feedbackType,
-    'dialogueHistory': dialogueHistory,
-    'instructionQuestionResult': Session.get('instructionQuestionResult'),
+    'dialogueHistory': dialogueHistory || null,
+    'instructionQuestionResult': Session.get('instructionQuestionResult') || false,
     'hintLevel': whichHintLevel,
-    'Entry_Point': entryPoint
+    'entryPoint': entryPoint
   };
   return answerLogRecord;
 }

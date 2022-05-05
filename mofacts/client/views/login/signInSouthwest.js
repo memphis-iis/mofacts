@@ -175,10 +175,10 @@ Template.signInSouthwest.onRendered(async function() {
   const classesByInstructorId = {};
   //  //sectionid, courseandsectionname
   for (const coursesection of allCourseSections) {
-    if (!classesByInstructorId[coursesection.teacheruserid]) {
-      classesByInstructorId[coursesection.teacheruserid] = [];
+    if (!classesByInstructorId[coursesection.teacherUserId]) {
+      classesByInstructorId[coursesection.teacherUserId] = [];
     }
-    classesByInstructorId[coursesection.teacheruserid].push(coursesection);
+    classesByInstructorId[coursesection.teacherUserId].push(coursesection);
   }
   Session.set('classesByInstructorId', classesByInstructorId);
 

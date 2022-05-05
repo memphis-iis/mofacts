@@ -20,7 +20,7 @@
       <select id="class-select">
         <option selected="selected" value="{{INVALID}}" disabled="true">Select a class</option>
         {{#each classes}}
-          <option value="{{this.courseId}}">{{this.courseName}}</option>
+          <option value="{{this._id}}">{{this.courseName}}</option>
         {{/each}}
       </select>
       <div>
@@ -28,7 +28,7 @@
         <select id="tdf-select" disabled="true">
             <option selected="selected" value="{{INVALID}}" disabled="true">Select a tdf</option>
             {{#each curInstructorReportingTdfs}}
-              <option value="{{this.tdfid}}">{{this.displayname}}</option>
+              <option value="{{this.TDFId}}">{{this.displayName}}</option>
             {{/each}}
         </select>
         {{#if performanceLoading}}

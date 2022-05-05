@@ -7,7 +7,7 @@
     <select id="class-select">
         <option selected="selected" value="invalid" disabled="true">Select a class</option>
         {{#each courses}}
-          <option value="{{this.courseId}}">{{this.courseName}}</option>
+          <option value="{{this._id}}">{{this.courseName}}</option>
         {{/each}}
     </select>
   </div>

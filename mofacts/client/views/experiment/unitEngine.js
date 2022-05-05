@@ -168,7 +168,7 @@ function defaultUnitEngine(curExperimentData) {
     },
 
     setUpCardQuestionSyllables: function(currentQuestion, currentQuestionPart2,
-        currentStimAnswer, probFunctionParameters, hintLevel) {
+        currentStimAnswer, probFunctionParameters, hintLevel, curQuestionSyllables) {
       console.log('setUpCardQuestionSyllables: ', currentQuestion, currentQuestionPart2,
           currentStimAnswer, probFunctionParameters);
       let currentAnswer = currentStimAnswer;
@@ -181,24 +181,24 @@ function defaultUnitEngine(curExperimentData) {
         console.log('getSubClozeAnswerSyllables, displaySyllableIndices/hintsylls: ', probFunctionParameters.hintsylls,
             ', this.cachedSyllables: ', this.cachedSyllables);
         const answer = currentStimAnswer.replace(/\./g, '_');
-        if (!this.cachedSyllables || !this.cachedSyllables.data[answer]) {
-            if(!this.cachedSyllables.data[answer]){
+        if (!curQuestionSyllables) {
+            //if(!this.cachedSyllables.data[answer]){
               console.log('no syllable data for that answer, throw error');
               const currentStimuliSetId = Session.get('currentStimuliSetId');
               const curAnswers = getAllCurrentStimAnswers();
               Meteor.call('updateStimSyllableCache', currentStimuliSetId, curAnswers, function(){});
               alert('Something went wrong generating hints. Please report this error to the administrator and restart your trial');
-          } else {
-            //We assume no hints were generated initially, meaning the tdf didn't have hints to start.
-            console.log('no syllable index or cachedSyllables, defaulting to no subclozeanswer');
-            console.log(typeof(probFunctionParameters.hintsylls),
-                !this.cachedSyllables,
-                (probFunctionParameters.hintsylls || []).length);
-          }
+          // } else {
+          //   //We assume no hints were generated initially, meaning the tdf didn't have hints to start.
+          //   console.log('no syllable index or cachedSyllables, defaulting to no subclozeanswer');
+          //   console.log(typeof(probFunctionParameters.hintsylls),
+          //       !this.cachedSyllables,
+          //       (probFunctionParameters.hintsylls || []).length);
+          // }
         } else {
           currentAnswerSyllables = {
-            count: this.cachedSyllables.data[answer].count,
-            syllableArray: this.cachedSyllables.data[answer].syllables,
+            count: curQuestionSyllables.length,
+            syllableArray: curQuestionSyllables,
           };
         }
 
@@ -307,7 +307,7 @@ function defaultUnitEngine(curExperimentData) {
         clozeQuestionParts,
         currentAnswer,
       } = this.setUpCardQuestionSyllables(currentQuestion, currentQuestionPart2, currentStimAnswer,
-          probFunctionParameters, whichHintLevel);
+          probFunctionParameters, whichHintLevel, cluster.stims[whichStim].syllables);
       
       console.log('HintLevel: setUpCardQuestionAndAnswerGlobals',whichHintLevel);  
       console.log('setUpCardQuestionAndAnswerGlobals2:', currentQuestionPostSylls, currentQuestionPart2PostSylls);
@@ -761,11 +761,11 @@ function modelUnitEngine() {
           const stimAnswer = stimCluster.stims[j].correctResponse
           let answerText = Answers.getDisplayAnswerText(stimAnswer).toLowerCase();
           //Detect Hint Levels
-          if (!this.cachedSyllables.data || !this.cachedSyllables.data[answerText]) {
+          if (!stimCluster.stims[j].syllables) {
             hintLevelIndex = 1;
             console.log('no cached syllables for: ' + currentStimuliSetId + ' | ' + answerText + '. hintlevel index is 1.');
           } else {
-            const stimSyllableData = this.cachedSyllables.data[answerText];
+            const stimSyllableData = stimCluster.stims[j].syllables;
             hintLevelIndex = stimSyllableData.count;
             console.log('syllables detected for: ' + currentStimuliSetId + ' | ' + answerText + '. hintlevel index is ' + hintLevelIndex);
           }
@@ -842,12 +842,12 @@ function modelUnitEngine() {
       p.answerText = answerText;
 
       if (probFunctionHasHintSylls) {
-        if (!this.cachedSyllables.data || !this.cachedSyllables.data[answerText]) {
+        if (!stimCluster.stims[stimIndex].syllables) {
           console.log('no cached syllables for: ' + currentStimuliSetId + '|' + answerText);
           throw new Error('can\'t find syllable data in database');
         } else {
-          const stimSyllableData = this.cachedSyllables.data[answerText];
-          p.syllables = stimSyllableData.count;
+          const stimSyllableData = stimCluster.stims[stimIndex].syllables;
+          p.syllables = stimSyllableData.length;
           p.syllablesArray = stimSyllableData.syllables;
         }
       }
