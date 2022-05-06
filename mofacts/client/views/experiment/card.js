@@ -468,7 +468,7 @@ Template.card.events({
   },
   'click #confirmFeedbackSelection': function() {
     Session.set('displayFeedback', false);
-    checkSyllableCacheForCurrentStimFile(processUserTimesLog);  
+    processUserTimesLog();  
   },
   'click #confirmFeedbackSelectionFromIndex': function(){
     Session.set('displayFeedback', false);
@@ -2924,7 +2924,7 @@ async function resumeFromComponentState() {
   // ALSO NOTICE that we'll be calling processUserTimesLog after the server
   // returns and we know we've logged what happened
   if(!Session.get('displayFeedback')){
-    checkSyllableCacheForCurrentStimFile(processUserTimesLog);
+    processUserTimesLog();
   }
 }
 
@@ -2935,22 +2935,22 @@ async function getFeedbackParameters(){
   } 
 }
 
-async function checkSyllableCacheForCurrentStimFile(cb) {
-  const currentStimuliSetId = Session.get('currentStimuliSetId');
-  cachedSyllables = StimSyllables.findOne({filename: currentStimuliSetId});
-  console.log('cachedSyllables start: ', cachedSyllables);
-  if (!cachedSyllables) {
-    console.log('no cached syllables for this stim, calling server method to create them');
-    const curAnswers = getAllCurrentStimAnswers();
-    Meteor.call('updateStimSyllableCache', currentStimuliSetId, curAnswers, function() {
-      cachedSyllables = StimSyllables.findOne({filename: currentStimuliSetId});
-      console.log('new cachedSyllables: ', cachedSyllables);
-      cb();
-    });
-  } else {
-    cb();
-  }
-}
+// cached syllables depreciated by mongo migration
+// async function checkSyllableCacheForCurrentStimFile(cb) {
+//   const currentStimuliSetId = Session.get('currentStimuliSetId');
+//   cachedSyllables = StimSyllables.findOne({filename: currentStimuliSetId});
+//   console.log('cachedSyllables start: ', cachedSyllables);
+//   if (!cachedSyllables) {
+//     console.log('no cached syllables for this stim, calling server method to create them');
+//     Meteor.call('updateStimSyllables', currentStimuliSetId, function() {
+//       // cachedSyllables = StimSyllables.findOne({filename: currentStimuliSetId});
+//       // console.log('new cachedSyllables: ', cachedSyllables);
+//       cb();
+//     });
+//   } else {
+//     cb();
+//   }
+// }
 
 async function removeCardByUser() {
   Meteor.clearTimeout(Session.get('CurTimeoutId'));
