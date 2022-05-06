@@ -55,14 +55,14 @@ async function userFilesRefresh() {
   }
   for (const tdf of Session.get('allTdfs')) {
     for(const stim of allStims){
-      if (!userFiles.findOne({'fileName': stim.stimulusfilename}) && userId == tdf.ownerId && stim.stimulisetid == tdf.stimulisetid){
+      if (!userFiles.findOne({'fileName': stim.stimulusFileName}) && userId == tdf.ownerId && stim.stimuliSetId == tdf.stimuliSetId){
         try{
           userFiles.insert({
             'temp': 1,
             '_id': '' + count,
             'idx': count,
             'type': 'stim',
-            'fileName': stim.stimulusfilename,
+            'fileName': stim.stimulusFileName,
             'stimID': 1,
           });
           count += 1;

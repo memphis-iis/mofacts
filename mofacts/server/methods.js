@@ -326,8 +326,6 @@ async function migration2(){
     delete stimuli[t].itemId;
     stimuli[t].syllables = sylls;
     Items.update({_id: oldId}, stimuli[t]);
-    console.error(oldEntry.correctResponse, curStimSetSylls)
-    console.error(e)
   }
 
   const courses = Courses.find().fetch()
@@ -485,26 +483,23 @@ async function getAllStims() {
   serverConsole('getAllStims');
   //PostgresReversion
   // const stimRet = await db.any('SELECT DISTINCT(stimulusfilename), stimulisetid FROM item;')
-  const stimRet = Items.rawCollection().aggregate([
+  return await Items.rawCollection().aggregate([
     {
       $group: {
         _id: {
-          stimulusFileName: "$stimulusfilename"
+          stimulusFileName: "$stimulusFileName",
+          stimuliSetId: "$stimuliSetId"
         }
       },
     },
     {
       $project:{
-        stimulusFileName: $_id.stimulusFileName,
-        stimulisetid: 1
+        _id: 0,
+        stimulusFileName: "$_id.stimulusFileName",
+        stimuliSetId: "$_id.stimuliSetId"
       }
     }
-  ])
-  const stims = [];
-  for (const stim of stimRet){
-    stims.push(stim);
-  }
-  return stims;
+  ]).toArray();
 }
 
 async function getStimuliSetsForIdSet(stimuliSetIds) {
@@ -1330,9 +1325,9 @@ async function getListOfStimTags(tdfFileName) {
 
 async function getStimuliSetByFilename(stimFilename) {
   //Postgres Reversion
-  // const idRet = await db.oneOrNone('SELECT stimuliSetId FROM item WHERE stimulusFilename = $1 LIMIT 1', stimFilename);
-  idRet = Items.findOne({stimulusFilename: stimFilename});
-  const stimuliSetId = idRet ? idRet.stimulisetid : null;
+  // const idRet = await db.oneOrNone('SELECT stimuliSetId FROM item WHERE stimulusFileName = $1 LIMIT 1', stimFilename);
+  idRet = Items.findOne({stimulusFileName: stimFilename});
+  const stimuliSetId = idRet ? idRet.stimuliSetId : null;
   if (isEmpty(stimuliSetId)) return null;
   return await getStimuliSetById(stimuliSetId);
 }
@@ -1862,33 +1857,33 @@ async function upsertStimFile(stimFilename, stimJSON, ownerId) {
   };
   const responseKCMap = await getReponseKCMap();
   // PostgresReversion Staged
-  // const query = 'SELECT stimuliSetId FROM item WHERE stimulusFilename = $1 LIMIT 1';
-  const associatedStimSetIdRet = Items.findOne({stimulusFilename: stimFilename}).stimuliSetId
+  // const query = 'SELECT stimuliSetId FROM item WHERE stimulusFileName = $1 LIMIT 1';
+  const associatedStimSetIdRet = Items.findOne({stimulusFileName: stimFilename})
   // const associatedStimSetIdRet = await t.oneOrNone(query, stimFilename);
   serverConsole('getAssociatedStimSetIdForStimFile', stimFilename, associatedStimSetIdRet);
   let stimuliSetId;
   if (associatedStimSetIdRet) {
-    stimuliSetId = associatedStimSetIdRet.stimulisetid;
+    stimuliSetId = associatedStimSetIdRet.stimuliSetId;
     serverConsole('stimuliSetId1:', stimuliSetId, associatedStimSetIdRet);
   } else {
     // PostgresReversion Staged
     // const highestStimuliSetId = await t.oneOrNone('SELECT MAX(stimuliSetId) AS stimuliSetId FROM item');
-    const highestStimuliSetId = Items.find().sort({stimuliSetId: -1}).limit(1);
-    stimuliSetId = highestStimuliSetId && highestStimuliSetId.stimulisetid ?
-        parseInt(highestStimuliSetId.stimulisetid) + 1 : 1;
+    const highestStimuliSetId = Items.findOne({}, {sort: {stimuliSetId: -1}, limit: 1 });
+    stimuliSetId = highestStimuliSetId && highestStimuliSetId.stimuliSetId ?
+        parseInt(highestStimuliSetId.stimuliSetId) + 1 : 1;
     serverConsole('stimuliSetId2:', stimuliSetId, highestStimuliSetId);
   }
 
   const newFormatItems = getNewItemFormat(oldStimFormat, stimFilename, stimuliSetId, responseKCMap);
   // PostgresReversion Staged
-  // const existingStims = await t.manyOrNone('SELECT * FROM item WHERE stimulusFilename = $1', stimFilename);
-  const existingStims = await Items.find({stimulusFilename: stimFilename});
+  // const existingStims = await t.manyOrNone('SELECT * FROM item WHERE stimulusFileName = $1', stimFilename);
+  const existingStims = await Items.find({stimulusFileName: stimFilename});
   let newStims = [];
   let stimulusKC;
   if (existingStims && existingStims.length > 0) {
     for (const newStim of newFormatItems) {
       stimulusKC = newStim.stimulusKC;
-      let matchingStim = existingStims.find((x) => x.stimuluskc == stimulusKC);
+      let matchingStim = existingStims.find((x) => x.stimulusKC == stimulusKC);
       if (!matchingStim) {
         serverConsole('matchingstims')
         newStims.push(newStim);
@@ -1906,8 +1901,8 @@ async function upsertStimFile(stimFilename, stimJSON, ownerId) {
       //              textStimulus = ${textStimulus}, audioStimulus = ${audioStimulus}, \
       //              imageStimulus = ${imageStimulus}, videoStimulus = ${videoStimulus}, \
       //              alternateDisplays = ${alternateDisplays}, tags = ${tags} \
-      //              WHERE stimulusFilename = ${stimulusFilename} AND stimulusKC = ${stimulusKC}', mergedStim);
-      Items.update({stimulusFilename: stimulusFilename, stimulusKC: stimulusKC},{$set: {
+      //              WHERE stimulusFileName = ${stimulusFileName} AND stimulusKC = ${stimulusKC}', mergedStim);
+      Items.update({stimulusFileName: stimulusFileName, stimulusKC: stimulusKC},{$set: {
         stimuliSetId: mergedStim.stimuliSetId,
         parentStimulusFileName: mergedStim.parentStimulusFileName,
         stimulusKC: mergedStim.stimulusKC,
@@ -1941,10 +1936,10 @@ async function upsertStimFile(stimFilename, stimJSON, ownerId) {
     if (stim.alternateDisplays) stim.alternateDisplays = JSON.stringify(stim.alternateDisplays);
     Items.insert(stim);
     // PostgresReversion Staged
-    // await t.none('INSERT INTO item(stimuliSetId, stimulusFilename, stimulusKC, clusterKC, responseKC, params, \
+    // await t.none('INSERT INTO item(stimuliSetId, stimulusFileName, stimulusKC, clusterKC, responseKC, params, \
     //   optimalProb, correctResponse, incorrectResponses, itemResponseType, speechHintExclusionList, clozeStimulus, \
     //  textStimulus, audioStimulus, imageStimulus, videoStimulus, alternateDisplays, tags) \
-    // VALUES(${stimuliSetId}, ${stimulusFilename}, ${stimulusKC}, ${clusterKC}, ${responseKC}, ${params}, \
+    // VALUES(${stimuliSetId}, ${stimulusFileName}, ${stimulusKC}, ${clusterKC}, ${responseKC}, ${params}, \
     //   ${optimalProb}, ${correctResponse}, ${incorrectResponses}, ${itemResponseType}, ${speechHintExclusionList}, \
     //  ${clozeStimulus}, ${textStimulus}, ${audioStimulus}, ${imageStimulus}, ${videoStimulus}, \
     //  ${alternateDisplays}::jsonb, ${tags})', stim);
@@ -1968,20 +1963,20 @@ async function upsertTDFFile(tdfFilename, tdfJSON, ownerId) {
     skipStimSet = true;
   }
   if (!stimSet && !skipStimSet) throw new Error('no stimset for tdf:', tdfFilename);
-  if (prev && prev.TDFId) {
+  if (prev && prev._id) {
     let tdfJSONtoUpsert;
     if (hasGeneratedTdfs(tdfJSON)) {
       const tdfGenerator = new DynamicTdfGenerator(tdfJSON.tdfs, tdfFilename, ownerId, 'repo', stimSet);
       const generatedTdf = tdfGenerator.getGeneratedTdf();
       delete generatedTdf.createdAt;
-      tdfJSONtoUpsert = JSON.stringify(generatedTdf);
+      tdfJSONtoUpsert = generatedTdf;
     } else {
-      tdfJSONtoUpsert = JSON.stringify(tdfJSON);
+      tdfJSONtoUpsert = tdfJSON;
     }
     // PostgresReversion Staged
-    Tdfs.update({TDFId: prev.TDFId},{$set:{
+    Tdfs.update({_id: prev._id},{$set:{
       ownerId: ownerId,
-      stimuliSetId: stimuliSetId,
+      stimuliSetId: prev.stimuliSetId,
       content: tdfJSONtoUpsert
     }});
     // const query = 'UPDATE tdf SET ownerId=$1, stimuliSetId=$2, content=$3::jsonb WHERE TDFId=$4';
@@ -1991,20 +1986,20 @@ async function upsertTDFFile(tdfFilename, tdfJSON, ownerId) {
     if (hasGeneratedTdfs(tdfJSON)) {
       const tdfGenerator = new DynamicTdfGenerator(tdfJSON.tdfs, tdfFilename, ownerId, 'repo', stimSet);
       const generatedTdf = tdfGenerator.getGeneratedTdf();
-      tdfJSONtoUpsert = JSON.stringify(generatedTdf);
+      tdfJSONtoUpsert = generatedTdf;
     } else {
       tdfJSON.createdAt = new Date();
-      tdfJSONtoUpsert = JSON.stringify(tdfJSON);
+      tdfJSONtoUpsert = tdfJSON;
     }
     let stimuliSetId;
     if (tdfJSON.tdfs.tutor.setspec.stimulusfile) {
       const stimFileName = tdfJSON.tdfs.tutor.setspec.stimulusfile;
       // PostgresReversion Staged
-      const associatedStimSetIdRet = Items.find({stimulusFilename: stimFileName}).limit(1).fetch();
-      // const stimuliSetIdQuery = 'SELECT stimuliSetId FROM item WHERE stimulusFilename = $1 LIMIT 1';
+      const associatedStimSetIdRet = Items.findOne({stimulusFileName: stimFileName});
+      // const stimuliSetIdQuery = 'SELECT stimuliSetId FROM item WHERE stimulusFileName = $1 LIMIT 1';
       // const associatedStimSetIdRet = await t.oneOrNone(stimuliSetIdQuery, stimFileName);
       if (associatedStimSetIdRet) {
-        stimuliSetId = associatedStimSetIdRet.stimulisetid;
+        stimuliSetId = associatedStimSetIdRet.stimuliSetId;
       } else {
         throw new Error('No matching stimulus file found');
       }
@@ -2012,7 +2007,7 @@ async function upsertTDFFile(tdfFilename, tdfJSON, ownerId) {
       stimuliSetId = null; // Root condition tdfs have no stimulisetid
     }
     // PostgresReversion Staged
-    TDFs.insert({$set: {ownerID: ownerId, stimuliSetId: stimuliSetId, content: tdfJSONtoUpsert}});
+    Tdfs.insert({ownerId: ownerId, stimuliSetId: stimuliSetId, content: tdfJSONtoUpsert});
     // const query = 'INSERT INTO tdf(ownerId, stimuliSetId, content) VALUES($1, $2, $3::jsonb)';
     // await t.none(query, [ownerId, stimuliSetId, tdfJSONtoUpsert]);
   }
@@ -2214,7 +2209,7 @@ Meteor.methods({
           let syllableArray;
           let syllableGenerationError;
           const answer = stim.correctResponse;
-          const safeAnswer = answer.replace(/\./g, '_');
+          const safeAnswer = answer.replace(/\./g, '_').split('~')[0];
           try{
             if(!answerSyllableMap[safeAnswer]){
               answerSyllableMap[safeAnswer] = getSyllablesForWord(safeAnswer);
@@ -2226,7 +2221,7 @@ Meteor.methods({
             syllableArray = [answer];
             syllableGenerationError = e;
           }
-          Items.update({_id: stim._id}, { $set: {syllables: syllableArray}})
+          Items.upsert({_id: stim._id}, { $set: {syllables: syllableArray}})
         }
       }
       serverConsole('after updateStimSyllables');
@@ -2543,9 +2538,9 @@ Meteor.methods({
         Histories.remove({TDFId: tdf});
     }
     //Postgres Reversion
-    // const query2 = 'DELETE FROM item WHERE stimulusFilename = $1';
+    // const query2 = 'DELETE FROM item WHERE stimulusFileName = $1';
     // await db.none(query2, [stimFilename]);
-    Items.remove({stimulusFilename: stimFilename});
+    Items.remove({stimulusFileName: stimFilename});
     //Postgres Reversion
     // const query3 = 'DELETE FROM tdf WHERE stimulisetid = $1';
     // await db.none(query3, [stimSetId]);
@@ -2632,10 +2627,10 @@ Meteor.methods({
           return results;
         } else {
           //Postgres Reversion
-          // const query = 'SELECT stimuliSetId FROM item WHERE stimulusFilename = $1 LIMIT 1';
+          // const query = 'SELECT stimuliSetId FROM item WHERE stimulusFileName = $1 LIMIT 1';
           // const associatedStimSetIdRet = await db.oneOrNone(query, stimFileName);
           const associatedStimSetIdRet = Items.findOne({stimulusFileName: stimFileName});
-          const stimuliSetId = associatedStimSetIdRet ? associatedStimSetIdRet.stimulisetid : null;
+          const stimuliSetId = associatedStimSetIdRet ? associatedStimSetIdRet.stimuliSetId : null;
           if (isEmpty(stimuliSetId)) {
             results.result = false;
             results.errmsg = 'Please upload stimulus file before uploading a TDF';
@@ -2732,12 +2727,9 @@ Meteor.methods({
   },
 
   toggleTdfPresence: async function(tdfIds, mode) {
-    await db.tx(async (t) => {
-      tdfIds.forEach((tdfid) => {
-        serverConsole('!!!toggleTdfPresence:', [mode, tdfid]);
-        t.none('UPDATE tdf SET visibility = $1 WHERE TDFId=$2', [mode, tdfid]);
-      });
-    });
+    tdfIds.forEach((tdfid) => {
+      Tdfs.update({_id: tdfid}, {$set: {visibility: mode}})
+    })
   },
 
   getTdfOwnersMap: (ownerIds) => {

@@ -253,7 +253,7 @@ function generateAndSubmitTDFAndStimFiles() {
   const tdfFileName = displayName.replace(/[ <>:"/|?*]/g, '_') + '_' + curUserName + '_' +
       curDateTime + '_' + curSemester + '_TDF.xml';
 
-  let stimulusFilename = undefined;
+  let stimulusFileName = undefined;
   let parentStimulusFileName = undefined;
   let isMultiTdf = false;
   if (clozesComeFromTemplate) {
@@ -261,19 +261,19 @@ function generateAndSubmitTDFAndStimFiles() {
     const originalTDF = tdfIdToTdfFileMap[tdfTemplateId];
     isMultiTdf = originalTDF.isMultiTdf;
 
-    stimulusFilename = originalTDF.tdfs.tutor.setspec.stimulusfile;
-    stimulusFilename = stimulusFilename.slice(0, stimulusFilename.length-5) + '_' + curUserName + '_' +
+    stimulusFileName = originalTDF.tdfs.tutor.setspec.stimulusfile;
+    stimulusFileName = stimulusFileName.slice(0, stimulusFileName.length-5) + '_' + curUserName + '_' +
         curDateTime + '_' + curSemester + '.json';
 
     parentStimulusFileName = originalTDF.tdfs.tutor.setspec.stimulusfile;
   } else {
-    stimulusFilename = displayName.replace(/ /g, '_') + '_' + curUserName + '_' + curDateTime + '_' +
+    stimulusFileName = displayName.replace(/ /g, '_') + '_' + curUserName + '_' + curDateTime + '_' +
         curSemester + '_autoNamed_Stim.json';
     parentStimulusFileName = null;
   }
 
-  const newStimJSON = generateStimJSON(clozes, isMultiTdf, stimulusFilename, parentStimulusFileName);
-  const newTDFJSON = generateTDFJSON(tdfFileName, displayName, stimulusFilename, newStimJSON);
+  const newStimJSON = generateStimJSON(clozes, isMultiTdf, stimulusFileName, parentStimulusFileName);
+  const newTDFJSON = generateTDFJSON(tdfFileName, displayName, stimulusFileName, newStimJSON);
   const wrappedTDF = {
     ownerId: Meteor.userId(),
     visibility: 'profileSouthwestOnly',
@@ -315,7 +315,7 @@ function generateAndSubmitTDFAndStimFiles() {
   });
 }
 
-function getStimForCloze(stimulusKC, stimulusFilename, parentStimulusFileName) {
+function getStimForCloze(stimulusKC, stimulusFileName, parentStimulusFileName) {
   const curStimClozes = stimulusKCtoClozesMap[stimulusKC];
 
   const clusterKC = curStimClozes[0].clusterKC;
@@ -331,7 +331,7 @@ function getStimForCloze(stimulusKC, stimulusFilename, parentStimulusFileName) {
   const tags = curStimClozes[0].tags;
 
   const stim = {
-    stimulusFilename,
+    stimulusFileName,
     parentStimulusFileName,
     stimulusKC,
     clusterKC,
@@ -372,8 +372,8 @@ function getStimForCloze(stimulusKC, stimulusFilename, parentStimulusFileName) {
   return stim;
 }
 
-function generateStimJSON(clozes, isMultiTdf, stimulusFilename, parentStimulusFileName) {
-  console.log('generateStimJSON:', isMultiTdf, clozes, stimulusFilename);
+function generateStimJSON(clozes, isMultiTdf, stimulusFileName, parentStimulusFileName) {
+  console.log('generateStimJSON:', isMultiTdf, clozes, stimulusFileName);
   const origStim = tdfIdToStimuliSetMap[origTdfId];
   const curStim = [];
 
@@ -398,7 +398,7 @@ function generateStimJSON(clozes, isMultiTdf, stimulusFilename, parentStimulusFi
       for (const cloze of curSentenceClozes) {
         const stimulusKC = cloze.stimulusKC;
         if (!completedStimulusKCs[stimulusKC]) {
-          const stim = getStimForCloze(stimulusKC, stimulusFilename, parentStimulusFileName);
+          const stim = getStimForCloze(stimulusKC, stimulusFileName, parentStimulusFileName);
           curStim.push(stim);// [{},{}]
           completedStimulusKCs[stimulusKC] = true;
         }
@@ -436,8 +436,8 @@ function generateStimJSON(clozes, isMultiTdf, stimulusFilename, parentStimulusFi
   return curStim;
 }
 
-function generateTDFJSON(tdfFileName, displayName, stimulusFilename, newStimJSON) {
-  console.log('generateTDFJSON:', tdfFileName, displayName, stimulusFilename, newStimJSON);
+function generateTDFJSON(tdfFileName, displayName, stimulusFileName, newStimJSON) {
+  console.log('generateTDFJSON:', tdfFileName, displayName, stimulusFileName, newStimJSON);
   console.log('clusterListMappings: ', clusterListMappings);
   let curTdf = undefined;
 
@@ -476,7 +476,7 @@ function generateTDFJSON(tdfFileName, displayName, stimulusFilename, newStimJSON
   }
 
   curTdf.tdfs.tutor.setspec.lessonname = [displayName];
-  curTdf.tdfs.tutor.setspec.stimulusfile = [stimulusFilename];
+  curTdf.tdfs.tutor.setspec.stimulusfile = [stimulusFileName];
 
   if (typeof(speechAPIKey) !== 'undefined') {
     curTdf.tdfs.tutor.setspec.speechAPIKey = [speechAPIKey];

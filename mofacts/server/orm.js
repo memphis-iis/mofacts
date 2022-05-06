@@ -4,7 +4,7 @@ function getItem(stim) {
   return {
     itemId: stim.itemid,
     stimuliSetId: stim.stimulisetid,
-    stimulusFilename: stim.stimulusfilename,
+    stimulusFileName: stim.stimulusfilename,
     parentStimulusFileName: stim.parentStimulusFileName,
     stimulusKC: stim.stimuluskc,
     clusterKC: stim.clusterkc,
