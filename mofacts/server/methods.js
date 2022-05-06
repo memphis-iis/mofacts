@@ -1891,7 +1891,6 @@ async function upsertStimFile(stimFilename, stimJSON, ownerId) {
       }
       matchingStim = getItem(matchingStim);
       const mergedStim = Object.assign(matchingStim, newStim);
-      if (mergedStim.alternateDisplays) mergedStim.alternateDisplays = JSON.stringify(mergedStim.alternateDisplays);
       //await t.none('UPDATE item SET stimuliSetId = ${stimuliSetId}, \
       //              parentStimulusFileName = ${parentStimulusFileName}, stimulusKC = ${stimulusKC}, \
       //              clusterKC = ${clusterKC}, responseKC = ${responseKC}, params = ${params}, \
@@ -1933,7 +1932,6 @@ async function upsertStimFile(stimFilename, stimJSON, ownerId) {
   }
   serverConsole('!!!newStims:', newStims);
   for (const stim of newStims) {
-    if (stim.alternateDisplays) stim.alternateDisplays = JSON.stringify(stim.alternateDisplays);
     Items.insert(stim);
     // PostgresReversion Staged
     // await t.none('INSERT INTO item(stimuliSetId, stimulusFileName, stimulusKC, clusterKC, responseKC, params, \
