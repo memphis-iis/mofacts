@@ -254,6 +254,13 @@ function checkAnswer(userAnswer, correctAnswer, originalAnswer, lfparameter, use
         // Take first answer if it's a bar-delimited string
         dispAnswer = _.trim(dispAnswer.split('|')[0]);
       }
+      //check for answer repetition 
+      let answerWordsCount = correctAnswer.split(" ").length;
+      let userAnswerWords = userAnswer.split(" ");
+      let userFirstAnswer =  userAnswerWords.slice(0,answerWordsCount - 1).join(" ");
+      if(userFirstAnswer.toLowerCase() == correctAnswer.toLowerCase()){
+         userAnswer = userFirstAnswer;
+      }
 
       const match = stringMatch(originalAnswer, userAnswer, lfparameter, userInput);
 
