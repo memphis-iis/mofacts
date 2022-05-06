@@ -158,7 +158,6 @@ Meteor.publish(null, function() {
   // The default data published to everyone - all TDF's and stims, and the
   // user data (user times log and user record) for them
   const defaultData = [
-    StimSyllables.find({}),
     Meteor.users.find({_id: userId}),
     UserProfileData.find({_id: userId}, {fields: {
       have_aws_id: 1,
@@ -1828,6 +1827,7 @@ function findUserByName(username) {
 async function verifySyllableUpload(stimSetId){
   // const query = 'SELECT COUNT(DISTINCT LOWER(correctresponse)) FROM item WHERE stimulisetid = $1';
   // PostgresReversion Staged
+  return true;
   let postgresRet = Items.find();
   // postgresRet = await db.oneOrNone(query, stimSetId);
   const answersCountPostgres = postgresRet.count;
@@ -1878,10 +1878,6 @@ async function upsertStimFile(stimFilename, stimJSON, ownerId) {
         parseInt(highestStimuliSetId.stimulisetid) + 1 : 1;
     serverConsole('stimuliSetId2:', stimuliSetId, highestStimuliSetId);
   }
-    
-  //Need to clear the syllable cache so that it no longer gets out of sync during a file upload
-  //This will force the system to regenerate the syllable cache.
-  StimSyllables.remove({'filename': stimuliSetId});
 
   const newFormatItems = getNewItemFormat(oldStimFormat, stimFilename, stimuliSetId, responseKCMap);
   // PostgresReversion Staged
@@ -1953,22 +1949,8 @@ async function upsertStimFile(stimFilename, stimJSON, ownerId) {
     //  ${clozeStimulus}, ${textStimulus}, ${audioStimulus}, ${imageStimulus}, ${videoStimulus}, \
     //  ${alternateDisplays}::jsonb, ${tags})', stim);
   }
-
-  const stims = await getStimuliSetById(stimuliSetId);
-  let allAnswers = new Set();
-  for (const stim of stims) {
-    const responseParts = stim.correctResponse.toLowerCase().split(';');
-    const answerArray = responseParts.filter(function(entry) {
-      return entry.indexOf('incorrect') == -1;
-    });
-    if (answerArray.length > 0) {
-      const singularAnswer = answerArray[0].split('~')[0];
-      allAnswers.add(singularAnswer);
-    }
-  }
-  allAnswers = Array.from(allAnswers);
   //Update Stim Cache every upload
-  Meteor.call('updateStimSyllableCache', stimuliSetId, allAnswers);
+  Meteor.call('updateStimSyllables', stimuliSetId);
 }
 
 
@@ -2221,41 +2203,35 @@ Meteor.methods({
     // LastStudentAnswer: Mutate this with student input you just got
   },
 
-  updateStimSyllableCache: async function(stimFileName, answers) {
-    let numTries = 0;
-    serverConsole('updateStimSyllableCache');
-    const curStimSyllables = StimSyllables.findOne({filename: stimFileName});
-    serverConsole('curStimSyllables: ' + JSON.stringify(curStimSyllables));
-    if (!curStimSyllables) {
-      let syllablesUploadedSuccessfully = await verifySyllableUpload(stimFileName);
-      while(!syllablesUploadedSuccessfully && numTries < 3){
-        const data = {};
-        for (const answer of answers) {
+  updateStimSyllables: async function(stimSetId) {
+    serverConsole('updateStimSyllables');
+    const curStimuliSet = Items.find({stimuliSetId: stimSetId}).fetch();
+    serverConsole('curStimuliSet: ' + JSON.stringify(curStimuliSet));
+    if (curStimuliSet) {
+      const answerSyllableMap = {};
+      for (const stim of curStimuliSet) {
+        if(!stim.syllables){
           let syllableArray;
           let syllableGenerationError;
+          const answer = stim.correctResponse;
           const safeAnswer = answer.replace(/\./g, '_');
-          try {
-            syllableArray = getSyllablesForWord(safeAnswer);
-          } catch (e) {
+          try{
+            if(!answerSyllableMap[safeAnswer]){
+              answerSyllableMap[safeAnswer] = getSyllablesForWord(safeAnswer);
+            }
+            syllableArray = answerSyllableMap[safeAnswer]
+          }
+          catch (e) {
             serverConsole('error fetching syllables for ' + answer + ': ' + JSON.stringify(e));
             syllableArray = [answer];
             syllableGenerationError = e;
           }
-          data[safeAnswer] = {
-            count: syllableArray.length,
-            syllables: syllableArray,
-            error: syllableGenerationError,
-          };
+          Items.update({_id: stim._id}, { $set: {syllables: syllableArray}})
         }
-        StimSyllables.insert({filename: stimFileName, data: data});
-        serverConsole('after updateStimSyllableCache');
-        serverConsole(stimFileName);
-        numTries++;
-        syllablesUploadedSuccessfully = await verifySyllableUpload(stimFileName);
       }
-      if(!syllablesUploadedSuccessfully){
-        throw new Error('Cannot upload stim file to mongoDB. Discrepency between postgres and mongo.');
-      }
+      serverConsole('after updateStimSyllables');
+      serverConsole(stimSetId);
+      //syllablesUploadedSuccessfully = await verifySyllableUpload(stimSetId);
     }
   },
 
@@ -2667,23 +2643,8 @@ Meteor.methods({
             try {
               const rec = {'fileName': filename, 'tdfs': json, 'ownerId': ownerId, 'source': 'upload'};
               await upsertTDFFile(filename, rec, ownerId);
-              cachedSyllables = StimSyllables.findOne({filename: stimuliSetId});
-              const stims = await getStimuliSetById(stimuliSetId);
-              let allAnswers = new Set();
-              for (const stim of stims) {
-                const responseParts = stim.correctResponse.toLowerCase().split(';');
-                const answerArray = responseParts.filter(function(entry) {
-                  return entry.indexOf('incorrect') == -1;
-                });
-                if (answerArray.length > 0) {
-                  const singularAnswer = answerArray[0].split('~')[0];
-                  allAnswers.add(singularAnswer);
-                }
-              }
-            
-              allAnswers = Array.from(allAnswers);
               //Update Stim Cache every upload
-              Meteor.call('updateStimSyllableCache', stimuliSetId, allAnswers);
+              Meteor.call('updateStimSyllables', stimuliSetId);
               results.result = true;
             } catch (err) {
               results.result=false;

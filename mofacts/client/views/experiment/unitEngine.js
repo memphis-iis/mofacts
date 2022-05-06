@@ -185,8 +185,7 @@ function defaultUnitEngine(curExperimentData) {
             //if(!this.cachedSyllables.data[answer]){
               console.log('no syllable data for that answer, throw error');
               const currentStimuliSetId = Session.get('currentStimuliSetId');
-              const curAnswers = getAllCurrentStimAnswers();
-              Meteor.call('updateStimSyllableCache', currentStimuliSetId, curAnswers, function(){});
+              Meteor.call('updateStimSyllables', currentStimuliSetId, function(){});
               alert('Something went wrong generating hints. Please report this error to the administrator and restart your trial');
           // } else {
           //   //We assume no hints were generated initially, meaning the tdf didn't have hints to start.
