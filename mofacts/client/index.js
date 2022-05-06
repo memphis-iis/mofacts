@@ -7,9 +7,6 @@ import {restartMainCardTimeoutIfNecessary} from './views/experiment/card.js';
 import {instructContinue} from './views/experiment/instructions.js';
 import {routeToSignin} from './lib/router.js';
 import { init } from "meteor/simonsimcity:client-session-timeout";
-
-const localMongo = new Mongo.Collection(null); // local-only - no database
-
 //Prevents new tab
 
 
