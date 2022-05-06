@@ -53,7 +53,7 @@ if (false) {// switch to true to run via node
 
 const localResponseKCMap = {};
 let curResponseKCCtr = 1;
-function getNewItemFormat(stimFile, stimulusFilename, stimuliSetId, responseKCMap) {
+function getNewItemFormat(stimFile, stimulusFileName, stimuliSetId, responseKCMap) {
   const items = [];
   const responseKCs = Object.values(responseKCMap);
   for (const mapResponseKC of responseKCs) {
@@ -85,7 +85,7 @@ function getNewItemFormat(stimFile, stimulusFilename, stimuliSetId, responseKCMa
       }
       const item = {
         stimuliSetId: stimuliSetId,
-        stimulusFilename: stimulusFilename,
+        stimulusFileName: stimulusFileName,
         stimulusKC: stimKC,
         clusterKC: clusterKC,
         responseKC: responseKC,
@@ -104,7 +104,7 @@ function getNewItemFormat(stimFile, stimulusFilename, stimuliSetId, responseKCMa
         tags: stim.tags,
       };
 
-      if (stimulusFilename.indexOf('test') != -1) {
+      if (stimulusFileName.indexOf('test') != -1) {
         console.log('stim:', JSON.stringify(stim), item, stim.display, stim.display.text);
       }
 
