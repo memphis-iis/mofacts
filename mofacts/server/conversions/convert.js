@@ -125,7 +125,7 @@ function getNewTdfFormat(oldTdf, stimuliSetId, tdfId) {
     },
     visibility: oldTdf.visibility || 'profileOnly',
   };
-  if (tdfId) tdfObj.TDFId = tdfId;
+  if (tdfId) tdfObj._id = tdfId;
 
   return tdfObj;
 }
