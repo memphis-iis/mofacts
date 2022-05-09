@@ -9,15 +9,24 @@
         <div class="row">
             <div class="col-md-3">
             <div class="form-group">
-                <span class="btn btn-default btn-file">
+                <span class="btn btn-default btn-file" >
                     Browse
                     <input type="file" class="form-control" name="upload-users" id="upload-users" value="" placeholder="Users File">
                     <span class='label label-info file-info' id="users-file-info"></span>
                 </span>
             </div>
-            <button type='button' id='doUploadUsers' class='btn btn-fix'>
-                Upload User File
-            </button>
+            <div class="form-group">
+                <button type='button' id='doUploadUsers' class='btn btn-fix btn-default'>
+                    Upload User File
+                </button>
+            </div>
+            <div class="form-group">
+            {{#if isInRole 'admin'}}
+                <button type='button' id='resetAllSecretKeys' class='btn btn-fix btn-default'>
+                    Reset Teacher Secret Keys
+                </button>
+            {{/if}}
+            </div>
             </div>
         </div>
 
