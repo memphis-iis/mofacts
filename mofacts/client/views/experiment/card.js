@@ -429,7 +429,10 @@ Template.card.rendered = async function() {
 
   window.AudioContext = window.webkitAudioContext || window.AudioContext;
   window.URL = window.URL || window.webkitURL;
-  audioContext = new AudioContext();
+  const audioContextConfig = {
+    sampleRate: 48000,
+  }
+  audioContext = new AudioContext(audioContextConfig);
   // If user has enabled audio input initialize web audio (this takes a bit)
   // (this will eventually call cardStart after we redirect through the voice
   // interstitial and get back here again)
@@ -799,7 +802,6 @@ function pollMediaDevices() {
 }
 
 function clearAudioContextAndRelatedVariables() {
-  audioContext.close();
   if (streamSource) {
     streamSource.disconnect();
   }
@@ -818,7 +820,8 @@ function clearAudioContextAndRelatedVariables() {
 
 function reinitializeMediaDueToDeviceChange() {
   // This will be decremented on startUserMedia and the main card timeout will be reset due to card being reloaded
-  data = localMongo.findOne({}) || {}; data.pausedLocks =  localMongo.findOne({}).pausedLocks+1; localMongo.update({},{$set:data});
+  Session.set('pausedLocks', Session.get('pausedLocks')+1);
+  audioContext.close();
   clearAudioContextAndRelatedVariables();
   const errMsg = 'It appears you may have unplugged your microphone.  \
     Please plug it back then click ok to reinitialize audio input.';
@@ -985,7 +988,12 @@ function setUpButtonTrial() {
   let correctButtonPopulated = null;
 
   if (buttonOptions) {
-    buttonChoices = buttonOptions.split(',');
+    if(typeof buttonOptions == "object"){
+      buttonChoices = buttonOptions
+    }
+    else{
+      buttonChoices = buttonOptions.split(',');
+    }
     correctButtonPopulated = true;
     console.log('buttonChoices==buttonOptions', buttonChoices);
   } else {
@@ -2603,7 +2611,7 @@ function makeGoogleSpeechAPICall(request, speechAPIKey, answerGrammar) {
 
 let recorder = null;
 let audioContext = null;
-window.audioContext1 = audioContext;
+window.audioContext = audioContext;
 let selectedInputDevice = null;
 let userMediaStream = null;
 let streamSource = null;
@@ -2616,6 +2624,7 @@ function startUserMedia(stream) {
   pollMediaDevicesInterval = Meteor.setInterval(pollMediaDevices, 2000);
   console.log('START USER MEDIA');
   const input = audioContext.createMediaStreamSource(stream);
+  window.audioContext = audioContext;
   streamSource = input;
   // Firefox hack https://support.mozilla.org/en-US/questions/984179
   window.firefox_audio_hack = input;

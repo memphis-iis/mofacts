@@ -93,32 +93,40 @@ function sessionCleanUp() {
   data = localMongo.findOne({})  || {}; data.clozeQuestionParts =  undefined; localMongo.update({},{$set:data});
   data = localMongo.findOne({})  || {}; data.engineIndices =  undefined; localMongo.update({},{$set:data});
 
-  data = localMongo.findOne({})  || {}; data.currentUnitStartTime =  Date.now(); localMongo.update({},{$set:data});
-  data = localMongo.findOne({})  || {}; data.currentScore =  0; localMongo.update({},{$set:data});
-  data = localMongo.findOne({})  || {}; data.overallOutcomeHistory =  []; localMongo.update({},{$set:data});
-  data = localMongo.findOne({})  || {}; data.dialogueLoopStage =  undefined; localMongo.update({},{$set:data});
-  data = localMongo.findOne({})  || {}; data.dialogueHistory =  undefined; localMongo.update({},{$set:data});
-  data = localMongo.findOne({})  || {}; data.enableAudioPromptAndFeedback =  false; localMongo.update({},{$set:data});
-  data = localMongo.findOne({})  || {}; data.errorReportStart =  undefined; localMongo.update({},{$set:data});
-  data = localMongo.findOne({})  || {}; data.mainCardTimeoutStart =  undefined; localMongo.update({},{$set:data});
-  data = localMongo.findOne({})  || {}; data.pausedLocks =  0; localMongo.update({},{$set:data});
-  data = localMongo.findOne({})  || {}; data.audioPromptMode =  undefined; localMongo.update({},{$set:data});
-  data = localMongo.findOne({})  || {}; data.experimentPasswordRequired =  false; localMongo.update({},{$set:data});
-  data = localMongo.findOne({})  || {}; data.filter =  '@gmail.com'; localMongo.update({},{$set:data});
-  data = localMongo.findOne({})  || {}; data.ignoreOutOfGrammarResponses =  false; localMongo.update({},{$set:data});
-  data = localMongo.findOne({})  || {}; data.inResume =  false; localMongo.update({},{$set:data});
-  data = localMongo.findOne({})  || {}; data.questionIndex =  undefined; localMongo.update({},{$set:data});
-  data = localMongo.findOne({})  || {}; data.recording =  false; localMongo.update({},{$set:data});
-  data = localMongo.findOne({})  || {}; data.sampleRate =  undefined; localMongo.update({},{$set:data});
-  data = localMongo.findOne({})  || {}; data.unitType =  undefined; localMongo.update({},{$set:data});
-  data = localMongo.findOne({})  || {}; data.showOverlearningText =  undefined; localMongo.update({},{$set:data});
-  data = localMongo.findOne({})  || {}; data.speechOutOfGrammarFeedback =  undefined; localMongo.update({},{$set:data});
-  data = localMongo.findOne({})  || {}; data.subTdfIndex =  undefined; localMongo.update({},{$set:data});
-  data = localMongo.findOne({})  || {}; data.testType =  undefined; localMongo.update({},{$set:data});
-  data = localMongo.findOne({})  || {}; data.VADInitialized =  false; localMongo.update({},{$set:data});
-  data = localMongo.findOne({})  || {}; data.scoringEnabled =  undefined; localMongo.update({},{$set:data});
-  data = localMongo.findOne({})  || {}; data.feedbackParamsSet =  undefined; localMongo.update({},{$set:data});
-  data = localMongo.findOne({})  || {}; data.instructionQuestionResult =  undefined; localMongo.update({},{$set:data});
-  data = localMongo.findOne({})  || {}; data.hintLevel =  undefined; localMongo.update({},{$set:data});
+  Session.set('currentUnitStartTime', Date.now());
+  Session.set('currentScore', 0);
+  Session.set('overallOutcomeHistory', []);
+  Session.set('dialogueLoopStage', undefined);
+  Session.set('dialogueHistory', undefined);
+  Session.set('enableAudioPromptAndFeedback', false);
+  Session.set('errorReportStart', undefined);
+  Session.set('mainCardTimeoutStart', undefined);
+  Session.set('pausedLocks', 0);
+  Session.set('audioPromptMode', undefined);
+  Session.set('experimentPasswordRequired', false);
+  Session.set('filter', '@gmail.com');
+  Session.set('ignoreOutOfGrammarResponses', false);
+  Session.set('inResume', false);
+  Session.set('questionIndex', undefined);
+  Session.set('recording', false);
+  Session.set('sampleRate', undefined);
+  Session.set('unitType', undefined);
+  Session.set('showOverlearningText', undefined);
+  Session.set('speechOutOfGrammarFeedback', undefined);
+  Session.set('subTdfIndex', undefined);
+  Session.set('testType', undefined);
+  Session.set('VADInitialized', false);
+  Session.set('scoringEnabled', undefined);
+  Session.set('feedbackParamsSet', undefined);
+  Session.set('instructionQuestionResult', undefined);
+  Session.set('hintLevel', undefined);
+  Meteor.clearInterval(Session.get('CurIntervalId'))
+  Session.set('CurIntervalId', undefined)
+  Meteor.clearTimeout(Session.get('CurTimeoutId'));
+  Session.set('CurTimeoutId', undefined);
+  if(window.audioContext && window.audioContext.state != "closed"){
+    window.audioContext.close();
+    window.audioContext = null;
+  }
 }
 
