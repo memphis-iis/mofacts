@@ -125,8 +125,8 @@ async function createExperimentExport(expName, isFirstInFileArray = true) {
     const histories = await getHistoryByTDFfileName(expName);
     for (let history of histories) {
       try {
-        const clusterKC = history.kc_cluster;
-        const stimulusKC = history.kc_default;
+        const clusterKC = history.KCCluster;
+        const stimulusKC = history.KCDefault;
         history = getHistory(history);
         const dynamicStimTagValues = await getValuesOfStimTagList(expName, clusterKC, stimulusKC, listOfDynamicStimTags);
         for (const tag of Object.keys(dynamicStimTagValues)) {

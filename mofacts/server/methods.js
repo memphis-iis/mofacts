@@ -1064,7 +1064,7 @@ async function getTdfNamesAssignedByInstructor(instructorID) {
     //             INNER JOIN tdf AS t ON t.TDFId = a.TDFId \
     //             WHERE c.teacherUserId = $1 AND c.semester = $2';
     // const assignmentTdfFileNames = await db.any(query, [instructorID, curSemester]);
-    const assignmentTdfFileNames = await Courses.rawCollection().aggregate([{
+    let  assignmentTdfFileNames = await Courses.rawCollection().aggregate([{
       $lookup:{
         from: "assessments",
         localField: "_id",
@@ -1094,13 +1094,14 @@ async function getTdfNamesAssignedByInstructor(instructorID) {
     },
     {
       $project:{
+        _id: 0,
         fileName: "$TDF.content.fileName"
       }
     }
   ]).toArray();
-    const unboxedAssignmentTdfFileNames = assignmentTdfFileNames.map((obj) => obj.filename);
-    serverConsole('assignmentTdfFileNames', unboxedAssignmentTdfFileNames);
-    return unboxedAssignmentTdfFileNames;
+  assignmentTdfFileNames = assignmentTdfFileNames.map(t => t.fileName)
+    serverConsole('assignmentTdfFileNames', assignmentTdfFileNames);
+    return assignmentTdfFileNames;
   } catch (e) {
     serverConsole('getTdfNamesAssignedByInstructor ERROR,', e);
     return null;
