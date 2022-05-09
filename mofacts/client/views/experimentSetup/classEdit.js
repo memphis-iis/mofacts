@@ -18,7 +18,7 @@ let curClass = {
 function classSelectedSetup(curClassName) {
   $('#class-select').children('[value="' + curClassName + '"]').attr('selected', true);
   $('#newClassName').val(curClassName);
-  const foundClass = search(curClassName, 'courseName', Session.get('classes'));
+  const foundClass = Session.get('classes').find(c => c.courseName = curClassName);
   $('#sectionNames').val(foundClass.sections.map((x) => x + '\n').join(''));
   isNewClass = false;
 }
@@ -66,7 +66,6 @@ Template.classEdit.events({
         return false;
       }
       curClass = {
-        courseId: undefined,
         courseName: curClassName,
         teacherUserId: Meteor.userId(),
         semester: curSemester,
