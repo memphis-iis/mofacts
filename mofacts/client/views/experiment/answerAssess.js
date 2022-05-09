@@ -254,12 +254,13 @@ function checkAnswer(userAnswer, correctAnswer, originalAnswer, lfparameter, use
         // Take first answer if it's a bar-delimited string
         dispAnswer = _.trim(dispAnswer.split('|')[0]);
       }
+
       //check for answer repetition 
       let answerWordsCount = correctAnswer.split(" ").length;
       let userAnswerWords = userAnswer.split(" ");
       let userFirstAnswer =  userAnswerWords.slice(0,answerWordsCount - 1).join(" ");
       if(userFirstAnswer.toLowerCase() == correctAnswer.toLowerCase()){
-         userAnswer = userFirstAnswer;
+        userAnswer = userFirstAnswer;
       }
 
       const match = stringMatch(originalAnswer, userAnswer, lfparameter, userInput);
@@ -328,18 +329,6 @@ const Answers = {
 
     // Try again with original answer in case we did a syllable answer and they input the full response
     if (!fullTextIsCorrect.isCorrect && !!originalAnswer) {
-      let index = 0;
-      let subAnswer = answer.split(' ').slice(0, index + 1).join(' ');
-      while(displayedAnswer >= subAnswer){
-        if(displayedAnswer == subAnswer){
-          //hint ended on a whole word. need to add a space before checking answer
-          userInput = userInput.trim();
-          userInput = ' ' + userInput;
-          break;
-        }
-        index += 1;
-        subAnswer = answer.split(' ').slice(0, index + 1).join(' ');
-      }
       let userInputWithAddedSylls = displayedAnswer + userInput;
       fullTextIsCorrect = checkAnswer(userInputWithAddedSylls, originalAnswer, originalAnswer, lfparameter, userInput);
     }
