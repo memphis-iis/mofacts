@@ -2806,7 +2806,8 @@ Meteor.startup(async function() {
 
   roleAdd('admins', 'admin');
   roleAdd('teachers', 'teacher');
-  const ret = await db.oneOrNone('SELECT COUNT(*) FROM tdf');
+  //const ret = await db.oneOrNone('SELECT COUNT(*) FROM tdf');
+  const ret = Tdfs.find().count();
   if (ret.count == 0) loadStimsAndTdfsFromPrivate(adminUserId);
 
   // Make sure we create a default user profile record when a new Google user
