@@ -737,12 +737,9 @@ async function getAllCourseSections() {
         }
       },
       {
-        $unwind: {path: "$section"}
-      },
-      {
         $project: {
           _id: 0,
-          sectionName: "$section.sectionName",
+          sections: "$section.sectionName",
           courseId: "$_id",
           courseName: 1,
           teacherUserId: 1,
@@ -1200,10 +1197,9 @@ async function addCourse(mycourse) {
 
 async function editCourse(mycourse) {
   serverConsole('editCourse:' + JSON.stringify(mycourse));
-  const courseId = Courses.update({_id: mycourse.courseId}, mycourse);
-  serverConsole('courseId', courseId, row);
+  Courses.update({_id: mycourse._id}, mycourse);
   const newSections = mycourse.sections;
-  const curCourseSections = Sections.find({courseId: courseId}).fetch()
+  const curCourseSections = Sections.find({courseId: mycourse.courseId}).fetch()
   const oldSections = curCourseSections.map((section) => section.sectionName);
   serverConsole('old/new', oldSections, newSections);
 
@@ -1213,13 +1209,13 @@ async function editCourse(mycourse) {
   serverConsole('sectionsRemoved,', sectionsRemoved);
 
   for (const sectionName of sectionsAdded) {
-    Sections.insert({courseId: courseId, sectionName: sectionName});
+    Sections.insert({courseId: mycourse.courseId, sectionName: sectionName});
   }
   for (const sectionName of sectionsRemoved) {
-    Sections.remove({courseId: courseId, sectionName: sectionName});
+    Sections.remove({courseId: mycourse.courseId, sectionName: sectionName});
   }
 
-  return res;
+  return mycourse.courseId;
 }
 
 async function addUserToTeachersClass(userid, teacherID, sectionId) {
@@ -1591,32 +1587,36 @@ async function getStudentPerformanceForClassAndTdfId(instructorId, date=null) {
     let sectionsRet = userMap.filter(u => u.userId == history.userId); //find all the sections that the user is in
     for(section of sectionsRet){
       let sectionId = section.sectionId;
-      let courseId = sections.find(s => s._id == sectionId).courseId; //find the courseID of each section
-      let course = courses.find(c => c._id == courseId);
-      if(course.teacherUserId == instructorId){
-        let foundIndex = studentPerformanceRet.findIndex( entry => 
-          entry.TDFId == history.TDFId && 
-          entry.userId == history.userId && 
-          entry.courseId == courseId
-        )
-        const correct = history.outcome == 'correct'
-        if(foundIndex > 0){
-          //entry exists
-          const studentPerf = studentPerformanceRet[foundIndex];
-          studentPerformanceRet[foundIndex].correct = studentPerf.correct + (correct ? 1 : 0);
-          studentPerformanceRet[foundIndex].incorrect = studentPerf.incorrect + (correct ? 0 : 1);
-          studentPerformanceRet[foundIndex].totalPracticeDuration = studentPerf.totalPracticeDuration + history.CFEndLatency + history.CFFeedbackLatency;
-        }
-        else{
-          studentPerformanceRet.push({
-            TDFId: history.TDFId,
-            courseId: courseId,
-            userId: history.userId,
-            correct: correct ? 1 : 0,
-            incorrect: correct ? 0 : 1,
-            totalPracticeDuration: history.CFEndLatency + history.CFFeedbackLatency,
-            sectionId: sectionId
-          })
+      let courseId = sections.find(s => s._id == sectionId); //find the courseID of each section
+      if(courseId)
+      {
+        courseId = courseId.courseId
+        let course = courses.find(c => c._id == courseId);
+        if(course.teacherUserId == instructorId){
+          let foundIndex = studentPerformanceRet.findIndex( entry => 
+            entry.TDFId == history.TDFId && 
+            entry.userId == history.userId && 
+            entry.courseId == courseId
+          )
+          const correct = history.outcome == 'correct'
+          if(foundIndex > 0){
+            //entry exists
+            const studentPerf = studentPerformanceRet[foundIndex];
+            studentPerformanceRet[foundIndex].correct = studentPerf.correct + (correct ? 1 : 0);
+            studentPerformanceRet[foundIndex].incorrect = studentPerf.incorrect + (correct ? 0 : 1);
+            studentPerformanceRet[foundIndex].totalPracticeDuration = studentPerf.totalPracticeDuration + history.CFEndLatency + history.CFFeedbackLatency;
+          }
+          else{
+            studentPerformanceRet.push({
+              TDFId: history.TDFId,
+              courseId: courseId,
+              userId: history.userId,
+              correct: correct ? 1 : 0,
+              incorrect: correct ? 0 : 1,
+              totalPracticeDuration: history.CFEndLatency + history.CFFeedbackLatency,
+              sectionId: sectionId
+            })
+          }
         }
       }
     }
