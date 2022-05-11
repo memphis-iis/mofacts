@@ -110,17 +110,6 @@ setTeacher = function(teacher) { // Shape: {_id:'{{this._id}}',username:'{{this.
   }
 };
 
-// eslint-disable-next-line no-undef
-setClass = function(curClassID) {
-  console.log(curClassID);
-  $('#classSelection').prop('hidden', 'true');
-  const allClasses = Session.get('curTeacherClasses');
-  const curClass = allClasses.find((aClass) => aClass.sectionid == curClassID);
-  Session.set('curClass', curClass);
-  Session.set('curSectionId', curClass.sectionid)
-  $('.login').prop('hidden', '');
-};
-
 Template.signInSouthwest.onCreated(async function() {
   Session.set('loginMode', 'southwest');
   Meteor.call('isSystemDown', function(err, systemDown) {
@@ -246,6 +235,18 @@ Template.signInSouthwest.events({
             });
       }
     });
+  },
+
+  'click #courseLink': function(event) {
+    event.preventDefault();
+    const sectionId = event.target.getAttribute('section-id');
+    console.log(sectionId);
+    $('#classSelection').prop('hidden', 'true');
+    const allClasses = Session.get('curTeacherClasses');
+    const curClass = allClasses.find((aClass) => aClass.sectionId.includes(sectionId));
+    Session.set('curClass', curClass);
+    Session.set('curSectionId', sectionId)
+    $('.login').prop('hidden', '');
   },
 
   'keypress .accept-enter-key': function(event) {
