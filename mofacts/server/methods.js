@@ -995,14 +995,14 @@ async function getTdfAssignmentsByCourseIdMap(instructorId) {
 }
 
 async function getTdfsAssignedToStudent(userId, curSectionId) {
-  serverConsole('getTdfsAssignedToStudent', userId);
+  serverConsole('getTdfsAssignedToStudent', userId, curSectionId);
   // Postgres Reversion
   // const query = 'SELECT t.* from TDF AS t INNER JOIN assignment AS a ON a.TDFId = t.TDFId INNER JOIN course AS c \
   //               ON c.courseId = a.courseId INNER JOIN section AS s ON s.courseId = c.courseId \
   //               INNER JOIN section_user_map AS m \
   //               ON m.sectionId = s.sectionId WHERE m.userId = $1 AND c.semester = $2 AND s.sectionId = $3';
   // const tdfs = await db.manyOrNone(query, [userId, curSemester, curSectionId]);
-  const tdfs = await TDFs.rawCollection().aggregate([{
+  const tdfs = await Tdfs.rawCollection().aggregate([{
     $lookup:{
       from: "assessments",
       localField: "_id",
@@ -1046,13 +1046,11 @@ async function getTdfsAssignedToStudent(userId, curSectionId) {
   {
     $match: {
       "course.semester": curSemester,
-      "course.teacherUserId": instructorId,
       "section._id": curSectionId
     }
   }
 ]).toArray();
-  const formattedTdfs = tdfs.map((x) => getTdf(x));
-  return formattedTdfs;
+return tdfs;
 }
 
 async function getTdfNamesAssignedByInstructor(instructorID) {
@@ -1218,16 +1216,16 @@ async function editCourse(mycourse) {
   return mycourse.courseId;
 }
 
-async function addUserToTeachersClass(userid, teacherID, sectionId) {
-  serverConsole('addUserToTeachersClass', userid, teacherID, sectionId);
+async function addUserToTeachersClass(userId, teacherID, sectionId) {
+  serverConsole('addUserToTeachersClass', userId, teacherID, sectionId);
 
   //const query = 'SELECT COUNT(*) AS existingMappingCount FROM section_user_map WHERE sectionId=$1 AND userId=$2';
-  //await db.oneOrNone(query, [sectionId, userid]);
+  //await db.oneOrNone(query, [sectionId, userId]);
   const existingMappingCount = SectionUserMap.find({sectionId: sectionId, userId: userId}).count();
   serverConsole('existingMapping', existingMappingCount);
   if (existingMappingCount == 0) {
-    serverConsole('new user, inserting into section_user_mapping', [sectionId, userid]);
-    //await db.none('INSERT INTO section_user_map(sectionId, userId) VALUES($1, $2)', [sectionId, userid]);
+    serverConsole('new user, inserting into section_user_mapping', [sectionId, userId]);
+    //await db.none('INSERT INTO section_user_map(sectionId, userId) VALUES($1, $2)', [sectionId, userId]);
     SectionUserMap.insert({sectionId: sectionId, userId: userId});
   }
 
