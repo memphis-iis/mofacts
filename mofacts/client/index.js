@@ -107,6 +107,11 @@ Template.body.onRendered(function() {
     restartMainCardTimeoutIfNecessary();
   });
 
+  $('#helpModal').on('hidden.bs.modal', function() {
+    console.log('error reporting modal hidden');
+    restartMainCardTimeoutIfNecessary();
+  });
+
   // Global handler for continue buttons
   $(window).keypress(function(e) {
     const key = e.keyCode || e.which;
@@ -161,6 +166,16 @@ Template.body.events({
     Session.set('instructorSelectedTdf', undefined);
     Session.set('curClassPerformance', undefined);
     Router.go('/studentReporting');
+  },
+  'click #helpButton': function(event) {
+    event.preventDefault();
+    Session.set('pausedLocks', Session.get('pausedLocks')+1);
+    Session.set('errorReportStart', new Date());
+    $('#helpModal').modal('show');
+  },
+  'click #helpCloseButton': function(event) {
+    event.preventDefault();
+    $('#errorReportingModal').modal('hide');
   },
 
   'click #errorReportButton': function(event) {
@@ -224,29 +239,31 @@ Template.body.events({
 Template.registerHelper('isLoggedIn', function() {
   return haveMeteorUser();
 });
-
 Template.registerHelper('showPerformanceDetails', function() {
   return (Session.get('curModule') == 'card' || Session.get('curModule') == 'instructions') && Session.get('scoringEnabled');
 });
-
 Template.registerHelper('currentScore', function() {
   return Session.get('currentScore');
 });
-
 Template.registerHelper('isNormal', function() {
   return Session.get('loginMode') !== 'experiment';
 });
-
 Template.registerHelper('curStudentPerformance', function() {
   return Session.get('curStudentPerformance');
 });
-
 Template.registerHelper('showFeedbackResetButton', function() {
   return Session.get('curModule') == 'card' && Session.get('currentTdfFile').tdfs.tutor.unit[Session.get('currentUnitNumber')].deliveryparams.allowFeedbackTypeSelect
 });
+Template.registerHelper('isInTrial', function() {
+  return Session.get('curModule') == 'card'
+});
 Template.registerHelper('isInSession', function() {
   return (Session.get('curModule') == 'profile');
-})
+});
+Template.registerHelper('curTdfTips', function() {
+  if(Session.get('curTdfTips'))
+    return Session.get('curTdfTips');
+});
 Template.registerHelper('and',(a,b)=>{
   return a && b;
 });
