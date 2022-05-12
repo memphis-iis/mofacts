@@ -401,11 +401,13 @@ async function selectTdf(currentTdfId, lessonName, currentStimuliSetId, ignoreOu
   Session.set('currentTdfId', currentTdfId);
   const tdfResponse = await meteorCallAsync('getTdfById', currentTdfId);
   const curTdfContent = tdfResponse.content;
+  const curTdfTips = tdfResponse.content.tdfs.tutor.setspec.tips;
   Session.set('currentTdfFile', curTdfContent);
   Session.set('currentTdfName', curTdfContent.fileName);
   Session.set('currentStimuliSetId', currentStimuliSetId);
   Session.set('ignoreOutOfGrammarResponses', ignoreOutOfGrammarResponses);
   Session.set('speechOutOfGrammarFeedback', speechOutOfGrammarFeedback);
+  Session.set('curTdfTips', curTdfTips)
 
   // Record state to restore when we return to this page
   const audioPromptMode = getAudioPromptModeFromPage();
