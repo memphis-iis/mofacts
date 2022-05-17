@@ -2294,6 +2294,7 @@ function stopUserInput() {
 function speakMessageIfAudioPromptFeedbackEnabled(msg, audioPromptSource) {
   const enableAudioPromptAndFeedback = Session.get('enableAudioPromptAndFeedback');
   const audioPromptMode = Session.get('audioPromptMode');
+  let synthesis = window.speechSynthesis;
   if (enableAudioPromptAndFeedback) {
     if (audioPromptSource === audioPromptMode || audioPromptMode === 'all') {
       Session.set('recordingLocked', true);
@@ -2317,23 +2318,31 @@ function speakMessageIfAudioPromptFeedbackEnabled(msg, audioPromptSource) {
             console.log('makeGoogleTTSApiCall returned undefined object')
           }
           else{
-            const audioObj = new Audio('data:audio/ogg;base64,' + res)
-            Session.set('recordingLocked', true);
-            if (window.currentAudioObj) {
-              window.currentAudioObj.pause();
+            try{
+              const audioObj = new Audio('data:audio/ogg;base64,' + res)
+              Session.set('recordingLocked', true);
+              if (window.currentAudioObj) {
+                window.currentAudioObj.pause();
+              }
+              window.currentAudioObj = audioObj;
+              audioObj.addEventListener('ended', (event) => {
+                Session.set('recordingLocked', false);
+                startRecording();
+              });
+              console.log('inside callback, playing audioObj:');
+              audioObj.play();
             }
-            window.currentAudioObj = audioObj;
-            audioObj.addEventListener('ended', (event) => {
-              Session.set('recordingLocked', false);
-              startRecording();
-            });
-            console.log('inside callback, playing audioObj:');
-            audioObj.play();
+            catch(e){
+              let utterance = new SpeechSynthesisUtterance(msg);
+              synthesis.speak(utterance);
+            }
           }
         });
         console.log('providing audio feedback');
       } else {
-        console.log('Text-to-Speech API key not found');
+        console.log('Text-to-Speech API key not found, using MDN Speech Synthesis');
+        let utterance = new SpeechSynthesisUtterance(msg);
+        synthesis.speak(utterance);
       }
     }
   } else {
