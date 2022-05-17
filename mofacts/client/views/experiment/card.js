@@ -2399,19 +2399,19 @@ async function processLINEAR16(data) {
     // Make the actual call to the google speech api with the audio data for transcription
     if (tdfSpeechAPIKey && tdfSpeechAPIKey != '') {
       console.log('tdf key detected');
-      Meteor.call('makeGoogleSpeechAPICall', Session.get('currentTdfId'), "", request, answerGrammar, (err, res) => speachAPICallback(err, res));
+      Meteor.call('makeGoogleSpeechAPICall', Session.get('currentTdfId'), "", request, answerGrammar, (err, res) => speechAPICallback(err, res));
     // If we don't have a tdf provided speech api key load up the user key
     // NOTE: we shouldn't be able to get here if there is no user key
     } else {
       console.log('no tdf key, using user provided key');
-      Meteor.call('makeGoogleSpeechAPICall', Session.get('currentTdfId'), Session.get('speechAPIKey'), request, answerGrammar, (err, res) => speachAPICallback(err, res));
+      Meteor.call('makeGoogleSpeechAPICall', Session.get('currentTdfId'), Session.get('speechAPIKey'), request, answerGrammar, (err, res) => speechAPICallback(err, res));
     }
   } else {
     console.log('processLINEAR16 userAnswer not defined');
   }
 }
 
-function speachAPICallback(err, data){
+function speechAPICallback(err, data){
   let [answerGrammar, response] = data;
   let transcript = '';
   const ignoreOutOfGrammarResponses = Session.get('ignoreOutOfGrammarResponses');
