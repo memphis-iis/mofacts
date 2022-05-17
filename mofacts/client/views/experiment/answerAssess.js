@@ -241,6 +241,7 @@ function _branchingCorrectText(answer) {
 
 function checkAnswer(userAnswer, correctAnswer, originalAnswer, lfparameter, userInput) {
   const answerDisplay = originalAnswer;
+  let match = 0;
   let isCorrect; let matchText;
   if(userAnswer === ''){
     matchText = 'Incorrect. The correct answer is ' + _.trim(answerDisplay) + '.';
@@ -259,12 +260,14 @@ function checkAnswer(userAnswer, correctAnswer, originalAnswer, lfparameter, use
       let answerWordsCount = correctAnswer.split(" ").length;
       let userAnswerWords = userAnswer.split(" ");
       let userFirstAnswer =  userAnswerWords.slice(0,answerWordsCount - 1).join(" ");
-      if(userFirstAnswer.toLowerCase() == correctAnswer.toLowerCase()){
-        userAnswer = userFirstAnswer;
+      let userSecondAnswer = user.AnswerWords.slice(answerWordsCount, answerWordsCount);
+      match = stringMatch(originalAnswer, userAnswer, lfparameter, userInput);
+      if(match == 0){
+        match = stringMatch(originalAnswer, userFirstAnswer, lfparameter, userInput);
       }
-      
-      const match = stringMatch(originalAnswer, userAnswer, lfparameter, userInput);
-
+      if(match == 0){
+        match = stringMatch(originalAnswer, userSecondAnswer, lfparameter, userInput);
+      }
       if (match === 0) {
         isCorrect = false;
         matchText = '';
