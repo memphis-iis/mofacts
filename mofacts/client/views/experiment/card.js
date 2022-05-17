@@ -2318,24 +2318,22 @@ function speakMessageIfAudioPromptFeedbackEnabled(msg, audioPromptSource) {
             console.log('makeGoogleTTSApiCall returned undefined object')
           }
           else{
-            try{
-              const audioObj = new Audio('data:audio/ogg;base64,' + res)
-              Session.set('recordingLocked', true);
-              if (window.currentAudioObj) {
-                window.currentAudioObj.pause();
-              }
-              window.currentAudioObj = audioObj;
-              audioObj.addEventListener('ended', (event) => {
-                Session.set('recordingLocked', false);
-                startRecording();
-              });
-              console.log('inside callback, playing audioObj:');
-              audioObj.play();
+            const audioObj = new Audio('data:audio/ogg;base64,' + res)
+            Session.set('recordingLocked', true);
+            if (window.currentAudioObj) {
+              window.currentAudioObj.pause();
             }
-            catch(e){
+            window.currentAudioObj = audioObj;
+            audioObj.addEventListener('ended', (event) => {
+              Session.set('recordingLocked', false);
+              startRecording();
+            });
+            console.log('inside callback, playing audioObj:');
+            audioObj.play().catch((err) => {
+              console.log(err)
               let utterance = new SpeechSynthesisUtterance(msg);
               synthesis.speak(utterance);
-            }
+            });
           }
         });
         console.log('providing audio feedback');
