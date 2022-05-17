@@ -119,5 +119,14 @@ function sessionCleanUp() {
   Session.set('feedbackParamsSet', undefined);
   Session.set('instructionQuestionResult', undefined);
   Session.set('hintLevel', undefined);
+  Session.set('curTdfTips', undefined)
+  Meteor.clearInterval(Session.get('CurIntervalId'))
+  Session.set('CurIntervalId', undefined)
+  Meteor.clearTimeout(Session.get('CurTimeoutId'));
+  Session.set('CurTimeoutId', undefined);
+  if(window.audioContext && window.audioContext.state != "closed"){
+    window.audioContext.close();
+    window.audioContext = null;
+  }
 }
 
