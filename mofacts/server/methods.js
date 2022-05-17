@@ -1776,12 +1776,11 @@ Meteor.methods({
         'Content-Type': 'application/json; charset=utf-8'
       }
     }
-    return await makeHTTPSrequest(options, request).then(data, error => {
+    return await makeHTTPSrequest(options, request).then((data, error) => {
       if(error)
         throw new Meteor.Error('Error with Google TTS API call: ' + error);
       response = JSON.parse(data.toString('utf-8'))
-      const audioDataEncoded = response.audioContent;
-      return audioDataEncoded;
+      return response.audioContent;
     });
   },
   
@@ -1795,7 +1794,7 @@ Meteor.methods({
       path: '/v1/speech:recognize?key=' + speechAPIKey,
       method: 'POST'
     }
-    return await makeHTTPSrequest(options, JSON.stringify(request)).then(data, error => {
+    return await makeHTTPSrequest(options, JSON.stringify(request)).then((data, error) => {
       if(error)
         throw new Meteor.Error('Error with Google SR API call: ' + error);
       return [answerGrammar, JSON.parse(data.toString('utf-8'))]
