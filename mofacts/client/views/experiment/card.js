@@ -2302,27 +2302,34 @@ function speakMessageIfAudioPromptFeedbackEnabled(msg, audioPromptSource) {
       msg = msg.replace(/(&nbsp;)+/g, 'blank');
       // Remove all HTML
       msg = msg.replace( /(<([^>]+)>)/ig, '');
-      let ttsAPIKey = '';
       if (Session.get('currentTdfFile').tdfs.tutor.setspec.textToSpeechAPIKey) {
-        ttsAPIKey = Session.get('currentTdfFile').tdfs.tutor.setspec.textToSpeechAPIKey;
         let audioPromptSpeakingRate = Session.get('audioPromptFeedbackSpeakingRate');
         let audioPromptVolume = Session.get('audioPromptFeedbackVolume')
         if (audioPromptSource == 'question'){
           audioPromptSpeakingRate = Session.get('audioPromptQuestionSpeakingRate');
           audioPromptVolume = Session.get('audioPromptQuestionVolume')
         }
-        makeGoogleTTSApiCall(msg, ttsAPIKey, audioPromptSpeakingRate, audioPromptVolume, function(audioObj) {
-          Session.set('recordingLocked', true);
-          if (window.currentAudioObj) {
-            window.currentAudioObj.pause();
+        Meteor.call('makeGoogleTTSApiCall', Session.get('currentTdfId'), msg, audioPromptSpeakingRate, audioPromptVolume, function(err, res) {
+          if(err){
+            console.log(err)
           }
-          window.currentAudioObj = audioObj;
-          audioObj.addEventListener('ended', (event) => {
-            Session.set('recordingLocked', false);
-            startRecording();
-          });
-          console.log('inside callback, playing audioObj:');
-          audioObj.play();
+          else if(res == undefined){
+            console.log('makeGoogleTTSApiCall returned undefined object')
+          }
+          else{
+            const audioObj = new Audio('data:audio/ogg;base64,' + res)
+            Session.set('recordingLocked', true);
+            if (window.currentAudioObj) {
+              window.currentAudioObj.pause();
+            }
+            window.currentAudioObj = audioObj;
+            audioObj.addEventListener('ended', (event) => {
+              Session.set('recordingLocked', false);
+              startRecording();
+            });
+            console.log('inside callback, playing audioObj:');
+            audioObj.play();
+          }
         });
         console.log('providing audio feedback');
       } else {
@@ -2331,32 +2338,6 @@ function speakMessageIfAudioPromptFeedbackEnabled(msg, audioPromptSource) {
     }
   } else {
     console.log('audio feedback disabled');
-  }
-}
-
-function decodeBase64AudioContent(audioDataEncoded) {
-  return new Audio('data:audio/ogg;base64,' + audioDataEncoded);
-}
-
-function makeGoogleTTSApiCall(message, ttsAPIKey, audioPromptSpeakingRate, audioVolume, callback) {
-  const request = {
-    input: {text: message},
-    voice: {languageCode: 'en-US', ssmlGender: 'FEMALE'},
-    audioConfig: {audioEncoding: 'MP3', speakingRate: audioPromptSpeakingRate, volumeGainDb: audioVolume},
-  };
-
-  const ttsURL = 'https://texttospeech.googleapis.com/v1/text:synthesize?key=' + ttsAPIKey;
-  // only make tts calls on pages: card, instruction, experiment
-  if(document.location.pathname == '/card' || document.location.pathname == '/instruction' || document.location.pathname.split('/')[1] == 'experiment'){
-    HTTP.call('POST', ttsURL, {'data': request}, function(err, response) {
-      if (err) {
-        console.log('err: ', err);
-      } else {
-        const audioDataEncoded = response.data.audioContent;
-        const audioData = decodeBase64AudioContent(audioDataEncoded);
-        callback(audioData);
-      }
-    });
   }
 }
 
@@ -2418,15 +2399,120 @@ async function processLINEAR16(data) {
     // Make the actual call to the google speech api with the audio data for transcription
     if (tdfSpeechAPIKey && tdfSpeechAPIKey != '') {
       console.log('tdf key detected');
-      makeGoogleSpeechAPICall(request, tdfSpeechAPIKey, answerGrammar);
+      Meteor.call('makeGoogleSpeechAPICall', Session.get('currentTdfId'), "", request, answerGrammar, (err, res) => speechAPICallback(err, res));
     // If we don't have a tdf provided speech api key load up the user key
     // NOTE: we shouldn't be able to get here if there is no user key
     } else {
       console.log('no tdf key, using user provided key');
-      makeGoogleSpeechAPICall(request, Session.get('speechAPIKey'), answerGrammar);
+      Meteor.call('makeGoogleSpeechAPICall', Session.get('currentTdfId'), Session.get('speechAPIKey'), request, answerGrammar, (err, res) => speechAPICallback(err, res));
     }
   } else {
     console.log('processLINEAR16 userAnswer not defined');
+  }
+}
+
+function speechAPICallback(err, data){
+  let [answerGrammar, response] = data;
+  let transcript = '';
+  const ignoreOutOfGrammarResponses = Session.get('ignoreOutOfGrammarResponses');
+  const speechOutOfGrammarFeedback = 'Please try again or press enter or say skip';
+  // Session.get("speechOutOfGrammarFeedback");//TODO: change this in tdfs and not hardcoded
+  let ignoredOrSilent = false;
+
+  // If we get back an error status make sure to inform the user so they at
+  // least have a hint at what went wrong
+  if (err) {
+    const content = JSON.parse(response);
+    console.log(err);
+    transcript = 'I did not get that. Please try again.';
+    ignoredOrSilent = true;
+  } else if (response['results']) {
+    transcript = response['results'][0]['alternatives'][0]['transcript'].toLowerCase();
+    console.log('transcript: ' + transcript);
+    if (ignoreOutOfGrammarResponses) {
+      if (transcript == 'skip') {
+        ignoredOrSilent = false;
+      } else if (answerGrammar.indexOf(transcript) == -1) { // Answer not in grammar, ignore and reset/re-record
+        console.log('ANSWER OUT OF GRAMMAR, IGNORING');
+        transcript = speechOutOfGrammarFeedback;
+        ignoredOrSilent = true;
+      }
+    }
+  } else {
+    console.log('NO TRANSCRIPT/SILENCE');
+    transcript = 'Silence detected';
+    ignoredOrSilent = true;
+  }
+
+  const inUserForceCorrect = $('#forceCorrectionEntry').is(':visible');
+  let userAnswer;
+  if (getButtonTrial()) {
+    console.log('button trial, setting user answer to verbalChoice');
+    userAnswer = $('[verbalChoice=\'' + transcript + '\']')[0];
+    if (!userAnswer) {
+      console.log('Choice couldn\'t be found');
+      ignoredOrSilent = true;
+    }
+  } else if (DialogueUtils.isUserInDialogueLoop()) {
+    if (DialogueUtils.isUserInDialogueIntroExit()) {
+      speechTranscriptionTimeoutsSeen = 0;
+    } else {
+      console.log('dialogue loop -> transcribe to dialogue user answer');
+      DialogueUtils.setDialogueUserAnswerValue(transcript);
+    }
+  } else {
+    userAnswer = inUserForceCorrect ? document.getElementById('userForceCorrect') :
+        document.getElementById('userAnswer');
+    console.log('regular trial, transcribing user response to user answer box');
+    userAnswer.value = transcript;
+  }
+
+  if (speechTranscriptionTimeoutsSeen >= Session.get('currentDeliveryParams').autostopTranscriptionAttemptLimit) {
+    ignoredOrSilent = false; // Force out of a silence loop if we've tried enough
+    const transcriptionMsg = ' transcription attempts which is over autostopTranscriptionAttemptLimit, \
+        forcing incorrect answer to move things along.';
+    console.log(speechTranscriptionTimeoutsSeen + transcriptionMsg);
+    // Dummy up some data so we don't fail downstream
+    if (getButtonTrial()) {
+      userAnswer = {'answer': {'name': 'a'}};
+    } else if (DialogueUtils.isUserInDialogueLoop()) {
+      DialogueUtils.setDialogueUserAnswerValue('FORCEDINCORRECT');
+    }
+  }
+
+  if (ignoredOrSilent) {
+    startRecording();
+    // If answer is out of grammar or we pick up silence wait 5 seconds for
+    // user to read feedback then clear the answer value
+    if (!getButtonTrial() && !DialogueUtils.isUserInDialogueLoop()) {
+      setTimeout(() => userAnswer.value = '', 5000);
+    }
+  } else {
+    // Only simulate enter key press if we picked up transcribable/in grammar
+    // audio for better UX
+    if (getButtonTrial()) {
+      handleUserInput({answer: userAnswer}, 'voice');
+    } else if (DialogueUtils.isUserInDialogueLoop()) {
+      speechTranscriptionTimeoutsSeen = 0;
+      if (DialogueUtils.isUserInDialogueIntroExit()) {
+        if (transcript === 'continue') {
+          dialogueContinue();
+        } else {
+          startRecording(); // continue trying to see if they do voice continue
+        }
+      } else {
+        const answer = DialogueUtils.getDialogueUserAnswerValue();
+        const dialogueContext = DialogueUtils.updateDialogueState(answer);
+        console.log('getDialogFeedbackForAnswer2', dialogueContext);
+        Meteor.call('getDialogFeedbackForAnswer', dialogueContext, dialogueLoop);
+      }
+    } else {
+      if (inUserForceCorrect) {
+        handleUserForceCorrectInput({}, 'voice');
+      } else {
+        handleUserInput({}, 'voice');
+      }
+    }
   }
 }
 
@@ -2452,113 +2538,6 @@ function generateRequestJSON(sampleRate, speechRecognitionLanguage, phraseHints,
   console.log('Request:' + _.pick(request, 'config'));
 
   return request;
-}
-
-function makeGoogleSpeechAPICall(request, speechAPIKey, answerGrammar) {
-  const speechURL = 'https://speech.googleapis.com/v1/speech:recognize?key=' + speechAPIKey;
-  HTTP.call('POST', speechURL, {'data': request}, function(err, response) {
-    console.log(response);
-    let transcript = '';
-    const ignoreOutOfGrammarResponses = Session.get('ignoreOutOfGrammarResponses');
-    const speechOutOfGrammarFeedback = 'Please try again or press enter or say skip';
-    // Session.get("speechOutOfGrammarFeedback");//TODO: change this in tdfs and not hardcoded
-    let ignoredOrSilent = false;
-
-    // If we get back an error status make sure to inform the user so they at
-    // least have a hint at what went wrong
-    if (response['statusCode'] != 200) {
-      const content = JSON.parse(response.content);
-      transcript = 'I did not get that. Please try again.';
-      ignoredOrSilent = true;
-    } else if (response['data']['results']) {
-      transcript = response['data']['results'][0]['alternatives'][0]['transcript'].toLowerCase();
-      console.log('transcript: ' + transcript);
-      if (ignoreOutOfGrammarResponses) {
-        if (transcript == 'skip') {
-          ignoredOrSilent = false;
-        } else if (answerGrammar.indexOf(transcript) == -1) { // Answer not in grammar, ignore and reset/re-record
-          console.log('ANSWER OUT OF GRAMMAR, IGNORING');
-          transcript = speechOutOfGrammarFeedback;
-          ignoredOrSilent = true;
-        }
-      }
-    } else {
-      console.log('NO TRANSCRIPT/SILENCE');
-      transcript = 'Silence detected';
-      ignoredOrSilent = true;
-    }
-
-    const inUserForceCorrect = $('#forceCorrectionEntry').is(':visible');
-    let userAnswer;
-    if (getButtonTrial()) {
-      console.log('button trial, setting user answer to verbalChoice');
-      userAnswer = $('[verbalChoice=\'' + transcript + '\']')[0];
-      if (!userAnswer) {
-        console.log('Choice couldn\'t be found');
-        ignoredOrSilent = true;
-      }
-    } else if (DialogueUtils.isUserInDialogueLoop()) {
-      if (DialogueUtils.isUserInDialogueIntroExit()) {
-        speechTranscriptionTimeoutsSeen = 0;
-      } else {
-        console.log('dialogue loop -> transcribe to dialogue user answer');
-        DialogueUtils.setDialogueUserAnswerValue(transcript);
-      }
-    } else {
-      userAnswer = inUserForceCorrect ? document.getElementById('userForceCorrect') :
-          document.getElementById('userAnswer');
-      console.log('regular trial, transcribing user response to user answer box');
-      userAnswer.value = transcript;
-    }
-
-    if (speechTranscriptionTimeoutsSeen >= Session.get('currentDeliveryParams').autostopTranscriptionAttemptLimit) {
-      ignoredOrSilent = false; // Force out of a silence loop if we've tried enough
-      const transcriptionMsg = ' transcription attempts which is over autostopTranscriptionAttemptLimit, \
-          forcing incorrect answer to move things along.';
-      console.log(speechTranscriptionTimeoutsSeen + transcriptionMsg);
-      // Dummy up some data so we don't fail downstream
-      if (getButtonTrial()) {
-        userAnswer = {'answer': {'name': 'a'}};
-      } else if (DialogueUtils.isUserInDialogueLoop()) {
-        DialogueUtils.setDialogueUserAnswerValue('FORCEDINCORRECT');
-      }
-    }
-
-    if (ignoredOrSilent) {
-      startRecording();
-      // If answer is out of grammar or we pick up silence wait 5 seconds for
-      // user to read feedback then clear the answer value
-      if (!getButtonTrial() && !DialogueUtils.isUserInDialogueLoop()) {
-        setTimeout(() => userAnswer.value = '', 5000);
-      }
-    } else {
-      // Only simulate enter key press if we picked up transcribable/in grammar
-      // audio for better UX
-      if (getButtonTrial()) {
-        handleUserInput({answer: userAnswer}, 'voice');
-      } else if (DialogueUtils.isUserInDialogueLoop()) {
-        speechTranscriptionTimeoutsSeen = 0;
-        if (DialogueUtils.isUserInDialogueIntroExit()) {
-          if (transcript === 'continue') {
-            dialogueContinue();
-          } else {
-            startRecording(); // continue trying to see if they do voice continue
-          }
-        } else {
-          const answer = DialogueUtils.getDialogueUserAnswerValue();
-          const dialogueContext = DialogueUtils.updateDialogueState(answer);
-          console.log('getDialogFeedbackForAnswer2', dialogueContext);
-          Meteor.call('getDialogFeedbackForAnswer', dialogueContext, dialogueLoop);
-        }
-      } else {
-        if (inUserForceCorrect) {
-          handleUserForceCorrectInput({}, 'voice');
-        } else {
-          handleUserInput({}, 'voice');
-        }
-      }
-    }
-  });
 }
 
 let recorder = null;
