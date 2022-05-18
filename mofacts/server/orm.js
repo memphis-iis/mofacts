@@ -137,6 +137,12 @@ function getHistory(history) {
 }
 
 function getTdf(tdf) {
+  if(tdf.content.tdfs.tutor.setspec.speechAPIKey){
+    tdf.content.tdfs.tutor.setspec.speechAPIKey = true;
+  }
+  if(tdf.content.tdfs.tutor.setspec.textToSpeechAPIKey){
+    tdf.content.tdfs.tutor.setspec.textToSpeechAPIKey = true;
+  }
   return {
     TDFId: tdf.tdfid,
     ownerId: tdf.ownerid,
