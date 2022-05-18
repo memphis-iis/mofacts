@@ -31,6 +31,19 @@ catch{
   }, false);
 }
 
+if((navigator.userAgent.indexOf("Opera") || navigator.userAgent.indexOf('OPR')) != -1 ) {
+  Session.set('isOpera', true)
+} else if(navigator.userAgent.indexOf("Edg") != -1 ) {
+  Session.set('isEdge', true)
+} else if(navigator.userAgent.indexOf("Chrome") != -1 ) {
+  Session.set('isChrome', true)
+} else if(navigator.userAgent.indexOf("Safari") != -1) {
+  Session.set('isSafari', true)
+} else if(navigator.userAgent.indexOf("Firefox") != -1 ) {
+  Session.set('isFirefox', true)
+} else if((navigator.userAgent.indexOf("MSIE") != -1 ) || (!!document.documentMode == true )) {
+  Session.set('isIE', true)
+}
 
 //Set checks if user is inactive
 const options = {
