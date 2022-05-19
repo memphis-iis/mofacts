@@ -20,7 +20,7 @@
             "audioPromptSpeakingRate": "1",
             "prestimulusDisplay": "Prestimulus Display Text",
             "progressReporterParams": [0.7,30,60,30,90,60],
-            "tips": ["this is tip 1", "this is tip 2", "this is tip 3"]
+            "tips": "<center><h3>Anatomy & Physiology Practice Instructions</h3></center>"
 
         },
         "unit": [
