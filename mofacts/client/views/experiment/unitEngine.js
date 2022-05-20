@@ -830,6 +830,7 @@ function modelUnitEngine() {
       p.stimSecsSinceLastShown = elapsed(stim.lastSeen);
       p.stimSecsSinceFirstShown = elapsed(stim.firstSeen);
       p.stimSecsPracticingOthers = secs(stim.otherPracticeTime);
+      p.stim = stimCluster.stims[stimIndex];
 
       p.stimSuccessCount = stim.priorCorrect;
       p.stimFailureCount = stim.priorIncorrect;
