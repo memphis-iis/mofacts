@@ -260,7 +260,7 @@ function checkAnswer(userAnswer, correctAnswer, originalAnswer, lfparameter, use
       let answerWordsCount = correctAnswer.split(" ").length;
       let userAnswerWords = userAnswer.split(" ");
       let userFirstAnswer =  userAnswerWords.slice(0,answerWordsCount - 1).join(" ");
-      let userSecondAnswer = userAnswerWords.slice(answerWordsCount, answerWordsCount);
+      let userSecondAnswer = userAnswerWords.slice(answerWordsCount).join(" ");
       match = stringMatch(originalAnswer, userAnswer, lfparameter, userInput);
       if(match == 0){
         match = stringMatch(originalAnswer, userFirstAnswer, lfparameter, userInput);
