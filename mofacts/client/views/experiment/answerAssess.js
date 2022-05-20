@@ -241,6 +241,7 @@ function _branchingCorrectText(answer) {
 
 function checkAnswer(userAnswer, correctAnswer, originalAnswer, lfparameter, userInput) {
   const answerDisplay = originalAnswer;
+  let match = 0;
   let isCorrect; let matchText;
   if(userAnswer === ''){
     matchText = 'Incorrect. The correct answer is ' + _.trim(answerDisplay) + '.';
@@ -255,8 +256,18 @@ function checkAnswer(userAnswer, correctAnswer, originalAnswer, lfparameter, use
         dispAnswer = _.trim(dispAnswer.split('|')[0]);
       }
 
-      const match = stringMatch(originalAnswer, userAnswer, lfparameter, userInput);
-
+      //check for answer repetition 
+      let answerWordsCount = correctAnswer.split(" ").length;
+      let userAnswerWords = userAnswer.split(" ");
+      let userFirstAnswer =  userAnswerWords.slice(0,answerWordsCount - 1).join(" ");
+      let userSecondAnswer = userAnswerWords.slice(answerWordsCount).join(" ");
+      match = stringMatch(originalAnswer, userAnswer, lfparameter, userInput);
+      if(match == 0){
+        match = stringMatch(originalAnswer, userFirstAnswer, lfparameter, userInput);
+      }
+      if(match == 0){
+        match = stringMatch(originalAnswer, userSecondAnswer, lfparameter, userInput);
+      }
       if (match === 0) {
         isCorrect = false;
         matchText = '';
