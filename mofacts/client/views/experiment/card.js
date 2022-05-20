@@ -2294,6 +2294,7 @@ function stopUserInput() {
 function speakMessageIfAudioPromptFeedbackEnabled(msg, audioPromptSource) {
   const enableAudioPromptAndFeedback = Session.get('enableAudioPromptAndFeedback');
   const audioPromptMode = Session.get('audioPromptMode');
+  let synthesis = window.speechSynthesis;
   if (enableAudioPromptAndFeedback) {
     if (audioPromptSource === audioPromptMode || audioPromptMode === 'all') {
       Session.set('recordingLocked', true);
@@ -2328,12 +2329,18 @@ function speakMessageIfAudioPromptFeedbackEnabled(msg, audioPromptSource) {
               startRecording();
             });
             console.log('inside callback, playing audioObj:');
-            audioObj.play();
+            audioObj.play().catch((err) => {
+              console.log(err)
+              let utterance = new SpeechSynthesisUtterance(msg);
+              synthesis.speak(utterance);
+            });
           }
         });
         console.log('providing audio feedback');
       } else {
-        console.log('Text-to-Speech API key not found');
+        console.log('Text-to-Speech API key not found, using MDN Speech Synthesis');
+        let utterance = new SpeechSynthesisUtterance(msg);
+        synthesis.speak(utterance);
       }
     }
   } else {
