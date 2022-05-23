@@ -1911,6 +1911,53 @@ Meteor.methods({
     sendEmail(to, from, subject, text);
   },
 
+  sendPasswordResetEmail: function(email){
+    console.log ("sending password reset code for ", email)
+    //Generate Code
+    var secret = '';
+    var length = 5;
+    var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    var charactersLength = characters.length;
+    Meteor.users.findOne({username: email})
+    for ( var i = 0; i < length; i++ ) {
+      secret += characters.charAt(Math.floor(Math.random() * charactersLength));
+    }  
+    Meteor.users.update({username: email},{
+      $set:{
+        secret: secret
+      }
+    });
+    
+    //Setup email variables
+    const ownerEmail = Meteor.settings.owner;
+    const from = ownerEmail;
+    const subject = 'MoFaCTs Password Reset';
+    let text = 'Your password reset secret is: <b>' + secret + "</b>.<br>If this email was sent in error, please contact your MoFaCTs administrator.";
+
+    //Send email
+    sendEmail(email,from,subject,text);
+  },
+
+  checkPasswordResetSecret: function(email, secret){
+    userSecret = Meteor.users.findOne({username: email}).secret;
+    if(userSecret == secret){
+      return true;
+    } else {
+      return false;
+    }
+  },
+
+  resetPasswordWithSecret: function(email, secret, newPassword){
+    user = Meteor.users.findOne({username: email});
+    userId = user._id;
+    userSecret = user.secret;
+    if(secret == userSecret){
+      Accounts.setPassword(userId, newPassword);
+      return true;
+    } else {
+      return false;
+    }        
+  },
   sendUserErrorReport: function(userID, description, curPage, sessionVars, userAgent, logs, currentExperimentState) {
     const errorReport = {
       user: userID,
@@ -1975,6 +2022,7 @@ Meteor.methods({
     if (!newUserPassword || newUserPassword.length < 6) {
       throw new Error('Passwords must be at least 6 characters long');
     }
+    
 
     // Now we can actually create the user
     // Note that on the server we just get back the ID and have nothing
