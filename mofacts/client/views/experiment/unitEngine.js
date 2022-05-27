@@ -799,7 +799,7 @@ function modelUnitEngine() {
     calculateSingleProb: function calculateSingleProb(cardIndex, stimIndex, hintLevel, i, stimCluster) {
       const card = cardProbabilities.cards[cardIndex];
       const stim = card.stims[stimIndex];
-
+      
       // Store parameters in an object for easy logging/debugging
       const p = {};
 
@@ -831,7 +831,7 @@ function modelUnitEngine() {
       p.stimSecsSinceFirstShown = elapsed(stim.firstSeen);
       p.stimSecsPracticingOthers = secs(stim.otherPracticeTime);
       p.stim = stimCluster.stims[stimIndex];
-
+    
       p.stimSuccessCount = stim.priorCorrect;
       p.stimFailureCount = stim.priorIncorrect;
       p.stimStudyTrialCount = stim.priorStudy;
@@ -873,6 +873,7 @@ function modelUnitEngine() {
       if (p.i<15) {
         console.log('cardProbability parameters:', JSON.parse(JSON.stringify(p)));
       }
+      console.log('Calculating Probability for clusterIndex: ' + cardIndex + ', stimIndex: ', stimIndex, '. hintLevel: ',hintLevel, 'stim:', p.stim);
       return probFunction(p);
     },
 
