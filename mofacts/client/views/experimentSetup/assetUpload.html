@@ -11,8 +11,21 @@
                             Uploading <b>{{file.name}}</b>:
                             <span id="progress">{{progress.get}}%</span>
                         {{else}}<br>
-                        <input id="fileInput" style="margin: auto; display:block;" type="file" />
-                        Asset Link: <a href="{{assetLink}}">{{assetLink}}</a>
+                        <input id="fileInput" style="margin: auto; display:block;" type="file" multiple />
+                        Asset Links
+                        
+                            <table class="table table-striped table-bordered table-condensed">
+                                {{#each assetLink}}
+                                <tr>
+                                    <td>
+                                        <a href="{{this.link}}">{{this.link}}</a><br>
+                                    </td>
+                                    <td>
+                                        Filename: {{this.filename}}
+                                    </td>
+                                </tr>
+                                {{/each}}
+                            </table>
                         {{/with}}
                     </tr>
                 </td>
