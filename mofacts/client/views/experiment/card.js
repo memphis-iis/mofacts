@@ -1158,6 +1158,8 @@ function handleUserInput(e, source, simAnswerCorrect) {
     return;
   }
 
+  $('#helpButton').prop("disabled",true);
+
   if(Meteor.isDevelopment)
     Meteor.call('captureProfile', 10000, 'answerTrial');
   
@@ -2032,6 +2034,7 @@ async function prepareCard() {
   Session.set('currentDisplay', {});
   Session.set('clozeQuestionParts', undefined);
   console.log('displayReadyFalse, prepareCard');
+  $('#helpButton').prop("disabled",false);
   if (engine.unitFinished()) {
     unitIsFinished('Unit Engine');
   } else {
