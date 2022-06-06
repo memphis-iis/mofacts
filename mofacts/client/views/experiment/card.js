@@ -2702,11 +2702,11 @@ async function updateExperimentState(newState, codeCallLocation) {
   }
   const oldExperimentState = Session.get('currentExperimentState') || {};
   const newExperimentState = Object.assign(JSON.parse(JSON.stringify(oldExperimentState)), newState);
-  const res = await meteorCallAsync('setExperimentState',
+  Meteor.call('setExperimentState',
       Meteor.userId(), Session.get('currentRootTdfId'), newExperimentState, 'card.updateExperimentState');
-  Session.set('currentExperimentState', res);
+  Session.set('currentExperimentState',newExperimentState);
   console.log('updateExperimentState', codeCallLocation, 'old:', oldExperimentState, '\nnew:', newExperimentState);
-  return res;
+  return Session.get('currentRootTdfId');
 }
 
 function updateExperimentStateSync(newState, codeCallLocation) {

@@ -319,11 +319,21 @@ async function migration2(){
     console.log(`stimuli: ${t}/${stimuli.length}`)
     let oldEntry = stimuli[t];
     let oldId = oldEntry._id;
-    const curStimSetSylls = stimuli_syllables.find(s => s.filename == oldEntry.stimuliSetId).data
+    const curStimSetSylls = stimuli_syllables.find(s => s.filename == oldEntry.stimuliSetId)?.data || undefined
     let response = oldEntry.correctResponse
     if(response.includes('~'))
       response = response.split('~')[0];
-    const sylls = curStimSetSylls && response ? curStimSetSylls[response.toLowerCase()].syllables : null;
+    let sylls = curStimSetSylls && response ? curStimSetSylls[response.toLowerCase()].syllables : null;
+
+    if(!sylls){
+      try{
+        sylls = getSyllablesForWord(stimuli[t].correctResponse.replace(/\./g, '_').split('~')[0]);
+      }
+      catch (e) {
+        serverConsole('error fetching syllables for ' + stimuli[t].correctResponse + ': ' + JSON.stringify(e));
+        sylls = [stimuli[t].correctResponse];
+      }
+    }
 
     delete stimuli[t].itemId;
     stimuli[t].syllables = sylls;
@@ -2211,7 +2221,7 @@ Meteor.methods({
   getClozeEditAuthors: function() {
     const authorIDs = {};
     ClozeEditHistory.find({}).forEach(function(entry) {
-      authorIDs[entry.user] = Meteor.users.findOne({_id: entry.user}).username;
+      authorIDs[entry.user] = Meteor.users.findOne({_id: entry.user})?.username || undefined;
     });
     return authorIDs;
   },
@@ -2735,8 +2745,8 @@ Meteor.startup(async function() {
   itemSourceSentences = new Meteor.Collection('item_source_sentences');
   Sections = new Meteor.Collection('section');
   SectionUserMap = new Meteor.Collection('section_user_map');
-  // await migration();
-  // await migration2();
+  //await migration();
+  //await migration2();
   // Let anyone looking know what config is in effect
   serverConsole('Log Notice (from siteConfig):', getConfigProperty('logNotice'));
 
