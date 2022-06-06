@@ -76,7 +76,7 @@ function getHistory(history) {
     'KC Category(Cluster)': '',
     'CF (Overlearning)': false,
     'CF (Note)': '',
-    'dialoguehistory': history.dialogueHistory,
+    'Dialogue History': JSON.stringify(history.dialogueHistory),
     'itemid': history.itemId,
     'useridtdfid': history.userIdTDFId,
     'kcid': history.KCId,
@@ -84,7 +84,7 @@ function getHistory(history) {
     'probabilityestimate': history.probabilityEstimate,
     'typeofresponse': history.typeOfResponse,
     'responsevalue': history.responseValue,
-    'displayedstimulus': history.displayedStimulus,
+    'displayedstimulus': JSON.stringify(history.displayedStimulus),
     'Anon Student Id': history.anonStudentId,
     'Session ID': history.sessionID,
     'Condition Namea': history.conditionNameA,
@@ -100,8 +100,8 @@ function getHistory(history) {
     'Level (Unit)': history.levelUnit,
     'Level (Unitname)': history.levelUnitName,
     'Level (Unittype)': history.levelUnitType,
-    'Problem Name': history.problemName,
-    'Step Name': history.stepName,
+    'Problem Name': JSON.stringify(history.problemName),
+    'Step Name': JSON.stringify(history.stepName),
     'Time': history.time,
     'Input': history.input,
     'Outcome': history.outcome,
@@ -130,11 +130,11 @@ function getHistory(history) {
     'CF (Button Order)': history.CFButtonOrder,
     'CF (Item Removed)': history.CFItemRemoved,
     'Feedback Text': history.feedbackText,
-    'feedbackType': history.feedbackType,
+    'Feedback Type': history.feedbackType,
     'dynamicTagFields': history.dynamicTagFields,
     'recordedServerTime': history.recordedServerTime,
-    'hintLevel':history.hintLevel,
-    'Entry_Point': history.entryPoint
+    'Hint Level':history.hintLevel,
+    'Entry Point': history.entryPoint
   };
   return historyOutput;
 }
