@@ -121,7 +121,9 @@ Template.body.onRendered(function() {
   });
 
   $('#helpModal').on('hidden.bs.modal', function() {
-    console.log('error reporting modal hidden');
+    if (window.currentAudioObj) {
+      window.currentAudioObj.play();
+    }
     restartMainCardTimeoutIfNecessary();
   });
 
@@ -184,6 +186,9 @@ Template.body.events({
     event.preventDefault();
     Session.set('pausedLocks', Session.get('pausedLocks')+1);
     Session.set('errorReportStart', new Date());
+    if (window.currentAudioObj) {
+      window.currentAudioObj.pause();
+    }
     $('#helpModal').modal('show');
   },
   'click #helpCloseButton': function(event) {
