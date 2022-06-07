@@ -459,7 +459,7 @@ async function setComponentStatesByUserIdTDFIdAndUnitNum(userId, TDFId, componen
             RETURNING componentStateId',
             componentState);
         } else {
-          resArr.push(componentState + '\nnot caught error:', e);
+          resArr.push(JSON.stringify(componentState) + '\nnot caught error:', e);
         }
       }
     }
