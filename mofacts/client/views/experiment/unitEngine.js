@@ -1034,7 +1034,7 @@ function modelUnitEngine() {
       // calculateCardProbabilities();
     },
 
-    saveSingleComponentState: function(stim, card, whichStim) {
+    saveSingleComponentState: function(stim, card) {
       const userId = Meteor.userId();
       const TDFId = Session.get('currentTdfId');
       const cardState = {
@@ -1598,7 +1598,7 @@ function modelUnitEngine() {
             displayify(cardProbabilities.responses));
       }
 
-      this.saveSingleComponentState(stim, card, currentCardInfo.whichStim);
+      this.saveSingleComponentState(stim, card);
     },
 
     unitFinished: function() {
