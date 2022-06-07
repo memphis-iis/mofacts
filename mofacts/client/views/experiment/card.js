@@ -1366,7 +1366,7 @@ function afterAnswerAssessmentCb(userAnswer, isCorrect, feedbackForAnswer, after
       if (feedbackForAnswer == null && correctAndText != null) {
         feedbackForAnswer = correctAndText.matchText;
       }
-      showUserFeedback(isCorrect, feedbackForAnswer, afterAnswerFeedbackCbBound);
+      showUserFeedback(isCorrect, feedbackForAnswer, afterAnswerFeedbackCbBound, userAnswer == '[timeout]');
     };
     if (currentDeliveryParams.feedbackType == 'dialogue' && !isCorrect) {
       speechTranscriptionTimeoutsSeen = 0;
@@ -1380,7 +1380,7 @@ function afterAnswerAssessmentCb(userAnswer, isCorrect, feedbackForAnswer, after
   }
 }
 
-async function showUserFeedback(isCorrect, feedbackMessage, afterAnswerFeedbackCbBound) {
+async function showUserFeedback(isCorrect, feedbackMessage, afterAnswerFeedbackCbBound, isTimeout) {
   console.log('showUserFeedback');
   userFeedbackStart = Date.now();
   const isButtonTrial = getButtonTrial();
@@ -1405,13 +1405,14 @@ async function showUserFeedback(isCorrect, feedbackMessage, afterAnswerFeedbackC
             .addClass('text-align')
             .text('Continuing in: ')
             .show();
+
           var countDownStart = new Date().getTime();
-          if(Session.get('isRefutation') && getCurrentDeliveryParams().refutationstudy){
-            countDownStart += getCurrentDeliveryParams().refutationstudy;
+          let dialogueHistory;
+          if (Session.get('dialogueHistory')) {
+            dialogueHistory = JSON.parse(JSON.stringify(Session.get('dialogueHistory')));
           }
-          else{
-            countDownStart += getCurrentDeliveryParams().reviewstudy;
-          }
+          countDownStart += getReviewTimeout(getTestType(), Session.get('currentDeliveryParams'), isCorrect, dialogueHistory, isTimeout);
+
           var CountdownTimerInterval = Meteor.setInterval(function() {
             var now = new Date().getTime()
             var distance = countDownStart - now;
@@ -1531,7 +1532,7 @@ async function afterAnswerFeedbackCallback(trialEndTimeStamp, source, userAnswer
   if (Session.get('dialogueHistory')) {
     dialogueHistory = JSON.parse(JSON.stringify(Session.get('dialogueHistory')));
   }
-  const reviewTimeout = wasReportedForRemoval ? 2000 : getReviewTimeout(testType, deliveryParams, isCorrect, dialogueHistory);
+  const reviewTimeout = wasReportedForRemoval ? 2000 : getReviewTimeout(testType, deliveryParams, isCorrect, dialogueHistory, isTimeout);
 
   // Stop previous timeout, log response data, and clear up any other vars for next question
   clearCardTimeout();
@@ -1615,7 +1616,7 @@ async function afterAnswerFeedbackCallback(trialEndTimeStamp, source, userAnswer
   }
 }
 
-function getReviewTimeout(testType, deliveryParams, isCorrect, dialogueHistory) {
+function getReviewTimeout(testType, deliveryParams, isCorrect, dialogueHistory, isTimeout) {
   let reviewTimeout = 0;
 
   if (testType === 's' || testType === 'f') {
@@ -1635,7 +1636,7 @@ function getReviewTimeout(testType, deliveryParams, isCorrect, dialogueHistory) 
       // Fast forward through feedback if we already did a dialogue feedback session
       if (deliveryParams.feedbackType == 'dialogue' && dialogueHistory && dialogueHistory.LastStudentAnswer) {
         reviewTimeout = 0.001;
-      } else if(Session.get('isRefutation')) {
+      } else if(Session.get('isRefutation') && !isTimeout) {
         reviewTimeout = _.intval(deliveryParams.refutationstudy) || _.intval(deliveryParams.reviewstudy);
       } else {
         reviewTimeout = _.intval(deliveryParams.reviewstudy);
