@@ -31,6 +31,19 @@ catch{
   }, false);
 }
 
+if((navigator.userAgent.indexOf("Opera") || navigator.userAgent.indexOf('OPR')) != -1 ) {
+  Session.set('isOpera', true)
+} else if(navigator.userAgent.indexOf("Edg") != -1 ) {
+  Session.set('isEdge', true)
+} else if(navigator.userAgent.indexOf("Chrome") != -1 ) {
+  Session.set('isChrome', true)
+} else if(navigator.userAgent.indexOf("Safari") != -1) {
+  Session.set('isSafari', true)
+} else if(navigator.userAgent.indexOf("Firefox") != -1 ) {
+  Session.set('isFirefox', true)
+} else if((navigator.userAgent.indexOf("MSIE") != -1 ) || (!!document.documentMode == true )) {
+  Session.set('isIE', true)
+}
 
 //Set checks if user is inactive
 const options = {
@@ -107,6 +120,13 @@ Template.body.onRendered(function() {
     restartMainCardTimeoutIfNecessary();
   });
 
+  $('#helpModal').on('hidden.bs.modal', function() {
+    if (window.currentAudioObj) {
+      window.currentAudioObj.play();
+    }
+    restartMainCardTimeoutIfNecessary();
+  });
+
   // Global handler for continue buttons
   $(window).keypress(function(e) {
     const key = e.keyCode || e.which;
@@ -161,6 +181,19 @@ Template.body.events({
     Session.set('instructorSelectedTdf', undefined);
     Session.set('curClassPerformance', undefined);
     Router.go('/studentReporting');
+  },
+  'click #helpButton': function(event) {
+    event.preventDefault();
+    Session.set('pausedLocks', Session.get('pausedLocks')+1);
+    Session.set('errorReportStart', new Date());
+    if (window.currentAudioObj) {
+      window.currentAudioObj.pause();
+    }
+    $('#helpModal').modal('show');
+  },
+  'click #helpCloseButton': function(event) {
+    event.preventDefault();
+    $('#errorReportingModal').modal('hide');
   },
 
   'click #errorReportButton': function(event) {
@@ -224,29 +257,31 @@ Template.body.events({
 Template.registerHelper('isLoggedIn', function() {
   return haveMeteorUser();
 });
-
 Template.registerHelper('showPerformanceDetails', function() {
   return (Session.get('curModule') == 'card' || Session.get('curModule') == 'instructions') && Session.get('scoringEnabled');
 });
-
 Template.registerHelper('currentScore', function() {
   return Session.get('currentScore');
 });
-
 Template.registerHelper('isNormal', function() {
   return Session.get('loginMode') !== 'experiment';
 });
-
 Template.registerHelper('curStudentPerformance', function() {
   return Session.get('curStudentPerformance');
 });
-
 Template.registerHelper('showFeedbackResetButton', function() {
   return Session.get('curModule') == 'card' && Session.get('currentTdfFile').tdfs.tutor.unit[Session.get('currentUnitNumber')].deliveryparams.allowFeedbackTypeSelect
 });
+Template.registerHelper('isInTrial', function() {
+  return Session.get('curModule') == 'card'
+});
 Template.registerHelper('isInSession', function() {
   return (Session.get('curModule') == 'profile');
-})
+});
+Template.registerHelper('curTdfTips', function() {
+  if(Session.get('curTdfTips'))
+    return Session.get('curTdfTips');
+});
 Template.registerHelper('and',(a,b)=>{
   return a && b;
 });
