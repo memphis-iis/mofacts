@@ -1034,7 +1034,7 @@ function modelUnitEngine() {
       // calculateCardProbabilities();
     },
 
-    saveSingleComponentState: function(stim, card) {
+    saveSingleComponentState: function(stim, card, response) {
       const userId = Meteor.userId();
       const TDFId = Session.get('currentTdfId');
       const cardState = {
@@ -1074,7 +1074,25 @@ function modelUnitEngine() {
         outcomeStack: stim.outcomeStack.join(','),
         instructionQuestionResult: null,
       };
-      const componentStates = [cardState, stimState];
+      const responseState = {
+        userId,
+        TDFId,
+        hintLevel: null,
+        componentType: 'response',
+        probabilityEstimate: null, // probabilityEstimates only exist for stimuli, not clusters or responses
+        firstSeen: response.firstSeen,
+        lastSeen: response.lastSeen,
+        priorCorrect: response.priorCorrect,
+        priorIncorrect: response.priorIncorrect,
+        curSessionPriorCorrect: 0,
+        curSessionPriorIncorrect: 0,
+        priorStudy: response.priorStudy,
+        totalPracticeDuration: response.totalPracticeDuration,
+        outcomeStack: response.outcomeStack.join(','),
+        responseText: Object.entries(cardProbabilities.responses).find(r => r[1] == response)[0], // not actually in db, need to lookup/assign kcid when loading
+        instructionQuestionResult: null,
+      };
+      const componentStates = [cardState, stimState, responseState];
       console.log('saveSingleComponentState', componentStates);
       try{
         if(!Meteor.user().profile.impersonating){
@@ -1584,8 +1602,9 @@ function modelUnitEngine() {
       // "Response" stats
       const answerText = stripSpacesAndLowerCase(Answers.getDisplayAnswerText(
           cluster.stims[currentCardInfo.whichStim].correctResponse));
+      let resp;
       if (answerText && answerText in cardProbabilities.responses) {
-        const resp = cardProbabilities.responses[answerText];
+        resp = cardProbabilities.responses[answerText];
         if (wasCorrect) resp.priorCorrect += 1;
         else resp.priorIncorrect += 1;
 
@@ -1598,7 +1617,7 @@ function modelUnitEngine() {
             displayify(cardProbabilities.responses));
       }
 
-      this.saveSingleComponentState(stim, card);
+      this.saveSingleComponentState(stim, card, resp);
     },
 
     unitFinished: function() {
