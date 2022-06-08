@@ -415,58 +415,53 @@ async function getComponentStatesByUserIdTDFIdAndUnitNum(userId, TDFId) {
 
 async function setComponentStatesByUserIdTDFIdAndUnitNum(userId, TDFId, componentStates, hintLevel) {
   serverConsole('setComponentStatesByUserIdTDFIdAndUnitNum, ', userId, TDFId);
-  const res = await db.tx(async (t) => {
-    const responseKCMap = await getReponseKCMap();
-    const newResponseKCRet = await t.one('SELECT MAX(responseKC) AS responseKC from ITEM');
-    let newResponseKC = newResponseKCRet.responsekc + 1;
-    const resArr = [];
+  const responseKCMap = await getReponseKCMap();
+  const newResponseKCRet = await db.one('SELECT MAX(responseKC) AS responseKC from ITEM');
+  let newResponseKC = newResponseKCRet.responsekc + 1;
+  const resArr = [];
 
-    for (const componentState of componentStates) {
-      componentState.userId = userId;
-      componentState.TDFId = TDFId;
-      if (componentState.componentType == 'response') {
-        if (!isEmpty(responseKCMap[componentState.responseText])) {
-          componentState.KCId = responseKCMap[componentState.responseText];
-        } else {
-          componentState.KCId = newResponseKC;
-          newResponseKC += 1;
-        }
-        delete componentState.responseText;
+  for (const componentState of componentStates) {
+    componentState.userId = userId;
+    componentState.TDFId = TDFId;
+    if (componentState.componentType == 'response') {
+      if (!isEmpty(responseKCMap[componentState.responseText])) {
+        componentState.KCId = responseKCMap[componentState.responseText];
+      } else {
+        componentState.KCId = newResponseKC;
+        newResponseKC += 1;
       }
-      if (!componentState.trialsSinceLastSeen) {
-        componentState.trialsSinceLastSeen = null;
-      }
-      const updateQuery = 'UPDATE componentstate SET probabilityEstimate=${probabilityEstimate}, \
-        firstSeen=${firstSeen}, lastSeen=${lastSeen}, trialsSinceLastSeen=${trialsSinceLastSeen}, \
-        priorCorrect=${priorCorrect}, priorIncorrect=${priorIncorrect}, \
-        priorStudy=${priorStudy}, totalPracticeDuration=${totalPracticeDuration}, outcomeStack=${outcomeStack}, \
-        curSessionPriorCorrect=${curSessionPriorCorrect}, curSessionPriorIncorrect=${curSessionPriorIncorrect}\
-        WHERE userId=${userId} AND TDFId=${TDFId} AND KCId=${KCId} AND componentType=${componentType} \
-        RETURNING componentStateId';
-      try {
-        const componentStateId = await t.one(updateQuery, componentState);
-        resArr.push(componentStateId);
-      } catch (e) {
-      // ComponentState didn't exist before so we'll insert it
-        if (e.name == 'QueryResultError') {
-          serverConsole("ComponentState didn't exist before so we'll insert it")
-          const componentStateId = await t.one('INSERT INTO componentstate(userId,TDFId,KCId,componentType, \
-            probabilityEstimate,hintLevel,firstSeen,lastSeen,trialsSinceLastSeen,priorCorrect,priorIncorrect,priorStudy, \
-            totalPracticeDuration,outcomeStack, curSessionPriorCorrect, curSessionPriorIncorrect) VALUES(${userId},${TDFId}, ${KCId}, ${componentType}, \
-            ${probabilityEstimate},${hintLevel}, ${firstSeen},${lastSeen},${trialsSinceLastSeen},${priorCorrect},${priorIncorrect}, \
-            ${priorStudy},${totalPracticeDuration},${outcomeStack}, \
-            ${curSessionPriorCorrect}, ${curSessionPriorIncorrect}) \
-            RETURNING componentStateId',
-            componentState);
-        } else {
-          resArr.push(JSON.stringify(componentState) + '\nnot caught error:', e);
-        }
+      delete componentState.responseText;
+    }
+    if (!componentState.trialsSinceLastSeen) {
+      componentState.trialsSinceLastSeen = null;
+    }
+    const updateQuery = 'UPDATE componentstate SET probabilityEstimate=${probabilityEstimate}, \
+      firstSeen=${firstSeen}, lastSeen=${lastSeen}, trialsSinceLastSeen=${trialsSinceLastSeen}, \
+      priorCorrect=${priorCorrect}, priorIncorrect=${priorIncorrect}, \
+      priorStudy=${priorStudy}, totalPracticeDuration=${totalPracticeDuration}, outcomeStack=${outcomeStack}, \
+      curSessionPriorCorrect=${curSessionPriorCorrect}, curSessionPriorIncorrect=${curSessionPriorIncorrect}\
+      WHERE userId=${userId} AND TDFId=${TDFId} AND KCId=${KCId} AND componentType=${componentType} \
+      RETURNING componentStateId';
+    try {
+      const componentStateId = await db.one(updateQuery, componentState);
+      resArr.push(componentStateId);
+    } catch (e) {
+    // ComponentState didn't exist before so we'll insert it
+      if (e.name == 'QueryResultError') {
+        serverConsole("ComponentState didn't exist before so we'll insert it")
+        const componentStateId = await db.one('INSERT INTO componentstate(userId,TDFId,KCId,componentType, \
+          probabilityEstimate,hintLevel,firstSeen,lastSeen,trialsSinceLastSeen,priorCorrect,priorIncorrect,priorStudy, \
+          totalPracticeDuration,outcomeStack, curSessionPriorCorrect, curSessionPriorIncorrect) VALUES(${userId},${TDFId}, ${KCId}, ${componentType}, \
+          ${probabilityEstimate},${hintLevel}, ${firstSeen},${lastSeen},${trialsSinceLastSeen},${priorCorrect},${priorIncorrect}, \
+          ${priorStudy},${totalPracticeDuration},${outcomeStack}, \
+          ${curSessionPriorCorrect}, ${curSessionPriorIncorrect}) \
+          RETURNING componentStateId',
+          componentState);
+      } else {
+        resArr.push(JSON.stringify(componentState) + '\nnot caught error:', e);
       }
     }
-    return {userId, TDFId, resArr};
-  });
-  serverConsole('res:', res);
-  return res;
+  }
 }
 
 function stripSpacesAndLowerCase(input) {
