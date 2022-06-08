@@ -33,6 +33,14 @@ function setAudioPromptFeedbackVolumeOnPage(audioVolume) {
 
 }
 
+function disableUnsupportedFeatures(isSafari){
+  if(isSafari){
+    $('#audioInputOn').prop( "disabled", true );
+    $('#audioInputOff').prop( "disabled", true );
+    $('#audioInputTitle').text($('#audioInputTitle').text() + "(Not available for safari)");
+  }
+}
+
 function setAudioPromptModeOnPage(audioPromptMode) {
   switch (audioPromptMode) {
     case 'all':
@@ -115,6 +123,7 @@ Template.profileAudioToggles.rendered = function() {
     $('#audioInputSensitivityLabel').text(document.getElementById('audioInputSensitivity').value);
   });
 
+  disableUnsupportedFeatures(Session.get('isSafari'));
   // Restore toggle values from prior page loads
   setAudioInputOnPage(Session.get('audioEnabledView'));
   const audioPromptMode = Session.get('audioPromptFeedbackView');

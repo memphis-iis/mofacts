@@ -241,43 +241,49 @@ function _branchingCorrectText(answer) {
 
 function checkAnswer(userAnswer, correctAnswer, originalAnswer, lfparameter, userInput) {
   const answerDisplay = originalAnswer;
+  let match = 0;
   let isCorrect; let matchText;
-  if(userAnswer === ''){
-    matchText = 'Incorrect. The correct answer is ' + _.trim(answerDisplay) + '.';
-    isCorrect = false;
+  if (answerIsBranched(correctAnswer)) {
+    [isCorrect, matchText] = matchBranching(correctAnswer, userAnswer, lfparameter);
   } else {
-    if (answerIsBranched(correctAnswer)) {
-      [isCorrect, matchText] = matchBranching(correctAnswer, userAnswer, lfparameter);
+    let dispAnswer = _.trim(answerDisplay);
+    if (dispAnswer.indexOf('|') >= 0) {
+      // Take first answer if it's a bar-delimited string
+      dispAnswer = _.trim(dispAnswer.split('|')[0]);
+    }
+
+    //check for answer repetition 
+    let answerWordsCount = correctAnswer.split(" ").length;
+    let userAnswerWords = userAnswer.split(" ");
+    let userFirstAnswer =  userAnswerWords.slice(0,answerWordsCount).join(" ");
+    let userSecondAnswer = userAnswerWords.slice(answerWordsCount).join(" ");
+    match = stringMatch(originalAnswer, userAnswer, lfparameter, userInput);
+    if(match == 0){
+      match = stringMatch(originalAnswer, userFirstAnswer, lfparameter, userInput);
+    }
+    if(match == 0){
+      match = stringMatch(originalAnswer, userSecondAnswer, lfparameter, userInput);
+    }
+    if (match === 0) {
+      isCorrect = false;
+      matchText = '';
+    } else if (match === 1) {
+      isCorrect = true;
+      matchText = 'Correct.';
+    } else if (match === 2) {
+      isCorrect = true;
+      matchText = 'Close enough to the correct answer \''+ dispAnswer + '\'.';
     } else {
-      let dispAnswer = _.trim(answerDisplay);
-      if (dispAnswer.indexOf('|') >= 0) {
-        // Take first answer if it's a bar-delimited string
-        dispAnswer = _.trim(dispAnswer.split('|')[0]);
-      }
+      console.log('MATCH ERROR: something fails in our comparison');
+      isCorrect = false;
+      matchText = '';
+    }
 
-      const match = stringMatch(originalAnswer, userAnswer, lfparameter, userInput);
-
-      if (match === 0) {
-        isCorrect = false;
-        matchText = '';
-      } else if (match === 1) {
-        isCorrect = true;
-        matchText = 'Correct.';
-      } else if (match === 2) {
-        isCorrect = true;
-        matchText = 'Close enough to the correct answer \''+ dispAnswer + '\'.';
+    if (!matchText) {
+      if (userAnswer === '' || userInput === '') {
+        matchText = 'The correct answer is ' + dispAnswer + '.';
       } else {
-        console.log('MATCH ERROR: something fails in our comparison');
-        isCorrect = false;
-        matchText = '';
-      }
-
-      if (!matchText) {
-        if (userAnswer === '' || userInput === '') {
-          matchText = 'The correct answer is ' + dispAnswer + '.';
-        } else {
-          matchText = isCorrect ? 'Correct' : 'Incorrect. The correct answer is ' + dispAnswer + '.';
-        }
+        matchText = isCorrect ? 'Correct' : 'Incorrect. The correct answer is ' + dispAnswer + '.';
       }
     }
   }

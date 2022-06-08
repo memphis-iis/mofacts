@@ -33,7 +33,8 @@ export {
 // for creating some MongoDB queries
 
 const fs = Npm.require('fs');
-const { randomBytes } = require('crypto');
+const https = require('https')
+const { randomBytes } = require('crypto')
 
 if (Meteor.isClient) {
   Meteor.subscribe('files.assets.all');
@@ -437,6 +438,18 @@ async function getTdfById(TDFId) {
   //PostgresReversion
   const tdf = Tdfs.findOne({_id: TDFId});
   return tdf;
+}
+
+async function getTdfTTSAPIKey(TDFId) {
+  const tdfs = await db.one('SELECT * from tdf WHERE TDFId=$1', TDFId);
+  const textToSpeechAPIKey = tdfs.content.tdfs.tutor.setspec.textToSpeechAPIKey;
+  return textToSpeechAPIKey;
+}
+
+async function getTdfSpeachAPIKey(TDFId) {
+  const tdfs = await db.one(`SELECT * from tdf WHERE TDFId=${TDFId}`);
+  const speechAPIKey = tdfs.content.tdfs.tutor.setspec.speechAPIKey;
+  return speechAPIKey;
 }
 
 // eslint-disable-next-line camelcase
@@ -2089,6 +2102,28 @@ async function loadStimsAndTdfsFromPrivate(adminUserId) {
   }
 }
 
+async function makeHTTPSrequest(options, request){
+  return new Promise((resolve, reject) => {
+    let chunks = []
+    const req = https.request(options, res => {        
+      res.on('data', d => {
+          chunks.push(d);
+      })
+      res.on('end', function() {
+          console.log(Buffer.concat(chunks).toString());
+          resolve(Buffer.concat(chunks));
+      })
+    })
+    
+    req.on('error', (e) => {
+      reject(e.message);
+    });
+
+    req.write(request)
+    req.end()
+  });
+}
+
 const baseSyllableURL = 'http://localhost:4567/syllables/';
 function getSyllablesForWord(word) {
   const syllablesURL = baseSyllableURL + word;
@@ -2128,6 +2163,46 @@ Meteor.methods({
 
   getTdfIdByStimSetIdAndFileName, getItemsByFileName,
 
+
+  makeGoogleTTSApiCall: async function(TDFId, message, audioPromptSpeakingRate, audioVolume) {
+    const ttsAPIKey = await getTdfTTSAPIKey(TDFId);
+    const request = JSON.stringify({
+      input: {text: message},
+      voice: {languageCode: 'en-US', ssmlGender: 'FEMALE'},
+      audioConfig: {audioEncoding: 'MP3', speakingRate: audioPromptSpeakingRate, volumeGainDb: audioVolume},
+    });
+    const options = {
+      hostname: 'texttospeech.googleapis.com',
+      path: '/v1/text:synthesize?key=' + ttsAPIKey,
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json; charset=utf-8'
+      }
+    }
+    return await makeHTTPSrequest(options, request).then((data, error) => {
+      if(error)
+        throw new Meteor.Error('Error with Google TTS API call: ' + error);
+      response = JSON.parse(data.toString('utf-8'))
+      return response.audioContent;
+    });
+  },
+  
+  makeGoogleSpeechAPICall: async function(TDFId, speechAPIKey = '', request, answerGrammar){
+    console.log(request)
+    if(speechAPIKey == ''){
+      speechAPIKey = await getTdfTTSAPIKey(TDFId);
+    }
+    const options = {
+      hostname: 'speech.googleapis.com',
+      path: '/v1/speech:recognize?key=' + speechAPIKey,
+      method: 'POST'
+    }
+    return await makeHTTPSrequest(options, JSON.stringify(request)).then((data, error) => {
+      if(error)
+        throw new Meteor.Error('Error with Google SR API call: ' + error);
+      return [answerGrammar, JSON.parse(data.toString('utf-8'))]
+    });
+  },
   getUIDAndSecretForCurrentUser: async function(){
     if(!Meteor.userId()){
       throw new Meteor.Error('Unauthorized: No user login');
@@ -2187,6 +2262,7 @@ Meteor.methods({
   },
 
   updateStimSyllables: async function(stimSetId) {
+    StimSyllables.remove({filename: stimSetId});
     serverConsole('updateStimSyllables');
     const curStimuliSet = Items.find({stimuliSetId: stimSetId}).fetch();
     serverConsole('curStimuliSet: ' + JSON.stringify(curStimuliSet));
@@ -2214,7 +2290,6 @@ Meteor.methods({
       }
       serverConsole('after updateStimSyllables');
       serverConsole(stimSetId);
-      //syllablesUploadedSuccessfully = await verifySyllableUpload(stimSetId);
     }
   },
 
@@ -2234,6 +2309,53 @@ Meteor.methods({
     sendEmail(to, from, subject, text);
   },
 
+  sendPasswordResetEmail: function(email){
+    console.log ("sending password reset code for ", email)
+    //Generate Code
+    var secret = '';
+    var length = 5;
+    var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    var charactersLength = characters.length;
+    Meteor.users.findOne({username: email})
+    for ( var i = 0; i < length; i++ ) {
+      secret += characters.charAt(Math.floor(Math.random() * charactersLength));
+    }  
+    Meteor.users.update({username: email},{
+      $set:{
+        secret: secret
+      }
+    });
+    
+    //Setup email variables
+    const ownerEmail = Meteor.settings.owner;
+    const from = ownerEmail;
+    const subject = 'MoFaCTs Password Reset';
+    let text = 'Your password reset secret is: <b>' + secret + "</b>.<br>If this email was sent in error, please contact your MoFaCTs administrator.";
+
+    //Send email
+    sendEmail(email,from,subject,text);
+  },
+
+  checkPasswordResetSecret: function(email, secret){
+    userSecret = Meteor.users.findOne({username: email}).secret;
+    if(userSecret == secret){
+      return true;
+    } else {
+      return false;
+    }
+  },
+
+  resetPasswordWithSecret: function(email, secret, newPassword){
+    user = Meteor.users.findOne({username: email});
+    userId = user._id;
+    userSecret = user.secret;
+    if(secret == userSecret){
+      Accounts.setPassword(userId, newPassword);
+      return true;
+    } else {
+      return false;
+    }        
+  },
   sendUserErrorReport: function(userID, description, curPage, sessionVars, userAgent, logs, currentExperimentState) {
     const errorReport = {
       user: userID,
@@ -2298,6 +2420,7 @@ Meteor.methods({
     if (!newUserPassword || newUserPassword.length < 6) {
       throw new Error('Passwords must be at least 6 characters long');
     }
+    
 
     // Now we can actually create the user
     // Note that on the server we just get back the ID and have nothing
