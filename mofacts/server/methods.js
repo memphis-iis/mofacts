@@ -316,6 +316,7 @@ async function migration2(){
 
   const stimuli = Items.find().fetch();
   const stimuli_syllables = StimSyllables.find().fetch();
+  let syllCache = {};
   for(let t in stimuli){
     console.log(`stimuli: ${t}/${stimuli.length}`)
     let oldEntry = stimuli[t];
@@ -327,6 +328,10 @@ async function migration2(){
     let sylls = curStimSetSylls && response ? curStimSetSylls[response.toLowerCase()].syllables : null;
 
     if(!sylls){
+      sylls = syllCache[stimuli[t].correctResponse]
+    }
+    
+    if(!sylls){
       try{
         sylls = getSyllablesForWord(stimuli[t].correctResponse.replace(/\./g, '_').split('~')[0]);
       }
@@ -335,7 +340,7 @@ async function migration2(){
         sylls = [stimuli[t].correctResponse];
       }
     }
-
+    if(!syllCache[stimuli[t].correctResponse]) syllCache[stimuli[t].correctResponse] = sylls
     delete stimuli[t].itemId;
     stimuli[t].syllables = sylls;
     Items.update({_id: oldId}, stimuli[t]);
@@ -2868,8 +2873,8 @@ Meteor.startup(async function() {
   itemSourceSentences = new Meteor.Collection('item_source_sentences');
   Sections = new Meteor.Collection('section');
   SectionUserMap = new Meteor.Collection('section_user_map');
-  //await migration();
-  //await migration2();
+  // await migration();
+  // await migration2();
   // Let anyone looking know what config is in effect
   serverConsole('Log Notice (from siteConfig):', getConfigProperty('logNotice'));
 
