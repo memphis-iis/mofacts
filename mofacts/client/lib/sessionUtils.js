@@ -125,7 +125,8 @@ function sessionCleanUp() {
   Meteor.clearTimeout(Session.get('CurTimeoutId'));
   Session.set('CurTimeoutId', undefined);
   if (window.currentAudioObj) {
-    window.currentAudioObj.close();
+    window.currentAudioObj.pause();
+    window.currentAudioObj = null;
   }
   if(window.audioContext && window.audioContext.state != "closed"){
     window.audioContext.close();

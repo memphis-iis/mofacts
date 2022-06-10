@@ -166,12 +166,12 @@ Template.studentReporting.events({
 
 async function updateDashboard(selectedTdfId){
   console.log('change tdf select', selectedTdfId);
-  if (selectedTdfId!==INVALID) {
+  if (selectedTdfId && selectedTdfId!==INVALID) {
     $(`#tdf-select option[value='${INVALID}']`).prop('disabled', true);
     $(`#select option[value='${INVALID}']`).prop('disabled', true);
     const studentID = Session.get('curStudentID') || Meteor.userId();
     const studentUsername = Session.get('studentUsername') || Meteor.user().username;
-    const studentData = await meteorCallAsync('getStudentReportingData', studentID, selectedTdfId, "0");
+    const studentData = await meteorCallAsync('getStudentReportingData', studentID, selectedTdfId, 0);
     console.log("studentData loaded...",studentData);
     setStudentPerformance(studentID, studentUsername, selectedTdfId);
     drawDashboard(studentID, selectedTdfId);
