@@ -283,7 +283,6 @@ async function migration(){
     t.itemid = itemid;
     t.tdfid = tdfid;
     t = getHistoryForMongo(t);
-    delete t.eventId;
     Histories.insert(t);
   }
 
@@ -537,7 +536,7 @@ async function getStimuliSetsForIdSet(stimuliSetIds) {
   //Postgres Reversion
   // const query = 'SELECT * FROM ITEM WHERE stimuliSetId IN (' + stimSetsStr + ') ORDER BY itemId';
   // const stimSets = await db.many(query);
-  const stimSets = Items.find({stimuliSetId: {$in: [stimSetsStr]}});
+  const stimSets = Items.find({stimuliSetId: {$in: [stimSetsStr]}}, {sort: {stimulusKC: 1}});
   const ret = [];
   for (const stim of stimSets) {
     ret.push(getItem(stim));
@@ -602,7 +601,7 @@ async function getReponseKCMap() {
 // by currentTdfId, not currentRootTDFId
 async function getComponentStatesByUserIdTDFIdAndUnitNum(userId, TDFId) {
   //PostgresReversion
-  const componentStates = ComponentStates.find({ userId: userId, TDFId: TDFId }, { sort: { componentStateId: -1 } }).fetch();
+  const componentStates = ComponentStates.find({ userId: userId, TDFId: TDFId }, { sort: { KCId: -1 } }).fetch();
   // const query = 'SELECT * FROM componentState WHERE userId = $1 AND TDFId = $2 ORDER BY componentStateId';
   // const componentStatesRet = await db.manyOrNone(query, [userId, TDFId]);
   return componentStates;
@@ -1182,12 +1181,14 @@ async function getUserLastFeedbackTypeFromHistory(tdfID) {
   //PostgresReversion Staged
   // const query = "SELECT feedbackType FROM HISTORY WHERE TDFId = $1 AND userId = $2 ORDER BY eventid DESC LIMIT 1";
   // const feedbackType = await db.oneOrNone(query, [tdfID, Meteor.userId]);
-  const feedbackType = Histories.findOne({TDFId: tdfID, userId: Meteor.userId});
+  const feedbackType = Histories.findOne({TDFId: tdfID, userId: Meteor.userId}, {sort: {time: -1}}).feedbackType;
   return feedbackType;
 }
 async function insertHistory(historyRecord) {
   const tdfFileName = historyRecord['Condition_Typea'];
   const dynamicTagFields = await getListOfStimTags(tdfFileName);
+  const eventId = histories.find({}, {limit: 1, sort: {eventId: 1}}).eventId + 1;
+  historyRecord.eventId = eventId
   historyRecord.dynamicTagFields = dynamicTagFields || [];
   historyRecord.recordedServerTime = (new Date()).getTime();
   Histories.insert(historyRecord)
@@ -1382,7 +1383,7 @@ async function getStimuliSetById(stimuliSetId) {
 
 async function getStimCountByStimuliSetId(stimuliSetId) {
   // PostgresReversion Staged
-  let ret = Items.find({$count: {stimuliSetId: stimuliSetId}}).fetch();
+  let ret = Items.find({$count: {stimuliSetId: stimuliSetId}}, {sort: {stimulusKC: 1}}).fetch();
   // const query = 'SELECT COUNT(*) FROM item \
   //             WHERE stimuliSetId=$1 \
   //             ORDER BY itemId';
@@ -1404,33 +1405,57 @@ async function getItemsByFileName(stimFileName) {
   return items;
 }
 async function getStudentReportingData(userId, TDFId, hintLevel) {
-  // const query = 'SELECT ordinality, SUM(CASE WHEN outcome=\'1\' THEN 1 ELSE 0 END) \
-  //                as numCorrect, COUNT(outcome) as numTotal FROM componentState, \
-  //                unnest(string_to_array(outcomestack,\',\')) WITH ORDINALITY as outcome \
-  //                WHERE componentType=\'stimulus\' AND USERId=$1 AND TDFId=$2 \
-  //                AND hintLevel=$3 AND showItem=true GROUP BY ordinality \
-  //                ORDER BY ORDINALITY ASC LIMIT 5;';
-  // const dataRet = await db.manyOrNone(query, [userId, TDFid, hintLevel]);
-  const dataRet = ComponentStates.find({componentType: 'stimulus', userId: userId, TDFId: TDFId, hintLevel: hintLevel, showItem: true}).fetch();
-  const correctnessAcrossRepetitions = [];
-  for (const curData of dataRet) {
-    const numCorrect = curData.outcomeStack.reduce((partialSum, a) => partialSum + a, 0);
-    const numTotal = curData.outcomeStack.length;
-    correctnessAcrossRepetitions.push({
-      numCorrect,
-      numTotal,
-      percentCorrect: Math.round( (numCorrect / numTotal) * 100 ),
-    });
-  }
-
-  // const query2 = 'SELECT item.clozeStimulus, item.textStimulus, componentState.probabilityEstimate, \
-  //                 componentState.lastSeen, componentState.KCId FROM componentState JOIN item \
-  //                 ON componentState.kcid=item.stimuluskc WHERE componentType=\'stimulus\' AND userId=$1 AND TDFId=$2;';
-  // const dataRet2 = await db.manyOrNone(query2, [userId, TDFid]);
-  const dataRet2 = await Items.rawCollection().aggregate([{
+  //creates a list of the correctness of the first 5 times a user answers.
+  const correctnessAcrossRepetitions = await ComponentStates.rawCollection().aggregate([{
+    $match: {
+      userId: userId,
+      TDFId: TDFId,
+      componentType: 'stimulus',
+      showItem: true,
+      outcomeStack: { $exists: true, $not: {$size: 0} }
+    }
+  },
+  {
+    $unwind: {
+      path: "$outcomeStack",
+      includeArrayIndex: 'ordinality'
+    }
+  },
+  {
+    $group: {
+      _id: "$ordinality",
+      "ordinality": { "$first": "$ordinality"},
+      "numCorrect": { "$sum": "$outcomeStack" },
+      "numTotal": { "$sum": 1}
+    }
+  },
+  {
+    $match: {
+      _id: {"$lt": 5}
+    }
+  },
+  {
+    $sort: {
+      ordinality: 1
+    }
+  },
+  {
+    $project: {
+      _id: 0,
+      numCorrect: 1,
+      numTotal: 1,
+      'percentCorrect': {
+        $round: {
+          $multiply: [{$divide: ['$numCorrect', '$numTotal']}, 100]
+        }
+      },
+    }
+  }]).toArray();
+  const probEstimates = await ComponentStates.rawCollection().aggregate([{
     $match: {
       "userId": userId,
-      "TDFId": TDFId
+      "TDFId": TDFId,
+      "componentType": 'stimulus'
     }
   },
   {
@@ -1446,15 +1471,29 @@ async function getStudentReportingData(userId, TDFId, hintLevel) {
       path: "$items",
       preserveNullAndEmptyArrays: true
     }
+  },
+  {
+    $project: {
+      _id: 0,
+      "clozeStimulus": {
+        $cond: { 
+          if:{
+            $eq: ["$items.textStimulus", ""]
+          }, 
+          then:"$items.clozeStimulus", 
+          else: '$items.textStimulus'
+        }
+      },
+      'probabilityEstimate': {
+        $round: {
+          $multiply: ['$probabilityEstimate', 100]
+        }
+      },
+      'lastSeen': '$lastSeen',
+      'KCId': '$KCId'
+    }
   }]).toArray();
-  const probEstimates = [];
-  for (const curData of dataRet2) {
-    probEstimates.push({
-      stimulus: curData.items.clozestimulus || curData.items.textstimulus,
-      probabilityEstimate: Math.round(100 * parseFloat(curData.probabilityestimate)),
-      lastSeen: curData.lastseen,
-    });
-  }
+  serverConsole(correctnessAcrossRepetitions, probEstimates)
   return {correctnessAcrossRepetitions, probEstimates};
 }
 
@@ -1535,7 +1574,7 @@ async function getStudentPerformanceByIdAndTDFIdFromHistory(userId, TDFId,return
   //const perfRet = await db.oneOrNone(query, [userId, TDFid]);
   let histories;
   if(returnRows)
-    histories = Histories.find({userId: userId, TDFId: TDFId, levelUnitType: 'model'}, {limit: returnRows}).fetch(); //limit
+    histories = Histories.find({userId: userId, TDFId: TDFId, levelUnitType: 'model'}, {limit: returnRows, sort: {time: -1}}).fetch(); //limit
   else
     histories = Histories.find({userId: userId, TDFId: TDFId, levelUnitType: 'model'}).fetch();
   let perfRet = {
@@ -1549,7 +1588,7 @@ async function getStudentPerformanceByIdAndTDFIdFromHistory(userId, TDFId,return
     perfRet = {
       numCorrect: history.outcome == 'correct' ? perfRet.numCorrect + 1 : perfRet.numCorrect,
       numIncorrect: history.outcome == 'incorrect' ? perfRet.numIncorrect + 1 : perfRet.numIncorrect,
-      practiceDuration: perfRet.numIncorrect + history.CFEndLatency + history.CFFeedbackLatency,
+      practiceDuration: perfRet.practiceDuration + history.CFEndLatency + history.CFFeedbackLatency,
     }
     itemIds.push(history.itemId);
   }
