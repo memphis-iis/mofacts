@@ -1191,7 +1191,7 @@ async function getStudentPerformanceByIdAndTDFIdFromHistory(userId, TDFid,return
   serverConsole('getStudentPerformanceByIdAndTDFIdFromHistory', userId, TDFid, returnRows);
   let limitAddendum = "";
   if(returnRows != null){
-    limitAddendum = "ORDER BY itemid DESC LIMIT " + returnRows;
+    limitAddendum = "ORDER BY eventid DESC LIMIT " + returnRows;
   }
   const query = `SELECT COUNT(DISTINCT s.ItemId) AS stimsintroduced,
                   COUNT(CASE WHEN s.outcome='correct' THEN 1 END) AS numCorrect,
