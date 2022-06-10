@@ -1553,23 +1553,6 @@ async function getStudentPerformanceByIdAndTDFId(userId, TDFId, stimIds=null) {
 async function getStudentPerformanceByIdAndTDFIdFromHistory(userId, TDFId,returnRows=null){
   //used to grab a limited sample of the student's performance
   serverConsole('getStudentPerformanceByIdAndTDFIdFromHistory', userId, TDFId, returnRows);
-  // let limitAddendum = "";
-  // if(returnRows != null){
-  //   limitAddendum = "ORDER BY itemid DESC LIMIT " + returnRows;
-  // }
-  // const query = `SELECT COUNT(DISTINCT s.ItemId) AS stimsintroduced,
-  //                 COUNT(CASE WHEN s.outcome='correct' THEN 1 END) AS numCorrect,
-  //                 COUNT(CASE WHEN s.outcome='incorrect' THEN 1 END) AS numIncorrect,
-  //                 SUM(s.trialTime) as practiceDuration
-  //                 FROM
-  //                 (
-  //                   SELECT itemid, outcome, cf_end_latency + cf_feedback_latency as trialTime
-  //                   from history 
-  //                   WHERE userId=$1 AND TDFId=$2
-  //                   AND level_unittype = 'model'
-  //                   ${limitAddendum}
-  //                 ) s`;
-  //const perfRet = await db.oneOrNone(query, [userId, TDFid]);
   let histories;
   if(returnRows)
     histories = Histories.find({userId: userId, TDFId: TDFId, levelUnitType: 'model'}, {limit: returnRows, sort: {time: -1}}).fetch(); //limit
@@ -1598,14 +1581,6 @@ async function getStudentPerformanceByIdAndTDFIdFromHistory(userId, TDFId,return
 async function getNumDroppedItemsByUserIDAndTDFId(userId, TDFId){
   //used to grab a limited sample of the student's performance
   serverConsole('getNumDroppedItemsByUserIDAndTDFId', userId, TDFId);
-  // const query = `select COUNT
-  //               (
-  //                 CASE WHEN CF_Item_Removed=TRUE AND 
-  //                 userId=$1 AND 
-  //                 TDFId=$2 AND 
-  //                 level_unittype = 'model' THEN 1 END
-  //               ) from history`;
-  // const queryRet = await db.oneOrNone(query, [userId, TDFid]);
   const count = Histories.find({userId: userId, TDFId: TDFId, CFItemRemoved: true, levelUnitType: 'model'}).count();
   return count;
 }
