@@ -1489,11 +1489,9 @@ async function getStudentReportingData(userId, TDFId, hintLevel) {
           $multiply: ['$probabilityEstimate', 100]
         }
       },
-      'lastSeen': '$lastSeen',
-      'KCId': '$KCId'
+      'lastSeen': '$lastSeen'
     }
   }]).toArray();
-  serverConsole(correctnessAcrossRepetitions, probEstimates)
   return {correctnessAcrossRepetitions, probEstimates};
 }
 
@@ -1503,7 +1501,7 @@ async function getStimSetFromLearningSessionByClusterList(stimuliSetId, clusterL
   //              AND POSITION(CAST(clusterkc as text) in $2)>0 \
   //              ORDER BY itemId';
   // const itemRet = await db.manyOrNone(query, [stimuliSetId, clusterList]);
-  const itemRet = Items.find({stimuliSetId: stimuliSetId}).fetch();
+  const itemRet = Items.find({stimuliSetId: stimuliSetId}, {sort: {stimulusKC: 1}}).fetch();
   console.log(itemRet)
   let learningSessionItem = [];
   for(let item of itemRet){
