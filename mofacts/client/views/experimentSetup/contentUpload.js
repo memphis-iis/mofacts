@@ -267,7 +267,7 @@ async function readFileAsDataURL(file) {
   const result = await new Promise((resolve) => {
     const fileReader = new FileReader();
     fileReader.onload = () => resolve(fileReader.result);
-    fileReader.readAsBinaryString(file);
+    fileReader.readAsText(file, 'UTF-8');
   });
 
   return result;
