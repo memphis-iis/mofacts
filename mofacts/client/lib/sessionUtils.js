@@ -124,8 +124,11 @@ function sessionCleanUp() {
   Session.set('CurIntervalId', undefined)
   Meteor.clearTimeout(Session.get('CurTimeoutId'));
   Session.set('CurTimeoutId', undefined);
+  Meteor.clearInterval(Session.get('varLenTimeoutName'));
+  Session.set('varLenTimeoutName', null)
   if (window.currentAudioObj) {
-    window.currentAudioObj.close();
+    window.currentAudioObj.pause();
+    window.currentAudioObj = null;
   }
   if(window.audioContext && window.audioContext.state != "closed"){
     window.audioContext.close();
