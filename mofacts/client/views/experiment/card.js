@@ -423,8 +423,9 @@ Template.card.events({
 
   'click #removeQuestion': function(e) {
     // check if the question was already reported.
-    // This button only needs to fire if the user hasnt answered the question already.  
+    // This button only needs to fire if the user hasnt answered the question already.
     if(!Session.get('wasReportedForRemoval'))
+      removeCardByUser();
       Session.set('wasReportedForRemoval', true)
       afterAnswerFeedbackCallback(Date.now(), 'removal', "", false, false);
   },
@@ -1511,19 +1512,9 @@ async function giveWrongAnswer(){
 }
 
 async function afterAnswerFeedbackCallback(trialEndTimeStamp, source, userAnswer, isTimeout, isCorrect) {
-  const removalShortcut = afterAnswerFeedbackCallback.bind(null, trialEndTimeStamp, source, userAnswer, isTimeout, isCorrect);
-  const wasReportedForRemoval = Session.get('wasReportedForRemoval');
+  //if the user presses the removal button after answering we need to shortcut the timeout
+  const wasReportedForRemoval = source == 'removal';
   Session.set("reviewTimeoutCompletedFirst", false);
-
-  if(!wasReportedForRemoval){
-    $('#removeQuestion').on('click', null, null, function() {
-      Session.set('wasReportedForRemoval', true);
-      removalShortcut();
-    });
-  }
-  else{
-    removeCardByUser();
-  }
 
   const testType = getTestType();
   const deliveryParams = Session.get('currentDeliveryParams');
@@ -1596,24 +1587,17 @@ async function afterAnswerFeedbackCallback(trialEndTimeStamp, source, userAnswer
     hideUserFeedback();
     $('#userAnswer').val('');
     Session.set('feedbackTimeoutEnds', Date.now())
-    if(Session.get('unitType') != "model" || Session.get("engineIndices")){
-      console.log("engineIndicesCompletedFirst");
-      prepareCard();
-    }
-    else{
-      Session.set("reviewTimeoutCompletedFirst", true);
-    }
+    prepareCard();
   }, reviewTimeout)
 
   Session.set('CurTimeoutId', timeout)
   
-  if(!wasReportedForRemoval){
-    Session.set('engineIndexCalculations', Date.now());
-    if(Session.get('unitType') == "model")
-      Session.set('engineIndices', await engine.calculateIndices());
-    else
-      Session.set('engineIndices', undefined);
-  }
+  if(Session.get('unitType') == "model")
+    engine.calculateIndices().then(function(res, err) {
+      Session.set('engineIndices', res );
+    })
+  else
+    Session.set('engineIndices', undefined);
 }
 
 function getReviewTimeout(testType, deliveryParams, isCorrect, dialogueHistory, isTimeout) {
@@ -2954,7 +2938,7 @@ async function removeCardByUser() {
   let whichStim = engine.findCurrentCardInfo().whichStim;
   const userId = Meteor.userId();
   const tdfId = Session.get('currentTdfId');
-  await meteorCallAsync('insertHiddenItem', userId, stims[whichStim].stimulusKC, tdfId);
+  Meteor.call('insertHiddenItem', userId, stims[whichStim].stimulusKC, tdfId)
   let hiddenItems = Session.get('hiddenItems');
   hiddenItems.push(stims[whichStim].stimulusKC);
   
