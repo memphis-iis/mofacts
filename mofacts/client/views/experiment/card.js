@@ -136,7 +136,6 @@ let userFeedbackStart = null;
 let timeoutName = null;
 let timeoutFunc = null;
 let timeoutDelay = null;
-let varLenTimeoutName = null;
 let simTimeoutName = null;
 
 // Helper - return elapsed seconds since unit started. Note that this is
@@ -164,12 +163,12 @@ function clearCardTimeout() {
   };
   safeClear(Meteor.clearTimeout, timeoutName);
   safeClear(Meteor.clearTimeout, simTimeoutName);
-  safeClear(Meteor.clearInterval, varLenTimeoutName);
+  safeClear(Meteor.clearInterval, Session.get('varLenTimeoutName'));
   timeoutName = null;
   timeoutFunc = null;
   timeoutDelay = null;
   simTimeoutName = null;
-  varLenTimeoutName = null;
+  Session.set('varLenTimeoutName', null);
 }
 
 // Start a timeout count
@@ -199,7 +198,7 @@ function beginMainCardTimeout(delay, func) {
   Session.set('mainCardTimeoutStart', mainCardTimeoutStart);
   console.log('mainCardTimeoutStart', mainCardTimeoutStart);
   timeoutName = Meteor.setTimeout(timeoutFunc, timeoutDelay);
-  varLenTimeoutName = Meteor.setInterval(varLenDisplayTimeout, 400);
+  Session.set('varLenTimeoutName', Meteor.setInterval(varLenDisplayTimeout, 400));
 }
 
 // Reset the previously set timeout counter
@@ -214,7 +213,7 @@ function resetMainCardTimeout() {
   Session.set('mainCardTimeoutStart', mainCardTimeoutStart);
   console.log('reset, mainCardTimeoutStart:', mainCardTimeoutStart);
   timeoutName = Meteor.setTimeout(savedFunc, savedDelay);
-  varLenTimeoutName = Meteor.setInterval(varLenDisplayTimeout, 400);
+  Session.set('varLenTimeoutName', Meteor.setInterval(varLenDisplayTimeout, 400));
 }
 
 // TODO: there is a minor bug here related to not being able to truly pause on
@@ -244,7 +243,7 @@ function restartMainCardTimeoutIfNecessary() {
     }
   }
   timeoutName = Meteor.setTimeout(wrappedTimeout, remainingDelay);
-  varLenTimeoutName = Meteor.setInterval(varLenDisplayTimeout, 400);
+  Session.set('varLenTimeoutName', Meteor.setInterval(varLenDisplayTimeout, 400));
 }
 
 // Set a special timeout to handle simulation if necessary
@@ -300,8 +299,8 @@ function varLenDisplayTimeout() {
     // No variable display parameters - we can stop the interval
     $('#continueButton').prop('disabled', false);
     setDispTimeoutText('');
-    Meteor.clearInterval(varLenTimeoutName);
-    varLenTimeoutName = null;
+    Meteor.clearInterval(Session.get('varLenTimeoutName'));
+    Session.set('varLenTimeoutName', null);
     return;
   }
 
@@ -2312,12 +2311,12 @@ function speakMessageIfAudioPromptFeedbackEnabled(msg, audioPromptSource) {
               window.currentAudioObj.pause();
             }
             window.currentAudioObj = audioObj;
-            audioObj.addEventListener('ended', (event) => {
+            window.currentAudioObj.addEventListener('ended', (event) => {
               Session.set('recordingLocked', false);
               startRecording();
             });
             console.log('inside callback, playing audioObj:');
-            audioObj.play().catch((err) => {
+            window.currentAudioObj.play().catch((err) => {
               console.log(err)
               let utterance = new SpeechSynthesisUtterance(msg);
               synthesis.speak(utterance);
