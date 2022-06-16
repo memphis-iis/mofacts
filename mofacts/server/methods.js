@@ -1491,21 +1491,6 @@ function findUserByName(username) {
   return null;
 }
 
-async function verifySyllableUpload(stimSetId){
-  const query = 'SELECT COUNT(DISTINCT LOWER(correctresponse)) FROM item WHERE stimulisetid = $1';
-  const postgresRet = await db.oneOrNone(query, stimSetId);
-  const answersCountPostgres = postgresRet.count;
-
-  const mongoRet = StimSyllables.findOne({filename: stimSetId});
-  if(mongoRet){
-    const answersCountMongo = Object.keys(mongoRet.data).length;
-    if(answersCountMongo == answersCountPostgres)
-      return true;
-  }
-  StimSyllables.remove({filename: stimSetId});
-  return false;
-}
-
 function sendEmail(to, from, subject, text) {
   check([to, from, subject, text], [String]);
   Email.send({to, from, subject, text});
@@ -1524,7 +1509,7 @@ async function upsertStimFile(stimFilename, stimJSON, ownerId) {
     'owner': ownerId,
     'source': 'repo',
   };
-  await db.tx(async (t) => {
+  let [stimuliSetId, allAnswers] = await db.tx(async (t) => {
     const responseKCMap = await getReponseKCMap();
     const query = 'SELECT stimuliSetId FROM item WHERE stimulusFilename = $1 LIMIT 1';
     const associatedStimSetIdRet = await t.oneOrNone(query, stimFilename);
@@ -1602,10 +1587,10 @@ async function upsertStimFile(stimFilename, stimJSON, ownerId) {
     }
     allAnswers = Array.from(allAnswers);
     //Update Stim Cache every upload
-    Meteor.call('updateStimSyllableCache', stimuliSetId, allAnswers);
 
-    return {ownerId};
+    return [stimuliSetId, allAnswers];
   });
+  Meteor.call('updateStimSyllableCache', stimuliSetId, allAnswers);
 }
 
 
@@ -1853,41 +1838,27 @@ Meteor.methods({
   },
 
   updateStimSyllableCache: async function(stimFileName, answers) {
-    let numTries = 0;
-    serverConsole('updateStimSyllableCache');
-    const curStimSyllables = StimSyllables.findOne({filename: stimFileName});
-    serverConsole('curStimSyllables: ' + JSON.stringify(curStimSyllables));
-    if (!curStimSyllables) {
-      let syllablesUploadedSuccessfully = await verifySyllableUpload(stimFileName);
-      while(!syllablesUploadedSuccessfully && numTries < 3){
-        const data = {};
-        for (const answer of answers) {
-          let syllableArray;
-          let syllableGenerationError;
-          const safeAnswer = answer.replace(/\./g, '_');
-          try {
-            syllableArray = getSyllablesForWord(safeAnswer);
-          } catch (e) {
-            serverConsole('error fetching syllables for ' + answer + ': ' + JSON.stringify(e));
-            syllableArray = [answer];
-            syllableGenerationError = e;
-          }
-          data[safeAnswer] = {
-            count: syllableArray.length,
-            syllables: syllableArray,
-            error: syllableGenerationError,
-          };
-        }
-        StimSyllables.insert({filename: stimFileName, data: data});
-        serverConsole('after updateStimSyllableCache');
-        serverConsole(stimFileName);
-        numTries++;
-        syllablesUploadedSuccessfully = await verifySyllableUpload(stimFileName);
+    StimSyllables.remove({filename: stimFileName});
+    serverConsole('updateStimSyllableCache', 'stimFileName', stimFileName, 'answers', answers);
+    const data = {};
+    for (const answer of answers) {
+      let syllableArray;
+      let syllableGenerationError;
+      const safeAnswer = answer.replace(/\./g, '_');
+      try {
+        syllableArray = getSyllablesForWord(safeAnswer);
+      } catch (e) {
+        serverConsole('error fetching syllables for ' + answer + ': ' + JSON.stringify(e));
+        syllableArray = [answer];
+        syllableGenerationError = e;
       }
-      if(!syllablesUploadedSuccessfully){
-        throw new Error('Cannot upload stim file to mongoDB. Discrepency between postgres and mongo.');
-      }
+      data[safeAnswer] = {
+        count: syllableArray.length,
+        syllables: syllableArray,
+        error: syllableGenerationError,
+      };
     }
+    StimSyllables.insert({filename: stimFileName, data: data});
   },
 
   getClozeEditAuthors: function() {
@@ -2336,10 +2307,6 @@ Meteor.methods({
                   allAnswers.add(singularAnswer);
                 }
               }
-            
-              allAnswers = Array.from(allAnswers);
-              //Update Stim Cache every upload
-              Meteor.call('updateStimSyllableCache', stimuliSetId, allAnswers);
               results.result = true;
             } catch (err) {
               results.result=false;
