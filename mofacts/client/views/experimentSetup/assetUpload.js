@@ -39,10 +39,22 @@ Template.assetUpload.events({
             assetList.push(
               {
                link: DynamicAssets.link(fileObj),
-               filename: fileObj.name
+               filename: fileObj.name,
+               path: fileObj.path,
+               ext: fileObj.ext,
               }
               );
             Session.set('assetLink',assetList);
+            if(fileObj.ext == "zip"){
+              console.log('package detected')
+              Meteor.call('processPackageUpload',fileObj.path,fileObj.ext,Meteor.userId(),function(err,res){
+                if(err){
+                  alert("Package upload failed.\n"+err);
+                } else {
+                  console.log(res);
+                }
+              });
+            }
           }
           template.currentUpload.set(false);
         });

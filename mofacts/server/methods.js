@@ -10,6 +10,7 @@ import {getNewItemFormat} from './conversions/convert';
 import {sendScheduledTurkMessages} from './turk_methods';
 import {getItem, getComponentState, getCourse, getTdf} from './orm';
 import { result } from 'underscore';
+import { type } from 'os';
 
 
 export {
@@ -311,6 +312,7 @@ async function getTdfByFileName(filename) {
     return null;
   }
 }
+
 
 async function getTdfByExperimentTarget(experimentTarget) {
   try {
@@ -2239,11 +2241,79 @@ Meteor.methods({
     result = "TDF deleted";
     return result;
   },
-
+  // Package Uploader
+  processPackageUpload: function(path,fileObject, owner){
+    const fs = Npm.require('fs');
+    const unzip = Npm.require('unzipper');
+    var tdfContents = [];
+    var stimContents = [];
+    var referenceContents = [];
+    fs.createReadStream(path)
+      .pipe(unzip.Parse())
+      .on('entry', async function(entry){
+        var fileName = entry.path;
+        var content =  await entry.buffer().then(function(file, stimContents){
+          fileSplit = fileName.split(".");
+          type = fileSplit[fileSplit.length - 1];
+          console.log(type);
+          if(type =="json"){
+            rawFileContents = file.toString();
+            parsedFileContents = JSON.parse(rawFileContents);
+            JSONStringContents = JSON.stringify(parsedFileContents);
+            if(parsedFileContents.setspec){
+              fileFinal = {
+                type: "stim",
+                contents: JSONStringContents,
+                fileName: fileName
+              }
+              stimContents.push(fileFinal);
+            } 
+            if(parsedFileContents.tutor){
+              fileFinal = {
+                type: "tdf",
+                contents: JSONStringContents,
+                fileName: fileName
+              }
+              tdfContents.push(fileFinal);
+            }
+          }else{
+            DynamicAssets.write(file, {
+              fileName: entry.path
+            },function(error,fileRef){
+              replacePath = DynamicAssets.link(fileRef);
+              referenceFile = {
+                fileName: fileName,
+                replacePath: replacePath
+              }
+              console.log(referenceFile);
+              referenceContents.push(referenceFile);
+            })
+          }
+          return {referenceContents,tdfContents,stimContents}
+        });
+        for(let files of stimContents){
+          console.log("rocessing package file:", files.fileName);
+            for(let referenceFile of referenceContents){
+              console.log("replacing reference:", files.fileName, referenceFile.fileName, referenceFile.replacePath);
+              toReplace = files.contents;
+              replaced = toReplace.replace(referenceFile.fileName,referenceFile.replacePath);          
+            }
+            Meteor.call("saveContentFile",files.type, files.fileName, files.contents, owner);
+        }
+        for(let files of tdfContents){
+          console.log("processing package file:", files.fileName);
+          for(let referenceFile of referenceContents){
+            toReplace = files.contents;
+            replaced = toReplace.replace(referenceFile.fileName,referenceFile.replacePath);             
+          }
+          Meteor.call("saveContentFile",files.type, files.fileName, files.contents, owner);
+        }
+      });
+  },
   // Allow file uploaded with name and contents. The type of file must be
   // specified - current allowed types are: 'stimuli', 'tdf'
-  saveContentFile: async function(type, filename, filecontents) {
-    serverConsole('saveContentFile', type, filename);
+  saveContentFile: async function(type, filename, filecontents, owner) {
+    serverConsole('saveContentFile', type, filename, owner);
     const results = {
       'result': null,
       'errmsg': 'No action taken?',
@@ -2252,13 +2322,17 @@ Meteor.methods({
     if (!type) throw new Error('Type required for File Save');
     if (!filename) throw new Error('Filename required for File Save');
     if (!filecontents) throw new Error('File Contents required for File Save');
-
+    let ownerId = "";
     // We need a valid use that is either admin or teacher
-    const ownerId = Meteor.user()._id;
+    if(owner){
+      ownerId = owner;
+    } else {
+      ownerId = Meteor.user()._id;
+    }
     if (!ownerId) {
       throw new Error('No user logged in - no file upload allowed');
     }
-    if (!Roles.userIsInRole(Meteor.user(), ['admin', 'teacher'])) {
+    if (!Roles.userIsInRole(ownerId, ['admin', 'teacher'])) {
       throw new Error('You are not authorized to upload files');
     }
     if (type != 'tdf' && type != 'stim') {
