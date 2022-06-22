@@ -2245,17 +2245,17 @@ Meteor.methods({
   processPackageUpload: function(path,fileObject, owner){
     const fs = Npm.require('fs');
     const unzip = Npm.require('unzipper');
-    var tdfContents = [];
-    var stimContents = [];
-    var referenceContents = [];
-    fs.createReadStream(path)
+    let links = [];
+    var stream = fs.createReadStream(path)
       .pipe(unzip.Parse())
       .on('entry', async function(entry){
+        var tdfContent = [];
+        var stimContent = [];
+        var referenceContents = [];
         var fileName = entry.path;
-        var content =  await entry.buffer().then(function(file, stimContents){
+        var content =  await entry.buffer().then(function(file, fileObject){
           fileSplit = fileName.split(".");
           type = fileSplit[fileSplit.length - 1];
-          console.log(type);
           if(type =="json"){
             rawFileContents = file.toString();
             parsedFileContents = JSON.parse(rawFileContents);
@@ -2266,7 +2266,7 @@ Meteor.methods({
                 contents: JSONStringContents,
                 fileName: fileName
               }
-              stimContents.push(fileFinal);
+              stimContent.push(fileFinal);
             } 
             if(parsedFileContents.tutor){
               fileFinal = {
@@ -2274,25 +2274,32 @@ Meteor.methods({
                 contents: JSONStringContents,
                 fileName: fileName
               }
-              tdfContents.push(fileFinal);
+              tdfContent.push(fileFinal);
             }
           }else{
+            console.log(path);
             DynamicAssets.write(file, {
-              fileName: entry.path
+              fileName: entry.path,
+              meta: {
+                owner: owner,
+                parent: path
+              }
             },function(error,fileRef){
               replacePath = DynamicAssets.link(fileRef);
               referenceFile = {
                 fileName: fileName,
-                replacePath: replacePath
+                replacePath: replacePath,
+                parent: path
               }
               console.log(referenceFile);
               referenceContents.push(referenceFile);
+              links.push(referenceFile);
             })
           }
-          return {referenceContents,tdfContents,stimContents}
+          return {referenceContents,tdfContent,stimContent}
         });
-        for(let files of stimContents){
-          console.log("rocessing package file:", files.fileName);
+        for(let files of content.stimContent){
+          console.log("Processing package file:", files.fileName);
             for(let referenceFile of referenceContents){
               console.log("replacing reference:", files.fileName, referenceFile.fileName, referenceFile.replacePath);
               toReplace = files.contents;
@@ -2300,7 +2307,7 @@ Meteor.methods({
             }
             Meteor.call("saveContentFile",files.type, files.fileName, files.contents, owner);
         }
-        for(let files of tdfContents){
+        for(let files of content.tdfContent){
           console.log("processing package file:", files.fileName);
           for(let referenceFile of referenceContents){
             toReplace = files.contents;
@@ -2308,7 +2315,10 @@ Meteor.methods({
           }
           Meteor.call("saveContentFile",files.type, files.fileName, files.contents, owner);
         }
+        this.content = content;
       });
+      assets = DynamicAssets.find({}).fetch();
+      return assets;
   },
   // Allow file uploaded with name and contents. The type of file must be
   // specified - current allowed types are: 'stimuli', 'tdf'
