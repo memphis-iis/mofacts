@@ -1743,11 +1743,11 @@ Meteor.methods({
   getTdfIdByStimSetIdAndFileName, getItemsByFileName,
 
 
-  makeGoogleTTSApiCall: async function(TDFId, message, audioPromptSpeakingRate, audioVolume) {
+  makeGoogleTTSApiCall: async function(TDFId, message, audioPromptSpeakingRate, audioVolume, selectedVoice) {
     const ttsAPIKey = await getTdfTTSAPIKey(TDFId);
     const request = JSON.stringify({
       input: {text: message},
-      voice: {languageCode: 'en-US', ssmlGender: 'FEMALE'},
+      voice: {languageCode: 'en-US', 'name': selectedVoice},
       audioConfig: {audioEncoding: 'MP3', speakingRate: audioPromptSpeakingRate, volumeGainDb: audioVolume},
     });
     const options = {

@@ -2293,11 +2293,13 @@ function speakMessageIfAudioPromptFeedbackEnabled(msg, audioPromptSource) {
       if (Session.get('currentTdfFile').tdfs.tutor.setspec.textToSpeechAPIKey) {
         let audioPromptSpeakingRate = Session.get('audioPromptFeedbackSpeakingRate');
         let audioPromptVolume = Session.get('audioPromptFeedbackVolume')
+        let audioPromptVoice = Session.get('audioPromptFeedbackVoice')
         if (audioPromptSource == 'question'){
           audioPromptSpeakingRate = Session.get('audioPromptQuestionSpeakingRate');
           audioPromptVolume = Session.get('audioPromptQuestionVolume')
+          audioPromptVoice = Session.get('audioPromptVoice')
         }
-        Meteor.call('makeGoogleTTSApiCall', Session.get('currentTdfId'), msg, audioPromptSpeakingRate, audioPromptVolume, function(err, res) {
+        Meteor.call('makeGoogleTTSApiCall', Session.get('currentTdfId'), msg, audioPromptSpeakingRate, audioPromptVolume, audioPromptVoice, function(err, res) {
           if(err){
             console.log(err)
           }

@@ -148,6 +148,16 @@ Template.profileAudioToggles.rendered = function() {
   if (audioPromptQuestionSpeakingRateView) {
     document.getElementById('audioPromptQuestionSpeakingRate').value = audioPromptQuestionSpeakingRateView;
   }
+
+  const audioPromptVoiceView = Session.get('audioPromptVoiceView');
+  if (audioPromptVoiceView) {
+    document.getElementById('audioPromptVoice').value = audioPromptVoiceView;
+  }
+
+  const audioPromptFeedbackVoiceView = Session.get('audioPromptFeedbackVoiceView');
+  if (audioPromptFeedbackVoiceView) {
+    document.getElementById('audioPromptFeedbackVoice').value = audioPromptFeedbackVoiceView;
+  }
 };
 
 Template.profileAudioToggles.events({
@@ -227,6 +237,18 @@ Template.profileAudioToggles.events({
   'change #audioPromptFeedbackVolume': function(event) {
     Session.set('audioPromptFeedbackVolume', event.currentTarget.value)
   },
+
+  'click #audioPromptVoiceTest': function(event) {
+    const voice = document.getElementById('audioPromptVoice').value;
+    const audioObj = new Audio(`https://cloud.google.com/text-to-speech/docs/audio/${voice}.wav`);
+    audioObj.play();
+  },
+
+  'click #audioPromptFeedbackVoiceTest': function(event) {
+    const voice = document.getElementById('audioPromptFeedbackVoice').value;
+    const audioObj = new Audio(`https://cloud.google.com/text-to-speech/docs/audio/${voice}.wav`);
+    audioObj.play();
+  }
 });
 
 Template.profileAudioToggles.helpers({
