@@ -54,6 +54,8 @@ function sessionCleanUp() {
   Session.set('audioPromptFeedbackVolume', undefined)
   Session.set('audioPromptQuestionVolume', undefined)
   Session.set('audioPromptQuestionSpeakingRate', undefined);
+  Session.set('audioPromptVoice', undefined);
+  Session.set('audioPromptFeedbackVoice', undefined);
   Session.set('buttonTrial', false);
   Session.set('currentAnswerSyllables', undefined);
 
