@@ -34,17 +34,7 @@ Template.assetUpload.events({
             alert(`Error during upload: ${error}`);
           } else {
             assetLink = DynamicAssets.link(fileObj);
-            console.log(fileObj);
             assetList = Session.get('assetLink') || [];
-            assetList.push(
-              {
-               link: DynamicAssets.link(fileObj),
-               filename: fileObj.name,
-               path: fileObj.path,
-               ext: fileObj.ext,
-              }
-              );
-            Session.set('assetLink',assetList);
             if(fileObj.ext == "zip"){
               console.log('package detected')
               Meteor.call('processPackageUpload',fileObj.path,fileObj.ext,Meteor.userId(),function(err,res){
@@ -52,6 +42,20 @@ Template.assetUpload.events({
                   alert("Package upload failed.\n"+err);
                 } else {
                   console.log(res);
+                  for(file of res){
+                    link = DynamicAssets.link(file);
+                    
+                    assetList.push(
+                      {
+                      link: link,
+                      name: file.name,
+                      path: file.path,
+                      ext: file.ext,
+                      }
+                      );
+                      console.log(file);
+                    Session.set('assetLink',assetList);
+                  }
                 }
               });
             }
@@ -61,7 +65,7 @@ Template.assetUpload.events({
         
         upload.start();
 
+        }
       }
-    }
   }
 });
