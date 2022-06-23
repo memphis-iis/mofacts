@@ -358,8 +358,8 @@ const Answers = {
   answerIsCorrect: async function(userInput, answer, originalAnswer, displayedAnswer, setspec, callback) {
     // Note that a missing or invalid lfparameter will result in a null value
     const lfparameter = parseFloat(setspec ? setspec.lfparameter || 0 : 0);
-    const allowPhoneticMatching = (setspec ? setspec.allowPhoneticMatching || false : false);
-    const useSpellingCorrection = (setspec ? setspec.useSpellingCorrection || false : false);
+    const allowPhoneticMatching = Session.get('currentDeliveryParams').allowPhoneticMatching || false;
+    const useSpellingCorrection = Session.get('currentDeliveryParams').useSpellingCorrection || false;
     const feedbackType = Session.get('currentDeliveryParams').feedbackType;
 
     let fullTextIsCorrect = await checkAnswer(userInput, answer, originalAnswer, lfparameter, allowPhoneticMatching, useSpellingCorrection, undefined);
