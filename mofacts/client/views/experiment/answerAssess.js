@@ -113,7 +113,7 @@ async function simpleStringMatch(userAnswer, correctAnswer, lfparameter, allowPh
   } 
   else {
     // See if they were close enough
-    if (lfparameter || useSymSpell) {
+    if (lfparameter || useSpellingCorrection) {
       const checkOtherAnswers = Session.get('currentDeliveryParams').checkOtherAnswers;
       // Check to see if the user answer is an exact match for any other answers in the stim file,
       // If not we'll do an edit distance calculation to determine if they were close enough to the correct answer
@@ -291,12 +291,12 @@ async function checkAnswer(userAnswer, correctAnswer, originalAnswer, lfparamete
     let userAnswerWords = userAnswer.split(" ");
     let userFirstAnswer =  userAnswerWords.slice(0,answerWordsCount).join(" ");
     let userSecondAnswer = userAnswerWords.slice(answerWordsCount).join(" ");
-    match = stringMatch(originalAnswer, userAnswer, lfparameter, allowPhoneticMatching, useSpellingCorrection, userInput);
+    match = await stringMatch(originalAnswer, userAnswer, lfparameter, allowPhoneticMatching, useSpellingCorrection, userInput);
     if(match == 0){
-      match = stringMatch(originalAnswer, userFirstAnswer, lfparameter, allowPhoneticMatching, useSpellingCorrection, userInput);
+      match = await stringMatch(originalAnswer, userFirstAnswer, lfparameter, allowPhoneticMatching, useSpellingCorrection, userInput);
     }
     if(match == 0){
-      match = stringMatch(originalAnswer, userSecondAnswer, lfparameter, allowPhoneticMatching, useSpellingCorrection, userInput);
+      match = await stringMatch(originalAnswer, userSecondAnswer, lfparameter, allowPhoneticMatching, useSpellingCorrection, userInput);
     }
     if (match === 0) {
       isCorrect = false;
