@@ -102,7 +102,7 @@ function checkIfUserAnswerMatchesOtherAnswers(userAnswer, correctAnswer) {
   return false;
 }
 
-async function simpleStringMatch(userAnswer, correctAnswer, lfparameter, fullAnswerStr) {
+async function simpleStringMatch(userAnswer, correctAnswer, lfparameter, allowPhoneticMatching, useSpellingCorrection, fullAnswerStr) {
   const s1 = _.trim(userAnswer).toLowerCase();
   const s2 = _.trim(correctAnswer).toLowerCase();
   const fullAnswerText = _.trim(fullAnswerStr).toLowerCase();
@@ -110,9 +110,10 @@ async function simpleStringMatch(userAnswer, correctAnswer, lfparameter, fullAns
   if (s1.localeCompare(s2) === 0) {
     // Exact match!
     return 1;
-  } else {
+  } 
+  else {
     // See if they were close enough
-    if (lfparameter) {
+    if (lfparameter || useSymSpell) {
       const checkOtherAnswers = Session.get('currentDeliveryParams').checkOtherAnswers;
       // Check to see if the user answer is an exact match for any other answers in the stim file,
       // If not we'll do an edit distance calculation to determine if they were close enough to the correct answer
@@ -122,21 +123,43 @@ async function simpleStringMatch(userAnswer, correctAnswer, lfparameter, fullAns
       }
       if (checkOtherAnswers && matchOther) {
         return 0;
-      } else {
-        const results = await meteorCallAsync('getSymSpellCorrection', s1);
-        if(results[0].term.localeCompare(s2) === 0) {
-          return 2; // Close enough
-        } else {
-          if(true){//enable phonetic encoding
-            const metaphone1 = doubleMetaphone(s1);
-            const metaphone2 = doubleMetaphone(s2);
-            if(compareMetaphones(metaphone1, metaphone2))
-              return 3; // Metaphone match
-          }
-          return 0; // No match
-        }
+      } 
+    }
+    if (lfparameter) {
+      const editDistance = getEditDistance(s1, s2);
+      const editDistScore = 1.0 - (
+        editDistance /
+                Math.max(s1.length, s2.length)
+      );
+      if (editDistScore >= lfparameter) {
+        return 2; // Close enough
+      } 
+      else if(allowPhoneticMatching) {//enable phonetic encoding
+        const metaphone1 = doubleMetaphone(s1);
+        const metaphone2 = doubleMetaphone(s2);
+        if(compareMetaphones(metaphone1, metaphone2))
+          return 3; // Metaphone match
+      } 
+      else {
+      return 0; // No match
       }
-    } else {
+    } 
+    else if(useSpellingCorrection) {
+      const results = await meteorCallAsync('getSymSpellCorrection', s1);
+      if(results[0].term.localeCompare(s2) === 0) {
+        return 2; // Close enough
+      } 
+      else if(allowPhoneticMatching) {//enable phonetic encoding
+        const metaphone1 = doubleMetaphone(s1);
+        const metaphone2 = doubleMetaphone(s2);
+        if(compareMetaphones(metaphone1, metaphone2))
+          return 3; // Metaphone match
+      } 
+      else {
+        return 0; // No match
+      }
+    }
+    else {
       // Nope - must compare exactly
       return 0;
     }
@@ -154,7 +177,7 @@ function compareMetaphones(m1, m2){
 // match was exact, we return 1. If we matched on edit distance, we return 2.
 // We also support a |-only regex(-ish) format (which is also honored by our
 // regex search)
-async function stringMatch(stimStr, userAnswer, lfparameter, userInput) {
+async function stringMatch(stimStr, userAnswer, lfparameter, allowPhoneticMatching, useSpellingCorrection, userInput) {
   if (userInput === '' || userAnswer === ''){
     //user didnt enter a response.
     return 0;
@@ -165,14 +188,14 @@ async function stringMatch(stimStr, userAnswer, lfparameter, userInput) {
       if (checks[i].length < 1) {
         continue;
       } // No blank checks
-      const matched = await simpleStringMatch(userAnswer, checks[i], lfparameter, stimStr);
+      const matched = await simpleStringMatch(userAnswer, checks[i], lfparameter, allowPhoneticMatching, useSpellingCorrection, stimStr);
       if (matched !== 0) {
         return matched; // Match!
       }
     }
     return 0; // Nothing found
   } else {
-    return await simpleStringMatch(userAnswer, stimStr, lfparameter, stimStr);
+    return await simpleStringMatch(userAnswer, stimStr, lfparameter, allowPhoneticMatching, useSpellingCorrection, stimStr);
   }
 }
 
@@ -183,7 +206,7 @@ async function stringMatch(stimStr, userAnswer, lfparameter, userInput) {
 // the current levenshtein distance.
 // ALSO notice that we use the same return values as stringMatch: 0 for no
 // match, 1 for exact match, 2 for edit distance match
-async function regExMatch(regExStr, userAnswer, lfparameter, fullAnswer) {
+async function regExMatch(regExStr, userAnswer, lfparameter, useSpellingCorrection, fullAnswer) {
   if (lfparameter && /^[\|A-Za-z0-9 ]+$/i.test(regExStr)) {
     // They have an edit distance parameter and the regex matching our
     // special condition - check it manually
@@ -192,7 +215,7 @@ async function regExMatch(regExStr, userAnswer, lfparameter, fullAnswer) {
       if (checks[i].length < 1) {
         continue;
       } // No blank checks
-      const matched = await simpleStringMatch(userAnswer, checks[i], lfparameter, fullAnswer);
+      const matched = await simpleStringMatch(userAnswer, checks[i], lfparameter, allowPhoneticMatching, useSpellingCorrection, fullAnswer);
       if (matched !== 0) {
         return matched; // Match!
       }
@@ -207,7 +230,7 @@ async function regExMatch(regExStr, userAnswer, lfparameter, fullAnswer) {
 // Return [isCorrect, matchText] where isCorrect is true if the user-supplied
 // answer matches the first branch and matchText is the text response from a
 // matching branch
-function matchBranching(answer, userAnswer, lfparameter) {
+function matchBranching(answer, userAnswer, allowPhoneticMatching, useSpellingCorrection, lfparameter) {
   let isCorrect = false;
   let matchText = '';
   const userAnswerCheck = _.trim(userAnswer).toLowerCase();
@@ -220,7 +243,7 @@ function matchBranching(answer, userAnswer, lfparameter) {
     }
 
     flds[0] = _.trim(flds[0]).toLowerCase();
-    const matched = regExMatch(flds[0], userAnswerCheck, lfparameter, answer);
+    const matched = regExMatch(flds[0], userAnswerCheck, lfparameter, allowPhoneticMatching, useSpellingCorrection, answer);
     if (matched !== 0) {
       matchText = _.trim(flds[1]);
       if (matched === 2) {
@@ -250,7 +273,7 @@ function _branchingCorrectText(answer) {
   return result[0];
 }
 
-async function checkAnswer(userAnswer, correctAnswer, originalAnswer, lfparameter, userInput) {
+async function checkAnswer(userAnswer, correctAnswer, originalAnswer, lfparameter, allowPhoneticMatching, useSpellingCorrection, userInput) {
   const answerDisplay = originalAnswer;
   let isCorrect; let matchText;
   if(userAnswer === ''){
@@ -258,7 +281,7 @@ async function checkAnswer(userAnswer, correctAnswer, originalAnswer, lfparamete
     isCorrect = false;
   } else {
     if (answerIsBranched(correctAnswer)) {
-      [isCorrect, matchText] = matchBranching(correctAnswer, userAnswer, lfparameter);
+      [isCorrect, matchText] = matchBranching(correctAnswer, userAnswer, lfparameter, useSpellingCorrection, allowPhoneticMatching);
     } else {
       let dispAnswer = _.trim(answerDisplay);
       if (dispAnswer.indexOf('|') >= 0) {
@@ -266,7 +289,7 @@ async function checkAnswer(userAnswer, correctAnswer, originalAnswer, lfparamete
         dispAnswer = _.trim(dispAnswer.split('|')[0]);
       }
 
-      const match = await stringMatch(originalAnswer, userAnswer, lfparameter, userInput);
+      const match = await stringMatch(originalAnswer, userAnswer, lfparameter, allowPhoneticMatching, useSpellingCorrection, userInput);
 
       if (match === 0) {
         isCorrect = false;
@@ -329,9 +352,11 @@ const Answers = {
   answerIsCorrect: async function(userInput, answer, originalAnswer, displayedAnswer, setspec, callback) {
     // Note that a missing or invalid lfparameter will result in a null value
     const lfparameter = parseFloat(setspec ? setspec.lfparameter || 0 : 0);
+    const allowPhoneticMatching = (setspec ? setspec.allowPhoneticMatching || false : false);
+    const useSpellingCorrection = (setspec ? setspec.useSpellingCorrection || false : false);
     const feedbackType = Session.get('currentDeliveryParams').feedbackType;
 
-    let fullTextIsCorrect = await checkAnswer(userInput, answer, originalAnswer, lfparameter, undefined);
+    let fullTextIsCorrect = await checkAnswer(userInput, answer, originalAnswer, lfparameter, allowPhoneticMatching, useSpellingCorrection, undefined);
 
     // Try again with original answer in case we did a syllable answer and they input the full response
     if (!fullTextIsCorrect.isCorrect && !!originalAnswer) {
@@ -348,7 +373,7 @@ const Answers = {
         subAnswer = answer.split(' ').slice(0, index + 1).join(' ');
       }
       let userInputWithAddedSylls = displayedAnswer + userInput;
-      fullTextIsCorrect = await checkAnswer(userInputWithAddedSylls, originalAnswer, originalAnswer, lfparameter, userInput);
+      fullTextIsCorrect = await checkAnswer(userInputWithAddedSylls, originalAnswer, originalAnswer, lfparameter, allowPhoneticMatching, useSpellingCorrection, userInput);
     }
 
     if (!fullTextIsCorrect.isCorrect) {
