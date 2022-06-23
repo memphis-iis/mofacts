@@ -125,7 +125,22 @@ async function simpleStringMatch(userAnswer, correctAnswer, lfparameter, allowPh
         return 0;
       } 
     }
-    if (lfparameter) {
+    if(useSpellingCorrection) {
+      const results = await meteorCallAsync('getSymSpellCorrection', s1);
+      if(results[0].term.localeCompare(s2) === 0) {
+        return 2; // Close enough
+      } 
+      else if(allowPhoneticMatching) {//enable phonetic encoding
+        const metaphone1 = doubleMetaphone(s1);
+        const metaphone2 = doubleMetaphone(s2);
+        if(compareMetaphones(metaphone1, metaphone2))
+          return 3; // Metaphone match
+      } 
+      else {
+        return 0; // No match
+      }
+    }
+    else if (lfparameter) {
       const editDistance = getEditDistance(s1, s2);
       const editDistScore = 1.0 - (
         editDistance /
@@ -144,21 +159,6 @@ async function simpleStringMatch(userAnswer, correctAnswer, lfparameter, allowPh
       return 0; // No match
       }
     } 
-    else if(useSpellingCorrection) {
-      const results = await meteorCallAsync('getSymSpellCorrection', s1);
-      if(results[0].term.localeCompare(s2) === 0) {
-        return 2; // Close enough
-      } 
-      else if(allowPhoneticMatching) {//enable phonetic encoding
-        const metaphone1 = doubleMetaphone(s1);
-        const metaphone2 = doubleMetaphone(s2);
-        if(compareMetaphones(metaphone1, metaphone2))
-          return 3; // Metaphone match
-      } 
-      else {
-        return 0; // No match
-      }
-    }
     else {
       // Nope - must compare exactly
       return 0;
