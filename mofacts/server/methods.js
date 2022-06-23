@@ -55,7 +55,7 @@ if (Meteor.settings.public.testLogin) {
 }
 
 const symSpell = new SymSpell(2, 7);
-symSpell.loadDictionary(Assets.absoluteFilePath('frequency dict/frequency_dictionary_en_82_765.txt'), 0, 1)
+  symSpell.loadDictionary(Meteor.settings.frequencyDictionaryLocation);
 process.env.MAIL_URL = Meteor.settings.MAIL_URL;
 const adminUsers = Meteor.settings.initRoles.admins;
 const ownerEmail = Meteor.settings.owner;
