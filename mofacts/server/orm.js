@@ -73,7 +73,7 @@ function getHistory(history) {
     'KC Category(Cluster)': '',
     'CF (Overlearning)': false,
     'CF (Note)': '',
-    'dialoguehistory': history.dialoguehistory,
+    'Dialogue History': JSON.stringify(history.dialoguehistory),
     'itemid': history.itemid,
     'useridtdfid': history.useridtdfid,
     'kcid': history.kcid,
@@ -127,16 +127,22 @@ function getHistory(history) {
     'CF (Button Order)': history.cf_button_order,
     'CF (Item Removed)': history.cf_item_removed,
     'Feedback Text': history.feedback_text,
-    'feedbackType': history.feedbackType,
+    'Feedback Type': history.feedbacktype,
     'dynamicTagFields': history.dynamictagfields,
     'recordedServerTime': history.recordedServerTime,
-    'hintLevel':history.hintlevel,
-    'Entry_Point': history.entry_point
+    'Hint Level':history.hintlevel,
+    'Entry Point': history.entry_point
   };
   return historyOutput;
 }
 
 function getTdf(tdf) {
+  if(tdf.content.tdfs.tutor.setspec.speechAPIKey){
+    tdf.content.tdfs.tutor.setspec.speechAPIKey = true;
+  }
+  if(tdf.content.tdfs.tutor.setspec.textToSpeechAPIKey){
+    tdf.content.tdfs.tutor.setspec.textToSpeechAPIKey = true;
+  }
   return {
     TDFId: tdf.tdfid,
     ownerId: tdf.ownerid,

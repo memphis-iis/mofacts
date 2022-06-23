@@ -33,6 +33,14 @@ function setAudioPromptFeedbackVolumeOnPage(audioVolume) {
 
 }
 
+function disableUnsupportedFeatures(isSafari){
+  if(isSafari){
+    $('#audioInputOn').prop( "disabled", true );
+    $('#audioInputOff').prop( "disabled", true );
+    $('#audioInputTitle').text($('#audioInputTitle').text() + "(Not available for safari)");
+  }
+}
+
 function setAudioPromptModeOnPage(audioPromptMode) {
   switch (audioPromptMode) {
     case 'all':
@@ -115,6 +123,7 @@ Template.profileAudioToggles.rendered = function() {
     $('#audioInputSensitivityLabel').text(document.getElementById('audioInputSensitivity').value);
   });
 
+  disableUnsupportedFeatures(Session.get('isSafari'));
   // Restore toggle values from prior page loads
   setAudioInputOnPage(Session.get('audioEnabledView'));
   const audioPromptMode = Session.get('audioPromptFeedbackView');
@@ -138,6 +147,16 @@ Template.profileAudioToggles.rendered = function() {
   const audioPromptQuestionSpeakingRateView = Session.get('audioPromptQuestionSpeakingRateView');
   if (audioPromptQuestionSpeakingRateView) {
     document.getElementById('audioPromptQuestionSpeakingRate').value = audioPromptQuestionSpeakingRateView;
+  }
+
+  const audioPromptVoiceView = Session.get('audioPromptVoiceView');
+  if (audioPromptVoiceView) {
+    document.getElementById('audioPromptVoice').value = audioPromptVoiceView;
+  }
+
+  const audioPromptFeedbackVoiceView = Session.get('audioPromptFeedbackVoiceView');
+  if (audioPromptFeedbackVoiceView) {
+    document.getElementById('audioPromptFeedbackVoice').value = audioPromptFeedbackVoiceView;
   }
 };
 
@@ -218,6 +237,18 @@ Template.profileAudioToggles.events({
   'change #audioPromptFeedbackVolume': function(event) {
     Session.set('audioPromptFeedbackVolume', event.currentTarget.value)
   },
+
+  'click #audioPromptVoiceTest': function(event) {
+    const voice = document.getElementById('audioPromptVoice').value;
+    const audioObj = new Audio(`https://cloud.google.com/text-to-speech/docs/audio/${voice}.wav`);
+    audioObj.play();
+  },
+
+  'click #audioPromptFeedbackVoiceTest': function(event) {
+    const voice = document.getElementById('audioPromptFeedbackVoice').value;
+    const audioObj = new Audio(`https://cloud.google.com/text-to-speech/docs/audio/${voice}.wav`);
+    audioObj.play();
+  }
 });
 
 Template.profileAudioToggles.helpers({

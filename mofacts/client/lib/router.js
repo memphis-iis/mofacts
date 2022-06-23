@@ -149,6 +149,7 @@ const defaultBehaviorRoutes = [
   'signInSouthwest',
   'signUp',
   'tabwarning',
+  'resetPassword'
 ];
 
 const restrictedRoutes = [

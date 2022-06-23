@@ -18,7 +18,8 @@
     "isomorphic-fetch": "^3.0.0",
     "node-symspell": "^0.1.0",
     "pg-promise": "^10.11.1",
-    "transliteration": "^2.1.7"
+    "transliteration": "^2.1.7",
+    "unzipper": "^0.10.11"
   },
   "devDependencies": {
     "@types/jquery": "^3.5.13",
