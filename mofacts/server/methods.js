@@ -1083,6 +1083,12 @@ async function getStimuliSetByFilename(stimFilename) {
   return await getStimuliSetById(stimuliSetId);
 }
 
+async function getStimuliSetIdByFilename(stimFilename) {
+  const idRet = await db.oneOrNone('SELECT stimuliSetId FROM item WHERE stimulusFilename = $1 LIMIT 1', stimFilename);
+  const stimuliSetId = idRet ? idRet.stimulisetid : null;
+  return stimuliSetId;
+}
+
 async function getStimuliSetById(stimuliSetId) {
   const query = 'SELECT * FROM item \
                WHERE stimuliSetId=$1 \
@@ -1603,14 +1609,16 @@ async function upsertTDFFile(tdfFilename, tdfJSON, ownerId) {
   let stimFileName;
   let skipStimSet = false;
   let stimSet;
+  let stimSetId;
   if (tdfJSON.tdfs.tutor.setspec.stimulusfile) {
     stimFileName = tdfJSON.tdfs.tutor.setspec.stimulusfile;
     stimSet = await getStimuliSetByFilename(stimFileName);
+    stimSetId = await getStimuliSetIdByFilename(stimFileName);
   } else {
     skipStimSet = true;
   }
   if (!stimSet && !skipStimSet) throw new Error('no stimset for tdf:', tdfFilename);
-  if (prev && prev.TDFId) {
+  if (prev && prev.TDFId) { //overwrite old tdf
     let tdfJSONtoUpsert;
     if (hasGeneratedTdfs(tdfJSON)) {
       const tdfGenerator = new DynamicTdfGenerator(tdfJSON.tdfs, tdfFilename, ownerId, 'repo', stimSet);
@@ -1621,7 +1629,14 @@ async function upsertTDFFile(tdfFilename, tdfJSON, ownerId) {
       tdfJSONtoUpsert = JSON.stringify(tdfJSON);
     }
     const query = 'UPDATE tdf SET ownerId=$1, stimuliSetId=$2, content=$3::jsonb WHERE TDFId=$4';
-    await db.none(query, [ownerId, prev.stimuliSetId, tdfJSONtoUpsert, prev.TDFId]);
+    if(stimSetId && prev.stimuliSetId != stimSetId) {
+      //we changed the stimsetid, can't use the old one anymore.
+      await db.none(query, [ownerId, stimSetId, tdfJSONtoUpsert, prev.TDFId]);
+    }
+    else {
+      //stim file uploaded had the same file name, so we can just update the tdf
+      await db.none(query, [ownerId, prev.stimuliSetId, tdfJSONtoUpsert, prev.TDFId]);
+    }
   } else {
     let tdfJSONtoUpsert;
     if (hasGeneratedTdfs(tdfJSON)) {
