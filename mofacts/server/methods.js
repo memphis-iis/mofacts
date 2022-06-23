@@ -10,6 +10,7 @@ import {getNewItemFormat} from './conversions/convert';
 import {sendScheduledTurkMessages} from './turk_methods';
 import {getItem, getComponentState, getCourse, getTdf} from './orm';
 import { result } from 'underscore';
+import { type } from 'os';
 
 
 export {
@@ -32,7 +33,8 @@ export {
 // for creating some MongoDB queries
 const SymSpell = require('node-symspell')
 const fs = Npm.require('fs');
-const { randomBytes } = require('crypto');
+const https = require('https')
+const { randomBytes } = require('crypto')
 
 if (Meteor.isClient) {
   Meteor.subscribe('files.assets.all');
@@ -273,6 +275,18 @@ async function getTdfById(TDFId) {
   return tdf;
 }
 
+async function getTdfTTSAPIKey(TDFId) {
+  const tdfs = await db.one('SELECT * from tdf WHERE TDFId=$1', TDFId);
+  const textToSpeechAPIKey = tdfs.content.tdfs.tutor.setspec.textToSpeechAPIKey;
+  return textToSpeechAPIKey;
+}
+
+async function getTdfSpeachAPIKey(TDFId) {
+  const tdfs = await db.one(`SELECT * from tdf WHERE TDFId=${TDFId}`);
+  const speechAPIKey = tdfs.content.tdfs.tutor.setspec.speechAPIKey;
+  return speechAPIKey;
+}
+
 // eslint-disable-next-line camelcase
 async function getTdfBy_id(_id) {
   try {
@@ -300,6 +314,7 @@ async function getTdfByFileName(filename) {
     return null;
   }
 }
+
 
 async function getTdfByExperimentTarget(experimentTarget) {
   try {
@@ -404,58 +419,53 @@ async function getComponentStatesByUserIdTDFIdAndUnitNum(userId, TDFId) {
 
 async function setComponentStatesByUserIdTDFIdAndUnitNum(userId, TDFId, componentStates, hintLevel) {
   serverConsole('setComponentStatesByUserIdTDFIdAndUnitNum, ', userId, TDFId);
-  const res = await db.tx(async (t) => {
-    const responseKCMap = await getReponseKCMap();
-    const newResponseKCRet = await t.one('SELECT MAX(responseKC) AS responseKC from ITEM');
-    let newResponseKC = newResponseKCRet.responsekc + 1;
-    const resArr = [];
+  const responseKCMap = await getReponseKCMap();
+  const newResponseKCRet = await db.one('SELECT MAX(responseKC) AS responseKC from ITEM');
+  let newResponseKC = newResponseKCRet.responsekc + 1;
+  const resArr = [];
 
-    for (const componentState of componentStates) {
-      componentState.userId = userId;
-      componentState.TDFId = TDFId;
-      if (componentState.componentType == 'response') {
-        if (!isEmpty(responseKCMap[componentState.responseText])) {
-          componentState.KCId = responseKCMap[componentState.responseText];
-        } else {
-          componentState.KCId = newResponseKC;
-          newResponseKC += 1;
-        }
-        delete componentState.responseText;
+  for (const componentState of componentStates) {
+    componentState.userId = userId;
+    componentState.TDFId = TDFId;
+    if (componentState.componentType == 'response') {
+      if (!isEmpty(responseKCMap[componentState.responseText])) {
+        componentState.KCId = responseKCMap[componentState.responseText];
+      } else {
+        componentState.KCId = newResponseKC;
+        newResponseKC += 1;
       }
-      if (!componentState.trialsSinceLastSeen) {
-        componentState.trialsSinceLastSeen = null;
-      }
-      const updateQuery = 'UPDATE componentstate SET probabilityEstimate=${probabilityEstimate}, \
-        firstSeen=${firstSeen}, lastSeen=${lastSeen}, trialsSinceLastSeen=${trialsSinceLastSeen}, \
-        priorCorrect=${priorCorrect}, priorIncorrect=${priorIncorrect}, \
-        priorStudy=${priorStudy}, totalPracticeDuration=${totalPracticeDuration}, outcomeStack=${outcomeStack}, \
-        curSessionPriorCorrect=${curSessionPriorCorrect}, curSessionPriorIncorrect=${curSessionPriorIncorrect}\
-        WHERE userId=${userId} AND TDFId=${TDFId} AND KCId=${KCId} AND componentType=${componentType} \
-        RETURNING componentStateId';
-      try {
-        const componentStateId = await t.one(updateQuery, componentState);
-        resArr.push(componentStateId);
-      } catch (e) {
-      // ComponentState didn't exist before so we'll insert it
-        if (e.name == 'QueryResultError') {
-          serverConsole("ComponentState didn't exist before so we'll insert it")
-          const componentStateId = await t.one('INSERT INTO componentstate(userId,TDFId,KCId,componentType, \
-            probabilityEstimate,hintLevel,firstSeen,lastSeen,trialsSinceLastSeen,priorCorrect,priorIncorrect,priorStudy, \
-            totalPracticeDuration,outcomeStack, curSessionPriorCorrect, curSessionPriorIncorrect) VALUES(${userId},${TDFId}, ${KCId}, ${componentType}, \
-            ${probabilityEstimate},${hintLevel}, ${firstSeen},${lastSeen},${trialsSinceLastSeen},${priorCorrect},${priorIncorrect}, \
-            ${priorStudy},${totalPracticeDuration},${outcomeStack}, \
-            ${curSessionPriorCorrect}, ${curSessionPriorIncorrect}) \
-            RETURNING componentStateId',
-            componentState);
-        } else {
-          resArr.push(componentState + '\nnot caught error:', e);
-        }
+      delete componentState.responseText;
+    }
+    if (!componentState.trialsSinceLastSeen) {
+      componentState.trialsSinceLastSeen = null;
+    }
+    const updateQuery = 'UPDATE componentstate SET probabilityEstimate=${probabilityEstimate}, \
+      firstSeen=${firstSeen}, lastSeen=${lastSeen}, trialsSinceLastSeen=${trialsSinceLastSeen}, \
+      priorCorrect=${priorCorrect}, priorIncorrect=${priorIncorrect}, \
+      priorStudy=${priorStudy}, totalPracticeDuration=${totalPracticeDuration}, outcomeStack=${outcomeStack}, \
+      curSessionPriorCorrect=${curSessionPriorCorrect}, curSessionPriorIncorrect=${curSessionPriorIncorrect}\
+      WHERE userId=${userId} AND TDFId=${TDFId} AND KCId=${KCId} AND componentType=${componentType} \
+      RETURNING componentStateId';
+    try {
+      const componentStateId = await db.one(updateQuery, componentState);
+      resArr.push(componentStateId);
+    } catch (e) {
+    // ComponentState didn't exist before so we'll insert it
+      if (e.name == 'QueryResultError') {
+        serverConsole("ComponentState didn't exist before so we'll insert it")
+        const componentStateId = await db.one('INSERT INTO componentstate(userId,TDFId,KCId,componentType, \
+          probabilityEstimate,hintLevel,firstSeen,lastSeen,trialsSinceLastSeen,priorCorrect,priorIncorrect,priorStudy, \
+          totalPracticeDuration,outcomeStack, curSessionPriorCorrect, curSessionPriorIncorrect) VALUES(${userId},${TDFId}, ${KCId}, ${componentType}, \
+          ${probabilityEstimate},${hintLevel}, ${firstSeen},${lastSeen},${trialsSinceLastSeen},${priorCorrect},${priorIncorrect}, \
+          ${priorStudy},${totalPracticeDuration},${outcomeStack}, \
+          ${curSessionPriorCorrect}, ${curSessionPriorIncorrect}) \
+          RETURNING componentStateId',
+          componentState);
+      } else {
+        resArr.push(JSON.stringify(componentState) + '\nnot caught error:', e);
       }
     }
-    return {userId, TDFId, resArr};
-  });
-  serverConsole('res:', res);
-  return res;
+  }
 }
 
 function stripSpacesAndLowerCase(input) {
@@ -1185,7 +1195,7 @@ async function getStudentPerformanceByIdAndTDFIdFromHistory(userId, TDFid,return
   serverConsole('getStudentPerformanceByIdAndTDFIdFromHistory', userId, TDFid, returnRows);
   let limitAddendum = "";
   if(returnRows != null){
-    limitAddendum = "ORDER BY itemid DESC LIMIT " + returnRows;
+    limitAddendum = "ORDER BY eventid DESC LIMIT " + returnRows;
   }
   const query = `SELECT COUNT(DISTINCT s.ItemId) AS stimsintroduced,
                   COUNT(CASE WHEN s.outcome='correct' THEN 1 END) AS numCorrect,
@@ -1485,21 +1495,6 @@ function findUserByName(username) {
   return null;
 }
 
-async function verifySyllableUpload(stimSetId){
-  const query = 'SELECT COUNT(DISTINCT LOWER(correctresponse)) FROM item WHERE stimulisetid = $1';
-  const postgresRet = await db.oneOrNone(query, stimSetId);
-  const answersCountPostgres = postgresRet.count;
-
-  const mongoRet = StimSyllables.findOne({filename: stimSetId});
-  if(mongoRet){
-    const answersCountMongo = Object.keys(mongoRet.data).length;
-    if(answersCountMongo == answersCountPostgres)
-      return true;
-  }
-  StimSyllables.remove({filename: stimSetId});
-  return false;
-}
-
 function sendEmail(to, from, subject, text) {
   check([to, from, subject, text], [String]);
   Email.send({to, from, subject, text});
@@ -1518,7 +1513,7 @@ async function upsertStimFile(stimFilename, stimJSON, ownerId) {
     'owner': ownerId,
     'source': 'repo',
   };
-  await db.tx(async (t) => {
+  let [stimuliSetId, allAnswers] = await db.tx(async (t) => {
     const responseKCMap = await getReponseKCMap();
     const query = 'SELECT stimuliSetId FROM item WHERE stimulusFilename = $1 LIMIT 1';
     const associatedStimSetIdRet = await t.oneOrNone(query, stimFilename);
@@ -1596,10 +1591,10 @@ async function upsertStimFile(stimFilename, stimJSON, ownerId) {
     }
     allAnswers = Array.from(allAnswers);
     //Update Stim Cache every upload
-    Meteor.call('updateStimSyllableCache', stimuliSetId, allAnswers);
 
-    return {ownerId};
+    return [stimuliSetId, allAnswers];
   });
+  Meteor.call('updateStimSyllableCache', stimuliSetId, allAnswers);
 }
 
 
@@ -1688,6 +1683,28 @@ async function loadStimsAndTdfsFromPrivate(adminUserId) {
   }
 }
 
+async function makeHTTPSrequest(options, request){
+  return new Promise((resolve, reject) => {
+    let chunks = []
+    const req = https.request(options, res => {        
+      res.on('data', d => {
+          chunks.push(d);
+      })
+      res.on('end', function() {
+          console.log(Buffer.concat(chunks).toString());
+          resolve(Buffer.concat(chunks));
+      })
+    })
+    
+    req.on('error', (e) => {
+      reject(e.message);
+    });
+
+    req.write(request)
+    req.end()
+  });
+}
+
 const baseSyllableURL = 'http://localhost:4567/syllables/';
 function getSyllablesForWord(word) {
   const syllablesURL = baseSyllableURL + word;
@@ -1727,6 +1744,46 @@ Meteor.methods({
 
   getTdfIdByStimSetIdAndFileName, getItemsByFileName,
 
+
+  makeGoogleTTSApiCall: async function(TDFId, message, audioPromptSpeakingRate, audioVolume, selectedVoice) {
+    const ttsAPIKey = await getTdfTTSAPIKey(TDFId);
+    const request = JSON.stringify({
+      input: {text: message},
+      voice: {languageCode: 'en-US', 'name': selectedVoice},
+      audioConfig: {audioEncoding: 'MP3', speakingRate: audioPromptSpeakingRate, volumeGainDb: audioVolume},
+    });
+    const options = {
+      hostname: 'texttospeech.googleapis.com',
+      path: '/v1/text:synthesize?key=' + ttsAPIKey,
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json; charset=utf-8'
+      }
+    }
+    return await makeHTTPSrequest(options, request).then((data, error) => {
+      if(error)
+        throw new Meteor.Error('Error with Google TTS API call: ' + error);
+      response = JSON.parse(data.toString('utf-8'))
+      return response.audioContent;
+    });
+  },
+  
+  makeGoogleSpeechAPICall: async function(TDFId, speechAPIKey = '', request, answerGrammar){
+    console.log(request)
+    if(speechAPIKey == ''){
+      speechAPIKey = await getTdfTTSAPIKey(TDFId);
+    }
+    const options = {
+      hostname: 'speech.googleapis.com',
+      path: '/v1/speech:recognize?key=' + speechAPIKey,
+      method: 'POST'
+    }
+    return await makeHTTPSrequest(options, JSON.stringify(request)).then((data, error) => {
+      if(error)
+        throw new Meteor.Error('Error with Google SR API call: ' + error);
+      return [answerGrammar, JSON.parse(data.toString('utf-8'))]
+    });
+  },
   getUIDAndSecretForCurrentUser: async function(){
     if(!Meteor.userId()){
       throw new Meteor.Error('Unauthorized: No user login');
@@ -1785,41 +1842,27 @@ Meteor.methods({
   },
 
   updateStimSyllableCache: async function(stimFileName, answers) {
-    let numTries = 0;
-    serverConsole('updateStimSyllableCache');
-    const curStimSyllables = StimSyllables.findOne({filename: stimFileName});
-    serverConsole('curStimSyllables: ' + JSON.stringify(curStimSyllables));
-    if (!curStimSyllables) {
-      let syllablesUploadedSuccessfully = await verifySyllableUpload(stimFileName);
-      while(!syllablesUploadedSuccessfully && numTries < 3){
-        const data = {};
-        for (const answer of answers) {
-          let syllableArray;
-          let syllableGenerationError;
-          const safeAnswer = answer.replace(/\./g, '_');
-          try {
-            syllableArray = getSyllablesForWord(safeAnswer);
-          } catch (e) {
-            serverConsole('error fetching syllables for ' + answer + ': ' + JSON.stringify(e));
-            syllableArray = [answer];
-            syllableGenerationError = e;
-          }
-          data[safeAnswer] = {
-            count: syllableArray.length,
-            syllables: syllableArray,
-            error: syllableGenerationError,
-          };
-        }
-        StimSyllables.insert({filename: stimFileName, data: data});
-        serverConsole('after updateStimSyllableCache');
-        serverConsole(stimFileName);
-        numTries++;
-        syllablesUploadedSuccessfully = await verifySyllableUpload(stimFileName);
+    StimSyllables.remove({filename: stimFileName});
+    serverConsole('updateStimSyllableCache', 'stimFileName', stimFileName, 'answers', answers);
+    const data = {};
+    for (const answer of answers) {
+      let syllableArray;
+      let syllableGenerationError;
+      const safeAnswer = answer.replace(/\./g, '_');
+      try {
+        syllableArray = getSyllablesForWord(safeAnswer);
+      } catch (e) {
+        serverConsole('error fetching syllables for ' + answer + ': ' + JSON.stringify(e));
+        syllableArray = [answer];
+        syllableGenerationError = e;
       }
-      if(!syllablesUploadedSuccessfully){
-        throw new Error('Cannot upload stim file to mongoDB. Discrepency between postgres and mongo.');
-      }
+      data[safeAnswer] = {
+        count: syllableArray.length,
+        syllables: syllableArray,
+        error: syllableGenerationError,
+      };
     }
+    StimSyllables.insert({filename: stimFileName, data: data});
   },
 
   getSymSpellCorrection: async function(userAnswer, maxEditDistance) {
@@ -1842,6 +1885,53 @@ Meteor.methods({
     sendEmail(to, from, subject, text);
   },
 
+  sendPasswordResetEmail: function(email){
+    console.log ("sending password reset code for ", email)
+    //Generate Code
+    var secret = '';
+    var length = 5;
+    var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    var charactersLength = characters.length;
+    Meteor.users.findOne({username: email})
+    for ( var i = 0; i < length; i++ ) {
+      secret += characters.charAt(Math.floor(Math.random() * charactersLength));
+    }  
+    Meteor.users.update({username: email},{
+      $set:{
+        secret: secret
+      }
+    });
+    
+    //Setup email variables
+    const ownerEmail = Meteor.settings.owner;
+    const from = ownerEmail;
+    const subject = 'MoFaCTs Password Reset';
+    let text = 'Your password reset secret is: <b>' + secret + "</b>.<br>If this email was sent in error, please contact your MoFaCTs administrator.";
+
+    //Send email
+    sendEmail(email,from,subject,text);
+  },
+
+  checkPasswordResetSecret: function(email, secret){
+    userSecret = Meteor.users.findOne({username: email}).secret;
+    if(userSecret == secret){
+      return true;
+    } else {
+      return false;
+    }
+  },
+
+  resetPasswordWithSecret: function(email, secret, newPassword){
+    user = Meteor.users.findOne({username: email});
+    userId = user._id;
+    userSecret = user.secret;
+    if(secret == userSecret){
+      Accounts.setPassword(userId, newPassword);
+      return true;
+    } else {
+      return false;
+    }        
+  },
   sendUserErrorReport: function(userID, description, curPage, sessionVars, userAgent, logs, currentExperimentState) {
     const errorReport = {
       user: userID,
@@ -1906,6 +1996,7 @@ Meteor.methods({
     if (!newUserPassword || newUserPassword.length < 6) {
       throw new Error('Passwords must be at least 6 characters long');
     }
+    
 
     // Now we can actually create the user
     // Note that on the server we just get back the ID and have nothing
@@ -2156,11 +2247,89 @@ Meteor.methods({
     result = "TDF deleted";
     return result;
   },
-
+  // Package Uploader
+  processPackageUpload: function(path,fileObject, owner){
+    const fs = Npm.require('fs');
+    const unzip = Npm.require('unzipper');
+    let links = [];
+    var stream = fs.createReadStream(path)
+      .pipe(unzip.Parse())
+      .on('entry', async function(entry){
+        var tdfContent = [];
+        var stimContent = [];
+        var referenceContents = [];
+        var fileName = entry.path;
+        var content =  await entry.buffer().then(function(file, fileObject){
+          fileSplit = fileName.split(".");
+          type = fileSplit[fileSplit.length - 1];
+          if(type =="json"){
+            rawFileContents = file.toString();
+            parsedFileContents = JSON.parse(rawFileContents);
+            JSONStringContents = JSON.stringify(parsedFileContents);
+            if(parsedFileContents.setspec){
+              fileFinal = {
+                type: "stim",
+                contents: JSONStringContents,
+                fileName: fileName
+              }
+              stimContent.push(fileFinal);
+            } 
+            if(parsedFileContents.tutor){
+              fileFinal = {
+                type: "tdf",
+                contents: JSONStringContents,
+                fileName: fileName
+              }
+              tdfContent.push(fileFinal);
+            }
+          }else{
+            console.log(path);
+            DynamicAssets.write(file, {
+              fileName: entry.path,
+              meta: {
+                owner: owner,
+                parent: path
+              }
+            },function(error,fileRef){
+              replacePath = DynamicAssets.link(fileRef);
+              referenceFile = {
+                fileName: fileName,
+                replacePath: replacePath,
+                parent: path
+              }
+              console.log(referenceFile);
+              referenceContents.push(referenceFile);
+              links.push(referenceFile);
+            })
+          }
+          return {referenceContents,tdfContent,stimContent}
+        });
+        for(let files of content.stimContent){
+          console.log("Processing package file:", files.fileName);
+            for(let referenceFile of referenceContents){
+              console.log("replacing reference:", files.fileName, referenceFile.fileName, referenceFile.replacePath);
+              toReplace = files.contents;
+              replaced = toReplace.replace(referenceFile.fileName,referenceFile.replacePath);          
+            }
+            Meteor.call("saveContentFile",files.type, files.fileName, files.contents, owner);
+        }
+        for(let files of content.tdfContent){
+          console.log("processing package file:", files.fileName);
+          for(let referenceFile of referenceContents){
+            toReplace = files.contents;
+            replaced = toReplace.replace(referenceFile.fileName,referenceFile.replacePath);             
+          }
+          Meteor.call("saveContentFile",files.type, files.fileName, files.contents, owner);
+        }
+        this.content = content;
+      });
+      assets = DynamicAssets.find({}).fetch();
+      return assets;
+  },
   // Allow file uploaded with name and contents. The type of file must be
   // specified - current allowed types are: 'stimuli', 'tdf'
-  saveContentFile: async function(type, filename, filecontents) {
-    serverConsole('saveContentFile', type, filename);
+  saveContentFile: async function(type, filename, filecontents, owner) {
+    serverConsole('saveContentFile', type, filename, owner);
     const results = {
       'result': null,
       'errmsg': 'No action taken?',
@@ -2169,13 +2338,17 @@ Meteor.methods({
     if (!type) throw new Error('Type required for File Save');
     if (!filename) throw new Error('Filename required for File Save');
     if (!filecontents) throw new Error('File Contents required for File Save');
-
+    let ownerId = "";
     // We need a valid use that is either admin or teacher
-    const ownerId = Meteor.user()._id;
+    if(owner){
+      ownerId = owner;
+    } else {
+      ownerId = Meteor.user()._id;
+    }
     if (!ownerId) {
       throw new Error('No user logged in - no file upload allowed');
     }
-    if (!Roles.userIsInRole(Meteor.user(), ['admin', 'teacher'])) {
+    if (!Roles.userIsInRole(ownerId, ['admin', 'teacher'])) {
       throw new Error('You are not authorized to upload files');
     }
     if (type != 'tdf' && type != 'stim') {
@@ -2224,10 +2397,6 @@ Meteor.methods({
                   allAnswers.add(singularAnswer);
                 }
               }
-            
-              allAnswers = Array.from(allAnswers);
-              //Update Stim Cache every upload
-              Meteor.call('updateStimSyllableCache', stimuliSetId, allAnswers);
               results.result = true;
             } catch (err) {
               results.result=false;

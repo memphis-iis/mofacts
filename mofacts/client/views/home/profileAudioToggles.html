@@ -12,7 +12,7 @@
         </div>
         <div class="audioPromptQuestionGroup invisible" style="padding-left:2%;">
           <h5 style="color:green; padding-left:8%">Requires <span class="glyphicon glyphicon-headphones"></span> icon. Headphones recommended.</h5>
-          <div style="display: inline-block; padding-left:8%">
+          <div style="display: inline-block; padding-left: 8%">
             <label for="audioPromptVolume" class="audioPromptQuestionVolume">Volume: </label>
             <input type="range" id="audioPromptQuestionVolume" min="-6" max="6" step=".5">
           </div>
@@ -29,11 +29,26 @@
               <option value="2">2</option>
             </select>
           </div>
+          <div style="padding-left: 8%">
+            <label for="audioPromptVoice" class="audioPromptVoice">Voice: </label>
+            <select type="select" id="audioPromptVoice">
+              <option value="en-US-Standard-A" selected>1</option>
+              <option value="en-US-Standard-B">2</option>
+              <option value="en-US-Standard-C">3</option>
+              <option value="en-US-Standard-D">4</option>
+              <option value="en-US-Standard-F">5</option>
+              <option value="en-US-Standard-G">6</option>
+              <option value="en-US-Standard-H">7</option>
+              <option value="en-US-Standard-I">8</option>
+              <option value="en-US-Standard-J">9</option>
+            </select>
+            <a href="#" id="audioPromptVoiceTest"><span class="glyphicon glyphicon-volume-up"></span></a>
+          </div>
         </div>
     </div>
     <div class="audio-button-containers">
       <div class="flow">
-        <p style="font-size: larger;">Answers</p>
+        <p style="font-size: larger;" id="audioInputTitle">Answers</p>
         <div id="switch-input" class="switch-3 switch-candy">
           <input class="audioInputRadio" id="audioInputOff" name="state-da" type="radio" checked="checked" />
           <label for="audioInputOff" onclick="">I type the answers.</label>
@@ -96,6 +111,21 @@
             <option value="1.75">1.75</option>
             <option value="2">2</option>
           </select>
+        </div>
+        <div style="padding-left: 8%">
+          <label for="audioPromptFeedbackVoice" class="audioPromptFeedbackVoice">Voice: </label>
+          <select type="select" id="audioPromptFeedbackVoice">
+            <option value="en-US-Standard-A" selected>1</option>
+            <option value="en-US-Standard-B">2</option>
+            <option value="en-US-Standard-C">3</option>
+            <option value="en-US-Standard-D">4</option>
+            <option value="en-US-Standard-F">5</option>
+            <option value="en-US-Standard-G">6</option>
+            <option value="en-US-Standard-H">7</option>
+            <option value="en-US-Standard-I">8</option>
+            <option value="en-US-Standard-J">9</option>
+          </select>
+          <a href="#" id="audioPromptFeedbackVoiceTest"><span class="glyphicon glyphicon-volume-up"></span></a>
         </div>
       </div>
     </div>

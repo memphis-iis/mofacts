@@ -17,30 +17,55 @@ Template.assetUpload.helpers({
 Template.assetUpload.events({
   'change #fileInput'(e, template) {
     if (e.currentTarget.files && e.currentTarget.files[0]) {
-      // We upload only one file, in case
-      // multiple files were selected
-      const upload = DynamicAssets.insert({
-        file: e.currentTarget.files[0],
-        chunkSize: 'dynamic'
-      }, false);
+      for(let file of e.currentTarget.files){
+        // We upload only one file, in case
+        // multiple files were selected
+        const upload = DynamicAssets.insert({
+          file: file,
+          chunkSize: 'dynamic'
+        }, false);
 
-      upload.on('start', function () {
-        template.currentUpload.set(this);
-      });
+        upload.on('start', function () {
+          template.currentUpload.set(this);
+        });
 
-      upload.on('end', function (error, fileObj) {
-        if (error) {
-          alert(`Error during upload: ${error}`);
-        } else {
-          alert(`File "${fileObj.name}" successfully uploaded`);
-          console.log(DynamicAssets.link(fileObj));
-          Session.set('assetLink',DynamicAssets.link(fileObj));
+        upload.on('end', function (error, fileObj) {
+          if (error) {
+            alert(`Error during upload: ${error}`);
+          } else {
+            assetLink = DynamicAssets.link(fileObj);
+            assetList = Session.get('assetLink') || [];
+            if(fileObj.ext == "zip"){
+              console.log('package detected')
+              Meteor.call('processPackageUpload',fileObj.path,fileObj.ext,Meteor.userId(),function(err,res){
+                if(err){
+                  alert("Package upload failed.\n"+err);
+                } else {
+                  console.log(res);
+                  for(file of res){
+                    link = DynamicAssets.link(file);
+                    
+                    assetList.push(
+                      {
+                      link: link,
+                      name: file.name,
+                      path: file.path,
+                      ext: file.ext,
+                      }
+                      );
+                      console.log(file);
+                    Session.set('assetLink',assetList);
+                  }
+                }
+              });
+            }
+          }
+          template.currentUpload.set(false);
+        });
+        
+        upload.start();
+
         }
-        template.currentUpload.set(false);
-      });
-
-      upload.start();
-
-    }
+      }
   }
 });

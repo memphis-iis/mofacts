@@ -1,4 +1,4 @@
-export const curSemester = 'FA_2021';
+export const curSemester = 'SU_2022';
 export const ALL_TDFS = 'xml';
 export const INVALID = 'invalid';
 export const ENTER_KEY = 13;
@@ -38,6 +38,10 @@ export const outputFields = [
   'Student Response Subtype', // qtype
   'Tutor Response Type', // trialType
   'Tutor Response Subtype', // qtype
+  'Hint Level',
+  'Feedback Type',
+  'Feedback Text',
+  'Dialogue History',
   'KC (Default)',
   'KC Category(Default)',
   'KC (Cluster)',
@@ -62,7 +66,5 @@ export const outputFields = [
   'CF (Button Order)', // CF buttonOrder
   'CF (Item Removed)', // item was reported by the user as wrong
   'CF (Note)', // CF note
-  'Feedback Text',
-  'dialogueHistory',
-  'Entry_Point'
+  'Entry Point'
 ];
