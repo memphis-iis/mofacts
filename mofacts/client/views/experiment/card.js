@@ -2321,6 +2321,14 @@ function speakMessageIfAudioPromptFeedbackEnabled(msg, audioPromptSource) {
             window.currentAudioObj.play().catch((err) => {
               console.log(err)
               let utterance = new SpeechSynthesisUtterance(msg);
+              utterance.addEventListener('end', (event) => { 
+                Session.set('recordingLocked', false);
+                startRecording();
+              });
+              utterance.addEventListener('error', (event) => { 
+                console.log(event);
+                Session.set('recordingLocked', false);
+              });
               synthesis.speak(utterance);
             });
           }
