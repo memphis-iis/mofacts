@@ -128,6 +128,7 @@ function sessionCleanUp() {
   Session.set('CurTimeoutId', undefined);
   Meteor.clearInterval(Session.get('varLenTimeoutName'));
   Session.set('varLenTimeoutName', null)
+  Session.set('recordingLocked', false);
   if (window.currentAudioObj) {
     window.currentAudioObj.pause();
     window.currentAudioObj = null;
