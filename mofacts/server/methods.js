@@ -11,6 +11,7 @@ import {sendScheduledTurkMessages} from './turk_methods';
 import {getItem, getComponentState, getCourse, getTdf} from './orm';
 import { result } from 'underscore';
 import { type } from 'os';
+import { split } from './lib/fable-library.2.10.2/RegExp';
 
 
 export {
@@ -2273,7 +2274,8 @@ Meteor.methods({
         var tdfContent = [];
         var stimContent = [];
         var referenceContents = [];
-        var fileName = entry.path;
+        var fileNameArray = entry.path.split("/");
+        var fileName = fileNameArray[fileNameArray.length - 1];
         var content =  await entry.buffer().then(function(file, fileObject){
           fileSplit = fileName.split(".");
           type = fileSplit[fileSplit.length - 1];
@@ -2298,45 +2300,55 @@ Meteor.methods({
               tdfContent.push(fileFinal);
             }
           }else{
-            console.log(path);
+            console.log("Uploading:", fileName);
             DynamicAssets.write(file, {
-              fileName: entry.path,
+              fileName: fileName,
               meta: {
                 owner: owner,
                 parent: path
               }
-            },function(error,fileRef){
-              replacePath = DynamicAssets.link(fileRef);
-              referenceFile = {
-                fileName: fileName,
-                replacePath: replacePath,
-                parent: path
-              }
-              console.log(referenceFile);
-              referenceContents.push(referenceFile);
-              links.push(referenceFile);
-            })
+            });
           }
-          return {referenceContents,tdfContent,stimContent}
+          return {tdfContent,stimContent}
+        });
+        referenceContents = [];
+        referenceFiles = DynamicAssets.find({}).forEach(function(fileRef){
+            replacePath = DynamicAssets.link(fileRef);
+            data = {
+              fileName: fileRef.name,
+              replacePath: replacePath,
+              parent: fileRef.name
+            }
+            referenceContents.push(data);
         });
         for(let files of content.stimContent){
-          console.log("Processing package file:", files.fileName);
+          console.log("Processing stim file:", files.fileName);
+            newContents = files.contents;
             for(let referenceFile of referenceContents){
-              console.log("replacing reference:", files.fileName, referenceFile.fileName, referenceFile.replacePath);
-              toReplace = files.contents;
-              replaced = toReplace.replace(referenceFile.fileName,referenceFile.replacePath);          
+              toReplace = newContents;
+              theSplit = toReplace.split(referenceFile.fileName);
+              if(theSplit.length > 1){
+                console.log("replacing", theSplit.length - 1,"references:", files.fileName, referenceFile.fileName, referenceFile.replacePath);
+                newContents = theSplit.join(referenceFile.replacePath);
+              } 
             }
-            Meteor.call("saveContentFile",files.type, files.fileName, files.contents, owner);
+            console.log(newContents);
+            Meteor.call("saveContentFile",files.type, files.fileName,newContents, owner);
         }
         for(let files of content.tdfContent){
-          console.log("processing package file:", files.fileName);
+          console.log("Processing tdf file:", files.fileName);
+          newContents = files.contents;
           for(let referenceFile of referenceContents){
-            toReplace = files.contents;
-            replaced = toReplace.replace(referenceFile.fileName,referenceFile.replacePath);             
+            toReplace = newContents;
+            theSplit = toReplace.split(referenceFile.fileName);
+            if(theSplit.length > 1){
+              console.log("replacing", theSplit.length - 1,"references:", files.fileName, referenceFile.fileName, referenceFile.replacePath);
+              newContents = theSplit.join(referenceFile.replacePath);
+            } 
           }
-          Meteor.call("saveContentFile",files.type, files.fileName, files.contents, owner);
+          console.log(newContents);
+          Meteor.call("saveContentFile",files.type, files.fileName,newContents, owner);
         }
-        this.content = content;
       });
       assets = DynamicAssets.find({}).fetch();
       return assets;
