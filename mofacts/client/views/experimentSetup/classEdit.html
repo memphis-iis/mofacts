@@ -25,19 +25,17 @@
               Save Class
           </button>
         </div>
-        <div>
-            <legend class="text-center">Links</legend>
+        <div class="row">
+          <div class="col-md-12">
+          <label>Class Links</label>
+          {{#each curTeacherClasses}}
             <ul>
-            {{#each classes}}
             
-              <li>{{this.courseName}}</li>
-              <ul>
-              {{#each this.newSections}}
-                <li>{{this.sectionName}} - <a href="{{this.link}}">{{this.sectionName}}</a></li>                
-              {{/each}}
+                <li><a href="{{baseLink}}classes/{{curTeacher}}/{{this.sectionid}}">{{this.coursename}} - {{this.sectionname}}</a></li>
+
             </ul>
-            {{/each}}
-            </ul>
+          {{/each}}
+        </div>
         </div>
     </div>
 {{/if}}
