@@ -1,13 +1,45 @@
+import {meteorCallAsync} from '../..';
 import {blankPassword} from '../../lib/currentTestingHelpers';
 import {sessionCleanUp} from '../../lib/sessionUtils';
 import {displayify} from '../../../common/globalHelpers';
 
-Template.signIn.onRendered(function() {
+
+Template.signIn.onCreated(async function() {
+  Session.set('loginMode', 'password');
+ 
+  let verifiedTeachers = await meteorCallAsync('getAllTeachers');
+  console.log('verifiedTeachers', verifiedTeachers);
+
+  console.log('got teachers');
+  Session.set('showTestLogins', true);
+  Session.set('teachers', verifiedTeachers);
+});
+
+Template.signIn.onRendered(async function() {
   if (Session.get('loginMode') !== 'experiment') {
     console.log('password signin, setting login mode');
     Session.set('loginMode', 'password');
   }
+  const allCourseSections = await meteorCallAsync('getAllCourseSections');
+  const classesByInstructorId = {};
+  //  //sectionid, courseandsectionname
+  for (const coursesection of allCourseSections) {
+    if (!classesByInstructorId[coursesection.teacheruserid]) {
+      classesByInstructorId[coursesection.teacheruserid] = [];
+    }
+    classesByInstructorId[coursesection.teacheruserid].push(coursesection);
+  }
+  Session.set('classesByInstructorId', classesByInstructorId);
+  curTeacher = Session.get('curTeacher');
+  console.log("teacher:", curTeacher._id);
+  if (curTeacher._id){
+    $('#initialInstructorSelection').prop('hidden', 'true');
+    $('#classSelection').prop('hidden', 'false');
+    $('.login').prop('hidden', 'true');
+  }
+
 });
+
 
 // //////////////////////////////////////////////////////////////////////////
 // Template Events
@@ -57,6 +89,11 @@ Template.signIn.helpers({
   isNormal: function() {
     return Session.get('loginMode') !== 'experiment';
   },
+  'teachers': () => Session.get('teachers'),
+
+  'curTeacherClasses': () => Session.get('curTeacherClasses'),
+  
+  'checkSectionExists': (sectionName) => sectionName != undefined && sectionName.length > 0,
 });
 
 // //////////////////////////////////////////////////////////////////////////
@@ -174,3 +211,13 @@ function userPasswordCheck() {
     }
   });
 }
+
+setClass = function(curClassID) {
+  console.log(curClassID);
+  $('#classSelection').prop('hidden', 'true');
+  const allClasses = Session.get('curTeacherClasses');
+  const curClass = allClasses.find((aClass) => aClass.sectionid == curClassID);
+  Session.set('curClass', curClass);
+  Session.set('curSectionId', curClass.sectionid)
+  $('.login').prop('hidden', '');
+};
