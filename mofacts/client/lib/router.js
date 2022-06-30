@@ -160,7 +160,6 @@ const restrictedRoutes = [
   'userProfileEdit',
   'userAdmin',
   'contentGeneration',
-  'classEdit',
   'tdfAssignmentEdit',
   'instructorReporting',
   'studentReporting',
@@ -248,6 +247,45 @@ Router.route('/profile', {
   },
 });
 
+Router.route('/classEdit',{
+  action: async function(){
+  if(Meteor.user()){
+    teacherSelected = Meteor.user().username;
+    let verifiedTeachers = await meteorCallAsync('getAllTeachers');
+    console.log('verifiedTeachers', verifiedTeachers);
+  
+    // Hack to redirect rblaudow classes to ambanker
+    const ambanker = verifiedTeachers.find((x) => x.username === 'ambanker@southwest.tn.edu');
+    const rblaudow = verifiedTeachers.find((x) => x.username === 'rblaudow@southwest.tn.edu');
+    if (ambanker && rblaudow) rblaudow._id = ambanker._id;
+  
+    //Get teacher info
+    const teacher = verifiedTeachers.find((x) => x.username === teacherSelected);
+    console.log('got teachers', teacher);
+
+    Session.set('teachers', verifiedTeachers);    
+    
+    console.log(teacher);
+    Session.set('curTeacher', teacher);
+    const allCourseSections = await meteorCallAsync('getAllCourseSections');
+    const classesByInstructorId = {};
+    //  //sectionid, courseandsectionname
+    for (const coursesection of allCourseSections) {
+      if (!classesByInstructorId[coursesection.teacheruserid]) {
+        classesByInstructorId[coursesection.teacheruserid] = [];
+      }
+      classesByInstructorId[coursesection.teacheruserid].push(coursesection);
+    }
+    Session.set('classesByInstructorId', classesByInstructorId);
+    const curClasses = Session.get('classesByInstructorId')[teacher._id];
+    console.log('setTeacher', Session.get('classesByInstructorId'), teacher._id, teacher);
+    Session.set('curTeacherClasses', curClasses);
+    $('#classSelection').prop('hidden', '');
+    this.render('classEdit');
+  } else {
+    this.redirect('/');
+  }
+}});
 //Setup profile routes for direct teacher links
 Router.route('/classes/:_teacher', {
   action: async function(){
@@ -306,6 +344,7 @@ Router.route('/classes/:_teacher', {
     }
   },
 });
+
 
 //Setup profile routes for direct class links
 Router.route('/classes/:_teacher/:_class', {

@@ -53,24 +53,17 @@ Template.classEdit.onRendered(async function() {
 });
 
 Template.classEdit.helpers({
-  classes: function(){
-    classes = Session.get('classes');
-    for(classIndex in classes){
-      sections = [];
-      for(sectionIndex in classes[classIndex].sections){
-        sectionIndexURL = parseInt(sectionIndex) + 1;
-        sections.push({
-          sectionName: classes[classIndex].sections[sectionIndex], 
-          link: "http://" + window.location.host + "/classes/" + Meteor.user().username + "/" + sectionIndexURL
-        });
-      }
-      classes[classIndex].newSections = sections;
-    }
-    console.log(classes);
-    return classes
-  }
-});
+  classes: () => classes = Session.get('classes'),
 
+  'curTeacherClasses': () => Session.get('curTeacherClasses'),
+
+  'curTeacher': () => Meteor.user().username,
+
+  'base:ink': function(){
+    return "http://" + window.location.host + "/";
+  }
+
+});
 Template.classEdit.events({
   'change #class-select': function(event, template) {
     console.log('change class-select');
