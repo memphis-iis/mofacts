@@ -129,7 +129,7 @@ Template.signInSouthwest.onCreated(async function() {
   });
   Meteor.call('isCurrentServerLoadTooHigh', function(err, res) {
     console.log('systemOverloaded?', res, err);
-    Session.set('systemOverloaded', false);
+    Session.set('systemOverloaded', (typeof(err) != 'undefined' || res));
   });
   Meteor.call('getAltServerUrl', function(err, res) {
     if (!(err || !res)) {
@@ -181,7 +181,9 @@ Template.signInSouthwest.onRendered(async function() {
     classesByInstructorId[coursesection.teacheruserid].push(coursesection);
   }
   Session.set('classesByInstructorId', classesByInstructorId);
-  if (Session.get('curTeacher')){
+  curTeacher = Session.get('curTeacher');
+  console.log("teacher:", curTeacher._id);
+  if (curTeacher._id){
     $('#initialInstructorSelection').prop('hidden', 'true');
     $('#classSelection').prop('hidden', 'false');
     $('.login').prop('hidden', 'true');
