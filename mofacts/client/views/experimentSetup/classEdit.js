@@ -20,6 +20,7 @@ function classSelectedSetup(curClassName) {
   $('#newClassName').val(curClassName);
   const foundClass = search(curClassName, 'courseName', Session.get('classes'));
   $('#sectionNames').val(foundClass.sections.map((x) => x + '\n').join(''));
+  $('#sectionNamesNotEditable').val(foundClass.sections.map((x, i) => x + ' - (Class ID: ' + i + ')'+ '\n').join(''));
   isNewClass = false;
 }
 
