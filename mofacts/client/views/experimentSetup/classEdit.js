@@ -20,10 +20,6 @@ function classSelectedSetup(curClassName) {
   $('#newClassName').val(curClassName);
   const foundClass = search(curClassName, 'courseName', Session.get('classes'));
   $('#sectionNames').val(foundClass.sections.map((x) => x + '\n').join(''));
-  curTeacher = Meteor.user().username;
-
-  $('#sectionNamesNotEditable').val(foundClass.sections.map((x, i) => x + ' - (Class ID: ' + i + '), Link: http://' + window.location.hostname
-+ "/classes/" + curTeacher + "/" + i + '\n').join(''));
   isNewClass = false;
 }
 
@@ -57,7 +53,22 @@ Template.classEdit.onRendered(async function() {
 });
 
 Template.classEdit.helpers({
-  classes: () => Session.get('classes'),
+  classes: function(){
+    classes = Session.get('classes');
+    for(classIndex in classes){
+      sections = [];
+      for(sectionIndex in classes[classIndex].sections){
+        sectionIndexURL = parseInt(sectionIndex) + 1;
+        sections.push({
+          sectionName: classes[classIndex].sections[sectionIndex], 
+          link: "http://" + window.location.host + "/classes/" + Meteor.user().username + "/" + sectionIndexURL
+        });
+      }
+      classes[classIndex].newSections = sections;
+    }
+    console.log(classes);
+    return classes
+  }
 });
 
 Template.classEdit.events({

@@ -20,13 +20,24 @@
           <textarea class="form-control" rows=15 cols=20 id="sectionNames" placeholder="Enter section names here"></textarea>
         </div>
         <div>
-          <div>
-            <label>Section list</label>
-            <textarea class="form-control" rows=15 cols=20 id="sectionNamesNotEditable" placeholder="Enter section names here" disabled></textarea>
-          </div>
+                 
           <button type='button' id='saveClass' class='btn btn-fix'>
               Save Class
           </button>
+        </div>
+        <div>
+            <legend class="text-center">Links</legend>
+            <ul>
+            {{#each classes}}
+            
+              <li>{{this.courseName}}</li>
+              <ul>
+              {{#each this.newSections}}
+                <li>{{this.sectionName}} - <a href="{{this.link}}">{{this.sectionName}}</a></li>                
+              {{/each}}
+            </ul>
+            {{/each}}
+            </ul>
         </div>
     </div>
 {{/if}}
