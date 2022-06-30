@@ -125,11 +125,11 @@ Template.signInSouthwest.onCreated(async function() {
   Session.set('loginMode', 'southwest');
   Meteor.call('isSystemDown', function(err, systemDown) {
     console.log('SYSTEM_DOWN:', systemDown);
-    Session.set('systemDown', systemDown);
+    Session.set('systemDown', false);
   });
   Meteor.call('isCurrentServerLoadTooHigh', function(err, res) {
     console.log('systemOverloaded?', res, err);
-    Session.set('systemOverloaded', (typeof(err) != 'undefined' || res));
+    Session.set('systemOverloaded', false);
   });
   Meteor.call('getAltServerUrl', function(err, res) {
     if (!(err || !res)) {
@@ -181,6 +181,11 @@ Template.signInSouthwest.onRendered(async function() {
     classesByInstructorId[coursesection.teacheruserid].push(coursesection);
   }
   Session.set('classesByInstructorId', classesByInstructorId);
+  if (Session.get('curTeacher')){
+    $('#initialInstructorSelection').prop('hidden', 'true');
+    $('#classSelection').prop('hidden', 'false');
+    $('.login').prop('hidden', 'true');
+  }
 
   window.onpopstate = function(event) {
     console.log('window popstate signin southwest');
