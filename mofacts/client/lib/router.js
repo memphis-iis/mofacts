@@ -160,7 +160,6 @@ const restrictedRoutes = [
   'userProfileEdit',
   'userAdmin',
   'contentGeneration',
-  'classEdit',
   'tdfAssignmentEdit',
   'instructorReporting',
   'studentReporting',
@@ -244,6 +243,174 @@ Router.route('/profile', {
       }
     } else {
       this.redirect('/');
+    }
+  },
+});
+
+Router.route('/classEdit',{
+  action: async function(){
+  if(Meteor.user()){
+    teacherSelected = Meteor.user().username;
+    let verifiedTeachers = await meteorCallAsync('getAllTeachers');
+    console.log('verifiedTeachers', verifiedTeachers);
+  
+    // Hack to redirect rblaudow classes to ambanker
+    const ambanker = verifiedTeachers.find((x) => x.username === 'ambanker@southwest.tn.edu');
+    const rblaudow = verifiedTeachers.find((x) => x.username === 'rblaudow@southwest.tn.edu');
+    if (ambanker && rblaudow) rblaudow._id = ambanker._id;
+  
+    //Get teacher info
+    const teacher = verifiedTeachers.find((x) => x.username === teacherSelected);
+    console.log('got teachers', teacher);
+
+    Session.set('teachers', verifiedTeachers);    
+    
+    console.log(teacher);
+    Session.set('curTeacher', teacher);
+    const allCourseSections = await meteorCallAsync('getAllCourseSections');
+    const classesByInstructorId = {};
+    //  //sectionid, courseandsectionname
+    for (const coursesection of allCourseSections) {
+      if (!classesByInstructorId[coursesection.teacheruserid]) {
+        classesByInstructorId[coursesection.teacheruserid] = [];
+      }
+      classesByInstructorId[coursesection.teacheruserid].push(coursesection);
+    }
+    Session.set('classesByInstructorId', classesByInstructorId);
+    const curClasses = Session.get('classesByInstructorId')[teacher._id];
+    console.log('setTeacher', Session.get('classesByInstructorId'), teacher._id, teacher);
+    Session.set('curTeacherClasses', curClasses);
+    $('#classSelection').prop('hidden', '');
+    this.render('classEdit');
+  } else {
+    this.redirect('/');
+  }
+}});
+//Setup profile routes for direct teacher links
+Router.route('/classes/:_teacher', {
+  action: async function(){
+    teacherSelected = this.params._teacher;
+    let southwestOnly = false;
+    let loginMode = Session.get('loginMode');
+    if(teacherSelected.match(/southwest[.]tn[.]edu/i)){
+      loginMode = 'southwest'
+      let southwestOnly=true;
+    }
+    console.log('loginMode: ' + loginMode);
+    let verifiedTeachers = await meteorCallAsync('getAllTeachers', southwestOnly);
+    console.log('verifiedTeachers', verifiedTeachers);
+  
+    // Hack to redirect rblaudow classes to ambanker
+    const ambanker = verifiedTeachers.find((x) => x.username === 'ambanker@southwest.tn.edu');
+    const rblaudow = verifiedTeachers.find((x) => x.username === 'rblaudow@southwest.tn.edu');
+    if (ambanker && rblaudow) rblaudow._id = ambanker._id;
+  
+    //Get teacher info
+    const teacher = verifiedTeachers.find((x) => x.username === teacherSelected);
+    console.log('got teachers', teacher);
+
+    Session.set('teachers', verifiedTeachers);    
+    
+    console.log(teacher);
+    Session.set('curTeacher', teacher);
+    const allCourseSections = await meteorCallAsync('getAllCourseSections');
+    const classesByInstructorId = {};
+    //  //sectionid, courseandsectionname
+    for (const coursesection of allCourseSections) {
+      if (!classesByInstructorId[coursesection.teacheruserid]) {
+        classesByInstructorId[coursesection.teacheruserid] = [];
+      }
+      classesByInstructorId[coursesection.teacheruserid].push(coursesection);
+    }
+    Session.set('classesByInstructorId', classesByInstructorId);
+    const curClasses = Session.get('classesByInstructorId')[teacher._id];
+    console.log('setTeacher', Session.get('classesByInstructorId'), teacher._id, teacher);
+    if (curClasses == undefined) {
+      $('#initialInstructorSelection').prop('hidden', '');
+      alert('Your instructor hasn\'t set up their classes yet.  Please contact them and check back in at a later time.');
+      Session.set('curTeacher', {});
+    } else {
+      Session.set('curTeacherClasses', curClasses);
+      $('#classSelection').prop('hidden', '');
+    }
+    if (loginMode === 'southwest') {
+      console.log('southwest login, routing to southwest profile');
+      Session.set('curModule', 'profileSouthwest');
+      this.render('/signInSouthwest');
+    } else { // Normal login mode
+      console.log('else, progress');
+      Session.set('curModule', 'profile');
+      this.render('signIn');
+    }
+  },
+});
+
+
+//Setup profile routes for direct class links
+Router.route('/classes/:_teacher/:_class', {
+  action: async function(){
+    teacherSelected = this.params._teacher;
+    curClassID = this.params._class;
+    let southwestOnly = false;
+    let loginMode = Session.get('loginMode');
+    if(teacherSelected.match(/southwest[.]tn[.]edu/i)){
+      loginMode = 'southwest'
+      let southwestOnly=true;
+    } else {
+      let loginMode = "";
+    }
+    console.log('loginMode: ' + loginMode);
+    let verifiedTeachers = await meteorCallAsync('getAllTeachers', southwestOnly);
+    console.log('verifiedTeachers', verifiedTeachers);
+
+    
+  
+    // Hack to redirect rblaudow classes to ambanker
+    const ambanker = verifiedTeachers.find((x) => x.username === 'ambanker@southwest.tn.edu');
+    const rblaudow = verifiedTeachers.find((x) => x.username === 'rblaudow@southwest.tn.edu');
+    if (ambanker && rblaudow) rblaudow._id = ambanker._id;
+  
+    //Get teacher info
+    const teacher = verifiedTeachers.find((x) => x.username === teacherSelected);
+    console.log('got teachers', teacher);
+
+    Session.set('teachers', verifiedTeachers);    
+    
+    console.log(teacher);
+    Session.set('curTeacher', teacher);
+    const allCourseSections = await meteorCallAsync('getAllCourseSections');
+    const classesByInstructorId = {};
+    //  //sectionid, courseandsectionname
+    for (const coursesection of allCourseSections) {
+      if (!classesByInstructorId[coursesection.teacheruserid]) {
+        classesByInstructorId[coursesection.teacheruserid] = [];
+      }
+      classesByInstructorId[coursesection.teacheruserid].push(coursesection);
+    }
+    Session.set('classesByInstructorId', classesByInstructorId);
+    const curClasses = Session.get('classesByInstructorId')[teacher._id];
+    console.log('setTeacher', Session.get('classesByInstructorId'), teacher._id, teacher);
+    if (curClasses == undefined) {
+      $('#initialInstructorSelection').prop('hidden', '');
+      alert('Your instructor hasn\'t set up their classes yet.  Please contact them and check back in at a later time.');
+      Session.set('curTeacher', {});
+    } else {
+      Session.set('curTeacherClasses', curClasses);
+      console.log(curClassID);
+      const allClasses = Session.get('curTeacherClasses');
+      const curClass = allClasses.find((aClass) => aClass.sectionid == curClassID);
+      Session.set('curClass', curClass);
+      Session.set('curSectionId', curClass.sectionid)
+      $('.login').prop('hidden', '');
+    }
+    if (loginMode === 'southwest') {
+      console.log('southwest login, routing to southwest profile');
+      Session.set('curModule', 'profileSouthwest');
+      this.render('/signInSouthwest');
+    } else { // Normal login mode
+      console.log('else, progress');
+      Session.set('curModule', 'profile');
+      this.render('signIn');
     }
   },
 });

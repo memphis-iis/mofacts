@@ -34,6 +34,15 @@ Template.profile.helpers({
     }
   },
 
+  class: function(){
+    thisClass = Session.get('curClass');
+    if(thisClass.coursename){
+      return thisClass;
+    } else {
+      return false;
+    }
+  },
+
   simulationChecked: function() {
     return Session.get('runSimulation');
   },

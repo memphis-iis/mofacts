@@ -4,6 +4,12 @@
       <div>
         {{>profileAudioToggles}}
       </div>
+      {{#if class}}
+      <legend class="text-center">
+          Course: {{class.coursename}}
+      </legend>
+      {{/if}}
+
       <br />
       <div class="row" id="testButtonContainer">
           <legend class="text-center">
