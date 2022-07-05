@@ -217,10 +217,12 @@ Router.route('/', {
       Cookie.set('experimentTarget', '', 1);
       Cookie.set('experimentXCond', '', 1);
       Session.set('curModule', 'signinoauth');
-      this.render('signInOauth');
+      this.render('signIn');
     }
   },
 });
+
+
 
 Router.route('/profile', {
   name: 'client.profile',
