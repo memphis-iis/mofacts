@@ -62,6 +62,7 @@
                     <div class="container-fluid" id="displayContainer">
                         <div id="leftPanel" class="col-md-11">
                             {{#if anythingButAudioCard}}
+                                {{#if ifClozeDisplayTextExists}}
                                 <div class="marginLeftAndRight alert alert-info {{fontSizeClass}}" id="textQuestion">
                                     {{#if textOrClozeCard}}
                                         {{#if subWordClozeCurrentQuestionExists}}
@@ -72,6 +73,7 @@
                                         {{/if}}
                                     {{/if}}
                                 </div>
+                                {{/if}}
                                 <div class="marginLeftAndRight h2" id="imageDisplay">
                                     {{#if imageCard}}
                                         <img id="cardQuestionImg" src="{{curImgSrc}}" style="max-width: 100%; width: auto; height: max-content;"> 
