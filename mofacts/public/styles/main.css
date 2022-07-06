@@ -188,6 +188,7 @@ legend {
 
 .tdfButton, .subTdfButton{
     height: 75px;
+    margin-top: 10px;  
     overflow: hidden;
     text-overflow: ellipsis; /*Changed to keep text from overflowing outside of the button*/
 }
