@@ -18,6 +18,7 @@ import {createScheduleUnit, createModelUnit, createEmptyUnit} from './unitEngine
 import {Answers} from './answerAssess';
 import {VAD} from '../../lib/vad';
 import {sessionCleanUp} from '../../lib/sessionUtils';
+import * as pFunc from './probabilityFunctions';
 
 export {
   speakMessageIfAudioPromptFeedbackEnabled,
