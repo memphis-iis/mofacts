@@ -419,6 +419,8 @@ async function selectTdf(currentTdfId, lessonName, currentStimuliSetId, ignoreOu
   Session.set('audioPromptFeedbackSpeakingRateView', audioPromptFeedbackSpeakingRate);
   const audioPromptQuestionSpeakingRate = document.getElementById('audioPromptQuestionSpeakingRate').value;
   Session.set('audioPromptQuestionSpeakingRateView', audioPromptQuestionSpeakingRate);
+  const audioPromptVoice = document.getElementById('audioPromptVoice').value;
+  Session.set('audioPromptVoiceView', audioPromptVoice)
   const audioInputSensitivity = document.getElementById('audioInputSensitivity').value;
   Session.set('audioInputSensitivityView', audioInputSensitivity);
   const audioPromptQuestionVolume = document.getElementById('audioPromptQuestionVolume').value;
@@ -426,11 +428,18 @@ async function selectTdf(currentTdfId, lessonName, currentStimuliSetId, ignoreOu
   const audioPromptFeedbackVolume = document.getElementById('audioPromptFeedbackVolume').value;
   Session.set('audioPromptFeedbackVolume', audioPromptFeedbackVolume);
   const feedbackType = await meteorCallAsync('getUserLastFeedbackTypeFromHistory', currentTdfId);
-  Session.set('feedbackTypeFromHistory', feedbackType || null)
+  const audioPromptFeedbackVoice = document.getElementById('audioPromptFeedbackVoice').value;
+  Session.set('audioPromptFeedbackVoiceView', audioPromptFeedbackVoice)
+  if(feedbackType)
+    Session.set('feedbackTypeFromHistory', feedbackType.feedbacktype)
+  else
+    Session.set('feedbackTypeFromHistory', null);
 
   // Set values for card.js to use later, in experiment mode we'll default to the values in the tdf
   Session.set('audioPromptFeedbackSpeakingRate', audioPromptFeedbackSpeakingRate);
   Session.set('audioPromptQuestionSpeakingRate', audioPromptQuestionSpeakingRate);
+  Session.set('audioPromptVoice', audioPromptVoice);
+  Session.set('audioPromptFeedbackVoice', audioPromptFeedbackVoice);
   Session.set('audioInputSensitivity', audioInputSensitivity);
 
   // Get some basic info about the current user's environment

@@ -54,6 +54,8 @@ function sessionCleanUp() {
   Session.set('audioPromptFeedbackVolume', undefined)
   Session.set('audioPromptQuestionVolume', undefined)
   Session.set('audioPromptQuestionSpeakingRate', undefined);
+  Session.set('audioPromptVoice', undefined);
+  Session.set('audioPromptFeedbackVoice', undefined);
   Session.set('buttonTrial', false);
   Session.set('currentAnswerSyllables', undefined);
 
@@ -124,6 +126,8 @@ function sessionCleanUp() {
   Session.set('CurIntervalId', undefined)
   Meteor.clearTimeout(Session.get('CurTimeoutId'));
   Session.set('CurTimeoutId', undefined);
+  Meteor.clearInterval(Session.get('varLenTimeoutName'));
+  Session.set('varLenTimeoutName', null)
   if (window.currentAudioObj) {
     window.currentAudioObj.pause();
     window.currentAudioObj = null;
