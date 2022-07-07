@@ -1,4 +1,4 @@
-export {getItem, getComponentState, getCourse, getHistory, getTdf, getHistoryForMongo};
+export {getItem, getComponentState, getCourse, getHistory, getTdf, getHistoryForMongo, migrateTdf};
 
 function getItem(stim) {
   return {
@@ -219,6 +219,16 @@ function getHistoryForMongo(history) {
     hintLevel:history.hintlevel,
     instructionQuestionResult: history.instructionquestionresult,
     entryPoint: history.entry_point
+  };
+}
+
+function migrateTdf(tdf){
+  return {
+    TDFId: tdf.tdfid,
+    ownerId: tdf.ownerid,
+    stimuliSetId: tdf.stimulisetid,
+    content: tdf.content,
+    visibility: tdf.visibility,
   };
 }
 

@@ -3,7 +3,7 @@
     <div class="col-md-6">
         {{#if isInRole 'admin,teacher'}}                      
              <h1 class="text-center">Asset Uploader</h1>
-             <p>This uploads your assets for use in experiments. You may use video, audio, or image files. A link will be generated that you should use in your TDFs/stims.</p>
+             <p>This uploads your assets for use in experiments. It can also upload packaged zip files with TDF/stim/asset combinations. You may use video, audio, or image files as well. A link will be generated and available after upload.</p>
             <table>
                 <td>
                     <tr>
@@ -12,16 +12,13 @@
                             <span id="progress">{{progress.get}}%</span>
                         {{else}}<br>
                         <input id="fileInput" style="margin: auto; display:block;" type="file" multiple />
-                        Asset Links
+                        Assets Available
                         
                             <table class="table table-striped table-bordered table-condensed">
                                 {{#each assetLink}}
                                 <tr>
                                     <td>
-                                        <a href="{{this.link}}">{{this.link}}</a><br>
-                                    </td>
-                                    <td>
-                                        Filename: {{this.filename}}
+                                        <a href="{{this.link}}">{{this.name}}</a><br>
                                     </td>
                                 </tr>
                                 {{/each}}

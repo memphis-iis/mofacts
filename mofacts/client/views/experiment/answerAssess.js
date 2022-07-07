@@ -125,7 +125,7 @@ function simpleStringMatch(userAnswer, correctAnswer, lfparameter, fullAnswerStr
           editDistance /
                   Math.max(s1.length, s2.length)
         );
-        if (editDistScore >= lfparameter || editDistance <= 1) {
+        if (editDistScore >= lfparameter) {
           return 2; // Close enough
         } else {
           return 0; // No match

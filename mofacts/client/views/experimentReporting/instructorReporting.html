@@ -40,7 +40,8 @@
         <input type="date" id="practice-deadline-date" name="practice-deadline-date-select" disabled="true">
       </div>
       <h3>Class Data</h3>
-        <table border="1" style="width: 100%;">
+      <div class="row">
+        <table border='1' style="width: 100%; border: 1px black; padding: 10px;">
           <tr><th class="thWideInstReport">ID</th><th class="thWideInstReport">% Correct</th><th class="thWideInstReport">Count</th><th style="width: 10%;text-align: center;">Total Time (min)</th></tr>
           {{#each curClassStudentPerformance}}
             <tr id="{{this.userId}}">
@@ -57,6 +58,7 @@
             <td>{{curClassPerformance.totalTimeDisplay}}</td>
           </tr>
         </table>
+      </div>
     </div>
 {{/if}}
 </template>

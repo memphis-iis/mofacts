@@ -8,9 +8,10 @@ import {displayify, isEmpty, stringifyIfExists} from '../common/globalHelpers';
 import {createExperimentExport} from './experiment_times';
 import {getNewItemFormat} from './conversions/convert';
 import {sendScheduledTurkMessages} from './turk_methods';
-import {getItem, getComponentState, getCourse, getTdf, getHistoryForMongo} from './orm';
+import {getItem, getComponentState, getCourse, getTdf, getHistoryForMongo, migrateTdf} from './orm';
 import { result } from 'underscore';
 import { Mongo } from 'meteor/mongo'
+import { type } from 'os';
 
 
 export {
@@ -187,7 +188,7 @@ async function migration(){
   const tdfret = await db.any("select * from tdf");
   for(let tdf of tdfret){
     console.log(`tdf: ${tdfret.indexOf(tdf) + 1}/${tdfret.length}`)
-    tdf = getTdf(tdf);
+    tdf = migrateTdf(tdf);
     Tdfs.insert(tdf);
   }
 
@@ -400,8 +401,6 @@ function createAwsHmac(secretKey, dataString) {
 async function getTdfQueryNames(tdfFileName) {
   let tdfQueryNames = [];
   if (tdfFileName === ALL_TDFS) {
-    // Postgres Reversion
-    // const tdfsRet = await db.any('SELECT content -> \'fileName\' AS filename from tdf');
     const tdfsRet = tdfs.find({},{ "fileName": 1 }).fetch();
     for (const tdfFileName of tdfsRet) {
       tdfQueryNames.push(tdfFileName);
@@ -430,39 +429,30 @@ async function getLearningSessionItems(tdfFileName) {
 }
 
 async function getTdfIdByStimSetIdAndFileName(stimuliSetId, fileName){
-  //Postgres Reversion
-  // const ret = await db.many('SELECT * FROM tdf WHERE stimulisetid =$1', stimuliSetId);
   const shortFileName = fileName.replace('.json', '').replace('.xml', '');
   let tdf = Tdfs.find({"content.fileName": shortFileName, stimuliSetId: stimuliSetId}).fetch()._id;
   return tdf;
 }
 
 async function getTdfById(TDFId) {
-  //const tdfs = await db.one('SELECT * from tdf WHERE TDFId=$1', TDFId);
-  //PostgresReversion
   const tdf = Tdfs.findOne({_id: TDFId});
   return tdf;
 }
 
 async function getTdfTTSAPIKey(TDFId) {
-  const tdfs = await db.one('SELECT * from tdf WHERE TDFId=$1', TDFId);
-  const textToSpeechAPIKey = tdfs.content.tdfs.tutor.setspec.textToSpeechAPIKey;
+  const textToSpeechAPIKey = Tdfs.findOne({_id: TDFId}).content.tdfs.tutor.setspec.textToSpeechAPIKey;
   return textToSpeechAPIKey;
 }
 
 async function getTdfSpeachAPIKey(TDFId) {
-  const tdfs = await db.one(`SELECT * from tdf WHERE TDFId=${TDFId}`);
-  const speechAPIKey = tdfs.content.tdfs.tutor.setspec.speechAPIKey;
+  const speechAPIKey = Tdfs.findOne({_id: TDFId}).content.tdfs.tutor.setspec.speechAPIKey;
   return speechAPIKey;
 }
 
 // eslint-disable-next-line camelcase
 async function getTdfBy_id(_id) {
   try {
-    //Postgres Reversion
     tdf = TDFs.find({_id: _id}).fetch();
-    // const queryJSON = {'_id': _id};
-    // const tdfs = await db.one('SELECT * from tdf WHERE content @> $1' + '::jsonb', [queryJSON]);
     return tdf;
   } catch (e) {
     serverConsole('getTdfBy_id ERROR,', _id, ',', e);
@@ -472,9 +462,6 @@ async function getTdfBy_id(_id) {
 
 async function getTdfByFileName(filename) {
   try {
-    //Postgres Reversion
-    // const queryJSON = {'fileName': filename};
-    // const tdfs = await db.oneOrNone('SELECT * from tdf WHERE content @> $1::jsonb', [queryJSON]);
     const tdf = Tdfs.findOne({"content.fileName": filename});
     if (!tdf) {
       return null;
@@ -486,12 +473,10 @@ async function getTdfByFileName(filename) {
   }
 }
 
+
 async function getTdfByExperimentTarget(experimentTarget) {
   try {
     serverConsole('getTdfByExperimentTarget:'+experimentTarget);
-    //PostgresReversion
-    // const queryJSON = {'tdfs': {'tutor': {'setspec': {'experimentTarget': experimentTarget}}}};
-    // const tdfs = await db.one('SELECT * from tdf WHERE content @> $1' + '::jsonb', [queryJSON]);
     tdf = Tdfs.findOne({"content.tdfs.tutor.setspec.experimentTarget": experimentTarget});
     return tdf;
   } catch (e) {
@@ -502,16 +487,12 @@ async function getTdfByExperimentTarget(experimentTarget) {
 
 async function getAllTdfs() {
   serverConsole('getAllTdfs');
-  //PostgresReversion
   const tdfs = Tdfs.find({}).fetch();
-  // const tdfsRet = await db.any('SELECT * from tdf');
   return tdfs;
 }
 
 async function getAllStims() {
   serverConsole('getAllStims');
-  //PostgresReversion
-  // const stimRet = await db.any('SELECT DISTINCT(stimulusfilename), stimulisetid FROM item;')
   return await Items.rawCollection().aggregate([
     {
       $group: {
@@ -533,9 +514,6 @@ async function getAllStims() {
 
 async function getStimuliSetsForIdSet(stimuliSetIds) {
   const stimSetsStr = stimuliSetIds.join(',');
-  //Postgres Reversion
-  // const query = 'SELECT * FROM ITEM WHERE stimuliSetId IN (' + stimSetsStr + ') ORDER BY itemId';
-  // const stimSets = await db.many(query);
   const stimSets = Items.find({stimuliSetId: {$in: [stimSetsStr]}}, {sort: {stimulusKC: 1}});
   const ret = [];
   for (const stim of stimSets) {
@@ -574,7 +552,6 @@ async function getProbabilityEstimatesByKCId(relevantKCIds) { // {clusterIndex:[
 }
 
 async function getReponseKCMap() {
-  // //const responseKCStuff = await db.manyOrNone('SELECT DISTINCT correctResponse, responseKC FROM item');
   const responseKCStuff = await Items.rawCollection().aggregate([{
     $group: {
       _id: "$correctResponse",
@@ -600,17 +577,14 @@ async function getReponseKCMap() {
 
 // by currentTdfId, not currentRootTDFId
 async function getComponentStatesByUserIdTDFIdAndUnitNum(userId, TDFId) {
-  //PostgresReversion
   const componentStates = ComponentStates.find({ userId: userId, TDFId: TDFId }, { sort: { KCId: -1 } }).fetch();
-  // const query = 'SELECT * FROM componentState WHERE userId = $1 AND TDFId = $2 ORDER BY componentStateId';
-  // const componentStatesRet = await db.manyOrNone(query, [userId, TDFId]);
   return componentStates;
 }
 
 async function setComponentStatesByUserIdTDFIdAndUnitNum(userId, TDFId, componentStates) {
   serverConsole('setComponentStatesByUserIdTDFIdAndUnitNum, ', userId, TDFId);
   const responseKCMap = await getReponseKCMap();
-  const newResponseKCRet = Items.find({}, {sort: {responseKC: -1}, limit: 1}).fetch();//await t.one('SELECT MAX(responseKC) AS responseKC from ITEM');
+  const newResponseKCRet = Items.find({}, {sort: {responseKC: -1}, limit: 1}).fetch();
   let newResponseKC = newResponseKCRet.responsekc + 1;
   let c = ComponentStates.find({userId: userId, TDFId: TDFId}).fetch();
   for (const componentState of componentStates) {
@@ -673,7 +647,6 @@ function _branchingCorrectText(answer) {
 async function insertStimTDFPair(newStimJSON, wrappedTDF, sourceSentences) {
   //PostgresReversion
   const maxStimuliSetId = Items.find().sort({stimuliSetId: -1}).limit(1);
-  // const highestStimuliSetIdRet = await db.oneOrNone('SELECT MAX(stimuliSetId) AS stimuliSetId FROM item');
   const newStimuliSetId = maxStimuliSetId + 1;
   wrappedTDF.stimuliSetId = newStimuliSetId;
   for (const stim of newStimJSON) {
@@ -681,7 +654,6 @@ async function insertStimTDFPair(newStimJSON, wrappedTDF, sourceSentences) {
   }
   //PostgresReversion
   const maxStimulusKC = Items.find({}, { sort: {stimulusKC: -1}}).limit(1).stimulusKC;
-  // const highestStimulusKCRet = await db.oneOrNone('SELECT MAX(stimulusKC) AS stimulusKC FROM item');
   const curNewKCBase = (Math.floor(maxStimulusKC / KC_MULTIPLE) * KC_MULTIPLE) + KC_MULTIPLE;// + 1
 
   let curNewStimulusKC = curNewKCBase;
@@ -724,18 +696,13 @@ async function insertStimTDFPair(newStimJSON, wrappedTDF, sourceSentences) {
 }
 
 async function getSourceSentences(stimuliSetId) {
-  //PostgresReversion
-  // const query = 'SELECT sourceSentences FROM itemSourceSentences WHERE stimuliSetId=$1';
-  // const sourceSentencesRet = await db.manyOrNone(query, stimuliSetId);
   const sourceSentencesRet = itemSourceSentences.find({stimuliSetId: stimuliSetId});
   return sourceSentencesRet.sourceSentences;
 }
 
 async function getAllCourses() {
   try {
-    //PostgresReversion Staged
     let coursesRet = Courses.find().fetch();
-    // coursesRet = await db.any('SELECT * from course');
     const courses = [];
     for (const course of coursesRet) {
       courses.push(getCourse(course));
@@ -750,7 +717,6 @@ async function getAllCourses() {
 async function getAllCourseSections() {
   try {
     serverConsole('getAllCourseSections');
-    //PostgresReversion Staged
     ret =  await Courses.rawCollection().aggregate([
       {
         $match: {semester: curSemester}
@@ -776,9 +742,6 @@ async function getAllCourseSections() {
         }
       }
     ]).toArray();
-    // const query = 'SELECT s.sectionid, s.sectionname, c.courseid, c.coursename, c.teacheruserid, c.semester, \
-    //     c.beginDate from course AS c INNER JOIN section AS s ON c.courseid = s.courseid WHERE c.semester=$1';
-    // const ret = await db.any(query, curSemester);
     return ret;
   } catch (e) {
     serverConsole('getAllCourseSections ERROR,', e);
@@ -788,18 +751,12 @@ async function getAllCourseSections() {
 
 async function getCourseById(courseId) {
   serverConsole('getAllCoursesById:', courseId);
-  //PostgresReversion Staged
-  // const query = 'SELECT * from course WHERE courseId=$1';
-  // const course = await db.oneOrNone(query, [courseId, curSemester]);
   const course = Courses.findOne({courseId: courseId});
   return course;
 }
 
 async function getAllCoursesForInstructor(instructorId) {
   serverConsole('getAllCoursesForInstructor:', instructorId);
-  // const query = 'SELECT *, (SELECT array_agg(section.sectionName) as sectionNames FROM section \
-  //     WHERE courseId=course.courseId) from course WHERE teacherUserId=$1 AND semester=$2';
-  // const coursesRet = await db.any(query, [instructorId, curSemester]);
   const courses = Courses.find({teacherUserId: instructorId}).fetch();
   return courses;
 }
@@ -808,12 +765,6 @@ async function getAllCourseAssignmentsForInstructor(instructorId) {
   try {
     //Postgres Reversion
     serverConsole('getAllCourseAssignmentsForInstructor:'+instructorId);
-    //const query = 'SELECT t.content -> \'fileName\' AS filename, c.courseName, c.courseId from assignment AS a \
-    //             INNER JOIN tdf AS t ON t.TDFId = a.TDFId \
-    //             INNER JOIN course AS c ON c.courseId = a.courseId \
-    //             WHERE c.teacherUserId = $1 AND c.semester = $2';
-    //const args = [instructorId, curSemester];
-    //const courseAssignments = await db.any(query, args);
     const courseAssignments = await Assignments.rawCollection().aggregate([{ //from assignment
       $lookup:{ //INNER JOIN tdf AS t ON t.TDFId = a.TDFId
         from: "tdfs",
@@ -870,12 +821,6 @@ async function editCourseAssignments(newCourseAssignment) {
   try {
     serverConsole('editCourseAssignments:', newCourseAssignment);
     const newTdfs = newCourseAssignment.tdfs;
-    //Postgres Reversion
-    // const query = 'SELECT t.content -> \'fileName\' AS filename, t.TDFId, c.courseId from assignment AS a \
-    //            INNER JOIN tdf AS t ON t.TDFId = a.TDFId \
-    //            INNER JOIN course AS c ON c.courseId = a.courseId \
-    //            WHERE c.courseid = $1';
-    // const curCourseAssignments = await db.manyOrNone(query, newCourseAssignment.courseid);
     const curCourseAssignments = await Assignments.rawCollection().aggregate([{
       $lookup:{ //INNER JOIN tdf AS t ON t.TDFId = a.TDFId
         from: "tdf",
@@ -915,7 +860,6 @@ async function editCourseAssignments(newCourseAssignment) {
     const tdfsAdded = getSetAMinusB(newTdfs, existingTdfs);
     const tdfsRemoved = getSetAMinusB(existingTdfs, newTdfs);
 
-    // const tdfNamesAndIDs = await t.manyOrNone('SELECT TDFId, content -> \'fileName\' AS filename from tdf');
     const tdfNamesAndIDs = Tdfs.find().fetch();
     const tdfNameIDMap = {};
     for (const tdfNamesAndID of tdfNamesAndIDs) {
@@ -926,15 +870,11 @@ async function editCourseAssignments(newCourseAssignment) {
       const TDFId = tdfNameIDMap[tdfName];
       serverConsole('editCourseAssignments tdf:', tdfNamesAndIDs, TDFId, tdfName, tdfsAdded, tdfsRemoved,
           curCourseAssignments, existingTdfs, newTdfs);
-      //PostgresReversion Staged
       Assignments.insert({courseId: newCourseAssignment.courseid, TDFId: TDFId});
-      // await t.none('INSERT INTO assignment(courseId, TDFId) VALUES($1, $2)', [newCourseAssignment.courseid, TDFId]);
     }
     for (const tdfName of tdfsRemoved) {
       const TDFId = tdfNameIDMap[tdfName];
-      //PostgresReversion Staged
       Assignment.remove({$and: [{courseId: newCourseAssignment.courseid}, {TDFId: TDFId}]});
-      // await t.none('DELETE FROM assignment WHERE courseId=$1 AND TDFId=$2', [newCourseAssignment.courseid, TDFId]);
     }
     return newCourseAssignment;
   } catch (e) {
@@ -945,14 +885,6 @@ async function editCourseAssignments(newCourseAssignment) {
 
 async function getTdfAssignmentsByCourseIdMap(instructorId) {
   serverConsole('getTdfAssignmentsByCourseIdMap', instructorId);
-  // Postgres Reversion
-  // const query = 'SELECT t.content \
-  //               AS content, a.TDFId, a.courseId \
-  //               FROM assignment AS a \
-  //               INNER JOIN tdf AS t ON t.TDFId = a.TDFId \
-  //               INNER JOIN course AS c ON c.courseId = a.courseId \
-  //               WHERE c.semester = $1 AND c.teacherUserId=$2';
-  // const assignmentTdfFileNamesRet = await db.any(query, [curSemester, instructorId]);
   const assignmentTdfFileNamesRet = await Assignments.rawCollection().aggregate([{
     $lookup:{
       from: "course",
@@ -1023,12 +955,6 @@ async function getTdfAssignmentsByCourseIdMap(instructorId) {
 
 async function getTdfsAssignedToStudent(userId, curSectionId) {
   serverConsole('getTdfsAssignedToStudent', userId, curSectionId);
-  // Postgres Reversion
-  // const query = 'SELECT t.* from TDF AS t INNER JOIN assignment AS a ON a.TDFId = t.TDFId INNER JOIN course AS c \
-  //               ON c.courseId = a.courseId INNER JOIN section AS s ON s.courseId = c.courseId \
-  //               INNER JOIN section_user_map AS m \
-  //               ON m.sectionId = s.sectionId WHERE m.userId = $1 AND c.semester = $2 AND s.sectionId = $3';
-  // const tdfs = await db.manyOrNone(query, [userId, curSemester, curSectionId]);
   const tdfs = await Tdfs.rawCollection().aggregate([{
     $lookup:{
       from: "assessments",
@@ -1082,12 +1008,6 @@ return tdfs;
 
 async function getTdfNamesAssignedByInstructor(instructorID) {
   try {
-    // Postgres Reversion
-    // const query = 'SELECT t.content -> \'fileName\' AS filename from course AS c \
-    //             INNER JOIN assignment AS a ON a.courseId = c.courseId\
-    //             INNER JOIN tdf AS t ON t.TDFId = a.TDFId \
-    //             WHERE c.teacherUserId = $1 AND c.semester = $2';
-    // const assignmentTdfFileNames = await db.any(query, [instructorID, curSemester]);
     let  assignmentTdfFileNames = await Courses.rawCollection().aggregate([{
       $lookup:{
         from: "assessments",
@@ -1133,9 +1053,6 @@ async function getTdfNamesAssignedByInstructor(instructorID) {
 }
 
 async function getExperimentState(userId, TDFId) { // by currentRootTDFId, not currentTdfId
-  //PostgresReversion Staged
-  // const query = 'SELECT experimentState FROM globalExperimentState WHERE userId = $1 AND TDFId = $2';
-  // const experimentStateRet = await db.oneOrNone(query, [UserId, TDFId]);
   const experimentStateRet = GlobalExperimentStates.findOne({userId: userId, TDFId: TDFId});
   const experimentState = experimentStateRet.experimentState;
   return experimentState;
@@ -1144,9 +1061,6 @@ async function getExperimentState(userId, TDFId) { // by currentRootTDFId, not c
 // UPSERT not INSERT
 async function setExperimentState(userId, TDFId, newExperimentState, where) { // by currentRootTDFId, not currentTdfId
   serverConsole('setExperimentState:', where, userId, TDFId, newExperimentState);
-  //PostgresReversion Staged
-  // const query = 'SELECT experimentState FROM globalExperimentState WHERE userId = $1 AND TDFId = $2';
-  // const experimentStateRet = await db.oneOrNone(query, [UserId, TDFId]);
   const experimentStateRet = GlobalExperimentStates.findOne({userId: userId, TDFId: TDFId});
   console.log(experimentStateRet)
   console.log(newExperimentState)
@@ -1155,32 +1069,20 @@ async function setExperimentState(userId, TDFId, newExperimentState, where) { //
     GlobalExperimentStates.update({userId: userId, TDFId: TDFId}, {$set: {experimentState: updatedExperimentState}})
     return updatedExperimentState;
   }
-  //PostgresReversion Staged
-  // const insertQuery = 'INSERT INTO globalExperimentState (experimentState, userId, TDFId) VALUES ($1, $2, $3)';
-  // await db.query(insertQuery, [{}, UserId, TDFId]);
   GlobalExperimentStates.insert({userId: userId, TDFId: TDFId, experimentState: {}});
 
   return TDFId;
 }
 
 async function insertHiddenItem(userId, stimulusKC, tdfId) {
-  //PostgresReversion Staged
-  //let query = "UPDATE componentstate SET showitem = FALSE WHERE userid = $1  AND tdfid = $2 AND kcid = $3 AND componenttype = 'stimulus'";
-  //await db.manyOrNone(query, [userId, tdfId, stimulusKC]);
   ComponentStates.update({userId: userId, TDFId: tdfId, KCId: stimulusKC, componentType: "stimulus"}, {$set: {showItem: false}});
 }
 
 async function getHiddenItems(userId, tdfId) {
-  //PostgresReversion Staged
-  // let query = "SELECT kcid FROM componentstate WHERE userid = $1 AND tdfid = $2 AND showitem = false AND componenttype = 'stimulus'";
-  // const res = await db.manyOrNone(query, [userId, tdfId]);
   const hiddenItems = ComponentStates.find({userId: userId, TDFId: tdfId, componentType: 'stimulus', showItem: false}).fetch();
   return hiddenItems;
 }
 async function getUserLastFeedbackTypeFromHistory(tdfID) {
-  //PostgresReversion Staged
-  // const query = "SELECT feedbackType FROM HISTORY WHERE TDFId = $1 AND userId = $2 ORDER BY eventid DESC LIMIT 1";
-  // const feedbackType = await db.oneOrNone(query, [tdfID, Meteor.userId]);
   const feedbackType = Histories.findOne({TDFId: tdfID, userId: Meteor.userId}, {sort: {time: -1}}).feedbackType;
   return feedbackType;
 }
@@ -1196,11 +1098,6 @@ async function insertHistory(historyRecord) {
 
 async function getHistoryByTDFfileName(TDFfileName) {
   const history = Histories.find({conditionTypeA: TDFfileName}).fetch();
-  // const query = 'SELECT DISTINCT h.* FROM history AS h INNER JOIN item AS i ON i.itemId=h.itemId \
-  //                INNER JOIN tdf AS t ON i.stimuliSetId=t.stimuliSetId WHERE h.condition_typea = $2 \
-  //                and t.content @> $1::jsonb';
-  // let query = 'SELECT * FROM history WHERE content @> $1' + '::jsonb';
-  // const historyRet = await db.manyOrNone(query, [{'fileName': TDFfileName}, TDFfileName]);
   return history;
 }
 
@@ -1248,13 +1145,10 @@ async function editCourse(mycourse) {
 async function addUserToTeachersClass(userId, teacherID, sectionId) {
   serverConsole('addUserToTeachersClass', userId, teacherID, sectionId);
 
-  //const query = 'SELECT COUNT(*) AS existingMappingCount FROM section_user_map WHERE sectionId=$1 AND userId=$2';
-  //await db.oneOrNone(query, [sectionId, userId]);
   const existingMappingCount = SectionUserMap.find({sectionId: sectionId, userId: userId}).count();
   serverConsole('existingMapping', existingMappingCount);
   if (existingMappingCount == 0) {
     serverConsole('new user, inserting into section_user_mapping', [sectionId, userId]);
-    //await db.none('INSERT INTO section_user_map(sectionId, userId) VALUES($1, $2)', [sectionId, userId]);
     SectionUserMap.insert({sectionId: sectionId, userId: userId});
   }
 
@@ -1264,16 +1158,6 @@ async function addUserToTeachersClass(userId, teacherID, sectionId) {
 async function getStimDisplayTypeMap() {
   try {
     serverConsole('getStimDisplayTypeMap');
-    // const query = 'SELECT \
-    // COUNT(i.clozeStimulus) AS clozeItemCount, \
-    // COUNT(i.textStimulus)  AS textItemCount, \
-    // COUNT(i.audioStimulus) AS audioItemCount, \
-    // COUNT(i.imageStimulus) AS imageItemCount, \
-    // COUNT(i.videoStimulus) AS videoItemCount, \
-    // i.stimuliSetId \
-    // FROM item AS i \
-    // GROUP BY i.stimuliSetId;';
-    //const counts = await db.many(query);
     const items = Items.find().fetch();
     let map = {};
     for(let item of items){
@@ -1315,12 +1199,6 @@ async function getStimDisplayTypeMap() {
 
 async function getUsersByUnitUpdateDate(userIds, tdfId, date) {
   serverConsole('getUsersByUnitUpdateDate', userIds, tdfId, date, userIds.join(','));
-  // const query = "SELECT userId, SUM(CF_End_Latency) AS duration \
-  //   FROM history WHERE recordedServerTime < $1 \
-  //   AND userId IN ('" + userIds.join(`','`) + "') AND TDFId = $2 \
-  //   GROUP BY userId";
-
-  //const res = await db.manyOrNone(query, [date, tdfId]);
   const res = Histories.find({userId: {$in: userIds}, TDFId: tdfId, recordedServerTime: {$lt: date}});
   const practiceTimeIntervalsMap = {};
   for (const row of res) {
@@ -1365,38 +1243,30 @@ async function getListOfStimTagsFromStims(stims) {
 
 async function getStimuliSetByFilename(stimFilename) {
   //Postgres Reversion
-  // const idRet = await db.oneOrNone('SELECT stimuliSetId FROM item WHERE stimulusFileName = $1 LIMIT 1', stimFilename);
   idRet = Items.findOne({stimulusFileName: stimFilename});
   const stimuliSetId = idRet ? idRet.stimuliSetId : null;
   if (isEmpty(stimuliSetId)) return null;
   return await getStimuliSetById(stimuliSetId);
 }
 
+async function getStimuliSetIdByFilename(stimFilename) {
+  idRet = Items.findOne({stimulusFileName: stimFilename});
+  const stimuliSetId = idRet ? idRet.stimuliSetId : null;
+  return stimuliSetId;
+}
+
 async function getStimuliSetById(stimuliSetId) {
-  // PostgresReversion Staged
-  // const query = 'SELECT * FROM item \
-  //             WHERE stimuliSetId=$1 \
-  //             ORDER BY itemId';
-  // const itemRet = await db.manyOrNone(query, stimuliSetId);
   return Items.find({stimuliSetId: stimuliSetId}, {sort: {stimulusKC: 1}}).fetch();
 }
 
 async function getStimCountByStimuliSetId(stimuliSetId) {
   // PostgresReversion Staged
   let ret = Items.find({$count: {stimuliSetId: stimuliSetId}}, {sort: {stimulusKC: 1}}).fetch();
-  // const query = 'SELECT COUNT(*) FROM item \
-  //             WHERE stimuliSetId=$1 \
-  //             ORDER BY itemId';
-  // ret = await db.one(query, stimuliSetId);
   return ret.count;
 }
 async function getItemsByFileName(stimFileName) {
   // PostgresReversion Staged
   let itemRet = Items.find({stimulusfilename: stimFileName}, {$sort: {stimulusKC: 1}}).fetch();
-  // const query = 'SELECT * FROM item \
-  //            WHERE stimulusfilename=$1 \
-  //            ORDER BY itemId';
-  // itemRet = await db.manyOrNone(query, stimFileName);
   const items = [];
   for (const item of itemRet) {
     items.push(getItem(item));
@@ -1496,11 +1366,6 @@ async function getStudentReportingData(userId, TDFId, hintLevel) {
 }
 
 async function getStimSetFromLearningSessionByClusterList(stimuliSetId, clusterList){
-  // const query = 'SELECT stimuluskc FROM item \
-  //              WHERE stimuliSetId=$1 \
-  //              AND POSITION(CAST(clusterkc as text) in $2)>0 \
-  //              ORDER BY itemId';
-  // const itemRet = await db.manyOrNone(query, [stimuliSetId, clusterList]);
   const itemRet = Items.find({stimuliSetId: stimuliSetId}, {sort: {stimulusKC: 1}}).fetch();
   console.log(itemRet)
   let learningSessionItem = [];
@@ -1514,14 +1379,6 @@ async function getStimSetFromLearningSessionByClusterList(stimuliSetId, clusterL
 
 async function getStudentPerformanceByIdAndTDFId(userId, TDFId, stimIds=null) {
   serverConsole('getStudentPerformanceByIdAndTDFId', userId, TDFId);
-  // const query = `SELECT COUNT(i.itemID) AS totalStimCount,
-  //                SUM(s.priorCorrect) AS numCorrect,
-  //                SUM(s.priorIncorrect) AS numIncorrect,
-  //                SUM(s.totalPracticeDuration) AS totalPracticeDuration,
-  //                COUNT(CASE WHEN (s.priorIncorrect > 0 OR s.priorCorrect > 0) THEN 1 END) AS stimsIntroduced
-  //                FROM (SELECT * from componentState WHERE userId=$1 AND TDFId=$2 AND componentType ='stimulus') AS s
-  //                INNER JOIN item AS i ON i.stimulusKC = s.KCId`;
-  //const perfRet = await db.oneOrNone(query, [userId, TDFid, stimIds]);
   let perfRet = {
     totalStimCount: 0,
     numCorrect: 0,
@@ -1586,28 +1443,6 @@ async function getNumDroppedItemsByUserIDAndTDFId(userId, TDFId){
 }
 
 async function getStudentPerformanceForClassAndTdfId(instructorId, date=null) {
-  // let dateAdendumn = "";
-  // if(date){
-  //   dateAdendumn = `AND s.recordedServerTime < ${date}`
-  // }
-  // const query = `SELECT MAX(t.TDFId) AS tdfid, 
-  //                 MAX(c.courseId) AS courseid, 
-  //                 MAX(s.userId) AS userid, 
-  //                 COUNT(CASE WHEN s.outcome='correct' THEN 1 END) AS correct, 
-  //                 COUNT(CASE WHEN s.outcome='incorrect' THEN 1 END) AS incorrect, 
-  //                 SUM(COALESCE(s.cf_end_latency + s.cf_feedback_latency, s.cf_end_latency, s.cf_feedback_latency)) AS totalPracticeDuration,
-  //                 sc.sectionId AS sectionId 
-  //                 FROM history AS s 
-  //                 INNER JOIN item AS i ON i.stimulusKC = s.KCId 
-  //                 INNER JOIN tdf AS t ON t.stimuliSetId = i.stimuliSetId 
-  //                 INNER JOIN assignment AS a on a.TDFId = t.TDFId 
-  //                 INNER JOIN course AS c on c.courseId = a.courseId 
-  //                 INNER JOIN section_user_map AS sm on sm.userId = s.userId 
-  //                 INNER JOIN section AS sc on sc.sectionId = sm.sectionId 
-  //                 WHERE c.semester = $1 AND c.teacherUserId = $2 AND sc.courseId = c.courseId AND s.level_unittype = 'model'  ${dateAdendumn}
-  //                 GROUP BY s.userId, t.TDFId, c.courseId, sc.sectionId;`
-
-  //const studentPerformanceRet = await db.manyOrNone(query, [curSemester, instructorId]);
   let studentPerformanceRet = [];
   let hist;
   if(date){
@@ -1728,9 +1563,6 @@ async function getStudentPerformanceForClassAndTdfId(instructorId, date=null) {
 }
 
 async function getTdfIDsAndDisplaysAttemptedByUserId(userId, onlyWithLearningSessions=true) {
-  //Postgres Reversion 
-  // const query = 'SELECT TDFId from globalExperimentState WHERE userId = $1';
-  // const tdfRet = await db.manyOrNone(query, userId);
   const tdfRet = GlobalExperimentStates.find({userId: userId}).fetch();
 
   const tdfsAttempted = [];
@@ -1898,24 +1730,6 @@ function findUserByName(username) {
   return null;
 }
 
-async function verifySyllableUpload(stimSetId){
-  // const query = 'SELECT COUNT(DISTINCT LOWER(correctresponse)) FROM item WHERE stimulisetid = $1';
-  // PostgresReversion Staged
-  return true;
-  let postgresRet = Items.find();
-  // postgresRet = await db.oneOrNone(query, stimSetId);
-  const answersCountPostgres = postgresRet.count;
-
-  const mongoRet = StimSyllables.findOne({filename: stimSetId});
-  if(mongoRet){
-    const answersCountMongo = Object.keys(mongoRet.data).length;
-    if(answersCountMongo == answersCountPostgres)
-      return true;
-  }
-  StimSyllables.remove({filename: stimSetId});
-  return false;
-}
-
 function sendEmail(to, from, subject, text) {
   check([to, from, subject, text], [String]);
   Email.send({to, from, subject, text});
@@ -1935,18 +1749,13 @@ async function upsertStimFile(stimFilename, stimJSON, ownerId) {
     'source': 'repo',
   };
   const responseKCMap = await getReponseKCMap();
-  // PostgresReversion Staged
-  // const query = 'SELECT stimuliSetId FROM item WHERE stimulusFileName = $1 LIMIT 1';
   const associatedStimSetIdRet = Items.findOne({stimulusFileName: stimFilename})
-  // const associatedStimSetIdRet = await t.oneOrNone(query, stimFilename);
   serverConsole('getAssociatedStimSetIdForStimFile', stimFilename, associatedStimSetIdRet);
   let stimuliSetId;
   if (associatedStimSetIdRet) {
     stimuliSetId = associatedStimSetIdRet.stimuliSetId;
     serverConsole('stimuliSetId1:', stimuliSetId, associatedStimSetIdRet);
   } else {
-    // PostgresReversion Staged
-    // const highestStimuliSetId = await t.oneOrNone('SELECT MAX(stimuliSetId) AS stimuliSetId FROM item');
     const highestStimuliSetId = Items.findOne({}, {sort: {stimuliSetId: -1}, limit: 1 });
     stimuliSetId = highestStimuliSetId && highestStimuliSetId.stimuliSetId ?
         parseInt(highestStimuliSetId.stimuliSetId) + 1 : 1;
@@ -1954,8 +1763,6 @@ async function upsertStimFile(stimFilename, stimJSON, ownerId) {
   }
 
   const newFormatItems = getNewItemFormat(oldStimFormat, stimFilename, stimuliSetId, responseKCMap);
-  // PostgresReversion Staged
-  // const existingStims = await t.manyOrNone('SELECT * FROM item WHERE stimulusFileName = $1', stimFilename);
   const existingStims = await Items.find({stimulusFileName: stimFilename});
   let newStims = [];
   let stimulusKC;
@@ -1970,16 +1777,14 @@ async function upsertStimFile(stimFilename, stimJSON, ownerId) {
       }
       matchingStim = getItem(matchingStim);
       const mergedStim = Object.assign(matchingStim, newStim);
-      //await t.none('UPDATE item SET stimuliSetId = ${stimuliSetId}, \
-      //              parentStimulusFileName = ${parentStimulusFileName}, stimulusKC = ${stimulusKC}, \
-      //              clusterKC = ${clusterKC}, responseKC = ${responseKC}, params = ${params}, \
-      //             optimalProb = ${optimalProb}, correctResponse = ${correctResponse}, \
-      //              incorrectResponses = ${incorrectResponses}, itemResponseType = ${itemResponseType}, \
-      //              speechHintExclusionList = ${speechHintExclusionList}, clozeStimulus = ${clozeStimulus}, \
-      //              textStimulus = ${textStimulus}, audioStimulus = ${audioStimulus}, \
-      //              imageStimulus = ${imageStimulus}, videoStimulus = ${videoStimulus}, \
-      //              alternateDisplays = ${alternateDisplays}, tags = ${tags} \
-      //              WHERE stimulusFileName = ${stimulusFileName} AND stimulusKC = ${stimulusKC}', mergedStim);
+      let curAnswerSylls
+      try{
+        curAnswerSylls = getSyllablesForWord(mergedStim.correctResponse.replace(/\./g, '_').split('~')[0]);
+      }
+      catch (e) {
+        serverConsole('error fetching syllables for ' + answer + ': ' + JSON.stringify(e));
+        curAnswerSylls = [answer];
+      }
       Items.update({stimulusFileName: stimulusFileName, stimulusKC: stimulusKC},{$set: {
         stimuliSetId: mergedStim.stimuliSetId,
         parentStimulusFileName: mergedStim.parentStimulusFileName,
@@ -1998,28 +1803,26 @@ async function upsertStimFile(stimFilename, stimJSON, ownerId) {
         imageStimulus: mergedStim.imageStimulus,
         videoStimulus: mergedStim.videoStimulus,
         aleternateDisplays: mergedStim.aleternateDisplays,
-        tags: mergedStim.tags
+        tags: mergedStim.tags,
+        syllables: curAnswerSylls
       }})
     }
-    // PostgresReversion Staged
-    //if we get here we might have more stims in the old file than in the new. Need to remove them from the db.
-    // PostgresReversion Staged
     Items.remove({stimulusKC: {$gt: stimulusKC},stimulusKC: {$lt: (stimulusKC + 1) * 10000}});
-    // await t.none(`DELETE FROM item WHERE stimulusKC > ${stimulusKC} and stimulusKC < ${stimuliSetId + 1} * 10000;`);
   } else {
     newStims = newFormatItems;
   }
   serverConsole('!!!newStims:', newStims);
   for (const stim of newStims) {
+    let curAnswerSylls
+    try{
+      curAnswerSylls = getSyllablesForWord(stim.correctResponse.replace(/\./g, '_').split('~')[0]);
+    }
+    catch (e) {
+      serverConsole('error fetching syllables for ' + answer + ': ' + JSON.stringify(e));
+      curAnswerSylls = [answer];
+    }
+    stim.syllables = curAnswerSylls;
     Items.insert(stim);
-    // PostgresReversion Staged
-    // await t.none('INSERT INTO item(stimuliSetId, stimulusFileName, stimulusKC, clusterKC, responseKC, params, \
-    //   optimalProb, correctResponse, incorrectResponses, itemResponseType, speechHintExclusionList, clozeStimulus, \
-    //  textStimulus, audioStimulus, imageStimulus, videoStimulus, alternateDisplays, tags) \
-    // VALUES(${stimuliSetId}, ${stimulusFileName}, ${stimulusKC}, ${clusterKC}, ${responseKC}, ${params}, \
-    //   ${optimalProb}, ${correctResponse}, ${incorrectResponses}, ${itemResponseType}, ${speechHintExclusionList}, \
-    //  ${clozeStimulus}, ${textStimulus}, ${audioStimulus}, ${imageStimulus}, ${videoStimulus}, \
-    //  ${alternateDisplays}::jsonb, ${tags})', stim);
   }
   //Update Stim Cache every upload
   Meteor.call('updateStimSyllables', stimuliSetId);
@@ -2033,9 +1836,11 @@ async function upsertTDFFile(tdfFilename, tdfJSON, ownerId) {
   let stimFileName;
   let skipStimSet = false;
   let stimSet;
+  let stimSetId;
   if (tdfJSON.tdfs.tutor.setspec.stimulusfile) {
     stimFileName = tdfJSON.tdfs.tutor.setspec.stimulusfile;
     stimSet = await getStimuliSetByFilename(stimFileName);
+    stimSetId = await getStimuliSetIdByFilename(stimFileName);
   } else {
     skipStimSet = true;
   }
@@ -2050,14 +1855,11 @@ async function upsertTDFFile(tdfFilename, tdfJSON, ownerId) {
     } else {
       tdfJSONtoUpsert = tdfJSON;
     }
-    // PostgresReversion Staged
     Tdfs.update({_id: prev._id},{$set:{
       ownerId: ownerId,
       stimuliSetId: prev.stimuliSetId,
       content: tdfJSONtoUpsert
     }});
-    // const query = 'UPDATE tdf SET ownerId=$1, stimuliSetId=$2, content=$3::jsonb WHERE TDFId=$4';
-    // await db.none(query, [ownerId, prev.stimuliSetId, tdfJSONtoUpsert, prev.TDFId]);
   } else {
     let tdfJSONtoUpsert;
     if (hasGeneratedTdfs(tdfJSON)) {
@@ -2071,10 +1873,7 @@ async function upsertTDFFile(tdfFilename, tdfJSON, ownerId) {
     let stimuliSetId;
     if (tdfJSON.tdfs.tutor.setspec.stimulusfile) {
       const stimFileName = tdfJSON.tdfs.tutor.setspec.stimulusfile;
-      // PostgresReversion Staged
       const associatedStimSetIdRet = Items.findOne({stimulusFileName: stimFileName});
-      // const stimuliSetIdQuery = 'SELECT stimuliSetId FROM item WHERE stimulusFileName = $1 LIMIT 1';
-      // const associatedStimSetIdRet = await t.oneOrNone(stimuliSetIdQuery, stimFileName);
       if (associatedStimSetIdRet) {
         stimuliSetId = associatedStimSetIdRet.stimuliSetId;
       } else {
@@ -2083,10 +1882,7 @@ async function upsertTDFFile(tdfFilename, tdfJSON, ownerId) {
     } else {
       stimuliSetId = null; // Root condition tdfs have no stimulisetid
     }
-    // PostgresReversion Staged
     Tdfs.insert({ownerId: ownerId, stimuliSetId: stimuliSetId, content: tdfJSONtoUpsert});
-    // const query = 'INSERT INTO tdf(ownerId, stimuliSetId, content) VALUES($1, $2, $3::jsonb)';
-    // await t.none(query, [ownerId, stimuliSetId, tdfJSONtoUpsert]);
   }
 }
 
@@ -2181,11 +1977,11 @@ Meteor.methods({
   getTdfIdByStimSetIdAndFileName, getItemsByFileName,
 
 
-  makeGoogleTTSApiCall: async function(TDFId, message, audioPromptSpeakingRate, audioVolume) {
+  makeGoogleTTSApiCall: async function(TDFId, message, audioPromptSpeakingRate, audioVolume, selectedVoice) {
     const ttsAPIKey = await getTdfTTSAPIKey(TDFId);
     const request = JSON.stringify({
       input: {text: message},
-      voice: {languageCode: 'en-US', ssmlGender: 'FEMALE'},
+      voice: {languageCode: 'en-US', 'name': selectedVoice},
       audioConfig: {audioEncoding: 'MP3', speakingRate: audioPromptSpeakingRate, volumeGainDb: audioVolume},
     });
     const options = {
@@ -2231,7 +2027,6 @@ Meteor.methods({
   },
 
   resetCurSessionTrialsCount: async function(userId, TDFId) {
-    //await db.none('UPDATE componentstate SET cursessionpriorcorrect = 0, cursessionpriorincorrect = 0 WHERE userId = $1 AND TDFId = $2', [userId, TDFId])
     ComponentStates.update({userId: userId, TDFId: TDFId}, {$set: {curSessionPriorCorrect: 0, curSessionPriorIncorrect: 0}});
   },
 
@@ -2308,6 +2103,7 @@ Meteor.methods({
       serverConsole('after updateStimSyllables');
       serverConsole(stimSetId);
     }
+    StimSyllables.insert({filename: stimFileName, data: data});
   },
 
   getClozeEditAuthors: function() {
@@ -2645,35 +2441,15 @@ Meteor.methods({
     stimSet = await getStimuliSetByFilename(stimFilename);
     stimSetId = stimSet[0].stimuliSetId;
     const query1 = 'SELECT tdfid FROM tdf WHERE stimulisetid = $1';
-    //Postgres Reversion
-    //tdfIds = await db.manyOrNone(query1, [stimSetId]);
     tdfIds = TDFs.find({stimulisetid: stimSetId});
     for(i=0; i < tdfIds.length; i++){
         tdf = tdfIds[i].tdfid;
-        //Postgres Reversion
-        //const querya = 'DELETE FROM globalexperimentstate WHERE TDFId=$1'
         GlobalExperimentStates.remove({TDFId: tdf});
-        //await db.none(querya, [tdf]);
-        //Postgres Reversion
-        //const queryb = 'DELETE FROM componentstate WHERE tdfid = $1'
-        //await db.none(queryb, [tdf]);
         ComponentStates.remove({TDFId: tdf});
-        //Postgres Reversion
-        //const queryc = 'DELETE FROM assignment WHERE tdfid = $1'
-        //await db.none(queryc, [tdf]);
         Assignments.remove({TDFId: tdf});
-        //Postgres Reversion
-        //const queryd = 'DELETE FROM history WHERE tdfid = $1'
-        //await db.none(queryd, [tdf]);
         Histories.remove({TDFId: tdf});
     }
-    //Postgres Reversion
-    // const query2 = 'DELETE FROM item WHERE stimulusFileName = $1';
-    // await db.none(query2, [stimFilename]);
     Items.remove({stimulusFileName: stimFilename});
-    //Postgres Reversion
-    // const query3 = 'DELETE FROM tdf WHERE stimulisetid = $1';
-    // await db.none(query3, [stimSetId]);
     Tdfs.remove({stimulisetid: stimSetId});
     res = "Stim and related TDFS deleted.";
     return res;
@@ -2685,24 +2461,10 @@ Meteor.methods({
     serverConsole(toRemove);
     if(toRemove.TDFId){
       tdf = toRemove.TDFId;
-      //Postgres Reversion
-      // const querya = 'DELETE FROM componentstate WHERE tdfid = $1'
-      // await db.none(querya, [tdf]);
       ComponentStates.remove({TDFId: tdf});
-      //Postgres Reversion
-      // const queryb = 'DELETE FROM assignment WHERE tdfid = $1'
       Assignments.remove({TDFId: tdf});
-      //Postgres Reversion
-      // const queryc = 'DELETE FROM history WHERE tdfid = $1'
-      // await db.none(queryc, [tdf]);
       Histories.remove({TDFId: tdf});
-      //Postgres Reversion
-      // const query2 = 'DELETE FROM globalexperimentstate WHERE TDFId=$1'
-      // await db.none(query2, [toRemove.TDFId]);
       GlobalExperimentStates.remove({TDFId: tdf});
-      //Postgres Reversion
-      // const query1 = 'DELETE FROM tdf WHERE TDFId=$1';
-      // await db.none(query1, [toRemove.TDFId]);
       Tdfs.remove({TDFId: tdf});
     } else {
       result = 'No matching tdf file found';
@@ -2711,11 +2473,89 @@ Meteor.methods({
     result = "TDF deleted";
     return result;
   },
-
+  // Package Uploader
+  processPackageUpload: function(path,fileObject, owner){
+    const fs = Npm.require('fs');
+    const unzip = Npm.require('unzipper');
+    let links = [];
+    var stream = fs.createReadStream(path)
+      .pipe(unzip.Parse())
+      .on('entry', async function(entry){
+        var tdfContent = [];
+        var stimContent = [];
+        var referenceContents = [];
+        var fileName = entry.path;
+        var content =  await entry.buffer().then(function(file, fileObject){
+          fileSplit = fileName.split(".");
+          type = fileSplit[fileSplit.length - 1];
+          if(type =="json"){
+            rawFileContents = file.toString();
+            parsedFileContents = JSON.parse(rawFileContents);
+            JSONStringContents = JSON.stringify(parsedFileContents);
+            if(parsedFileContents.setspec){
+              fileFinal = {
+                type: "stim",
+                contents: JSONStringContents,
+                fileName: fileName
+              }
+              stimContent.push(fileFinal);
+            } 
+            if(parsedFileContents.tutor){
+              fileFinal = {
+                type: "tdf",
+                contents: JSONStringContents,
+                fileName: fileName
+              }
+              tdfContent.push(fileFinal);
+            }
+          }else{
+            console.log(path);
+            DynamicAssets.write(file, {
+              fileName: entry.path,
+              meta: {
+                owner: owner,
+                parent: path
+              }
+            },function(error,fileRef){
+              replacePath = DynamicAssets.link(fileRef);
+              referenceFile = {
+                fileName: fileName,
+                replacePath: replacePath,
+                parent: path
+              }
+              console.log(referenceFile);
+              referenceContents.push(referenceFile);
+              links.push(referenceFile);
+            })
+          }
+          return {referenceContents,tdfContent,stimContent}
+        });
+        for(let files of content.stimContent){
+          console.log("Processing package file:", files.fileName);
+            for(let referenceFile of referenceContents){
+              console.log("replacing reference:", files.fileName, referenceFile.fileName, referenceFile.replacePath);
+              toReplace = files.contents;
+              replaced = toReplace.replace(referenceFile.fileName,referenceFile.replacePath);          
+            }
+            Meteor.call("saveContentFile",files.type, files.fileName, files.contents, owner);
+        }
+        for(let files of content.tdfContent){
+          console.log("processing package file:", files.fileName);
+          for(let referenceFile of referenceContents){
+            toReplace = files.contents;
+            replaced = toReplace.replace(referenceFile.fileName,referenceFile.replacePath);             
+          }
+          Meteor.call("saveContentFile",files.type, files.fileName, files.contents, owner);
+        }
+        this.content = content;
+      });
+      assets = DynamicAssets.find({}).fetch();
+      return assets;
+  },
   // Allow file uploaded with name and contents. The type of file must be
   // specified - current allowed types are: 'stimuli', 'tdf'
-  saveContentFile: async function(type, filename, filecontents) {
-    serverConsole('saveContentFile', type, filename);
+  saveContentFile: async function(type, filename, filecontents, owner) {
+    serverConsole('saveContentFile', type, filename, owner);
     const results = {
       'result': null,
       'errmsg': 'No action taken?',
@@ -2724,13 +2564,17 @@ Meteor.methods({
     if (!type) throw new Error('Type required for File Save');
     if (!filename) throw new Error('Filename required for File Save');
     if (!filecontents) throw new Error('File Contents required for File Save');
-
+    let ownerId = "";
     // We need a valid use that is either admin or teacher
-    const ownerId = Meteor.user()._id;
+    if(owner){
+      ownerId = owner;
+    } else {
+      ownerId = Meteor.user()._id;
+    }
     if (!ownerId) {
       throw new Error('No user logged in - no file upload allowed');
     }
-    if (!Roles.userIsInRole(Meteor.user(), ['admin', 'teacher'])) {
+    if (!Roles.userIsInRole(ownerId, ['admin', 'teacher'])) {
       throw new Error('You are not authorized to upload files');
     }
     if (type != 'tdf' && type != 'stim') {
@@ -2756,9 +2600,6 @@ Meteor.methods({
 
           return results;
         } else {
-          //Postgres Reversion
-          // const query = 'SELECT stimuliSetId FROM item WHERE stimulusFileName = $1 LIMIT 1';
-          // const associatedStimSetIdRet = await db.oneOrNone(query, stimFileName);
           const associatedStimSetIdRet = Items.findOne({stimulusFileName: stimFileName});
           const stimuliSetId = associatedStimSetIdRet ? associatedStimSetIdRet.stimuliSetId : null;
           if (isEmpty(stimuliSetId)) {
@@ -2938,7 +2779,6 @@ Meteor.startup(async function() {
 
   roleAdd('admins', 'admin');
   roleAdd('teachers', 'teacher');
-  //const ret = await db.oneOrNone('SELECT COUNT(*) FROM tdf');
   const ret = Tdfs.find().count();
   if (ret.count == 0) loadStimsAndTdfsFromPrivate(adminUserId);
 
