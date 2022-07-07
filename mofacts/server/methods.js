@@ -783,7 +783,7 @@ async function getAllCourseAssignmentsForInstructor(instructorId) {
       $lookup:{ //INNER JOIN course AS c ON c.courseId = a.courseId
         from: "course",
         localField: "courseId",
-        foreignField: "courseId",
+        foreignField: "_id",
         as: "course"
       }
     },
@@ -826,7 +826,7 @@ async function editCourseAssignments(newCourseAssignment) {
     const newTdfs = newCourseAssignment.tdfs;
     const curCourseAssignments = await Assignments.rawCollection().aggregate([{
       $lookup:{ //INNER JOIN tdf AS t ON t.TDFId = a.TDFId
-        from: "tdf",
+        from: "tdfs",
         localField: "TDFId",
         foreignField: "_id",
         as: "TDF"
@@ -841,14 +841,14 @@ async function editCourseAssignments(newCourseAssignment) {
       }
     },
     {
-      $unwind: "$course"
+      $unwind:  { path: "$course" }
     },
     {
-      $unwind: "$TDF"
+      $unwind:  { path: "$TDF" }
     },
     {
       $match: { //WHERE c.courseid = $1
-        "course._id": newCourseAssignment.courseid,
+        "course._id": newCourseAssignment.courseId,
       }
     },
     {
@@ -873,11 +873,11 @@ async function editCourseAssignments(newCourseAssignment) {
       const TDFId = tdfNameIDMap[tdfName];
       serverConsole('editCourseAssignments tdf:', tdfNamesAndIDs, TDFId, tdfName, tdfsAdded, tdfsRemoved,
           curCourseAssignments, existingTdfs, newTdfs);
-      Assignments.insert({courseId: newCourseAssignment.courseid, TDFId: TDFId});
+      Assignments.insert({courseId: newCourseAssignment.courseId, TDFId: TDFId});
     }
     for (const tdfName of tdfsRemoved) {
       const TDFId = tdfNameIDMap[tdfName];
-      Assignment.remove({$and: [{courseId: newCourseAssignment.courseid}, {TDFId: TDFId}]});
+      Assignments.remove({courseId: newCourseAssignment.courseId, TDFId: TDFId});
     }
     return newCourseAssignment;
   } catch (e) {

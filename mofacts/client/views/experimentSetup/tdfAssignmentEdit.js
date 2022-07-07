@@ -7,7 +7,7 @@ Session.set('allTdfFilenamesAndDisplayNames', []);
 Session.set('tdfsSelected', []);
 Session.set('tdfsNotSelected', []);
 
-let curCourseAssignment = {coursename: '', courseid: undefined, tdfs: []};
+let curCourseAssignment = {courseName: '', courseId: undefined, tdfs: []};
 Template.tdfAssignmentEdit.onRendered(async function() {
   console.log('tdfAssignmentEdit rendered');
   const courses = await meteorCallAsync('getAllCoursesForInstructor', Meteor.userId());
@@ -17,15 +17,15 @@ Template.tdfAssignmentEdit.onRendered(async function() {
   const courseAssignments = await meteorCallAsync('getAllCourseAssignmentsForInstructor', Meteor.userId());
   const assignments = {};
   for (const courseAssignment of courseAssignments) {
-    if (!assignments[courseAssignment.coursename]) assignments[courseAssignment.coursename] = new Set();
-    assignments[courseAssignment.coursename].add(courseAssignment.filename);
+    if (!assignments[courseAssignment.courseName]) assignments[courseAssignment.courseName] = new Set();
+    assignments[courseAssignment.courseName].add(courseAssignment.fileName);
   }
   for (const assignmentKey of Object.keys(assignments)) {
     assignments[assignmentKey] = Array.from(assignments[assignmentKey]);
   }
   Session.set('assignments', assignments);
   console.log('assignments', assignments);
-  curCourseAssignment = {coursename: '', courseid: undefined, tdfs: []};
+  curCourseAssignment = {courseName: '', courseId: undefined, tdfs: []};
 
   const allTdfs = await meteorCallAsync('getAllTdfs');
   console.log('allTdfs', allTdfs);
@@ -55,7 +55,7 @@ Template.tdfAssignmentEdit.events({
     const curCourseName = $('#class-select option:selected').text();
     const assignments = Session.get('assignments');
     const tempTdfs = assignments[curCourseName] || [];
-    curCourseAssignment = {coursename: curCourseName, courseid: curCourseId, tdfs: tempTdfs};
+    curCourseAssignment = {courseName: curCourseName, courseId: curCourseId, tdfs: tempTdfs};
     console.log('curCourseAssignment', curCourseAssignment);
     updateTdfsSelectedAndNotSelected();
   },
@@ -78,12 +78,11 @@ Template.tdfAssignmentEdit.events({
 
   'click #saveAssignment': function(event, template) {
     console.log('save assignment');
-    if (!curCourseAssignment.coursename) {
+    if (!curCourseAssignment.courseName) {
       alert('Please select a class to assign Chapters to.');
     } else {
-      const dbCurCourseAssignment = JSON.parse(JSON.stringify(curCourseAssignment));
       // dbCurCourseAssignment.tdfs = dbCurCourseAssignment.tdfs.map(x => x.fileName);
-      Meteor.call('editCourseAssignments', dbCurCourseAssignment, function(err, res) {
+      Meteor.call('editCourseAssignments', curCourseAssignment, function(err, res) {
         if (err ) {
           alert('Error saving class: ' + err);
         } else if (res == null) {
@@ -94,13 +93,13 @@ Template.tdfAssignmentEdit.events({
           const assignments = Session.get('assignments');
           let hadAssignment = false;
           for (let i=0; i<assignments.length; i++) {
-            if (assignments[i].coursename == curCourseAssignment.coursename) {
+            if (assignments[i].courseName == curCourseAssignment.courseName) {
               assignments[i] = curCourseAssignment;
               hadAssignment = true;
               break;
             }
           }
-          if (!hadAssignment) assignments[curCourseAssignment.coursename] = curCourseAssignment.tdfs;
+          if (!hadAssignment) assignments[curCourseAssignment.courseName] = curCourseAssignment.tdfs;
           Session.set('assignments', assignments);
         }
       });
