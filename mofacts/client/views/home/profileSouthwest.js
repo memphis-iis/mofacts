@@ -12,6 +12,14 @@ Template.profileSouthwest.helpers({
       return Meteor.user().username;
     }
   },
+  class: function(){
+    thisClass = Session.get('curClass');
+    if(thisClass.coursename){
+      return thisClass;
+    } else {
+      return false;
+    }
+  },
 });
 
 Template.profileSouthwest.events({

@@ -12,6 +12,7 @@ import {getItem, getComponentState, getCourse, getTdf, getHistoryForMongo, migra
 import { result } from 'underscore';
 import { Mongo } from 'meteor/mongo'
 import { type } from 'os';
+import { split } from './lib/fable-library.2.10.2/RegExp';
 
 
 export {
@@ -32,7 +33,7 @@ export {
 // The jshint inline option above suppresses a warning about using sqaure
 // brackets instead of dot notation - that's because we prefer square brackets
 // for creating some MongoDB queries
-
+const SymSpell = require('node-symspell')
 const fs = Npm.require('fs');
 const https = require('https')
 const { randomBytes } = require('crypto')
@@ -55,6 +56,8 @@ if (Meteor.settings.public.testLogin) {
   serverConsole('dev environment, allow insecure tls');
 }
 
+const symSpell = new SymSpell(2, 7);
+  symSpell.loadDictionary(Meteor.settings.frequencyDictionaryLocation);
 process.env.MAIL_URL = Meteor.settings.MAIL_URL;
 const adminUsers = Meteor.settings.initRoles.admins;
 const ownerEmail = Meteor.settings.owner;
@@ -2106,6 +2109,10 @@ Meteor.methods({
     StimSyllables.insert({filename: stimFileName, data: data});
   },
 
+  getSymSpellCorrection: async function(userAnswer, maxEditDistance) {
+    return symSpell.lookupCompound(userAnswer, maxEditDistance)
+  },
+
   getClozeEditAuthors: function() {
     const authorIDs = {};
     ClozeEditHistory.find({}).forEach(function(entry) {
@@ -2484,7 +2491,8 @@ Meteor.methods({
         var tdfContent = [];
         var stimContent = [];
         var referenceContents = [];
-        var fileName = entry.path;
+        var fileNameArray = entry.path.split("/");
+        var fileName = fileNameArray[fileNameArray.length - 1];
         var content =  await entry.buffer().then(function(file, fileObject){
           fileSplit = fileName.split(".");
           type = fileSplit[fileSplit.length - 1];
@@ -2509,45 +2517,55 @@ Meteor.methods({
               tdfContent.push(fileFinal);
             }
           }else{
-            console.log(path);
+            console.log("Uploading:", fileName);
             DynamicAssets.write(file, {
-              fileName: entry.path,
+              fileName: fileName,
               meta: {
                 owner: owner,
                 parent: path
               }
-            },function(error,fileRef){
-              replacePath = DynamicAssets.link(fileRef);
-              referenceFile = {
-                fileName: fileName,
-                replacePath: replacePath,
-                parent: path
-              }
-              console.log(referenceFile);
-              referenceContents.push(referenceFile);
-              links.push(referenceFile);
-            })
+            });
           }
-          return {referenceContents,tdfContent,stimContent}
+          return {tdfContent,stimContent}
+        });
+        referenceContents = [];
+        referenceFiles = DynamicAssets.find({}).forEach(function(fileRef){
+            replacePath = DynamicAssets.link(fileRef);
+            data = {
+              fileName: fileRef.name,
+              replacePath: replacePath,
+              parent: fileRef.name
+            }
+            referenceContents.push(data);
         });
         for(let files of content.stimContent){
-          console.log("Processing package file:", files.fileName);
+          console.log("Processing stim file:", files.fileName);
+            newContents = files.contents;
             for(let referenceFile of referenceContents){
-              console.log("replacing reference:", files.fileName, referenceFile.fileName, referenceFile.replacePath);
-              toReplace = files.contents;
-              replaced = toReplace.replace(referenceFile.fileName,referenceFile.replacePath);          
+              toReplace = newContents;
+              theSplit = toReplace.split(referenceFile.fileName);
+              if(theSplit.length > 1){
+                console.log("replacing", theSplit.length - 1,"references:", files.fileName, referenceFile.fileName, referenceFile.replacePath);
+                newContents = theSplit.join(referenceFile.replacePath);
+              } 
             }
-            Meteor.call("saveContentFile",files.type, files.fileName, files.contents, owner);
+            console.log(newContents);
+            Meteor.call("saveContentFile",files.type, files.fileName,newContents, owner);
         }
         for(let files of content.tdfContent){
-          console.log("processing package file:", files.fileName);
+          console.log("Processing tdf file:", files.fileName);
+          newContents = files.contents;
           for(let referenceFile of referenceContents){
-            toReplace = files.contents;
-            replaced = toReplace.replace(referenceFile.fileName,referenceFile.replacePath);             
+            toReplace = newContents;
+            theSplit = toReplace.split(referenceFile.fileName);
+            if(theSplit.length > 1){
+              console.log("replacing", theSplit.length - 1,"references:", files.fileName, referenceFile.fileName, referenceFile.replacePath);
+              newContents = theSplit.join(referenceFile.replacePath);
+            } 
           }
-          Meteor.call("saveContentFile",files.type, files.fileName, files.contents, owner);
+          console.log(newContents);
+          Meteor.call("saveContentFile",files.type, files.fileName,newContents, owner);
         }
-        this.content = content;
       });
       assets = DynamicAssets.find({}).fetch();
       return assets;

@@ -18,6 +18,7 @@ import {createScheduleUnit, createModelUnit, createEmptyUnit} from './unitEngine
 import {Answers} from './answerAssess';
 import {VAD} from '../../lib/vad';
 import {sessionCleanUp} from '../../lib/sessionUtils';
+import * as pFunc from './probabilityFunctions';
 
 export {
   speakMessageIfAudioPromptFeedbackEnabled,
@@ -569,6 +570,17 @@ Template.card.helpers({
   // For now we're going to assume syllable hints are contiguous. TODO: make this more generalizable
   'subWordParts': () => Session.get('clozeQuestionParts'),
 
+  'ifClozeDisplayTextExists': function (){
+    const clozeText = Session.get('currentDisplay') ? Session.get('currentDisplay').clozeText : undefined;
+    const text = Session.get('currentDisplay') ? Session.get('currentDisplay').text : undefined;
+    const subWordCloze = Session.get('clozeQuestionParts') ? Session.get('clozeQuestionParts') : undefined;
+    let display = false;
+    if(typeof clozeText != "undefined" || clozeText != "" || typeof subWordCloze != "undefined" || subWordCloze != "" || typeof text != "undefined" || text != ""){
+      display = true;
+    }
+    return display;
+  },
+
   'clozeText': function() {
     const clozeText = Session.get('currentDisplay') ? Session.get('currentDisplay').clozeText : undefined;
     return clozeText;
@@ -731,7 +743,6 @@ Template.card.helpers({
     return (disp.minSecs > 0 || disp.maxSecs > 0);
   },
 
-  'inResume': () => Session.get('inResume') && !Session.get('displayReady'),
 
   'audioEnabled': () => Session.get('audioEnabled'),
 
@@ -2322,6 +2333,14 @@ function speakMessageIfAudioPromptFeedbackEnabled(msg, audioPromptSource) {
             window.currentAudioObj.play().catch((err) => {
               console.log(err)
               let utterance = new SpeechSynthesisUtterance(msg);
+              utterance.addEventListener('end', (event) => { 
+                Session.set('recordingLocked', false);
+                startRecording();
+              });
+              utterance.addEventListener('error', (event) => { 
+                console.log(event);
+                Session.set('recordingLocked', false);
+              });
               synthesis.speak(utterance);
             });
           }

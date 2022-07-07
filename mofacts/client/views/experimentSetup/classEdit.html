@@ -7,7 +7,7 @@
           <select id="class-select">
               <option selected="selected" value="">Add a class</option>
               {{#each classes}}
-                <option value="{{this.courseName}}">{{this.courseName}}</option>
+                <option value="{{this.courseName}}">{{this.courseName}} </option>
               {{/each}}
           </select>
         </div>
@@ -20,9 +20,22 @@
           <textarea class="form-control" rows=15 cols=20 id="sectionNames" placeholder="Enter section names here"></textarea>
         </div>
         <div>
+                 
           <button type='button' id='saveClass' class='btn btn-fix'>
               Save Class
           </button>
+        </div>
+        <div class="row">
+          <div class="col-md-12">
+          <label>Class Links</label>
+          {{#each curTeacherClasses}}
+            <ul>
+            
+                <li><a href="{{baseLink}}classes/{{curTeacher}}/{{this.sectionid}}">{{this.coursename}} - {{this.sectionname}}</a></li>
+
+            </ul>
+          {{/each}}
+        </div>
         </div>
     </div>
 {{/if}}
