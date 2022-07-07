@@ -16,6 +16,7 @@ import {MODEL_UNIT, SCHEDULE_UNIT} from '../../../common/Definitions';
 import {meteorCallAsync} from '../../index';
 import {displayify} from '../../../common/globalHelpers';
 import {Answers} from './answerAssess';
+import * as pFunc from './probabilityFunctions'
 
 export {createScheduleUnit, createModelUnit, createEmptyUnit};
 
