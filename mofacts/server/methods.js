@@ -57,7 +57,7 @@ if (Meteor.settings.public.testLogin) {
 }
 
 const symSpell = new SymSpell(2, 7);
-  symSpell.loadDictionary(Meteor.settings.frequencyDictionaryLocation);
+symSpell.loadDictionary(Meteor.settings.frequencyDictionaryLocation);
 process.env.MAIL_URL = Meteor.settings.MAIL_URL;
 const adminUsers = Meteor.settings.initRoles.admins;
 const ownerEmail = Meteor.settings.owner;
@@ -760,7 +760,7 @@ async function getCourseById(courseId) {
 
 async function getAllCoursesForInstructor(instructorId) {
   serverConsole('getAllCoursesForInstructor:', instructorId);
-  const courses = Courses.find({teacherUserId: instructorId}).fetch();
+  const courses = Courses.find({teacherUserId: instructorId, semester: curSemester}).fetch();
   return courses;
 }
 
@@ -1092,7 +1092,7 @@ async function getUserLastFeedbackTypeFromHistory(tdfID) {
 async function insertHistory(historyRecord) {
   const tdfFileName = historyRecord['Condition_Typea'];
   const dynamicTagFields = await getListOfStimTags(tdfFileName);
-  const eventId = histories.find({}, {limit: 1, sort: {eventId: 1}}).eventId + 1;
+  const eventId = Histories.find({}, {limit: 1, sort: {eventId: 1}}).eventId + 1;
   historyRecord.eventId = eventId
   historyRecord.dynamicTagFields = dynamicTagFields || [];
   historyRecord.recordedServerTime = (new Date()).getTime();
