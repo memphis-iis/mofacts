@@ -15,6 +15,7 @@ export {selectTdf};
 Template.profile.created = function() {
   this.showTdfs = new ReactiveVar(false);
   this.enabledTdfs = new ReactiveVar([]);
+  this.tagFilter = new ReactiveVar("");
   this.disabledTdfs = new ReactiveVar([]);
   this.tdfsToDisable = new ReactiveVar([]);
   this.tdfsToEnable = new ReactiveVar([]);
@@ -51,8 +52,23 @@ Template.profile.helpers({
     return Template.instance().showTdfs.get();
   },
 
-  enabledTdfs: () => {
-    return Template.instance().enabledTdfs.get();
+  enabledTdfs: function(){
+    enabledTdfs = Template.instance().enabledTdfs.get();
+    tagFilter = Template.instance().tagFilter.get();
+    filteredTdfs = [];
+    if(tagFilter != ""){
+      for(tdf of enabledTdfs){
+        tags = tdf.tdfs.tutor.setspec.tags || [];
+        if(tags.includes(tagFilter)){
+          filteredTdfs.push(tdf);
+        }
+        console.log('tags', tags, tdf);
+      }
+    } else {
+      filteredTdfs = enabledTdfs;
+    }
+    console.log('filteredTdfs', filteredTdfs);
+    return filteredTdfs;
   },
 
   disabledTdfs: () => {
@@ -75,6 +91,10 @@ Template.profile.helpers({
 // Template Events
 
 Template.profile.events({
+  // Filter TDF by tag
+  'keyup #tdfFilter': function(event) {
+    Template.instance().tagFilter.set(event.target.value);
+  },
   // Start a TDF
   'click .tdfButton': function(event) {
     event.preventDefault();
