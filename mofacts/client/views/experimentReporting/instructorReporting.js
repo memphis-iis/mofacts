@@ -26,10 +26,14 @@ function setCurClassStudents(curClassId, currentTdf) {
         _.isEmpty(Session.get('studentPerformanceForClassAndTdfIdMap')[curClassId][currentTdf])) {
     console.log('curClassStudentPerformance:is empty');
     Session.set('curClassStudentPerformance', [{percentCorrect: 'No attempts for this tdf'}]);
+    Session.set('curClassStudentPerformanceAfter', [{percentCorrect: 'No attempts for this tdf'}]);
   } else {
     const curClassStudentPerformance = Session.get('studentPerformanceForClassAndTdfIdMap')[curClassId][currentTdf];
+    const curClassStudentPerformanceAfter = Session.get('studentPerformanceForClassAndTdfIdMapAfter')[curClassId][currentTdf];
     Session.set('curClassStudentPerformance', Object.values(curClassStudentPerformance));// PER STUDENT
+    Session.set('curClassStudentPerformanceAfter', Object.values(curClassStudentPerformanceAfter));// PER STUDENT
     console.log('curClassStudentPerformance:', Object.values(curClassStudentPerformance));
+    console.log('curClassStudentPerformanceAfter:', Object.values(curClassStudentPerformanceAfter));
   }
 
   if (_.isEmpty(Session.get('studentPerformanceForClass')) ||
@@ -45,11 +49,14 @@ function setCurClassStudents(curClassId, currentTdf) {
 }
 
 async function fetchAndSetPracticeTimeIntervalsMap(date) {
-  console.log('fetch', Session.get('curClassStudentPerformance'));
+  console.log('fetch', Session.get('curClassStudentPerformance',Session.get('curClassStudentPerformanceAfter')));
   const [studentPerformanceForClass, studentPerformanceForClassAndTdfIdMap] = await meteorCallAsync('getStudentPerformanceForClassAndTdfId', Meteor.userId(), date);
+  const [studentPerformanceForClassAfter, studentPerformanceForClassAndTdfIdMapAfter] = await meteorCallAsync('getStudentPerformanceForClassAndTdfId', Meteor.userId(), date, true);
   Session.set('studentPerformanceForClass', studentPerformanceForClass);
   Session.set('studentPerformanceForClassAndTdfIdMap', studentPerformanceForClassAndTdfIdMap);
-  setCurClassStudents(Session.get('curClass').courseId, _state.get('currentTdf'))
+  Session.set('studentPerformanceForClassAfter', studentPerformanceForClassAfter);
+  Session.set('studentPerformanceForClassAndTdfIdMapAfter', studentPerformanceForClassAndTdfIdMapAfter);
+  setCurClassStudents(Session.get('curClass').courseId, _state.get('currentTdf'));
 }
 
 async function hideUsersByDate(date, tdfId){
@@ -76,6 +83,7 @@ async function hideUsersByDate(date, tdfId){
 Template.instructorReporting.helpers({
   INVALID: INVALID,
   curClassStudentPerformance: () => Session.get('curClassStudentPerformance'),
+  curClassStudentPerformanceAfter: () => Session.get('curClassStudentPerformanceAfter'),
   curInstructorReportingTdfs: () => Session.get('curInstructorReportingTdfs'),
   classes: () => Session.get('classes'),
   curClassPerformance: () => Session.get('curClassPerformance'),
@@ -86,6 +94,7 @@ Template.instructorReporting.helpers({
 Template.instructorReporting.events({
   'change #class-select': function(event) {
     Session.set('curClassStudentPerformance', []);
+    Session.set('curClassStudentPerformanceAfter', []);
     Session.set('curClassPerformance', undefined);
     const curClassId = parseInt($(event.currentTarget).val());
     const curClass = Session.get('classes').find((x) => x.courseId == curClassId);
@@ -103,6 +112,15 @@ Template.instructorReporting.events({
 
   'change #tdf-select': function(event) {
     curTdf = parseInt($(event.currentTarget).val());
+    console.log(curTdf,Session.get('allTdfs'));
+    curTdfData = Session.get('allTdfs').find((x) => x.TDFId == curTdf)  ;
+    console.log('change tdf-select, curTdf: ', curTdf, curTdfData);
+    if(curTdfData){
+      curDueDate = curTdfData.content.tdfs.tutor.setspec.duedate;
+      if(curDueDate){
+        $('#practice-deadline-date').val(curDueDate);
+      }
+    }
     _state.set('currentTdf', curTdf);
     console.log('tdf change: ', curTdf, Session.get('curClass').courseId);
     if (Session.get('curClass')) {
@@ -136,6 +154,7 @@ Template.instructorReporting.onRendered(async function() {
   Session.set('instructorReportingTdfs', []);
   Session.set('classes', []);
   Session.set('curClassStudentPerformance', []);
+  Session.set('curClassStudentPerformanceAfter', []);
   Session.set('curClassPerformance', undefined);
   Session.set('curInstructorReportingTdfs', []);
 

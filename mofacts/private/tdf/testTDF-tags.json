@@ -3,7 +3,7 @@
         "setspec": {
             "name": "Internal Testing",
             "lessonname": "Testing Tdf Tagged",
-            "tags": ["testing"],
+            "duedate": "2023-01-01",
             "userselect": "true",
             "experimentTarget": "test",
             "stimulusfile": "testStim.json",

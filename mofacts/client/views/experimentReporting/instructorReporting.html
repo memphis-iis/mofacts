@@ -36,7 +36,7 @@
         {{/if}}
       </div>
       <div>
-        <h3>Practice Deadline</h3>
+        <h3>Practice Deadline / TDF Due Date</h3>
         <input type="date" id="practice-deadline-date" name="practice-deadline-date-select" disabled="true">
       </div>
       <h3>Class Data</h3>
@@ -51,6 +51,15 @@
               <td>{{this.totalTimeDisplay}}</td>
             </tr>
           {{/each}}
+          <tr><td>After Deadline</td></tr>
+          {{#each curClassStudentPerformanceAfter}}
+          <tr id="{{this.userId}}">
+            <td><a onclick="navigateToStudentReporting('{{this.username}}')">{{this.username}}</a></td>
+            <td>{{this.percentCorrect}}</td>
+            <td>{{this.count}}</td>
+            <td>{{this.totalTimeDisplay}}</td>
+          </tr>
+        {{/each}}
           <tr id="classReportingTotal">
             <td>Total</td>
             <td>{{curClassPerformance.percentCorrect}}</td>

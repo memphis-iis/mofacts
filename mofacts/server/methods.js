@@ -1197,10 +1197,17 @@ async function getStudentPerformanceByIdAndTDFId(userId, TDFid, stimIds=null) {
   };
 }
 
-async function getStudentPerformanceByIdAndTDFIdFromHistory(userId, TDFid,returnRows=null){
+async function getStudentPerformanceByIdAndTDFIdFromHistory(userId, TDFid,returnRows=null, time=null, after=false){
   //used to grab a limited sample of the student's performance
-  serverConsole('getStudentPerformanceByIdAndTDFIdFromHistory', userId, TDFid, returnRows);
+  serverConsole('getStudentPerformanceByIdAndTDFIdFromHistory', userId, TDFid, returnRows, time);
+  let timeAddendum = "";
   let limitAddendum = "";
+  if(time != null || after){
+    timeAddendum = `AND time < ${time}`;
+  }
+  if(time != null || !after){
+    timeAddendum = `AND time > ${time}`;
+  }
   if(returnRows != null){
     limitAddendum = "ORDER BY eventid DESC LIMIT " + returnRows;
   }
@@ -1214,6 +1221,7 @@ async function getStudentPerformanceByIdAndTDFIdFromHistory(userId, TDFid,return
                     from history 
                     WHERE userId=$1 AND TDFId=$2
                     AND level_unittype = 'model'
+                    ${timeAddendum}
                     ${limitAddendum}
                   ) s`;
   const perfRet = await db.oneOrNone(query, [userId, TDFid]);
@@ -1241,10 +1249,13 @@ async function getNumDroppedItemsByUserIDAndTDFId(userId, TDFid){
   return queryRet.count;
 }
 
-async function getStudentPerformanceForClassAndTdfId(instructorId, date=null) {
+async function getStudentPerformanceForClassAndTdfId(instructorId, date=null, after=null) {
   let dateAdendumn = "";
-  if(date){
-    dateAdendumn = `AND s.recordedServerTime < ${date}`
+  if(date && after){
+    dateAdendumn = `AND s.recordedServerTime > ${date}`;
+  } 
+  if(date && !after){ 
+    dateAdendumn = `AND s.recordedServerTime < ${date}`;
   }
   const query = `SELECT MAX(t.TDFId) AS tdfid, 
                   MAX(c.courseId) AS courseid, 

@@ -16,7 +16,14 @@
             <option value="{{this.tdfid}}">{{this.displayName}}</option>
           {{/each}}
       </select>
-        for {{curTotalTime}} minute(s). You have practiced items {{curTotalAttempts}} time(s) so far.
+        for {{curTotalTime}} minute(s). You have practiced items {{curTotalAttempts}} time(s) so far. <br>
+        {{#if curTdfDueDate}}
+          The due date for this tdf is {{curTdfDueDate}}. View the report for <a href="#" id="toggle-before-due-date">before due date</a>, <a href="#" id="toggle-all">total</a>, or <a href="#" id="toggle-after-due-date">after due date.</a><br>
+          {{# if curToggleState}}
+            Current viewing {{curToggleState}}.
+          {{/if}}
+        {{/if}}
+        <br>
     <div id="dashboardGauges" hidden>
       <div class="row" style="padding-top:20px;">   
         <div class="gauge col-sm-6 col-xs-12">

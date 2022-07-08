@@ -1,3 +1,5 @@
+import { U } from "../../node_modules/core-js/modules/_export";
+
 export {sessionCleanUp};
 
 /* *****************************************************************
@@ -129,6 +131,11 @@ function sessionCleanUp() {
   Meteor.clearInterval(Session.get('varLenTimeoutName'));
   Session.set('varLenTimeoutName', null)
   Session.set('recordingLocked', false);
+  Session.set('curClassStudentPerformanceAfter', undefined);
+  Session.set('curTdfDueDate', undefined);
+  Session.set('curViewDate', undefined);
+  Session.set('curToggleState', undefined);
+
   if (window.currentAudioObj) {
     window.currentAudioObj.pause();
     window.currentAudioObj = null;

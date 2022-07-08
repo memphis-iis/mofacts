@@ -100,6 +100,9 @@ $('[data-toggle="tooltip"]').tooltip();
 
 Template.studentReporting.helpers({
   studentReportingTdfs: () => Session.get('studentReportingTdfs'),
+  curTdfDueDate: () => Session.get('curTdfDueDate'),
+  curViewDate: () => Session.get('curViewDate'),
+  curToggleState: () => Session.get('curToggleState'),
   curClassPerformance: () => Session.get('curClassPerformance'),
   curClass: () => Session.get('curClass'),
   curTotalAttempts: () => Session.get('curTotalAttempts'),
@@ -159,9 +162,42 @@ Template.studentReporting.rendered = async function() {
 
 Template.studentReporting.events({
   'change #tdf-select': async function(event) {
+    curTdf = parseInt($(event.currentTarget).val());
+    curTdfData = Session.get('allTdfs').find((x) => x.TDFId == curTdf);
+    if(curTdfData){
+      curDueDate = curTdfData.content.tdfs.tutor.setspec.duedate;
+      if(curDueDate){
+        Session.set('curTdfDueDate', curDueDate);
+        Session.set('viewDate', curDueDate);
+      } else {
+        Session.set('curTdfDueDate', undefined);
+        Session.set('viewDate', curDueDate);
+      }
+    }
     const selectedTdfId = $(event.currentTarget).val();
     updateDashboard(selectedTdfId)
   },
+
+  'click #toggle-before-due-date': function(event) {
+    curTdf = parseInt($('#tdf-select').val());
+    curTdfData = Session.get('allTdfs').find((x) => x.TDFId == curTdf);
+    curDueDate = curTdfData.content.tdfs.tutor.setspec.duedate;
+    Session.set('viewDate', curDueDate);
+    Session.set('curToggleState', 'before due date');
+    updateDashboard(curTdf);
+  },
+  'click #toggle-after-due-date': function(event) {
+    curTdf = parseInt($('#tdf-select').val());
+    Session.set('viewDate', curDueDate);
+    Session.set('curToggleState', 'after due date');
+    updateDashboard(curTdf,true);
+  },
+  'click #toggle-all': function(event) {
+    curTdf = parseInt($('#tdf-select').val());
+    Session.set('viewDate', undefined);
+    Session.set('curToggleState', 'all trials');
+    updateDashboard(curTdf);
+  }
 });
 
 async function updateDashboard(selectedTdfId){
@@ -179,7 +215,7 @@ async function updateDashboard(selectedTdfId){
   }
 }
 
-async function drawDashboard(studentId, selectedTdfId){
+async function drawDashboard(studentId, selectedTdfId, afterDueDate=false){
   // Get TDF Parameters
   selectedTdf = await meteorCallAsync('getTdfById',selectedTdfId);
   selectedTdfIdProgressReportParams = selectedTdf.content.tdfs.tutor.setspec.progressReporterParams;
@@ -199,13 +235,14 @@ async function drawDashboard(studentId, selectedTdfId){
   const [optimumDifficulty, difficultyHistory, masteryDisplay, masteryHistory, timeToMasterDisplay, timeToMasterHistory] = selectedTdfIdProgressReportParams;
   console.log('expanded params',  optimumDifficulty, difficultyHistory, masteryDisplay, masteryHistory, timeToMasterDisplay, timeToMasterHistory);
   //Get Student Data
+  const dueDate = Math.floor(new Date(Session.get('viewDate')).getTime() / 1000) || undefined;
   const stimids = await meteorCallAsync('getStimSetFromLearningSessionByClusterList', curStimSetId, clusterlist);
-  const curStudentGraphData = await meteorCallAsync('getStudentPerformanceByIdAndTDFId', studentId, selectedTdfId, stimids);
-  const speedOfLearningData = await meteorCallAsync('getStudentPerformanceByIdAndTDFIdFromHistory', studentId, selectedTdfId, 30);
-  const masteryRateData = await meteorCallAsync('getStudentPerformanceByIdAndTDFIdFromHistory', studentId, selectedTdfId, masteryHistory);
-  const masteryEstimateData = await meteorCallAsync('getStudentPerformanceByIdAndTDFIdFromHistory', studentId, selectedTdfId, timeToMasterHistory);
-  const difficultyData = await meteorCallAsync('getStudentPerformanceByIdAndTDFIdFromHistory', studentId, selectedTdfId, difficultyHistory);
-  const numDroppedStims = await meteorCallAsync('getNumDroppedItemsByUserIDAndTDFId', studentId, selectedTdfId)
+  const curStudentGraphData = await meteorCallAsync('getStudentPerformanceByIdAndTDFId', studentId, selectedTdfId, stimids, dueDate, afterDueDate);
+  const speedOfLearningData = await meteorCallAsync('getStudentPerformanceByIdAndTDFIdFromHistory', studentId, selectedTdfId, 30, dueDate, afterDueDate);
+  const masteryRateData = await meteorCallAsync('getStudentPerformanceByIdAndTDFIdFromHistory', studentId, selectedTdfId, masteryHistory, dueDate, afterDueDate);
+  const masteryEstimateData = await meteorCallAsync('getStudentPerformanceByIdAndTDFIdFromHistory', studentId, selectedTdfId, timeToMasterHistory, dueDate, afterDueDate);
+  const difficultyData = await meteorCallAsync('getStudentPerformanceByIdAndTDFIdFromHistory', studentId, selectedTdfId, difficultyHistory, dueDate, afterDueDate);
+  const numDroppedStims = await meteorCallAsync('getNumDroppedItemsByUserIDAndTDFId', studentId, selectedTdfId,dueDate)
   console.log("curStudentGraphData(all trials)", curStudentGraphData)
   console.log(`speedOfLearningData(${30} trials)`, speedOfLearningData)
   console.log(`masteryRateData(${masteryHistory} trials)`, masteryRateData)
