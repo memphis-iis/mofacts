@@ -33,7 +33,7 @@ export {
 // The jshint inline option above suppresses a warning about using sqaure
 // brackets instead of dot notation - that's because we prefer square brackets
 // for creating some MongoDB queries
-const SymSpell = require('node-symspell')
+//const SymSpell = require('node-symspell')
 const fs = Npm.require('fs');
 const https = require('https')
 const { randomBytes } = require('crypto')
@@ -56,8 +56,8 @@ if (Meteor.settings.public.testLogin) {
   serverConsole('dev environment, allow insecure tls');
 }
 
-const symSpell = new SymSpell(2, 7);
-symSpell.loadDictionary(Meteor.settings.frequencyDictionaryLocation);
+//const symSpell = new SymSpell(2, 7);
+//symSpell.loadDictionary(Meteor.settings.frequencyDictionaryLocation);
 process.env.MAIL_URL = Meteor.settings.MAIL_URL;
 const adminUsers = Meteor.settings.initRoles.admins;
 const ownerEmail = Meteor.settings.owner;
@@ -1938,9 +1938,9 @@ Meteor.methods({
     StimSyllables.insert({filename: stimFileName, data: data});
   },
 
-  getSymSpellCorrection: async function(userAnswer, maxEditDistance) {
-    return symSpell.lookupCompound(userAnswer, maxEditDistance)
-  },
+  // getSymSpellCorrection: async function(userAnswer, maxEditDistance) {
+  //   return symSpell.lookupCompound(userAnswer, maxEditDistance)
+  // },
 
   getClozeEditAuthors: function() {
     const authorIDs = {};
