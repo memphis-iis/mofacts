@@ -1092,10 +1092,11 @@ async function getUserLastFeedbackTypeFromHistory(tdfID) {
 async function insertHistory(historyRecord) {
   const tdfFileName = historyRecord['Condition_Typea'];
   const dynamicTagFields = await getListOfStimTags(tdfFileName);
-  const eventId = Histories.find({}, {limit: 1, sort: {eventId: 1}}).eventId + 1;
+  const eventId = Histories.findOne({}, {limit: 1, sort: {eventId: -1}}).eventId + 1;
   historyRecord.eventId = eventId
   historyRecord.dynamicTagFields = dynamicTagFields || [];
   historyRecord.recordedServerTime = (new Date()).getTime();
+  serverConsole('insertHistory', historyRecord);
   Histories.insert(historyRecord)
 }
 
