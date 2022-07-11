@@ -16,7 +16,7 @@ import {MODEL_UNIT, SCHEDULE_UNIT} from '../../../common/Definitions';
 import {meteorCallAsync} from '../../index';
 import {displayify} from '../../../common/globalHelpers';
 import {Answers} from './answerAssess';
-import * as pFunc from './probabilityFunctions'
+import * as pFunc from './probabilityFunctions';
 
 export {createScheduleUnit, createModelUnit, createEmptyUnit};
 
@@ -752,6 +752,7 @@ function modelUnitEngine() {
       let parms;
       const ptemp=[];
       const tdfDebugLog=[];
+      const pParams=[];
       for (let i=0; i<cardProbabilities.cards.length; i++) {
         const card = cardProbabilities.cards[i];
         const stimCluster = getStimCluster(i);
@@ -770,7 +771,10 @@ function modelUnitEngine() {
             hintLevelIndex = stimSyllableData.count;
             console.log('syllables detected for: ' + currentStimuliSetId + ' | ' + answerText + '. hintlevel index is ' + hintLevelIndex);
           }
-          parms = this.calculateSingleProb(i, j, 0, count, stimCluster);
+          output = this.calculateSingleProb(i, j, 0, count, stimCluster);
+          parms = output.probOutput;
+          console.log('rusty',output);
+          pParams.push({cardIndex:i, stimIndex:j, hintlevel: hintLevelIndex, pInput: output.probInput});
           tdfDebugLog.push(parms.debugLog);
           
           if(stimCluster.stims[j].textStimulus || stimCluster.stims[j].clozeStimulus){
@@ -874,7 +878,7 @@ function modelUnitEngine() {
       if (p.i<15) {
         console.log('cardProbability parameters:', JSON.parse(JSON.stringify(p)));
       }
-      return probFunction(p);
+      return {probOutput: probFunction(p), probInput: p};
     },
 
     // TODO: do this function without side effects on cards
@@ -1406,7 +1410,7 @@ function modelUnitEngine() {
             indices = findMinProbCardAndHintLevel(cards, hiddenItems);
           }
           break;
-      }
+        }
       return indices;
     },
 
@@ -1437,6 +1441,9 @@ function modelUnitEngine() {
       const whichStim = newStimIndex;
       const whichHintLevel = newHintLevel;
       const stim = card.stims[whichStim];
+
+      // Save the stim's probability function input parameters for display in the UI
+      Session.set('currentStimProbFunctionParameters', stim.probFunctionParameters);
 
       // Save the card selection
       // Note that we always take the first stimulus and it's always a drill

@@ -750,6 +750,19 @@ Template.card.helpers({
 
   'dialogueCacheHint': () => Session.get('dialogueCacheHint'),
 
+  'probabilityParameters': function(){
+    probParms = [];
+    parms = Session.get('currentStimProbFunctionParameters');
+    keys = Object.keys(parms);
+    for(key of keys){
+      probParms.push({
+        'parameter': key,
+        'value': parms[key]
+      });
+    }
+    return probParms;
+  },
+
   'questionIsRemovable': () => Session.get('numVisibleCards') > 3 && getCurrentDeliveryParams().allowstimulusdropping,
 });
 
