@@ -151,11 +151,6 @@ function getMatchingDialogueCacheWordsForAnswer(answer) {
   }
 }
 
-const pgp = require('pg-promise')();
-// TODO: don't hardcode this
-const connectionString = 'postgres://mofacts:test101@localhost:5432';
-const db = pgp(connectionString);
-
 // Published to all clients (even without subscription calls)
 Meteor.publish(null, function() {
   // Only valid way to get the user ID for publications
