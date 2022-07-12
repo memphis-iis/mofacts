@@ -1609,8 +1609,8 @@ async function upsertStimFile(stimFilename, stimJSON, ownerId) {
         curAnswerSylls = getSyllablesForWord(mergedStim.correctResponse.replace(/\./g, '_').split('~')[0]);
       }
       catch (e) {
-        serverConsole('error fetching syllables for ' + answer + ': ' + JSON.stringify(e));
-        curAnswerSylls = [answer];
+        serverConsole('error fetching syllables for ' + stim.correctResponse + ': ' + JSON.stringify(e));
+        curAnswerSylls = [stim.correctResponse];
       }
       Items.update({stimulusFileName: stimulusFileName, stimulusKC: stimulusKC},{$set: {
         stimuliSetId: mergedStim.stimuliSetId,
@@ -1645,8 +1645,8 @@ async function upsertStimFile(stimFilename, stimJSON, ownerId) {
       curAnswerSylls = getSyllablesForWord(stim.correctResponse.replace(/\./g, '_').split('~')[0]);
     }
     catch (e) {
-      serverConsole('error fetching syllables for ' + answer + ': ' + JSON.stringify(e));
-      curAnswerSylls = [answer];
+      serverConsole('error fetching syllables for ' + stim.correctResponse + ': ' + JSON.stringify(e));
+      curAnswerSylls = [stim.correctResponse];
     }
     stim.syllables = curAnswerSylls;
     Items.insert(stim);
@@ -1930,7 +1930,6 @@ Meteor.methods({
       serverConsole('after updateStimSyllables');
       serverConsole(stimSetId);
     }
-    StimSyllables.insert({filename: stimFileName, data: data});
   },
 
   // getSymSpellCorrection: async function(userAnswer, maxEditDistance) {
@@ -2610,7 +2609,7 @@ Meteor.startup(async function() {
   roleAdd('admins', 'admin');
   roleAdd('teachers', 'teacher');
   const ret = Tdfs.find().count();
-  if (ret.count == 0) loadStimsAndTdfsFromPrivate(adminUserId);
+  if (ret == 0) loadStimsAndTdfsFromPrivate(adminUserId);
 
   // Make sure we create a default user profile record when a new Google user
   // shows up. We still want the default hook's 'profile' behavior, AND we want
