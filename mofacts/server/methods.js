@@ -1709,7 +1709,7 @@ async function upsertTDFFile(tdfFilename, tdfJSON, ownerId) {
     } else {
       stimuliSetId = null; // Root condition tdfs have no stimulisetid
     }
-    Tdfs.insert({ownerId: ownerId, stimuliSetId: stimuliSetId, content: tdfJSONtoUpsert});
+    Tdfs.insert({ownerId: ownerId, stimuliSetId: stimuliSetId, content: tdfJSONtoUpsert, visibility: 'profileOnly'});
   }
 }
 
