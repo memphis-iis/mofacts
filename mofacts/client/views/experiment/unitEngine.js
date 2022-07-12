@@ -773,7 +773,6 @@ function modelUnitEngine() {
           }
           output = this.calculateSingleProb(i, j, 0, count, stimCluster);
           parms = output.probOutput;
-          console.log('rusty',output);
           pParams.push({cardIndex:i, stimIndex:j, hintlevel: hintLevelIndex, pInput: output.probInput});
           tdfDebugLog.push(parms.debugLog);
           
