@@ -1704,12 +1704,12 @@ async function upsertTDFFile(tdfFilename, tdfJSON, ownerId) {
       if (associatedStimSetIdRet) {
         stimuliSetId = associatedStimSetIdRet.stimuliSetId;
       } else {
-        throw new Error('No matching stimulus file found');
+        throw new Error('No matching stimulus file found')
       }
     } else {
       stimuliSetId = null; // Root condition tdfs have no stimulisetid
     }
-    Tdfs.insert({ownerId: ownerId, stimuliSetId: stimuliSetId, content: tdfJSONtoUpsert});
+    Tdfs.insert({ownerId: ownerId, stimuliSetId: stimuliSetId, content: tdfJSONtoUpsert, visibility: 'profileOnly'});
   }
 }
 
