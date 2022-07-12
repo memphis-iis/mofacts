@@ -750,6 +750,8 @@ Template.card.helpers({
 
   'dialogueCacheHint': () => Session.get('dialogueCacheHint'),
 
+  'debugParms': () => Session.get('debugParms'),
+
   'probabilityParameters': function(){
     probParms = [];
     parms = Session.get('currentStimProbFunctionParameters');
@@ -760,6 +762,7 @@ Template.card.helpers({
         'value': parms[key]
       });
     }
+    console.log("probability parms input",probParms);
     return probParms;
   },
 

@@ -215,19 +215,20 @@
             </div>
             {{/if}}
             {{#if isInRole 'admin'}}
+                {{#if debugParms.probParmsDisplay}}            
                 <div class="col-lg-12 visible-text text-left">
-                    <h5>Probabilty Parameters for this Selection:</h5>
+                    {{#if probabilityParameters}}
+                    <h5>(Debug) Probabilty input parameters for this selection:</h5>
                         <p style="font-size: small;">
-                            <table id="probabilityParameters" hidden>
                                 {{#each probabilityParameters}}
-                                <tr>
-                                    <td>{{this.parameter}}</td>
-                                    <td>{{this.value}}</td>
-                                </tr>
+                                   {{this.parameter}}: {{this.value}}, &nbsp;
                                 {{/each}}
-                            </table>
                         </p>
+                    {{else}}
+                    <h5>(Debug) No probability input parameters for this selection due to being a resumed session.</h5>
+                    {{/if}}
                 </div>
+                {{/if}}
             {{/if}}
             <div class="row">
                 <div hidden  class="col-lg-offset-2 col-lg-5" style="text-align: center;" id="overlearningRow">
