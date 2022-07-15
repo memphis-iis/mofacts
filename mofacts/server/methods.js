@@ -1208,7 +1208,7 @@ async function getStudentPerformanceByIdAndTDFIdFromHistory(userId, TDFid,return
                   FROM
                   (
                     SELECT itemid, outcome, cf_end_latency + cf_feedback_latency as trialTime
-                    from history 
+                    from history
                     WHERE userId=$1 AND TDFId=$2
                     AND level_unittype = 'model'
                     ${limitAddendum}
@@ -1228,9 +1228,9 @@ async function getNumDroppedItemsByUserIDAndTDFId(userId, TDFid){
   serverConsole('getNumDroppedItemsByUserIDAndTDFId', userId, TDFid);
   const query = `select COUNT
                 (
-                  CASE WHEN CF_Item_Removed=TRUE AND 
-                  userId=$1 AND 
-                  TDFId=$2 AND 
+                  CASE WHEN CF_Item_Removed=TRUE AND
+                  userId=$1 AND
+                  TDFId=$2 AND
                   level_unittype = 'model' THEN 1 END
                 ) from history`;
   const queryRet = await db.oneOrNone(query, [userId, TDFid]);
@@ -1243,20 +1243,20 @@ async function getStudentPerformanceForClassAndTdfId(instructorId, date=null) {
   if(date){
     dateAdendumn = `AND s.recordedServerTime < ${date}`
   }
-  const query = `SELECT MAX(t.TDFId) AS tdfid, 
-                  MAX(c.courseId) AS courseid, 
-                  MAX(s.userId) AS userid, 
-                  COUNT(CASE WHEN s.outcome='correct' THEN 1 END) AS correct, 
-                  COUNT(CASE WHEN s.outcome='incorrect' THEN 1 END) AS incorrect, 
+  const query = `SELECT MAX(t.TDFId) AS tdfid,
+                  MAX(c.courseId) AS courseid,
+                  MAX(s.userId) AS userid,
+                  COUNT(CASE WHEN s.outcome='correct' THEN 1 END) AS correct,
+                  COUNT(CASE WHEN s.outcome='incorrect' THEN 1 END) AS incorrect,
                   SUM(COALESCE(s.cf_end_latency + s.cf_feedback_latency, s.cf_end_latency, s.cf_feedback_latency)) AS totalPracticeDuration,
-                  sc.sectionId AS sectionId 
-                  FROM history AS s 
-                  INNER JOIN item AS i ON i.stimulusKC = s.KCId 
-                  INNER JOIN tdf AS t ON t.stimuliSetId = i.stimuliSetId 
-                  INNER JOIN assignment AS a on a.TDFId = t.TDFId 
-                  INNER JOIN course AS c on c.courseId = a.courseId 
-                  INNER JOIN section_user_map AS sm on sm.userId = s.userId 
-                  INNER JOIN section AS sc on sc.sectionId = sm.sectionId 
+                  sc.sectionId AS sectionId
+                  FROM history AS s
+                  INNER JOIN item AS i ON i.stimulusKC = s.KCId
+                  INNER JOIN tdf AS t ON t.stimuliSetId = i.stimuliSetId
+                  INNER JOIN assignment AS a on a.TDFId = t.TDFId
+                  INNER JOIN course AS c on c.courseId = a.courseId
+                  INNER JOIN section_user_map AS sm on sm.userId = s.userId
+                  INNER JOIN section AS sc on sc.sectionId = sm.sectionId
                   WHERE c.semester = $1 AND c.teacherUserId = $2 AND sc.courseId = c.courseId AND s.level_unittype = 'model'  ${dateAdendumn}
                   GROUP BY s.userId, t.TDFId, c.courseId, sc.sectionId;`
 
@@ -1327,6 +1327,107 @@ async function getStudentPerformanceForClassAndTdfId(instructorId, date=null) {
     }
   }
   return [studentPerformanceForClass, studentPerformanceForClassAndTdfIdMap];
+}
+
+async function uploadPackagePart(files, referenceContents, owner){
+  for(let file of files){
+    console.log("Processing file:", file.fileName);
+    newContents = file.contents;
+    for(let referenceFile of referenceContents){
+      toReplace = newContents;
+      theSplit = toReplace.split(referenceFile.fileName);
+      if(theSplit.length > 1){
+        console.log("replacing", theSplit.length - 1,"references:", file.fileName, referenceFile.fileName, referenceFile.replacePath);
+        newContents = theSplit.join(referenceFile.replacePath);
+      }
+    }
+    console.log(newContents);
+    serverConsole(await saveContentFile(file.type, file.fileName,newContents, owner));
+  }
+}
+
+async function saveContentFile(type, filename, filecontents, owner) {
+// Allow file uploaded with name and contents. The type of file must be
+// specified - current allowed types are: 'stimuli', 'tdf'
+  serverConsole('saveContentFile', type, filename, owner);
+  const results = {
+    'result': null,
+    'errmsg': 'No action taken?',
+    'action': 'None',
+  };
+  if (!type) throw new Error('Type required for File Save');
+  if (!filename) throw new Error('Filename required for File Save');
+  if (!filecontents) throw new Error('File Contents required for File Save');
+  let ownerId = "";
+  // We need a valid use that is either admin or teacher
+  if(owner){
+    ownerId = owner;
+  } else {
+    ownerId = Meteor.user()._id;
+  }
+  if (!ownerId) {
+    throw new Error('No user logged in - no file upload allowed');
+  }
+  if (!Roles.userIsInRole(ownerId, ['admin', 'teacher'])) {
+    throw new Error('You are not authorized to upload files');
+  }
+  if (type != 'tdf' && type != 'stim') {
+    throw new Error('Unknown file type not allowed: ' + type);
+  }
+
+  try {
+    if (type == 'tdf') {
+      const jsonContents = JSON.parse(filecontents);
+      const json = {tutor: jsonContents.tutor};
+      const lessonName = _.trim(jsonContents.tutor.setspec.lessonname);
+      if (lessonName.length < 1) {
+        results.result = false;
+        results.errmsg = 'TDF has no lessonname - it cannot be valid';
+
+        return results;
+      }
+      const stimFileName = json.tutor.setspec.stimulusfile ? json.tutor.setspec.stimulusfile : 'INVALID';
+      if (stimFileName == 'INVALID') {
+        // Note this means root tdfs will have NULL stimulisetid
+        results.result = false;
+        results.errmsg = 'Please upload stimulus file before uploading a TDF';
+
+        return results;
+      } else {
+        const query = 'SELECT stimuliSetId FROM item WHERE stimulusFilename = $1 LIMIT 1';
+        const associatedStimSetIdRet = await db.oneOrNone(query, stimFileName);
+        const stimuliSetId = associatedStimSetIdRet ? associatedStimSetIdRet.stimulisetid : null;
+        if (isEmpty(stimuliSetId)) {
+          results.result = false;
+          results.errmsg = 'Please upload stimulus file before uploading a TDF';
+        } else {
+          try {
+            const rec = {'fileName': filename, 'tdfs': json, 'ownerId': ownerId, 'source': 'upload'};
+            await upsertTDFFile(filename, rec, ownerId);
+            results.result = true;
+          } catch (err) {
+            results.result=false;
+            results.errmsg=err.toString();
+          }
+        }
+        return results;
+      }
+    } else if (type === 'stim') {
+      const jsonContents = JSON.parse(filecontents);
+      await upsertStimFile(filename, jsonContents, ownerId);
+      results.data = jsonContents;
+    }
+  } catch (e) {
+    serverConsole('ERROR saving content file:', e, e.stack);
+    results.result = false;
+    results.errmsg = JSON.stringify(e);
+    return results;
+  }
+
+  results.result = true;
+  results.errmsg = '';
+
+  return results;
 }
 
 async function getTdfIDsAndDisplaysAttemptedByUserId(userId, onlyWithLearningSessions=true) {
@@ -1461,7 +1562,7 @@ function generateKey(size = 32, format = 'base64') {
   return buffer.toString(format);
 }
 
-//only if we dont already have a secret for this user. 
+//only if we dont already have a secret for this user.
 function createUserSecretKey(targetUserId){
   if(!Meteor.users.findOne({_id: targetUserId}).secretKey){
     Meteor.users.update({_id: targetUserId}, { $set: { secretKey: generateKey() }});
@@ -1532,7 +1633,7 @@ async function upsertStimFile(stimFilename, stimJSON, ownerId) {
           parseInt(highestStimuliSetId.stimulisetid) + 1 : 1;
       serverConsole('stimuliSetId2:', stimuliSetId, highestStimuliSetId);
     }
-    
+
     //Need to clear the syllable cache so that it no longer gets out of sync during a file upload
     //This will force the system to regenerate the syllable cache.
     StimSyllables.remove({'filename': stimuliSetId});
@@ -1541,6 +1642,7 @@ async function upsertStimFile(stimFilename, stimJSON, ownerId) {
     const existingStims = await t.manyOrNone('SELECT * FROM item WHERE stimulusFilename = $1', stimFilename);
     let newStims = [];
     let stimulusKC;
+    let allAnswers = new Set();
     if (existingStims && existingStims.length > 0) {
       for (const newStim of newFormatItems) {
         stimulusKC = newStim.stimulusKC;
@@ -1563,6 +1665,16 @@ async function upsertStimFile(stimFilename, stimJSON, ownerId) {
                       imageStimulus = ${imageStimulus}, videoStimulus = ${videoStimulus}, \
                       alternateDisplays = ${alternateDisplays}, tags = ${tags} \
                       WHERE stimulusFilename = ${stimulusFilename} AND stimulusKC = ${stimulusKC}', mergedStim);
+
+                      
+      const responseParts = mergedStim.correctResponse.toLowerCase().split(';');
+      const answerArray = responseParts.filter(function(entry) {
+        return entry.indexOf('incorrect') == -1;
+      });
+      if (answerArray.length > 0) {
+        const singularAnswer = answerArray[0].split('~')[0];
+        allAnswers.add(singularAnswer);
+      }
       }
       //if we get here we might have more stims in the old file than in the new. Need to remove them from the db.
       await t.none(`DELETE FROM item WHERE stimulusKC > ${stimulusKC} and stimulusKC < ${stimuliSetId + 1} * 10000;`);
@@ -1579,11 +1691,8 @@ async function upsertStimFile(stimFilename, stimJSON, ownerId) {
         ${optimalProb}, ${correctResponse}, ${incorrectResponses}, ${itemResponseType}, ${speechHintExclusionList}, \
         ${clozeStimulus}, ${textStimulus}, ${audioStimulus}, ${imageStimulus}, ${videoStimulus}, \
         ${alternateDisplays}::jsonb, ${tags})', stim);
-    }
 
-    const stims = await getStimuliSetById(stimuliSetId);
-    let allAnswers = new Set();
-    for (const stim of stims) {
+        
       const responseParts = stim.correctResponse.toLowerCase().split(';');
       const answerArray = responseParts.filter(function(entry) {
         return entry.indexOf('incorrect') == -1;
@@ -1699,7 +1808,7 @@ async function loadStimsAndTdfsFromPrivate(adminUserId) {
 async function makeHTTPSrequest(options, request){
   return new Promise((resolve, reject) => {
     let chunks = []
-    const req = https.request(options, res => {        
+    const req = https.request(options, res => {
       res.on('data', d => {
           chunks.push(d);
       })
@@ -1708,7 +1817,7 @@ async function makeHTTPSrequest(options, request){
           resolve(Buffer.concat(chunks));
       })
     })
-    
+
     req.on('error', (e) => {
       reject(e.message);
     });
@@ -1740,7 +1849,7 @@ Meteor.methods({
   getAllTeachers, getTdfNamesAssignedByInstructor, getTdfsAssignedToStudent, getTdfAssignmentsByCourseIdMap,
 
   getStudentPerformanceByIdAndTDFId, getStudentPerformanceByIdAndTDFIdFromHistory, getNumDroppedItemsByUserIDAndTDFId,
-  
+
   getStudentPerformanceForClassAndTdfId, getStimSetFromLearningSessionByClusterList,
 
   getExperimentState, setExperimentState, getUserIdforUsername, insertStimTDFPair,
@@ -1755,7 +1864,7 @@ Meteor.methods({
 
   insertHiddenItem, getHiddenItems, getUserLastFeedbackTypeFromHistory,
 
-  getTdfIdByStimSetIdAndFileName, getItemsByFileName,
+  getTdfIdByStimSetIdAndFileName, getItemsByFileName, saveContentFile,
 
 
   makeGoogleTTSApiCall: async function(TDFId, message, audioPromptSpeakingRate, audioVolume, selectedVoice) {
@@ -1780,7 +1889,7 @@ Meteor.methods({
       return response.audioContent;
     });
   },
-  
+
   makeGoogleSpeechAPICall: async function(TDFId, speechAPIKey = '', request, answerGrammar){
     console.log(request)
     if(speechAPIKey == ''){
@@ -1904,13 +2013,13 @@ Meteor.methods({
     Meteor.users.findOne({username: email})
     for ( var i = 0; i < length; i++ ) {
       secret += characters.charAt(Math.floor(Math.random() * charactersLength));
-    }  
+    }
     Meteor.users.update({username: email},{
       $set:{
         secret: secret
       }
     });
-    
+
     //Setup email variables
     const ownerEmail = Meteor.settings.owner;
     const from = ownerEmail;
@@ -1939,7 +2048,7 @@ Meteor.methods({
       return true;
     } else {
       return false;
-    }        
+    }
   },
   sendUserErrorReport: function(userID, description, curPage, sessionVars, userAgent, logs, currentExperimentState) {
     const errorReport = {
@@ -2005,7 +2114,7 @@ Meteor.methods({
     if (!newUserPassword || newUserPassword.length < 6) {
       throw new Error('Passwords must be at least 6 characters long');
     }
-    
+
 
     // Now we can actually create the user
     // Note that on the server we just get back the ID and have nothing
@@ -2258,6 +2367,7 @@ Meteor.methods({
   },
   // Package Uploader
   processPackageUpload: function(path,fileObject, owner){
+    var referenceContents = [];
     const fs = Npm.require('fs');
     const unzip = Npm.require('unzipper');
     let links = [];
@@ -2266,7 +2376,6 @@ Meteor.methods({
       .on('entry', async function(entry){
         var tdfContent = [];
         var stimContent = [];
-        var referenceContents = [];
         var fileNameArray = entry.path.split("/");
         var fileName = fileNameArray[fileNameArray.length - 1];
         var content =  await entry.buffer().then(function(file, fileObject){
@@ -2283,7 +2392,7 @@ Meteor.methods({
                 fileName: fileName
               }
               stimContent.push(fileFinal);
-            } 
+            }
             if(parsedFileContents.tutor){
               fileFinal = {
                 type: "tdf",
@@ -2294,153 +2403,64 @@ Meteor.methods({
             }
           }else{
             console.log("Uploading:", fileName);
-            DynamicAssets.write(file, {
+            fileRef = DynamicAssets.write(file, {
               fileName: fileName,
               meta: {
                 owner: owner,
                 parent: path
               }
             });
-          }
-          return {tdfContent,stimContent}
-        });
-        referenceContents = [];
-        referenceFiles = DynamicAssets.find({}).forEach(function(fileRef){
+            serverConsole('fileRef', fileRef)
             replacePath = DynamicAssets.link(fileRef);
+            serverConsole('replacePath', replacePath)
             data = {
               fileName: fileRef.name,
               replacePath: replacePath,
               parent: fileRef.name
             }
             referenceContents.push(data);
+          }
+          return {tdfContent,stimContent}
         });
-        for(let files of content.stimContent){
-          console.log("Processing stim file:", files.fileName);
-            newContents = files.contents;
-            for(let referenceFile of referenceContents){
-              toReplace = newContents;
-              theSplit = toReplace.split(referenceFile.fileName);
-              if(theSplit.length > 1){
-                console.log("replacing", theSplit.length - 1,"references:", files.fileName, referenceFile.fileName, referenceFile.replacePath);
-                newContents = theSplit.join(referenceFile.replacePath);
-              } 
-            }
-            console.log(newContents);
-            Meteor.call("saveContentFile",files.type, files.fileName,newContents, owner);
-        }
-        for(let files of content.tdfContent){
-          console.log("Processing tdf file:", files.fileName);
-          newContents = files.contents;
-          for(let referenceFile of referenceContents){
-            toReplace = newContents;
-            theSplit = toReplace.split(referenceFile.fileName);
-            if(theSplit.length > 1){
-              console.log("replacing", theSplit.length - 1,"references:", files.fileName, referenceFile.fileName, referenceFile.replacePath);
-              newContents = theSplit.join(referenceFile.replacePath);
-            } 
-          }
-          console.log(newContents);
-          Meteor.call("saveContentFile",files.type, files.fileName,newContents, owner);
-        }
+        // referenceFiles = DynamicAssets.find({}).forEach(function(fileRef){
+        //     replacePath = DynamicAssets.link(fileRef);
+        //     data = {
+        //       fileName: fileRef.name,
+        //       replacePath: replacePath,
+        //       parent: fileRef.name
+        //     }
+        //     referenceContents.push(data);
+        // });
+        await uploadPackagePart(content.stimContent, referenceContents, owner);
+        setTimeout(async function() {
+          await uploadPackagePart(content.tdfContent, referenceContents, owner)
+        }, 5000)
       });
-      assets = DynamicAssets.find({}).fetch();
-      return assets;
+      let assetList = []
+      assets = DynamicAssets.find({}).forEach(function(file){
+        fileLink = DynamicAssets.link(file);
+        assetList.push({
+          link: fileLink,
+          name: file.name,
+          path: file.path,
+          ext: file.ext,
+        });
+      });
+      return assetList;
   },
-  // Allow file uploaded with name and contents. The type of file must be
-  // specified - current allowed types are: 'stimuli', 'tdf'
-  saveContentFile: async function(type, filename, filecontents, owner) {
-    serverConsole('saveContentFile', type, filename, owner);
-    const results = {
-      'result': null,
-      'errmsg': 'No action taken?',
-      'action': 'None',
-    };
-    if (!type) throw new Error('Type required for File Save');
-    if (!filename) throw new Error('Filename required for File Save');
-    if (!filecontents) throw new Error('File Contents required for File Save');
-    let ownerId = "";
-    // We need a valid use that is either admin or teacher
-    if(owner){
-      ownerId = owner;
-    } else {
-      ownerId = Meteor.user()._id;
-    }
-    if (!ownerId) {
-      throw new Error('No user logged in - no file upload allowed');
-    }
-    if (!Roles.userIsInRole(ownerId, ['admin', 'teacher'])) {
-      throw new Error('You are not authorized to upload files');
-    }
-    if (type != 'tdf' && type != 'stim') {
-      throw new Error('Unknown file type not allowed: ' + type);
-    }
 
-    try {
-      if (type == 'tdf') {
-        const jsonContents = JSON.parse(filecontents);
-        const json = {tutor: jsonContents.tutor};
-        const lessonName = _.trim(jsonContents.tutor.setspec.lessonname);
-        if (lessonName.length < 1) {
-          results.result = false;
-          results.errmsg = 'TDF has no lessonname - it cannot be valid';
-
-          return results;
-        }
-        const stimFileName = json.tutor.setspec.stimulusfile ? json.tutor.setspec.stimulusfile : 'INVALID';
-        if (stimFileName == 'INVALID') {
-          // Note this means root tdfs will have NULL stimulisetid
-          results.result = false;
-          results.errmsg = 'Please upload stimulus file before uploading a TDF';
-
-          return results;
-        } else {
-          const query = 'SELECT stimuliSetId FROM item WHERE stimulusFilename = $1 LIMIT 1';
-          const associatedStimSetIdRet = await db.oneOrNone(query, stimFileName);
-          const stimuliSetId = associatedStimSetIdRet ? associatedStimSetIdRet.stimulisetid : null;
-          if (isEmpty(stimuliSetId)) {
-            results.result = false;
-            results.errmsg = 'Please upload stimulus file before uploading a TDF';
-          } else {
-            try {
-              const rec = {'fileName': filename, 'tdfs': json, 'ownerId': ownerId, 'source': 'upload'};
-              await upsertTDFFile(filename, rec, ownerId);
-              cachedSyllables = StimSyllables.findOne({filename: stimuliSetId});
-              const stims = await getStimuliSetById(stimuliSetId);
-              let allAnswers = new Set();
-              for (const stim of stims) {
-                const responseParts = stim.correctResponse.toLowerCase().split(';');
-                const answerArray = responseParts.filter(function(entry) {
-                  return entry.indexOf('incorrect') == -1;
-                });
-                if (answerArray.length > 0) {
-                  const singularAnswer = answerArray[0].split('~')[0];
-                  allAnswers.add(singularAnswer);
-                }
-              }
-              results.result = true;
-            } catch (err) {
-              results.result=false;
-              results.errmsg=err.toString();
-            }
-          }
-          return results;
-        }
-      } else if (type === 'stim') {
-        const jsonContents = JSON.parse(filecontents);
-        await upsertStimFile(filename, jsonContents, ownerId);
-        results.data = jsonContents;
-      }
-    } catch (e) {
-      serverConsole('ERROR saving content file:', e, e.stack);
-      results.result = false;
-      results.errmsg = JSON.stringify(e);
-      return results;
-    }
-
-    results.result = true;
-    results.errmsg = '';
-
-    return results;
+  getAssetList: function(){
+    let assetList = []
+    assets = DynamicAssets.find({}).forEach(function(file){
+      fileLink = DynamicAssets.link(file);
+      assetList.push({
+        link: fileLink,
+        name: file.name,
+        path: file.path,
+        ext: file.ext,
+      });
+    });
+    return assetList;
   },
 
   updatePerformanceData: function(type, codeLocation, userId) {
@@ -2745,7 +2765,7 @@ Router.route('data-by-teacher', {
     const loginToken = this.request.headers['x-auth-token'];
     const uid = this.params.uid;
     const response = this.response;
-    
+
     if(!userId || !loginToken){
       response.writeHead(403);
       response.end('Unauthorized');
@@ -2800,7 +2820,7 @@ Router.route('data-by-class', {
     const loginToken = this.request.headers['x-auth-token'];
     const classId = this.params.classid;
     const response = this.response;
-    
+
     if(!userId || !loginToken){
       response.writeHead(403);
       response.end('Unauthorized');
@@ -2869,7 +2889,7 @@ Router.route('data-by-file', {
     const exp = this.params.exp;
     const response = this.response;
     let path = this.url;
-    
+
     if(!userId || !loginToken){
       response.writeHead('403');
       response.end();
@@ -2913,7 +2933,7 @@ Router.route('clozeEditHistory', {
     const loginToken = this.request.headers['x-auth-token'];
     const uid = this.params.uid;
     const response = this.response;
-    
+
     if(!userId || !loginToken){
       response.writeHead('403');
       response.end();

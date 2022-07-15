@@ -25,6 +25,6 @@ DynamicAssets = new FilesCollection({
       if (file.size <= 10485760 && /zip|png|gif|jpg|jpeg|bmp|wav|mp3|mp4|mov|mpg|mpeg|tif|webm|flac/i.test(file.extension)) {
         return true;
       }
-      return 'Please upload image, audio, or video fi with size equal or less than 10MB';
+      return 'Please upload image, audio, or video file with size equal or less than 10MB';
     }
   });

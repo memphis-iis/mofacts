@@ -5,6 +5,9 @@ import { Route53RecoveryCluster, Route53Resolver } from '../../../node_modules/a
 
 Template.assetUpload.onCreated(function () {
   this.currentUpload = new ReactiveVar(false);
+  Meteor.call('getAssetList', function(err, res) {
+    Session.set('assetLink',res);
+  })
 });
 
 Template.assetUpload.helpers({
@@ -42,20 +45,7 @@ Template.assetUpload.events({
                   alert("Package upload failed.\n"+err);
                 } else {
                   console.log(res);
-                  for(file of res){
-                    link = DynamicAssets.link(file);
-                    
-                    assetList.push(
-                      {
-                      link: link,
-                      name: file.name,
-                      path: file.path,
-                      ext: file.ext,
-                      }
-                      );
-                      console.log(file);
-                    Session.set('assetLink',assetList);
-                  }
+                  Session.set('assetLink',res);
                 }
               });
             }
