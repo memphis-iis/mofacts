@@ -24,7 +24,7 @@ async function userFilesRefresh() {
           'idx': count,
           'type': 'tdf',
           'fileName': tdf.content.fileName.trim(),
-          'tdfID': tdf.TDFId,
+          'tdfID': tdf._id,
         });
         count += 1;
       } catch (err) {
@@ -110,8 +110,8 @@ Template.contentUpload.events({
   },
   'click #tdf-download-btn': function(event){
     event.preventDefault();
-    let selectedTdf = Session.get('allTdfs')[event.currentTarget.getAttribute('value') - 1];
-    console.log('downloading tdf id', event.currentTarget.getAttribute('value') - 1);
+    let selectedTdf = Session.get('allTdfs').find(x => x._id == event.currentTarget.getAttribute('value'));
+    console.log('downloading tdf id', event.currentTarget.getAttribute('value'));
     let blob = new Blob([JSON.stringify(selectedTdf.content.tdfs,null,2)], { type: 'application/json' });
     let url = window.URL.createObjectURL(blob);
     let downloadFileName = selectedTdf.content.fileName.trim();
