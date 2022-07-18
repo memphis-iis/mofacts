@@ -1093,7 +1093,7 @@ async function getStimCountByStimuliSetId(stimuliSetId) {
 }
 async function getItemsByFileName(stimFileName) {
   // PostgresReversion Staged
-  let itemRet = Items.find({stimulusfilename: stimFileName}, {$sort: {stimulusKC: 1}}).fetch();
+  let itemRet = Items.find({stimulusFileName: stimFileName}, {$sort: {stimulusKC: 1}}).fetch();
   const items = [];
   for (const item of itemRet) {
     items.push(getItem(item));
