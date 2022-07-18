@@ -2447,7 +2447,7 @@ Meteor.methods({
           ext: file.ext,
         });
       });
-      //return assetList;
+      return assetList;
   },
 
   getAssetList: function(){
