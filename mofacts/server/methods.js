@@ -2409,16 +2409,17 @@ Meteor.methods({
                 owner: owner,
                 parent: path
               }
+            }, (writeError, fileRef) => {
+              serverConsole('fileRef', fileRef)
+              replacePath = DynamicAssets.link(fileRef);
+              serverConsole('replacePath', replacePath)
+              data = {
+                fileName: fileRef.name,
+                replacePath: replacePath,
+                parent: fileRef.name
+              }
+              referenceContents.push(data);
             });
-            serverConsole('fileRef', fileRef)
-            replacePath = DynamicAssets.link(fileRef);
-            serverConsole('replacePath', replacePath)
-            data = {
-              fileName: fileRef.name,
-              replacePath: replacePath,
-              parent: fileRef.name
-            }
-            referenceContents.push(data);
           }
           return {tdfContent,stimContent}
         });
