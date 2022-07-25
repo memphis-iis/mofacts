@@ -487,7 +487,7 @@ function modelUnitEngine() {
   const probFunctionHasHintSylls = typeof(probFunction) == 'undefined' ? false : probFunction.indexOf('hintsylls') > -1;
   console.log('probFunctionHasHintSylls: ' + probFunctionHasHintSylls, typeof(probFunction));
   if (probFunction) {
-    probFunction = new Function('p', '\'use strict\';\n' + probFunction); // jshint ignore:line
+    probFunction = new Function('p', 'pFunc', '\'use strict\';\n' + probFunction); // jshint ignore:line
   } else {
     probFunction = defaultProbFunction;
   }
@@ -802,13 +802,79 @@ function modelUnitEngine() {
 
       // Store parameters in an object for easy logging/debugging
       const p = {};
+      
+      // Probability Functions
+      pFunc = {};
+      pFunc.testFunction = function() {
+        console.log("testing probability function");
+      }
+
+      pFunc.mul = function(m1,m2){
+        var result = 0;
+          var len = m1.length;
+          for (var i = 0; i < len; i++) {
+              result += m1[i] * m2[i]
+          }
+          return result
+      }
+      pFunc.logitdec = function(outcomes, decay){
+        if (outcomes) {
+          var outcomessuc = JSON.parse(JSON.stringify(outcomes));
+          var outcomesfail = outcomes.map(function(value) {
+              return Math.abs(value - 1)
+          });
+          var w = outcomessuc.unshift(1);
+          var v = outcomesfail.unshift(1);
+          return Math.log(mul(outcomessuc, [...Array(w).keys()].reverse().map(function(value, index) {
+              return Math.pow(decay, value)
+          })) / mul(outcomesfail, [...Array(w).keys()].reverse().map(function(value, index) {
+              return Math.pow(decay, value)
+          })))
+          }
+          return 0
+      }
+
+      pFunc.recency = function(age,d){
+        if (age==0) { return 0;
+        } else
+        {return Math.pow(1 + age, -d);
+        }
+      }
+
+      pFunc.qyaddiffcor = function(seq, probs){
+        return pFunc.mul(seq, probs.map(function(value) {
+          return value * value
+        }))
+      }
+
+      pFunc.quaddiffincor = function(seq, probs){
+        return pFunc.mul(Math.abs(seq-1), probs.map(function(value) {
+          return value * value
+        }))
+      }
+
+      pFunc.linediffcor = function(seq, probs) {
+        return mul(seq, probs)
+      }
+
+      pFunc.linediffincor = function(seq, probs) {
+        return mul(seq.map(function(value) {
+          return Math.abs(value - 1)
+        }), probs)
+      }
+
+      pFunc.arrSum = function(arr) {
+        return arr.reduce(function(a,b){return a + b}, 0);
+      }
+
+      pFunc.errlist = function(seq) {  return seq.map(function(value) {return Math.abs(value - 1)})}
 
       p.i = i;
 
       // Current Indices
       p.clusterIndex = cardIndex;
       p.stimIndex = stimIndex;
-      p.hintLevel = hintLevel;
+      p.pFunc = pFunc
 
       // Top-level metrics
       p.userTotalResponses = cardProbabilities.numQuestionsAnswered;
@@ -873,7 +939,7 @@ function modelUnitEngine() {
       if (p.i<15) {
         console.log('cardProbability parameters:', JSON.parse(JSON.stringify(p)));
       }
-      return probFunction(p);
+      return probFunction(p, pFunc);
     },
 
     // TODO: do this function without side effects on cards
