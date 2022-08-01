@@ -909,13 +909,21 @@ async function getHiddenItems(userId, tdfId) {
   return hiddenItems;
 }
 async function getUserLastFeedbackTypeFromHistory(tdfID) {
-  const feedbackType = Histories.findOne({TDFId: tdfID, userId: Meteor.userId}, {sort: {time: -1}}).feedbackType;
+  const userHistory =  Histories.findOne({TDFId: tdfID, userId: Meteor.userId}, {sort: {time: -1}})
+  let feedbackType = 'undefined';
+  if( userHistory && userHistory.feedbackType ) {
+    feedbackType = userHistory.feedbackType;
+  } 
   return feedbackType;
 }
 async function insertHistory(historyRecord) {
   const tdfFileName = historyRecord['Condition_Typea'];
   const dynamicTagFields = await getListOfStimTags(tdfFileName);
-  const eventId = Histories.findOne({}, {limit: 1, sort: {eventId: -1}}).eventId + 1;
+  userHistory = Histories.findOne({}, {limit: 1, sort: {eventId: -1}});
+  let eventId = 1;
+  if(userHistory && userHistory.eventId) {
+    eventId = userHistory.eventId + 1;
+  }
   historyRecord.eventId = eventId
   historyRecord.dynamicTagFields = dynamicTagFields || [];
   historyRecord.recordedServerTime = (new Date()).getTime();
