@@ -16,7 +16,6 @@ import {MODEL_UNIT, SCHEDULE_UNIT} from '../../../common/Definitions';
 import {meteorCallAsync} from '../../index';
 import {displayify} from '../../../common/globalHelpers';
 import {Answers} from './answerAssess';
-import * as pFunc from './probabilityFunctions'
 
 export {createScheduleUnit, createModelUnit, createEmptyUnit};
 
@@ -753,6 +752,7 @@ function modelUnitEngine() {
       const tdfDebugLog=[];
       for (let i=0; i<cardProbabilities.cards.length; i++) {
         const card = cardProbabilities.cards[i];
+        const pParams=[];
         const stimCluster = getStimCluster(i);
         for (let j=0; j<card.stims.length; j++) {
           const stim = card.stims[j];
@@ -1502,6 +1502,10 @@ function modelUnitEngine() {
       const whichStim = newStimIndex;
       const whichHintLevel = newHintLevel;
       const stim = card.stims[whichStim];
+
+
+      // Save the stim's probability function input parameters for display in the UI
+      Session.set('currentStimProbFunctionParameters', stim.probFunctionParameters);
 
       // Save the card selection
       // Note that we always take the first stimulus and it's always a drill
