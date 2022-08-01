@@ -18,7 +18,6 @@ import {createScheduleUnit, createModelUnit, createEmptyUnit} from './unitEngine
 import {Answers} from './answerAssess';
 import {VAD} from '../../lib/vad';
 import {sessionCleanUp} from '../../lib/sessionUtils';
-import * as pFunc from './probabilityFunctions';
 
 export {
   speakMessageIfAudioPromptFeedbackEnabled,
@@ -751,6 +750,22 @@ Template.card.helpers({
   'dialogueCacheHint': () => Session.get('dialogueCacheHint'),
 
   'questionIsRemovable': () => Session.get('numVisibleCards') > 3 && getCurrentDeliveryParams().allowstimulusdropping,
+
+  'debugParms': () => Session.get('debugParms'),
+
+  'probabilityParameters': function(){
+    probParms = [];
+    parms = Session.get('currentStimProbFunctionParameters');
+    keys = Object.keys(parms);
+    for(key of keys){
+      probParms.push({
+        'parameter': key,
+        'value': parms[key]
+      });
+    }
+    console.log("probability parms input",probParms);
+    return probParms;
+  }
 });
 
 function getResponseType() {

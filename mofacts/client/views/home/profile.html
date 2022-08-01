@@ -49,7 +49,8 @@
         {{/unless}}
 
         {{#if isInRole 'admin,teacher'}}
-            <br><br>
+        {{>profileDebugToggles}}    
+        <br><br>
 
             <div class="row">
                 <div class="col-md-offset-3 col-md-6">

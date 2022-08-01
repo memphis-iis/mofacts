@@ -214,7 +214,22 @@
                 </div>
             </div>
             {{/if}}
-
+            {{#if isInRole 'admin'}}
+            {{#if debugParms.probParmsDisplay}}            
+            <div class="col-lg-12 visible-text text-left">
+                {{#if probabilityParameters}}
+                <h5>(Debug) Probabilty input parameters for this selection:</h5>
+                    <p style="font-size: small;">
+                            {{#each probabilityParameters}}
+                               {{this.parameter}}: {{this.value}}, &nbsp;
+                            {{/each}}
+                    </p>
+                {{else}}
+                <h5>(Debug) No probability input parameters for this selection due to being a resumed session.</h5>
+                {{/if}}
+            </div>
+            {{/if}}
+        {{/if}}
             <div class="row">
                 <div hidden  class="col-lg-offset-2 col-lg-5" style="text-align: center;" id="overlearningRow">
                     <h4 style=" color: #585858;">You are currently overlearning!  Please consider taking a break and coming back later.</h4>
