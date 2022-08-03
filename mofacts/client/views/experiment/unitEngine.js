@@ -825,7 +825,7 @@ function modelUnitEngine() {
           });
           var w = outcomessuc.unshift(1);
           var v = outcomesfail.unshift(1);
-          return Math.log(mul(outcomessuc, [...Array(w).keys()].reverse().map(function(value, index) {
+          return Math.log(Pfunc.mul(outcomessuc, [...Array(w).keys()].reverse().map(function(value, index) {
               return Math.pow(decay, value)
           })) / mul(outcomesfail, [...Array(w).keys()].reverse().map(function(value, index) {
               return Math.pow(decay, value)
@@ -854,11 +854,11 @@ function modelUnitEngine() {
       }
 
       pFunc.linediffcor = function(seq, probs) {
-        return mul(seq, probs)
+        return Pfunc.mul(seq, probs)
       }
 
       pFunc.linediffincor = function(seq, probs) {
-        return mul(seq.map(function(value) {
+        return Pfunc.mul(seq.map(function(value) {
           return Math.abs(value - 1)
         }), probs)
       }
