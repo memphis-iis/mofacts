@@ -1184,7 +1184,9 @@ function handleUserInput(e, source, simAnswerCorrect) {
     return;
   }
 
-  $('#helpButton').prop("disabled",true);
+  const testType = getTestType();
+  if(!(testType === 't' || testType === 'i'))
+    $('#helpButton').prop("disabled",true);
 
   if(Meteor.isDevelopment)
     Meteor.call('captureProfile', 10000, 'answerTrial');
