@@ -2806,7 +2806,6 @@ Router.route('data-by-teacher', {
 
     console.log(tdfNames);
     response.write(await createExperimentExport(tdfNames));
-    response.write('\r\n');
 
     tdfNames.forEach(function(tdf) {
       serverConsole('Sent all  data for', tdf, 'as file', fileName);
@@ -2872,7 +2871,6 @@ Router.route('data-by-class', {
     });
 
     response.write(await createExperimentExport(tdfFileNames));
-    response.write('\r\n');
 
     tdfFileNames.forEach(function(tdf) {
       serverConsole('Sent all  data for', tdf, 'as file', fileName, 'with record-count:', recCount);
