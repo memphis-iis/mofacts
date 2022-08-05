@@ -19,7 +19,6 @@ export {
   getTdfBy_id,
   getHistoryByTDFfileName,
   getListOfStimTags,
-  getListOfStimTagsFromStims,
   getListOfStimTagsByTDFFileNames,
   getStimuliSetById,
   getDisplayAnswerText,
@@ -1050,20 +1049,6 @@ async function getListOfStimTags(tdfFileName) {
   const stimuliSetId = tdf.stimuliSetId;
   serverConsole('getListOfStimTags, stimuliSetId: ' + stimuliSetId);
   const stims = await getStimuliSetById(stimuliSetId);
-  const allTagsInStimFile = new Set();
-
-  for (const stim of stims) {
-    if (stim.tags) {
-      for (const tagName of Object.keys(stim.tags)) {
-        allTagsInStimFile.add(tagName);
-      }
-    }
-  }
-
-  return Array.from(allTagsInStimFile);
-}
-
-async function getListOfStimTagsFromStims(stims) {
   const allTagsInStimFile = new Set();
 
   for (const stim of stims) {
