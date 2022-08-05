@@ -20,6 +20,7 @@ export {
   getHistoryByTDFfileName,
   getListOfStimTags,
   getListOfStimTagsFromStims,
+  getListOfStimTagsByTDFFileNames,
   getStimuliSetById,
   getDisplayAnswerText,
   serverConsole,
@@ -1069,6 +1070,26 @@ async function getListOfStimTagsFromStims(stims) {
     if (stim.tags) {
       for (const tagName of Object.keys(stim.tags)) {
         allTagsInStimFile.add(tagName);
+      }
+    }
+  }
+
+  return Array.from(allTagsInStimFile);
+}
+
+async function getListOfStimTagsByTDFFileNames(TDFFileNames){
+  const allTagsInStimFile = new Set();
+  
+  for (const TDFFileName of TDFFileNames){
+    const TDF = await getTdfByFileName(TDFFileName);
+    const stimSetId = TDF.stimuliSetId;
+    const stims = await getStimuliSetById(stimSetId);
+
+    for (const stim of stims) {
+      if (stim.tags) {
+        for (const tagName of Object.keys(stim.tags)) {
+          allTagsInStimFile.add(tagName);
+        }
       }
     }
   }
@@ -2798,10 +2819,9 @@ Router.route('data-by-teacher', {
       'File-Name': fileName
     });
 
-    for(tdfName of tdfNames){
-      response.write(await createExperimentExport(tdfName));
-      response.write('\r\n');
-    }
+    console.log(tdfNames);
+    response.write(await createExperimentExport(tdfNames));
+    response.write('\r\n');
 
     tdfNames.forEach(function(tdf) {
       serverConsole('Sent all  data for', tdf, 'as file', fileName);
@@ -2866,10 +2886,8 @@ Router.route('data-by-class', {
       'File-Name': fileName
     });
 
-    for(tdfName of tdfFileNames){
-      response.write(await createExperimentExport(tdfName));
-      response.write('\r\n');
-    }
+    response.write(await createExperimentExport(tdfFileNames));
+    response.write('\r\n');
 
     tdfFileNames.forEach(function(tdf) {
       serverConsole('Sent all  data for', tdf, 'as file', fileName, 'with record-count:', recCount);
