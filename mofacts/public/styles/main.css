@@ -351,6 +351,17 @@ input:focus {
     border: 1px solid #000000;
 }
 
+.table-instructorreport{
+    border: 0.5px solid green
+}
+
+.table-instructorreport th {
+    background-color: #ccc;
+}
+.table-instructorreport td {
+    background-color: white;
+}
+
 .table-bordered > thead > tr > th,
 .table-bordered > tbody > tr > th,
 .table-bordered > tfoot > tr > th,

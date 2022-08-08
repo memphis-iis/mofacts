@@ -779,6 +779,7 @@ async function getTdfAssignmentsByCourseIdMap(instructorId) {
   return assignmentTdfFileNamesByCourseIdMap;
 }
 
+
 async function getTdfsAssignedToStudent(userId, curSectionId) {
   serverConsole('getTdfsAssignedToStudent', userId, curSectionId);
   const tdfs = await Tdfs.rawCollection().aggregate([{
@@ -1032,15 +1033,99 @@ async function getStimDisplayTypeMap() {
   }
 }
 
-async function getUsersByUnitUpdateDate(userIds, tdfId, date) {
-  serverConsole('getUsersByUnitUpdateDate', userIds, tdfId, date, userIds.join(','));
-  const res = Histories.find({userId: {$in: userIds}, TDFId: tdfId, recordedServerTime: {$lt: date}});
-  const practiceTimeIntervalsMap = {};
-  for (const row of res) {
-    practiceTimeIntervalsMap[row.userId] = parseInt(row.duration);
+function getClassPerformanceByTDF(classId, tdfId, date=false) {
+  serverConsole('getClassPerformanceByTDF', classId, tdfId, date);
+  const sections = Sections.find({courseId: classId}).fetch();
+  const sectionIds = sections.map((section) => section._id);
+  const userIds = SectionUserMap.find({sectionId: {$in: sectionIds}}).fetch().map((user) => user.userId);
+  const performanceMet = [];
+  const performanceNotMet = [];
+  if(!date){
+    curDate = new Date();
+    date = curDate.getTime();
   }
-  serverConsole(practiceTimeIntervalsMap)
-  return practiceTimeIntervalsMap;
+  const res1 = Histories.find({userId: {$in: userIds}, TDFId: tdfId}).fetch();
+  for(let history of res1){
+    var outcome = 0;
+    if(history.outcome === "correct"){
+      outcome = 1;
+    }
+    var exception = false;
+    var exceptions = Meteor.users.findOne({_id: history.userId}).profile.dueDateExceptions || [];
+    var exceptionRawDate = false;
+    if(exceptions.findIndex((item) => item.tdfId == tdfId && item.classId == classId) !== -1){
+      var exceptionRaw = exceptions.find((item) => item.tdfId == tdfId && item.classId == classId).date;
+      var exceptionRawDate = new Date(exceptionRaw).getTime();
+      exception = new Date(exceptionRaw).toLocaleDateString();
+    }
+    if(history.recordedServerTime < date || history.recordedServerTime < exceptionRawDate){
+      index = performanceMet.findIndex((item) => item.userId == history.userId);
+      if(index == -1){
+        performanceMet.push({
+          userId: history.userId,
+          count: 0
+        });
+        index = performanceMet.length - 1;
+      }
+      performanceMet[index].username = Meteor.users.findOne({_id: history.userId}).username;
+      performanceMet[index].count  = performanceMet[index].count + 1;
+      performanceMet[index].numCorrect = performanceMet[index].numCorrect + outcome || outcome;
+      performanceMet[index].numIncorrect = performanceMet[index].numIncorrect + (1 - outcome) || outcome;
+      performanceMet[index].percentCorrect = performanceMet[index].numCorrect / performanceMet[index].count;
+      performanceMet[index].totalTime = performanceMet[index].totalTime + history.time || history.time;
+      performanceMet[index].totalTimeMins = Math.round(performanceMet[index].totalTime / 60000);
+      performanceMet[index].exception = exception;
+    } else {
+      index = performanceNotMet.findIndex((item) => item.userId == history.userId);
+      if(index == -1){
+        performanceNotMet.push({
+          userId: history.userId,
+          count: 0
+        });
+        index = performanceNotMet.length - 1;
+      }
+      performanceNotMet[index].username = Meteor.users.findOne({_id: history.userId}).username;
+      performanceNotMet[index].count  = performanceNotMet[index].count + 1;
+      performanceNotMet[index].numCorrect = performanceNotMet[index].numCorrect + outcome || outcome;
+      performanceNotMet[index].numIncorrect = performanceNotMet[index].numIncorrect + (1 - outcome) || outcome;
+      performanceNotMet[index].percentCorrect = performanceNotMet[index].numCorrect / performanceNotMet[index].count;
+      performanceNotMet[index].totalTime = performanceNotMet[index].totalTime + history.time || history.time;
+      performanceNotMet[index].totalTimeMins = Math.round(performanceNotMet[index].totalTime / 60000);
+      performanceNotMet[index].exception = exception;
+    }
+  }
+  return [performanceMet, performanceNotMet];
+};
+
+async function addUserDueDateException(userId, tdfId, classId, date){
+  serverConsole('addUserDueDateException', userId, tdfId, date);
+  exception = {
+    tdfId: tdfId,
+    classId: classId,
+    date: date,
+  }
+  user = Meteor.users.findOne({_id: userId});
+  if(user.profile.dueDateExceptions){
+    user.profile.dueDateExceptions.push(exception);
+  }
+  else{
+    user.profile.dueDateExceptions = [exception];
+  }
+  Meteor.users.update({_id: userId}, user);
+}
+
+async function removeUserDueDateException(userId, tdfId, classId){
+  serverConsole('removeUserDueDateException', userId, tdfId, classId);
+  user = Meteor.users.findOne({_id: userId});
+  if(user.profile.dueDateExceptions){
+    exceptionIndex = user.profile.dueDateExceptions.findIndex((item) => item.tdfId == tdfId && item.classId == classId);
+    if(exceptionIndex > -1){
+      user.profile.dueDateExceptions.splice(exceptionIndex, 1);
+    } else {
+      serverConsole('removeUserDueDateException ERROR, no exception found', userId, tdfId);
+    }
+  }
+  Meteor.users.update({_id: userId}, user);
 }
 
 async function getListOfStimTags(tdfFileName) {
@@ -1803,13 +1888,13 @@ Meteor.methods({
 
   getComponentStatesByUserIdTDFIdAndUnitNum, setComponentStatesByUserIdTDFIdAndUnitNum,
 
-  insertHistory, getHistoryByTDFfileName, getUsersByUnitUpdateDate,
+  insertHistory, getHistoryByTDFfileName, getClassPerformanceByTDF,
 
   loadStimsAndTdfsFromPrivate, getListOfStimTags, getStudentReportingData,
 
   insertHiddenItem, getHiddenItems, getUserLastFeedbackTypeFromHistory,
 
-  getTdfIdByStimSetIdAndFileName, getItemsByFileName,
+  getTdfIdByStimSetIdAndFileName, getItemsByFileName, addUserDueDateException, removeUserDueDateException,
 
 
   makeGoogleTTSApiCall: async function(TDFId, message, audioPromptSpeakingRate, audioVolume, selectedVoice) {
@@ -2561,6 +2646,12 @@ Meteor.methods({
       }
     });
     return ownerMap;
+  },
+
+
+  getTdfsAssignedToCourseId: (courseId) => {
+    const tdfs = Assignments.find({courseId: courseId}).fetch();
+    return tdfs;
   },
 });
 

@@ -28,10 +28,10 @@
         <div class="row">
           <div class="col-md-12">
           <label>Class Links</label>
-          {{#each curTeacherClasses}}
+          {{#each classes}}
             <ul>
             
-                <li><a href="{{baseLink}}classes/{{curTeacher}}/{{this.sectionid}}">{{this.coursename}} - {{this.sectionname}}</a></li>
+                <li><a href="{{baseLink}}classes/{{curTeacher}}/{{this.sectionid}}">{{this.courseName}} - {{this.sectionname}}</a></li>
 
             </ul>
           {{/each}}

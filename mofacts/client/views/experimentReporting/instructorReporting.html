@@ -38,25 +38,89 @@
       <div>
         <h3>Practice Deadline</h3>
         <input type="date" id="practice-deadline-date" name="practice-deadline-date-select" disabled="true">
+        {{#if selectedTdfDueDate}}
+        <h3>Filter By Due Date ({{selectedTdfDueDate}})</h3>
+        Enabled: <input type="checkbox" id="due-date-filter" name="due-date-filter-select"><br>
+        Exception Date: <input type="date" id="exception-date" name="exception-date-select">
+        {{else}}
+        <h3>Filter By Due Date</h3>
+        No due date set for this chapter.
+        {{/if}}   
       </div>
       <h3>Class Data</h3>
       <div class="row">
-        <table border='1' style="width: 100%; border: 1px black; padding: 10px;">
-          <tr><th class="thWideInstReport">ID</th><th class="thWideInstReport">% Correct</th><th class="thWideInstReport">Count</th><th style="width: 10%;text-align: center;">Total Time (min)</th></tr>
-          {{#each curClassStudentPerformance}}
-            <tr id="{{this.userId}}">
+        <table class="table table-instructorreport">
+          <thead>
+            <th scope="col">Student</th>
+            <th scope="col">% Correct</th>
+            <th scope="col">Count</th>
+            <th scope="col">Total Time (min)</th>
+            <th scope="col">Exceptions</th>
+            <th scope="col">Actions</th>
+          </thead>
+          {{#if dueDateFilter}}
+          <thead><th>Completed Before Due Date:</th><th></th><th></th><th></th><th></th><th></th><th></th></thead>
+          {{/if}}
+          {{#if curClassStudentPerformance}}
+            {{#each curClassStudentPerformance}}
+              <tr id="{{this.userId}}">
+                <td scope="row"><a onclick="navigateToStudentReporting('{{this.username}}')">{{this.username}}</a></td>
+                <td>{{this.percentCorrect}}</td>
+                <td>{{this.count}}</td>
+                <td>{{this.totalTimeMins}}</td>
+                <td>
+                  {{#if this.exception}}
+                    {{this.exception}}
+                  {{/if}}
+                </td>
+                <td>
+                {{#if this.exception}}
+                  <a data-userid="{{this.userId}}" id="remove-exception">Remove Exception</a>
+                {{else}}
+                {{/if}}
+                </td>
+              </tr>
+            {{/each}}
+          {{else}}
+            <tr><td colspan="6">No data available</td></tr>
+          {{/if}}
+          {{#if dueDateFilter}}
+          <thead><th>Completed After Due Date:</th><th></th><th></th><th></th><th></th><th></th><th></th></thead>
+            {{#if curClassStudentPerformanceAfterFilter}}
+              {{#each curClassStudentPerformanceAfterFilter}}
               <td><a onclick="navigateToStudentReporting('{{this.username}}')">{{this.username}}</a></td>
               <td>{{this.percentCorrect}}</td>
               <td>{{this.count}}</td>
-              <td>{{this.totalTimeDisplay}}</td>
-            </tr>
-          {{/each}}
-          <tr id="classReportingTotal">
-            <td>Total</td>
-            <td>{{curClassPerformance.percentCorrect}}</td>
-            <td>{{curClassPerformance.count}}</td>
-            <td>{{curClassPerformance.totalTimeDisplay}}</td>
-          </tr>
+              <td>{{this.totalTimeMins}}</td>
+
+                {{#if this.exception}}
+                <td style="color: red">
+                  {{this.exception}}
+                </td>
+                {{else}}
+                <td>
+                </td>
+                {{/if}}
+              <td>
+                {{#if this.exception}}
+                  <a data-userid="{{this.userId}}" id="remove-exception">Remove Exception</a>
+                {{else}}
+                  <a data-userid="{{this.userId}}" id="add-exception">Add Exception</a>
+                {{/if}}
+              </td>
+              {{/each}}
+            {{else}}
+              <tr><td colspan="6">No data available</td></tr>
+            {{/if}}
+          {{/if}}
+          <thead id="classReportingTotal">
+            <th>Totals</th>
+            <th>{{curClassPerformance.percentCorrect}}</th>
+            <th>{{curClassPerformance.count}}</th>
+            <th>{{curClassPerformance.totalTimeMins}}</th>
+            <th></th>
+            <th></th>
+          </thead>
         </table>
       </div>
     </div>

@@ -19,74 +19,31 @@ navigateToStudentReporting = async function(studentUsername) {
   Router.go('/studentReporting');
 };
 
-function setCurClassStudents(curClassId, currentTdf) {
-  console.log('setCurClassStudents', curClassId, currentTdf);
-  if (_.isEmpty(Session.get('studentPerformanceForClassAndTdfIdMap')) ||
-        _.isEmpty(Session.get('studentPerformanceForClassAndTdfIdMap')[curClassId]) ||
-        _.isEmpty(Session.get('studentPerformanceForClassAndTdfIdMap')[curClassId][currentTdf])) {
-    console.log('curClassStudentPerformance:is empty');
-    Session.set('curClassStudentPerformance', [{percentCorrect: 'No attempts for this tdf'}]);
-  } else {
-    const curClassStudentPerformance = Session.get('studentPerformanceForClassAndTdfIdMap')[curClassId][currentTdf];
-    Session.set('curClassStudentPerformance', Object.values(curClassStudentPerformance));// PER STUDENT
-    console.log('curClassStudentPerformance:', Object.values(curClassStudentPerformance));
-  }
-
-  if (_.isEmpty(Session.get('studentPerformanceForClass')) ||
-        _.isEmpty(Session.get('studentPerformanceForClass')[curClassId]) ||
-        _.isEmpty(Session.get('studentPerformanceForClass')[curClassId][currentTdf])) {
-    console.log('studentPerformanceForClass:is empty');
-    Session.set('curClassPerformance', {});// AGGREGATED BY CLASS
-  } else {
-    const curClassPerformance = Session.get('studentPerformanceForClass')[curClassId][currentTdf];
-    Session.set('curClassPerformance', curClassPerformance);// AGGREGATED BY CLASS
-    console.log('curClassPerformance:', curClassPerformance);
-  }
-}
-
-async function fetchAndSetPracticeTimeIntervalsMap(date) {
-  console.log('fetch', Session.get('curClassStudentPerformance'));
-  const [studentPerformanceForClass, studentPerformanceForClassAndTdfIdMap] = await meteorCallAsync('getStudentPerformanceForClassAndTdfId', Meteor.userId(), date);
-  Session.set('studentPerformanceForClass', studentPerformanceForClass);
-  Session.set('studentPerformanceForClassAndTdfIdMap', studentPerformanceForClassAndTdfIdMap);
-  setCurClassStudents(Session.get('curClass').courseId, _state.get('currentTdf'))
-}
-
-async function hideUsersByDate(date, tdfId){
-  let hideAllUsers = true;
-  const userIds = Session.get('curClassStudentPerformance').map( (x) => x.userId );
-  usersToShow = await meteorCallAsync('getUsersByUnitUpdateDate', userIds, tdfId, date)
-  for(user of userIds){
-    if (usersToShow[user]) {
-      hideAllUsers = false;
-      $('#' + user).show()
-    }
-    else{
-      $('#' + user).hide()
-    }
-  }
-  if(hideAllUsers){
-    $('#classReportingTotal').hide();
-  }
-  else{
-    $('#classReportingTotal').show();
-  }
+async function updateTables(tdfId, date){
+  const dateInt = date || false;
+  const [historiesMet, historiesNotMet] = await meteorCallAsync('getClassPerformanceByTDF', Session.get('curClass')._id, curTdf, dateInt);
+  console.log('updateTables', historiesMet, historiesNotMet);
+  Session.set('curClassStudentPerformance', historiesMet)
+  Session.set('curClassStudentPerformanceAfterFilter', historiesNotMet);
 }
 
 Template.instructorReporting.helpers({
   INVALID: INVALID,
   curClassStudentPerformance: () => Session.get('curClassStudentPerformance'),
+  curClassStudentPerformanceAfterFilter: () => Session.get('curClassStudentPerformanceAfterFilter'),
   curInstructorReportingTdfs: () => Session.get('curInstructorReportingTdfs'),
   classes: () => Session.get('classes'),
   curClassPerformance: () => Session.get('curClassPerformance'),
   performanceLoading: () => Session.get('performanceLoading'),
-  replaceSpacesWithUnderscores: (string) => string.replace(' ', '_')
+  replaceSpacesWithUnderscores: (string) => string.replace(' ', '_'),
+  selectedTdfDueDate: () => Session.get('selectedTdfDueDate'),
+  dueDateFilter: () => Session.get('dueDateFilter'),
 });
 
 Template.instructorReporting.events({
   'change #class-select': function(event) {
     Session.set('curClassStudentPerformance', []);
-    Session.set('curClassPerformance', undefined);
+    Session.set('curClassPerformance', []);
     const curClassId = $(event.currentTarget).val();
     const curClass = Session.get('classes').find((x) => x._id == curClassId);
     Session.set('curClass', curClass);
@@ -101,13 +58,18 @@ Template.instructorReporting.events({
     _state.set('userMetThresholdMap', undefined);
   },
 
-  'change #tdf-select': function(event) {
+  'change #tdf-select': async function(event) {
     curTdf = $(event.currentTarget).val();
     _state.set('currentTdf', curTdf);
     console.log('tdf change: ', curTdf, Session.get('curClass')._id);
+    updateTables(curTdf);
     if (Session.get('curClass')) {
-      setCurClassStudents(Session.get('curClass')._id, curTdf);
+      tdfData = Session.get('allTdfs').find((x) => x._id == curTdf);
+      tdfDate = tdfData.content.tdfs.tutor.setspec.duedate;
+      Session.set('selectedTdfDueDate', tdfDate);
+      
     } else {
+      Session.set('selectedTdfDueDate', undefined);
       alert('Please select a class');
     }
     _state.set('userMetThresholdMap', undefined);
@@ -119,11 +81,56 @@ Template.instructorReporting.events({
     const dateInt = new Date(date).getTime();
     console.log('practice deadline:', dateInt);
     if(dateInt && !isNaN(dateInt)){
-      await fetchAndSetPracticeTimeIntervalsMap(dateInt, _state.get('currentTdf'));
-      hideUsersByDate(dateInt, _state.get('currentTdf'));
-      _state.set('userMetThresholdMap', undefined);
+      updateTables(_state.get('currentTdf'), dateInt);
     }
   },
+  'change #due-date-filter': async function(event) {
+    if(event.target.checked){
+      $('#practice-deadline-date').prop('disabled', true);
+      curTdfDueDate= Session.get('selectedTdfDueDate');
+      console.log('due date filter: ', curTdfDueDate);
+      $('#practice-deadline-date').val(curTdfDueDate);
+      Session.set('dueDateFilter', true);
+      const date = $('#practice-deadline-date').val();
+      const dateInt = new Date(date).getTime();
+      console.log('practice deadline:', dateInt);
+      if(dateInt && !isNaN(dateInt)){
+        updateTables(_state.get('currentTdf'),dateInt);
+      }
+    } else {
+      $('#practice-deadline-date').prop('disabled', false);
+      $('#practice-deadline-date').val('');
+      Session.set('dueDateFilter', false);
+      updateTables(curTdf, false);
+    }
+  },
+  'click #add-exception': async function(event) {
+    date = $('#exception-date').val();
+    dateInt = new Date(date).getTime();
+    const userId = $(event.currentTarget).attr('data-userid');
+    updateTables(curTdf, dateInt);
+    curTdf = _state.get('currentTdf');
+    classId = Session.get('curClass')._id;
+    console.log('add exception: ', userId, curTdf, classId);
+    await meteorCallAsync('addUserDueDateException', userId, curTdf, classId, dateInt);
+    alert('Exception added');
+    date = Session.get('selectedTdfDueDate');
+    dateInt = new Date(date).getTime();
+    updateTables(curTdf, dateInt);
+  },
+
+  'click #remove-exception': async function(event) {
+    const userId = $(event.currentTarget).attr('data-userid');
+    curTdf = _state.get('currentTdf');
+    classId = Session.get('curClass')._id;
+    console.log('remove exception: ', userId, curTdf, classId);
+    await meteorCallAsync('removeUserDueDateException', userId, curTdf, classId);
+    alert('Exception removed');
+    date = Session.get('selectedTdfDueDate');
+    dateInt = new Date(date).getTime();
+    updateTables(curTdf, dateInt);
+  }
+
 });
 
 Template.instructorReporting.onRendered(async function() {
@@ -138,6 +145,7 @@ Template.instructorReporting.onRendered(async function() {
   Session.set('curClassStudentPerformance', []);
   Session.set('curClassPerformance', undefined);
   Session.set('curInstructorReportingTdfs', []);
+  Session.set('dueDateFilter', false);
 
   Session.set('performanceLoading', true);
 
