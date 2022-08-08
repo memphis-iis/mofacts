@@ -7,7 +7,7 @@ Session.set('teachers', []);
 Session.set('curTeacher', {});
 Session.set('curClass', {});
 Session.set('systemOverloaded', false);
-Session.set('systemDown', undefined);
+Session.set('systemDown', false);
 Session.set('classesByInstructorId', {});
 
 

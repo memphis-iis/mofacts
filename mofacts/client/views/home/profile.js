@@ -36,7 +36,8 @@ Template.profile.helpers({
 
   class: function(){
     thisClass = Session.get('curClass');
-    if(thisClass.coursename){
+    console.log('class: ', thisClass);
+    if(thisClass.courseName){
       return thisClass;
     } else {
       return false;
@@ -277,6 +278,11 @@ Template.profile.rendered = async function() {
   const tdfOwnerIds = [];
   const isAdmin = Roles.userIsInRole(Meteor.user(), ['admin']);
 
+  //Get all course tdfs
+  const courseId = Session.get('curClass').courseId;
+  const courseTdfs = await meteorCallAsync('getTdfsAssignedToCourseId', courseId);
+  console.log('courseTdfs', courseTdfs, courseId);
+
   // Check all the valid TDF's
   for (const tdf of allTdfs) {
     const TDFId = tdf._id;
@@ -348,7 +354,22 @@ Template.profile.rendered = async function() {
     tdfObject.audioInputEnabled = audioInputEnabled;
     tdfObject.enableAudioPromptAndFeedback = enableAudioPromptAndFeedback;
 
-    if (tdf.visibility == 'profileOnly' || tdf.visibility == 'enabled') {
+    //Get Class TDFS
+    
+    tdfIsAssigned = courseTdfs.filter(e => e.TDFId === TDFId);
+    console.log("courseTdfs", courseTdfs);
+    console.log("tdfIsAssigned", tdfIsAssigned);
+    if(courseTdfs.length > 0){
+      if(tdfIsAssigned.length > 0) {
+        tdfObject.isAssigned = true;
+      } else {
+        tdfObject.isAssigned = false;
+      }
+    } else {
+      tdfObject.isAssigned = true;
+    }
+    
+    if ((tdf.visibility == 'profileOnly' || tdf.visibility == 'enabled') && tdfObject.isAssigned) {
       enabledTdfs.push(tdfObject);
     } else {
       disabledTdfs.push(tdfObject);

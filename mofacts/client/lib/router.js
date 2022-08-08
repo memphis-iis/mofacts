@@ -313,20 +313,36 @@ Router.route('/classes/:_teacher', {
 
     Session.set('teachers', verifiedTeachers);    
     
-    console.log(teacher);
+    console.log('teacher', teacher);
     Session.set('curTeacher', teacher);
     const allCourseSections = await meteorCallAsync('getAllCourseSections');
-    const classesByInstructorId = {};
+    console.log('allCourseSections', allCourseSections);
+    const sectionsByInstructorId = [];
+    const classesByInstructorId = [];
     //  //sectionid, courseandsectionname
-    for (const coursesection of allCourseSections) {
-      if (!classesByInstructorId[coursesection.teacheruserid]) {
-        classesByInstructorId[coursesection.teacheruserid] = [];
+    if(teacher){
+      for (const coursesection of allCourseSections) {
+        if(coursesection.teacherUserId === teacher._id){
+          classesByInstructorId.push(coursesection);
+          for(const sectionIndex in coursesection.sections){
+            section = coursesection;
+            section.sectionid = coursesection.sectionId[sectionIndex];
+            section.sectionname = coursesection.sections[sectionIndex];
+            sectionsByInstructorId.push(section);
+          }
+        }
       }
-      classesByInstructorId[coursesection.teacheruserid].push(coursesection);
+    }  else {
+      console.log('teacher not found');
+      alert('Your instructor hasn\'t set up their classes yet.  Please contact them and check back in at a later time.')
+      Router.go('/');
     }
     Session.set('classesByInstructorId', classesByInstructorId);
-    const curClasses = Session.get('classesByInstructorId')[teacher._id];
+    Session.set('sectionsByInstructorId', sectionsByInstructorId);
+    const curClasses = Session.get('classesByInstructorId');
     console.log('setTeacher', Session.get('classesByInstructorId'), teacher._id, teacher);
+    console.log('setClasses', curClasses);
+    console.log('setSections', Session.get('sectionsByInstructorId'));
     if (curClasses == undefined) {
       $('#initialInstructorSelection').prop('hidden', '');
       alert('Your instructor hasn\'t set up their classes yet.  Please contact them and check back in at a later time.');
