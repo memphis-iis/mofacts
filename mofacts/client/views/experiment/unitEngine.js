@@ -841,7 +841,7 @@ function modelUnitEngine() {
         }
       }
 
-      pFunc.qyaddiffcor = function(seq, probs){
+      pFunc.quaddiffcor = function(seq, probs){
         return pFunc.mul(seq, probs.map(function(value) {
           return value * value
         }))
