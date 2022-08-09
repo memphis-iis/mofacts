@@ -16,7 +16,15 @@
             <option value="{{this.TDFId}}">{{this.displayName}}</option>
           {{/each}}
       </select>
-        for {{curTotalTime}} minute(s). You have practiced items {{curTotalAttempts}} time(s) so far.
+        for {{curTotalTime}} minute(s). You have practiced items {{curTotalAttempts}} time(s) so far. 
+        {{#if selectedTdfDueDate}}
+        <br>
+          The due date is {{selectedTdfDueDate}}.
+        {{/if}}
+        {{#if exception}}
+        <br>
+          You are under an exception until {{exception}}.
+        {{/if}}
     <div id="dashboardGauges" hidden>
       <div class="row" style="padding-top:20px;">   
         <div class="gauge col-sm-6 col-xs-12">

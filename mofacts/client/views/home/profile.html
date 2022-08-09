@@ -28,15 +28,22 @@
 
             {{#each enabledTdfs}}
                 <div class='col-xs-12 col-sm-12 col-md-3 col-lg-3 text-center'>
-                    <button id="{{this.tdfid}}" class="btn btn-block btn-responsive tdfButton" type="button" name="{{this.name}}"
+                    <button id="{{this.tdfid}}" class="btn btn-block btn-responsive tdfButton" style="height: 80px;" name="{{this.name}}"
                         data-tdfid="{{this.tdfid}}"
                         data-lessonname="{{this.name}}"
                         data-currentStimuliSetId="{{this.currentStimuliSetId}}"
                         data-tdffilename="{{this.fileName}}"
                         data-ignoreOutOfGrammarResponses="{{this.ignoreOutOfGrammarResponses}}"
                         data-speechOutOfGrammarFeedback="{{this.speechOutOfGrammarFeedback}}"
-                        data-isMultiTdf="{{this.isMultiTdf}}">{{this.name}}<br>
+                        data-isMultiTdf="{{this.isMultiTdf}}"
+                        disabled="{{this.isOverDue}}">
+                        {{this.name}}
+                    {{#if this.dueDate}}
+                        <br>
+                        <small>Due: {{this.dueDate}}</small>
+                    {{/if}}
                     {{#if this.enableAudioPromptAndFeedback}}
+                        <br>
                         <p style="display:inline-block" title="Audio Output available for this module"><span class="glyphicon glyphicon-headphones"></span></p>
                     {{/if}}
                     <p style="display:inline-block">&nbsp;&nbsp;&nbsp;</p>
