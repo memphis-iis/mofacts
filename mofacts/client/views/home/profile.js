@@ -369,6 +369,31 @@ Template.profile.rendered = async function() {
       tdfObject.isAssigned = true;
     }
     
+    //Get exceptions
+    const exception = await meteorCallAsync('checkForUserException', Meteor.userId(), TDFId);
+    var exceptionDate = false;
+    if (exception) {
+      var exceptionRaw = new Date(exception);
+      var exceptionDate = exceptionRaw.getTime();
+      tdfObject.exceptionDate = exceptionDate;
+    }
+    const curDate = new Date().getTime();
+    tdfObject.dueDate = setspec.duedate ? setspec.duedate : false;
+    tdfObject.exceptionDate = exceptionDate || false;
+
+    tdfObject.isOverDue = false;
+    if(tdfObject.dueDate) {
+      console.log("dueDate", tdfObject.dueDate, curDate, exceptionDate);
+      if(tdfObject.dueDate < curDate) {
+       tdfObject.isOverDue = true;
+      } 
+    } 
+    if(!tdfObject.isOverDue && exceptionDate){
+      if(exceptionDate < curDate) {
+        tdfObject.isOverDue = true;
+      }
+    }
+
     if ((tdf.visibility == 'profileOnly' || tdf.visibility == 'enabled') && tdfObject.isAssigned) {
       enabledTdfs.push(tdfObject);
     } else {

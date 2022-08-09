@@ -1072,8 +1072,8 @@ function getClassPerformanceByTDF(classId, tdfId, date=false) {
       performanceMet[index].numCorrect = performanceMet[index].numCorrect + outcome || outcome;
       performanceMet[index].numIncorrect = performanceMet[index].numIncorrect + (1 - outcome) || outcome;
       performanceMet[index].percentCorrect = performanceMet[index].numCorrect / performanceMet[index].count;
-      performanceMet[index].totalTime = performanceMet[index].totalTime + history.time || history.time;
-      performanceMet[index].totalTimeMins = Math.round(performanceMet[index].totalTime / 60000);
+      performanceMet[index].totalTime = performanceMet[index].totalTime || history.time;
+      performanceMet[index].totalTimeMins = parseInt(history.time) / 60000;
       performanceMet[index].exception = exception;
     } else {
       index = performanceNotMet.findIndex((item) => item.userId == history.userId);
@@ -1089,8 +1089,8 @@ function getClassPerformanceByTDF(classId, tdfId, date=false) {
       performanceNotMet[index].numCorrect = performanceNotMet[index].numCorrect + outcome || outcome;
       performanceNotMet[index].numIncorrect = performanceNotMet[index].numIncorrect + (1 - outcome) || outcome;
       performanceNotMet[index].percentCorrect = performanceNotMet[index].numCorrect / performanceNotMet[index].count;
-      performanceNotMet[index].totalTime = performanceNotMet[index].totalTime + history.time || history.time;
-      performanceNotMet[index].totalTimeMins = Math.round(performanceNotMet[index].totalTime / 60000);
+      performanceNotMet[index].totalTime = performanceNotMet[index].totalTime || history.time;
+      performanceNotMet[index].totalTimeMins = parseInt(history.time) / 60000;
       performanceNotMet[index].exception = exception;
     }
   }
@@ -1114,11 +1114,26 @@ async function addUserDueDateException(userId, tdfId, classId, date){
   Meteor.users.update({_id: userId}, user);
 }
 
-async function removeUserDueDateException(userId, tdfId, classId){
-  serverConsole('removeUserDueDateException', userId, tdfId, classId);
+async function checkForUserException(userId, tdfId){
+  serverConsole('checkForUserException', userId, tdfId);
   user = Meteor.users.findOne({_id: userId});
   if(user.profile.dueDateExceptions){
-    exceptionIndex = user.profile.dueDateExceptions.findIndex((item) => item.tdfId == tdfId && item.classId == classId);
+    var exceptions = user.profile.dueDateExceptions;
+    var exception = exceptions.find((item) => item.tdfId == tdfId);
+    if(exception){
+      exceptionDate = new Date(exception.date);
+      exceptionDateReadable = exceptionDate.toLocaleDateString();
+      return exceptionDateReadable;
+    }
+  }
+  return false;
+}
+
+async function removeUserDueDateException(userId, tdfId){
+  serverConsole('removeUserDueDateException', userId, tdfId);
+  user = Meteor.users.findOne({_id: userId});
+  if(user.profile.dueDateExceptions){
+    exceptionIndex = user.profile.dueDateExceptions.findIndex((item) => item.tdfId == tdfId);
     if(exceptionIndex > -1){
       user.profile.dueDateExceptions.splice(exceptionIndex, 1);
     } else {
@@ -1894,7 +1909,7 @@ Meteor.methods({
 
   insertHiddenItem, getHiddenItems, getUserLastFeedbackTypeFromHistory,
 
-  getTdfIdByStimSetIdAndFileName, getItemsByFileName, addUserDueDateException, removeUserDueDateException,
+  getTdfIdByStimSetIdAndFileName, getItemsByFileName, addUserDueDateException, removeUserDueDateException, checkForUserException,
 
 
   makeGoogleTTSApiCall: async function(TDFId, message, audioPromptSpeakingRate, audioVolume, selectedVoice) {

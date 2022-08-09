@@ -67,7 +67,7 @@ Template.profileSouthwest.rendered = async function() {
   const allTdfs = await meteorCallAsync('getAllTdfs');
   Session.set('allTdfs', allTdfs);
   const curSectionId = Session.get('curSectionId');
-  Meteor.call('getTdfsAssignedToStudent', Meteor.userId(), curSectionId, function(err, result) {
+  Meteor.call('getTdfsAssignedToStudent', Meteor.userId(), curSectionId, async function(err, result) {
     console.log('err: ' + err + ', res: ' + result);
     const assignedTdfs = result;
     console.log('assignedTdfs: ', assignedTdfs);
@@ -103,6 +103,35 @@ Template.profileSouthwest.rendered = async function() {
       let audioInputEnabled = setspec.audioInputEnabled == 'true';
       const enableAudioPromptAndFeedback = setspec.enableAudioPromptAndFeedback == 'true';
 
+      //If the tdf has a due date, display
+      if(setspec.duedate){
+        innerBtnHtml += "<small>Due: " + setspec.duedate + "</small><br>";
+      }
+
+      //If the tdf is overdue, disable
+      const exception = getTDFExceptionStatus(Meteor.userId(), TDFId);
+      var exceptionDate = false;
+      if (exception) {
+        var exceptionRaw = new Date(exception);
+        var exceptionDate = exceptionRaw.getTime();
+      }
+      const curDate = new Date().getTime();
+      dueDate = setspec.duedate ? setspec.duedate : false;
+  
+      isOverDue = false;
+      if(dueDate) {
+        console.log("dueDate", dueDate, curDate, exceptionDate);
+        if(dueDate < curDate) {
+         isOverDue = true;
+        } 
+      } 
+      if(isOverDue && exceptionDate){
+        if(exceptionDate < curDate) {
+          isOverDue = true;
+        }
+      }
+
+
       const audioInputSpeechAPIKeyAvailable = !!setspec.speechAPIKey;
 
       // Only display the audio input available if enabled in tdf and tdf has key for it
@@ -132,6 +161,7 @@ Template.profileSouthwest.rendered = async function() {
               .attr('data-ignoreOutOfGrammarResponses', ignoreOutOfGrammarResponses)
               .attr('data-speechOutOfGrammarFeedback', speechOutOfGrammarFeedback)
               .attr('data-isMultiTdf', isMultiTdf)
+              .attr('disabled', isOverDue)
               .html(innerBtnHtml), audioInputEnabled, audioOutputEnabled,
       );
     });
@@ -141,3 +171,14 @@ Template.profileSouthwest.rendered = async function() {
 // We'll use this in card.js if audio input is enabled and user has provided a
 // speech API key
 Session.set('speechAPIKey', null);
+
+async function getTDFExceptionStatus(userId, tdfId) {
+  const exception =  meteorCallAsync('checkForUserException', userId, tdfId, function (err, result) {
+    var exceptionDate = false;
+    if (result) {
+      var exceptionRaw = new Date(result);
+      var exceptionDate = exceptionRaw.getTime();
+    }
+    return exceptionDate;
+  });
+}
