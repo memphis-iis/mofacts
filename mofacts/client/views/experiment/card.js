@@ -1839,7 +1839,8 @@ function gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect,
     'typeOfResponse': responseType,
     'responseValue': _.trim(userAnswer),
     'displayedStimulus': Session.get('currentDisplay'),
-
+    'sectionId': Session.get('curSectionId'),
+    'teacherId': Session.get('curTeacher')?._id,
     'anonStudentId': Meteor.user().username,
     'sessionID': sessionID,
 

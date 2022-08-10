@@ -27,7 +27,7 @@ import {
   getTdfByFileName,
   getStimuliSetById,
   getHistoryByTDFfileName,
-  getListOfStimTagsFromStims,
+  getListOfStimTagsByTDFFileNames,
   serverConsole} from './methods';
 import {outputFields} from '../common/Definitions';
 import {getHistory} from '../server/orm';
@@ -37,8 +37,8 @@ export {createExperimentExport};
 let FIELDSDS = JSON.parse(JSON.stringify(outputFields));
 
 // Helper to transform our output record into a delimited record
-function delimitedRecord(rec, listOfDynamicStimTags, isHeader = false) {
-  const vals = new Array(FIELDSDS.length);
+async function delimitedRecord(rec, listOfDynamicStimTags, isHeader = false) {
+  let vals = new Array(FIELDSDS.length);
   for (let i = 0; i < FIELDSDS.length; ++i) {
     vals[i] = _.trim(rec[FIELDSDS[i]])
         .replace(/\s+/gm, ' ') // Norm ws and remove non-space ws
@@ -52,12 +52,12 @@ function delimitedRecord(rec, listOfDynamicStimTags, isHeader = false) {
       .slice(0, 255) // Respect len limits for data shop
       .replace(/\s+$/gm, '')); // Might have revealed embedded space at end
   }
-
-  return vals.join('\t');
+  vals = vals.join('\t') + "\n"
+  return vals;
 }
 
-async function getValuesOfStimTagList(stimuliSet, clusterKC, stimulusKC, tagList) {
-  const curStimSet = stimuliSet.find((x) => x.clusterKC==clusterKC && x.stimulusKC==stimulusKC);
+async function getValuesOfStimTagList(stimuliSet, itemId, tagList) {
+  const curStimSet = stimuliSet.find((x) => x.itemId == itemId);
   const valueDict = {};
 
   for (const tag of tagList) {
@@ -73,14 +73,11 @@ async function getValuesOfStimTagList(stimuliSet, clusterKC, stimulusKC, tagList
 // Exported main function: call recordAcceptor with each record generated
 // for expName in datashop format. We do NOT terminate our records.
 // We return the number of records written
-async function createExperimentExport(expName, isFirstInFileArray = true) {
-  const tdf = await getTdfByFileName(expName);
-  const stimuliSetId = tdf.stimuliSetId;
-  const stims = await getStimuliSetById(stimuliSetId);
-  
+async function createExperimentExport(expName, requestingUserId) {
+  const requestingUserName = Meteor.users.findOne({_id: requestingUserId}).username;
   let record = '';
   const header = {};
-  let expNames = [];
+  let expNames = [];  
 
   if (_.isString(expName)) {
     expNames.push(expName);
@@ -88,7 +85,7 @@ async function createExperimentExport(expName, isFirstInFileArray = true) {
     expNames = expName;
   }
   
-  const listOfDynamicStimTags = await getListOfStimTagsFromStims(stims);
+  const listOfDynamicStimTags = await getListOfStimTagsByTDFFileNames(expNames)
   const listOfDynamicStimTagsWithColumnNames = [];
   for (const tag of listOfDynamicStimTags) {
     let renamedField = 'CF (' + tag + ')';
@@ -114,34 +111,31 @@ async function createExperimentExport(expName, isFirstInFileArray = true) {
     header[f] = t;
   });
 
-  if(isFirstInFileArray) {
-    record += delimitedRecord(header, listOfDynamicStimTags, true) + "\n";
-  }
+  record += await delimitedRecord(header, listOfDynamicStimTags, true);
 
   Meteor.call('updatePerformanceData', 'utlQuery', 'experiment_times.createExperimentExport', 'SERVER_REPORT');
-  let expIndex = 1; 
-  let expCount = expNames.length;
   for(expName of expNames){
+    const tdf = await getTdfByFileName(expName);
+    const stimuliSetId = tdf.stimuliSetId;
+    const stims = await getStimuliSetById(stimuliSetId);
     const histories = await getHistoryByTDFfileName(expName);
-    let hisIndex = 1; 
-    let hisCount = histories.length;
     for (let history of histories) {
-      console.log(`Experiment: ${expIndex} / ${expCount} | History: ${hisIndex} / ${hisCount}`)
       try {
-        const clusterKC = history.KCCluster;
-        const stimulusKC = history.KCDefault;
+        const itemId = history.itemid;
+        const teacherUserName = history.conditionTypeE?.split('/')[0];
+        const teacherId = history.teacherId;
         history = getHistory(history);
-        const dynamicStimTagValues = await getValuesOfStimTagList(stims, clusterKC, stimulusKC, listOfDynamicStimTags);
-        for (const tag of Object.keys(dynamicStimTagValues)) {
-          history["CF (" + tag + ")"] = dynamicStimTagValues[tag];
+        if(Roles.userIsInRole(requestingUserId, 'admin') || teacherUserName == requestingUserName || teacherId == requestingUserId){
+          const dynamicStimTagValues = await getValuesOfStimTagList(stims, itemId, listOfDynamicStimTags);
+          for (const tag of Object.keys(dynamicStimTagValues)) {
+            history["CF (" + tag + ")"] = dynamicStimTagValues[tag];
+          }
+          record += await delimitedRecord(history, listOfDynamicStimTags, false);
         }
-        record += await delimitedRecord(history, listOfDynamicStimTags, false) + "\n";
       } catch (e) {
         serverConsole('There was an error populating the record - it will be skipped', e, e.stack);
       }
-      hisIndex++
     }
-    expIndex++
   }
   return record;
 }

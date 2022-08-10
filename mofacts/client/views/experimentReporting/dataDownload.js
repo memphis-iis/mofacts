@@ -22,29 +22,6 @@ Template.dataDownload.onRendered(async function() {
   Session.set('classesByInstructorId', classesByInstructorId);
   const allTeachers = await meteorCallAsync('getAllTeachers');
   Session.set('allUsersWithTeacherRole', allTeachers);
-
-  if (isAdmin()) {
-    const clozeEdits = [];
-
-    Meteor.call('getClozeEditAuthors', function(err, res) {
-      if (err) {
-        console.log('error getting cloze edit authors: ', err);
-      } else {
-        const authors = res;
-
-        _.each(_.keys(authors), function(authorId) {
-          const clozeEdit = {};
-
-          clozeEdit.authorId = authorId;
-          clozeEdit.disp = authors[authorId];
-
-          clozeEdits.push(clozeEdit);
-        });
-      }
-
-      Session.set('clozeEdits', clozeEdits);
-    });
-  }
 });
 
 Template.dataDownload.helpers({
@@ -133,9 +110,6 @@ Template.dataDownload.helpers({
 
     return dataDownloads;
   },
-  'userClozeEdits': function() {
-    return Session.get('clozeEdits');
-  },
   'isTeacherSelected': function() {
     return !_.isEmpty(Template.instance().selectedTeacherId.get());
   },
@@ -205,12 +179,6 @@ Template.dataDownload.events({
     const path = `${sitePath}/data-by-class/${classId}`
     makeDataDownloadAPICall(path);
   },
-
-  'click #downloadClozeEditHistory': function(event){
-    event.preventDefault();
-    const path = `${sitePath}/clozeEditHistory/${event.currentTarget.getAttribute('data-authorID')}`
-    makeDataDownloadAPICall(path);
-  }
 });
 
 function makeDataDownloadAPICall(path){

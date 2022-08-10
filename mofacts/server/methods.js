@@ -20,7 +20,7 @@ export {
   getTdfBy_id,
   getHistoryByTDFfileName,
   getListOfStimTags,
-  getListOfStimTagsFromStims,
+  getListOfStimTagsByTDFFileNames,
   getStimuliSetById,
   getDisplayAnswerText,
   serverConsole,
@@ -909,7 +909,7 @@ async function getHiddenItems(userId, tdfId) {
   return hiddenItems;
 }
 async function getUserLastFeedbackTypeFromHistory(tdfID) {
-  const userHistory =  Histories.findOne({TDFId: tdfID, userId: Meteor.userId}, {sort: {time: -1}})
+  const userHistory =  Histories.findOne({TDFId: tdfID, userId: Meteor.userId}, {sort: {time: -1}})?.feedbackType
   let feedbackType = 'undefined';
   if( userHistory && userHistory.feedbackType ) {
     feedbackType = userHistory.feedbackType;
@@ -919,11 +919,7 @@ async function getUserLastFeedbackTypeFromHistory(tdfID) {
 async function insertHistory(historyRecord) {
   const tdfFileName = historyRecord['Condition_Typea'];
   const dynamicTagFields = await getListOfStimTags(tdfFileName);
-  userHistory = Histories.findOne({}, {limit: 1, sort: {eventId: -1}});
-  let eventId = 1;
-  if(userHistory && userHistory.eventId) {
-    eventId = userHistory.eventId + 1;
-  }
+  const eventId = Histories.findOne({}, {limit: 1, sort: {eventId: -1}})?.eventId + 1 || 1;
   historyRecord.eventId = eventId
   historyRecord.dynamicTagFields = dynamicTagFields || [];
   historyRecord.recordedServerTime = (new Date()).getTime();
@@ -1062,17 +1058,22 @@ async function getListOfStimTags(tdfFileName) {
   return Array.from(allTagsInStimFile);
 }
 
-async function getListOfStimTagsFromStims(stims) {
+async function getListOfStimTagsByTDFFileNames(TDFFileNames){
   const allTagsInStimFile = new Set();
 
-  for (const stim of stims) {
-    if (stim.tags) {
-      for (const tagName of Object.keys(stim.tags)) {
-        allTagsInStimFile.add(tagName);
+  for (const TDFFileName of TDFFileNames){
+    const TDF = await getTdfByFileName(TDFFileName);
+    const stimSetId = TDF.stimuliSetId;
+    const stims = await getStimuliSetById(stimSetId);
+
+    for (const stim of stims) {
+      if (stim.tags) {
+        for (const tagName of Object.keys(stim.tags)) {
+          allTagsInStimFile.add(tagName);
+        }
       }
     }
   }
-
   return Array.from(allTagsInStimFile);
 }
 
@@ -1944,14 +1945,6 @@ Meteor.methods({
   //   return symSpell.lookupCompound(userAnswer, maxEditDistance)
   // },
 
-  getClozeEditAuthors: function() {
-    const authorIDs = {};
-    ClozeEditHistory.find({}).forEach(function(entry) {
-      authorIDs[entry.user] = Meteor.users.findOne({_id: entry.user})?.username || undefined;
-    });
-    return authorIDs;
-  },
-
   sendErrorReportSummaries: function() {
     sendErrorReportSummaries();
   },
@@ -2815,10 +2808,8 @@ Router.route('data-by-teacher', {
       'File-Name': fileName
     });
 
-    for(tdfName of tdfNames){
-      response.write(await createExperimentExport(tdfName));
-      response.write('\r\n');
-    }
+    console.log(tdfNames);
+    response.write(await createExperimentExport(tdfNames, uid));
 
     tdfNames.forEach(function(tdf) {
       serverConsole('Sent all  data for', tdf, 'as file', fileName);
@@ -2883,10 +2874,7 @@ Router.route('data-by-class', {
       'File-Name': fileName
     });
 
-    for(tdfName of tdfFileNames){
-      response.write(await createExperimentExport(tdfName));
-      response.write('\r\n');
-    }
+    response.write(await createExperimentExport(tdfFileNames, userId));
 
     tdfFileNames.forEach(function(tdf) {
       serverConsole('Sent all  data for', tdf, 'as file', fileName, 'with record-count:', recCount);
@@ -2935,7 +2923,7 @@ Router.route('data-by-file', {
       'File-Name': fileName
     });
 
-    response.write(await createExperimentExport(exp));
+    response.write(await createExperimentExport(exp, userId));
     response.end('');
 
     serverConsole('Sent all  data for', exp, 'as file', fileName);
