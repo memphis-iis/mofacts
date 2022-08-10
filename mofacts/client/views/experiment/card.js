@@ -590,6 +590,11 @@ Template.card.helpers({
     return text;
   },
 
+  'dialogueText': function() {
+    const text = Session.get('dialogueDisplay') ? Session.get('dialogueDisplay').text : undefined;
+    return text
+  },
+
   'curImgSrc': function() {
     const curImgSrc = Session.get('currentDisplay') ? Session.get('currentDisplay').imgSrc : undefined;
     if (curImgSrc) {
@@ -742,6 +747,7 @@ Template.card.helpers({
     return (disp.minSecs > 0 || disp.maxSecs > 0);
   },
 
+  'userInDiaglogue': () => Session.get('showDialogueText'),
 
   'audioEnabled': () => Session.get('audioEnabled'),
 
