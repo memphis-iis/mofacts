@@ -44,13 +44,4 @@
             {{/each}}
         </ul>
     </div>
-
-    <div class="col-md-12" id="userClozeEditsContainer">
-        <legend class="downloadLegend">User Cloze Edits</legend>
-        <ul class="downloadContainerList" id="userClozeEditsDownloadContainer">
-            {{#each userClozeEdits}}
-                <li><a class="exp-data-link" id="downloadClozeEditHistory" target="_blank" data-authorID="{{this.authorId}}" href>Download: {{this.disp}}</a></li>
-            {{/each}}
-        </ul>
-    </div>
 </template>
