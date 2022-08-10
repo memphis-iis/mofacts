@@ -52,6 +52,7 @@ function updateDialogueDisplay(newDisplay) {
   $('#dialogueUserAnswer').val('');
   Session.set('displayReady', true);
   Tracker.afterFlush(function() {
+    $('#textQuestion').css({'color': '#383d41', 'background-color': '#e2e3e5', 'border-color': '#d6d8db'})
     console.log('dialogue after flush');
     $('#dialogueUserAnswer').focus();
   });
@@ -133,6 +134,7 @@ function initiateDialogue(incorrectUserAnswer, callback, lookupFailCallback) {
   Session.set('showDialogueText', true);
   const clozeItem = Session.get('originalQuestion') || Session.get('currentDisplay').clozeText;
   const clozeAnswer = Session.get('originalAnswer') || Session.get('currentAnswer');
+  $('#textQuestion').css({'color': '#383d41', 'background-color': '#e2e3e5', 'border-color': '#d6d8db'})
 
   Meteor.call('initializeTutorialDialogue', clozeAnswer, incorrectUserAnswer, clozeItem, (err, res)=>{
     if (err) {
