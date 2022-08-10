@@ -47,11 +47,12 @@ function updateDialogueDisplay(newDisplay) {
   Session.set('displayReady', false);
   // set prompt and feedback here
   const displayWrapper = {'text': newDisplay};
-  Session.set('currentDisplay', displayWrapper);
+  Session.set('dialogueDisplay', displayWrapper);
   $('#dialogueUserAnswer').prop('disabled', false);
   $('#dialogueUserAnswer').val('');
   Session.set('displayReady', true);
   Tracker.afterFlush(function() {
+    // $('#textQuestion').css({'color': '#383d41', 'background-color': '#e2e3e5', 'border-color': '#d6d8db'})
     console.log('dialogue after flush');
     $('#dialogueUserAnswer').focus();
   });
@@ -110,6 +111,7 @@ function dialogueContinue() {
       Session.set('dialogueStart', undefined);
       Session.set('displayReady', false);
       Session.set('dialogueLoopStage', undefined);
+      Session.set('showDialogueText', false);
       // restore session state
       Session.set('currentDisplay', dialogueCurrentDisplaySaver);
       Session.set('closeQuestionParts', closeQuestionPartsSaver);
@@ -129,8 +131,10 @@ function dialogueContinue() {
 
 function initiateDialogue(incorrectUserAnswer, callback, lookupFailCallback) {
   Session.set('dialogueStart', Date.now());
+  Session.set('showDialogueText', true);
   const clozeItem = Session.get('originalQuestion') || Session.get('currentDisplay').clozeText;
   const clozeAnswer = Session.get('originalAnswer') || Session.get('currentAnswer');
+  // $('#textQuestion').css({'color': '#383d41', 'background-color': '#e2e3e5', 'border-color': '#d6d8db'})
 
   Meteor.call('initializeTutorialDialogue', clozeAnswer, incorrectUserAnswer, clozeItem, (err, res)=>{
     if (err) {

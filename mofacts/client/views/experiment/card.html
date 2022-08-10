@@ -80,6 +80,17 @@
                         </div>
                     </div>
                 </div>
+                {{#if userInDiaglogue}}   
+                    <div class="row">
+                        <div class="container-fluid" id="displayContainer">
+                            <div id="leftPanel" class="col-md-11">
+                                <div class="marginLeftAndRight alert alert-info {{fontSizeClass}}" id="textQuestion">
+                                    {{{dialogueText}}}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {{/if}}
             {{/if}}
 
             {{#if study}}
