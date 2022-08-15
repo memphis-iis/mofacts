@@ -37,19 +37,27 @@ export {createExperimentExport};
 let FIELDSDS = JSON.parse(JSON.stringify(outputFields));
 
 // Helper to transform our output record into a delimited record
+// Need to adhere to these data limittions: https://datashop.memphis.edu/help?page=importFormatTd
 async function delimitedRecord(rec, listOfDynamicStimTags, isHeader = false) {
   let vals = new Array(FIELDSDS.length);
   for (let i = 0; i < FIELDSDS.length; ++i) {
+    let charLimit = 255;
+    if(FIELDSDS[i] == 'Feedback Text' || FIELDSDS[i].slice(0,2) == "KC"){
+      charLimit = 65535;
+    }
+    else if(FIELDSDS[i].slice(0,2) == "CF"){
+      charLimit = 65000;
+    }
     vals[i] = _.trim(rec[FIELDSDS[i]])
         .replace(/\s+/gm, ' ') // Norm ws and remove non-space ws
-        .slice(0, 255) // Respect len limits for data shop
+        .slice(0, charLimit) // Respect len limits for data shop
         .replace(/\s+$/gm, ''); // Might have revealed embedded space at end
   }
   for(let i = 0; i < listOfDynamicStimTags.length; i++){
     let record = isHeader ? `CF (${listOfDynamicStimTags[i]})` : rec[`CF (${listOfDynamicStimTags[i]})`];
     vals.push(_.trim(record)
       .replace(/\s+/gm, ' ') // Norm ws and remove non-space ws
-      .slice(0, 255) // Respect len limits for data shop
+      .slice(0, 65000) // CF fields are limited too 65000 characters
       .replace(/\s+$/gm, '')); // Might have revealed embedded space at end
   }
   vals = vals.join('\t') + "\n"

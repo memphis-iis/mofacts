@@ -76,7 +76,7 @@ function getHistory(history) {
     'KC Category(Cluster)': '',
     'CF (Overlearning)': false,
     'CF (Note)': '',
-    'Dialogue History': JSON.stringify(history.dialogueHistory),
+    'CF (Dialogue History)': JSON.stringify(history.dialogueHistory),
     'itemid': history.itemId,
     'useridtdfid': history.userIdTDFId,
     'kcid': history.KCId,
@@ -134,7 +134,7 @@ function getHistory(history) {
     'dynamicTagFields': history.dynamicTagFields,
     'recordedServerTime': history.recordedServerTime,
     'Hint Level':history.hintLevel,
-    'Entry Point': history.entryPoint
+    'CF (Entry Point)': history.entryPoint
   };
   return historyOutput;
 }
