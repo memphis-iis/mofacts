@@ -38,13 +38,9 @@ const fs = Npm.require('fs');
 const https = require('https')
 const { randomBytes } = require('crypto')
 
-if (Meteor.isClient) {
-  Meteor.subscribe('files.assets.all');
-}
-
 if (Meteor.isServer) {
   Meteor.publish('files.assets.all', function () {
-    return DynamicAssets.find().cursor;
+    return DynamicAssets.collection.find();
   });
 }
 
@@ -1913,7 +1909,6 @@ Meteor.methods({
     StimSyllables.remove({filename: stimSetId});
     serverConsole('updateStimSyllables');
     const curStimuliSet = Items.find({stimuliSetId: stimSetId}).fetch();
-    serverConsole('curStimuliSet: ' + JSON.stringify(curStimuliSet));
     if (curStimuliSet) {
       const answerSyllableMap = {};
       for (const stim of curStimuliSet) {
@@ -2305,11 +2300,10 @@ Meteor.methods({
     return result;
   },
   // Package Uploader
-  processPackageUpload: function(path,fileObject, owner){
+  processPackageUpload: function(path, owner){
     const fs = Npm.require('fs');
     const unzip = Npm.require('unzipper');
-    let links = [];
-    var stream = fs.createReadStream(path)
+    fs.createReadStream(path)
       .pipe(unzip.Parse())
       .on('entry', async function(entry){
         var tdfContent = [];
@@ -2317,9 +2311,9 @@ Meteor.methods({
         var referenceContents = [];
         var fileNameArray = entry.path.split("/");
         var fileName = fileNameArray[fileNameArray.length - 1];
-        var content =  await entry.buffer().then(function(file, fileObject){
-          fileSplit = fileName.split(".");
-          type = fileSplit[fileSplit.length - 1];
+        var content =  await entry.buffer().then(async function(file){
+          let fileSplit = fileName.split(".");
+          let type = fileSplit[fileSplit.length - 1];
           if(type =="json"){
             rawFileContents = file.toString();
             parsedFileContents = JSON.parse(rawFileContents);
@@ -2341,14 +2335,31 @@ Meteor.methods({
               tdfContent.push(fileFinal);
             }
           }else{
-            console.log("Uploading:", fileName);
-            DynamicAssets.write(file, {
-              fileName: fileName,
-              meta: {
-                owner: owner,
+            serverConsole("Uploading:", fileName);
+            const foundFile = DynamicAssets.findOne({userId: owner, name: fileName})
+            if(foundFile){
+              foundFile.remove(function (error){
+                if (error) {
+                  serverConsole(`File ${fileName} could not be removed`, error)
+                }
+                else{
+                  serverConsole(`File ${fileName} already exists, overwritting.`)
+                  DynamicAssets.write(file, {
+                    fileName: fileName,
+                    userId: owner,
+                    parent: path
+                  });
+                }
+              })
+            }
+            else{
+              serverConsole(`File ${fileName} doesn't exist, uploading`)
+              DynamicAssets.write(file, {
+                fileName: fileName,
+                userId: owner,
                 parent: path
-              }
-            });
+              });
+            }
           }
           return {tdfContent,stimContent}
         });
@@ -2361,33 +2372,32 @@ Meteor.methods({
               parent: fileRef.name
             }
             referenceContents.push(data);
+            DynamicAssets.collection.update({_id: fileRef._id}, {$set: {meta: {link: replacePath}}});
         });
         for(let files of content.stimContent){
-          console.log("Processing stim file:", files.fileName);
+          serverConsole("Processing stim file:", files.fileName);
             newContents = files.contents;
             for(let referenceFile of referenceContents){
               toReplace = newContents;
               theSplit = toReplace.split(referenceFile.fileName);
               if(theSplit.length > 1){
-                console.log("replacing", theSplit.length - 1,"references:", files.fileName, referenceFile.fileName, referenceFile.replacePath);
+                serverConsole("replacing", theSplit.length - 1,"references:", files.fileName, referenceFile.fileName, referenceFile.replacePath);
                 newContents = theSplit.join(referenceFile.replacePath);
               } 
             }
-            console.log(newContents);
             Meteor.call("saveContentFile",files.type, files.fileName,newContents, owner);
         }
         for(let files of content.tdfContent){
-          console.log("Processing tdf file:", files.fileName);
+          serverConsole("Processing tdf file:", files.fileName);
           newContents = files.contents;
           for(let referenceFile of referenceContents){
             toReplace = newContents;
             theSplit = toReplace.split(referenceFile.fileName);
             if(theSplit.length > 1){
-              console.log("replacing", theSplit.length - 1,"references:", files.fileName, referenceFile.fileName, referenceFile.replacePath);
+              serverConsole("replacing", theSplit.length - 1,"references:", files.fileName, referenceFile.fileName, referenceFile.replacePath);
               newContents = theSplit.join(referenceFile.replacePath);
             } 
           }
-          console.log(newContents);
           Meteor.call("saveContentFile",files.type, files.fileName,newContents, owner);
         }
       });
