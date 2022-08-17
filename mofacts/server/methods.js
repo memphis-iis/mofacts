@@ -556,9 +556,14 @@ async function getAllCourseSections() {
         }
       },
       {
+        $unwind: {
+          path: "$section"
+        }
+      },
+      {
         $project: {
           _id: 0,
-          sections: "$section.sectionName",
+          sectionName: "$section.sectionName",
           courseId: "$_id",
           courseName: 1,
           teacherUserId: 1,
@@ -2095,8 +2100,15 @@ Meteor.methods({
     check(userId, String);
     if (!Meteor.users.findOne(userId))
       throw new Meteor.Error(404, 'User not found');
-      Meteor.users.update(this.userId, { $set: { 'profile.impersonating': userId }});
-       this.setUserId(userId);
+    Meteor.users.update(this.userId, { $set: { 'profile.impersonating': userId }});
+    this.setUserId(userId);
+  },
+
+  setUserEntryPoint: function(entryPoint){
+    console.log(Meteor.userId());
+    if(Meteor.userId()){
+      Meteor.users.update(Meteor.userId(), { $set: { 'profile.entryPoint': entryPoint}})
+    }
   },
 
   clearImpersonation: function(){
