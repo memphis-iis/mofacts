@@ -38,7 +38,7 @@ Template.assetUpload.events({
       }
     }
   },
-  'click .imageLink'(e, template) {
+  'click .imageLink'(e) {
     const url = $(e.currentTarget).data('link');
     const img = '<img src="'+url+'">';
     const popup = window.open();
