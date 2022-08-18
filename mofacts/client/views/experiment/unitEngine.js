@@ -1654,7 +1654,7 @@ function modelUnitEngine() {
       console.log('cardAnswered, curTrialInfo:', currentStimProbability, card, stim);
       if (wasCorrect) card.priorCorrect += 1;
       else card.priorIncorrect += 1;
-      
+
       card.outcomeStack.push(wasCorrect ? 1 : 0);
 
       if (wasCorrect) {
