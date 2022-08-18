@@ -56,7 +56,6 @@ function testLogin() {
     }
 
     const newUserId = result;
-
     Meteor.call('addUserToTeachersClass', newUserId, Session.get('curTeacher')._id, Session.get('curClass').sectionid,
         function(err, result) {
           if (err) {
@@ -82,6 +81,11 @@ function testLogin() {
                 console.log(currentUser + ' was test logged in successfully! Current route is ',
                     Router.current().route.getName());
               }
+              let sectionName = "";
+              if(Session.get('curClass').sectionName){
+                sectionName = "/" + Session.get('curClass').sectionName;
+              }
+              Meteor.call('setUserEntryPoint', `${Session.get('curTeacher').username}/${Session.get('curClass').courseName + sectionName}`);
               Meteor.call('logUserAgentAndLoginTime', Meteor.userId(), navigator.userAgent);
               Meteor.call('updatePerformanceData', 'login', 'signinSouthwest.testLogin', Meteor.userId());
               Meteor.logoutOtherClients();
@@ -228,13 +232,16 @@ Template.signInSouthwest.events({
       if (!!data && !!data.error) {
         alert('Problem logging in: ' + data.error);
       } else {
-        Meteor.call('addUserToTeachersClass', Meteor.userId(), Session.get('curTeacher')._id,
-            Session.get('curClass').sectionid,
-            function(err, result) {
+        Meteor.call('addUserToTeachersClass', Meteor.userId(), Session.get('curTeacher')._id, Session.get('curClass').sectionid, function(err, result) {
               if (err) {
                 console.log('error adding user to teacher class: ' + err);
               }
               console.log('addUserToTeachersClass result: ' + result);
+              let sectionName = "";
+              if(Session.get('curClass').sectionName){
+                sectionName = "/" + Session.get('curClass').sectionName;
+              }
+              Meteor.call('setUserEntryPoint', `${Session.get('curTeacher').username}/${Session.get('curClass').courseName + sectionName}`);
               Meteor.call('logUserAgentAndLoginTime', Meteor.userId(), navigator.userAgent);
               Meteor.call('updatePerformanceData', 'login', 'signinSouthwest.clickSamlLogin', Meteor.userId());
               Meteor.logoutOtherClients();

@@ -63,6 +63,7 @@ function testLogin() {
         }
         Meteor.call('logUserAgentAndLoginTime', Meteor.userId(), navigator.userAgent);
         Meteor.call('updatePerformanceData', 'login', 'signinOauth.testLogin', Meteor.userId());
+        Meteor.call('setUserEntryPoint', `direct`);
         Meteor.logoutOtherClients();
         Router.go('/profile');
       }
@@ -105,7 +106,7 @@ Template.signInOauth.events({
     const options = {
       requestOfflineToken: true,
       requestPermissions: ['email', 'profile'],
-      loginStyle: 'redirect',
+      loginStyle: 'popup',
     };
 
     Meteor.loginWithGoogle(options, function(err) {
@@ -124,6 +125,7 @@ Template.signInOauth.events({
       }
       Meteor.call('logUserAgentAndLoginTime', Meteor.userId(), navigator.userAgent);
       Meteor.call('updatePerformanceData', 'login', 'signinOauth.clickSigninButton', Meteor.userId());
+      Meteor.call('setUserEntryPoint', `direct`);
       Meteor.logoutOtherClients();
       Router.go('/profile');
     });

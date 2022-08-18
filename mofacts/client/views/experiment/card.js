@@ -1819,15 +1819,6 @@ function gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect,
   if (isCorrect) {
     outcome = 'correct';
   }
-  let entryPoint = 'direct'
-  if(Session.get('curTeacher') && Session.get('curClass') && Session.get('curTeacher').username){
-    if(typeof Session.get('curClass').sectionname === "undefined"){
-      sectionname = ""
-    } else {
-      sectionname = "/" + Session.get('curClass').sectionname;
-    }
-    entryPoint = Session.get('curTeacher').username + '/' + Session.get('curClass').coursename + sectionname;
-  }
   const answerLogRecord = {
     'itemId': _id,
     'KCId': stimulusKC,
@@ -1902,7 +1893,7 @@ function gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect,
     'dialogueHistory': dialogueHistory || null,
     'instructionQuestionResult': Session.get('instructionQuestionResult') || false,
     'hintLevel': whichHintLevel,
-    'entryPoint': entryPoint
+    'entryPoint': Meteor.user().profile.entryPoint
   };
   return answerLogRecord;
 }
