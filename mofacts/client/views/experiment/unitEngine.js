@@ -766,7 +766,7 @@ function modelUnitEngine() {
             console.log('no cached syllables for: ' + currentStimuliSetId + ' | ' + answerText + '. hintlevel index is 1.');
           } else {
             const stimSyllableData = stimCluster.stims[j].syllables;
-            hintLevelIndex = stimSyllableData.count;
+            hintLevelIndex = stimSyllableData.length;
             console.log('syllables detected for: ' + currentStimuliSetId + ' | ' + answerText + '. hintlevel index is ' + hintLevelIndex);
           }
           parms = this.calculateSingleProb(i, j, 0, count, stimCluster);
@@ -1654,7 +1654,7 @@ function modelUnitEngine() {
       console.log('cardAnswered, curTrialInfo:', currentStimProbability, card, stim);
       if (wasCorrect) card.priorCorrect += 1;
       else card.priorIncorrect += 1;
-
+      
       card.outcomeStack.push(wasCorrect ? 1 : 0);
 
       if (wasCorrect) {
