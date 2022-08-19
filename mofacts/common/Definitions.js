@@ -41,11 +41,11 @@ export const outputFields = [
   'Hint Level',
   'Feedback Type',
   'Feedback Text',
-  'Dialogue History',
   'KC (Default)',
   'KC Category(Default)',
   'KC (Cluster)',
   'KC Category(Cluster)',
+  'CF (Dialogue History)',
   'CF (Audio Input Enabled)',
   'CF (Audio Output Enabled)',
   'CF (Display Order)', // questionIndex
@@ -66,5 +66,5 @@ export const outputFields = [
   'CF (Button Order)', // CF buttonOrder
   'CF (Item Removed)', // item was reported by the user as wrong
   'CF (Note)', // CF note
-  'Entry Point'
+  'CF (Entry Point)'
 ];
