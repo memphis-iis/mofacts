@@ -376,8 +376,8 @@ function autoEncoder(extra$$2, caseStrategy$$1, skipNullField$$1, t$$1) {
             return function (value$$52) {
               const state$$1 = {};
               return (0, _Seq.fold)(function folder$$1(target$$3, _arg1$$1) {
-                const activePatternResult6602 = _arg1$$1;
-                target$$3[activePatternResult6602[0]] = valueEncoder(activePatternResult6602[1]);
+                const activePatternResult6813 = _arg1$$1;
+                target$$3[activePatternResult6813[0]] = valueEncoder(activePatternResult6813[1]);
                 return target$$3;
               }, state$$1, value$$52);
             };
@@ -392,8 +392,8 @@ function autoEncoder(extra$$2, caseStrategy$$1, skipNullField$$1, t$$1) {
             return function (value$$53) {
               let values$$10;
               values$$10 = (0, _Seq.map)(function mapping$$3(_arg2) {
-                const activePatternResult6606 = _arg2;
-                const values$$9 = [keyEncoder(activePatternResult6606[0]), valueEncoder(activePatternResult6606[1])];
+                const activePatternResult6817 = _arg2;
+                const values$$9 = [keyEncoder(activePatternResult6817[0]), valueEncoder(activePatternResult6817[1])];
                 return values$$9;
               }, value$$53);
               return seq(values$$10);

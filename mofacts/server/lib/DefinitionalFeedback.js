@@ -315,7 +315,7 @@ function GenerateFeedback(incorrectAnswer, correctAnswer) {
         }
     }
 
-    return feedback !== null ? Promise.resolve(new _Option.Result(0, "Ok", new Feedback(feedback))) : Promise.resolve(new _Option.Result(1, "Error", "Unable to generate definitional feedback. Definitional feedback cache is " + ((0, _Map.FSharpMap$$get_IsEmpty)(definitionMap()) ? "empty" : "full")));
+    return feedback !== null ? Promise.resolve(new _Option.Result(0, "Ok", new Feedback(feedback))) : Promise.resolve(new _Option.Result(1, "Error", "Unable to generate definitional feedback from " + ((0, _Map.FSharpMap$$get_IsEmpty)(definitionMap()) ? "empty cache." : "loaded cache.")));
   }));
 }
 
