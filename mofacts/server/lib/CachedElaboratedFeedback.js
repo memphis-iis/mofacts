@@ -103,9 +103,7 @@ function GenerateFeedback(incorrectAnswer$$1, correctAnswer$$1) {
     const tags = [];
     let elaboratedFeedback;
     const matchValue = [(0, _Map.FSharpMap$$TryFind$$2B595)(cache(), [incorrectAnswer$$1, correctAnswer$$1]), (0, _Map.FSharpMap$$TryFind$$2B595)(cache(), [correctAnswer$$1, incorrectAnswer$$1])];
-    console.log("match value: " + matchValue)
-    console.log("incorrectAnswer$$1: " + incorrectAnswer$$1)
-    console.log("correctAnswer$$1: " + correctAnswer$$1)
+
     if (matchValue[0] == null) {
       if (matchValue[1] == null) {
         elaboratedFeedback = undefined;
@@ -117,6 +115,7 @@ function GenerateFeedback(incorrectAnswer$$1, correctAnswer$$1) {
       const ef = matchValue[0];
       elaboratedFeedback = ef;
     }
+
     if (elaboratedFeedback != null) {
       void tags.push(new Tag(1, "CachedElaboratedFeedback"));
       const cs = correctnessStatement(incorrectAnswer$$1, correctAnswer$$1);
@@ -124,7 +123,7 @@ function GenerateFeedback(incorrectAnswer$$1, correctAnswer$$1) {
     } else {
       return (0, _DefinitionalFeedback.GenerateFeedback)(incorrectAnswer$$1, correctAnswer$$1).then(function (_arg1) {
         if (_arg1.tag === 1) {
-          const message = "Unable to generate elaborated feedback. Elaborated feedback cache is " + ((0, _Map.FSharpMap$$get_IsEmpty)(cache()) ? "empty" : "full. " + _arg1.fields[0]);
+          const message = "Unable to generate elaborated feedback from " + ((0, _Map.FSharpMap$$get_IsEmpty)(cache()) ? "empty" : "loaded") + " cache. " + _arg1.fields[0];
           return Promise.resolve(new _Option.Result(1, "Error", message));
         } else {
           void tags.push(new Tag(0, "DefinitionalFeedback"));
