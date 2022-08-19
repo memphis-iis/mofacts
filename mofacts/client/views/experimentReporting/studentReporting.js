@@ -102,6 +102,7 @@ Template.studentReporting.helpers({
   studentReportingTdfs: () => Session.get('studentReportingTdfs'),
   curClassPerformance: () => Session.get('curClassPerformance'),
   curClass: () => Session.get('curClass'),
+  selectedTdfDueDate: () => Session.get('selectedTdfDueDate'),
   curTotalAttempts: () => Session.get('curTotalAttempts'),
   curStudentPerformance: () => Session.get('curStudentPerformance'),
   curTotalTime: () => Session.get('practiceDuration'),
@@ -118,6 +119,7 @@ Template.studentReporting.helpers({
   itemMasteryTime: () => Session.get('itemMasteryTime'),
   displayItemsMasteredPerMinute: () => Session.get('displayItemMasteryRate'),
   displayEstimatedMasteryTime: () => Session.get('displayEstimatedMasteryTime'),
+  exception: () => Session.get('exception'),
   INVALID: INVALID,
 });
 
@@ -169,6 +171,14 @@ async function updateDashboard(selectedTdfId){
   if (selectedTdfId && selectedTdfId!==INVALID) {
     $(`#tdf-select option[value='${INVALID}']`).prop('disabled', true);
     $(`#select option[value='${INVALID}']`).prop('disabled', true);
+    curTdf = selectedTdfId;
+    tdfData = Session.get('allTdfs').find((x) => x._id == curTdf);
+    tdfDate = tdfData.content.tdfs.tutor.setspec.duedate;
+    console.log('tdfDate', tdfDate, tdfData);
+    Session.set('selectedTdfDueDate', tdfDate);
+    exception = await meteorCallAsync('checkForUserException',Meteor.userId(), curTdf);
+    Session.set('exception', exception);
+    console.log('exception', exception);
     const studentID = Session.get('curStudentID') || Meteor.userId();
     const studentUsername = Session.get('studentUsername') || Meteor.user().username;
     const studentData = await meteorCallAsync('getStudentReportingData', studentID, selectedTdfId, 0);

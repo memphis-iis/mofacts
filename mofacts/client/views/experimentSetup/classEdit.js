@@ -48,7 +48,7 @@ Template.classEdit.helpers({
 
   'curTeacher': () => Meteor.user().username,
 
-  'base:ink': function(){
+  'baseLink': function(){
     return "http://" + window.location.host + "/";
   }
 

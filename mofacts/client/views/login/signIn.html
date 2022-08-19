@@ -12,9 +12,9 @@
             {{#each curTeacherClasses}}
               <ul>
                 {{#if checkSectionExists this.sectionname}}
-                  <li><a href="#" onclick="setClass({{this.sectionid}})">{{this.coursename}} - {{this.sectionname}}</a></li>
+                  <li><a href="#" onclick="setClass('{{this.sectionId}}')">{{this.courseName}} - {{this.sectionname}}</a></li>
                 {{else}}
-                  <li><a href="#" onclick="setClass({{this.sectionid}})">{{this.coursename}}</a></li>
+                  <li><a href="#" onclick="setClass('{{this.sectionId}}')">{{this.courseName}}</a></li>
                 {{/if}}
               </ul>
             {{/each}}

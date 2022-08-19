@@ -147,6 +147,8 @@ Template.signIn.helpers({
   'teachers': () => Session.get('teachers'),
 
   'curTeacherClasses': () => Session.get('curTeacherClasses'),
+
+  'curTeacherSections': () => Session.get('sectionsByInstructorId'),
   
   'checkSectionExists': (sectionName) => sectionName != undefined && sectionName.length > 0,
 });
@@ -156,6 +158,18 @@ Template.signIn.helpers({
 
 // Called after we have signed in
 function signinNotify() {
+  if(Session.get('curTeacher') && Session.get('curClass')){
+    Meteor.call('addUserToTeachersClass', Meteor.userId(), Session.get('curTeacher')._id, Session.get('curClass').sectionid,
+    function(err, result) {
+      if (err) {
+        console.log('error adding user to teacher class: ' + err);
+        alert(err);
+        return;
+      }
+      console.log('addUserToTeachersClass result: ' + result);
+
+    });
+  }
   if (Session.get('debugging')) {
     const currentUser = Meteor.users.findOne({_id: Meteor.userId()}).username;
     console.log(currentUser + ' was logged in successfully! Current route is ', Router.current().route.getName());
@@ -263,7 +277,7 @@ function userPasswordCheck() {
         alert('This login page is not for Mechanical Turk workers. Please use the link provided with your HIT');
         $('#signInButton').prop('disabled', false);
         return;
-      }
+      }    
       signinNotify();
       Meteor.call('setUserEntryPoint', `direct`);
     }
@@ -342,9 +356,10 @@ function testLogin() {
 setClass = function(curClassID) {
   console.log(curClassID);
   $('#classSelection').prop('hidden', 'true');
-  const allClasses = Session.get('curTeacherClasses');
+  const allClasses = Session.get('sectionsByInstructorId');
   const curClass = allClasses.find((aClass) => aClass.sectionid == curClassID);
   Session.set('curClass', curClass);
   Session.set('curSectionId', curClass.sectionid)
+  console.log("Class/Section Set", curClass, curClass.sectionid);
   $('.login').prop('hidden', '');
 };

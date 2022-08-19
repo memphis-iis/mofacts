@@ -130,6 +130,7 @@ function sessionCleanUp() {
   Meteor.clearInterval(Session.get('varLenTimeoutName'));
   Session.set('varLenTimeoutName', null)
   Session.set('recordingLocked', false);
+  Session.set('selectedTdfDueDate', undefined);
   Session.set('currentStimProbFunctionParameters', undefined);
   if (window.currentAudioObj) {
     window.currentAudioObj.pause();
