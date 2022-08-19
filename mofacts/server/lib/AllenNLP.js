@@ -40,6 +40,7 @@ exports.getInvertAuxIndex = getInvertAuxIndex;
 exports.getPredicateIndex = getPredicateIndex;
 exports.getObjectIndices = getObjectIndices;
 exports.getRootOfSpan = getRootOfSpan;
+exports.firstLetterLower = firstLetterLower;
 exports.resolveReferents = resolveReferents;
 exports.ResolveTextReferents = ResolveTextReferents;
 exports.prePunctuationSpaceRegex = exports.endpoints = exports.EntailmentRequest = exports.TextRequest = exports.DocumentRequest = exports.SentenceRequest = exports.Entailment = exports.DocumentAnnotation = exports.SentenceAnnotation = exports.SentenceCoreference = exports.Coreference = exports.DependencyParse = exports.SRL = exports.SRLVerb = exports.Endpoints = void 0;
@@ -798,6 +799,10 @@ function getRootOfSpan(start$$1, stop, sa$$7) {
   return start$$1 + spanHeadIndex | 0;
 }
 
+function firstLetterLower(input$$37) {
+  return (0, _String.substring)(input$$37, 0, 1).toLocaleLowerCase() + (0, _String.substring)(input$$37, 1);
+}
+
 function resolveReferents(da) {
   let clusterSentenceMap;
   let elements$$3;
@@ -824,17 +829,9 @@ function resolveReferents(da) {
     Compare: _Util.comparePrimitives
   });
   const demonstrativeRegex = (0, _RegExp.create)("(this|that|these|those)", 1);
-
-  const spanIsPronominal = function spanIsPronominal(sa$$8, span$$2) {
-    if (sa$$8.dep.pos[span$$2[0]].indexOf("PRP") === 0) {
-      return true;
-    } else {
-      return (0, _RegExp.isMatch)(demonstrativeRegex, sa$$8.dep.words[span$$2[0]]);
-    }
-  };
-
   let resolvedSentences;
-  resolvedSentences = (0, _Array.map)(function mapping$$26(sa$$9) {
+  resolvedSentences = (0, _Array.map)(function mapping$$26(sa$$10) {
+    var span$$3;
     let clusterReferents;
     clusterReferents = (0, _Array.map)(function mapping$$24(clusterId) {
       let nominalReferents;
@@ -850,67 +847,83 @@ function resolveReferents(da) {
         Compare: _Util.comparePrimitives
       });
       nominalReferents = (0, _Array.choose)(function chooser$$2(tupledArg$$6) {
-        var strings$$3;
-        const span$$3 = da.sentences[tupledArg$$6[0]].cor.spans[tupledArg$$6[1]];
+        var sa$$8;
+        const span$$4 = da.sentences[tupledArg$$6[0]].cor.spans[tupledArg$$6[1]];
 
-        if (spanIsPronominal(da.sentences[tupledArg$$6[0]], span$$3)) {
+        if (sa$$8 = da.sentences[tupledArg$$6[0]], (sa$$8.dep.pos[span$$4[0]].indexOf("PRP") === 0 ? true : (0, _RegExp.isMatch)(demonstrativeRegex, sa$$8.dep.words[span$$4[0]]))) {
           return undefined;
         } else {
-          return [tupledArg$$6[0], (strings$$3 = da.sentences[tupledArg$$6[0]].dep.words.slice(span$$3[0], span$$3[1] + 1), ((0, _String.join)(" ", strings$$3)))];
+          let referent;
+          const strings$$3 = da.sentences[tupledArg$$6[0]].dep.words.slice(span$$4[0], span$$4[1] + 1);
+          referent = (0, _String.join)(" ", strings$$3);
+
+          if (span$$4[0] === 0) {
+            return [tupledArg$$6[0], (firstLetterLower(referent))];
+          } else {
+            return [tupledArg$$6[0], referent];
+          }
         }
       }, array$$44, Array);
+      const referentInSentence = (nominalReferents.some(function predicate$$13(tupledArg$$7) {
+        return tupledArg$$7[0] === sa$$10.id;
+      })) ? true : false;
 
       if (!(0, _Array.equalsWith)(_Util.compareArrays, nominalReferents, null) ? nominalReferents.length === 0 : false) {
         return undefined;
+      } else if (referentInSentence) {
+        return undefined;
       } else {
-        let matchValue$$1;
-        let array$$46;
-        array$$46 = (0, _Array.sortBy)(function projection$$4(tuple$$3) {
+        let matchValue$$2;
+        let array$$47;
+        array$$47 = (0, _Array.sortBy)(function projection$$4(tuple$$3) {
           return tuple$$3[0];
         }, nominalReferents, {
           Compare: _Util.comparePrimitives
         });
-        matchValue$$1 = (0, _Array.tryFindBack)(function predicate$$13(tupledArg$$7) {
-          return tupledArg$$7[0] < sa$$9.id;
-        }, array$$46);
+        matchValue$$2 = (0, _Array.tryFindBack)(function predicate$$14(tupledArg$$8) {
+          return tupledArg$$8[0] < sa$$10.id;
+        }, array$$47);
 
-        if (matchValue$$1 != null) {
-          const w$$2 = matchValue$$1[1];
-          return w$$2;
+        if (matchValue$$2 != null) {
+          const w$$3 = matchValue$$2[1];
+          return w$$3;
         } else {
           return undefined;
         }
       }
-    }, sa$$9.cor.clusters, Array);
+    }, sa$$10.cor.clusters, Array);
     let indexedWords;
-    indexedWords = (0, _Array.copy)(sa$$9.dep.words, Array);
+    indexedWords = (0, _Array.copy)(sa$$10.dep.words, Array);
+    let notResolved = true;
 
-    for (let i$$18 = 0; i$$18 <= sa$$9.cor.spans.length - 1; i$$18++) {
+    for (let i$$19 = 0; i$$19 <= sa$$10.cor.spans.length - 1; i$$19++) {
       let originalWords;
-      const strings$$4 = sa$$9.dep.words.slice(sa$$9.cor.spans[i$$18][0], sa$$9.cor.spans[i$$18][1] + 1);
+      const strings$$4 = sa$$10.dep.words.slice(sa$$10.cor.spans[i$$19][0], sa$$10.cor.spans[i$$19][1] + 1);
       originalWords = (0, _String.join)(" ", strings$$4);
 
-      if (spanIsPronominal(sa$$9, sa$$9.cor.spans[i$$18]) ? clusterReferents[i$$18] != null : false) {
-        indexedWords[sa$$9.cor.spans[i$$18][0]] = clusterReferents[i$$18];
+      if (((span$$3 = sa$$10.cor.spans[i$$19], (sa$$10.dep.pos[span$$3[0]] === "PRP" ? true : (0, _RegExp.isMatch)(demonstrativeRegex, sa$$10.dep.words[span$$3[0]]))) ? clusterReferents[i$$19] != null : false) ? notResolved : false) {
+        indexedWords[sa$$10.cor.spans[i$$19][0]] = clusterReferents[i$$19];
 
-        for (let j$$2 = sa$$9.cor.spans[i$$18][0] + 1; j$$2 <= sa$$9.cor.spans[i$$18][1]; j$$2++) {
+        for (let j$$2 = sa$$10.cor.spans[i$$19][0] + 1; j$$2 <= sa$$10.cor.spans[i$$19][1]; j$$2++) {
           indexedWords[j$$2] = "";
         }
+
+        notResolved = false;
       } else {
         void null;
       }
     }
 
     let str;
-    let input$$37;
+    let input$$39;
     let strings$$5;
-    strings$$5 = indexedWords.filter(function predicate$$14(w$$3) {
-      return w$$3.length > 0;
+    strings$$5 = indexedWords.filter(function predicate$$15(w$$4) {
+      return w$$4.length > 0;
     });
-    input$$37 = (0, _String.join)(" ", strings$$5);
-    str = removePrePunctuationSpaces(input$$37);
-    return Array.from((0, _Seq.mapIndexed)(function mapping$$25(i$$19, c$$3) {
-      if (i$$19 === 0) {
+    input$$39 = (0, _String.join)(" ", strings$$5);
+    str = removePrePunctuationSpaces(input$$39);
+    return Array.from((0, _Seq.mapIndexed)(function mapping$$25(i$$20, c$$3) {
+      if (i$$20 === 0) {
         return c$$3.toLocaleUpperCase();
       } else {
         return c$$3;
