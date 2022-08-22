@@ -799,7 +799,7 @@ function modelUnitEngine() {
     calculateSingleProb: function calculateSingleProb(cardIndex, stimIndex, hintLevel, i, stimCluster) {
       const card = cardProbabilities.cards[cardIndex];
       const stim = card.stims[stimIndex];
-
+      
       // Store parameters in an object for easy logging/debugging
       const p = {};
       
@@ -811,33 +811,34 @@ function modelUnitEngine() {
 
       pFunc.mul = function(m1,m2){
         var result = 0;
-          var len = m1.length;
-          for (var i = 0; i < len; i++) {
-              result += m1[i] * m2[i]
-          }
-          return result
+        var len = m1.length;
+        for (var i = 0; i < len; i++) {
+          result += m1[i] * m2[i]
+        }
+        return result
       }
       pFunc.logitdec = function(outcomes, decay){
         if (outcomes) {
           var outcomessuc = JSON.parse(JSON.stringify(outcomes));
           var outcomesfail = outcomes.map(function(value) {
-              return Math.abs(value - 1)
+            return Math.abs(value - 1)
           });
           var w = outcomessuc.unshift(1);
           var v = outcomesfail.unshift(1);
-          return Math.log(pFunc.mul(outcomessuc, [...Array(w).keys()].reverse().map(function(value, index) {
-              return Math.pow(decay, value)
+          return Math.log(pFunc.mul(outcomessuc, [...Array(w).keys()].reverse().map(function(value, index) { 
+            return Math.pow(decay, value) 
           }))  / pFunc.mul(outcomesfail, [...Array(w).keys()].reverse().map(function(value, index) {
-              return Math.pow(decay, value)
+            return Math.pow(decay, value) 
           })))
-          }
-          return 0
+        }
+        return 0
       }
 
       pFunc.recency = function(age,d){
-        if (age==0) { return 0;
-        } else
-        {return Math.pow(1 + age, -d);
+        if (age==0) {
+          return 0;
+        } else {
+          return Math.pow(1 + age, -d);
         }
       }
 
@@ -874,6 +875,7 @@ function modelUnitEngine() {
       // Current Indices
       p.clusterIndex = cardIndex;
       p.stimIndex = stimIndex;
+      p.hintLevel = hintLevel;
       p.pFunc = pFunc
 
       // Top-level metrics
