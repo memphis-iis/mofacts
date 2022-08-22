@@ -159,7 +159,7 @@ Template.signIn.helpers({
 // Called after we have signed in
 function signinNotify() {
   if(Session.get('curTeacher') && Session.get('curClass')){
-    Meteor.call('addUserToTeachersClass', Meteor.userId(), Session.get('curTeacher')._id, Session.get('curClass').sectionid,
+    Meteor.call('addUserToTeachersClass', Meteor.userId(), Session.get('curTeacher')._id, Session.get('curClass').sectionId,
     function(err, result) {
       if (err) {
         console.log('error adding user to teacher class: ' + err);
