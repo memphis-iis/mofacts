@@ -56,7 +56,7 @@ function testLogin() {
     }
 
     const newUserId = result;
-    Meteor.call('addUserToTeachersClass', newUserId, Session.get('curTeacher')._id, Session.get('curClass').sectionid,
+    Meteor.call('addUserToTeachersClass', newUserId, Session.get('curTeacher')._id, Session.get('curClass').sectionId,
         function(err, result) {
           if (err) {
             console.log('error adding user to teacher class: ' + err);
@@ -232,7 +232,7 @@ Template.signInSouthwest.events({
       if (!!data && !!data.error) {
         alert('Problem logging in: ' + data.error);
       } else {
-        Meteor.call('addUserToTeachersClass', Meteor.userId(), Session.get('curTeacher')._id, Session.get('curClass').sectionid, function(err, result) {
+        Meteor.call('addUserToTeachersClass', Meteor.userId(), Session.get('curTeacher')._id, Session.get('curClass').sectionId, function(err, result) {
               if (err) {
                 console.log('error adding user to teacher class: ' + err);
               }
