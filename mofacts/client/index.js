@@ -8,6 +8,14 @@ import {instructContinue} from './views/experiment/instructions.js';
 import {routeToSignin} from './lib/router.js';
 import { init } from "meteor/simonsimcity:client-session-timeout";
 
+
+// This redirects to the SSL version of the page if we're not on it
+const forceSSL = Meteor.settings.public.forceSSL || false;
+console.log('forceSSL', forceSSL);
+if (location.protocol !== 'https:' && forceSSL) {
+  location.href = location.href.replace(/^http:/, 'https:');
+}
+
 try{
   //Prevents new tab
   const channel = new BroadcastChannel('tab');
