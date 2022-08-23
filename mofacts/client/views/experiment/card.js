@@ -747,11 +747,16 @@ Template.card.helpers({
     return (disp.minSecs > 0 || disp.maxSecs > 0);
   },
 
-  'userInDiaglogue': () => Session.get('showDialogueText'),
+  'userInDiaglogue': () => Session.get('showDialogueText') && Session.get('dialogueDisplay'),
 
   'audioEnabled': () => Session.get('audioEnabled'),
 
-  'showDialogueHints': () => Session.get('showDialogueHints'),
+  'showDialogueHints': function() {
+    if(Meteor.isDevelopment){
+      return true;
+    }
+    return Session.get('showDialogueHints')
+  },
 
   'dialogueCacheHint': () => Session.get('dialogueCacheHint'),
 
@@ -1545,6 +1550,7 @@ async function giveWrongAnswer(){
 }
 
 async function afterAnswerFeedbackCallback(trialEndTimeStamp, source, userAnswer, isTimeout, isCorrect) {
+  Session.set('showDialogueText', false);
   //if the user presses the removal button after answering we need to shortcut the timeout
   const wasReportedForRemoval = source == 'removal';
   Session.set("reviewTimeoutCompletedFirst", false);
