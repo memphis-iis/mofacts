@@ -47,7 +47,7 @@ function sessionCleanUp() {
   console.log('session cleanup!!!');
 
   Session.set('alternateDisplayIndex', undefined);
-  Session.set('showDialogueText', undefined);
+  Session.set('showDialogueText', false);
   Session.set('audioEnabled', undefined);
   Session.set('audioInputSensitivity', undefined);
   Session.set('audioPromptFeedbackView', undefined);
