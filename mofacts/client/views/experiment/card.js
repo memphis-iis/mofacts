@@ -1365,7 +1365,7 @@ async function writeCurrentToScrollList(userAnswer, isTimeout, simCorrect, justA
 
   if (userAnswerWithTimeout != null) {
     Answers.answerIsCorrect(userAnswerWithTimeout, Session.get('currentAnswer'), Session.get('originalAnswer'),
-        setspec, afterAnswerAssessment);
+    "",setspec, afterAnswerAssessment);
   } else {
     afterAnswerAssessment(null);
   }
