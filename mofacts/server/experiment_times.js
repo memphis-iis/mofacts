@@ -65,7 +65,7 @@ async function delimitedRecord(rec, listOfDynamicStimTags, isHeader = false) {
 }
 
 async function getValuesOfStimTagList(stimuliSet, itemId, tagList) {
-  const curStimSet = stimuliSet.find((x) => x.itemId == itemId);
+  const curStimSet = stimuliSet.find((x) => x._id == itemId);
   const valueDict = {};
 
   for (const tag of tagList) {
@@ -129,7 +129,7 @@ async function createExperimentExport(expName, requestingUserId) {
     const histories = await getHistoryByTDFfileName(expName);
     for (let history of histories) {
       try {
-        const itemId = history.itemid;
+        const itemId = history.itemId;
         const teacherUserName = history.conditionTypeE?.split('/')[0];
         const teacherId = history.teacherId;
         history = getHistory(history);
