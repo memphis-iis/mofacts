@@ -1069,8 +1069,8 @@ function getClassPerformanceByTDF(classId, tdfId, date=false) {
       performanceMet[index].numCorrect = performanceMet[index].numCorrect + outcome || outcome;
       performanceMet[index].numIncorrect = performanceMet[index].numIncorrect + (1 - outcome) || outcome;
       performanceMet[index].percentCorrect = performanceMet[index].numCorrect / performanceMet[index].count;
-      performanceMet[index].totalTime = performanceMet[index].totalTime || history.time;
-      performanceMet[index].totalTimeMins = parseInt(history.time) / 60000;
+      performanceMet[index].totalTime = performanceMet[index].totalTime + history.CFEndLatency + history.CFFeedbackLatency || history.CFEndLatency + history.CFFeedbackLatency;
+      performanceMet[index].totalTimeMins = (performanceMet[index].totalTime / 60000).toFixed(3);
       performanceMet[index].exception = exception;
     } else {
       index = performanceNotMet.findIndex((item) => item.userId == history.userId);
