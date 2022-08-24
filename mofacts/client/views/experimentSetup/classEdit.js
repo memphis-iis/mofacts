@@ -29,7 +29,25 @@ function noClassSelectedSetup() {
   isNewClass = true;
 }
 
+async function updateSections(){
+  const allCourseSections = await meteorCallAsync('getAllCourseSections');
+  console.log('allCourseSections', allCourseSections);
+  const sectionsByInstructorId = [];
+  //  //sectionid, courseandsectionname
+  for (const courseSection of allCourseSections) {
+    if (courseSection.teacherUserId != Meteor.userId()) continue;
+    sectionsByInstructorId.push({
+      sectionId: courseSection.sectionId,
+      courseName: courseSection.courseName,
+      sectionName: courseSection.sectionName
+    });
+  }
+  console.log('sectionsByInstructorId', sectionsByInstructorId);
+  Session.set('sectionsByInstructorId', sectionsByInstructorId);
+}
+
 Template.classEdit.onRendered(async function() {
+  updateSections();
   const courseSections = await meteorCallAsync('getAllCourseSections');
   const classes = {};
   for (const courseSection of courseSections) {
@@ -43,6 +61,12 @@ Template.classEdit.onRendered(async function() {
 
 Template.classEdit.helpers({
   classes: () => classes = Session.get('classes'),
+
+  'sections': function() {
+    const sections = Session.get('sectionsByInstructorId');
+    console.log('sections', sections);
+    return sections;
+  },
 
   'curTeacherClasses': () => Session.get('curTeacherClasses'),
 
@@ -119,5 +143,6 @@ Template.classEdit.events({
     } else {
       Meteor.call('editCourse', curClass, addEditClassCallback);
     }
+    updateSections();
   },
 });
