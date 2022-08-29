@@ -2,6 +2,7 @@ import { Template }    from 'meteor/templating';
 import { ReactiveVar } from 'meteor/reactive-var';
 import { FilesCollection } from 'meteor/ostrio:files';
 import { Route53RecoveryCluster, Route53Resolver } from '../../../node_modules/aws-sdk/index';
+import { meteorCallAsync } from '../../index';
 
 Template.assetUpload.onCreated(function () {
   this.currentUpload = new ReactiveVar(false);
@@ -37,6 +38,23 @@ Template.assetUpload.events({
         }
       }
     }
+
+  },
+  'click #deleteAllAssetsPrompt'(e, template) {
+    e.preventDefault();
+    console.log('deleteAllAssetsPrompt clicked');
+    $('#deleteAllAssetsPrompt').css('display', 'none');
+    $('#deleteAllAssetsConfirm').css('display', 'block');
+  },
+  'click #deleteAllAssetsConfirm': async function(e, template) {
+    fileCount = await meteorCallAsync('deleteAllFiles');
+    if(fileCount == 0){
+      alert(`All files deleted.`);
+    } else {
+      alert("Error: Files not deleted.");
+    }
+    $('#deleteAllAssetsPrompt').css('display', 'block');
+    $('#deleteAllAssetsConfirm').css('display', 'none');
   },
   'click .imageLink'(e) {
     const url = $(e.currentTarget).data('link');

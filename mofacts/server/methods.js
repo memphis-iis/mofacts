@@ -2374,6 +2374,13 @@ Meteor.methods({
   },
 
   //handle file deletions
+
+  deleteAllFiles: async function(){
+    serverConsole('delete all uploaded files');
+    DynamicAssets.remove({});
+    filesLength = DynamicAssets.find().fetch().length;
+    return filesLength;
+  },
   deleteStimFile: async function(stimFilename) {
     serverConsole('delete Stim File', stimFilename);
     stimSet = await getStimuliSetByFilename(stimFilename);
