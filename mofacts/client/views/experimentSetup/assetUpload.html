@@ -30,6 +30,13 @@
         {{else}}
         <h2>You do not have access to this function.</h2>
         {{/if}}
+        {{#if isInRole 'admin'}}
+            <h2>Admin Functions</h2>
+            <p>
+                <button class="btn btn-danger" id="deleteAllAssetsPrompt">Delete All Assets. This is NOT recoverable.</button>
+                <button class="btn btn-danger" style="display: none;" id="deleteAllAssetsConfirm" hidden>Are you sure? This is NOT recoverable.</button>
+            </p>
+        {{/if}}
         </div>
         <div class="col-md-3"></div>
   </template>
