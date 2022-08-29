@@ -52,6 +52,9 @@ if (Meteor.settings.public.testLogin) {
   serverConsole('dev environment, allow insecure tls');
 }
 
+let highestStimuliSetId;
+let nextStimuliSetId;
+
 //const symSpell = new SymSpell(2, 7);
 //symSpell.loadDictionary(Meteor.settings.frequencyDictionaryLocation);
 process.env.MAIL_URL = Meteor.settings.MAIL_URL;
@@ -1693,10 +1696,9 @@ async function upsertStimFile(stimFilename, stimJSON, ownerId) {
     stimuliSetId = associatedStimSetIdRet.stimuliSetId;
     serverConsole('stimuliSetId1:', stimuliSetId, associatedStimSetIdRet);
   } else {
-    const highestStimuliSetId = Items.findOne({}, {sort: {stimuliSetId: -1}, limit: 1 });
-    stimuliSetId = highestStimuliSetId && highestStimuliSetId.stimuliSetId ?
-        parseInt(highestStimuliSetId.stimuliSetId) + 1 : 1;
-    serverConsole('stimuliSetId2:', stimuliSetId, highestStimuliSetId);
+    stimuliSetId = nextStimuliSetId;
+    nextStimuliSetId += 1;
+    serverConsole('stimuliSetId2:', stimuliSetId, nextStimuliSetId);
   }
 
   const newFormatItems = getNewItemFormat(oldStimFormat, stimFilename, stimuliSetId, responseKCMap);
@@ -2686,6 +2688,10 @@ Meteor.methods({
 });
 
 Meteor.startup(async function() {
+
+  highestStimuliSetId = Items.findOne({}, {sort: {stimuliSetId: -1}, limit: 1 });
+  nextStimuliSetId = highestStimuliSetId && highestStimuliSetId.stimuliSetId ? parseInt(highestStimuliSetId.stimuliSetId) + 1 : 1;
+
   // Let anyone looking know what config is in effect
   serverConsole('Log Notice (from siteConfig):', getConfigProperty('logNotice'));
 
