@@ -13,7 +13,6 @@ import { result } from 'underscore';
 import { Mongo } from 'meteor/mongo'
 import { type } from 'os';
 import { split } from './lib/fable-library.2.10.2/RegExp';
-import { resultToErrorOption } from './lib/ElaboratedFeedback';
 
 
 export {
@@ -2441,7 +2440,6 @@ Meteor.methods({
             if(type =="json"){
               try{
                 rawFileContents = file.toString();
-                
                   parsedFileContents = JSON.parse(rawFileContents);
                   JSONStringContents = JSON.stringify(parsedFileContents);
                 if(parsedFileContents.setspec){
