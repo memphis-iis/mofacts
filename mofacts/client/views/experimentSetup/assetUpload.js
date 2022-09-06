@@ -84,14 +84,19 @@ function doFileUpload(file, template){
         Meteor.call('processPackageUpload', fileObj.path, Meteor.userId(), function(err,res){
           if(err){
             alert("Package upload failed.\n"+err);
+            return;
+          } 
+          if(res.uploadErrors.length > 0){
+            alert("Package upload succeded with errors. Please check the console for details.");
+            console.log("Error:", res.uploadErrors);
+            return;
           } else {
-            console.log(res);
+            alert("Package upload succeded.");
           }
         });
       }
     }
     template.currentUpload.set(false);
   });
-  
   upload.start();
 }
