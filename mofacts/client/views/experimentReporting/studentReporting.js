@@ -224,10 +224,10 @@ async function drawDashboard(studentId, selectedTdfId){
   console.log(`masteryEstimateData(${timeToMasterHistory} trials)`, masteryEstimateData)
   console.log(`difficultyData(${difficultyHistory} trials)`, difficultyData)
   //Expand Data
-  let {numCorrect, numIncorrect, totalStimCount,  totalPracticeDuration, stimsIntroduced} = curStudentGraphData;
-    // Perform calculated data
   let practiceDuration = curStudentTDFData.practiceDuration;
-  
+  let totalStimCount = curStudentTDFData.numCorrect + curStudentTDFData.numIncorrect;
+  let numCorrect = curStudentTDFData.numCorrect;
+  let numIncorrect = curStudentTDFData.numIncorrect;
   totalAttempts = parseFloat(numCorrect) + parseFloat(numIncorrect);
   if(isNaN(totalAttempts)){
     totalAttempts = 0;
