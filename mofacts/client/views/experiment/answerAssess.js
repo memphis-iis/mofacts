@@ -206,7 +206,7 @@ async function stringMatch(stimStr, userAnswer, lfparameter, allowPhoneticMatchi
 // the current levenshtein distance.
 // ALSO notice that we use the same return values as stringMatch: 0 for no
 // match, 1 for exact match, 2 for edit distance match
-async function regExMatch(regExStr, userAnswer, lfparameter, useSpellingCorrection, fullAnswer) {
+async function regExMatch(regExStr, userAnswer, lfparameter, allowPhoneticMatching, useSpellingCorrection, fullAnswer) {
   if (lfparameter && /^[\|A-Za-z0-9 ]+$/i.test(regExStr)) {
     // They have an edit distance parameter and the regex matching our
     // special condition - check it manually
@@ -230,7 +230,7 @@ async function regExMatch(regExStr, userAnswer, lfparameter, useSpellingCorrecti
 // Return [isCorrect, matchText] where isCorrect is true if the user-supplied
 // answer matches the first branch and matchText is the text response from a
 // matching branch
-function matchBranching(answer, userAnswer, allowPhoneticMatching, useSpellingCorrection, lfparameter) {
+async function matchBranching(answer, userAnswer, lfparameter, allowPhoneticMatching, useSpellingCorrection) {
   let isCorrect = false;
   let matchText = '';
   const userAnswerCheck = _.trim(userAnswer).toLowerCase();
@@ -243,7 +243,7 @@ function matchBranching(answer, userAnswer, allowPhoneticMatching, useSpellingCo
     }
 
     flds[0] = _.trim(flds[0]).toLowerCase();
-    const matched = regExMatch(flds[0], userAnswerCheck, lfparameter, allowPhoneticMatching, useSpellingCorrection, answer);
+    const matched = await regExMatch(flds[0], userAnswerCheck, lfparameter, allowPhoneticMatching, useSpellingCorrection, answer);
     if (matched !== 0) {
       matchText = _.trim(flds[1]);
       if (matched === 2) {
@@ -278,7 +278,7 @@ async function checkAnswer(userAnswer, correctAnswer, originalAnswer, lfparamete
   let match = 0;
   let isCorrect; let matchText;
   if (answerIsBranched(correctAnswer)) {
-    [isCorrect, matchText] = matchBranching(correctAnswer, userAnswer, lfparameter, useSpellingCorrection, allowPhoneticMatching);
+    [isCorrect, matchText] = await matchBranching(correctAnswer, userAnswer, lfparameter, useSpellingCorrection, allowPhoneticMatching);
   } else {
     let dispAnswer = _.trim(answerDisplay);
     if (dispAnswer.indexOf('|') >= 0) {
