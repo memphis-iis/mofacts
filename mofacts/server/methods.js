@@ -2463,79 +2463,99 @@ Meteor.methods({
   processPackageUpload: function(path, owner){
     const fs = Npm.require('fs');
     const unzip = Npm.require('unzipper');
-    fs.createReadStream(path)
-      .pipe(unzip.Parse())
-      .on('entry', async function(entry){
-        var tdfContent = [];
-        var stimContent = [];
-        var referenceContents = [];
-        var fileNameArray = entry.path.split("/");
-        var fileName = fileNameArray[fileNameArray.length - 1];
-        var content =  await entry.buffer().then(async function(file){
-          let fileSplit = fileName.split(".");
-          let type = fileSplit[fileSplit.length - 1];
-          if(type =="json"){
-            rawFileContents = file.toString();
-            parsedFileContents = JSON.parse(rawFileContents);
-            JSONStringContents = JSON.stringify(parsedFileContents);
-            if(parsedFileContents.setspec){
-              fileFinal = {
-                type: "stim",
-                contents: JSONStringContents,
-                fileName: fileName
-              }
-              stimContent.push(fileFinal);
-            } 
-            if(parsedFileContents.tutor){
-              fileFinal = {
-                type: "tdf",
-                contents: JSONStringContents,
-                fileName: fileName
-              }
-              tdfContent.push(fileFinal);
-            }
-          }else{
-            serverConsole("Uploading:", fileName);
-            const foundFile = DynamicAssets.findOne({userId: owner, name: fileName})
-            if(foundFile){
-              foundFile.remove(function (error){
-                if (error) {
-                  serverConsole(`File ${fileName} could not be removed`, error)
+    return new Promise((resolve, reject) => {
+      fs.createReadStream(path)
+        .pipe(unzip.Parse())
+        .on('entry', async function(entry){
+          var tdfContent = [];
+          var stimContent = [];
+          var errors = [];
+          var referenceContents = [];
+          var fileNameArray = entry.path.split("/");
+          var fileName = fileNameArray[fileNameArray.length - 1];
+          var content =  await entry.buffer().then(async function(file){
+            let fileSplit = fileName.split(".");
+            let type = fileSplit[fileSplit.length - 1];
+            if(type =="json"){
+              try{
+                rawFileContents = file.toString();
+                  parsedFileContents = JSON.parse(rawFileContents);
+                  JSONStringContents = JSON.stringify(parsedFileContents);
+                if(parsedFileContents.setspec){
+                  fileFinal = {
+                    type: "stim",
+                    contents: JSONStringContents,
+                    fileName: fileName
+                  }
+                  stimContent.push(fileFinal);
+                } 
+                if(parsedFileContents.tutor){
+                  fileFinal = {
+                    type: "tdf",
+                    contents: JSONStringContents,
+                    fileName: fileName
+                  }
+                  tdfContent.push(fileFinal);
                 }
-                else{
-                  serverConsole(`File ${fileName} already exists, overwritting.`)
-                  DynamicAssets.write(file, {
-                    fileName: fileName,
-                    userId: owner,
-                    parent: path
-                  });
-                }
-              })
+              } catch(e){
+                errors.push("Error parsing JSON file: " + fileName + ": " + e);
+              }
+            }else{
+              serverConsole("Uploading:", fileName);
+              const foundFile = DynamicAssets.findOne({userId: owner, name: fileName})
+              if(foundFile){
+                foundFile.remove(function (error){
+                  if (error) {
+                    serverConsole(`File ${fileName} could not be removed`, error)
+                  }
+                  else{
+                    serverConsole(`File ${fileName} already exists, overwritting.`)
+                    DynamicAssets.write(file, {
+                      fileName: fileName,
+                      userId: owner,
+                      parent: path
+                    });
+                  }
+                })
+              }
+              else{
+                serverConsole(`File ${fileName} doesn't exist, uploading`)
+                DynamicAssets.write(file, {
+                  fileName: fileName,
+                  userId: owner,
+                  parent: path
+                });
+              }
             }
-            else{
-              serverConsole(`File ${fileName} doesn't exist, uploading`)
-              DynamicAssets.write(file, {
-                fileName: fileName,
-                userId: owner,
-                parent: path
-              });
-            }
+            return {tdfContent,stimContent, errors}
+          });
+          referenceContents = [];
+          uploadErrors = content.errors;
+          referenceFiles = DynamicAssets.find({}).forEach(function(fileRef){
+              replacePath = DynamicAssets.link(fileRef);
+              data = {
+                fileName: fileRef.name,
+                replacePath: replacePath,
+                parent: fileRef.name
+              }
+              referenceContents.push(data);
+              DynamicAssets.collection.update({_id: fileRef._id}, {$set: {meta: {link: replacePath}}});
+          });
+          for(let files of content.stimContent){
+            serverConsole("Processing stim file:", files.fileName);
+              newContents = files.contents;
+              for(let referenceFile of referenceContents){
+                toReplace = newContents;
+                theSplit = toReplace.split(referenceFile.fileName);
+                if(theSplit.length > 1){
+                  serverConsole("replacing", theSplit.length - 1,"references:", files.fileName, referenceFile.fileName, referenceFile.replacePath);
+                  newContents = theSplit.join(referenceFile.replacePath);
+                } 
+              }
+              Meteor.call("saveContentFile",files.type, files.fileName,newContents, owner);
           }
-          return {tdfContent,stimContent}
-        });
-        referenceContents = [];
-        referenceFiles = DynamicAssets.find({}).forEach(function(fileRef){
-            replacePath = DynamicAssets.link(fileRef);
-            data = {
-              fileName: fileRef.name,
-              replacePath: replacePath,
-              parent: fileRef.name
-            }
-            referenceContents.push(data);
-            DynamicAssets.collection.update({_id: fileRef._id}, {$set: {meta: {link: replacePath}}});
-        });
-        for(let files of content.stimContent){
-          serverConsole("Processing stim file:", files.fileName);
+          for(let files of content.tdfContent){
+            serverConsole("Processing tdf file:", files.fileName);
             newContents = files.contents;
             for(let referenceFile of referenceContents){
               toReplace = newContents;
@@ -2546,23 +2566,12 @@ Meteor.methods({
               } 
             }
             Meteor.call("saveContentFile",files.type, files.fileName,newContents, owner);
-        }
-        for(let files of content.tdfContent){
-          serverConsole("Processing tdf file:", files.fileName);
-          newContents = files.contents;
-          for(let referenceFile of referenceContents){
-            toReplace = newContents;
-            theSplit = toReplace.split(referenceFile.fileName);
-            if(theSplit.length > 1){
-              serverConsole("replacing", theSplit.length - 1,"references:", files.fileName, referenceFile.fileName, referenceFile.replacePath);
-              newContents = theSplit.join(referenceFile.replacePath);
-            } 
           }
-          Meteor.call("saveContentFile",files.type, files.fileName,newContents, owner);
-        }
+          assets = DynamicAssets.find({}).fetch();
+          serverConsole("Errors:", uploadErrors);
+          resolve({assets, uploadErrors});
+        });
       });
-      assets = DynamicAssets.find({}).fetch();
-      return assets;
   },
   // Allow file uploaded with name and contents. The type of file must be
   // specified - current allowed types are: 'stimuli', 'tdf'
