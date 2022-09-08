@@ -1,4 +1,4 @@
-import {getTdfBy_id, getTdfByFileName, serverConsole} from './methods';
+import {getTdfById, getTdfByFileName, serverConsole} from './methods';
 import {displayify} from '../common/globalHelpers';
 
 export {sendScheduledTurkMessages};
@@ -117,7 +117,7 @@ async function getTdfOwner(experiment, userId) {
 
   // Now we can get the owner (either set on upload of TDF *OR* set on server
   // startup for TDF's that live in git)
-  const tdfBoxed = await getTdfBy_id(tdfId);
+  const tdfBoxed = await getTdfById(tdfId);
   const tdf = tdfBoxed.content;
   if (!!tdf && typeof tdf.owner !== 'undefined') {
     return tdf.owner;
@@ -558,7 +558,7 @@ Meteor.methods({
       }
 
       // We read the TDF to get the bonus amount
-      const tdfFile = await getTdfBy_id(tdfid);
+      const tdfFile = await getTdfById(tdfid);
       let bonusAmt = null;
       const unitList = tdfFile.tdfs.tutor.unit || [];
       for (i = 0; i < unitList.length; ++i) {
