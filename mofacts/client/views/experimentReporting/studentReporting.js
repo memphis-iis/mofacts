@@ -181,8 +181,6 @@ async function updateDashboard(selectedTdfId){
     console.log('exception', exception);
     const studentID = Session.get('curStudentID') || Meteor.userId();
     const studentUsername = Session.get('studentUsername') || Meteor.user().username;
-    const studentData = await meteorCallAsync('getStudentReportingData', studentID, selectedTdfId, 0);
-    console.log("studentData loaded...",studentData);
     setStudentPerformance(studentID, studentUsername, selectedTdfId);
     drawDashboard(studentID, selectedTdfId);
     $('#tdf-select').val(selectedTdfId);
@@ -211,10 +209,15 @@ async function drawDashboard(studentId, selectedTdfId){
   //Get Student Data
   const stimids = await meteorCallAsync('getStimSetFromLearningSessionByClusterList', curStimSetId, clusterlist);
   const curStudentGraphData = await meteorCallAsync('getStudentPerformanceByIdAndTDFId', studentId, selectedTdfId, stimids);
-  const speedOfLearningData = await meteorCallAsync('getStudentPerformanceByIdAndTDFIdFromHistory', studentId, selectedTdfId, 30);
-  const masteryRateData = await meteorCallAsync('getStudentPerformanceByIdAndTDFIdFromHistory', studentId, selectedTdfId, masteryHistory);
-  const masteryEstimateData = await meteorCallAsync('getStudentPerformanceByIdAndTDFIdFromHistory', studentId, selectedTdfId, timeToMasterHistory);
-  const difficultyData = await meteorCallAsync('getStudentPerformanceByIdAndTDFIdFromHistory', studentId, selectedTdfId, difficultyHistory);
+  const studentPerfData = await meteorCallAsync('getStudentPerformanceByIdAndTDFIdFromHistory', studentId, selectedTdfId);
+  // const speedOfLearningData = await meteorCallAsync('getStudentPerformanceByIdAndTDFIdFromHistory', studentId, selectedTdfId, 30);
+  const speedOfLearningData = limitStudentPerformanceByLastXTrials(studentPerfData, 30);
+  // const masteryRateData = await meteorCallAsync('getStudentPerformanceByIdAndTDFIdFromHistory', studentId, selectedTdfId, masteryHistory);
+  const masteryRateData = limitStudentPerformanceByLastXTrials(studentPerfData, masteryHistory);
+  // const masteryEstimateData = await meteorCallAsync('getStudentPerformanceByIdAndTDFIdFromHistory', studentId, selectedTdfId, timeToMasterHistory);
+  const masteryEstimateData = limitStudentPerformanceByLastXTrials(studentPerfData, timeToMasterHistory);
+  //const difficultyData = await meteorCallAsync('getStudentPerformanceByIdAndTDFIdFromHistory', studentId, selectedTdfId, difficultyHistory);
+  const difficultyData = limitStudentPerformanceByLastXTrials(studentPerfData, difficultyHistory);
   const numDroppedStims = await meteorCallAsync('getNumDroppedItemsByUserIDAndTDFId', studentId, selectedTdfId)
   console.log("curStudentGraphData(all trials)", curStudentGraphData)
   console.log(`speedOfLearningData(${30} trials)`, speedOfLearningData)
@@ -315,4 +318,14 @@ function lookUpLabelByDataValue(labels, series, value) {
   return labels[series.findIndex(function(element) {
     return element == value;
   })];
+}
+
+function limitStudentPerformanceByLastXTrials(curStudentPerformanceData, trialLimit){
+  let limitedStudentPerformanceData = [];
+  let curStudentPerformanceDataLength = curStudentPerformanceData.length;
+  let curStudentPerformanceDataLengthMinusTrialLimit = curStudentPerformanceDataLength - trialLimit;
+  for(let i = curStudentPerformanceDataLengthMinusTrialLimit; i < curStudentPerformanceDataLength; i++){
+    limitedStudentPerformanceData.push(curStudentPerformanceData[i]);
+  }
+  return limitedStudentPerformanceData;
 }

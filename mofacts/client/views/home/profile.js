@@ -279,10 +279,14 @@ Template.profile.rendered = async function() {
   const isAdmin = Roles.userIsInRole(Meteor.user(), ['admin']);
 
   //Get all course tdfs
-  const courseId = Session.get('curClass').courseId;
-  const courseTdfs = await meteorCallAsync('getTdfsAssignedToCourseId', courseId);
-  console.log('courseTdfs', courseTdfs, courseId);
-
+  const courseId = Session.get('curClass').courseId || null;
+  const courseTdfs = [];
+  if(courseId){
+    const courseTdfs = await meteorCallAsync('getTdfsAssignedToCourseId', courseId);
+    console.log('courseTdfs', courseTdfs, courseId);
+  } else {
+    console.log('no course id set');
+  }
   // Check all the valid TDF's
   for (const tdf of allTdfs) {
     const TDFId = tdf._id;
