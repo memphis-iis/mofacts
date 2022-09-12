@@ -1307,7 +1307,6 @@ async function getStudentReportingData(userId, TDFId, hintLevel) {
 
 async function getStimSetFromLearningSessionByClusterList(stimuliSetId, clusterList){
   const itemRet = Items.find({stimuliSetId: stimuliSetId}, {sort: {stimulusKC: 1}}).fetch();
-  console.log(itemRet)
   let learningSessionItem = [];
   for(let item of itemRet){
     if(clusterList.includes(item.clusterKC)){
@@ -1347,8 +1346,12 @@ async function getStudentPerformanceByIdAndTDFId(userId, TDFId, stimIds=null) {
   return perfRet;
 }
 
-async function getStudentPerformanceByIdAndTDFIdFromHistory(userId, TDFId,returnRows=null){
-  //used to grab a limited sample of the student's performance
+async function getStudentPerformanceByIdAndTDFIdFromHistory(userId, TDFId, limitArray=null){
+  if(limitArray){
+    largestLimit = Math.max(...limitArray);
+    returnRows = largestLimit;
+  }
+  //used to grab a limited sample of the student's performance, limit 60
   serverConsole('getStudentPerformanceByIdAndTDFIdFromHistory', userId, TDFId, returnRows);
   let histories;
   if(returnRows)
