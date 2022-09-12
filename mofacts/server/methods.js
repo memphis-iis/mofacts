@@ -1881,7 +1881,6 @@ function getSyllablesForWord(word) {
   const syllablesURL = baseSyllableURL + word;
   const result = HTTP.call('GET', syllablesURL);
   const syllableArray = result.content.replace(/\[|\]/g, '').split(',').map((x) => x.trim());
-  serverConsole('syllables for word, ' + word + ': ' + stringifyIfExists(syllableArray) );
   return syllableArray;
 }
 
@@ -2432,6 +2431,8 @@ Meteor.methods({
         var referenceContents = [];
         var fileNameArray = entry.path.split("/");
         var fileName = fileNameArray[fileNameArray.length - 1];
+        // replace all spaces with underscores
+        fileName = fileName.replace(/ /g, "_");
         var content =  await entry.buffer().then(async function(file){
           let fileSplit = fileName.split(".");
           let type = fileSplit[fileSplit.length - 1];
