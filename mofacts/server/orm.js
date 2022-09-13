@@ -22,6 +22,7 @@ function getItem(stim) {
     videoStimulus: stim.videostimulus,
     alternateDisplays: stim.alternatedisplays,
     tags: stim.tags,
+    syllables: stim.syllables,
   };
 }
 
