@@ -83,7 +83,7 @@ function doFileUpload(file, template){
         console.log('package detected')
         Meteor.call('processPackageUpload', fileObj.path, Meteor.userId(), function(err,res){
           if(err){
-            alert("Package upload failed.\n"+err);
+            alert(err);
           } else {
             console.log(res);
           }
