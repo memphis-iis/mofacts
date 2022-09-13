@@ -440,6 +440,186 @@ async function setComponentStatesByUserIdTDFIdAndUnitNum(userId, TDFId, componen
   return {userId, TDFId};
 }
 
+// Package Uploader
+async function processPackageUpload(path, owner){
+  let results
+  let unzippedFiles
+  let filePath
+  let fileName
+  let extension
+    try{
+      results = [];
+      const unzipper = Npm.require('unzipper');
+      const zip = await unzipper.Open.file(path);
+      unzippedFiles = [];
+      for(const file of zip.files){
+        let fileContents = await file.buffer();
+        filePath = file.path;
+        const filePathArray = filePath.split("/");
+        fileName = filePathArray[filePathArray.length - 1];
+        const fileNameArray = fileName.split(".");
+        extension = fileNameArray[fileNameArray.length - 1];
+        let type;
+        if(extension == "json"){
+          serverConsole(fileName);
+          fileContents = JSON.parse(fileContents.toString());
+          type = fileContents.setspec ? 'stim' : 'tdf'
+        }
+        else {
+          type = 'media'
+        }
+        const fileMeta = { 
+          name: fileName,
+          path: filePath,
+          extension: extension,
+          contents: fileContents,
+          type: type
+        };
+        unzippedFiles.push(fileMeta);
+      }
+      try {
+        for(const media of unzippedFiles.filter(f => f.type == 'media')){
+          await saveMediaFile(media, owner);
+        }
+      } catch(e) {
+        serverConsole('processPackageUpload ERROR,', path, ',', e + ' on file: ' + filePath);
+        throw new Meteor.Error('package upload failed at media upload: ' + e + ' on file: ' + filePath)
+      }
+
+      try {
+        for(const stim of unzippedFiles.filter(f => f.type == 'stim')){
+          results.concat(await saveContentFile(stim.type, stim.name, stim.contents, owner, stim.path));
+        }
+      } catch(e) {
+        serverConsole('processPackageUpload ERROR,', path, ',', e + ' on file: ' + filePath);
+        throw new Meteor.Error('package upload failed at stim upload: ' + e + ' on file: ' + filePath)
+      }
+
+      try {
+        for(const tdf of unzippedFiles.filter(f => f.type == 'tdf')){
+          results.concat(await saveContentFile(tdf.type, tdf.name, tdf.contents, owner, tdf.path));
+        }
+      } catch(e) {
+        serverConsole('processPackageUpload ERROR,', path, ',', e + ' on file: ' + filePath);
+        throw new Meteor.Error('package upload failed at tdf upload: ' + e + ' on file: ' + filePath)
+      }
+
+      return results;
+    } catch(e) {
+      serverConsole('processPackageUpload ERROR,', path, ',', e + ' on file: ' + filePath);
+      throw new Meteor.Error('package upload failed at initialization: ' + e + ' on file: ' + filePath)
+    }
+}
+
+async function saveMediaFile(media, owner){
+  serverConsole("Uploading:", media.name);
+  const relativePath = media.path.split('/')[0];
+  const foundFile = DynamicAssets.collection.findOne({userId: owner, name: media.name, "meta.relativePath": relativePath})
+  if(foundFile){
+    DynamicAssets.collection.remove({_id: foundFile._id});
+    serverConsole(`File ${media.name} already exists, overwritting.`);
+  }
+  else{
+    serverConsole(`File ${media.name} doesn't exist, uploading`)
+  }
+  DynamicAssets.write(media.contents, {
+    name: media.name,
+    userId: owner
+  }, (error, fileRef) => {
+    if (error) {
+      serverConsole(`File ${media.name} could not be uploaded`, error)
+    } else {
+      const metadata = { relativePath: relativePath, link: DynamicAssets.link(fileRef) }
+      DynamicAssets.collection.update({_id: fileRef._id}, {$set: {meta: metadata}});
+    }
+  });
+}
+
+// Allow file uploaded with name and contents. The type of file must be
+// specified - current allowed types are: 'stimuli', 'tdf'
+async function saveContentFile(type, filename, filecontents, owner, packagePath = null) {
+  serverConsole('saveContentFile', type, filename, owner);
+  const results = {
+    'result': null,
+    'errmsg': 'No action taken?',
+    'action': 'None',
+  };
+  if (!type) throw new Error('Type required for File Save');
+  if (!filename) throw new Error('Filename required for File Save');
+  if (!filecontents) throw new Error('File Contents required for File Save');
+  let ownerId = "";
+  // We need a valid use that is either admin or teacher
+  if(owner){
+    ownerId = owner;
+  } else {
+    ownerId = Meteor.user()._id;
+  }
+  if (!ownerId) {
+    throw new Error('No user logged in - no file upload allowed');
+  }
+  if (!Roles.userIsInRole(ownerId, ['admin', 'teacher'])) {
+    throw new Error('You are not authorized to upload files');
+  }
+  if (type != 'tdf' && type != 'stim') {
+    throw new Error('Unknown file type not allowed: ' + type);
+  }
+
+  try {
+    if (type == 'tdf') {
+      const jsonContents = typeof filecontents == 'string' ? JSON.parse(filecontents) : filecontents;
+      const json = {tutor: jsonContents.tutor};
+      const lessonName = _.trim(jsonContents.tutor.setspec.lessonname);
+      if (lessonName.length < 1) {
+        results.result = false;
+        results.errmsg = 'TDF has no lessonname - it cannot be valid';
+
+        return results;
+      }
+      const stimFileName = json.tutor.setspec.stimulusfile ? json.tutor.setspec.stimulusfile : 'INVALID';
+      if (stimFileName == 'INVALID') {
+        // Note this means root tdfs will have NULL stimulisetid
+        results.result = false;
+        results.errmsg = 'Please upload stimulus file before uploading a TDF';
+
+        return results;
+      } else {
+        const associatedStimSetIdRet = Items.findOne({stimulusFileName: stimFileName});
+        const stimuliSetId = associatedStimSetIdRet ? associatedStimSetIdRet.stimuliSetId : null;
+        if (isEmpty(stimuliSetId)) {
+          results.result = false;
+          results.errmsg = 'Please upload stimulus file before uploading a TDF';
+        } else {
+          try {
+            const rec = {'fileName': filename, 'tdfs': json, 'ownerId': ownerId, 'source': 'upload'};
+            await upsertTDFFile(filename, rec, ownerId);
+            //Update Stim Cache every upload
+            Meteor.call('updateStimSyllables', stimuliSetId);
+            results.result = true;
+          } catch (err) {
+            results.result=false;
+            results.errmsg=err.toString();
+          }
+        }
+        return results;
+      }
+    } else if (type === 'stim') {
+      const jsonContents = typeof filecontents == 'string' ? JSON.parse(filecontents) : filecontents;
+      await upsertStimFile(filename, jsonContents, ownerId, packagePath);
+      results.data = jsonContents;
+    }
+  } catch (e) {
+    serverConsole('ERROR saving content file:', e, e.stack);
+    results.result = false;
+    results.errmsg = JSON.stringify(e);
+    return results;
+  }
+
+  results.result = true;
+  results.errmsg = '';
+
+  //return results;
+}
+
 function stripSpacesAndLowerCase(input) {
   return input.replace(/ /g, '').toLowerCase();
 }
@@ -1680,17 +1860,21 @@ function hasGeneratedTdfs(TDFjson) {
 }
 
 // TODO rework for input in a new format as well as the current assumption of the old format
-async function upsertStimFile(stimFilename, stimJSON, ownerId) {
-  serverConsole('upsertStimFile', stimFilename);
+async function upsertStimFile(stimulusFileName, stimJSON, ownerId, packagePath = null) {
+  console.time('upsertStimFile');
+  if(packagePath){
+    packagePath = packagePath.split('/')[0];
+  }
+  serverConsole('upsertStimFile', stimulusFileName);
   const oldStimFormat = {
-    'fileName': stimFilename,
+    'fileName': stimulusFileName,
     'stimuli': stimJSON,
     'owner': ownerId,
     'source': 'repo',
   };
   const responseKCMap = await getReponseKCMap();
-  const associatedStimSetIdRet = Items.findOne({stimulusFileName: stimFilename})
-  serverConsole('getAssociatedStimSetIdForStimFile', stimFilename, associatedStimSetIdRet);
+  const associatedStimSetIdRet = Items.findOne({stimulusFileName: stimulusFileName})
+  serverConsole('getAssociatedStimSetIdForStimFile', stimulusFileName, associatedStimSetIdRet);
   let stimuliSetId;
   if (associatedStimSetIdRet) {
     stimuliSetId = associatedStimSetIdRet.stimuliSetId;
@@ -1701,8 +1885,9 @@ async function upsertStimFile(stimFilename, stimJSON, ownerId) {
     serverConsole('stimuliSetId2:', stimuliSetId, nextStimuliSetId);
   }
 
-  const newFormatItems = getNewItemFormat(oldStimFormat, stimFilename, stimuliSetId, responseKCMap);
-  const existingStims = await Items.find({stimulusFileName: stimFilename});
+  const newFormatItems = getNewItemFormat(oldStimFormat, stimulusFileName, stimuliSetId, responseKCMap);
+  const existingStims = await Items.find({stimulusFileName: stimulusFileName}).fetch();
+  serverConsole('existingStims', existingStims);
   let newStims = [];
   let stimulusKC;
   if (existingStims && existingStims.length > 0) {
@@ -1710,7 +1895,7 @@ async function upsertStimFile(stimFilename, stimJSON, ownerId) {
       stimulusKC = newStim.stimulusKC;
       let matchingStim = existingStims.find((x) => x.stimulusKC == stimulusKC);
       if (!matchingStim) {
-        serverConsole('matchingstims')
+        serverConsole('matchingstims') 
         newStims.push(newStim);
         continue;
       }
@@ -1718,12 +1903,27 @@ async function upsertStimFile(stimFilename, stimJSON, ownerId) {
       const mergedStim = Object.assign(matchingStim, newStim);
       let curAnswerSylls
       try{
-        curAnswerSylls = getSyllablesForWord(mergedStim.correctResponse.replace(/\./g, '_').split('~')[0]);
+        if(mergedStim.syllables && mergedStim.syllables.length < 1){
+          serverConsole('fetching syllables for ' + stim.correctResponse);
+          curAnswerSylls = getSyllablesForWord(mergedStim.correctResponse.replace(/\./g, '_').split('~')[0]);
+        }
       }
       catch (e) {
         serverConsole('error fetching syllables for ' + stim.correctResponse + ': ' + JSON.stringify(e));
         curAnswerSylls = [stim.correctResponse];
       }
+      if(mergedStim.imageStimulus && mergedStim.imageStimulus.split('http').length == 1){
+        //image is not a url
+        console.time('imageStimulus')
+        const imageFilePathArray = mergedStim.imageStimulus.split('/');
+        const imageFileName = imageFilePathArray[imageFilePathArray.length - 1];
+        serverConsole('grabbing link for image', imageFileName);
+        const image = await DynamicAssets.findOne({name: imageFileName, "meta.relativePath": packagePath});
+        const imageLink = image.meta.link;
+        mergedStim.imageStimulus = imageLink;
+        console.timeEnd('imageStimulus')
+      }
+      console.time('itemUpsert')
       Items.update({stimulusFileName: stimulusFileName, stimulusKC: stimulusKC},{$set: {
         stimuliSetId: mergedStim.stimuliSetId,
         parentStimulusFileName: mergedStim.parentStimulusFileName,
@@ -1745,8 +1945,8 @@ async function upsertStimFile(stimFilename, stimJSON, ownerId) {
         tags: mergedStim.tags,
         syllables: curAnswerSylls
       }})
+      console.timeEnd('itemUpsert')
     }
-    Items.remove({stimulusKC: {$gt: stimulusKC},stimulusKC: {$lt: (stimulusKC + 1) * 10000}});
   } else {
     newStims = newFormatItems;
   }
@@ -1754,6 +1954,7 @@ async function upsertStimFile(stimFilename, stimJSON, ownerId) {
   for (const stim of newStims) {
     let curAnswerSylls
     try{
+      serverConsole('fetching syllables for ' + stim.correctResponse);
       curAnswerSylls = getSyllablesForWord(stim.correctResponse.replace(/\./g, '_').split('~')[0]);
     }
     catch (e) {
@@ -1761,10 +1962,21 @@ async function upsertStimFile(stimFilename, stimJSON, ownerId) {
       curAnswerSylls = [stim.correctResponse];
     }
     stim.syllables = curAnswerSylls;
+    if(stim.imageStimulus && stim.imageStimulus.split('http').length == 1){
+      //image is not a url
+      const imageFilePathArray = stim.imageStimulus.split('/');
+      const imageFileName = imageFilePathArray[imageFilePathArray.length - 1];
+      serverConsole('grabbing link for image', imageFileName);
+      const image = await DynamicAssets.findOne({name: imageFileName, "meta.relativePath": packagePath});
+      const imageLink = image.meta.link;
+      stim.imageStimulus = imageLink;
+    }
     Items.insert(stim);
   }
   //Update Stim Cache every upload
   Meteor.call('updateStimSyllables', stimuliSetId);
+
+  console.timeEnd('upsertStimFile');
 }
 
 
@@ -1889,10 +2101,12 @@ Meteor.methods({
   getAllTdfs, getAllStims, getTdfById, getTdfByFileName, getTdfByExperimentTarget, getTdfIDsAndDisplaysAttemptedByUserId,
 
   getLearningSessionItems, getStimDisplayTypeMap, getStimuliSetById, getStimuliSetsForIdSet,
+
   getStimuliSetByFilename, getSourceSentences, getMatchingDialogueCacheWordsForAnswer,
 
   getAllCourses, getAllCourseSections, getAllCoursesForInstructor, getAllCourseAssignmentsForInstructor,
-  addCourse, editCourse, editCourseAssignments, addUserToTeachersClass,
+
+  addCourse, editCourse, editCourseAssignments, addUserToTeachersClass, saveContentFile,
 
   getAllTeachers, getTdfNamesAssignedByInstructor, getTdfsAssignedToStudent, getTdfAssignmentsByCourseIdMap,
 
@@ -1902,7 +2116,7 @@ Meteor.methods({
 
   getExperimentState, setExperimentState, getUserIdforUsername, insertStimTDFPair,
 
-  getProbabilityEstimatesByKCId, getReponseKCMap,
+  getProbabilityEstimatesByKCId, getReponseKCMap, processPackageUpload,
 
   getComponentStatesByUserIdTDFIdAndUnitNum, setComponentStatesByUserIdTDFIdAndUnitNum,
 
@@ -2418,197 +2632,6 @@ Meteor.methods({
     }
     result = "TDF deleted";
     return result;
-  },
-  // Package Uploader
-  processPackageUpload: function(path, owner){
-    const fs = Npm.require('fs');
-    const unzip = Npm.require('unzipper');
-    fs.createReadStream(path)
-      .pipe(unzip.Parse())
-      .on('entry', async function(entry){
-        var tdfContent = [];
-        var stimContent = [];
-        var referenceContents = [];
-        var fileNameArray = entry.path.split("/");
-        var fileName = fileNameArray[fileNameArray.length - 1];
-        // replace all spaces with underscores
-        fileName = fileName.replace(/ /g, "_");
-        var content =  await entry.buffer().then(async function(file){
-          let fileSplit = fileName.split(".");
-          let type = fileSplit[fileSplit.length - 1];
-          if(type =="json"){
-            rawFileContents = file.toString();
-            parsedFileContents = JSON.parse(rawFileContents);
-            JSONStringContents = JSON.stringify(parsedFileContents);
-            if(parsedFileContents.setspec){
-              fileFinal = {
-                type: "stim",
-                contents: JSONStringContents,
-                fileName: fileName
-              }
-              stimContent.push(fileFinal);
-            } 
-            if(parsedFileContents.tutor){
-              fileFinal = {
-                type: "tdf",
-                contents: JSONStringContents,
-                fileName: fileName
-              }
-              tdfContent.push(fileFinal);
-            }
-          }else{
-            serverConsole("Uploading:", fileName);
-            const foundFile = DynamicAssets.findOne({userId: owner, name: fileName})
-            if(foundFile){
-              foundFile.remove(function (error){
-                if (error) {
-                  serverConsole(`File ${fileName} could not be removed`, error)
-                }
-                else{
-                  serverConsole(`File ${fileName} already exists, overwritting.`)
-                  DynamicAssets.write(file, {
-                    fileName: fileName,
-                    userId: owner,
-                    parent: path
-                  });
-                }
-              })
-            }
-            else{
-              serverConsole(`File ${fileName} doesn't exist, uploading`)
-              DynamicAssets.write(file, {
-                fileName: fileName,
-                userId: owner,
-                parent: path
-              });
-            }
-          }
-          return {tdfContent,stimContent}
-        });
-        referenceContents = [];
-        referenceFiles = DynamicAssets.find({}).forEach(function(fileRef){
-            replacePath = DynamicAssets.link(fileRef);
-            data = {
-              fileName: fileRef.name,
-              replacePath: replacePath,
-              parent: fileRef.name
-            }
-            referenceContents.push(data);
-            DynamicAssets.collection.update({_id: fileRef._id}, {$set: {meta: {link: replacePath}}});
-        });
-        for(let files of content.stimContent){
-          serverConsole("Processing stim file:", files.fileName);
-            newContents = files.contents;
-            for(let referenceFile of referenceContents){
-              toReplace = newContents;
-              theSplit = toReplace.split(referenceFile.fileName);
-              if(theSplit.length > 1){
-                serverConsole("replacing", theSplit.length - 1,"references:", files.fileName, referenceFile.fileName, referenceFile.replacePath);
-                newContents = theSplit.join(referenceFile.replacePath);
-              } 
-            }
-            Meteor.call("saveContentFile",files.type, files.fileName,newContents, owner);
-        }
-        for(let files of content.tdfContent){
-          serverConsole("Processing tdf file:", files.fileName);
-          newContents = files.contents;
-          for(let referenceFile of referenceContents){
-            toReplace = newContents;
-            theSplit = toReplace.split(referenceFile.fileName);
-            if(theSplit.length > 1){
-              serverConsole("replacing", theSplit.length - 1,"references:", files.fileName, referenceFile.fileName, referenceFile.replacePath);
-              newContents = theSplit.join(referenceFile.replacePath);
-            } 
-          }
-          Meteor.call("saveContentFile",files.type, files.fileName,newContents, owner);
-        }
-      });
-      assets = DynamicAssets.find({}).fetch();
-      return assets;
-  },
-  // Allow file uploaded with name and contents. The type of file must be
-  // specified - current allowed types are: 'stimuli', 'tdf'
-  saveContentFile: async function(type, filename, filecontents, owner) {
-    serverConsole('saveContentFile', type, filename, owner);
-    const results = {
-      'result': null,
-      'errmsg': 'No action taken?',
-      'action': 'None',
-    };
-    if (!type) throw new Error('Type required for File Save');
-    if (!filename) throw new Error('Filename required for File Save');
-    if (!filecontents) throw new Error('File Contents required for File Save');
-    let ownerId = "";
-    // We need a valid use that is either admin or teacher
-    if(owner){
-      ownerId = owner;
-    } else {
-      ownerId = Meteor.user()._id;
-    }
-    if (!ownerId) {
-      throw new Error('No user logged in - no file upload allowed');
-    }
-    if (!Roles.userIsInRole(ownerId, ['admin', 'teacher'])) {
-      throw new Error('You are not authorized to upload files');
-    }
-    if (type != 'tdf' && type != 'stim') {
-      throw new Error('Unknown file type not allowed: ' + type);
-    }
-
-    try {
-      if (type == 'tdf') {
-        const jsonContents = JSON.parse(filecontents);
-        const json = {tutor: jsonContents.tutor};
-        const lessonName = _.trim(jsonContents.tutor.setspec.lessonname);
-        if (lessonName.length < 1) {
-          results.result = false;
-          results.errmsg = 'TDF has no lessonname - it cannot be valid';
-
-          return results;
-        }
-        const stimFileName = json.tutor.setspec.stimulusfile ? json.tutor.setspec.stimulusfile : 'INVALID';
-        if (stimFileName == 'INVALID') {
-          // Note this means root tdfs will have NULL stimulisetid
-          results.result = false;
-          results.errmsg = 'Please upload stimulus file before uploading a TDF';
-
-          return results;
-        } else {
-          const associatedStimSetIdRet = Items.findOne({stimulusFileName: stimFileName});
-          const stimuliSetId = associatedStimSetIdRet ? associatedStimSetIdRet.stimuliSetId : null;
-          if (isEmpty(stimuliSetId)) {
-            results.result = false;
-            results.errmsg = 'Please upload stimulus file before uploading a TDF';
-          } else {
-            try {
-              const rec = {'fileName': filename, 'tdfs': json, 'ownerId': ownerId, 'source': 'upload'};
-              await upsertTDFFile(filename, rec, ownerId);
-              //Update Stim Cache every upload
-              Meteor.call('updateStimSyllables', stimuliSetId);
-              results.result = true;
-            } catch (err) {
-              results.result=false;
-              results.errmsg=err.toString();
-            }
-          }
-          return results;
-        }
-      } else if (type === 'stim') {
-        const jsonContents = JSON.parse(filecontents);
-        await upsertStimFile(filename, jsonContents, ownerId);
-        results.data = jsonContents;
-      }
-    } catch (e) {
-      serverConsole('ERROR saving content file:', e, e.stack);
-      results.result = false;
-      results.errmsg = JSON.stringify(e);
-      return results;
-    }
-
-    results.result = true;
-    results.errmsg = '';
-
-    return results;
   },
 
   updatePerformanceData: function(type, codeLocation, userId) {
