@@ -1900,7 +1900,6 @@ function hasGeneratedTdfs(TDFjson) {
 
 // TODO rework for input in a new format as well as the current assumption of the old format
 async function upsertStimFile(stimulusFileName, stimJSON, ownerId, packagePath = null) {
-  console.time('upsertStimFile');
   if(packagePath){
     packagePath = packagePath.split('/')[0];
   }
@@ -1929,9 +1928,13 @@ async function upsertStimFile(stimulusFileName, stimJSON, ownerId, packagePath =
   serverConsole('existingStims', existingStims);
   let newStims = [];
   let stimulusKC;
+  let maxStimulusKC = 0;
   if (existingStims && existingStims.length > 0) {
     for (const newStim of newFormatItems) {
       stimulusKC = newStim.stimulusKC;
+      if (stimulusKC > maxStimulusKC) {
+        maxStimulusKC = stimulusKC;
+      }
       let matchingStim = existingStims.find((x) => x.stimulusKC == stimulusKC);
       if (!matchingStim) {
         serverConsole('matchingstims') 
@@ -1953,16 +1956,13 @@ async function upsertStimFile(stimulusFileName, stimJSON, ownerId, packagePath =
       }
       if(mergedStim.imageStimulus && mergedStim.imageStimulus.split('http').length == 1){
         //image is not a url
-        console.time('imageStimulus')
         const imageFilePathArray = mergedStim.imageStimulus.split('/');
         const imageFileName = imageFilePathArray[imageFilePathArray.length - 1];
         serverConsole('grabbing link for image', imageFileName);
         const image = await DynamicAssets.findOne({name: imageFileName, "meta.relativePath": packagePath});
         const imageLink = image.meta.link;
         mergedStim.imageStimulus = imageLink;
-        console.timeEnd('imageStimulus')
       }
-      console.time('itemUpsert')
       Items.update({stimulusFileName: stimulusFileName, stimulusKC: stimulusKC},{$set: {
         stimuliSetId: mergedStim.stimuliSetId,
         parentStimulusFileName: mergedStim.parentStimulusFileName,
@@ -1984,13 +1984,15 @@ async function upsertStimFile(stimulusFileName, stimJSON, ownerId, packagePath =
         tags: mergedStim.tags,
         syllables: curAnswerSylls
       }})
-      console.timeEnd('itemUpsert')
     }
   } else {
     newStims = newFormatItems;
   }
   serverConsole('!!!newStims:', newStims);
   for (const stim of newStims) {
+    if(stim.stimulusKC > maxStimulusKC){
+      maxStimulusKC = stim.stimulusKC;
+    }
     let curAnswerSylls
     try{
       serverConsole('fetching syllables for ' + stim.correctResponse);
@@ -2014,8 +2016,8 @@ async function upsertStimFile(stimulusFileName, stimJSON, ownerId, packagePath =
   }
   //Update Stim Cache every upload
   Meteor.call('updateStimSyllables', stimuliSetId);
-
-  console.timeEnd('upsertStimFile');
+  // We may have less stims than in previous versions of an uploaded stim file
+  // Items.remove({stimulusKC: {$gt: maxStimulusKC, $lt: (Math.floor(maxStimulusKC / 10000) + 1) * 10000}});
 }
 
 
