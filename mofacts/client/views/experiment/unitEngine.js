@@ -396,6 +396,10 @@ function modelUnitEngine() {
     return getStimCluster(clusterIndex).stims[whichStim].params.split(',').map((x) => _.floatval(x));
   }
 
+  function getStimParameterArrayFromCluster(cluster, whichStim) {
+    return cluster.stims[whichStim].params.split(',').map((x) => _.floatval(x));
+  }
+
   const currentCardInfo = {
     testType: 'd',
     clusterIndex: -1,
@@ -1034,7 +1038,7 @@ function modelUnitEngine() {
         const numStims = cluster.stims.length;
         for (j = 0; j < numStims; ++j) {
           // Note this may be a single element array for older stims or a 3 digit array for newer ones
-          const parameter = getStimParameterArray(i, j);
+          const parameter = getStimParameterArrayFromCluster(cluster, j);
           // Per-stim counts
           card.stims.push({
             clusterKC: (curKCBase + i),
@@ -1371,11 +1375,6 @@ function modelUnitEngine() {
                 card.stims.filter((x) => x.stimulusKC != stimulusKC).reduce((acc, stim) => acc +
                     stim.totalPracticeDuration, 0), 0);
           }
-        }
-
-        for (const response of responses) {
-          const modelResponse = Object.values(cardProbabilities.responses).find((x) => x.KCId == response.KCId);
-          Object.assign(modelResponse, response);
         }
         console.log('loadComponentStates2', cards, stims, probsMap, componentStates,
             clusterStimKCs, stimProbabilityEstimates);

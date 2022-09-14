@@ -160,8 +160,8 @@ async function setStudentPerformance(studentID, studentUsername, tdfId) {
     'count': count,
     'percentCorrect': percentCorrect,
     'numCorrect': studentPerformanceData.numCorrect,
-    'stimsSeen' : studentPerformanceData.stimsSeen,
-    'totalStimCount': studentPerformanceDataRet.totalStimCount,
+    'stimsSeen': studentPerformanceData.stimsSeen,
+    'totalStimCount': studentPerformanceData.totalStimCount,
     'totalTime': studentPerformanceData.totalPracticeDuration,
     // convert from ms to min
     'totalTimeDisplay': (studentPerformanceData.totalPracticeDuration / (60 * 1000)).toFixed(0),

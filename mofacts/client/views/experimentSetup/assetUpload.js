@@ -85,13 +85,12 @@ function doFileUpload(file, template){
           if(err){
             alert(err);
           } else {
-            console.log(res);
+            alert("Package upload succeded.");
           }
         });
       }
     }
     template.currentUpload.set(false);
   });
-  
   upload.start();
 }
