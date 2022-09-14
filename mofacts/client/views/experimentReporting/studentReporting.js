@@ -211,27 +211,27 @@ async function drawDashboard(studentId, selectedTdfId){
   //Get Student Data
   const stimids = await meteorCallAsync('getStimSetFromLearningSessionByClusterList', curStimSetId, clusterlist);
   const curStudentGraphData = await meteorCallAsync('getStudentPerformanceByIdAndTDFId', studentId, selectedTdfId, stimids);
+  const curStudentTotalData = await meteorCallAsync('getStudentPerformanceByIdAndTDFId', studentId, selectedTdfId);
   const speedOfLearningData = await meteorCallAsync('getStudentPerformanceByIdAndTDFIdFromHistory', studentId, selectedTdfId, 30);
   const masteryRateData = await meteorCallAsync('getStudentPerformanceByIdAndTDFIdFromHistory', studentId, selectedTdfId, masteryHistory);
   const masteryEstimateData = await meteorCallAsync('getStudentPerformanceByIdAndTDFIdFromHistory', studentId, selectedTdfId, timeToMasterHistory);
   const difficultyData = await meteorCallAsync('getStudentPerformanceByIdAndTDFIdFromHistory', studentId, selectedTdfId, difficultyHistory);
-  const numDroppedStims = await meteorCallAsync('getNumDroppedItemsByUserIDAndTDFId', studentId, selectedTdfId)
-  console.log("curStudentGraphData(all trials)", curStudentGraphData)
-  console.log(`speedOfLearningData(${30} trials)`, speedOfLearningData)
-  console.log(`masteryRateData(${masteryHistory} trials)`, masteryRateData)
-  console.log(`masteryEstimateData(${timeToMasterHistory} trials)`, masteryEstimateData)
-  console.log(`difficultyData(${difficultyHistory} trials)`, difficultyData)
+  const numDroppedStims = await meteorCallAsync('getNumDroppedItemsByUserIDAndTDFId', studentId, selectedTdfId);
+  console.log("curStudentGraphData(all trials)", curStudentGraphData);
+  console.log(`speedOfLearningData(${30} trials)`, speedOfLearningData);
+  console.log(`masteryRateData(${masteryHistory} trials)`, masteryRateData);
+  console.log(`masteryEstimateData(${timeToMasterHistory} trials)`, masteryEstimateData);
+  console.log(`difficultyData(${difficultyHistory} trials)`, difficultyData);
   //Expand Data
-  let {numCorrect, numIncorrect, totalStimCount,  totalPracticeDuration, stimsIntroduced} = curStudentGraphData;
-    // Perform calculated data
-  
+  let {totalStimCount, stimsIntroduced} = curStudentGraphData;
+  const {numCorrect, numIncorrect, totalPracticeDuration} = curStudentTotalData;
   totalAttempts = parseFloat(numCorrect) + parseFloat(numIncorrect);
   if(isNaN(totalAttempts)){
     totalAttempts = 0;
   }
   percentCorrect = (parseFloat(numCorrect) / totalAttempts) * 100;
-  totalPracticeDurationMinutes = totalPracticeDuration / 60000;
-  totalPracticeDurationMinutesDisplay = totalPracticeDurationMinutes.toFixed();
+  totalPracticeDurationInMinutes = totalPracticeDuration / 60000;
+  totalPracticeDurationMinutesDisplay = totalPracticeDurationInMinutes.toFixed();
   percentStimsSeen = parseFloat(stimsIntroduced - numDroppedStims) / parseFloat(totalStimCount - numDroppedStims) * 100;
   speedOfLearning = Math.log(1+parseFloat(speedOfLearningData.stimsIntroduced)) * 100;
   difficultyCorrectProportion = parseFloat(difficultyData.numCorrect) / (parseFloat(difficultyData.numCorrect) + parseFloat(difficultyData.numIncorrect));

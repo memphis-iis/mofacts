@@ -8,16 +8,13 @@ import {displayify, isEmpty, stringifyIfExists} from '../common/globalHelpers';
 import {createExperimentExport} from './experiment_times';
 import {getNewItemFormat} from './conversions/convert';
 import {sendScheduledTurkMessages} from './turk_methods';
-import {getItem, getComponentState, getCourse, getTdf, getHistoryForMongo, migrateTdf} from './orm';
-import { result } from 'underscore';
-import { Mongo } from 'meteor/mongo'
-import { type } from 'os';
-import { split } from './lib/fable-library.2.10.2/RegExp';
+import {getItem, getCourse} from './orm';
+import {result} from 'underscore';
 
 
 export {
   getTdfByFileName,
-  getTdfBy_id,
+  getTdfById,
   getHistoryByTDFfileName,
   getListOfStimTags,
   getListOfStimTagsByTDFFileNames,
@@ -267,22 +264,6 @@ async function getTdfById(TDFId) {
 async function getTdfTTSAPIKey(TDFId) {
   const textToSpeechAPIKey = Tdfs.findOne({_id: TDFId}).content.tdfs.tutor.setspec.textToSpeechAPIKey;
   return textToSpeechAPIKey;
-}
-
-async function getTdfSpeachAPIKey(TDFId) {
-  const speechAPIKey = Tdfs.findOne({_id: TDFId}).content.tdfs.tutor.setspec.speechAPIKey;
-  return speechAPIKey;
-}
-
-// eslint-disable-next-line camelcase
-async function getTdfBy_id(_id) {
-  try {
-    tdf = TDFs.find({_id: _id}).fetch();
-    return tdf;
-  } catch (e) {
-    serverConsole('getTdfBy_id ERROR,', _id, ',', e);
-    return null;
-  }
 }
 
 async function getTdfByFileName(filename) {
@@ -1486,11 +1467,11 @@ async function getStudentReportingData(userId, TDFId, hintLevel) {
 }
 
 async function getStimSetFromLearningSessionByClusterList(stimuliSetId, clusterList){
+  serverConsole('getStimSetFromLearningSessionByClusterList', stimuliSetId, clusterList);
   const itemRet = Items.find({stimuliSetId: stimuliSetId}, {sort: {stimulusKC: 1}}).fetch();
-  console.log(itemRet)
   let learningSessionItem = [];
   for(let item of itemRet){
-    if(clusterList.includes(item.clusterKC)){
+    if(clusterList.includes(item.clusterKC) && learningSessionItem.includes(item.stimulusKC) === false){
       learningSessionItem.push(item.stimulusKC);
     }
   }
@@ -1498,61 +1479,119 @@ async function getStimSetFromLearningSessionByClusterList(stimuliSetId, clusterL
 }
 
 async function getStudentPerformanceByIdAndTDFId(userId, TDFId, stimIds=null) {
-  serverConsole('getStudentPerformanceByIdAndTDFId', userId, TDFId);
-  let perfRet = {
-    totalStimCount: 0,
-    numCorrect: 0,
-    numIncorrect: 0,
-    totalPracticeDuration: 0,
-    stimsIntroduced: 0
+  serverConsole('getStudentPerformanceByIdAndTDFId', userId, TDFId, stimIds);
+  const innerQuery = {
+    userId: userId,
+    TDFId: TDFId,
+    componentType: 'stimulus',
   };
-  let innerQuery;
-  console.log('stimIds: ', stimIds)
-  if(stimIds)
-    innerQuery = ComponentStates.find({userId: userId, TDFId: TDFId, componentType: 'stimulus', KCId: { $in: stimIds }}).fetch();
-  else
-    innerQuery = ComponentStates.find({userId: userId, TDFId: TDFId, componentType: 'stimulus'}).fetch();
-  
-  for(let i of innerQuery){
-    const introduced = (i.priorCorrect > 0 || i.priorIncorrect > 0);
-    perfRet = {
-      totalStimCount: perfRet.totalStimCount + 1,
-      numCorrect: perfRet.numCorrect + i.priorCorrect,
-      numIncorrect: perfRet.numIncorrect + i.priorIncorrect,
-      totalPracticeDuration: perfRet.totalPracticeDuration + i.totalPracticeDuration,
-      stimsIntroduced: introduced ? perfRet.stimsIntroduced + 1 : perfRet.stimsIntroduced
-    }
+
+  if (stimIds) {
+    innerQuery.KCId = {$in: stimIds};
   }
-  if (!perfRet) return null;
-  return perfRet;
+
+  const query = [{
+    $match: innerQuery,
+  },
+  {
+    $addFields: {
+      introduced: {
+        $cond: {
+          if: {$or: ['$priorCorrect', '$priorIncorrect']},
+          then: 1,
+          else: 0,
+        },
+      },
+      totalStimCount: 1,
+    },
+  },
+  {
+    $group: {
+      _id: null,
+      totalStimCount: {$sum: '$totalStimCount'},
+      numCorrect: {$sum: '$priorCorrect'},
+      numIncorrect: {$sum: '$priorIncorrect'},
+      totalPracticeDuration: {$sum: '$totalPracticeDuration'},
+      stimsIntroduced: {$sum: '$introduced'},
+    },
+  },
+  {
+    $project: {
+      _id: 0,
+    },
+  }];
+
+  const studentPerformance = await ComponentStates.rawCollection().aggregate(query).toArray();
+  if (!studentPerformance[0]) return null;
+  console.log('query', query);
+  console.log('studentPerformance', studentPerformance[0]);
+  return studentPerformance[0];
 }
 
-async function getStudentPerformanceByIdAndTDFIdFromHistory(userId, TDFId,returnRows=null){
-  //used to grab a limited sample of the student's performance
-  serverConsole('getStudentPerformanceByIdAndTDFIdFromHistory', userId, TDFId, returnRows);
-  let histories;
-  if(returnRows)
-    histories = Histories.find({userId: userId, TDFId: TDFId, levelUnitType: 'model'}, {limit: returnRows, sort: {time: -1}}).fetch(); //limit
-  else
-    histories = Histories.find({userId: userId, TDFId: TDFId, levelUnitType: 'model'}).fetch();
-  let perfRet = {
-    numCorrect: 0,
-    numIncorrect: 0,
-    practiceDuration: 0,
-    stimsIntroduced: 0
+async function getStudentPerformanceByIdAndTDFIdFromHistory(userId, TDFId, returnRows=null) {
+  // used to grab a limited sample of the student's performance
+  // serverConsole('getStudentPerformanceByIdAndTDFIdFromHistory', userId, TDFId, returnRows);
+  const query = [
+    {
+      $match: {userId: userId, TDFId: TDFId, levelUnitType: 'model'},
+    },
+    {
+      $addFields: {
+        correct: {
+          $cond: {
+            if: {$eq: ['$outcome', 'correct']},
+            then: 1,
+            else: 0,
+          },
+        },
+        incorrect: {
+          $cond: {
+            if: {$eq: ['$outcome', 'incorrect']},
+            then: 1,
+            else: 0,
+          },
+        },
+        practiceDuration: {$sum: ['$CFFeedbackLatency', '$CFEndLatency']},
+      },
+    },
+    {
+      $group: {
+        _id: '$KCId',
+        numCorrect: {$sum: '$correct'},
+        numIncorrect: {$sum: '$incorrect'},
+        practiceDuration: {$sum: '$practiceDuration'},
+      },
+    },
+    {
+      $addFields: {
+        introduced: 1,
+      },
+    },
+    {
+      $group: {
+        _id: null,
+        numCorrect: {$sum: '$numCorrect'},
+        numIncorrect: {$sum: '$numIncorrect'},
+        stimsIntroduced: {$sum: '$introduced'},
+        practiceDuration: {$sum: '$practiceDuration'},
+      },
+    },
+    {
+      $project: {
+        _id: 0,
+      },
+    },
+  ];
+
+  if (returnRows) {
+    query.splice(1, 0, {$limit: returnRows});
+    query.splice(1, 0, {$sort: {time: -1}});
   }
-  let itemIds = []
-  for(let history of histories){
-    perfRet = {
-      numCorrect: history.outcome == 'correct' ? perfRet.numCorrect + 1 : perfRet.numCorrect,
-      numIncorrect: history.outcome == 'incorrect' ? perfRet.numIncorrect + 1 : perfRet.numIncorrect,
-      practiceDuration: perfRet.practiceDuration + history.CFEndLatency + history.CFFeedbackLatency,
-    }
-    itemIds.push(history.itemId);
-  }
-  perfRet.stimsIntroduced = new Set(itemIds).size;
-  if (!perfRet) return null;
-  return perfRet
+  const studentPerformance = await Histories.rawCollection().aggregate(query).toArray();
+  if (!studentPerformance[0]) return null;
+
+  studentPerformance[0].totalStimCount = await ComponentStates.find({userId: userId, TDFId: TDFId, componentType: 'stimulus'}).count();
+  return studentPerformance[0];
 }
 
 async function getNumDroppedItemsByUserIDAndTDFId(userId, TDFId){
