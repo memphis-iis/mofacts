@@ -1347,7 +1347,7 @@ async function getStudentPerformanceByIdAndTDFId(userId, TDFId, stimIds=null) {
   return perfRet;
 }
 
-async function getStudentPerformanceByIdAndTDFIdFromHistory(userId, TDFId,returnRows=null){
+async function getStudentPerformanceByIdAndTDFIdFromHistory(userId, TDFId,returnRows=false){
   //used to grab a limited sample of the student's performance
   serverConsole('getStudentPerformanceByIdAndTDFIdFromHistory', userId, TDFId, returnRows);
   let histories;
