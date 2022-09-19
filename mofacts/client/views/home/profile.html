@@ -35,8 +35,8 @@
                         data-tdffilename="{{this.fileName}}"
                         data-ignoreOutOfGrammarResponses="{{this.ignoreOutOfGrammarResponses}}"
                         data-speechOutOfGrammarFeedback="{{this.speechOutOfGrammarFeedback}}"
-                        data-isMultiTdf="{{this.isMultiTdf}}"
-                        disabled="{{this.isOverDue}}">
+                        data-isMultiTdf="{{this.isMultiTdf}}">
+                        <!-- add disabled="{{this.isOverDue}}" to this to enable due date lockouts -->
                         {{this.name}}
                     {{#if this.dueDate}}
                         <br>
