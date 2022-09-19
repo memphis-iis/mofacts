@@ -181,8 +181,6 @@ async function updateDashboard(selectedTdfId){
     console.log('exception', exception);
     const studentID = Session.get('curStudentID') || Meteor.userId();
     const studentUsername = Session.get('studentUsername') || Meteor.user().username;
-    const studentData = await meteorCallAsync('getStudentReportingData', studentID, selectedTdfId, 0);
-    console.log("studentData loaded...",studentData);
     setStudentPerformance(studentID, studentUsername, selectedTdfId);
     drawDashboard(studentID, selectedTdfId);
     $('#tdf-select').val(selectedTdfId);
