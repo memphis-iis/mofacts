@@ -494,8 +494,7 @@ async function processPackageUpload(path, owner){
 
 async function saveMediaFile(media, owner){
   serverConsole("Uploading:", media.name);
-  const relativePath = media.path.split('/')[0];
-  const foundFile = DynamicAssets.collection.findOne({userId: owner, name: media.name, "meta.relativePath": relativePath})
+  const foundFile = DynamicAssets.collection.findOne({userId: owner, name: media.name})
   if(foundFile){
     DynamicAssets.collection.remove({_id: foundFile._id});
     serverConsole(`File ${media.name} already exists, overwritting.`);
@@ -510,7 +509,7 @@ async function saveMediaFile(media, owner){
     if (error) {
       serverConsole(`File ${media.name} could not be uploaded`, error)
     } else {
-      const metadata = { relativePath: relativePath, link: DynamicAssets.link(fileRef) }
+      const metadata = { link: DynamicAssets.link(fileRef) }
       DynamicAssets.collection.update({_id: fileRef._id}, {$set: {meta: metadata}});
     }
   });
@@ -550,6 +549,18 @@ async function saveContentFile(type, filename, filecontents, owner, packagePath 
       const jsonContents = typeof filecontents == 'string' ? JSON.parse(filecontents) : filecontents;
       const json = {tutor: jsonContents.tutor};
       const lessonName = _.trim(jsonContents.tutor.setspec.lessonname);
+      const tips = jsonContents.tutor.setspec.tips;
+      let newFormatttedTips = [];
+      for(const tip of tips){
+        const imageName = tip.split('<img')[1].split('src="')[1].split('"')[0];
+        const image = await DynamicAssets.collection.findOne({userId: ownerId, name: imageName});
+        const imageLink = image.meta.link;
+        newFormatttedTips.push(tip.replace(imageName, imageLink));
+        serverConsole('imageLink', imageLink);
+      }
+      if(newFormatttedTips.length > 0){
+        json.tutor.setspec.tips = newFormatttedTips;
+      }
       if (lessonName.length < 1) {
         results.result = false;
         results.errmsg = 'TDF has no lessonname - it cannot be valid';
@@ -1959,7 +1970,7 @@ async function upsertStimFile(stimulusFileName, stimJSON, ownerId, packagePath =
         const imageFilePathArray = mergedStim.imageStimulus.split('/');
         const imageFileName = imageFilePathArray[imageFilePathArray.length - 1];
         serverConsole('grabbing link for image', imageFileName);
-        const image = await DynamicAssets.findOne({name: imageFileName, "meta.relativePath": packagePath});
+        const image = await DynamicAssets.findOne({name: imageFileName, userId: ownerId});
         const imageLink = image.meta.link;
         mergedStim.imageStimulus = imageLink;
       }
@@ -2008,7 +2019,7 @@ async function upsertStimFile(stimulusFileName, stimJSON, ownerId, packagePath =
       const imageFilePathArray = stim.imageStimulus.split('/');
       const imageFileName = imageFilePathArray[imageFilePathArray.length - 1];
       serverConsole('grabbing link for image', imageFileName);
-      const image = await DynamicAssets.findOne({name: imageFileName, "meta.relativePath": packagePath});
+      const image = await DynamicAssets.findOne({name: imageFileName, userId: ownerId});
       const imageLink = image.meta.link;
       stim.imageStimulus = imageLink;
     }
