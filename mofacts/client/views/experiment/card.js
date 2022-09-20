@@ -1697,9 +1697,8 @@ function gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect,
   let responseDuration = trialEndTimeStamp - firstActionTimestamp;
   let startLatency = firstActionTimestamp - trialStartTimestamp;
   let endLatency = trialEndTimeStamp - trialStartTimestamp;
-  if(firstActionTimestamp == 0 || trialEndTimeStamp == 0 || trialStartTimestamp == 0 || 
-    firstActionTimestamp == null || trialEndTimeStamp == null || trialStartTimestamp == null || 
-    firstActionTimestamp == undefined || trialEndTimeStamp == undefined || trialStartTimestamp == undefined ){
+  if( !firstActionTimestamp || !trialEndTimeStamp || !trialStartTimestamp || 
+    firstActionTimestamp < 0 || trialEndTimeStamp < 0 || trialStartTimestamp < 0 || endLatency < 0){
     //something broke. The user probably didnt start answering the questing in 1970.
     alert('Something went wrong with your trial. Please restart the chapter.');
     const errorDescription = `One or more timestamps were set to 0 or null. 
