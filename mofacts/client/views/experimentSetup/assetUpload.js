@@ -65,7 +65,12 @@ Template.assetUpload.events({
   }
 });
 
-function doFileUpload(file, template){
+async function doFileUpload(file, template){
+  const existingFile = await DynamicAssets.findOne({ name: file.name, userId: Meteor.userId() });
+  if (existingFile) {
+    console.log(`File ${file.name} already exists, overwritting.`)
+    existingFile.remove();
+  }
   const upload = DynamicAssets.insert({
     file: file,
     chunkSize: 'dynamic'
