@@ -939,6 +939,10 @@ function modelUnitEngine() {
 
       p.stimPreviousCalculatedProbabilities = JSON.parse(JSON.stringify(stim.previousCalculatedProbabilities));
       p.stimOutcomeHistory = JSON.parse(JSON.stringify(stim.outcomeStack));
+      console.log('stimOutcomeHistory', typeof p.stimOutcomeHistory, p.stimOutcomeHistory)
+      if(typeof p.stimOutcomeHistory === 'string') {
+        p.stimOutcomeHistory = p.stimOutcomeHistory.split(',');
+      }
 
       p.overallOutcomeHistory = Session.get('overallOutcomeHistory');
 
