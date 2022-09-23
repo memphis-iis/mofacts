@@ -2049,6 +2049,7 @@ async function upsertTDFFile(tdfFilename, tdfJSON, ownerId) {
   }
   if (!stimSet && !skipStimSet) throw new Error('no stimset for tdf:', tdfFilename);
   if (prev && prev._id) {
+    serverConsole('updating tdf', tdfFilename, stimSet);
     let tdfJSONtoUpsert;
     if (hasGeneratedTdfs(tdfJSON)) {
       const tdfGenerator = new DynamicTdfGenerator(tdfJSON.tdfs, tdfFilename, ownerId, 'repo', stimSet);
@@ -2060,10 +2061,11 @@ async function upsertTDFFile(tdfFilename, tdfJSON, ownerId) {
     }
     Tdfs.update({_id: prev._id},{$set:{
       ownerId: ownerId,
-      stimuliSetId: prev.stimuliSetId,
+      stimuliSetId: stimSetId,
       content: tdfJSONtoUpsert
     }});
   } else {
+    serverConsole('inserting tdf', tdfFilename, stimSet);
     let tdfJSONtoUpsert;
     if (hasGeneratedTdfs(tdfJSON)) {
       const tdfGenerator = new DynamicTdfGenerator(tdfJSON.tdfs, tdfFilename, ownerId, 'repo', stimSet);
