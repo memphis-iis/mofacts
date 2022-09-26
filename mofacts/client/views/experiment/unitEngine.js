@@ -1129,7 +1129,7 @@ function modelUnitEngine() {
         curSessionPriorIncorrect: 0,
         priorStudy: card.priorStudy,
         totalPracticeDuration: card.totalPracticeDuration,
-        outcomeStack: card.outcomeStack.join(','),
+        outcomeStack: card.outcomeStack,
         instructionQuestionResult: Session.get('instructionQuestionResult'),
       };
       const stimState = {
@@ -1147,7 +1147,7 @@ function modelUnitEngine() {
         curSessionPriorIncorrect: stim.curSessionPriorIncorrect,
         priorStudy: stim.priorStudy,
         totalPracticeDuration: stim.totalPracticeDuration,
-        outcomeStack: stim.outcomeStack.join(','),
+        outcomeStack: stim.outcomeStack,
         instructionQuestionResult: null,
       };
       const responseState = {
@@ -1164,7 +1164,7 @@ function modelUnitEngine() {
         curSessionPriorIncorrect: 0,
         priorStudy: response.priorStudy,
         totalPracticeDuration: response.totalPracticeDuration,
-        outcomeStack: response.outcomeStack.join(','),
+        outcomeStack: response.outcomeStack,
         responseText: Object.entries(cardProbabilities.responses).find(r => r[1] == response)[0], // not actually in db, need to lookup/assign kcid when loading
         instructionQuestionResult: null,
       };
@@ -1215,7 +1215,7 @@ function modelUnitEngine() {
           curSessionPriorIncorrect: 0,
           priorStudy: card.priorStudy,
           totalPracticeDuration: card.totalPracticeDuration,
-          outcomeStack: typeof card.outcomeStack == 'string' ?  card.outcomeStack.split(', '):  card.outcomeStack,
+          outcomeStack: typeof card.outcomeStack == 'string' ?  card.outcomeStack.split(','):  card.outcomeStack,
           instructionQuestionResult: Session.get('instructionQuestionResult'),
         };
         componentStates.push(cardState);
@@ -1236,7 +1236,7 @@ function modelUnitEngine() {
             curSessionPriorIncorrect: stim.curSessionPriorIncorrect,
             priorStudy: stim.priorStudy,
             totalPracticeDuration: stim.totalPracticeDuration,
-            outcomeStack: typeof stim.outcomeStack == 'string' ?  stim.outcomeStack.split(', '):  stim.outcomeStack,
+            outcomeStack: typeof stim.outcomeStack == 'string' ?  stim.outcomeStack.split(','):  stim.outcomeStack,
             instructionQuestionResult: null,
           };
           componentStates.push(stimState);
@@ -1258,7 +1258,7 @@ function modelUnitEngine() {
           curSessionPriorIncorrect: 0,
           priorStudy: response.priorStudy,
           totalPracticeDuration: response.totalPracticeDuration,
-          outcomeStack: typeof response.outcomeStack == 'string' ?  response.outcomeStack.split(', '):  response.outcomeStack,
+          outcomeStack: typeof response.outcomeStack == 'string' ?  response.outcomeStack.split(','):  response.outcomeStack,
           responseText, // not actually in db, need to lookup/assign kcid when loading
           instructionQuestionResult: null,
         };
