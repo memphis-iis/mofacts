@@ -14,6 +14,8 @@ console.log('forceSSL', forceSSL);
 if (location.protocol !== 'https:' && forceSSL) {
   location.href = location.href.replace(/^http:/, 'https:');
 }
+//update the user's last activity
+Meteor.call('logUserActivity', Meteor.userId());
 
 try{
   //Prevents new tab
@@ -52,10 +54,6 @@ if((navigator.userAgent.indexOf("Opera") || navigator.userAgent.indexOf('OPR')) 
   Session.set('isIE', true)
 }
 
-//Set checks if user is inactive
-const options = {
-  expiryTime: 30 * 60 * 60 * 1000 // 30 mins
-};
 init(options);
 export {redoCardImage, meteorCallAsync};
 
@@ -119,6 +117,9 @@ Meteor.startup(function() {
   $(window).on('resize', function() {
     redoCardImage();
   });
+
+  //check if user is inactive
+
 });
 
 Template.body.onRendered(function() {

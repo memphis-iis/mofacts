@@ -421,6 +421,29 @@ async function setComponentStatesByUserIdTDFIdAndUnitNum(userId, TDFId, componen
   return {userId, TDFId};
 }
 
+// start syncedchron job that logs out users who have been inactive for 30 minutes
+function startLogoutJob() {
+  SyncedCron.add({
+    name: 'Logout inactive users',
+    schedule: function (parser) {
+      return parser.text('every 1 minute');
+    },
+    job: function () {
+      serverConsole('checking for inactive users');
+      const now = new Date();
+      const thirtyMinutesAgo = new Date(now.getTime() - 30 * 60 * 1000);
+      const thirtyMinutesAgoStr = thirtyMinutesAgo.toISOString();
+      const users = Meteor.users.find({ 'status.lastActivity': { $lt: thirtyMinutesAgoStr } }).fetch();
+      for (const user of users) {
+        serverConsole('Logging out user', user._id);
+        //delete user's token to log them out
+        Meteor.users.update({ _id: user._id }, { $set: { 'services.resume.loginTokens': [] } });
+      }
+    }
+  });
+}
+
+
 // Package Uploader
 async function processPackageUpload(path, owner){
   let results
@@ -2389,6 +2412,17 @@ Meteor.methods({
     return Meteor.users.update({_id: userID}, {$set: {status: {lastLogin: loginTime, userAgent: userAgent}}});
   },
 
+  logUserActivity: function(userID) {
+    const loginTime = new Date();
+    //get users current status
+    const user = Meteor.users.findOne({_id: userID});
+    const status = user.status;
+    //set last activity to now
+    status.lastActivity = loginTime;
+    //update user status
+    return Meteor.users.update({_id: userID}, {$set: {status: status}});
+  },
+
   insertClozeEditHistory: function(history) {
     ClozeEditHistory.insert(history);
   },
@@ -2467,6 +2501,7 @@ Meteor.methods({
     Meteor.users.update(this.userId, { $set: { 'profile.impersonating': userId }});
     this.setUserId(userId);
   },
+
 
   setUserEntryPoint: function(entryPoint){
     console.log(Meteor.userId());
@@ -2897,11 +2932,6 @@ Meteor.startup(async function() {
     return user;
   });
 
-  // Set the global logout time for all users
-  Accounts.config({
-    loginExpirationInDays: 90
-  })
-
   // Create any helpful indexes for queries we run
   ScheduledTurkMessages._ensureIndex({'sent': 1, 'scheduled': 1});
 
@@ -2928,6 +2958,9 @@ Meteor.startup(async function() {
       return sendErrorReportSummaries();
     },
   });
+
+  //start up inactivity cron job
+  startLogoutJob();
 });
 
 Router.route('/dynamic-assets/:tdfid?/:filetype?/:filename?', {
