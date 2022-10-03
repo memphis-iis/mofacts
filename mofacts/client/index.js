@@ -117,9 +117,6 @@ Meteor.startup(function() {
   $(window).on('resize', function() {
     redoCardImage();
   });
-
-  //check if user is inactive
-
 });
 
 Template.body.onRendered(function() {
