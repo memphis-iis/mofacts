@@ -2250,7 +2250,11 @@ function beginQuestionAndInitiateUserInput(delayMs, deliveryParams) {
 function allowUserInput() {
   console.log('allow user input');
   inputDisabled = false;
-  startRecording();
+  const enableAudioPromptAndFeedback = Session.get('enableAudioPromptAndFeedback');
+  const audioPromptMode = Session.get('audioPromptMode');
+  if (!enableAudioPromptAndFeedback || !(audioPromptMode === 'question' || audioPromptMode === 'all')) {
+    startRecording();
+  }
 
   // Need timeout here so that the disable input timeout doesn't fire after this
   setTimeout(async function() {
