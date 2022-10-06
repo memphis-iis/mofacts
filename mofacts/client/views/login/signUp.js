@@ -74,7 +74,8 @@ Template.signUp.events({
             console.log(currentUser + ' was logged in successfully!');
             Meteor.call('debugLog', 'Sign in was successful');
           }
-          Meteor.call('setUserEntryPoint', `direct`, 'default');
+          Meteor.call('setUserEntryPoint', `direct`);
+          Meteor.call('setLoginMode', 'password');
           Meteor.logoutOtherClients();
           Router.go('/profile');
         }

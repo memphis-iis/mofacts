@@ -2468,10 +2468,10 @@ Meteor.methods({
     this.setUserId(userId);
   },
 
-  setUserEntryPoint: function(entryPoint, loginMode){
+  setUserEntryPoint: function(entryPoint){
     console.log(Meteor.userId());
     if(Meteor.userId()){
-      Meteor.users.update(Meteor.userId(), { $set: { 'profile.entryPoint': entryPoint, 'profile.loginMode': loginMode }});
+      Meteor.users.update(Meteor.userId(), { $set: { 'profile.entryPoint': entryPoint }});
     }
   },
 
@@ -2482,13 +2482,12 @@ Meteor.methods({
     }
   },
 
-  setUserLoginData: function(entryPoint, curTeacher, curClass, loginMode){
+  setUserLoginData: function(entryPoint, curTeacher, curClass){
     console.log(Meteor.userId());
     let query = { 
       'profile.entryPoint': entryPoint,
       'profile.curTeacher': curTeacher,
       'profile.curClass': curClass,
-      'profile.loginMode': loginMode
     };
     if(Meteor.userId()){
       Meteor.users.update(Meteor.userId(), { $set: query })

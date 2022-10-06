@@ -86,7 +86,8 @@ function testLogin() {
                 sectionName = "/" + Session.get('curClass').sectionName;
               }
               const entryPoint = `${Session.get('curTeacher').username}/${Session.get('curClass').courseName + sectionName}`
-              Meteor.call('setUserLoginData', entryPoint, Session.get('curTeacher'), Session.get('curClass'), 'southwest');
+              Meteor.call('setUserLoginData', entryPoint, Session.get('curTeacher'), Session.get('curClass'));
+              Meteor.call('setLoginMode',  'southwest');
               Meteor.call('logUserAgentAndLoginTime', Meteor.userId(), navigator.userAgent);
               Meteor.call('updatePerformanceData', 'login', 'signinSouthwest.testLogin', Meteor.userId());
               Meteor.logoutOtherClients();
@@ -243,7 +244,8 @@ Template.signInSouthwest.events({
             sectionName = "/" + Session.get('curClass').sectionName;
           }
           const entryPoint = `${Session.get('curTeacher').username}/${Session.get('curClass').courseName + sectionName}`
-          Meteor.call('setUserLoginData', entryPoint, Session.get('curTeacher'), Session.get('curClass'), 'southwest');
+          Meteor.call('setUserLoginData', entryPoint, Session.get('curTeacher'), Session.get('curClass'));
+          Meteor.call('setLoginMode', 'southwest');
           Meteor.call('logUserAgentAndLoginTime', Meteor.userId(), navigator.userAgent);
           Meteor.call('updatePerformanceData', 'login', 'signinSouthwest.clickSamlLogin', Meteor.userId());
           Meteor.logoutOtherClients();
