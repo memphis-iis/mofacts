@@ -104,7 +104,7 @@ Template.signIn.events({
       }
       Meteor.call('logUserAgentAndLoginTime', Meteor.userId(), navigator.userAgent);
       Meteor.call('updatePerformanceData', 'login', 'signinOauth.clickSigninButton', Meteor.userId());
-      Meteor.call('setUserEntryPoint', `direct`);
+      Meteor.call('setUserEntryPoint', `direct`, Session.get('loginMode'));
       Meteor.logoutOtherClients();
       Router.go('/profile');
     });
@@ -167,6 +167,12 @@ function signinNotify() {
         return;
       }
       console.log('addUserToTeachersClass result: ' + result);
+      let sectionName = "";
+      if(Session.get('curClass').sectionName){
+        sectionName = "/" + Session.get('curClass').sectionName;
+      }
+      const entryPoint = `${Session.get('curTeacher').username}/${Session.get('curClass').courseName + sectionName}`
+      Meteor.call('setUserLoginData', entryPoint, Session.get('curTeacher'), Session.get('curClass'), Session.get('loginMode'));
 
     });
   }
@@ -209,7 +215,7 @@ function userPasswordCheck() {
           $('#signInButton').prop('disabled', false);
         } else {
           signinNotify();
-          Meteor.call('setUserEntryPoint', `direct`);
+          Meteor.call('setUserEntryPoint', `direct`, Session.get('loginMode'));
         }
       });
 
@@ -250,7 +256,7 @@ function userPasswordCheck() {
             $('#signInButton').prop('disabled', false);
           } else {
             signinNotify();
-            Meteor.call('setUserEntryPoint', `direct`);
+            Meteor.call('setUserEntryPoint', `direct`, Session.get('loginMode'));
           }
         });
       });
@@ -279,7 +285,7 @@ function userPasswordCheck() {
         return;
       }    
       signinNotify();
-      Meteor.call('setUserEntryPoint', `direct`);
+      Meteor.call('setUserEntryPoint', `direct`, Session.get('loginMode'));
     }
   });
 }
@@ -345,7 +351,7 @@ function testLogin() {
         }
         Meteor.call('logUserAgentAndLoginTime', Meteor.userId(), navigator.userAgent);
         Meteor.call('updatePerformanceData', 'login', 'signinOauth.testLogin', Meteor.userId());
-        Meteor.call('setUserEntryPoint', `direct`);
+        Meteor.call('setUserEntryPoint', `direct`, Session.get('loginMode'));
         Meteor.logoutOtherClients();
         Router.go('/profile');
       }

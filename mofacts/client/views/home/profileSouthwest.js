@@ -13,7 +13,7 @@ Template.profileSouthwest.helpers({
     }
   },
   class: function(){
-    thisClass = Session.get('curClass');
+    thisClass = Meteor.user().profile.curClass;
     if(thisClass.coursename){
       return thisClass;
     } else {
@@ -50,23 +50,13 @@ const addButton = function(btnObj, audioInputEnabled, enableAudioPromptAndFeedba
 };
 
 Template.profileSouthwest.rendered = async function() {
-  const pageAccessedByReload = (
-    (window.performance.navigation && window.performance.navigation.type === 1) ||
-      window.performance
-        .getEntriesByType('navigation')
-        .map((nav) => nav.type)
-        .includes('reload')
-  );
-  if(pageAccessedByReload){
-    Router.go('/signInSouthwest');
-  }
   Session.set('currentExperimentState', undefined);
   Session.set('subTdfIndex', undefined);
   Session.set('showSpeechAPISetup', false);
   $('#expDataDownloadContainer').html('');
   const allTdfs = await meteorCallAsync('getAllTdfs');
   Session.set('allTdfs', allTdfs);
-  const curSectionId = Session.get('curSectionId');
+  const curSectionId = Meteor.user().profile.curClass.sectionId;
   Meteor.call('getTdfsAssignedToStudent', Meteor.userId(), curSectionId, async function(err, result) {
     console.log('err: ' + err + ', res: ' + result);
     const assignedTdfs = result;

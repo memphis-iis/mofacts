@@ -2468,11 +2468,41 @@ Meteor.methods({
     this.setUserId(userId);
   },
 
-  setUserEntryPoint: function(entryPoint){
+  setUserEntryPoint: function(entryPoint, loginMode){
     console.log(Meteor.userId());
     if(Meteor.userId()){
-      Meteor.users.update(Meteor.userId(), { $set: { 'profile.entryPoint': entryPoint}})
+      Meteor.users.update(Meteor.userId(), { $set: { 'profile.entryPoint': entryPoint, 'profile.loginMode': loginMode }});
     }
+  },
+
+  setLoginMode: function(loginMode){
+    console.log(Meteor.userId());
+    if(Meteor.userId()){
+      Meteor.users.update(Meteor.userId(), { $set: { 'profile.loginMode': loginMode }});
+    }
+  },
+
+  setUserLoginData: function(entryPoint, curTeacher, curClass, loginMode){
+    console.log(Meteor.userId());
+    let query = { 
+      'profile.entryPoint': entryPoint,
+      'profile.curTeacher': curTeacher,
+      'profile.curClass': curClass,
+      'profile.loginMode': loginMode
+    };
+    if(Meteor.userId()){
+      Meteor.users.update(Meteor.userId(), { $set: query })
+    }
+  },
+
+  clearLoginData: function(){
+    let query = { 
+      'profile.entryPoint': null, 
+      'profile.curTeacher': null, 
+      'profile.curClass': null,
+      'profile.loginMode': null
+    };
+    Meteor.users.update(Meteor.userId(), { $set: query })
   },
 
   clearImpersonation: function(){
