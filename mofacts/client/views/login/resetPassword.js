@@ -59,6 +59,6 @@ Template.resetPassword.events({
 
 Template.resetPassword.helpers({
   secret: function() {
-    return Session.get('loginMode') === 'experiment';
+    return Meteor.user().profile.loginMode === 'experiment';
   }
 });

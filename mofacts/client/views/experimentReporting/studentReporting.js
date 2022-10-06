@@ -101,7 +101,7 @@ $('[data-toggle="tooltip"]').tooltip();
 Template.studentReporting.helpers({
   studentReportingTdfs: () => Session.get('studentReportingTdfs'),
   curClassPerformance: () => Session.get('curClassPerformance'),
-  curClass: () => Session.get('curClass'),
+  curClass: () => Meteor.user().profile.curClass,
   selectedTdfDueDate: () => Session.get('selectedTdfDueDate'),
   curTotalAttempts: () => Session.get('curTotalAttempts'),
   curStudentPerformance: () => Session.get('curStudentPerformance'),
@@ -126,7 +126,7 @@ Template.studentReporting.helpers({
 Template.studentReporting.rendered = async function() {
   window.onpopstate = function(event) {
     console.log('window popstate student reporting');
-    if (document.location.pathname == '/studentReporting' && Session.get('loginMode') === 'southwest') {
+    if (document.location.pathname == '/studentReporting' && Meteor.user().profile.loginMode === 'southwest') {
       Router.go('/profileSouthwest');
     } else {
       Router.go('/profile');

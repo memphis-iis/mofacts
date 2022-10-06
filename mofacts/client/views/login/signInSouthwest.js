@@ -85,7 +85,8 @@ function testLogin() {
               if(Session.get('curClass').sectionName){
                 sectionName = "/" + Session.get('curClass').sectionName;
               }
-              Meteor.call('setUserEntryPoint', `${Session.get('curTeacher').username}/${Session.get('curClass').courseName + sectionName}`);
+              const entryPoint = `${Session.get('curTeacher').username}/${Session.get('curClass').courseName + sectionName}`
+              Meteor.call('setUserLoginData', entryPoint, Session.get('curTeacher'), Session.get('curClass'), 'southwest');
               Meteor.call('logUserAgentAndLoginTime', Meteor.userId(), navigator.userAgent);
               Meteor.call('updatePerformanceData', 'login', 'signinSouthwest.testLogin', Meteor.userId());
               Meteor.logoutOtherClients();
@@ -233,20 +234,21 @@ Template.signInSouthwest.events({
         alert('Problem logging in: ' + data.error);
       } else {
         Meteor.call('addUserToTeachersClass', Meteor.userId(), Session.get('curTeacher')._id, Session.get('curClass').sectionId, function(err, result) {
-              if (err) {
-                console.log('error adding user to teacher class: ' + err);
-              }
-              console.log('addUserToTeachersClass result: ' + result);
-              let sectionName = "";
-              if(Session.get('curClass').sectionName){
-                sectionName = "/" + Session.get('curClass').sectionName;
-              }
-              Meteor.call('setUserEntryPoint', `${Session.get('curTeacher').username}/${Session.get('curClass').courseName + sectionName}`);
-              Meteor.call('logUserAgentAndLoginTime', Meteor.userId(), navigator.userAgent);
-              Meteor.call('updatePerformanceData', 'login', 'signinSouthwest.clickSamlLogin', Meteor.userId());
-              Meteor.logoutOtherClients();
-              Router.go('/profileSouthwest');
-            });
+          if (err) {
+            console.log('error adding user to teacher class: ' + err);
+          }
+          console.log('addUserToTeachersClass result: ' + result);
+          let sectionName = "";
+          if(Session.get('curClass').sectionName){
+            sectionName = "/" + Session.get('curClass').sectionName;
+          }
+          const entryPoint = `${Session.get('curTeacher').username}/${Session.get('curClass').courseName + sectionName}`
+          Meteor.call('setUserLoginData', entryPoint, Session.get('curTeacher'), Session.get('curClass'), 'southwest');
+          Meteor.call('logUserAgentAndLoginTime', Meteor.userId(), navigator.userAgent);
+          Meteor.call('updatePerformanceData', 'login', 'signinSouthwest.clickSamlLogin', Meteor.userId());
+          Meteor.logoutOtherClients();
+          Router.go('/profileSouthwest');
+        });
       }
     });
   },
