@@ -231,13 +231,13 @@ Router.route('/profile', {
       if (Roles.userIsInRole(Meteor.user(), ['admin'])) {
         this.subscribe('allUsers').wait();
       }
-      const loginMode = Session.get('loginMode');
+      const loginMode = Meteor.user().profile.loginMode;
       console.log('loginMode: ' + loginMode);
 
       if (loginMode === 'southwest') {
         console.log('southwest login, routing to southwest profile');
         Session.set('curModule', 'profileSouthwest');
-        this.render('/profileSouthwest');
+        this.redirect('/profileSouthwest');
       } else { // Normal login mode
         console.log('else, progress');
         Session.set('curModule', 'profile');

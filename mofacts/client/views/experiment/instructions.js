@@ -131,7 +131,7 @@ function lockoutPeriodicCheck() {
     // we only need to call it once
     if (serverNotify === null) {
       serverNotify = function() {
-        if (Session.get('loginMode') !== 'experiment') {
+        if (Meteor.user().profile.loginMode !== 'experiment') {
           return; // Nothing to do
         }
 
@@ -279,11 +279,11 @@ function instructContinue() {
 
 Template.instructions.helpers({
   isExperiment: function() {
-    return Session.get('loginMode') === 'experiment';
+    return Meteor.user().profile.loginMode === 'experiment';
   },
 
   isNormal: function() {
-    return Session.get('loginMode') !== 'experiment';
+    return Meteor.user().profile.loginMode !== 'experiment';
   },
 
   backgroundImage: function() {
@@ -332,7 +332,7 @@ Template.instructions.helpers({
   allowcontinue: function() {
     // If we're in experiment mode, they can only continue if there are
     // units left.
-    if (Session.get('loginMode') === 'experiment') {
+    if (Meteor.user().profile.loginMode === 'experiment') {
       return getUnitsRemaining() > 0;
     } else {
       return true;
