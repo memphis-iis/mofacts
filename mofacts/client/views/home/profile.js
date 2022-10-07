@@ -35,7 +35,7 @@ Template.profile.helpers({
   },
 
   class: function(){
-    thisClass = Session.get('curClass');
+    thisClass = Meteor.user().profile.class;
     console.log('class: ', thisClass);
     if(thisClass.courseName){
       return thisClass;
@@ -266,7 +266,7 @@ Template.profile.rendered = async function() {
 
   // In experiment mode, they may be forced to a single tdf
   let experimentTarget = null;
-  if (Session.get('loginMode') === 'experiment') {
+  if (Meteor.user().profile.loginMode === 'experiment') {
     experimentTarget = Session.get('experimentTarget');
     if (experimentTarget) experimentTarget = experimentTarget.toLowerCase();
   }
@@ -279,7 +279,7 @@ Template.profile.rendered = async function() {
   const isAdmin = Roles.userIsInRole(Meteor.user(), ['admin']);
 
   //Get all course tdfs
-  const courseId = Session.get('curClass').courseId;
+  const courseId = Meteor.user().profile.curClass ? Meteor.user().profile.curClass.courseId : null;
   const courseTdfs = await meteorCallAsync('getTdfsAssignedToCourseId', courseId);
   console.log('courseTdfs', courseTdfs, courseId);
 

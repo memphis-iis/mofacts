@@ -493,7 +493,7 @@ Template.card.events({
   'click .instructModalDismiss': function(event) {
     event.preventDefault();
     $('#finalInstructionsDlg').modal('hide');
-    if (Session.get('loginMode') === 'experiment') {
+    if (Meteor.user().profile.loginMode === 'experiment') {
       // Experiment user - no where to go?
       leavePage(routeToSignin);
     } else {
@@ -509,9 +509,9 @@ Template.card.events({
 });
 
 Template.card.helpers({
-  'isExperiment': () => Session.get('loginMode') === 'experiment',
+  'isExperiment': () => Meteor.user().profile.loginMode === 'experiment',
 
-  'isNormal': () => Session.get('loginMode') !== 'experiment',
+  'isNormal': () => Meteor.user().profile.loginMode !== 'experiment',
 
   'isNotInDialogueLoopStageIntroOrExit': () => Session.get('dialogueLoopStage') != 'intro' && Session.get('dialogueLoopStage') != 'exit',
 
@@ -1850,9 +1850,8 @@ function gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect,
     'conditionNameD': 'how answered',
     'conditionTypeD': _.trim(source),
     'conditionNameE': 'section',
-    'conditionTypeE': Session.get('curClass') && Session.get('curTeacher') &&
-    Session.get('curTeacher').username && Session.get('curClass').sectionName ? 
-    Session.get('curTeacher').username + '/' + Session.get('curClass').sectionName : null,
+    'conditionTypeE': Meteor.user().profile.entryPoint && 
+        Meteor.user().profile.entryPoint !== 'direct' ? Meteor.user().profile.entryPoint : null,
 
     'responseDuration': responseDuration,
 
@@ -3089,7 +3088,7 @@ async function processUserTimesLog() {
   if (moduleCompleted) {
     // They are DONE!
     console.log('TDF already completed - leaving for profile page.');
-    if (Session.get('loginMode') === 'experiment') {
+    if (Meteor.user().profile.loginMode === 'experiment') {
       // Experiment users don't *have* a normal page
       leavePage(routeToSignin);
     } else {

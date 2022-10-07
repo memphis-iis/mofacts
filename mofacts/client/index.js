@@ -167,7 +167,7 @@ Template.body.events({
     if (window.currentAudioObj) {
       window.currentAudioObj.pause();
     }
-    if(Session.get('loginMode') == 'southwest'){
+    if(Meteor.user().profile.loginMode == 'southwest'){
       Router.go('/profileSouthwest')
     } else {
       Router.go('/profile');
@@ -240,6 +240,7 @@ Template.body.events({
 
   'click #logoutButton': function(event) {
     Meteor.call('clearImpersonation',Meteor.userId());
+    Meteor.call('clearLoginData');
     Session.set('curUnitInstructionsSeen', undefined);
     Session.set('curSectionId', undefined);
     event.preventDefault();
@@ -271,7 +272,7 @@ Template.registerHelper('currentScore', function() {
   return Session.get('currentScore');
 });
 Template.registerHelper('isNormal', function() {
-  return Session.get('loginMode') !== 'experiment';
+  return Meteor.user().profile.loginMode !== 'experiment';
 });
 Template.registerHelper('curStudentPerformance', function() {
   return Session.get('curStudentPerformance');
