@@ -125,21 +125,22 @@ async function simpleStringMatch(userAnswer, correctAnswer, lfparameter, allowPh
         return 0;
       } 
     }
-    // if(useSpellingCorrection) {
-    //   const results = await meteorCallAsync('getSymSpellCorrection', s1);
-    //   if(results[0].term.localeCompare(s2) === 0) {
-    //     return 2; // Close enough
-    //   } 
-    //   else if(allowPhoneticMatching) {//enable phonetic encoding
-    //     const metaphone1 = doubleMetaphone(s1);
-    //     const metaphone2 = doubleMetaphone(s2);
-    //     if(compareMetaphones(metaphone1, metaphone2))
-    //       return 3; // Metaphone match
-    //   } 
-    //   else {
-    //     return 0; // No match
-    //   }
-    // }
+    if(useSpellingCorrection) {
+      let editDistance = 1;
+      const results = await meteorCallAsync('getSymSpellCorrection', s1, s2, editDistance);
+      if(results) {
+        return 2; //Close enough
+      } 
+      else if(allowPhoneticMatching) {//enable phonetic encoding
+        const metaphone1 = doubleMetaphone(s1);
+        const metaphone2 = doubleMetaphone(s2);
+        if(compareMetaphones(metaphone1, metaphone2))
+          return 3; //Metaphone match
+      } 
+      else {
+        return 0; //No match
+      }
+    }
     if (lfparameter) {
       const editDistance = getEditDistance(s1, s2);
       const editDistScore = 1.0 - (
@@ -359,7 +360,7 @@ const Answers = {
     // Note that a missing or invalid lfparameter will result in a null value
     const lfparameter = parseFloat(setspec ? setspec.lfparameter || 0 : 0);
     const allowPhoneticMatching = Session.get('currentDeliveryParams').allowPhoneticMatching || false;
-    const useSpellingCorrection = Session.get('currentDeliveryParams').useSpellingCorrection || false;
+    const useSpellingCorrection = true //Session.get('currentDeliveryParams').useSpellingCorrection || false;
     const feedbackType = Session.get('currentDeliveryParams').feedbackType;
 
     let fullTextIsCorrect = await checkAnswer(userInput, answer, originalAnswer, lfparameter, allowPhoneticMatching, useSpellingCorrection, undefined);
