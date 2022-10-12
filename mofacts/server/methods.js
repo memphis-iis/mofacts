@@ -30,7 +30,7 @@ export {
 // The jshint inline option above suppresses a warning about using sqaure
 // brackets instead of dot notation - that's because we prefer square brackets
 // for creating some MongoDB queries
-//const SymSpell = require('node-symspell')
+const SymSpell = require('node-symspell')
 const fs = Npm.require('fs');
 const https = require('https')
 const { randomBytes } = require('crypto')
@@ -52,8 +52,11 @@ if (Meteor.settings.public.testLogin) {
 let highestStimuliSetId;
 let nextStimuliSetId;
 
-//const symSpell = new SymSpell(2, 7);
-//symSpell.loadDictionary(Meteor.settings.frequencyDictionaryLocation);
+const maxEditDistance = 2;
+const prefixLength = 7;
+const symSpell = new SymSpell(maxEditDistance, prefixLength);
+serverConsole(Meteor.settings.frequencyDictionaryLocation)
+symSpell.loadDictionary(Meteor.settings.frequencyDictionaryLocation, 0, 1);
 process.env.MAIL_URL = Meteor.settings.MAIL_URL;
 const adminUsers = Meteor.settings.initRoles.admins;
 const ownerEmail = Meteor.settings.owner;
@@ -2310,9 +2313,17 @@ Meteor.methods({
     }
   },
 
-  // getSymSpellCorrection: async function(userAnswer, maxEditDistance) {
-  //   return symSpell.lookupCompound(userAnswer, maxEditDistance)
-  // },
+  getSymSpellCorrection: async function(userAnswer, s2, maxEditDistance = 1) {
+    const verbosity = 2
+    let corrections = symSpell.lookup(userAnswer, verbosity, maxEditDistance);
+    let words = corrections.map( correction => correction.term );
+    for(let word of words){
+      console.log(typeof word, word);
+      if(word.localeCompare(s2) === 0)
+        return true;
+    }
+    return false;
+  },
 
   sendErrorReportSummaries: function() {
     sendErrorReportSummaries();
