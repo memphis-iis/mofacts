@@ -129,7 +129,7 @@ async function simpleStringMatch(userAnswer, correctAnswer, lfparameter, fullAns
       } 
     }
     if(useSpellingCorrection) {
-      let editDistance = deliveryParams.editDistance ? parseInt(deliveryParams.editDistance) : 1;
+      let editDistance = deliveryParams.editDistance ? deliveryParams.editDistance : 1;
       const results = await meteorCallAsync('getSymSpellCorrection', s1, s2, editDistance);
       if(results) {
         return 2; //Close enough

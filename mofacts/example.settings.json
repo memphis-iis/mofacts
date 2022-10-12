@@ -7,5 +7,9 @@
     "initRoles": {
         "admins": ["ADMIN"],
         "teachers": []
+    },
+    "SymSpell": {
+        "maxEditDistance": 4,
+        "prefixLength": 7
     }
 }
