@@ -1,0 +1,84 @@
+{
+    "setspec": {
+            "clusters": [
+                {
+                    "stims": [
+                        {
+                            "response": {
+                                "correctResponse": "correct",
+                                "incorrectResponses": [
+                                    "wrong 1",
+                                    "wrong 2",
+                                    "wrong 3"
+                                ]
+                            },
+                            "display": {
+                                "clozeText": "The first cloze is __________ here."
+                            },
+                            "alternateDisplays": [
+                                {
+                                    "clozeText": "Alt 0 ____ here"
+                                }
+                            ],
+                            "parameter": "-0.479299999999998"
+                        },
+                        {
+                            "response": {
+                                "correctResponse": "correct",
+                                "incorrectResponses": [
+                                    "wrong 1",
+                                    "wrong 2",
+                                    "wrong 3"
+                                ]
+                            },
+                            "display": {
+                                "clozeText": "The myofibrils are essentially __________ joined end to end."
+                            },
+                            "parameter": "-0.479299999999998"
+                        }
+                    ]
+                },
+                {
+                    "stims": [
+                        {
+                            "response": {
+                                "correctResponse": "nervous system",
+                                "incorrectResponses": [
+                                    "wrong 1",
+                                    "wrong 2",
+                                    "wrong 3"
+                                ]
+                            },
+                            "display": {
+                                "clozeText": "John ate a ____ because he was hungry.",
+                                "text":"test text stuff",
+                                "audioSrc":"sounds/croatian/bolnica.mp3",
+                                "imgSrc":"images/TNplants/6151_IMG00293.JPG",
+                                "videoSrc":"https://bart.binarydolphin.com/shortfriends.webm"
+                            },
+                            "parameter": "-0.479299999999998"
+                        }
+                    ]
+                },
+                {
+                    "responseType": "image",
+                    "stims": [
+                        {
+                            "response": {
+                                "correctResponse": "images/Countries/algeria_sm_2011.gif",
+                                "incorrectResponses": [
+                                    "images/Countries/afghanistan_sm_2011.gif",
+                                    "images/Countries/akrotiri_sm_2011.gif",
+                                    "images/Countries/albania_sm_2011.gif"
+                                ]
+                            },
+                            "display": {
+                                "text":"Algeria"
+                            },
+                            "parameter": "-0.479299999999998"
+                        }
+                    ]
+                }
+            ]
+        }
+}
