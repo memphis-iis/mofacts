@@ -52,8 +52,10 @@ if (Meteor.settings.public.testLogin) {
 let highestStimuliSetId;
 let nextStimuliSetId;
 
-const maxEditDistance = 2;
-const prefixLength = 7;
+// How large the distance between two words can be to be considered a match. Larger values result in a slower search. Defualt is 2.
+const maxEditDistance = Meteor.settings.SymSpell.maxEditDistance ? parseInt(Meteor.settings.SymSpell.maxEditDistance) : 2;
+// How big the prefix used for indexing is. Larger values will be result in a faster search, but will use more memory. Default is 7.
+const prefixLength = Meteor.settings.SymSpell.prefixLength ? parseInt(Meteor.settings.SymSpell.prefixLength) : 7;
 const symSpell = new SymSpell(maxEditDistance, prefixLength);
 serverConsole(Meteor.settings.frequencyDictionaryLocation)
 symSpell.loadDictionary(Meteor.settings.frequencyDictionaryLocation, 0, 1);
