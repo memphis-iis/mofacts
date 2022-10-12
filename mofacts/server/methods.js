@@ -2318,7 +2318,6 @@ Meteor.methods({
     let corrections = symSpell.lookup(userAnswer, verbosity, maxEditDistance);
     let words = corrections.map( correction => correction.term );
     for(let word of words){
-      console.log(typeof word, word);
       if(word.localeCompare(s2) === 0)
         return true;
     }
