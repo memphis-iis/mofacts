@@ -387,6 +387,9 @@ function getCurrentDeliveryParams() {
     'falseAnswerLimit': undefined,
     'allowstimulusdropping': false,
     'intertrialmessage': "",
+    'allowPhoneticMatching': false,
+    'useSpellingCorrection': false,
+    'editDistance': 1,
   };
 
   // We've defined defaults - also define translatations for values
@@ -418,6 +421,9 @@ function getCurrentDeliveryParams() {
     'allowFeedbackTypeSelect': xlateBool,
     'falseAnswerLimit': _.intval,
     'allowstimulusdropping': xlateBool,
+    'allowPhoneticMatching': xlateBool,
+    'useSpellingCorrection': xlateBool,
+    'editDistance': _.intval,
   };
 
   let modified = false;
