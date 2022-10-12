@@ -63,7 +63,7 @@ sudo systemctl enable syllable.service
 sudo systemctl start syllable.service
 
 # Install nodejs 12.x
-curl -sL https://deb.nodesource.com/setup_14.x | sudo bash -
+curl -sL https://deb.nodesource.com/setup_12.x | sudo bash -
 sudo apt install -y nodejs
 
 # Install meteor
