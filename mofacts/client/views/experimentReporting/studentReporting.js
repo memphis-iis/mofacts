@@ -296,7 +296,7 @@ async function drawDashboard(studentId, selectedTdfId){
     Session.set('practiceDuration', 0);
     Session.set('curTotalAttempts', 0);
     $('#dashboardGauges').hide();
-    $('#guagesUnavailableMsg').hide();
+    $('#guagesUnavailableMsg').show();
   }
 }
 function progressGauge(target, gaugeType, currentValue,maxValue,options = defaultGaugeOptions){
