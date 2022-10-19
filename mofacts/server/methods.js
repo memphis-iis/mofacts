@@ -2803,6 +2803,21 @@ Meteor.methods({
 
 Meteor.startup(async function() {
 
+  //add a job to send an email showing deployment status
+  const deployment = {
+    user: "MoFACTs System",
+    description: "Deployment Status",
+    page: "",
+    time: new Date(),
+    sessionVars: sessionVars,
+    userAgent: userAgent,
+    logs: logs,
+    currentExperimentState: "none",
+    emailed: false
+  };
+  ErrorReports.insert(errorReport);
+  
+
   highestStimuliSetId = Items.findOne({}, {sort: {stimuliSetId: -1}, limit: 1 });
   nextStimuliSetId = highestStimuliSetId && highestStimuliSetId.stimuliSetId ? parseInt(highestStimuliSetId.stimuliSetId) + 1 : 1;
 
