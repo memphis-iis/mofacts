@@ -28,6 +28,7 @@ export {
   updateExperimentStateSync,
   restartMainCardTimeoutIfNecessary,
   getCurrentClusterAndStimIndices,
+  afterFeedbackCallback,
 };
 
 /*
@@ -1553,7 +1554,6 @@ async function afterAnswerFeedbackCallback(trialEndTimeStamp, source, userAnswer
   Session.set('showDialogueText', false);
   //if the user presses the removal button after answering we need to shortcut the timeout
   const wasReportedForRemoval = source == 'removal';
-  Session.set("reviewTimeoutCompletedFirst", false);
 
   const testType = getTestType();
   const deliveryParams = Session.get('currentDeliveryParams');
@@ -1568,42 +1568,83 @@ async function afterAnswerFeedbackCallback(trialEndTimeStamp, source, userAnswer
   clearCardTimeout();
 
   Session.set('feedbackTimeoutBegins', Date.now())
+  const answerLogRecord = gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect,
+      testType, deliveryParams, dialogueHistory, wasReportedForRemoval);
+
+  Session.set('answerLogRecord', answerLogRecord);
+  Session.set('engine', engine);
+  Session.set('trialEndTimeStamp', trialEndTimeStamp);
+  Session.set('testType', testType);
+  Session.set('isCorrect', isCorrect);
+  Session.set('isTimeout', isTimeout);
   const timeout = Meteor.setTimeout(async function() {
-    Session.set('CurTimeoutId', undefined);
-    let reviewEnd = Date.now();
-    const answerLogRecord = gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect,
-        reviewEnd, testType, deliveryParams, dialogueHistory, wasReportedForRemoval);
+    afterFeedbackCallback(trialEndTimeStamp, isTimeout, isCorrect, testType, deliveryParams, answerLogRecord, 'card')
+  }, reviewTimeout)
+  Session.set('CurTimeoutId', timeout)
+
+  if(Session.get('unitType') == "model")
+    engine.calculateIndices().then(function(res, err) {
+      Session.set('engineIndices', res );
+    })
+  else
+    Session.set('engineIndices', undefined);
+}
+
+async function afterFeedbackCallback(trialEndTimeStamp, isTimeout, isCorrect, testType, deliveryParams, answerLogRecord, callLocation) {
+  Session.set('CurTimeoutId', null)
+  const userLeavingTrial = callLocation != 'card';
+  let reviewEnd = Date.now();
+  Session.set('isTimeout', null);
+  Session.set('isCorrect', null);
+  Session.set('trialEndTimeStamp', null);
+  Session.set('testType', null);
+  Session.set('answerLogRecord', null);
+  Session.set('engine', null);
+  Session.set('CurTimeoutId', undefined);
+      
+  let {responseDuration, startLatency, endLatency, feedbackLatency} = getTrialTime(trialEndTimeStamp, reviewEnd, testType);
+
+  const answerLogAction = isTimeout ? '[timeout]' : 'answer';
+  //if dialogueStart is set that means the user went through interactive dialogue
+  Session.set('dialogueTotalTime', undefined);
+  Session.set('dialogueHistory', undefined);
+  const newExperimentState = {
+    lastAction: answerLogAction,
+    lastActionTimeStamp: Date.now(),
+  };
   
-    // Give unit engine a chance to update any necessary stats
-    const practiceTime = answerLogRecord.CFEndLatency + answerLogRecord.CFFeedbackLatency;
+  if (testType !== 'i') {
+    const overallOutcomeHistory = Session.get('overallOutcomeHistory');
+    overallOutcomeHistory.push(isCorrect ? 1 : 0);
+    newExperimentState.overallOutcomeHistory = overallOutcomeHistory;
+    Session.set('overallOutcomeHistory', overallOutcomeHistory);
+  }
+
+  // Give unit engine a chance to update any necessary stats
+  const practiceTime = endLatency + feedbackLatency;
+  if(userLeavingTrial){
+    engine.cardAnswered(isCorrect, practiceTime);
+  } else {
     await engine.cardAnswered(isCorrect, practiceTime);
-    const answerLogAction = isTimeout ? '[timeout]' : 'answer';
-    //if dialogueStart is set that means the user went through interactive dialogue
-    Session.set('dialogueTotalTime', undefined);
-    Session.set('dialogueHistory', undefined);
-    const newExperimentState = {
-      lastAction: answerLogAction,
-      lastActionTimeStamp: Date.now(),
-    };
-    if (getTestType() !== 'i') {
-      const overallOutcomeHistory = Session.get('overallOutcomeHistory');
-      overallOutcomeHistory.push(isCorrect ? 1 : 0);
-      newExperimentState.overallOutcomeHistory = overallOutcomeHistory;
-      Session.set('overallOutcomeHistory', overallOutcomeHistory);
+  }
+  console.log('writing answerLogRecord to history:', answerLogRecord);
+  if(Meteor.user().profile === undefined || !Meteor.user().profile.impersonating){
+    try {
+      answerLogRecord.responseDuration = responseDuration;
+      answerLogRecord.startLatency = startLatency;
+      answerLogRecord.endLatency = endLatency;
+      answerLogRecord.feedbackLatency = feedbackLatency;
+      Meteor.call('insertHistory', answerLogRecord);
+      updateExperimentStateSync(newExperimentState, 'card.afterAnswerFeedbackCallback');
+    } catch (e) {
+      console.log('error writing history record:', e);
+      throw new Error('error inserting history/updating state:', e);
     }
-    console.log('writing answerLogRecord to history:', answerLogRecord);
-    if(Meteor.user().profile === undefined || !Meteor.user().profile.impersonating){
-      try {
-        await meteorCallAsync('insertHistory', answerLogRecord);
-        updateExperimentStateSync(newExperimentState, 'card.afterAnswerFeedbackCallback');
-      } catch (e) {
-        console.log('error writing history record:', e);
-        throw new Error('error inserting history/updating state:', e);
-      }
-    } else {
-      console.log('no history saved. impersonation mode.');
-    }
-  
+  } else {
+    console.log('no history saved. impersonation mode.');
+  }
+
+  if(!userLeavingTrial){
     // Special: count the number of timeouts in a row. If autostopTimeoutThreshold
     // is specified and we have seen that many (or more) timeouts in a row, then
     // we leave the page. Note that autostopTimeoutThreshold defaults to 0 so that
@@ -1612,11 +1653,11 @@ async function afterAnswerFeedbackCallback(trialEndTimeStamp, source, userAnswer
       timeoutsSeen = 0; // Reset count
     } else {
       timeoutsSeen++;
-  
+
       // Figure out threshold (with default of 0)
       // Also note: threshold < 1 means no autostop at all
       const threshold = deliveryParams.autostopTimeoutThreshold;
-  
+
       if (threshold > 0 && timeoutsSeen >= threshold) {
         console.log('Hit timeout threshold', threshold, 'Quitting');
         leavePage('/profile');
@@ -1627,16 +1668,7 @@ async function afterAnswerFeedbackCallback(trialEndTimeStamp, source, userAnswer
     $('#userAnswer').val('');
     Session.set('feedbackTimeoutEnds', Date.now())
     prepareCard();
-  }, reviewTimeout)
-
-  Session.set('CurTimeoutId', timeout)
-  
-  if(Session.get('unitType') == "model")
-    engine.calculateIndices().then(function(res, err) {
-      Session.set('engineIndices', res );
-    })
-  else
-    Session.set('engineIndices', undefined);
+  }
 }
 
 function getReviewTimeout(testType, deliveryParams, isCorrect, dialogueHistory, isTimeout) {
@@ -1679,9 +1711,7 @@ function getReviewTimeout(testType, deliveryParams, isCorrect, dialogueHistory, 
   return reviewTimeout;
 }
 
-// eslint-disable-next-line max-len
-function gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect, reviewEnd, testType, deliveryParams, dialogueHistory, wasReportedForRemoval) {
-  const feedbackType = deliveryParams.feedbackType || 'simple';
+function getTrialTime(trialEndTimeStamp, reviewEnd, testType) {
   let feedbackLatency;
   if(Session.get('dialogueTotalTime')){
     feedbackLatency = Session.get('dialogueTotalTime');
@@ -1722,7 +1752,6 @@ function gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect,
     leavePage('/profile');
     return;
   }
-
   // Don't count test type trials in progress reporting
   if (testType === 't') {
     endLatency = 0;
@@ -1733,6 +1762,12 @@ function gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect,
     endLatency = -1;
     startLatency = -1;
   }
+  return {responseDuration, startLatency, endLatency, feedbackLatency};
+}
+
+// eslint-disable-next-line max-len
+function gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect, testType, deliveryParams, dialogueHistory, wasReportedForRemoval) {
+  const feedbackType = deliveryParams.feedbackType || 'simple';
 
   // Figure out button trial entries
   let buttonEntries = '';
@@ -1853,7 +1888,7 @@ function gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect,
     'conditionTypeE': Meteor.user().profile.entryPoint && 
         Meteor.user().profile.entryPoint !== 'direct' ? Meteor.user().profile.entryPoint : null,
 
-    'responseDuration': responseDuration,
+    'responseDuration': null,
 
     'levelUnit': Session.get('currentUnitNumber'),
     'levelUnitName': unitName,
@@ -1885,9 +1920,9 @@ function gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect,
     'CFDisplayedHintSyllables': hintsDisplayed,
     'CFOverlearning': false,
     'CFResponseTime': trialEndTimeStamp,
-    'CFStartLatency': startLatency,
-    'CFEndLatency': endLatency,
-    'CFFeedbackLatency': feedbackLatency,
+    'CFStartLatency': null,
+    'CFEndLatency': null,
+    'CFFeedbackLatency': null,
     'CFReviewEntry': _.trim($('#userForceCorrect').val()),
     'CFButtonOrder': buttonEntries,
     'CFItemRemoved': wasReportedForRemoval,

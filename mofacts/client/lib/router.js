@@ -3,6 +3,7 @@ import {haveMeteorUser} from '../lib/currentTestingHelpers';
 import {instructContinue} from '../views/experiment/instructions';
 import {Cookie} from './cookies';
 import {displayify} from '../../common/globalHelpers';
+import {afterFeedbackCallback} from '../views/experiment/card'
 
 export {routeToSignin};
 /* router.js - the routing logic we use for the application.
@@ -443,6 +444,19 @@ Router.route('/card', {
       this.redirect('/');
     }
   },
+  unload: async function() {
+    let timeout = Session.get('CurTimeoutId')
+    if(Meteor.user() && timeout){
+      Meteor.clearTimeout(timeout);
+      let trialEndTimeStamp = Session.get('trialEndTimeStamp');
+      let isTimeout = Session.get('isTimeout');
+      let isCorrect = Session.get('isCorrect');
+      let testType = Session.get('testType');
+      let deliveryParams = Session.get('currentDeliveryParams');
+      let answerLogRecord = Session.get('answerLogRecord');
+      afterFeedbackCallback(trialEndTimeStamp, isTimeout, isCorrect, testType, deliveryParams, answerLogRecord, 'router');
+    }
+  }
 });
 
 // We track the start time for instructions, which means we need to track
