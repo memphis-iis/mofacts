@@ -2802,20 +2802,6 @@ Meteor.methods({
 });
 
 Meteor.startup(async function() {
-
-  //add a job to send an email showing deployment status
-  const deployment = {
-    user: "MoFACTs System",
-    description: "Deployment Status",
-    page: "",
-    time: new Date(),
-    sessionVars: sessionVars,
-    userAgent: userAgent,
-    logs: logs,
-    currentExperimentState: "none",
-    emailed: false
-  };
-  ErrorReports.insert(errorReport);
   
 
   highestStimuliSetId = Items.findOne({}, {sort: {stimuliSetId: -1}, limit: 1 });
@@ -2840,6 +2826,7 @@ Meteor.startup(async function() {
   // Note that we accept username or email and then find the ID
   const adminUser = findUserByName(getConfigProperty('owner'));
 
+
   // Used below for ownership
   const adminUserId = _.prop(adminUser, '_id') || '';
   // adminUser should be in an admin role
@@ -2852,6 +2839,18 @@ Meteor.startup(async function() {
     serverConsole('Make sure you have a valid siteConfig');
     serverConsole('***IMPORTANT*** There will be no owner for system TDF\'s');
   }
+
+  //email admin that the server has restarted
+  if (ownerEmail) {
+    const email = {
+      to: ownerEmail,
+      from: ownerEmail,
+      subject: 'MoFaCTs Server Started',
+      text: 'The server has restarted. If this was not expected, please contact the system administrator. This is expected if a deployment occured. This is an automated message.'
+    };
+    Email.send(email);
+  }
+
 
   // Get user in roles and make sure they are added
   const roles = getConfigProperty('initRoles');
