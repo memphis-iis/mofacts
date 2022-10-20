@@ -446,6 +446,8 @@ Template.profile.rendered = async function() {
         }
       }
     }
+    //sort tdfTags by natural alphabetical order
+    tdfTags.sort((a, b) => a.tag.localeCompare(b.tag, 'en'));
     this.tdfTags.set(tdfTags);
 
 
