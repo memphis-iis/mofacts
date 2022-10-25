@@ -156,7 +156,6 @@ const defaultBehaviorRoutes = [
 const restrictedRoutes = [
   'multiTdfSelect',
   'turkWorkflow',
-  'contentUpload',
   'dataDownload',
   'userProfileEdit',
   'userAdmin',
@@ -166,7 +165,6 @@ const restrictedRoutes = [
   'studentReporting',
   'voice',
   'feedback',
-  'assetUpload',
   'profileSouthwest'
 ];
 
@@ -223,7 +221,17 @@ Router.route('/', {
   },
 });
 
-
+Router.route('/contentUpload', {
+  name: 'client.contentUpload',
+  action: function() {
+    if(Meteor.user()){
+      this.subscribe('contentUpload').wait();
+      this.render('contentUpload');
+    } else {
+      this.redirect('/');
+    }
+  }
+})
 
 Router.route('/profile', {
   name: 'client.profile',

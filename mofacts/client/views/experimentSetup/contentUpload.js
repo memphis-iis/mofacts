@@ -1,89 +1,22 @@
 import {meteorCallAsync} from '../..';
-import { getCurrentClusterAndStimIndices } from '../experiment/card';
-
-const userFiles = new Mongo.Collection(null); // local-only - no database;
-
-async function userFilesRefresh() {
-  console.log('userFilesRefresh');
-  userFiles.remove({'temp': 1});
-
-  let count = 0;
-  const userId = Meteor.userId();
-  let allTdfs = await meteorCallAsync('getAllTdfs');
-  let allStims = await meteorCallAsync('getAllStims');
-  console.log('allTdfs', allTdfs, typeof(allTdfs));
-  console.log('allStims', allStims, typeof(allStims));
-  Session.set('allTdfs', allTdfs);
-
-  for (const tdf of Session.get('allTdfs')) {
-    if (userId === tdf.ownerId) {
-      try {
-        userFiles.insert({
-          'temp': 1,
-          '_id': '' + count,
-          'idx': count,
-          'type': 'tdf',
-          'fileName': tdf.content.fileName.trim(),
-          'tdfID': tdf._id,
-        });
-        count += 1;
-      } catch (err) {
-        if (err.name !== 'MinimongoError') {
-          throw err;
-        }
-      }
-      let stimFileName = tdf.content.tdfs.tutor.setspec.stimulusfile;
-      if (typeof stimFileName == 'object') stimFileName = stimFileName[0];
-      if (stimFileName && !userFiles.findOne({'fileName': stimFileName})) {
-        try {
-          userFiles.insert({
-            'temp': 1,
-            '_id': '' + count,
-            'idx': count,
-            'type': 'stim',
-            'fileName': stimFileName,
-            'stimID': 1,
-          });
-          count += 1;
-        } catch (err) {
-          if (err.name !== 'MinimongoError') {
-            throw err;
-          }
-        }
-      }
-    }
-  }
-  for (const tdf of Session.get('allTdfs')) {
-    for(const stim of allStims){
-      if (!userFiles.findOne({'fileName': stim.stimulusFileName}) && stim.stimuliSetId == tdf.stimuliSetId){
-        try{
-          userFiles.insert({
-            'temp': 1,
-            '_id': '' + count,
-            'idx': count,
-            'type': 'stim',
-            'fileName': stim.stimulusFileName,
-            'stimID': 1,
-          });
-          count += 1;
-        } catch (err) {
-          if (err.name !== 'MinimongoError') {
-            throw err;
-          }
-        }
-      }
-    }
-  }
-}
+import { ReactiveVar } from 'meteor/reactive-var';
 
 Template.contentUpload.helpers({
-  userFiles: function() {
-    return userFiles.find();
+  TdfFiles: function() {
+    return Tdfs.find();
+  },
+  currentUpload() {
+    return Template.instance().currentUpload.get();
+  },
+  assetLink: function() {
+    const files = DynamicAssets.find().fetch();
+    return files;
   },
 });
 
 Template.contentUpload.onRendered(function() {
-  userFilesRefresh();
+  this.currentUpload = new ReactiveVar(false);
+  Meteor.subscribe('files.assets.all');
 });
 
 
@@ -98,7 +31,6 @@ Template.contentUpload.events({
 
     const stimDisplayTypeMap = await meteorCallAsync('getStimDisplayTypeMap');
     Session.set('stimDisplayTypeMap', stimDisplayTypeMap);
-    userFilesRefresh();
   },
 
   // Admin/Teachers - upload a Stimulus file
@@ -106,7 +38,6 @@ Template.contentUpload.events({
     $('#stimUploadLoadingSymbol').show()
     event.preventDefault();
     await doFileUpload('#upload-stim', 'stim', 'Stimlus');
-    userFilesRefresh();
   },
   'click #tdf-download-btn': function(event){
     event.preventDefault();
@@ -122,75 +53,40 @@ Template.contentUpload.events({
     a.download = downloadFileName;
     a.click();
     window.URL.revokeObjectURL(url);
-    alert('TDF downloaded.');
   },
 
   'click #tdf-delete-btn': function(event){
-    const btnTarget = $(event.currentTarget);
-    const fileName = _.trim(btnTarget.data('filename'));
-    meteorCallAsync('deleteTDFFile',fileName);
-    userFilesRefresh();
+    const tdfId = event.currentTarget.getAttribute('value')
+    Meteor.call('deleteTDFFile',tdfId);
+  },
+
+  'click #assetDeleteButton': function(event){
+    const assetId = event.currentTarget.getAttribute('value')
+    Meteor.call('removeAssetById', assetId);
   },
 
   'click #stim-download-btn': async function(event){
     event.preventDefault();
-    // Set Filename
-    const btnTarget = $(event.currentTarget);
-    const fileName = _.trim(btnTarget.data('filename'));
-    console.log('downloading stim', fileName);
-    // Get All Items matching filename
-    const allStims = await meteorCallAsync('getItemsByFileName',fileName);
-    let curCluster = allStims[0].clusterKC;
-    let stims = [];
-    let output = "{\n\t\"setspec\": {\n\t\t\"clusters\": [\n\t\t\t{\n\t\t\t\t\"stims\": [\n";
-    for(i = 0; i < allStims.length; i++){
-      let stim = allStims[i];
-      let itemResponseType = "";
-      stims[i] = {};
-      stims[i].response = {};
-      if(stim.correctResponse){stims[i].response.correctResponse = stim.correctResponse;}
-      if(stim.incorrectResponses){stims[i].response.incorrectResponses = stim.incorrectResponses.split(",");}
-      stims[i].display  = {};
-      if(stim.clozeStimulus){stims[i].display.clozeText = stim.clozeStimulus;}
-      if(stim.textStimulus){stims[i].display.text = stim.textStimulus;}
-      if(stim.audioStimulus){stims[i].display.audioSrc = stim.audioStimulus;}
-      if(stim.imageStimulus){stims[i].display.imgSrc = stim.imageStimulus;}
-      if(stim.videoStimulus){stims[i].display.videoSrc = stim.videoStimulus;}
-      if(stim.tags){stims[i].tags = stim.tags};
-      if(stim.alternateDisplays){stims[i].alternateDisplays = stim.alternateDisplays};
-      if(stim.params){stims[i].parameter = stim.params};
-      stimConverted = JSON.stringify(stims[i],null,2);
-      if(stim.clusterKC != curCluster){
-        curCluster = stim.clusterKC;
-        if(stim.itemResponseType){itemResponse = "\"responseType\": \"" + stim.itemResponseType + "\",\n";}
-        output = output + "\n]\n},\n{\n" + itemResponse + "\"stims\": [\n" + stimConverted;
-      } else if(i != 0) {
-        output = output + ",\n" + stimConverted;
-      } else {
-        output = output + stimConverted;
+    const stimSetId = parseInt(event.currentTarget.getAttribute('value'));
+    Meteor.call('downloadStimFile', stimSetId, function(err, res){
+      for(let stim of res){
+        let blob = new Blob([JSON.stringify(stim.stimuli,null,2)], { type: 'application/json' });
+        let url = window.URL.createObjectURL(blob);
+        let downloadFileName = stim.fileName.trim();
+        var a = document.createElement("a");
+        document.body.appendChild(a);
+        a.style = "display: none";
+        a.href = url;
+        a.download = downloadFileName;
+        a.click();
+        window.URL.revokeObjectURL(url);
       }
-    }
-    output = output.substring(0,output.length - 2) + "\n}\n]\n}\n]\n}\n}";
-    output = JSON.stringify(JSON.parse(output),null,2);
-    newJson = output;
-    let blob = new Blob([newJson], { type: 'application/json' });
-    let url = window.URL.createObjectURL(blob);
-    let downloadFileName = _.trim(btnTarget.data('filename'));
-    var a = document.createElement("a");
-    document.body.appendChild(a);
-    a.style = "display: none";
-    a.href = url;
-    a.download = downloadFileName;
-    a.click();
-    window.URL.revokeObjectURL(url);
-    alert('Stim Exported.');
+    })
   },
 
   'click #stim-delete-btn': function(event){
-    const btnTarget = $(event.currentTarget);
-    const fileName = _.trim(btnTarget.data('filename'));
-    meteorCallAsync('deleteStimFile',fileName);
-    userFilesRefresh();
+    const stimuliSetId = event.currentTarget.getAttribute('value')
+    Meteor.call('deleteStimFile',stimuliSetId);
   },
 
   'change #upload-tdf': function(event) {
@@ -210,6 +106,53 @@ Template.contentUpload.events({
     }
     $('#stim-file-info').html(outputLabel);
   },
+
+  'change #fileInput'(e, template) {
+    if (e.currentTarget.files && e.currentTarget.files[0]) {
+      for(let file of e.currentTarget.files){
+        // We upload only one file, in case
+        // multiple files were selected
+        const foundFile = DynamicAssets.findOne({name: file.name, userId: Meteor.userId()})
+        if(foundFile){
+          foundFile.remove(function (error){
+            if (error) {
+              console.log(`File ${file.name} could not be removed`, error)
+            }
+            else{
+              console.log(`File ${file.name} already exists, overwritting.`)
+              doPackageUpload(file, template)
+            }
+          });
+        } else {
+          doPackageUpload(file, template)
+        }
+      }
+    }
+
+  },
+  'click #deleteAllAssetsPrompt'(e, template) {
+    e.preventDefault();
+    console.log('deleteAllAssetsPrompt clicked');
+    $('#deleteAllAssetsPrompt').css('display', 'none');
+    $('#deleteAllAssetsConfirm').css('display', 'block');
+  },
+  'click #deleteAllAssetsConfirm': async function(e, template) {
+    fileCount = await meteorCallAsync('deleteAllFiles');
+    if(fileCount == 0){
+      alert(`All files deleted.`);
+    } else {
+      alert("Error: Files not deleted.");
+    }
+    $('#deleteAllAssetsPrompt').css('display', 'block');
+    $('#deleteAllAssetsConfirm').css('display', 'none');
+  },
+  'click .imageLink'(e) {
+    const url = $(e.currentTarget).data('link');
+    const img = '<img src="'+url+'">';
+    const popup = window.open();
+    popup.document.write(img);                        
+    popup.print();
+  }
 });
 
 
@@ -261,6 +204,43 @@ async function doFileUpload(fileElementSelector, fileType, fileDescrip) {
   $(fileElementSelector).parent().find('.file-info').html('');
 
   console.log(fileType, ':', fileDescrip, 'at ele', fileElementSelector, 'scheduled', count, 'uploads');
+}
+
+
+
+async function doPackageUpload(file, template){
+  const existingFile = await DynamicAssets.findOne({ name: file.name, userId: Meteor.userId() });
+  if (existingFile) {
+    console.log(`File ${file.name} already exists, overwritting.`)
+    existingFile.remove();
+  }
+  const upload = DynamicAssets.insert({
+    file: file,
+    chunkSize: 'dynamic'
+  }, false);
+
+  upload.on('start', function () {
+    template.currentUpload.set(this);
+  });
+
+  upload.on('end', function (error, fileObj) {
+    if (error) {
+      alert(`Error during upload: ${error}`);
+    } else {
+      if(fileObj.ext == "zip"){
+        console.log('package detected')
+        Meteor.call('processPackageUpload', fileObj.path, Meteor.userId(), function(err,res){
+          if(err){
+            alert(err);
+          } else {
+            alert("Package upload succeded.");
+          }
+        });
+      }
+    }
+    template.currentUpload.set(false);
+  });
+  upload.start();
 }
 
 async function readFileAsDataURL(file) {

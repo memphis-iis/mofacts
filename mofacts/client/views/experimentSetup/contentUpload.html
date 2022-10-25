@@ -1,69 +1,124 @@
 <!-- Content (TDF and Stim) File Uploading Template -->
 
 <template name="contentUpload">
-    <div>
-        <div class="col-md-3">
-            <legend class="text-center">Upload Stimulus File(s)</legend>
-            <div class="form-group">
-                <span class="btn btn-default btn-file">
-                    Browse
-                    <input type="file" class="form-control" name="upload-stim" id="upload-stim" value="" placeholder="Stimulus File" multiple>
-                    <span class='label label-info file-info' id="stim-file-info"></span>
-                </span>
+    <div class="container-fluid" style="padding: 0% 10%;">
+        {{#if isInRole 'admin,teacher'}}
+            <div class="row">
+                <h1 class="text-center">Asset Uploader</h1>
+                <p>This uploads your assets for use in experiments. It can also upload packaged zip files with TDF/stim/asset combinations. You may use video, audio, or image files as well. A link will be generated and available after upload. Note, it may take some time to complete large packages. Please wait until a prompt is given to navigate to a new page.</p>   
             </div>
-            <div class="stim-upload-button-container">
-                <button type='button' id='doUploadStim' class='btn btn-fix' style="margin-right: 2%;">
-                    Upload Stimulus File(s)
+        {{else}}
+        <h2>You do not have access to this function.</h2>
+        {{/if}}
+        <br>
+        <div class="row"> 
+            <div class="col-md-2">
+                <legend class="text-center">Upload Stimulus File(s)</legend>
+                <div class="form-group">
+                    <span class="btn btn-default btn-file">
+                        Browse
+                        <input type="file" class="form-control" name="upload-stim" id="upload-stim" value="" placeholder="Stimulus File" multiple>
+                        <span class='label label-info file-info' id="stim-file-info"></span>
+                    </span>
+                </div>
+                <div class="stim-upload-button-container">
+                    <button type='button' id='doUploadStim' class='btn btn-fix' style="margin-right: 2%;">
+                        Upload Stimulus File(s)
+                    </button>
+                    <div class="loader" id='stimUploadLoadingSymbol' style="margin-top: 1%" hidden></div>
+                </div>
+            </div>
+
+            <div class="col-md-2">
+                <legend class="text-center">Upload TDF File(s)</legend>
+                <div class="form-group">
+                    <span class="btn btn-default btn-file">
+                        Browse
+                        <input type="file" class="form-control" name="upload-tdf" id="upload-tdf" value="" placeholder="TDF File" multiple>
+                        <span class='label label-info file-info' id="tdf-file-info"></span>
+                    </span>
+                </div>
+                <button type='button' id='doUploadTDF' class='btn btn-fix'>
+                    Upload TDF File(s)
                 </button>
-                <div class="loader" id='stimUploadLoadingSymbol' style="margin-top: 1%" hidden></div>
             </div>
-        </div>
 
-        <div class="col-md-3">
-            <legend class="text-center">Upload TDF File(s)</legend>
-            <div class="form-group">
-                <span class="btn btn-default btn-file">
-                    Browse
-                    <input type="file" class="form-control" name="upload-tdf" id="upload-tdf" value="" placeholder="TDF File" multiple>
-                    <span class='label label-info file-info' id="tdf-file-info"></span>
-                </span>
+
+            <div class="col-md-2">
+                <legend class="text-center">Upload Package</legend>
+                <div class="form-group">
+                    <span class="btn btn-default btn-file">
+                        Browse
+                        <input id="fileInput" style="margin: auto; display:block;" type="file" multiple />
+                        <span class='label label-info file-info' id="tdf-file-info"></span>
+                    </span>
+                </div>
+                <button type='button' id='doUploadTDF' class='btn btn-fix'>
+                    Upload Package
+                </button>
             </div>
-            <button type='button' id='doUploadTDF' class='btn btn-fix'>
-                Upload TDF File(s)
-            </button>
-        </div>
+            <div class="col-md-6 table-responsive">
+                <legend class="text-center">Your Uploaded Files</legend>
+                <p>*Deleting a stim will delete the corresponding TDF and all related history. Deleting is not recoverable.</p>
 
-        <div class="col-md-6 responsiveTable">
-            <legend class="text-center">Your Uploaded Files</legend>
-            <table class="table table-striped table-bordered table-condensed">
-                <thead>
-                    <tr>
-                        <th>Type</th>
-                        <th>Name</th>
-                        <th>Download</th>
-                        <th>Delete</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {{#each userFiles}}
+                <p><span class="glyphicon glyphicon-download-alt" aria-hidden="true"></span>Download<br><span class="glyphicon glyphicon-share-alt" aria-hidden="true"></span>Export</p>
+            
+                <table class="table table-striped table-bordered table-condensed">
+                    <thead>
                         <tr>
-                            <td>{{type}}</td>
-                            <td>{{fileName}}</td>
-                            {{#if tdfID}}
-                            <td><button id="tdf-download-btn" value="{{tdfID}}" class="btn"><span class="glyphicon glyphicon-download-alt" aria-hidden="true"></span></button></td>
-                            <td><button id="tdf-delete-btn" value="{{tdfID}}" data-filename="{{fileName}}" class="btn"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></button></td>
-                            {{/if}}
-                            {{#if stimID}}
-                            <td><button id="stim-download-btn" data-filename="{{fileName}}" class="btn"><span class="glyphicon glyphicon-share-alt" aria-hidden="true"></span></button></td>
-                            <td><button id="stim-delete-btn" data-filename="{{fileName}}" class="btn"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></button></td>
-                            {{/if}}
+                            <th class="col-md-1">Type</th>
+                            <th class="col-md-6">Name</th>
+                            <th class="col-md-1">Download</th>
+                            <th class="col-md-1">Delete</th>
                         </tr>
-                    {{/each}}
-                    <p>*Deleting a stim will delete the corresponding TDF and all related history. Deleting is not recoverable.</p>
-
-                    <p><span class="glyphicon glyphicon-download-alt" aria-hidden="true"></span>Download<br><span class="glyphicon glyphicon-share-alt" aria-hidden="true"></span>Export</p>
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        {{#each TdfFiles}}
+                            <tr>
+                                <td>tdf</td>
+                                <td>{{content.fileName}}</td>
+                                <td><button id="tdf-download-btn" value="{{_id}}" class="btn"><span class="glyphicon glyphicon-download-alt" aria-hidden="true"></span></button></td>
+                                <td><button id="tdf-delete-btn" value="{{_id}}" data-filename="{{fileName}}" class="btn"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></button></td>
+                            </tr>
+                            <tr>
+                                <td>stim</td>
+                                <td>{{content.tdfs.tutor.setspec.stimulusfile}}</td>
+                                <td><button id="stim-download-btn" value="{{stimuliSetId}}" class="btn"><span class="glyphicon glyphicon-download-alt" aria-hidden="true"></span></button></td>
+                                <td><button id="stim-delete-btn" value="{{stimuliSetId}}" data-filename="{{fileName}}" class="btn"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></button></td>
+                            </tr>
+                        {{/each}}
+                        {{#each assetLink}}
+                            <tr>
+                                <td>
+                                    {{ext}}
+                                    <!-- <a class="imageLink" data-link="{{this.meta.link}}">{{this.name}}</a><br> -->
+                                </td>
+                                <td>
+                                    {{name}}
+                                </td>
+                                <!-- <td>
+                                    {{meta.link}}
+                                    
+                                </td> -->
+                                <td>
+                                    <a href="{{meta.link}}?download=true" download="{{name}}" target="_parent">
+                                        <button id="assetDownloadButton" value="{{_id}}" class="btn"><span class="glyphicon glyphicon-download-alt" aria-hidden="true"></span></button>
+                                    </a>
+                                </td>
+                                <td><button id="assetDeleteButton" value="{{_id}}" data-id="{{_id}}" class="btn"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></button></td>
+                            </tr>
+                        {{/each}}
+                    </tbody>
+                </table>
+            </div>
         </div>
+
+        {{#if isInRole 'admin'}}
+            <h2>Admin Functions</h2>
+            <p>
+                <button class="btn btn-danger" id="deleteAllAssetsPrompt">Delete All Assets. This is NOT recoverable.</button>
+                <button class="btn btn-danger" style="display: none;" id="deleteAllAssetsConfirm" hidden>Are you sure? This is NOT recoverable.</button>
+            </p>
+        {{/if}}
     </div>
 </template>
