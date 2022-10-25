@@ -39,6 +39,10 @@ if (Meteor.isServer) {
   Meteor.publish('files.assets.all', function () {
     return DynamicAssets.collection.find();
   });
+
+  Meteor.publish('contentUpload', function() {
+    return Tdfs.find({'content.ownerId': Meteor.userId()})
+  })
 }
 
 if (process.env.METEOR_SETTINGS_WORKAROUND) {
@@ -1934,6 +1938,12 @@ async function upsertStimFile(stimulusFileName, stimJSON, ownerId, packagePath =
     serverConsole('stimuliSetId2:', stimuliSetId, nextStimuliSetId);
   }
 
+  Stims.insert({
+    'stimuliSetId': stimuliSetId,
+    'fileName': stimulusFileName,
+    'stimuli': stimJSON,
+    'owner': ownerId,
+  })
   const newFormatItems = getNewItemFormat(oldStimFormat, stimulusFileName, stimuliSetId, responseKCMap);
   const existingStims = await Items.find({stimulusFileName: stimulusFileName}).fetch();
   serverConsole('existingStims', existingStims);
@@ -2679,36 +2689,32 @@ Meteor.methods({
     filesLength = DynamicAssets.find().fetch().length;
     return filesLength;
   },
-  deleteStimFile: async function(stimFilename) {
-    serverConsole('delete Stim File', stimFilename);
-    stimSet = await getStimuliSetByFilename(stimFilename);
-    stimSetId = stimSet[0].stimuliSetId;
-    const query1 = 'SELECT tdfid FROM tdf WHERE stimulisetid = $1';
-    tdfIds = TDFs.find({stimulisetid: stimSetId});
-    for(i=0; i < tdfIds.length; i++){
-        tdf = tdfIds[i].tdfid;
-        GlobalExperimentStates.remove({TDFId: tdf});
-        ComponentStates.remove({TDFId: tdf});
-        Assignments.remove({TDFId: tdf});
-        Histories.remove({TDFId: tdf});
+  deleteStimFile: async function(stimSetId) {
+    stimSetId = parseInt(stimSetId);
+    let tdfs = Tdfs.find({stimuliSetId: stimSetId}).fetch();
+    serverConsole(tdfs);
+    for(let tdf of tdfs) {
+      tdfId = tdf._id;
+      GlobalExperimentStates.remove({TDFId: tdfId});
+      ComponentStates.remove({TDFId: tdfId});
+      Assignments.remove({TDFId: tdfId});
+      Histories.remove({TDFId: tdfId});
     }
-    Items.remove({stimulusFileName: stimFilename});
-    Tdfs.remove({stimulisetid: stimSetId});
+    Items.remove({stimuliSetId: stimSetId});
+    Tdfs.remove({stimuliSetId: stimSetId});
+    Stims.remove({stimuliSetId: stimSetId});
     res = "Stim and related TDFS deleted.";
     return res;
   },
 
-  deleteTDFFile: async function(tdfFileName){
-    serverConsole("Remove TDF File:", tdfFileName);
-    const toRemove = await getTdfByFileName(tdfFileName);
-    serverConsole(toRemove);
-    if(toRemove.TDFId){
-      tdf = toRemove.TDFId;
-      ComponentStates.remove({TDFId: tdf});
-      Assignments.remove({TDFId: tdf});
-      Histories.remove({TDFId: tdf});
-      GlobalExperimentStates.remove({TDFId: tdf});
-      Tdfs.remove({TDFId: tdf});
+  deleteTDFFile: function(tdfId){
+    serverConsole("Remove TDF File:", tdfId);
+    if(tdfId){
+      ComponentStates.remove({TDFId: tdfId});
+      Assignments.remove({TDFId: tdfId});
+      Histories.remove({TDFId: tdfId});
+      GlobalExperimentStates.remove({TDFId: tdfId});
+      Tdfs.remove({_id: tdfId});
     } else {
       result = 'No matching tdf file found';
       return result;
@@ -2764,6 +2770,12 @@ Meteor.methods({
     return currentServerLoadIsTooHigh;
   },
 
+  downloadStimFile: function(stimuliSetId) {
+    let stims = Stims.find({'stimuliSetId': stimuliSetId}).fetch();
+    serverConsole(stims);
+    return stims;
+  },
+
   // Let client code send console output up to server
   debugLog: function(logtxt) {
     let usr = Meteor.user();
@@ -2775,6 +2787,11 @@ Meteor.methods({
     }
 
     serverConsole(usr + ' ' + logtxt);
+  },
+  
+
+  removeAssetById: function(assetId) {
+    DynamicAssets.remove({_id: assetId});
   },
 
   toggleTdfPresence: async function(tdfIds, mode) {
