@@ -469,7 +469,6 @@ Template.profile.rendered = async function() {
 
     this.disabledTdfs.set(disabledTdfs);
     this.enabledTdfs.set(enabledTdfs);
-    console.log(typeof this.enabledTdfs)
   }
 
   if (isAdmin) {
