@@ -447,7 +447,7 @@ Template.profile.rendered = async function() {
       }
     }
     //sort tdfTags by natural alphabetical order
-    tdfTags.sort((a, b) => a.tag.localeCompare(b.tag, 'en'));
+    tdfTags.sort((a, b) => a.tag.localeCompare(b.tag, 'en', {numeric: true, sensitivity: 'base'}));
     this.tdfTags.set(tdfTags);
 
 
@@ -463,8 +463,13 @@ Template.profile.rendered = async function() {
       }
     }
 
+    if(enabledTdfs){
+      enabledTdfs.sort((a, b) => a.name.localeCompare(b.name, 'en', {numeric: true, sensitivity: 'base'}));
+    }
+
     this.disabledTdfs.set(disabledTdfs);
     this.enabledTdfs.set(enabledTdfs);
+    console.log(typeof this.enabledTdfs)
   }
 
   if (isAdmin) {
