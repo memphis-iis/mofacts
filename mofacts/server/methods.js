@@ -2857,18 +2857,6 @@ Meteor.startup(async function() {
     serverConsole('***IMPORTANT*** There will be no owner for system TDF\'s');
   }
 
-  //email admin that the server has restarted
-  if (ownerEmail) {
-    const email = {
-      to: ownerEmail,
-      from: ownerEmail,
-      subject: 'MoFaCTs Server Started',
-      text: 'The server has restarted. If this was not expected, please contact the system administrator. This is expected if a deployment occured. This is an automated message.'
-    };
-    Email.send(email);
-  }
-
-
   // Get user in roles and make sure they are added
   const roles = getConfigProperty('initRoles');
   const roleAdd = function(memberName, roleName) {
@@ -2988,6 +2976,13 @@ Meteor.startup(async function() {
       return sendErrorReportSummaries();
     },
   });
+  
+  //email admin that the server has restarted
+  if (ownerEmail && Meteor.isProduction) {
+    subject = 'MoFaCTs Server Started';
+    text = 'The server has restarted. If this was not expected, please contact the system administrator. This is expected if a deployment occured. This is an automated message.'
+    sendEmail(ownerEmail, ownerEmail, subject, text)
+  }
 });
 
 Router.route('/dynamic-assets/:tdfid?/:filetype?/:filename?', {
