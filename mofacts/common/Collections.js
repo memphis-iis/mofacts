@@ -12,6 +12,7 @@ Courses = new Meteor.Collection('course');
 GlobalExperimentStates = new Meteor.Collection('global_experiment_state');
 Histories = new Meteor.Collection('history');
 Items = new Meteor.Collection('stimuli');
+Stims = new Meteor.Collection('stim_files');
 itemSourceSentences = new Meteor.Collection('item_source_sentences');
 Sections = new Meteor.Collection('section');
 SectionUserMap = new Meteor.Collection('section_user_map');
