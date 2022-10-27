@@ -25,7 +25,22 @@
                 Course: {{class.courseName}}
             </legend>
             {{/if}}
-
+            <!-- search by tag form -->
+            <div class="row" style="margin: 10px;">
+                <h4><label for="practiceTDFSearch" class="form-label">Tag Search:</label></h4>
+                <input id="practiceTDFSearch" class="form-control margin-auto" type="text" placeholder="tag" alt="tdf search box">
+                {{#if tdfTags}}
+                    <div class="row">
+                        <div class="col-md-12">
+                            <ul class="list-inline">
+                                {{#each tdfTags}}
+                                    <li><a href="#" class="tdf-tag" data-tag="{{this.tag}}">{{this.tag}}({{this.count}})</a></li>
+                                {{/each}}
+                            </ul>
+                        </div>
+                    </div>
+                {{/if}}
+            </div>
             {{#each enabledTdfs}}
                 <div class='col-xs-12 col-sm-12 col-md-3 col-lg-3 text-center'>
                     <button id="{{this.tdfid}}" class="btn btn-block btn-responsive tdfButton" style="height: 80px;" name="{{this.name}}"
@@ -85,6 +100,22 @@
                     {{/if}} 
                 </legend>
                 {{#if showTdfs}}
+                    <!-- search by tag form -->
+                    <div class="row" style="margin: 10px;">
+                        <h4><label for="practiceTDFSearch" class="form-label">Tag Search:</label></h4>
+                        <input id="practiceTDFSearch" class="form-control margin-auto" type="text" placeholder="tag" alt="tdf search box">
+                        {{#if tdfTags}}
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <ul class="list-inline">
+                                        {{#each tdfTags}}
+                                            <li><a href="#" class="tdf-tag" data-tag="{{this.tag}}">{{this.tag}}({{this.count}})</a></li>
+                                        {{/each}}
+                                    </ul>
+                                </div>
+                            </div>
+                        {{/if}}
+                    </div>
                     {{#each enabledTdfs}}
                         <div class='col-xs-12 col-sm-12 col-md-3 col-lg-3 text-center'>
                             <button id="{{this.tdfid}}" class="btn btn-block btn-responsive tdfButton" type="button" name="{{this.name}}"
