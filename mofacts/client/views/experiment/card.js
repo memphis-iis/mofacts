@@ -16,7 +16,6 @@ import {secsIntervalString, displayify, stringifyIfExists} from '../../../common
 import {routeToSignin} from '../../lib/router';
 import {createScheduleUnit, createModelUnit, createEmptyUnit} from './unitEngine';
 import {Answers} from './answerAssess';
-import {VAD} from '../../lib/vad';
 import {sessionCleanUp} from '../../lib/sessionUtils';
 
 export {
@@ -116,6 +115,7 @@ turn it on, you need to set <showhistory>true</showhistory> in the
 // Global variables and helper functions for them
 
 let engine = null; // The unit engine for display (i.e. model or schedule)
+const hark = require('../../lib/hark');
 Session.set('buttonList', []);
 const scrollList = new Mongo.Collection(null); // local-only - no database
 Session.set('scrollListCount', 0);
@@ -339,7 +339,7 @@ function varLenDisplayTimeout() {
 // Clean up things if we navigate away from this page
 function leavePage(dest) {
   console.log('leaving page for dest: ' + dest);
-  if (dest != '/card' && dest != '/instructions' && dest != '/voice' && document.location.pathname != '/instructions') {
+  if (dest != '/card' && dest != '/instructions' && document.location.pathname != '/instructions') {
     console.log('resetting subtdfindex, dest: ' + dest);
     Session.set('subTdfIndex', null);
     sessionCleanUp();
@@ -394,7 +394,6 @@ Template.card.rendered = async function() {
   }
   //Gets the list of hidden items from the db on load of card. 
   Session.set('hiddenItems', await meteorCallAsync('getHiddenItems', Meteor.userId(), Session.get('currentTdfId')));
-  const audioInputDetectionInitialized = Session.get('VADInitialized');
 
   window.AudioContext = window.webkitAudioContext || window.AudioContext;
   window.URL = window.URL || window.webkitURL;
@@ -405,7 +404,7 @@ Template.card.rendered = async function() {
   // If user has enabled audio input initialize web audio (this takes a bit)
   // (this will eventually call cardStart after we redirect through the voice
   // interstitial and get back here again)
-  if (audioInputEnabled && !audioInputDetectionInitialized) {
+  if (audioInputEnabled) {
     initializeAudio();
   } else {
     cardStart();
@@ -818,7 +817,6 @@ function clearAudioContextAndRelatedVariables() {
   streamSource = null;
   Meteor.clearInterval(pollMediaDevicesInterval);
   pollMediaDevicesInterval = null;
-  Session.get('VADInitialized', false);
 }
 
 function reinitializeMediaDueToDeviceChange() {
@@ -2284,11 +2282,7 @@ function beginQuestionAndInitiateUserInput(delayMs, deliveryParams) {
 function allowUserInput() {
   console.log('allow user input');
   inputDisabled = false;
-  const enableAudioPromptAndFeedback = Session.get('enableAudioPromptAndFeedback');
-  const audioPromptMode = Session.get('audioPromptMode');
-  if (!enableAudioPromptAndFeedback || !(audioPromptMode === 'question' || audioPromptMode === 'all')) {
-    startRecording();
-  }
+  startRecording();
 
   // Need timeout here so that the disable input timeout doesn't fire after this
   setTimeout(async function() {
@@ -2620,6 +2614,7 @@ window.audioContext = audioContext;
 let selectedInputDevice = null;
 let userMediaStream = null;
 let streamSource = null;
+let speechEvents = null;
 
 // The callback used in initializeAudio when an audio data stream becomes available
 function startUserMedia(stream) {
@@ -2645,72 +2640,49 @@ function startUserMedia(stream) {
   // function to process the audio data
   recorder.setProcessCallback(processLINEAR16);
 
-  // Set up options for voice activity detection code (vad.js)
-  const energyOffsetExp = 60 - Session.get('audioInputSensitivity');
-  const energyOffset = parseFloat('1e+' + energyOffsetExp);
-  const options = {
-    source: input,
-    energy_offset: energyOffset,
-    // On voice stop we want to send off the recorded audio (via the process callback)
-    // to the google speech api for processing (it only takes up to 15 second clips at a time)
-    voice_stop: function() {
-      // This will hopefully only be fired once while we're still on the voice.html interstitial,
-      // once VAD.js loads we should navigate back to card to start the practice set
-      if (!Session.get('VADInitialized')) {
-        console.log('VAD previously not initialized, now initialized');
-        Session.set('VADInitialized', true);
-        $('#voiceDetected').value = 'Voice detected, refreshing now...';
-        Session.set('inResume', true);
-        if (Session.get('pausedLocks')>0) {
-          const numRemainingLocks = Session.get('pausedLocks')-1;
-          Session.set('pausedLocks', numRemainingLocks);
-        }
-        Router.go('/card');
-        return;
-      } else if (!Session.get('recording') || Session.get('pausedLocks')>0) {
-        if (document.location.pathname != '/card' && document.location.pathname != '/instructions') {
-          leavePage(function() {
-            console.log('cleaning up page after nav away from card, voice_stop');
-          });
-          return;
+  // Set up options for voice activity detection code (hark.js)
+  speechEvents = hark(stream); //{interval: 50, play: false};
+
+  speechEvents.on('speaking', function() {
+    if (!Session.get('recording')) {
+      console.log('NOT RECORDING, VOICE START');
+      return;
+    } else {
+      console.log('VOICE START');
+      if (resetMainCardTimeout && timeoutFunc) {
+        if (Session.get('recording')) {
+          console.log('voice_start resetMainCardTimeout');
+          resetMainCardTimeout();
         } else {
-          console.log('NOT RECORDING, VOICE STOP');
-          return;
+          console.log('NOT RECORDING');
         }
       } else {
-        console.log('VOICE STOP');
-        recorder.stop();
-        Session.set('recording', false);
-        recorder.exportToProcessCallback();
+        console.log('RESETMAINCARDTIMEOUT NOT DEFINED');
       }
-    },
-    voice_start: function() {
-      if (!Session.get('recording')) {
-        console.log('NOT RECORDING, VOICE START');
+    }
+  });
+
+  speechEvents.on('stopped_speaking', function() {
+    if (!Session.get('recording') || Session.get('pausedLocks')>0) {
+      if (document.location.pathname != '/card' && document.location.pathname != '/instructions') {
+        leavePage(function() {
+          console.log('cleaning up page after nav away from card, voice_stop');
+        });
         return;
       } else {
-        console.log('VOICE START');
-        if (resetMainCardTimeout && timeoutFunc) {
-          if (Session.get('recording')) {
-            console.log('voice_start resetMainCardTimeout');
-            resetMainCardTimeout();
-          } else {
-            console.log('NOT RECORDING');
-          }
-        } else {
-          console.log('RESETMAINCARDTIMEOUT NOT DEFINED');
-        }
+        console.log('NOT RECORDING, VOICE STOP');
+        return;
       }
-    },
-  };
-  const vad = new VAD(options);
-  Session.set('VADInitialized', false);
+    } else {
+      console.log('VOICE STOP');
+      recorder.stop();
+      Session.set('recording', false);
+      recorder.exportToProcessCallback();
+    }
+  });
 
   console.log('Audio recorder ready');
-
-  // Navigate to the voice interstitial which gives VAD.js time to load so we're
-  // ready to transcribe when we finally come back to the practice set
-  Router.go('/voice');
+  cardStart();
 }
 
 function startRecording() {

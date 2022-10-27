@@ -38,7 +38,6 @@ export {sessionCleanUp};
  * speechAPIKeyIsSetup       - Indicates if we have a *user* provided speech api key (there may be one in the tdf file)
  * speechOutOfGrammarFeedback - What should we display when transcription is ignored when out of grammar
  * testType
- * VADInitialized            - Is voice activity detection code for voice start/stop events initialized
  * */
 
 // Handle an entire session - note that we current don't limit this to the
@@ -117,7 +116,6 @@ function sessionCleanUp() {
   Session.set('speechOutOfGrammarFeedback', undefined);
   Session.set('subTdfIndex', undefined);
   Session.set('testType', undefined);
-  Session.set('VADInitialized', false);
   Session.set('scoringEnabled', undefined);
   Session.set('feedbackParamsSet', undefined);
   Session.set('instructionQuestionResult', undefined);
