@@ -163,7 +163,6 @@ const restrictedRoutes = [
   'tdfAssignmentEdit',
   'instructorReporting',
   'studentReporting',
-  'voice',
   'feedback',
   'profileSouthwest'
 ];
