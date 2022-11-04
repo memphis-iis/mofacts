@@ -426,7 +426,7 @@ Template.card.events({
     if(!Session.get('wasReportedForRemoval'))
       removeCardByUser();
       Session.set('wasReportedForRemoval', true)
-      afterAnswerFeedbackCallback(Date.now(), 'removal', "", false, false);
+      afterAnswerFeedbackCallback(Date.now(), trialStartTimestamp, 'removal', "", false, false);
   },
 
   'click #dialogueIntroExit': function() {
@@ -1234,8 +1234,7 @@ function handleUserInput(e, source, simAnswerCorrect) {
 
   const trialEndTimeStamp = Date.now();
   const afterAnswerFeedbackCallbackWithEndTime = afterAnswerFeedbackCallback.bind(null,
-      trialEndTimeStamp, source, userAnswer);
-
+      trialEndTimeStamp, trialStartTimestamp, source, userAnswer);
   // Show user feedback and find out if they answered correctly
   // Note that userAnswerFeedback will display text and/or media - it is
   // our responsbility to decide when to hide it and move on
@@ -1549,7 +1548,7 @@ async function giveWrongAnswer(){
   }
 }
 
-async function afterAnswerFeedbackCallback(trialEndTimeStamp, source, userAnswer, isTimeout, isCorrect) {
+async function afterAnswerFeedbackCallback(trialEndTimeStamp, trialStartTimeStamp, source, userAnswer, isTimeout, isCorrect) {
   Session.set('showDialogueText', false);
   //if the user presses the removal button after answering we need to shortcut the timeout
   const wasReportedForRemoval = source == 'removal';
@@ -1571,7 +1570,7 @@ async function afterAnswerFeedbackCallback(trialEndTimeStamp, source, userAnswer
   const timeout = Meteor.setTimeout(async function() {
     Session.set('CurTimeoutId', undefined);
     let reviewEnd = Date.now();
-    const answerLogRecord = gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect,
+    const answerLogRecord = gatherAnswerLogRecord(trialEndTimeStamp, trialStartTimeStamp, source, userAnswer, isCorrect,
         reviewEnd, testType, deliveryParams, dialogueHistory, wasReportedForRemoval);
   
     // Give unit engine a chance to update any necessary stats
@@ -1680,7 +1679,7 @@ function getReviewTimeout(testType, deliveryParams, isCorrect, dialogueHistory, 
 }
 
 // eslint-disable-next-line max-len
-function gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect, reviewEnd, testType, deliveryParams, dialogueHistory, wasReportedForRemoval) {
+function gatherAnswerLogRecord(trialEndTimeStamp, trialStartTimeStamp, source, userAnswer, isCorrect, reviewEnd, testType, deliveryParams, dialogueHistory, wasReportedForRemoval) {
   const feedbackType = deliveryParams.feedbackType || 'simple';
   let feedbackLatency;
   if(Session.get('dialogueTotalTime')){
@@ -1695,22 +1694,22 @@ function gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect,
 
   const firstActionTimestamp = firstKeypressTimestamp || trialEndTimeStamp;
   let responseDuration = trialEndTimeStamp - firstActionTimestamp;
-  let startLatency = firstActionTimestamp - trialStartTimestamp;
-  let endLatency = trialEndTimeStamp - trialStartTimestamp;
-  if( !firstActionTimestamp || !trialEndTimeStamp || !trialStartTimestamp || 
-    firstActionTimestamp < 0 || trialEndTimeStamp < 0 || trialStartTimestamp < 0 || endLatency < 0){
+  let startLatency = firstActionTimestamp - trialStartTimeStamp;
+  let endLatency = trialEndTimeStamp - trialStartTimeStamp;
+  if( !firstActionTimestamp || !trialEndTimeStamp || !trialStartTimeStamp || 
+    firstActionTimestamp < 0 || trialEndTimeStamp < 0 || trialStartTimeStamp < 0 || endLatency < 0){
     //something broke. The user probably didnt start answering the questing in 1970.
     alert('Something went wrong with your trial. Please restart the chapter.');
     const errorDescription = `One or more timestamps were set to 0 or null. 
     firstActionTimestamp: ${firstActionTimestamp}
     trialEndTimeStamp: ${trialEndTimeStamp}
-    trialStartTimestamp: ${trialStartTimestamp}`
+    trialStartTimeStamp: ${trialStartTimeStamp}`
     console.log(`responseDuration: ${responseDuration}
     startLatency: ${startLatency}
     endLatency: ${endLatency}
     firstKeypressTimestamp: ${firstKeypressTimestamp}
     trialEndTimeStamp: ${trialEndTimeStamp}
-    trialStartTimestamp: ${trialStartTimestamp}`)
+    trialStartTimeStamp: ${trialStartTimeStamp}`)
     const curUser = Meteor.userId();
     const curPage = document.location.pathname;
     const sessionVars = Session.all();
@@ -1819,7 +1818,7 @@ function gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect,
   }
 
   // hack
-  const sessionID = (new Date(trialStartTimestamp)).toUTCString().substr(0, 16) + ' ' + Session.get('currentTdfName');
+  const sessionID = (new Date(trialStartTimeStamp)).toUTCString().substr(0, 16) + ' ' + Session.get('currentTdfName');
   let outcome = 'incorrect';
   if (isCorrect) {
     outcome = 'correct';
@@ -1860,7 +1859,7 @@ function gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect,
     'levelUnitType': Session.get('unitType'),
     'problemName': problemName,
     'stepName': stepName, // this is no longer a valid field as we don't restore state one step at a time
-    'time': trialStartTimestamp,
+    'time': trialStartTimeStamp,
     'selection': '',
     'action': '',
     'input': _.trim(userAnswer),
