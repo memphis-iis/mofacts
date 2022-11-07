@@ -426,7 +426,7 @@ Template.card.events({
     if(!Session.get('wasReportedForRemoval'))
       removeCardByUser();
       Session.set('wasReportedForRemoval', true)
-      afterAnswerFeedbackCallback(Date.now(), 'removal', "", false, false);
+      afterAnswerFeedbackCallback(Date.now(), trialStartTimestamp, 'removal', "", false, false);
   },
 
   'click #dialogueIntroExit': function() {
@@ -544,9 +544,9 @@ Template.card.helpers({
     }
   },
 
-  'interTrialMessage': () => getCurrentDeliveryParams().intertrialmessage,
+  'interTrialMessage': () => Session.get('currentDeliveryParams').intertrialmessage,
 
-  'displayFeedback': () => Session.get('displayFeedback') && getCurrentDeliveryParams().allowFeedbackTypeSelect,
+  'displayFeedback': () => Session.get('displayFeedback') && Session.get('currentDeliveryParams').allowFeedbackTypeSelect,
 
   'resetFeedbackSettingsFromIndex': () => Session.get('resetFeedbackSettingsFromIndex'),
 
@@ -760,7 +760,7 @@ Template.card.helpers({
 
   'dialogueCacheHint': () => Session.get('dialogueCacheHint'),
 
-  'questionIsRemovable': () => Session.get('numVisibleCards') > 3 && getCurrentDeliveryParams().allowstimulusdropping,
+  'questionIsRemovable': () => Session.get('numVisibleCards') > 3 && Session.get('currentDeliveryParams').allowstimulusdropping,
 
   'debugParms': () => Session.get('debugParms'),
 
@@ -1233,7 +1233,7 @@ function handleUserInput(e, source, simAnswerCorrect) {
 
   const trialEndTimeStamp = Date.now();
   const afterAnswerFeedbackCallbackWithEndTime = afterAnswerFeedbackCallback.bind(null,
-      trialEndTimeStamp, source, userAnswer);
+    trialEndTimeStamp, trialStartTimestamp, source, userAnswer);
 
   // Show user feedback and find out if they answered correctly
   // Note that userAnswerFeedback will display text and/or media - it is
@@ -1387,7 +1387,7 @@ function afterAnswerAssessmentCb(userAnswer, isCorrect, feedbackForAnswer, after
 
   const afterAnswerFeedbackCbBound = afterAnswerFeedbackCb.bind(null, isCorrect);
 
-  const currentDeliveryParams = getCurrentDeliveryParams();
+  const currentDeliveryParams = Session.get('currentDeliveryParams')
   if (currentDeliveryParams.scoringEnabled) {
     // Note that we track the score in the user progress object, but we
     // copy it to the Session object for template updates
@@ -1548,13 +1548,13 @@ async function giveWrongAnswer(){
   }
 }
 
-async function afterAnswerFeedbackCallback(trialEndTimeStamp, source, userAnswer, isTimeout, isCorrect) {
+async function afterAnswerFeedbackCallback(trialEndTimeStamp, trialStartTimeStamp, source, userAnswer, isTimeout, isCorrect) {
   Session.set('showDialogueText', false);
   //if the user presses the removal button after answering we need to shortcut the timeout
   const wasReportedForRemoval = source == 'removal';
 
   const testType = getTestType();
-  const deliveryParams = Session.get('currentDeliveryParams');
+  const deliveryParams = Session.get('currentDeliveryParams')
 
   let dialogueHistory;
   if (Session.get('dialogueHistory')) {
@@ -1566,7 +1566,7 @@ async function afterAnswerFeedbackCallback(trialEndTimeStamp, source, userAnswer
   clearCardTimeout();
 
   Session.set('feedbackTimeoutBegins', Date.now())
-  const answerLogRecord = gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect,
+  const answerLogRecord = gatherAnswerLogRecord(trialEndTimeStamp, trialStartTimeStamp, source, userAnswer, isCorrect,
       testType, deliveryParams, dialogueHistory, wasReportedForRemoval);
 
   Session.set('answerLogRecord', answerLogRecord);
@@ -1575,8 +1575,10 @@ async function afterAnswerFeedbackCallback(trialEndTimeStamp, source, userAnswer
   Session.set('testType', testType);
   Session.set('isCorrect', isCorrect);
   Session.set('isTimeout', isTimeout);
+  Session.set('trialStartTimeStamp', trialStartTimeStamp);
+  const afterFeedbackCallbackBind = afterFeedbackCallback.bind(null, trialEndTimeStamp, trialStartTimeStamp, isTimeout, isCorrect, testType, deliveryParams, answerLogRecord, 'card')
   const timeout = Meteor.setTimeout(async function() {
-    afterFeedbackCallback(trialEndTimeStamp, isTimeout, isCorrect, testType, deliveryParams, answerLogRecord, 'card')
+    afterFeedbackCallbackBind()
   }, reviewTimeout)
   Session.set('CurTimeoutId', timeout)
 
@@ -1588,7 +1590,7 @@ async function afterAnswerFeedbackCallback(trialEndTimeStamp, source, userAnswer
     Session.set('engineIndices', undefined);
 }
 
-async function afterFeedbackCallback(trialEndTimeStamp, isTimeout, isCorrect, testType, deliveryParams, answerLogRecord, callLocation) {
+async function afterFeedbackCallback(trialEndTimeStamp, trialStartTimeStamp, isTimeout, isCorrect, testType, deliveryParams, answerLogRecord, callLocation) {
   Session.set('CurTimeoutId', null)
   const userLeavingTrial = callLocation != 'card';
   let reviewEnd = Date.now();
@@ -1600,7 +1602,7 @@ async function afterFeedbackCallback(trialEndTimeStamp, isTimeout, isCorrect, te
   Session.set('engine', null);
   Session.set('CurTimeoutId', undefined);
       
-  let {responseDuration, startLatency, endLatency, feedbackLatency} = getTrialTime(trialEndTimeStamp, reviewEnd, testType);
+  let {responseDuration, startLatency, endLatency, feedbackLatency} = getTrialTime(trialEndTimeStamp, trialStartTimeStamp, reviewEnd, testType);
 
   const answerLogAction = isTimeout ? '[timeout]' : 'answer';
   //if dialogueStart is set that means the user went through interactive dialogue
@@ -1709,7 +1711,7 @@ function getReviewTimeout(testType, deliveryParams, isCorrect, dialogueHistory, 
   return reviewTimeout;
 }
 
-function getTrialTime(trialEndTimeStamp, reviewEnd, testType) {
+function getTrialTime(trialEndTimeStamp, trialStartTimeStamp, reviewEnd, testType) {
   let feedbackLatency;
   if(Session.get('dialogueTotalTime')){
     feedbackLatency = Session.get('dialogueTotalTime');
@@ -1723,22 +1725,22 @@ function getTrialTime(trialEndTimeStamp, reviewEnd, testType) {
 
   const firstActionTimestamp = firstKeypressTimestamp || trialEndTimeStamp;
   let responseDuration = trialEndTimeStamp - firstActionTimestamp;
-  let startLatency = firstActionTimestamp - trialStartTimestamp;
-  let endLatency = trialEndTimeStamp - trialStartTimestamp;
-  if( !firstActionTimestamp || !trialEndTimeStamp || !trialStartTimestamp || 
-    firstActionTimestamp < 0 || trialEndTimeStamp < 0 || trialStartTimestamp < 0 || endLatency < 0){
+  let startLatency = firstActionTimestamp - trialStartTimeStamp;
+  let endLatency = trialEndTimeStamp - trialStartTimeStamp;
+  if( !firstActionTimestamp || !trialEndTimeStamp || !trialStartTimeStamp || 
+    firstActionTimestamp < 0 || trialEndTimeStamp < 0 || trialStartTimeStamp < 0 || endLatency < 0){
     //something broke. The user probably didnt start answering the questing in 1970.
     alert('Something went wrong with your trial. Please restart the chapter.');
     const errorDescription = `One or more timestamps were set to 0 or null. 
     firstActionTimestamp: ${firstActionTimestamp}
     trialEndTimeStamp: ${trialEndTimeStamp}
-    trialStartTimestamp: ${trialStartTimestamp}`
+    trialStartTimeStamp: ${trialStartTimeStamp}`
     console.log(`responseDuration: ${responseDuration}
     startLatency: ${startLatency}
     endLatency: ${endLatency}
     firstKeypressTimestamp: ${firstKeypressTimestamp}
     trialEndTimeStamp: ${trialEndTimeStamp}
-    trialStartTimestamp: ${trialStartTimestamp}`)
+    trialStartTimeStamp: ${trialStartTimeStamp}`)
     const curUser = Meteor.userId();
     const curPage = document.location.pathname;
     const sessionVars = Session.all();
@@ -1764,8 +1766,8 @@ function getTrialTime(trialEndTimeStamp, reviewEnd, testType) {
 }
 
 // eslint-disable-next-line max-len
-function gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect, testType, deliveryParams, dialogueHistory, wasReportedForRemoval) {
-  const feedbackType = deliveryParams.feedbackType || 'simple';
+function gatherAnswerLogRecord(trialEndTimeStamp, trialStartTimeStamp, source, userAnswer, isCorrect, 
+  testType, deliveryParams, dialogueHistory, wasReportedForRemoval) {
 
   // Figure out button trial entries
   let buttonEntries = '';
@@ -1773,7 +1775,7 @@ function gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect,
   if (wasButtonTrial) {
     const wasDrill = (testType === 'd' || testType === 'm' || testType === 'n');
     // If we had a dialogue interaction restore this from the session variable as the screen was wiped
-    if (getCurrentDeliveryParams().feedbackType == 'dialogue' && !isCorrect && wasDrill) {
+    if (deliveryParams.feedbackType == 'dialogue' && !isCorrect && wasDrill) {
       buttonEntries = JSON.parse(JSON.stringify(Session.get('buttonEntriesTemp')));
     } else {
       buttonEntries = _.map(Session.get('buttonList'), (val) => val.buttonValue).join(',');
@@ -1852,7 +1854,7 @@ function gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect,
   }
 
   // hack
-  const sessionID = (new Date(trialStartTimestamp)).toUTCString().substr(0, 16) + ' ' + Session.get('currentTdfName');
+  const sessionID = (new Date(trialStartTimeStamp)).toUTCString().substr(0, 16) + ' ' + Session.get('currentTdfName');
   let outcome = 'incorrect';
   if (isCorrect) {
     outcome = 'correct';
@@ -1893,7 +1895,7 @@ function gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect,
     'levelUnitType': Session.get('unitType'),
     'problemName': problemName,
     'stepName': stepName, // this is no longer a valid field as we don't restore state one step at a time
-    'time': trialStartTimestamp,
+    'time': trialStartTimeStamp,
     'selection': '',
     'action': '',
     'input': _.trim(userAnswer),
@@ -1926,7 +1928,7 @@ function gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect,
     'CFItemRemoved': wasReportedForRemoval,
     'CFNote': '',
     'feedbackText': $('#UserInteraction').text() || '',
-    'feedbackType': feedbackType,
+    'feedbackType': deliveryParams.feedbackType,
     'dialogueHistory': dialogueHistory || null,
     'instructionQuestionResult': Session.get('instructionQuestionResult') || false,
     'hintLevel': whichHintLevel,
@@ -2954,7 +2956,7 @@ async function resumeFromComponentState() {
 
 
 async function getFeedbackParameters(){
-  if(getCurrentDeliveryParams().allowFeedbackTypeSelect){
+  if(Session.get('currentDeliveryParams').allowFeedbackTypeSelect){
     Session.set('displayFeedback',true);
   } 
 }
