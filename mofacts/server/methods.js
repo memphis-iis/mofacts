@@ -555,12 +555,14 @@ async function saveContentFile(type, filename, filecontents, owner, packagePath 
       const lessonName = _.trim(jsonContents.tutor.setspec.lessonname);
       const tips = jsonContents.tutor.setspec.tips;
       let newFormatttedTips = [];
-      for(const tip of tips){
-        const imageName = tip.split('<img')[1].split('src="')[1].split('"')[0];
-        const image = await DynamicAssets.collection.findOne({userId: ownerId, name: imageName});
-        const imageLink = image.meta.link;
-        newFormatttedTips.push(tip.replace(imageName, imageLink));
-        serverConsole('imageLink', imageLink);
+      if(tips){
+        for(const tip of tips){
+          const imageName = tip.split('<img')[1].split('src="')[1].split('"')[0];
+          const image = await DynamicAssets.collection.findOne({userId: ownerId, name: imageName});
+          const imageLink = image.meta.link;
+          newFormatttedTips.push(tip.replace(imageName, imageLink));
+          serverConsole('imageLink', imageLink);
+        }
       }
       if(newFormatttedTips.length > 0){
         json.tutor.setspec.tips = newFormatttedTips;
