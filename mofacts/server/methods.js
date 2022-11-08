@@ -557,11 +557,13 @@ async function saveContentFile(type, filename, filecontents, owner, packagePath 
       let newFormatttedTips = [];
       if(tips){
         for(const tip of tips){
-          const imageName = tip.split('<img')[1].split('src="')[1].split('"')[0];
-          const image = await DynamicAssets.collection.findOne({userId: ownerId, name: imageName});
-          const imageLink = image.meta.link;
-          newFormatttedTips.push(tip.replace(imageName, imageLink));
-          serverConsole('imageLink', imageLink);
+          if(tip.split('<img').length > 1){
+            const imageName = tip.split('<img')[1].split('src="')[1].split('"')[0];
+            const image = await DynamicAssets.collection.findOne({userId: ownerId, name: imageName});
+            const imageLink = image.meta.link;
+            newFormatttedTips.push(tip.replace(imageName, imageLink));
+            serverConsole('imageLink', imageLink);
+          }
         }
       }
       if(newFormatttedTips.length > 0){
