@@ -615,7 +615,7 @@ async function saveContentFile(type, filename, filecontents, owner, packagePath 
   results.result = true;
   results.errmsg = '';
 
-  //return results;
+  return results;
 }
 
 function stripSpacesAndLowerCase(input) {
