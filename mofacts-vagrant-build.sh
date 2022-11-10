@@ -20,4 +20,14 @@ Session.set("versionInfo",
 );
 EOF
 
+cat << EOF > mofacts/private/versionInfo.json
+{
+"commitID":"$commitID",
+"buildTimestamp":"$buildTimestamp",
+"buildersUsername":"$buildersUsername",
+"branch":"$branch",
+"repoURL":"$repoURL"
+}
+EOF
+
 vagrant ssh -c "cd mofacts/mofacts/build; meteor build ./ --architecture os.linux.x86_64"
