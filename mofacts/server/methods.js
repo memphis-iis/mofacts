@@ -2958,25 +2958,39 @@ Meteor.startup(async function() {
   SyncedCron.start();
 
   // Now check for messages to send every 5 minutes
-  SyncedCron.add({
-    name: 'Period Email Sent Check',
-    schedule: function(parser) {
-      return parser.text('every 5 minutes');
-    },
-    job: function() {
-      return sendScheduledTurkMessages();
-    },
-  });
+  
+  if (Meteor.isProduction) {
+    SyncedCron.add({
+      name: 'Period Email Sent Check',
+      schedule: function(parser) {
+        return parser.text('every 5 minutes');
+      },
+      job: function() {
+        return sendScheduledTurkMessages();
+      },
+    });
 
-  SyncedCron.add({
-    name: 'Send Error Report Summaries',
-    schedule: function(parser) {
-      return parser.text('at 3:00 pm');
-    },
-    job: function() {
-      return sendErrorReportSummaries();
-    },
-  });
+    SyncedCron.add({
+      name: 'Send Error Report Summaries',
+      schedule: function(parser) {
+        return parser.text('at 3:00 pm');
+      },
+      job: function() {
+        return sendErrorReportSummaries();
+      },
+    });
+  }
+  
+  //email admin that the server has restarted
+  if (ownerEmail && Meteor.isProduction) {
+    const versionFile = Assets.getText('versionInfo.json');
+    const version = JSON.parse(versionFile);
+    server = Meteor.absoluteUrl().split('//')[1];
+    server = server.substring(0, server.length - 1);
+    subject = `MoFaCTs Deployed on ${server}`;
+    text = `The server has restarted.\nServer: ${server}\nVersion: ${JSON.stringify(version, null, 2)}`;
+    console.log(ownerEmail, ownerEmail, subject, text)
+  }
 });
 
 Router.route('/dynamic-assets/:tdfid?/:filetype?/:filename?', {
