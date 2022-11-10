@@ -50,7 +50,7 @@ function testLogin() {
     // Note that we force Meteor to think we have a user name so that
     // it doesn't try it as an email - this let's you test email-like
     // users, which you can promote to admin or teacher
-    Meteor.loginWithPassword({'username': testUserName}, testPassword, function(error) {
+    Meteor.loginWithPassword({'username': testUserName}, testPassword, async function(error) {
       if (typeof error !== 'undefined') {
         console.log('ERROR: The user was not logged in on TEST sign in?', testUserName, 'Error:', error);
         alert('It appears that you couldn\'t be logged in as ' + testUserName);
@@ -63,8 +63,7 @@ function testLogin() {
         }
         Meteor.call('logUserAgentAndLoginTime', Meteor.userId(), navigator.userAgent);
         Meteor.call('updatePerformanceData', 'login', 'signinOauth.testLogin', Meteor.userId());
-        Meteor.call('setUserEntryPoint', `direct`);
-        Meteor.call('setLoginMode', Session.get('loginMode'));
+        await meteorCallAsync('setUserLoginData', 'direct', Session.get('loginMode'));
         Meteor.logoutOtherClients();
         Router.go('/profile');
       }
@@ -110,7 +109,7 @@ Template.signInOauth.events({
       loginStyle: 'popup',
     };
 
-    Meteor.loginWithGoogle(options, function(err) {
+    Meteor.loginWithGoogle(options, async function(err) {
       if (err) {
         $('#signInButton').prop('disabled', false);
         // error handling
@@ -126,8 +125,7 @@ Template.signInOauth.events({
       }
       Meteor.call('logUserAgentAndLoginTime', Meteor.userId(), navigator.userAgent);
       Meteor.call('updatePerformanceData', 'login', 'signinOauth.clickSigninButton', Meteor.userId());
-      Meteor.call('setUserEntryPoint', `direct`);
-      Meteor.call('setLoginMode', Session.get('loginMode'));
+      await meteorCallAsync('setUserLoginData', 'direct', Session.get('loginMode'));
       Meteor.logoutOtherClients();
       Router.go('/profile');
     });

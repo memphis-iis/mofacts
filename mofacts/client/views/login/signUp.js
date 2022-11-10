@@ -61,7 +61,7 @@ Template.signUp.events({
 
       sessionCleanUp();
 
-      Meteor.loginWithPassword(formUsername, formPassword1, function(error) {
+      Meteor.loginWithPassword(formUsername, formPassword1, async function(error) {
         if (typeof error !== 'undefined') {
           // This means that we have an issue of some kind - but there's
           // nothing that we can do? We'll just fall thru for now since
@@ -74,8 +74,7 @@ Template.signUp.events({
             console.log(currentUser + ' was logged in successfully!');
             Meteor.call('debugLog', 'Sign in was successful');
           }
-          Meteor.call('setUserEntryPoint', `direct`);
-          Meteor.call('setLoginMode', 'password');
+          await meteorCallAsync('setUserLoginData', `direct`, 'password');
           Meteor.logoutOtherClients();
           Router.go('/profile');
         }
