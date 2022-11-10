@@ -2210,6 +2210,20 @@ Meteor.methods({
 
   getTdfIdByStimSetIdAndFileName, getItemsByFileName, addUserDueDateException, removeUserDueDateException, checkForUserException, 
 
+  generateContent: function( percentage, stringArrayJsonOption, inputText ) {
+    ClozeAPI.GetSelectClozePercentage(percentage, stringArrayJsonOption, null, inputText).then((result) => {
+      if(result.tag == 1) {
+        console.log(result);
+      } else {
+        console.log(result);
+        return result;
+      }
+    }).catch((err) => {
+      console.log('err', err);
+    });
+    
+  },
+
   makeGoogleTTSApiCall: async function(TDFId, message, audioPromptSpeakingRate, audioVolume, selectedVoice) {
     const ttsAPIKey = await getTdfTTSAPIKey(TDFId);
     const request = JSON.stringify({

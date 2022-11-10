@@ -154,11 +154,10 @@ Template.profile.events({
 
   'click #contentGenerationButton': function(event) {
     event.preventDefault();
-    Router.go('/contentGeneration');
-  },
-  'click #contentGenerationButton': function(event) {
-    event.preventDefault();
-    Router.go('/contentGeneration');
+    let percentage = 0.1;
+    let inputText = "hi I'm some text###bye bye";
+    let stringArrayJsonOption = inputText.split('###');
+    Meteor.call('generateContent', percentage, stringArrayJsonOption, inputText)
   },
 
   'click #tdfPracticeBtn': function(event, instance) {
