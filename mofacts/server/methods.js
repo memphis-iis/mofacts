@@ -2107,6 +2107,18 @@ async function upsertTDFFile(tdfFilename, tdfJSON, ownerId) {
   }
 }
 
+async function setUserLoginData(entryPoint, loginMode, curTeacher = undefined, curClass = undefined){
+  console.log(Meteor.userId());
+  let query = { 
+    'profile.entryPoint': entryPoint,
+    'profile.curTeacher': curTeacher,
+    'profile.curClass': curClass,
+    'profile.loginMode': loginMode
+  };
+  if(Meteor.userId()){
+    Meteor.users.update(Meteor.userId(), { $set: query })
+  }
+}
 
 async function loadStimsAndTdfsFromPrivate(adminUserId) {
   if (!isProd) {
@@ -2194,10 +2206,9 @@ Meteor.methods({
 
   loadStimsAndTdfsFromPrivate, getListOfStimTags, getStudentReportingData,
 
-  insertHiddenItem, getHiddenItems, getUserLastFeedbackTypeFromHistory,
+  insertHiddenItem, getHiddenItems, getUserLastFeedbackTypeFromHistory, setUserLoginData,
 
-  getTdfIdByStimSetIdAndFileName, getItemsByFileName, addUserDueDateException, removeUserDueDateException, checkForUserException,
-
+  getTdfIdByStimSetIdAndFileName, getItemsByFileName, addUserDueDateException, removeUserDueDateException, checkForUserException, 
 
   makeGoogleTTSApiCall: async function(TDFId, message, audioPromptSpeakingRate, audioVolume, selectedVoice) {
     const ttsAPIKey = await getTdfTTSAPIKey(TDFId);
@@ -2482,32 +2493,6 @@ Meteor.methods({
       throw new Meteor.Error(404, 'User not found');
     Meteor.users.update(this.userId, { $set: { 'profile.impersonating': userId }});
     this.setUserId(userId);
-  },
-
-  setUserEntryPoint: function(entryPoint){
-    console.log(Meteor.userId());
-    if(Meteor.userId()){
-      Meteor.users.update(Meteor.userId(), { $set: { 'profile.entryPoint': entryPoint }});
-    }
-  },
-
-  setLoginMode: function(loginMode){
-    console.log(Meteor.userId());
-    if(Meteor.userId()){
-      Meteor.users.update(Meteor.userId(), { $set: { 'profile.loginMode': loginMode }});
-    }
-  },
-
-  setUserLoginData: function(entryPoint, curTeacher, curClass){
-    console.log(Meteor.userId());
-    let query = { 
-      'profile.entryPoint': entryPoint,
-      'profile.curTeacher': curTeacher,
-      'profile.curClass': curClass,
-    };
-    if(Meteor.userId()){
-      Meteor.users.update(Meteor.userId(), { $set: query })
-    }
   },
 
   clearLoginData: function(){
