@@ -302,10 +302,6 @@ Template.profile.rendered = async function() {
 
   // In experiment mode, they may be forced to a single tdf
   let experimentTarget = null;
-  if (Meteor.user().profile.loginMode === 'experiment') {
-    experimentTarget = Session.get('experimentTarget');
-    if (experimentTarget) experimentTarget = experimentTarget.toLowerCase();
-  }
 
   // Will be populated if we find an experimental target to jump to
   let foundExpTarget = null;
@@ -496,7 +492,8 @@ Template.profile.rendered = async function() {
 
 // Actual logic for selecting and starting a TDF
 // eslint-disable-next-line max-len
-async function selectTdf(currentTdfId, lessonName, currentStimuliSetId, ignoreOutOfGrammarResponses, speechOutOfGrammarFeedback, how, isMultiTdf, fromSouthwest) {
+async function selectTdf(currentTdfId, lessonName, currentStimuliSetId, ignoreOutOfGrammarResponses, 
+  speechOutOfGrammarFeedback, how, isMultiTdf, fromSouthwest, setspec, isExperiment = false) {
   console.log('Starting Lesson', lessonName, currentTdfId,
       'currentStimuliSetId:', currentStimuliSetId, 'isMultiTdf:', isMultiTdf);
 
@@ -522,25 +519,53 @@ async function selectTdf(currentTdfId, lessonName, currentStimuliSetId, ignoreOu
   Session.set('curTdfTips', curTdfTips)
 
   // Record state to restore when we return to this page
-  const audioPromptMode = getAudioPromptModeFromPage();
+  let audioPromptMode;
+  let audioInputEnabled;
+  let audioPromptFeedbackSpeakingRate;
+  let audioPromptQuestionSpeakingRate;
+  let audioPromptVoice;
+  let audioInputSensitivity;
+  let audioPromptQuestionVolume
+  let audioPromptFeedbackVolume
+  let feedbackType
+  let audioPromptFeedbackVoice
+  if(isExperiment) {
+    audioPromptMode = setspec.audioPromptMode || 'silent';
+    audioInputEnabled = setspec.audioInputEnabled || false;
+    audioPromptFeedbackSpeakingRate = setspec.audioPromptFeedbackSpeakingRate || 1;
+    audioPromptQuestionSpeakingRate = setspec.audioPromptQuestionSpeakingRate || 1;
+    audioPromptVoice = setspec.audioPromptVoice || 'en-US-Standard-A';
+    audioInputSensitivity = setspec.audioInputSensitivity || 20;
+    audioPromptQuestionVolume = setspec.audioPromptQuestionVolume || 0;
+    audioPromptFeedbackVolume = setspec.audioPromptFeedbackVolume || 0;
+    feedbackType = setspec.feedbackType;
+    audioPromptFeedbackVoice = setspec.audioPromptFeedbackVoice || 'en-US-Standard-A';
+  }
+  else {
+    audioPromptMode = getAudioPromptModeFromPage();
+    audioInputEnabled = getAudioInputFromPage();
+    audioPromptFeedbackSpeakingRate = document.getElementById('audioPromptFeedbackSpeakingRate').value;
+    audioPromptQuestionSpeakingRate = document.getElementById('audioPromptQuestionSpeakingRate').value;
+    audioPromptVoice = document.getElementById('audioPromptVoice').value;
+    audioInputSensitivity = document.getElementById('audioInputSensitivity').value;
+    audioPromptQuestionVolume = document.getElementById('audioPromptQuestionVolume').value;
+    audioPromptFeedbackVolume = document.getElementById('audioPromptFeedbackVolume').value;
+    feedbackType = await meteorCallAsync('getUserLastFeedbackTypeFromHistory', currentTdfId);
+    audioPromptFeedbackVoice = document.getElementById('audioPromptFeedbackVoice').value;
+    if(feedbackType)
+      Session.set('feedbackTypeFromHistory', feedbackType.feedbacktype)
+    else
+      Session.set('feedbackTypeFromHistory', null);
+  }
   Session.set('audioPromptMode', audioPromptMode);
   Session.set('audioPromptFeedbackView', audioPromptMode);
-  const audioInputEnabled = getAudioInputFromPage();
   Session.set('audioEnabledView', audioInputEnabled);
-  const audioPromptFeedbackSpeakingRate = document.getElementById('audioPromptFeedbackSpeakingRate').value;
   Session.set('audioPromptFeedbackSpeakingRateView', audioPromptFeedbackSpeakingRate);
-  const audioPromptQuestionSpeakingRate = document.getElementById('audioPromptQuestionSpeakingRate').value;
   Session.set('audioPromptQuestionSpeakingRateView', audioPromptQuestionSpeakingRate);
-  const audioPromptVoice = document.getElementById('audioPromptVoice').value;
   Session.set('audioPromptVoiceView', audioPromptVoice)
-  const audioInputSensitivity = document.getElementById('audioInputSensitivity').value;
   Session.set('audioInputSensitivityView', audioInputSensitivity);
-  const audioPromptQuestionVolume = document.getElementById('audioPromptQuestionVolume').value;
   Session.set('audioPromptQuestionVolume', audioPromptQuestionVolume);
-  const audioPromptFeedbackVolume = document.getElementById('audioPromptFeedbackVolume').value;
   Session.set('audioPromptFeedbackVolume', audioPromptFeedbackVolume);
-  const feedbackType = await meteorCallAsync('getUserLastFeedbackTypeFromHistory', currentTdfId);
-  const audioPromptFeedbackVoice = document.getElementById('audioPromptFeedbackVoice').value;
   Session.set('audioPromptFeedbackVoiceView', audioPromptFeedbackVoice)
   if(feedbackType)
     Session.set('feedbackTypeFromHistory', feedbackType.feedbacktype)

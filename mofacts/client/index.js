@@ -272,7 +272,7 @@ Template.registerHelper('currentScore', function() {
   return Session.get('currentScore');
 });
 Template.registerHelper('isNormal', function() {
-  return Meteor.user().profile.loginMode !== 'experiment';
+  return Session.get('loginMode') !== 'experiment';
 });
 Template.registerHelper('curStudentPerformance', function() {
   return Session.get('curStudentPerformance');
