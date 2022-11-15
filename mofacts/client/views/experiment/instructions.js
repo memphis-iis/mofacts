@@ -225,7 +225,7 @@ function getUnitsRemaining() {
     }
     if (unitCount > 0) {
       const unitIdx = Session.get('currentUnitNumber') || 0;
-      unitsLeft = (unitCount - unitIdx) - 1;
+      unitsLeft = (unitCount - unitIdx);
       if (unitsLeft < 0) {
         unitsLeft = 0;
       }
