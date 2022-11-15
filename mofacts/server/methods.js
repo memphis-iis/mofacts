@@ -2989,7 +2989,7 @@ Meteor.startup(async function() {
     server = server.substring(0, server.length - 1);
     subject = `MoFaCTs Deployed on ${server}`;
     text = `The server has restarted.\nServer: ${server}\nVersion: ${JSON.stringify(version, null, 2)}`;
-    console.log(ownerEmail, ownerEmail, subject, text)
+    sendEmail(ownerEmail, ownerEmail, subject, text)
   }
 });
 
