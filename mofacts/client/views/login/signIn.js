@@ -2,6 +2,7 @@ import {meteorCallAsync} from '../..';
 import {blankPassword} from '../../lib/currentTestingHelpers';
 import {sessionCleanUp} from '../../lib/sessionUtils';
 import {displayify} from '../../../common/globalHelpers';
+import {selectTdf} from '../home/profile'
 import {routeToSignin} from '../../lib/router';
 
 Template.signIn.onRendered(async function() {
@@ -16,7 +17,7 @@ Template.signIn.onRendered(async function() {
     Session.set('showTestLogins', true);
     Session.set('teachers', verifiedTeachers);
   }
-  if(Meteor.userId()){
+  if(Meteor.userId() && Meteor.user().profile.loginMode !== 'experiment'){
     console.log("already logged in")
     Router.go("/profile");
   }
@@ -152,7 +153,7 @@ Template.signIn.helpers({
 // Implementation functions
 
 // Called after we have signed in
-function signinNotify() {
+function signinNotify(landingPage = '/profile') {
   if(Session.get('curTeacher') && Session.get('curClass')){
     Meteor.call('addUserToTeachersClass', Meteor.userId(), Session.get('curTeacher')._id, Session.get('curClass').sectionId,
     async function(err, result) {
@@ -179,7 +180,8 @@ function signinNotify() {
     Meteor.call('logUserAgentAndLoginTime', Meteor.userId(), navigator.userAgent);
   }
   Meteor.logoutOtherClients();
-  Router.go('/profile');
+  if(landingPage)
+    Router.go(landingPage);
 }
 
 function userPasswordCheck() {
@@ -209,7 +211,30 @@ function userPasswordCheck() {
           alert('It appears that you couldn\'t be logged in as ' + newUsername);
           $('#signInButton').prop('disabled', false);
         } else {
-          signinNotify();
+          let experimentTarget = Session.get('experimentTarget');
+          if (experimentTarget) experimentTarget = experimentTarget.toLowerCase();
+          let foundExpTarget = await meteorCallAsync('getTdfByExperimentTarget', experimentTarget);
+          const setspec = foundExpTarget.content.tdfs.tutor.setspec ? foundExpTarget.content.tdfs.tutor.setspec : null;
+          const ignoreOutOfGrammarResponses = setspec.speechIgnoreOutOfGrammarResponses ?
+          setspec.speechIgnoreOutOfGrammarResponses.toLowerCase() == 'true' : false;
+          const speechOutOfGrammarFeedback = setspec.speechOutOfGrammarFeedback ?
+          setspec.speechOutOfGrammarFeedback : 'Response not in answer set';
+
+          if (foundExpTarget) {
+            selectTdf(
+                foundExpTarget._id,
+                setspec.lessonname,
+                foundExpTarget.stimuliSetId,
+                ignoreOutOfGrammarResponses,
+                speechOutOfGrammarFeedback,
+                'Auto-selected by experiment target ' + experimentTarget,
+                foundExpTarget.content.isMultiTdf,
+                false,
+                setspec,
+                true
+            );
+          }
+          signinNotify(false);
           await meteorCallAsync('setUserLoginData', 'direct', Session.get('loginMode'));
         }
       });
@@ -250,7 +275,30 @@ function userPasswordCheck() {
             alert('It appears that you couldn\'t be logged in as ' + newUsername);
             $('#signInButton').prop('disabled', false);
           } else {
-            signinNotify();
+            let experimentTarget = Session.get('experimentTarget');
+            if (experimentTarget) experimentTarget = experimentTarget.toLowerCase();
+            let foundExpTarget = await meteorCallAsync('getTdfByExperimentTarget', experimentTarget);
+            const setspec = foundExpTarget.content.tdfs.tutor.setspec ? foundExpTarget.content.tdfs.tutor.setspec : null;
+            const ignoreOutOfGrammarResponses = setspec.speechIgnoreOutOfGrammarResponses ?
+            setspec.speechIgnoreOutOfGrammarResponses.toLowerCase() == 'true' : false;
+            const speechOutOfGrammarFeedback = setspec.speechOutOfGrammarFeedback ?
+            setspec.speechOutOfGrammarFeedback : 'Response not in answer set';
+
+            if (foundExpTarget) {
+              selectTdf(
+                  foundExpTarget._id,
+                  setspec.lessonname,
+                  foundExpTarget.stimuliSetId,
+                  ignoreOutOfGrammarResponses,
+                  speechOutOfGrammarFeedback,
+                  'Auto-selected by experiment target ' + experimentTarget,
+                  foundExpTarget.content.isMultiTdf,
+                  false,
+                  setspec,
+                  true
+              );
+            }
+            signinNotify(false);
             await meteorCallAsync('setUserLoginData', 'direct', Session.get('loginMode'));
           }
         });

@@ -206,11 +206,13 @@ for (const route of defaultBehaviorRoutes) {
 Router.route('/', {
   name: 'client.index',
   action: function() {
-    if(Meteor.user()){
+    if(Meteor.user() && Meteor.user().profile.loginMode != 'experiment'){
       this.redirect('/profile');
     } else {
       // If they are navigating to "/" then we clear the (possible) cookie
       // keeping them in experiment mode
+      if(Meteor.user())
+        Meteor.logout();
       Cookie.set('isExperiment', '0', 1); // 1 day
       Cookie.set('experimentTarget', '', 1);
       Cookie.set('experimentXCond', '', 1);
@@ -246,6 +248,13 @@ Router.route('/profile', {
         console.log('southwest login, routing to southwest profile');
         Session.set('curModule', 'profileSouthwest');
         this.redirect('/profileSouthwest');
+      } else if (loginMode === 'experiment') {
+        Meteor.logout();
+        Cookie.set('isExperiment', '0', 1); // 1 day
+        Cookie.set('experimentTarget', '', 1);
+        Cookie.set('experimentXCond', '', 1);
+        Session.set('curModule', 'signinoauth');
+        this.redirect('/signIn');
       } else { // Normal login mode
         console.log('else, progress');
         Session.set('curModule', 'profile');
