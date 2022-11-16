@@ -15,11 +15,13 @@ export {selectTdf};
 Template.profile.created = function() {
   this.showTdfs = new ReactiveVar(false);
   this.enabledTdfs = new ReactiveVar([]);
+  this.filteredTdfs = new ReactiveVar(false);
   this.disabledTdfs = new ReactiveVar([]);
   this.tdfsToDisable = new ReactiveVar([]);
   this.tdfsToEnable = new ReactiveVar([]);
   this.showTdfAdminInfo = new ReactiveVar([]);
   this.tdfOwnersMap = new ReactiveVar({});
+  this.tdfTags = new ReactiveVar([]);
 };
 
 // //////////////////////////////////////////////////////////////////////////
@@ -53,8 +55,18 @@ Template.profile.helpers({
   },
 
   enabledTdfs: () => {
+    //if filteredTdfs is false, return enabledTdfs, else return filteredTdfs
+    const filteredTdfs = Template.instance().filteredTdfs.get();
+    if (filteredTdfs) {
+      return filteredTdfs;
+    }
     return Template.instance().enabledTdfs.get();
   },
+
+  tdfTags: () => {
+    return Template.instance().tdfTags.get();
+  },
+
 
   disabledTdfs: () => {
     return Template.instance().disabledTdfs.get();
@@ -108,10 +120,6 @@ Template.profile.events({
   'click #contentUploadButton': function(event) {
     event.preventDefault();
     Router.go('/contentUpload');
-  },
-  'click #assetUploadButton': function(event) {
-    event.preventDefault();
-    Router.go('/assetUpload');
   },
 
   'click #dataDownloadButton': function(event) {
@@ -201,6 +209,34 @@ Template.profile.events({
     const checked = event.target.checked;
     instance.showTdfAdminInfo.set(checked);
   },
+  //if practiceTDFSearch is changed, filter enabled tdfs reactive var and set filteredtdfs reactive var to the filtered list
+  'keyup #practiceTDFSearch': function(event, instance) {
+    const search = event.target.value;
+    const enabledTdfs = instance.enabledTdfs.get();
+    //filter tdf based off of tdf.tdfs.setspec.tags array
+    const filteredTdfs = enabledTdfs.filter((tdf) => {
+      //check if tdf.tdfs.setspec.tags array exists and is not empty
+      //print tdf.tdfs
+      if (tdf.tdfs.tutor.setspec.tags && tdf.tdfs.tutor.setspec.tags.length > 0) {
+        //check if search string is in any of the tags
+        return tdf.tdfs.tutor.setspec.tags.some((tag) => tag.includes(search));
+      } else {
+        return false;
+      }
+    });
+    //if search is empty, set filteredtdfs to false
+    if (search === '') {
+      instance.filteredTdfs.set(false);
+    } else {
+      instance.filteredTdfs.set(filteredTdfs);
+    }
+  },
+  //if tdf-tag-search is clicked, change #practiceTDFSearch input value to the value of the tag
+  'click .tdf-tag': function(event) {
+    const search = $(event.target).attr('data-tag');
+    $('#practiceTDFSearch').val(search);
+    $('#practiceTDFSearch').trigger('keyup');
+  }
 });
 
 function toggleTdfPresence(instance, mode) {
@@ -266,14 +302,11 @@ Template.profile.rendered = async function() {
 
   // In experiment mode, they may be forced to a single tdf
   let experimentTarget = null;
-  if (Meteor.user().profile.loginMode === 'experiment') {
-    experimentTarget = Session.get('experimentTarget');
-    if (experimentTarget) experimentTarget = experimentTarget.toLowerCase();
-  }
 
   // Will be populated if we find an experimental target to jump to
   let foundExpTarget = null;
   const enabledTdfs = [];
+  const tdfTags = [];
   const disabledTdfs = [];
   const tdfOwnerIds = [];
   const isAdmin = Roles.userIsInRole(Meteor.user(), ['admin']);
@@ -404,6 +437,22 @@ Template.profile.rendered = async function() {
     //  }
     // }
 
+    //check if the tdf.setspec.tags array exists, if so, add it to tdfTags  var for filtering as object {tag: tag, count: count}
+    if (setspec.tags) {
+      for (const tag of setspec.tags) {
+        const tagIndex = tdfTags.findIndex((e) => e.tag === tag);
+        if (tagIndex > -1) {
+          tdfTags[tagIndex].count++;
+        } else {
+          tdfTags.push({tag: tag, count: 1});
+        }
+      }
+    }
+    //sort tdfTags by natural alphabetical order
+    tdfTags.sort((a, b) => a.tag.localeCompare(b.tag, 'en', {numeric: true, sensitivity: 'base'}));
+    this.tdfTags.set(tdfTags);
+
+
     if ((tdf.visibility == 'profileOnly' || tdf.visibility == 'enabled') && tdfObject.isAssigned) {
       enabledTdfs.push(tdfObject);
     } else {
@@ -414,6 +463,10 @@ Template.profile.rendered = async function() {
       if (!tdfOwnerIds.includes(tdf.ownerId)) {
         tdfOwnerIds.push(tdf.ownerId);
       }
+    }
+
+    if(enabledTdfs){
+      enabledTdfs.sort((a, b) => a.name.localeCompare(b.name, 'en', {numeric: true, sensitivity: 'base'}));
     }
 
     this.disabledTdfs.set(disabledTdfs);
@@ -449,7 +502,8 @@ Template.profile.rendered = async function() {
 
 // Actual logic for selecting and starting a TDF
 // eslint-disable-next-line max-len
-async function selectTdf(currentTdfId, lessonName, currentStimuliSetId, ignoreOutOfGrammarResponses, speechOutOfGrammarFeedback, how, isMultiTdf, fromSouthwest) {
+async function selectTdf(currentTdfId, lessonName, currentStimuliSetId, ignoreOutOfGrammarResponses, 
+  speechOutOfGrammarFeedback, how, isMultiTdf, fromSouthwest, setspec, isExperiment = false) {
   console.log('Starting Lesson', lessonName, currentTdfId,
       'currentStimuliSetId:', currentStimuliSetId, 'isMultiTdf:', isMultiTdf);
 
@@ -475,25 +529,53 @@ async function selectTdf(currentTdfId, lessonName, currentStimuliSetId, ignoreOu
   Session.set('curTdfTips', curTdfTips)
 
   // Record state to restore when we return to this page
-  const audioPromptMode = getAudioPromptModeFromPage();
+  let audioPromptMode;
+  let audioInputEnabled;
+  let audioPromptFeedbackSpeakingRate;
+  let audioPromptQuestionSpeakingRate;
+  let audioPromptVoice;
+  let audioInputSensitivity;
+  let audioPromptQuestionVolume
+  let audioPromptFeedbackVolume
+  let feedbackType
+  let audioPromptFeedbackVoice
+  if(isExperiment) {
+    audioPromptMode = setspec.audioPromptMode || 'silent';
+    audioInputEnabled = setspec.audioInputEnabled || false;
+    audioPromptFeedbackSpeakingRate = setspec.audioPromptFeedbackSpeakingRate || 1;
+    audioPromptQuestionSpeakingRate = setspec.audioPromptQuestionSpeakingRate || 1;
+    audioPromptVoice = setspec.audioPromptVoice || 'en-US-Standard-A';
+    audioInputSensitivity = setspec.audioInputSensitivity || 20;
+    audioPromptQuestionVolume = setspec.audioPromptQuestionVolume || 0;
+    audioPromptFeedbackVolume = setspec.audioPromptFeedbackVolume || 0;
+    feedbackType = setspec.feedbackType;
+    audioPromptFeedbackVoice = setspec.audioPromptFeedbackVoice || 'en-US-Standard-A';
+  }
+  else {
+    audioPromptMode = getAudioPromptModeFromPage();
+    audioInputEnabled = getAudioInputFromPage();
+    audioPromptFeedbackSpeakingRate = document.getElementById('audioPromptFeedbackSpeakingRate').value;
+    audioPromptQuestionSpeakingRate = document.getElementById('audioPromptQuestionSpeakingRate').value;
+    audioPromptVoice = document.getElementById('audioPromptVoice').value;
+    audioInputSensitivity = document.getElementById('audioInputSensitivity').value;
+    audioPromptQuestionVolume = document.getElementById('audioPromptQuestionVolume').value;
+    audioPromptFeedbackVolume = document.getElementById('audioPromptFeedbackVolume').value;
+    feedbackType = await meteorCallAsync('getUserLastFeedbackTypeFromHistory', currentTdfId);
+    audioPromptFeedbackVoice = document.getElementById('audioPromptFeedbackVoice').value;
+    if(feedbackType)
+      Session.set('feedbackTypeFromHistory', feedbackType.feedbacktype)
+    else
+      Session.set('feedbackTypeFromHistory', null);
+  }
   Session.set('audioPromptMode', audioPromptMode);
   Session.set('audioPromptFeedbackView', audioPromptMode);
-  const audioInputEnabled = getAudioInputFromPage();
   Session.set('audioEnabledView', audioInputEnabled);
-  const audioPromptFeedbackSpeakingRate = document.getElementById('audioPromptFeedbackSpeakingRate').value;
   Session.set('audioPromptFeedbackSpeakingRateView', audioPromptFeedbackSpeakingRate);
-  const audioPromptQuestionSpeakingRate = document.getElementById('audioPromptQuestionSpeakingRate').value;
   Session.set('audioPromptQuestionSpeakingRateView', audioPromptQuestionSpeakingRate);
-  const audioPromptVoice = document.getElementById('audioPromptVoice').value;
   Session.set('audioPromptVoiceView', audioPromptVoice)
-  const audioInputSensitivity = document.getElementById('audioInputSensitivity').value;
   Session.set('audioInputSensitivityView', audioInputSensitivity);
-  const audioPromptQuestionVolume = document.getElementById('audioPromptQuestionVolume').value;
   Session.set('audioPromptQuestionVolume', audioPromptQuestionVolume);
-  const audioPromptFeedbackVolume = document.getElementById('audioPromptFeedbackVolume').value;
   Session.set('audioPromptFeedbackVolume', audioPromptFeedbackVolume);
-  const feedbackType = await meteorCallAsync('getUserLastFeedbackTypeFromHistory', currentTdfId);
-  const audioPromptFeedbackVoice = document.getElementById('audioPromptFeedbackVoice').value;
   Session.set('audioPromptFeedbackVoiceView', audioPromptFeedbackVoice)
   if(feedbackType)
     Session.set('feedbackTypeFromHistory', feedbackType.feedbacktype)

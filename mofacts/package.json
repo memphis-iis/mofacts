@@ -15,6 +15,7 @@
     "core-js": "^2.5.7",
     "diff": "^5.0.0",
     "double-metaphone": "^2.0.0",
+    "hark": "^1.2.3",
     "isomorphic-fetch": "^3.0.0",
     "pg-promise": "^10.11.1",
     "transliteration": "^2.1.7",
