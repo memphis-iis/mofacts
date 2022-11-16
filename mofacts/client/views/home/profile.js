@@ -321,8 +321,6 @@ Template.profile.rendered = async function() {
   const courseTdfs = await meteorCallAsync('getTdfsAssignedToCourseId', courseId);
   console.log('courseTdfs', courseTdfs, courseId);
 
-  
-
   // Check all the valid TDF's
   for (const tdf of allTdfs) {
     const TDFId = tdf._id;
