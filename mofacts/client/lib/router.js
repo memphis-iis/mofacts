@@ -246,7 +246,7 @@ Router.route('/profile', {
       if (loginMode === 'southwest') {
         console.log('southwest login, routing to southwest profile');
         Session.set('curModule', 'profileSouthwest');
-        this.redirect('/profile');
+        this.render('/profile');
       } else if (loginMode === 'experiment') {
         Meteor.logout();
         Cookie.set('isExperiment', '0', 1); // 1 day
