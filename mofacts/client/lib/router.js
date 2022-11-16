@@ -166,7 +166,6 @@ const restrictedRoutes = [
   'voice',
   'feedback',
   'assetUpload',
-  'profileSouthwest'
 ];
 
 const getDefaultRouteAction = function(routeName) {
@@ -237,7 +236,7 @@ Router.route('/profile', {
       if (loginMode === 'southwest') {
         console.log('southwest login, routing to southwest profile');
         Session.set('curModule', 'profileSouthwest');
-        this.redirect('/profileSouthwest');
+        this.render('profile');
       } else { // Normal login mode
         console.log('else, progress');
         Session.set('curModule', 'profile');
