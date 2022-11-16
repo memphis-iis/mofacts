@@ -294,7 +294,13 @@ Session.set('speechAPIKey', null);
 Template.profile.rendered = async function() {
   sessionCleanUp();
   Session.set('showSpeechAPISetup', true);
-  const allTdfs = await meteorCallAsync('getAllTdfs');
+  if(Meteor.user().profile.loginMode === 'southwest') {
+    const curSectionId = Meteor.user().profile.curClass.sectionId;
+    const assignedTdfs = await meteorCallAsync('getTdfsAssignedToStudent', Meteor.userId(), curSectionId);
+    allTdfs = assignedTdfs;
+  } else {
+    allTdfs = await meteorCallAsync('getAllTdfs');
+  }
   console.log('allTdfs', allTdfs, typeof(allTdfs));
   Session.set('allTdfs', allTdfs);
 
