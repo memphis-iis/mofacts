@@ -167,7 +167,7 @@ Template.body.events({
     if (window.currentAudioObj) {
       window.currentAudioObj.pause();
     }
-    Router.go('/');
+    Router.go('/profile');
   },
 
   'click #progressButton': function(event) {

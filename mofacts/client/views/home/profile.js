@@ -294,7 +294,12 @@ Session.set('speechAPIKey', null);
 Template.profile.rendered = async function() {
   sessionCleanUp();
   Session.set('showSpeechAPISetup', true);
-  allTdfs = await meteorCallAsync('getAllTdfs');
+  if(Meteor.user().profile.loginMode === 'southwest') {
+    const curSectionId = Meteor.user().profile.curClass.sectionId;
+    const allTdfs = await meteorCallAsync('getTdfsAssignedToStudent', Meteor.userId(), curSectionId);
+  } else {
+    const allTdfs = await meteorCallAsync('getAllTdfs');
+  }
   console.log('allTdfs', allTdfs, typeof(allTdfs));
   Session.set('allTdfs', allTdfs);
 
@@ -316,14 +321,6 @@ Template.profile.rendered = async function() {
   const courseTdfs = await meteorCallAsync('getTdfsAssignedToCourseId', courseId);
   console.log('courseTdfs', courseTdfs, courseId);
 
-  // In southwest mode, we want to show the user the assigned TDFs, hijacking allTdfs
-  if(Meteor.user().profile.loginMode === 'southwest') {
-    const curSectionId = Meteor.user().profile.curClass.sectionId;
-    const assignedTdfs = await meteorCallAsync('getTdfsAssignedToStudent', Meteor.userId(), curSectionId);
-    console.log('assignedTdfs', assignedTdfs);
-    Session.set('allTdfs', assignedTdfs);
-    allTdfs = assignedTdfs;
-  }
   
 
   // Check all the valid TDF's
