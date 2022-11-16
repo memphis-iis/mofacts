@@ -39,6 +39,10 @@ if (Meteor.isServer) {
   Meteor.publish('files.assets.all', function () {
     return DynamicAssets.collection.find();
   });
+
+  Meteor.publish('contentUpload', function() {
+    return Tdfs.find({'content.ownerId': Meteor.userId()})
+  })
 }
 
 if (process.env.METEOR_SETTINGS_WORKAROUND) {
@@ -1940,6 +1944,12 @@ async function upsertStimFile(stimulusFileName, stimJSON, ownerId, packagePath =
     serverConsole('stimuliSetId2:', stimuliSetId, nextStimuliSetId);
   }
 
+  Stims.insert({
+    'stimuliSetId': stimuliSetId,
+    'fileName': stimulusFileName,
+    'stimuli': stimJSON,
+    'owner': ownerId,
+  })
   const newFormatItems = getNewItemFormat(oldStimFormat, stimulusFileName, stimuliSetId, responseKCMap);
   const existingStims = await Items.find({stimulusFileName: stimulusFileName}).fetch();
   serverConsole('existingStims', existingStims);
@@ -2097,6 +2107,18 @@ async function upsertTDFFile(tdfFilename, tdfJSON, ownerId) {
   }
 }
 
+async function setUserLoginData(entryPoint, loginMode, curTeacher = undefined, curClass = undefined){
+  console.log(Meteor.userId());
+  let query = { 
+    'profile.entryPoint': entryPoint,
+    'profile.curTeacher': curTeacher,
+    'profile.curClass': curClass,
+    'profile.loginMode': loginMode
+  };
+  if(Meteor.userId()){
+    Meteor.users.update(Meteor.userId(), { $set: query })
+  }
+}
 
 async function loadStimsAndTdfsFromPrivate(adminUserId) {
   if (!isProd) {
@@ -2184,10 +2206,9 @@ Meteor.methods({
 
   loadStimsAndTdfsFromPrivate, getListOfStimTags, getStudentReportingData,
 
-  insertHiddenItem, getHiddenItems, getUserLastFeedbackTypeFromHistory,
+  insertHiddenItem, getHiddenItems, getUserLastFeedbackTypeFromHistory, setUserLoginData,
 
-  getTdfIdByStimSetIdAndFileName, getItemsByFileName, addUserDueDateException, removeUserDueDateException, checkForUserException,
-
+  getTdfIdByStimSetIdAndFileName, getItemsByFileName, addUserDueDateException, removeUserDueDateException, checkForUserException, 
 
   makeGoogleTTSApiCall: async function(TDFId, message, audioPromptSpeakingRate, audioVolume, selectedVoice) {
     const ttsAPIKey = await getTdfTTSAPIKey(TDFId);
@@ -2474,32 +2495,6 @@ Meteor.methods({
     this.setUserId(userId);
   },
 
-  setUserEntryPoint: function(entryPoint){
-    console.log(Meteor.userId());
-    if(Meteor.userId()){
-      Meteor.users.update(Meteor.userId(), { $set: { 'profile.entryPoint': entryPoint }});
-    }
-  },
-
-  setLoginMode: function(loginMode){
-    console.log(Meteor.userId());
-    if(Meteor.userId()){
-      Meteor.users.update(Meteor.userId(), { $set: { 'profile.loginMode': loginMode }});
-    }
-  },
-
-  setUserLoginData: function(entryPoint, curTeacher, curClass){
-    console.log(Meteor.userId());
-    let query = { 
-      'profile.entryPoint': entryPoint,
-      'profile.curTeacher': curTeacher,
-      'profile.curClass': curClass,
-    };
-    if(Meteor.userId()){
-      Meteor.users.update(Meteor.userId(), { $set: query })
-    }
-  },
-
   clearLoginData: function(){
     let query = { 
       'profile.entryPoint': null, 
@@ -2685,36 +2680,32 @@ Meteor.methods({
     filesLength = DynamicAssets.find().fetch().length;
     return filesLength;
   },
-  deleteStimFile: async function(stimFilename) {
-    serverConsole('delete Stim File', stimFilename);
-    stimSet = await getStimuliSetByFilename(stimFilename);
-    stimSetId = stimSet[0].stimuliSetId;
-    const query1 = 'SELECT tdfid FROM tdf WHERE stimulisetid = $1';
-    tdfIds = TDFs.find({stimulisetid: stimSetId});
-    for(i=0; i < tdfIds.length; i++){
-        tdf = tdfIds[i].tdfid;
-        GlobalExperimentStates.remove({TDFId: tdf});
-        ComponentStates.remove({TDFId: tdf});
-        Assignments.remove({TDFId: tdf});
-        Histories.remove({TDFId: tdf});
+  deleteStimFile: async function(stimSetId) {
+    stimSetId = parseInt(stimSetId);
+    let tdfs = Tdfs.find({stimuliSetId: stimSetId}).fetch();
+    serverConsole(tdfs);
+    for(let tdf of tdfs) {
+      tdfId = tdf._id;
+      GlobalExperimentStates.remove({TDFId: tdfId});
+      ComponentStates.remove({TDFId: tdfId});
+      Assignments.remove({TDFId: tdfId});
+      Histories.remove({TDFId: tdfId});
     }
-    Items.remove({stimulusFileName: stimFilename});
-    Tdfs.remove({stimulisetid: stimSetId});
+    Items.remove({stimuliSetId: stimSetId});
+    Tdfs.remove({stimuliSetId: stimSetId});
+    Stims.remove({stimuliSetId: stimSetId});
     res = "Stim and related TDFS deleted.";
     return res;
   },
 
-  deleteTDFFile: async function(tdfFileName){
-    serverConsole("Remove TDF File:", tdfFileName);
-    const toRemove = await getTdfByFileName(tdfFileName);
-    serverConsole(toRemove);
-    if(toRemove.TDFId){
-      tdf = toRemove.TDFId;
-      ComponentStates.remove({TDFId: tdf});
-      Assignments.remove({TDFId: tdf});
-      Histories.remove({TDFId: tdf});
-      GlobalExperimentStates.remove({TDFId: tdf});
-      Tdfs.remove({TDFId: tdf});
+  deleteTDFFile: function(tdfId){
+    serverConsole("Remove TDF File:", tdfId);
+    if(tdfId){
+      ComponentStates.remove({TDFId: tdfId});
+      Assignments.remove({TDFId: tdfId});
+      Histories.remove({TDFId: tdfId});
+      GlobalExperimentStates.remove({TDFId: tdfId});
+      Tdfs.remove({_id: tdfId});
     } else {
       result = 'No matching tdf file found';
       return result;
@@ -2770,6 +2761,12 @@ Meteor.methods({
     return currentServerLoadIsTooHigh;
   },
 
+  downloadStimFile: function(stimuliSetId) {
+    let stims = Stims.find({'stimuliSetId': stimuliSetId}).fetch();
+    serverConsole(stims);
+    return stims;
+  },
+
   // Let client code send console output up to server
   debugLog: function(logtxt) {
     let usr = Meteor.user();
@@ -2781,6 +2778,11 @@ Meteor.methods({
     }
 
     serverConsole(usr + ' ' + logtxt);
+  },
+  
+
+  removeAssetById: function(assetId) {
+    DynamicAssets.remove({_id: assetId});
   },
 
   toggleTdfPresence: async function(tdfIds, mode) {
@@ -2989,7 +2991,7 @@ Meteor.startup(async function() {
     server = server.substring(0, server.length - 1);
     subject = `MoFaCTs Deployed on ${server}`;
     text = `The server has restarted.\nServer: ${server}\nVersion: ${JSON.stringify(version, null, 2)}`;
-    console.log(ownerEmail, ownerEmail, subject, text)
+    sendEmail(ownerEmail, ownerEmail, subject, text)
   }
 });
 
