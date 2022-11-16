@@ -2848,7 +2848,6 @@ Meteor.startup(async function() {
     serverConsole('***IMPORTANT*** There will be no owner for system TDF\'s');
   }
 
-
   // Get user in roles and make sure they are added
   const roles = getConfigProperty('initRoles');
   const roleAdd = function(memberName, roleName) {
