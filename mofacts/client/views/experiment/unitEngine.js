@@ -225,7 +225,7 @@ function defaultUnitEngine(curExperimentData) {
           while ( (result = regex.exec(currentQuestion)) ) {
             indecies.push(result.index);
           }
-          for(index in indecies){
+          for(let index of indecies){
             let answerBlanks = ""
             currentQuestion = currentQuestion.replaceAll("_","");
             for(i=0;i<currentStimAnswerWordCount;i++){
