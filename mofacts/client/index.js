@@ -167,11 +167,7 @@ Template.body.events({
     if (window.currentAudioObj) {
       window.currentAudioObj.pause();
     }
-    if(Meteor.user().profile.loginMode == 'southwest'){
-      Router.go('/profileSouthwest')
-    } else {
-      Router.go('/profile');
-    }
+    Router.go('/');
   },
 
   'click #progressButton': function(event) {

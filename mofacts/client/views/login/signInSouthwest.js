@@ -91,7 +91,7 @@ function testLogin() {
               Meteor.call('logUserAgentAndLoginTime', Meteor.userId(), navigator.userAgent);
               Meteor.call('updatePerformanceData', 'login', 'signinSouthwest.testLogin', Meteor.userId());
               Meteor.logoutOtherClients();
-              Router.go('/profileSouthwest');
+              Router.go('/profile');
             }
           });
         });
@@ -249,7 +249,7 @@ Template.signInSouthwest.events({
           Meteor.call('logUserAgentAndLoginTime', Meteor.userId(), navigator.userAgent);
           Meteor.call('updatePerformanceData', 'login', 'signinSouthwest.clickSamlLogin', Meteor.userId());
           Meteor.logoutOtherClients();
-          Router.go('/profileSouthwest');
+          Router.go('/profile');
         });
       }
     });
