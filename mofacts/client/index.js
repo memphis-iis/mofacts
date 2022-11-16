@@ -59,6 +59,12 @@ const options = {
 init(options);
 export {redoCardImage, meteorCallAsync};
 
+//select default stylesheet path in session variable if stylesheet session variable is not set
+if (!Session.get('stylesheet')) {
+  Session.set('stylesheet', '/styles/main.css');
+}
+
+
 const meteorCallAsync = Promise.promisify(Meteor.call);
 
 // function meteorCallAsync(funcName, ...rest) {
@@ -122,6 +128,9 @@ Meteor.startup(function() {
 });
 
 Template.body.onRendered(function() {
+  //load CSS file
+  const stylesheet = Session.get('stylesheet');
+  $('head').append('<link rel="stylesheet" href="' + stylesheet + '" type="text/css" />');  
   $('#errorReportingModal').on('hidden.bs.modal', function() {
     console.log('error reporting modal hidden');
     restartMainCardTimeoutIfNecessary();
