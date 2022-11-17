@@ -12,8 +12,8 @@ Template.contentGeneration.events({
   'click #submit-btn': function(event) {
     const inputText = $('#source-text').val();
     console.log('inputText: ' + inputText);
-    const inputTextArray = inputText.split(/\s*###\s*/gm)
-    const stringArrayJson = JSON.stringify(inputTextArray);
+    const inputTextArray = inputText.split(/\s*###\s*/gm) //split input on ###, with optional whitespace
+    const stringArrayJson = JSON.stringify(inputTextArray); 
     const compressionLevel = $('#compressionLevel').val();
     if(compressionLevel > .99 || compressionLevel < .01) {
       alert('Compression level must be between 0.01 and 0.99');
