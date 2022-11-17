@@ -2213,36 +2213,28 @@ Meteor.methods({
   generateContent: function( percentage, stringArrayJsonOption, inputText ) {
     if(Meteor.user() && Meteor.user().emails[0] || Meteor.isDevelopment){
       ClozeAPI.GetSelectClozePercentage(percentage, stringArrayJsonOption, null, inputText).then((result) => {
-        if(!Meteor.isDevelopment){
-          // return result to client via meteor
-          if(result.tag == 1) {
-            console.log(JSON.stringify(result.fields[0]));
-          } else {
-            console.log(JSON.stringify(result.fields[0]));
-            return result;
-          }
+        let message;
+        let subject;
+        let file;
+        if(result.tag == 1) {
+          message = "Cloze Error: " + result;
+          subject = "Could not generate stimulus.";
         } else {
-          if(result.tag == 1) {
-            let message = "Cloze Error: " + result;
-            Email.send({
-              to: Meteor.user().emails[0].address,
-              from: Meteor.settings.owner,
-              subject: "Cloze Error",
-              text: message
-            });
-          } else {
-            let message = "Cloze Generation Complete, your file is attached.";
-            const fileContents = JSON.stringify(result.fields[0]);
-            const fileContentsBuffer = Buffer.from(fileContents);
-            Email.send({
-              to: Meteor.user().emails[0].address,
-              from: Meteor.settings.owner,
-              subject: "Cloze Generation Complete",
-              text: message,
-              //attachments: [file]
-            });
+          message = "Cloze Generation Complete, your file is attached.";
+          subject = "Cloze Generation Complete";
+          file = {
+            filename: "cloze.json",
+            content: JSON.stringify(result.fields[0], null, 4),
+            contentType: 'application/json'
           }
         }
+        Email.send({
+          to: Meteor.user().emails[0].address,
+          from: Meteor.settings.owner,
+          subject: subject,
+          text: message,
+          attachments: [file]
+        });
       }).catch((err) => {
         console.log('err', err);
       });
