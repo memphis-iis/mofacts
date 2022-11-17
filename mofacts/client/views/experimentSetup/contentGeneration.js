@@ -19,6 +19,7 @@ Template.contentGeneration.events({
       alert('Compression level must be between 0.01 and 0.99');
     } else {
       Meteor.call('generateContent', compressionLevel, stringArrayJson, inputText);
+      alert(`Content generation has begun. An email will be sent too ${Meteor.user().emails[0].address} with your file when it is complete.`);
     }
   },
 });
