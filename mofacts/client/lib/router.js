@@ -464,12 +464,13 @@ Router.route('/card', {
     if(Meteor.user() && timeout){
       Meteor.clearTimeout(timeout);
       let trialEndTimeStamp = Session.get('trialEndTimeStamp');
+      let trialStartTimeStamp = Session.get('trialStartTimeStamp');
       let isTimeout = Session.get('isTimeout');
       let isCorrect = Session.get('isCorrect');
       let testType = Session.get('testType');
       let deliveryParams = Session.get('currentDeliveryParams');
       let answerLogRecord = Session.get('answerLogRecord');
-      afterFeedbackCallback(trialEndTimeStamp, isTimeout, isCorrect, testType, deliveryParams, answerLogRecord, 'router');
+      afterFeedbackCallback(trialEndTimeStamp, trialStartTimeStamp, isTimeout, isCorrect, testType, deliveryParams, answerLogRecord, 'router');
     }
   }
 });
