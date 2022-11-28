@@ -107,8 +107,7 @@ async function getTdfOwner(experiment, userId) {
   }
 
   // Find the TDF _id from the user log
-  const tdfId = userLogGetTdfId(userId, experiment);
-
+  const tdfId = await userLogGetTdfId(userId, experiment);
   // If no TDF ID then we can't continue
   if (!tdfId) {
     serverConsole('getTdfOwner for ', experiment, 'failed - no tdfId found');
@@ -346,7 +345,7 @@ Meteor.methods({
       };
 
       serverConsole('About to log email sched entry for Turk', JSON.stringify(schedLogEntry, null, 2));
-      writeUserLogEntries(experiment, schedLogEntry, workerUserId);
+      writeUserLogEntries(experiment, [schedLogEntry], workerUserId);
     }
 
     if (errmsg !== null) {
