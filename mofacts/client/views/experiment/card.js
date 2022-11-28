@@ -1601,6 +1601,7 @@ async function afterFeedbackCallback(trialEndTimeStamp, trialStartTimeStamp, isT
   Session.set('answerLogRecord', null);
   Session.set('engine', null);
   Session.set('CurTimeoutId', undefined);
+  Session.set('trialStartTimeStamp', undefined);
       
   let {responseDuration, startLatency, endLatency, feedbackLatency} = getTrialTime(trialEndTimeStamp, trialStartTimeStamp, reviewEnd, testType);
 
@@ -1631,9 +1632,9 @@ async function afterFeedbackCallback(trialEndTimeStamp, trialStartTimeStamp, isT
   if(Meteor.user().profile === undefined || !Meteor.user().profile.impersonating){
     try {
       answerLogRecord.responseDuration = responseDuration;
-      answerLogRecord.startLatency = startLatency;
-      answerLogRecord.endLatency = endLatency;
-      answerLogRecord.feedbackLatency = feedbackLatency;
+      answerLogRecord.CFStartLatency = startLatency;
+      answerLogRecord.CFEndLatency = endLatency;
+      answerLogRecord.CFFeedbackLatency = feedbackLatency;
       Meteor.call('insertHistory', answerLogRecord);
       updateExperimentStateSync(newExperimentState, 'card.afterAnswerFeedbackCallback');
     } catch (e) {
