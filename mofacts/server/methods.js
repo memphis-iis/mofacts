@@ -2233,6 +2233,18 @@ Meteor.methods({
     });
   },
   
+  setLockoutTimeStamp: async function(lockoutTimeStamp, lockoutMinutes, currentUnitNumber, TDFId) {
+    console.log(Meteor.userId())
+    const lockout = {
+      [`profile.lockouts.${TDFId}.lockoutTimeStamp`]: lockoutTimeStamp,
+      [`profile.lockouts.${TDFId}.lockoutMinutes`]: lockoutMinutes,
+      [`profile.lockouts.${TDFId}.currentLockoutUnit`]: currentUnitNumber
+    }
+    Meteor.users.update(Meteor.userId(), { 
+      $set: lockout
+    });
+  },
+
   makeGoogleSpeechAPICall: async function(TDFId, speechAPIKey = '', request, answerGrammar){
     console.log(request)
     if(speechAPIKey == ''){
