@@ -156,10 +156,6 @@ Template.profile.events({
     event.preventDefault();
     Router.go('/contentGeneration');
   },
-  'click #contentGenerationButton': function(event) {
-    event.preventDefault();
-    Router.go('/contentGeneration');
-  },
 
   'click #tdfPracticeBtn': function(event, instance) {
     const showTdfs = instance.showTdfs.get();

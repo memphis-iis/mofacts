@@ -2210,6 +2210,37 @@ Meteor.methods({
 
   getTdfIdByStimSetIdAndFileName, getItemsByFileName, addUserDueDateException, removeUserDueDateException, checkForUserException, 
 
+  generateContent: function( percentage, stringArrayJsonOption, inputText ) {
+    if(Meteor.user() && Meteor.user().emails[0] || Meteor.isDevelopment){
+      ClozeAPI.GetSelectClozePercentage(percentage, stringArrayJsonOption, null, inputText).then((result) => {
+        let message;
+        let subject;
+        let file;
+        if(result.tag == 1) {
+          message = "Cloze Error: " + result;
+          subject = "Could not generate stimulus.";
+        } else {
+          message = "Cloze Generation Complete, your file is attached.";
+          subject = "Cloze Generation Complete";
+          file = {
+            filename: "cloze.json",
+            content: JSON.stringify(result.fields[0], null, 4),
+            contentType: 'application/json'
+          }
+        }
+        Email.send({
+          to: Meteor.user().emails[0].address,
+          from: Meteor.settings.owner,
+          subject: subject,
+          text: message,
+          attachments: [file]
+        });
+      }).catch((err) => {
+        console.log('err', err);
+      });
+    }
+  },
+
   makeGoogleTTSApiCall: async function(TDFId, message, audioPromptSpeakingRate, audioVolume, selectedVoice) {
     const ttsAPIKey = await getTdfTTSAPIKey(TDFId);
     const request = JSON.stringify({

@@ -90,13 +90,7 @@
 
     <div class="row">
       <div class="col-md-5">
-        <h3>Either paste in source material and click "Submit"</h3>
-      </div>
-      <div class="col-md-1">
-        <center><h3><b>or</b></h3></center>
-      </div>
-      <div class="col-md-6">
-        <h3>Choose an existing file as a template</h3>
+        <h3>1. Paste text into the box below. Insert ### between sections</h3>
       </div>
     </div>
 
@@ -104,84 +98,27 @@
       <div class="col-md-5 form-group" id="textbox-div">
         <textarea class="form-control" id="source-text" placeholder="Paste source material here"></textarea>
       </div>
-      <div class="col-md-1"></div>
-      <div class="col-md-6">
-        <select id="templateTDFSelect">
-          <option value="invalid" disabled="true" selected="true">Select a template</option>
-          {{#each contentGenerationAllTdfs}}
-            <option value="{{this.tdfid}}">
-              {{this.displayName}} - {{tdfOwnersMap this.ownerId}} - {{this.displayDate}}
-            </option>
-          {{/each}}
-        </select>
+    </div>
+    
+    <div class="row">
+      <div class="col-md-5">
+        <h3>2. Select compression level</h3>
       </div>
     </div>
+    <div>
+      <input type="number" id="compressionLevel" name="compressionLevel" min="0.01" max=".99">
+    </div>
+    
+    <div class="row">
+      <div class="col-md-5">
+        <h3>3. Generate content.</h3>
+        <h5>Depending on the amount of text you have entered, this could take a while. Once the process starts it cannot be aborted.</h5> 
+      </div>
+    </div>
+
     <div class="row">
       <div class="col-md-5" id="submit-btn-div">
-        <button class="btn btn-primary" type="button" id="submit-btn"> Submit </button>
-      </div>
-      <div class="col-md-1"></div>
-      <div class="col-md-6">
-        <h3 id="fileTemplateLabel">Select a file template</h3>
+        <button class="btn btn-primary" type="button" id="submit-btn"> I understand, please proceed </button>
       </div>
     </div>
-
-    <div class="row">
-      <div class="col-md-12">
-        <h3>Reorder clozes</h3>
-        <div class="col-md-2"><button class="btn btn-primary sortingBtn" type="button" sortProperty="originalOrderIndex">Sort by original order</button></div>
-        <div class="col-md-2"><button class="btn btn-primary sortingBtn" type="button" sortProperty="sentenceWeight">Sort by sentence importance</button></div>
-        <div class="col-md-2"><button class="btn btn-primary sortingBtn" type="button" sortProperty="coreference">Sort by coreference</button></div>
-        <div class="col-md-2"><button class="btn btn-primary sortingBtn" type="button" sortProperty="paraphrase"> Sort by paraphrase</button></div>
-      </div>
-    </div>
-
-    <div class="row">
-      <div class="col-md-12" id="clozes-div">
-        {{#if clozesSelected}}
-          <a class="btn btn-default" id="delete-selected">Delete selected clozes</a>
-        {{/if}}
-        
-        <h3>Clozes</h3>
-
-        <div id="extracted-clozes">
-          {{#each clozes}}
-            <div id="cloze-display">
-              <input disabled type="checkbox" class="cloze-checkbox" id="select-delete" clusterKC="{{this.clusterKC}}" stimulusKC="{{this.stimulusKC}}" paraphrase-id="{{this.paraphraseId}}"/>
-              <div class="row" id="cloze" clusterKC="{{this.clusterKC}}" stimulusKC="{{this.stimulusKC}}" paraphrase-id="{{this.paraphraseId}}">
-                <ul class="ul-no-bullets">
-                  {{#if isCurrentPair this.clusterKC}}
-                    <li><span class="cur-sentence">Current Version: {{this.clozeStimulus}}</span></li>
-                  {{else}}
-                    <li><span>Current Version: {{this.clozeStimulus}}</span></li>
-                  {{/if}}
-                  <li><span>Original Version: {{this.originalVersion}}</span></li>
-                  <li>
-                    <span class="cloze-answers">Answer: {{this.correctResponse}},</span>
-                    <span>Sentence Weight: {{this.tags.sentenceWeight}},</span>
-                    <span>Has Coreference: {{convertBoolToYesNo this.isCoreference}},</span>
-                    <span>Has Paraphrase: {{convertBoolToYesNo this.isParaphrase}},</span>
-                    <input type="image" id="delete-btn" clusterKC="{{this.clusterKC}}" stimulusKC="{{this.stimulusKC}}" paraphrase-id="{{this.paraphraseId}}" src="images/trash.svg" />
-                    <input type="image" id="edit-btn" clusterKC="{{this.clusterKC}}" stimulusKC="{{this.stimulusKC}}" paraphrase-id="{{this.paraphraseId}}" src="images/edit.svg" />
-                    {{#if isCoreference this.paraphraseId}}
-                      <span class="col-md-2">
-                        {{#if isCorefReverted this.paraphraseId}}
-                        <button type="button" id="redoCoreference" class="btn btn-primary" clusterKC="{{this.clusterKC}}" stimulusKC="{{this.stimulusKC}}" paraphrase-id="{{this.paraphraseId}}">Redo coreference</button>
-                        {{else}}
-                        <button type="button" id="revertCoreference" class="btn btn-primary" clusterKC="{{this.clusterKC}}" stimulusKC="{{this.stimulusKC}}" paraphrase-id="{{this.paraphraseId}}">Revert to original</button>
-                        {{/if}}
-                      </span>
-                    {{/if}}
-                  </li>
-                </ul>
-              </div>
-            </div>
-          {{/each}}
-        </div>
-      </div>
-    </div>
-    <div class="row">
-      <div class="col-md-12" id="footer"><button class="btn btn-primary" type="button" id="save-btn">Save</button></div>
-    </div>
-  <!-- </div> -->
 </template>
