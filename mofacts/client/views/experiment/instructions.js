@@ -57,9 +57,28 @@ const logLockout = _.throttle(
 
 // Return current TDF unit's lockout minutes (or 0 if none-specified)
 function currLockOutMinutes() {
-  const lockoutminutes = parseInt(Session.get('currentDeliveryParams').lockoutminutes || 0);
-  logLockout(lockoutminutes);
-  return lockoutminutes;
+  const userLockout = Meteor.user()?.profile?.lockouts[Session.get('currentTdfId')];
+  if(Meteor.user() && userLockout && userLockout.currentLockoutUnit == Session.get('currentUnitNumber')){
+    // user has started the lockout previously
+    const lockoutTimeStamp = userLockout.lockoutTimeStamp;
+    const lockoutMinutes = userLockout.lockoutMinutes;
+    const lockoutTime = lockoutTimeStamp + lockoutMinutes*60*1000;
+    const currTime = new Date().getTime();
+    if(currTime < lockoutTime){
+      // lockout is still in effect
+      const newLockoutMinutes = Math.ceil((lockoutTime - currTime)/(60*1000));
+      logLockout(newLockoutMinutes);
+      return newLockoutMinutes;
+    }
+  } else {
+    // user has not started the lockout previously
+    const lockoutminutes = parseInt(Session.get('currentDeliveryParams').lockoutminutes || 0);
+    if(lockoutminutes > 0){
+      Meteor.call('setLockoutTimeStamp', new Date().getTime(), lockoutminutes, Session.get('currentUnitNumber'), Session.get('currentTdfId'));
+    }
+    logLockout(lockoutminutes);
+    return lockoutminutes;
+  }
 }
 
 function lockoutKick() {

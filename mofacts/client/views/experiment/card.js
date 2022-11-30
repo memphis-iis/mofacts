@@ -452,17 +452,17 @@ Template.card.events({
     handleUserForceCorrectInput(e, 'keypress');
   },
   'click #skipUnit': function() {
-    if(Roles.userIsInRole(Meteor.user(), ['admin', 'teacher'])){
+    if(Roles.userIsInRole(Meteor.user(), ['admin', 'teacher']) || Meteor.isDevelopment){
       unitIsFinished('Skipped by admin');
     }
   },
   'click #giveAnser': function() {
-    if(Roles.userIsInRole(Meteor.user(), ['admin',])){
+    if(Roles.userIsInRole(Meteor.user(), ['admin',]) || Meteor.isDevelopment){
       giveAnswer();
     }
   },
   'click #giveWrongAnser': function() {
-    if(Roles.userIsInRole(Meteor.user(), ['admin',])){
+    if(Roles.userIsInRole(Meteor.user(), ['admin',]) || Meteor.isDevelopment){
       giveWrongAnswer();
     }
   },
@@ -618,6 +618,8 @@ Template.card.helpers({
   'currentProgress': () => Session.get('questionIndex'),
 
   'displayReady': () => Session.get('displayReady'),
+
+  'isDevelopment': () => Meteor.isDevelopment,
 
   'displayReadyConverter': function(displayReady) {
     return displayReady ? '' : 'none';
