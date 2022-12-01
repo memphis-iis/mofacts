@@ -3142,10 +3142,15 @@ async function processUserTimesLog() {
       // we might need to stick with the instructions *IF AND ONLY IF* the
       // lockout period hasn't finished (which prepareCard won't handle)
       if (engine.unitFinished()) {
-        const lockoutMins = Session.get('currentDeliveryParams').lockoutminutes;
+        let lockoutMins = Session.get('currentDeliveryParams').lockoutminutes;
         if (lockoutMins > 0) {
-          const unitStartTimestamp = Session.get('currentUnitStartTime');
-          const lockoutFreeTime = unitStartTimestamp + (lockoutMins * (60 * 1000)); // minutes to ms
+          let unitStartTimestamp = Session.get('currentUnitStartTime');
+          if(Meteor.user().profile?.lockouts && Meteor.user().profile.lockouts[Session.get('currentTdfId')] && 
+          Meteor.user().profile.lockouts[Session.get('currentTdfId')].currentLockoutUnit == Session.get('currentUnitNumber')){
+            unitStartTimestamp = Meteor.user().profile.lockouts[Session.get('currentTdfId')].lockoutTimeStamp;
+            lockoutMins = Meteor.user().profile.lockouts[Session.get('currentTdfId')].lockoutMinutes;
+          }
+          lockoutFreeTime = unitStartTimestamp + (lockoutMins * (60 * 1000)); // minutes to ms
           if (Date.now() < lockoutFreeTime && (typeof curTdfUnit.unitinstructions !== 'undefined') ){
             console.log('RESUME FINISHED: showing lockout instructions');
             leavePage('/instructions');

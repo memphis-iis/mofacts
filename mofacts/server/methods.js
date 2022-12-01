@@ -23,6 +23,7 @@ export {
   serverConsole,
   decryptUserData,
   createAwsHmac,
+  getTdfByExperimentTarget
 };
 
 /* jshint sub:true*/
@@ -2234,7 +2235,7 @@ Meteor.methods({
   },
   
   setLockoutTimeStamp: async function(lockoutTimeStamp, lockoutMinutes, currentUnitNumber, TDFId) {
-    console.log(Meteor.userId())
+    serverConsole('setLockoutTimeStamp', lockoutTimeStamp, lockoutMinutes, currentUnitNumber, TDFId);
     const lockout = {
       [`profile.lockouts.${TDFId}.lockoutTimeStamp`]: lockoutTimeStamp,
       [`profile.lockouts.${TDFId}.lockoutMinutes`]: lockoutMinutes,
@@ -2246,7 +2247,7 @@ Meteor.methods({
   },
 
   makeGoogleSpeechAPICall: async function(TDFId, speechAPIKey = '', request, answerGrammar){
-    console.log(request)
+    serverConsole('makeGoogleSpeechAPICall', TDFId, speechAPIKey, request, answerGrammar);
     if(speechAPIKey == ''){
       speechAPIKey = await getTdfTTSAPIKey(TDFId);
     }
@@ -2961,11 +2962,11 @@ Meteor.startup(async function() {
 
   // Now check for messages to send every 5 minutes
   
-  if (Meteor.isProduction) {
+  if (true) { //Meteor.isProduction) {
     SyncedCron.add({
       name: 'Period Email Sent Check',
       schedule: function(parser) {
-        return parser.text('every 5 minutes');
+        return parser.text('every 1 minutes');
       },
       job: function() {
         return sendScheduledTurkMessages();
