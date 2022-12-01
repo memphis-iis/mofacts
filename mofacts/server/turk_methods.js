@@ -1,4 +1,4 @@
-import {getTdfById, getTdfByFileName, serverConsole} from './methods';
+import {getTdfById, getTdfByFileName, serverConsole, getTdfByExperimentTarget} from './methods';
 import {displayify} from '../common/globalHelpers';
 
 export {sendScheduledTurkMessages};
@@ -10,13 +10,12 @@ writeUserLogEntries = function(experimentId, objectsToLog, userId) {
   if (!userId) {
     throw new Meteor.Error('No valid user ID found for User Log Entry');
   }
-
-  // Create action object: should look like:
-  // { $push: { <experimentId>: { $each: <objectsToLog in array> } } }
+  if(!Array.isArray(objectsToLog))
+    objectsToLog = [objectsToLog];
   const action = {$push: {}};
   action['$push'][experimentId] = {$each: objectsToLog};
 
-  UserTimesLog.update( {_id: userId}, action, {upsert: true} );
+  UserTimesLog.update( {userId: userId}, action, {upsert: true} );
   logUserMetrics(userId, experimentId, objectsToLog);
 };
 
@@ -63,7 +62,7 @@ function logUserMetrics(userId, experimentKey, valsToCheck) {
 }
 // Given a user ID (_id) and an experiment, return the corresponding tdfId (_id)
 async function userLogGetTdfId(userid, experiment) {
-  const userLog = UserTimesLog.findOne({_id: userid});
+  const userLog = UserTimesLog.findOne({userId: userid});
   let entries = [];
   if (userLog && userLog[experiment] && userLog[experiment].length) {
     entries = userLog[experiment];
@@ -95,34 +94,15 @@ async function userLogGetTdfId(userid, experiment) {
 
 // Return the _id of the user record for the "owner" (or teacher) of the given
 // experiment name (TDF). This is mainly for knowing how to handle MTurk calls
-async function getTdfOwner(experiment, userId) {
-  if (!userId) {
-    const usr = Meteor.user();
-    userId = usr ? usr._id : null;
-  }
-  if (!userId) {
-    // No user currently logged in, so we can't figure out the current TDF
-    serverConsole('getTdfOwner for ', experiment, 'failed - no current user found');
-    return null;
-  }
-
-  // Find the TDF _id from the user log
-  const tdfId = await userLogGetTdfId(userId, experiment);
-  // If no TDF ID then we can't continue
-  if (!tdfId) {
-    serverConsole('getTdfOwner for ', experiment, 'failed - no tdfId found');
-    return null;
-  }
-
+async function getTdfOwner(experimentId) {
   // Now we can get the owner (either set on upload of TDF *OR* set on server
   // startup for TDF's that live in git)
-  const tdfBoxed = await getTdfById(tdfId);
-  const tdf = tdfBoxed.content;
-  if (!!tdf && typeof tdf.owner !== 'undefined') {
-    return tdf.owner;
+  const tdf = await getTdfById(experimentId);
+  if (!!tdf && typeof tdf.ownerId !== 'undefined') {
+    return tdf.ownerId;
   } else {
-    serverConsole('getTdfOwner for ', experiment, 'failed - TDF doesn\'t contain owner');
-    serverConsole(tdfId, tdf);
+    serverConsole('getTdfOwner for ', experimentId, 'failed - TDF doesn\'t contain owner');
+    serverConsole(tdf._id, tdf);
     return null;
   }
 }
@@ -158,7 +138,6 @@ async function sendScheduledTurkMessages() {
       if (!ownerProfile.have_aws_id || !ownerProfile.have_aws_secret) {
         throw new Error('Current user not set up for AWS/MTurk');
       }
-
       const ret = await turk.notifyWorker(ownerProfile, nextJob.requestParams);
       serverConsole('Completed scheduled job', nextJob._id);
       retval = _.extend({'passedParams': nextJob.requestParams}, ret);
@@ -278,47 +257,53 @@ Meteor.methods({
       workerUserId = usr._id;
       turkid = usr.username;
       if (!turkid) {
-        throw Meteor.Error('No valid username found');
+        throw new Meteor.Error('No valid username found');
       }
       turkid = _.trim(turkid).toUpperCase();
 
       ownerId = await getTdfOwner(experiment);
 
-      const ownerProfile = UserProfileData.findOne({_id: ownerId});
+      const ownerProfile = await UserProfileData.findOne({_id: ownerId});
       if (!ownerProfile) {
-        throw Meteor.Error('Could not find TDF owner profile for id \'' + ownerId + '\'');
+        throw new Meteor.Error('Could not find TDF owner profile for id \'' + ownerId + '\'');
       }
+      serverConsole('Found owner profile', ownerProfile);
       if (!ownerProfile.have_aws_id || !ownerProfile.have_aws_secret) {
-        throw Meteor.Error('Current TDF owner not set up for AWS/MTurk');
+        throw new Meteor.Error('Current TDF owner not set up for AWS/MTurk');
       }
 
-      subject = subject || _.trim('Message from ' + turkid + ' Profile Page');
-      const msgtext = 'The lock out period has ended - you may continue.\n\n' + msgbody;
-      jobName = 'Message for ' + experiment + ' to ' + turkid;
-      schedDate = new Date(lockoutend);
+      const previouslyScheduledMessage = await ScheduledTurkMessages.findOne({ workerUserId: workerUserId, experiment: experiment, scheduled: { $gt: Date.now() } });
+      if (!previouslyScheduledMessage) {
+        subject = subject || _.trim('Message from ' + turkid + ' Profile Page');
+        const msgtext = 'The lock out period has ended - you may continue.\n\n' + msgbody;
+        jobName = 'Message for ' + experiment + ' to ' + turkid;
+        schedDate = new Date(lockoutend);
 
-      // Pre-calculate our request parameters for send to that we can
-      // copy them to our schedule log entry
-      requestParams = {
-        'Subject': subject,
-        'MessageText': msgtext,
-        'WorkerId': turkid,
-      };
+        // Pre-calculate our request parameters for send to that we can
+        // copy them to our schedule log entry
+        requestParams = {
+          'Subject': subject,
+          'MessageText': msgtext,
+          'WorkerId': turkid,
+        };
 
-      serverConsole('Scheduling:', jobName, 'at', schedDate);
-      ScheduledTurkMessages.insert({
-        'sent': '',
-        'ownerId': ownerId,
-        'scheduled': schedDate.getTime(),
-        'ownerProfileId': ownerProfile._id,
-        'requestParams': requestParams,
-        'jobName': jobName,
-        'experiment': experiment,
-        'workerUserId': workerUserId,
-      });
+        serverConsole('Scheduling:', jobName, 'at', schedDate);
+        ScheduledTurkMessages.insert({
+          'sent': '',
+          'ownerId': ownerId,
+          'scheduled': schedDate.getTime(),
+          'ownerProfileId': ownerProfile._id,
+          'requestParams': requestParams,
+          'jobName': jobName,
+          'experiment': experiment,
+          'workerUserId': workerUserId
+        });
 
-      serverConsole('Scheduled Message scheduled for:', schedDate);
-      resultMsg = 'Message scheduled';
+        serverConsole('Scheduled Message scheduled for:', schedDate);
+        resultMsg = 'Message scheduled';
+      } else {
+        resultMsg = 'Message already scheduled';
+      }
     } catch (e) {
       serverConsole('Failure scheduling turk message at later date:', e);
       errmsg = {
@@ -396,7 +381,7 @@ Meteor.methods({
         throw new Error('No valid username found');
       }
 
-      if (ownerId != await getTdfOwner(experiment, workerUserId)) {
+      if (ownerId != await getTdfOwner(experiment)) {
         throw new Error('You are not the owner of that TDF');
       }
 
@@ -506,7 +491,7 @@ Meteor.methods({
         throw new Error('No valid username found');
       }
 
-      if (ownerId != await getTdfOwner(experiment, workerUserId)) {
+      if (ownerId != await getTdfOwner(experiment)) {
         throw new Error('You are not the owner of that TDF');
       }
 
@@ -519,7 +504,7 @@ Meteor.methods({
         throw new Error('Could not find the TDF for that user/experiment combination');
       }
 
-      const userLog = UserTimesLog.findOne({_id: workerUserId});
+      const userLog = UserTimesLog.findOne({userId: workerUserId});
       let userLogEntries = [];
       if (userLog && userLog[experiment] && userLog[experiment].length) {
         userLogEntries = userLog[experiment];
@@ -631,7 +616,7 @@ Meteor.methods({
       }
 
       const data = {
-        userid: entry._id,
+        userId: entry._id,
         username: userRec.username,
         turkpay: '?',
         turkpayDetails: 'No Details Found',
