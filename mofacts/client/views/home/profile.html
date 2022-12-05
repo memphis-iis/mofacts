@@ -125,13 +125,6 @@
                             data-ignoreOutOfGrammarResponses="{{this.ignoreOutOfGrammarResponses}}"
                             data-speechOutOfGrammarFeedback="{{this.speechOutOfGrammarFeedback}}"
                             data-isMultiTdf="{{this.isMultiTdf}}">{{this.name}}<br>
-                            {{#if isInRole 'admin'}}
-                                {{#if showTdfAdminInfo}}
-                                    <input type="checkbox" id="select-disable" uid="{{this.tdfid}}"/>
-                                    <p class="admin-info-p" id="tdf-src">src: {{this.source}}</p>
-                                    <p class="admin-info-p" id="tdf-owner">own: {{tdfOwnersMap this.ownerId}}</p>
-                                {{/if}}
-                            {{/if}}
                             {{#if this.enableAudioPromptAndFeedback}}
                                 <p style="display:inline-block" title="Audio Output available for this module"><span class="glyphicon glyphicon-headphones"></span></p>
                             {{/if}}
@@ -140,7 +133,13 @@
                                 <p style="display:inline-block" title="Speech Input available for this module"><i class="fa fa-microphone"></i></p>
                             {{/if}}
                             </button>
-
+                            {{#if isInRole 'admin'}}
+                                {{#if showTdfAdminInfo}}
+                                    <input type="checkbox" id="select-disable" name="tdf-toggle-checkbox" uid="{{this.tdfid}}"/>
+                                    <p class="admin-info-p" id="tdf-src">src: {{this.source}}</p>
+                                    <p class="admin-info-p" id="tdf-owner">own: {{tdfOwnersMap this.ownerId}}</p>
+                                {{/if}}
+                            {{/if}}
                         </div>
                     {{/each}}
                 {{/if}}
@@ -178,7 +177,7 @@
                             {{#each disabledTdfs}}
                                 <tr>
                                     <td>
-                                        <input type="checkbox" id="select-enable" uid="{{this.tdfid}}"/>
+                                        <input type="checkbox" id="select-enable" name="tdf-toggle-checkbox" uid="{{this.tdfid}}"/>
                                     </td>
                                     <td>{{this.name}}</td>
                                     <td>{{tdfOwnersMap this.ownerid}}</td>
