@@ -15,6 +15,8 @@ export {selectTdf};
 Template.profile.created = function() {
   this.showTdfs = new ReactiveVar(false);
   this.filteredTdfs = new ReactiveVar(false);
+  this.enabledTdfs = new ReactiveVar([]);
+  this.disabledTdfs = new ReactiveVar([]);
   this.tdfsToDisable = new ReactiveVar([]);
   this.tdfsToEnable = new ReactiveVar([]);
   this.showTdfAdminInfo = new ReactiveVar([]);
@@ -59,7 +61,7 @@ Template.profile.helpers({
     if (filteredTdfs) {
       return filteredTdfs;
     }
-    return Session.get('enabledTdfs') 
+    return Template.instance().enabledTdfs.get();
   },
 
   tdfTags: () => {
@@ -68,7 +70,7 @@ Template.profile.helpers({
 
 
   disabledTdfs: () => {
-    return Session.get('disabledTdfs')
+    return Template.instance().disabledTdfs.get();
   },
 
   showTdfAdminInfo: () => {
@@ -88,7 +90,7 @@ Template.profile.helpers({
 
 Template.profile.events({
   // Start a TDF
-  'click .tdfButton': function(event, instance) {
+  'click .tdfButton': function(event) {
     event.preventDefault();
     console.log(event);
     const target = $(event.currentTarget);
@@ -206,7 +208,7 @@ Template.profile.events({
   //if practiceTDFSearch is changed, filter enabled tdfs reactive var and set filteredtdfs reactive var to the filtered list
   'keyup #practiceTDFSearch': function(event, instance) {
     const search = event.target.value;
-    const enabledTdfs = Session.get('enabledTdfs');
+    const enabledTdfs = instance.enabledTdfs.get();
     //filter tdf based off of tdf.tdfs.setspec.tags array
     const filteredTdfs = enabledTdfs.filter((tdf) => {
       //check if tdf.tdfs.setspec.tags array exists and is not empty
@@ -240,8 +242,8 @@ function toggleTdfPresence(instance, mode) {
   } else {
     tdfsToChange = instance.tdfsToEnable.get();
   }
-  const en1 = Session.get('enabledTdfs');
-  const dis1 = Session.get('disabledTdfs');
+  const en1 = instance.enabledTdfs.get();
+  const dis1 = instance.disabledTdfs.get();
 
 
   console.log('toggleTdfPresence, mode: ', mode, tdfsToChange, en1, dis1, instance);
@@ -251,9 +253,9 @@ function toggleTdfPresence(instance, mode) {
   const tdfsToUpdate = [];
   let tdfsInOtherModeState = [];
   if (mode === DISABLED) {
-    tdfsInOtherModeState = Session.get('enabledTdfs');
+    tdfsInOtherModeState = instance.enabledTdfs.get();
   } else {
-    tdfsInOtherModeState = Session.get('disabledTdfs');
+    tdfsInOtherModeState = instance.disabledTdfs.get();
   }
 
   tdfsInOtherModeState.forEach((tdf) => {
@@ -266,16 +268,16 @@ function toggleTdfPresence(instance, mode) {
 
   let changedTdfs = [];
   if (mode === DISABLED) {
-    Session.set('enabledTdfs', remainingTdfs);
-    changedTdfs = Session.get('disabledTdfs');
+    instance.enabledTdfs.set(remainingTdfs);
+    changedTdfs = instance.disabledTdfs.get();
     const newlyChangedTdfs = changedTdfs.concat(tdfsToUpdate);
-    Session.set('disabledTdfs', newlyChangedTdfs);
+    instance.disabledTdfs.set(newlyChangedTdfs);
     instance.tdfsToDisable.set([]);
   } else {
-    Session.set('disabledTdfs', remainingTdfs);
-    changedTdfs = Session.get('enabledTdfs');
+    instance.disabledTdfs.set(remainingTdfs);
+    changedTdfs = instance.enabledTdfs.get();
     const newlyChangedTdfs = changedTdfs.concat(tdfsToUpdate);
-    Session.set('enabledTdfs', newlyChangedTdfs);
+    instance.enabledTdfs.set(newlyChangedTdfs);
     instance.tdfsToEnable.set([]);
   }
 
@@ -463,8 +465,8 @@ Template.profile.rendered = async function() {
       enabledTdfs.sort((a, b) => a.name.localeCompare(b.name, 'en', {numeric: true, sensitivity: 'base'}));
     }
 
-    Session.set('disabledTdfs', disabledTdfs);
-    Session.set('enabledTdfs', enabledTdfs);
+    this.disabledTdfs.set(disabledTdfs);
+    this.enabledTdfs.set(enabledTdfs);
   }
 
   if (isAdmin) {
