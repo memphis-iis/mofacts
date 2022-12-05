@@ -14,13 +14,12 @@ export {selectTdf};
  */
 Template.profile.created = function() {
   this.showTdfs = new ReactiveVar(false);
-  this.filteredTdfs = new ReactiveVar(false);
   this.enabledTdfs = new ReactiveVar([]);
+  this.filteredTdfs = new ReactiveVar(false);
   this.disabledTdfs = new ReactiveVar([]);
   this.tdfsToDisable = new ReactiveVar([]);
   this.tdfsToEnable = new ReactiveVar([]);
   this.showTdfAdminInfo = new ReactiveVar([]);
-  this.enableTdfSelection = new ReactiveVar([]);
   this.tdfOwnersMap = new ReactiveVar({});
   this.tdfTags = new ReactiveVar([]);
 };
@@ -93,6 +92,7 @@ Template.profile.events({
   'click .tdfButton': function(event) {
     event.preventDefault();
     console.log(event);
+
     const target = $(event.currentTarget);
     selectTdf(
         target.data('tdfid'),
