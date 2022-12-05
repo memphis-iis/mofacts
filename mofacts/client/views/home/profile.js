@@ -14,12 +14,11 @@ export {selectTdf};
  */
 Template.profile.created = function() {
   this.showTdfs = new ReactiveVar(false);
-  this.enabledTdfs = new ReactiveVar([]);
   this.filteredTdfs = new ReactiveVar(false);
-  this.disabledTdfs = new ReactiveVar([]);
   this.tdfsToDisable = new ReactiveVar([]);
   this.tdfsToEnable = new ReactiveVar([]);
   this.showTdfAdminInfo = new ReactiveVar([]);
+  this.enableTdfSelection = new ReactiveVar([]);
   this.tdfOwnersMap = new ReactiveVar({});
   this.tdfTags = new ReactiveVar([]);
 };
@@ -60,7 +59,7 @@ Template.profile.helpers({
     if (filteredTdfs) {
       return filteredTdfs;
     }
-    return Template.instance().enabledTdfs.get();
+    return Session.get('enabledTdfs') 
   },
 
   tdfTags: () => {
@@ -69,7 +68,7 @@ Template.profile.helpers({
 
 
   disabledTdfs: () => {
-    return Template.instance().disabledTdfs.get();
+    return Session.get('disabledTdfs')
   },
 
   showTdfAdminInfo: () => {
@@ -89,10 +88,9 @@ Template.profile.helpers({
 
 Template.profile.events({
   // Start a TDF
-  'click .tdfButton': function(event) {
+  'click .tdfButton': function(event, instance) {
     event.preventDefault();
     console.log(event);
-
     const target = $(event.currentTarget);
     selectTdf(
         target.data('tdfid'),
@@ -208,7 +206,7 @@ Template.profile.events({
   //if practiceTDFSearch is changed, filter enabled tdfs reactive var and set filteredtdfs reactive var to the filtered list
   'keyup #practiceTDFSearch': function(event, instance) {
     const search = event.target.value;
-    const enabledTdfs = instance.enabledTdfs.get();
+    const enabledTdfs = Session.get('enabledTdfs');
     //filter tdf based off of tdf.tdfs.setspec.tags array
     const filteredTdfs = enabledTdfs.filter((tdf) => {
       //check if tdf.tdfs.setspec.tags array exists and is not empty
@@ -242,45 +240,49 @@ function toggleTdfPresence(instance, mode) {
   } else {
     tdfsToChange = instance.tdfsToEnable.get();
   }
-  const en1 = instance.enabledTdfs.get();
-  const dis1 = instance.disabledTdfs.get();
+  const en1 = Session.get('enabledTdfs');
+  const dis1 = Session.get('disabledTdfs');
 
 
   console.log('toggleTdfPresence, mode: ', mode, tdfsToChange, en1, dis1, instance);
 
-  Meteor.call('toggleTdfPresence', tdfsToChange, mode, () =>{
-    const remainingTdfs = [];
-    const tdfsToUpdate = [];
-    let tdfsInOtherModeState = [];
-    if (mode === DISABLED) {
-      tdfsInOtherModeState = instance.enabledTdfs.get();
-    } else {
-      tdfsInOtherModeState = instance.disabledTdfs.get();
-    }
+  Meteor.call('toggleTdfPresence', tdfsToChange, mode);
+  const remainingTdfs = [];
+  const tdfsToUpdate = [];
+  let tdfsInOtherModeState = [];
+  if (mode === DISABLED) {
+    tdfsInOtherModeState = Session.get('enabledTdfs');
+  } else {
+    tdfsInOtherModeState = Session.get('disabledTdfs');
+  }
 
-    tdfsInOtherModeState.forEach((tdf) => {
-      if (!tdfsToChange.includes(tdf._id)) {
-        remainingTdfs.push(tdf);
-      } else {
-        tdfsToUpdate.push(tdf);
-      }
-    });
-
-    let changedTdfs = [];
-    if (mode === DISABLED) {
-      instance.enabledTdfs.set(remainingTdfs);
-      changedTdfs = instance.disabledTdfs.get();
-      const newlyChangedTdfs = changedTdfs.concat(tdfsToUpdate);
-      instance.disabledTdfs.set(newlyChangedTdfs);
-      instance.tdfsToDisable.set([]);
+  tdfsInOtherModeState.forEach((tdf) => {
+    if (!tdfsToChange.includes(tdf.tdfid)) {
+      remainingTdfs.push(tdf);
     } else {
-      instance.disabledTdfs.set(remainingTdfs);
-      changedTdfs = instance.enabledTdfs.get();
-      const newlyChangedTdfs = changedTdfs.concat(tdfsToUpdate);
-      instance.enabledTdfs.set(newlyChangedTdfs);
-      instance.tdfsToEnable.set([]);
+      tdfsToUpdate.push(tdf);
     }
   });
+
+  let changedTdfs = [];
+  if (mode === DISABLED) {
+    Session.set('enabledTdfs', remainingTdfs);
+    changedTdfs = Session.get('disabledTdfs');
+    const newlyChangedTdfs = changedTdfs.concat(tdfsToUpdate);
+    Session.set('disabledTdfs', newlyChangedTdfs);
+    instance.tdfsToDisable.set([]);
+  } else {
+    Session.set('disabledTdfs', remainingTdfs);
+    changedTdfs = Session.get('enabledTdfs');
+    const newlyChangedTdfs = changedTdfs.concat(tdfsToUpdate);
+    Session.set('enabledTdfs', newlyChangedTdfs);
+    instance.tdfsToEnable.set([]);
+  }
+
+  let checkboxes = document.getElementsByName('tdf-toggle-checkbox');
+  for (let checkbox of checkboxes) {
+      checkbox.checked = false;
+  }
 }
 
 // We'll use this in card.js if audio input is enabled and user has provided a
@@ -461,8 +463,8 @@ Template.profile.rendered = async function() {
       enabledTdfs.sort((a, b) => a.name.localeCompare(b.name, 'en', {numeric: true, sensitivity: 'base'}));
     }
 
-    this.disabledTdfs.set(disabledTdfs);
-    this.enabledTdfs.set(enabledTdfs);
+    Session.set('disabledTdfs', disabledTdfs);
+    Session.set('enabledTdfs', enabledTdfs);
   }
 
   if (isAdmin) {
