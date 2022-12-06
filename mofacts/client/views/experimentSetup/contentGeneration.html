@@ -1,93 +1,5 @@
 <template name="contentGeneration">
   <br><br>
-    <div id="edit-modal" class="modal fade">
-      <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-          <div class="modal-header">
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-            <h4 class="modal-title"><b>Edit</b></h4>
-          </div> <!-- .modal-header -->
-          <div class="modal-body">
-            <div class="row">
-              <div class="col-md-12 nav-box">
-                <b>Original Sentence:</b>
-              </div>
-            </div>
-            <div class="row">
-              <div class="col-md-12">
-                {{editingSentence}}
-              </div>
-            </div>
-            <div class="row">
-              <div class="col-md-4 nav-box">
-                <b><p>Previous cloze/response:</p></b>
-              </div>
-              <div class="col-md-4 nav-box">
-                <b><p>New cloze:</p></b>
-              </div>
-              <div class="col-md-4 nav-box">
-                <b><p>Correct Response:</p></b>
-              </div>
-            </div>
-            <div class="row flexContent">
-              <div class="col-md-4">
-                {{editingCloze}}&nbsp;/&nbsp;{{editingClozeResponse}}
-              </div>
-              <div class="col-md-4">
-                <textarea id="clozeTextEdit">{{editingCloze}}</textarea>
-              </div>
-              <div class="col-md-4">
-                <input id="clozeResponseEdit" type="text" />
-              </div>
-            </div>
-          </div>
-          <div class="modal-footer row">
-            <div class="col-md-3">
-              <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-            </div>
-            <div class="col-md-6"></div>
-            <div class="col-md-3">
-              <button type="button" id="editClozeSaveButton" class="btn btn-primary">Save changes</button>
-            </div>
-          </div> <!-- .modal-footer -->
-        </div> <!-- .modal-content -->
-      </div> <!-- .modal-dialog -->
-    </div> <!-- .modal -->
-
-    <div id="save-modal" class="modal fade">
-      <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-          <div class="modal-header">
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-            <h4 class="modal-title">Submit</h4>
-          </div> <!-- .modal-header -->
-          <div class="modal-body">
-            <div class="row">
-              <div class="col-md-6 nav-box">
-                <b>Display Name:</b>
-              </div>
-            </div>
-            <div class="row">
-              <div class="col-md-6">
-                <input type="text" id="tdfDisplayNameTextBox" placeholder="Enter a display name" />
-              </div>
-            </div>
-          </div>
-          <div class="modal-footer">
-            <div class="row">
-              <div class="col-md-3">
-                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-              </div>
-              <div class="col-md-6"></div>
-              <div class="col-md-3">
-                <button type="button" class="btn btn-primary" id="save-btn-final">Submit</button>
-              </div>
-            </div>
-          </div> <!-- .modal-footer -->
-        </div> <!-- .modal-content -->
-      </div> <!-- .modal-dialog -->
-    </div> <!-- .modal -->
-
     <div class="row">
       <div class="col-md-5">
         <h3>1. Paste text into the box below. Insert ### between sections</h3>
@@ -107,6 +19,15 @@
     </div>
     <div>
       <input type="number" id="compressionLevel" name="compressionLevel" min="0.01" max=".99">
+    </div>
+    
+    <div class="row">
+      <div class="col-md-5">
+        <h3>3. Input email</h3>
+      </div>
+    </div>
+    <div>
+      <input type="email" id="sendToEmail" name="sendToEmail">
     </div>
     
     <div class="row">
