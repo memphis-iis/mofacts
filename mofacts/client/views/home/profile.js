@@ -248,39 +248,43 @@ function toggleTdfPresence(instance, mode) {
 
   console.log('toggleTdfPresence, mode: ', mode, tdfsToChange, en1, dis1, instance);
 
-  Meteor.call('toggleTdfPresence', tdfsToChange, mode, () =>{
-    const remainingTdfs = [];
-    const tdfsToUpdate = [];
-    let tdfsInOtherModeState = [];
-    if (mode === DISABLED) {
-      tdfsInOtherModeState = instance.enabledTdfs.get();
-    } else {
-      tdfsInOtherModeState = instance.disabledTdfs.get();
-    }
+  Meteor.call('toggleTdfPresence', tdfsToChange, mode);
+  const remainingTdfs = [];
+  const tdfsToUpdate = [];
+  let tdfsInOtherModeState = [];
+  if (mode === DISABLED) {
+    tdfsInOtherModeState = instance.enabledTdfs.get();
+  } else {
+    tdfsInOtherModeState = instance.disabledTdfs.get();
+  }
 
-    tdfsInOtherModeState.forEach((tdf) => {
-      if (!tdfsToChange.includes(tdf._id)) {
-        remainingTdfs.push(tdf);
-      } else {
-        tdfsToUpdate.push(tdf);
-      }
-    });
-
-    let changedTdfs = [];
-    if (mode === DISABLED) {
-      instance.enabledTdfs.set(remainingTdfs);
-      changedTdfs = instance.disabledTdfs.get();
-      const newlyChangedTdfs = changedTdfs.concat(tdfsToUpdate);
-      instance.disabledTdfs.set(newlyChangedTdfs);
-      instance.tdfsToDisable.set([]);
+  tdfsInOtherModeState.forEach((tdf) => {
+    if (!tdfsToChange.includes(tdf.tdfid)) {
+      remainingTdfs.push(tdf);
     } else {
-      instance.disabledTdfs.set(remainingTdfs);
-      changedTdfs = instance.enabledTdfs.get();
-      const newlyChangedTdfs = changedTdfs.concat(tdfsToUpdate);
-      instance.enabledTdfs.set(newlyChangedTdfs);
-      instance.tdfsToEnable.set([]);
+      tdfsToUpdate.push(tdf);
     }
   });
+
+  let changedTdfs = [];
+  if (mode === DISABLED) {
+    instance.enabledTdfs.set(remainingTdfs);
+    changedTdfs = instance.disabledTdfs.get();
+    const newlyChangedTdfs = changedTdfs.concat(tdfsToUpdate);
+    instance.disabledTdfs.set(newlyChangedTdfs);
+    instance.tdfsToDisable.set([]);
+  } else {
+    instance.disabledTdfs.set(remainingTdfs);
+    changedTdfs = instance.enabledTdfs.get();
+    const newlyChangedTdfs = changedTdfs.concat(tdfsToUpdate);
+    instance.enabledTdfs.set(newlyChangedTdfs);
+    instance.tdfsToEnable.set([]);
+  }
+
+  let checkboxes = document.getElementsByName('tdf-toggle-checkbox');
+  for (let checkbox of checkboxes) {
+      checkbox.checked = false;
+  }
 }
 
 // We'll use this in card.js if audio input is enabled and user has provided a
