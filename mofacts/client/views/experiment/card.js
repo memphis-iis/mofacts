@@ -1467,7 +1467,11 @@ async function showUserFeedback(isCorrect, feedbackMessage, afterAnswerFeedbackC
             // If the count down is finished, end interval and clear CountdownTimer
             if (distance < 0) {
               Meteor.clearInterval(CountdownTimerInterval);
-              document.getElementById("CountdownTimer").innerHTML = "";
+              if(window.currentAudioObj) {
+                $('#CountdownTimer').text('Continuing after feedback...');
+              } else {
+                $('#CountdownTimer').text('');
+              }
               Session.set('CurIntervalId', undefined);
             }
           }, 100);
@@ -1597,7 +1601,6 @@ async function afterFeedbackCallback(trialEndTimeStamp, trialStartTimeStamp, isT
   Session.set('isTimeout', null);
   Session.set('isCorrect', null);
   Session.set('trialEndTimeStamp', null);
-  Session.set('testType', null);
   Session.set('answerLogRecord', null);
   Session.set('engine', null);
   Session.set('CurTimeoutId', undefined);
@@ -1665,11 +1668,21 @@ async function afterFeedbackCallback(trialEndTimeStamp, trialStartTimeStamp, isT
         return; // We are totally done
       }
     }
-    hideUserFeedback();
-    $('#userAnswer').val('');
-    Session.set('feedbackTimeoutEnds', Date.now())
-    prepareCard();
+    if(window.currentAudioObj) {
+      window.currentAudioObj.addEventListener('ended', async () => {
+        cardEnd();
+      });
+    } else {
+      cardEnd();
+    }
   }
+}
+
+async function cardEnd() {
+  hideUserFeedback();
+  $('#userAnswer').val('');
+  Session.set('feedbackTimeoutEnds', Date.now())
+  prepareCard();
 }
 
 function getReviewTimeout(testType, deliveryParams, isCorrect, dialogueHistory, isTimeout) {
@@ -2381,6 +2394,7 @@ function speakMessageIfAudioPromptFeedbackEnabled(msg, audioPromptSource) {
             }
             window.currentAudioObj = audioObj;
             window.currentAudioObj.addEventListener('ended', (event) => {
+              window.currentAudioObj = undefined;
               Session.set('recordingLocked', false);
               startRecording();
             });
