@@ -452,17 +452,17 @@ Template.card.events({
     handleUserForceCorrectInput(e, 'keypress');
   },
   'click #skipUnit': function() {
-    if(Roles.userIsInRole(Meteor.user(), ['admin', 'teacher']) || Meteor.isDevelopment){
+    if(Meteor.isDevelopment){
       unitIsFinished('Skipped by admin');
     }
   },
   'click #giveAnser': function() {
-    if(Roles.userIsInRole(Meteor.user(), ['admin',]) || Meteor.isDevelopment){
+    if(Meteor.isDevelopment){
       giveAnswer();
     }
   },
   'click #giveWrongAnser': function() {
-    if(Roles.userIsInRole(Meteor.user(), ['admin',]) || Meteor.isDevelopment){
+    if(Meteor.isDevelopment){
       giveWrongAnswer();
     }
   },
@@ -574,7 +574,7 @@ Template.card.helpers({
     const text = Session.get('currentDisplay') ? Session.get('currentDisplay').text : undefined;
     const subWordCloze = Session.get('clozeQuestionParts') ? Session.get('clozeQuestionParts') : undefined;
     let display = false;
-    if(typeof clozeText != "undefined" || clozeText != "" || typeof subWordCloze != "undefined" || subWordCloze != "" || typeof text != "undefined" || text != ""){
+    if((typeof clozeText != "undefined" && clozeText != "") || (typeof subWordCloze != "undefined" && subWordCloze != "") || (typeof text != "undefined" && text != "")){
       display = true;
     }
     return display;
