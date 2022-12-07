@@ -57,9 +57,29 @@ const logLockout = _.throttle(
 
 // Return current TDF unit's lockout minutes (or 0 if none-specified)
 function currLockOutMinutes() {
-  const lockoutminutes = parseInt(Session.get('currentDeliveryParams').lockoutminutes || 0);
-  logLockout(lockoutminutes);
-  return lockoutminutes;
+  if(Meteor.user() && Meteor.user().profile.lockouts && Meteor.user().profile.lockouts[Session.get('currentTdfId')] &&
+  Meteor.user().profile.lockouts[Session.get('currentTdfId')].currentLockoutUnit == Session.get('currentUnitNumber')){
+    // user has started the lockout previously
+    const userLockout = Meteor.user().profile.lockouts[Session.get('currentTdfId')];
+    const lockoutTimeStamp = userLockout.lockoutTimeStamp;
+    const lockoutMinutes = userLockout.lockoutMinutes;
+    const lockoutTime = lockoutTimeStamp + lockoutMinutes*60*1000;
+    const currTime = new Date().getTime();
+    if(currTime < lockoutTime){
+      // lockout is still in effect
+      const newLockoutMinutes = Math.ceil((lockoutTime - currTime)/(60*1000));
+      logLockout(newLockoutMinutes);
+      return newLockoutMinutes;
+    }
+  } else {
+    // user has not started the lockout previously
+    const lockoutminutes = parseInt(Session.get('currentDeliveryParams').lockoutminutes || 0);
+    if(lockoutminutes > 0){
+      Meteor.call('setLockoutTimeStamp', new Date().getTime(), lockoutminutes, Session.get('currentUnitNumber'), Session.get('currentTdfId'));
+    }
+    logLockout(lockoutminutes);
+    return lockoutminutes;
+  }
 }
 
 function lockoutKick() {
@@ -138,8 +158,8 @@ function lockoutPeriodicCheck() {
         // We're in experiment mode and locked out - if they should get a Turk email,
         // now is the time to let the server know we've shown a lockout msg
         const currUnit = Session.get('currentTdfUnit');
-        const turkemail = _.trim(_.safefirst(currUnit.turkemail));
-        const subject = _.trim(_.safefirst(currUnit.turkemailsubject));
+        const turkemail = _.trim(currUnit.turkemail);
+        const subject = _.trim(currUnit.turkemailsubject);
 
         if (!turkemail) {
           return; // No message to show
