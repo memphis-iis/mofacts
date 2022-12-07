@@ -16,16 +16,6 @@
             {{/if}}
         </div>
     {{else}}
-        {{#if isInRole 'teacher'}}
-            <button id='skipUnit' class='btn'>Skip Unit</button>
-        {{/if}}
-        {{#if isInRole 'admin'}}
-            <button id='skipUnit' class='btn'>Skip Unit</button>
-            <br><br>
-            <button id='giveAnser' class='btn'>Answer Correctly</button>
-            <br><br>
-            <button id='giveWrongAnser' class='btn'>Answer Incorrectly</button>
-        {{/if}}
         {{#if isDevelopment}}
             <button id='skipUnit' class='btn'>Skip Unit</button>
             <br><br>
