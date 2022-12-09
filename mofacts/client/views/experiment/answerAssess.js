@@ -313,7 +313,7 @@ async function checkAnswer(userAnswer, correctAnswer, originalAnswer, lfparamete
       matchText = 'Close enough to the correct answer \''+ dispAnswer + '\'.';
     } else if (match === 3) {
       isCorrect = true;
-      matchText = 'That sounds like the answer but you\'re writing it the wrong way'
+      matchText = 'That sounds like the answer but you\'re writing it the wrong way, the correct answer is \''+ dispAnswer + '\'.';
     } else {
       console.log('MATCH ERROR: something fails in our comparison');
       isCorrect = false;
