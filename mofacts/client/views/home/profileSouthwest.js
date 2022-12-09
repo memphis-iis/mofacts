@@ -44,7 +44,7 @@ Template.profileSouthwest.events({
 
 const addButton = function(btnObj, audioInputEnabled, enableAudioPromptAndFeedback) {
   console.log('ADD BUTTON CALLED: ' + JSON.stringify(btnObj));
-  let container = '<div class=\'col-xs-12 col-sm-12 col-md-3 col-lg-3 text-center\'><br></div>'
+  let container = '<div class=\'col-xs-12 col-sm-12 col-md-3 col-lg-3 text-center\'></div>'
   container = $(container).prepend(btnObj);
   $('#testButtonContainer').append(container);
 };

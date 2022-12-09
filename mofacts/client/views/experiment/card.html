@@ -16,10 +16,8 @@
             {{/if}}
         </div>
     {{else}}
-        {{#if isInRole 'admin,teacher'}}
+        {{#if isDevelopment}}
             <button id='skipUnit' class='btn'>Skip Unit</button>
-        {{/if}}
-        {{#if isInRole 'admin'}}
             <br><br>
             <button id='giveAnser' class='btn'>Answer Correctly</button>
             <br><br>
