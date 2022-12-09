@@ -167,11 +167,7 @@ Template.body.events({
     if (window.currentAudioObj) {
       window.currentAudioObj.pause();
     }
-    if(Meteor.user().profile.loginMode == 'southwest'){
-      Router.go('/profileSouthwest')
-    } else {
-      Router.go('/profile');
-    }
+    Router.go('/profile');
   },
 
   'click #progressButton': function(event) {
@@ -272,7 +268,7 @@ Template.registerHelper('currentScore', function() {
   return Session.get('currentScore');
 });
 Template.registerHelper('isNormal', function() {
-  return Meteor.user().profile.loginMode !== 'experiment';
+  return Session.get('loginMode') !== 'experiment';
 });
 Template.registerHelper('curStudentPerformance', function() {
   return Session.get('curStudentPerformance');

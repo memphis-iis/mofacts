@@ -224,7 +224,7 @@ import {serverConsole, decryptUserData, createAwsHmac} from './methods';
         'MessageText': requestParams.MessageText,
         'WorkerIds': [requestParams.WorkerId],
       };
-
+      serverConsole('Sending request to Mechanical Turk', req);
       client = getClient(userProfile);
 
       return client.notifyWorkers(req).promise().then(function(res) {

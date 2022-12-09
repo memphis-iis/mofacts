@@ -82,6 +82,7 @@ async function getValuesOfStimTagList(stimuliSet, itemId, tagList) {
 // for expName in datashop format. We do NOT terminate our records.
 // We return the number of records written
 async function createExperimentExport(expName, requestingUserId) {
+  const userIsAdmin = Roles.userIsInRole(requestingUserId, 'admin');
   const requestingUserName = Meteor.users.findOne({_id: requestingUserId}).username;
   let record = '';
   const header = {};
@@ -131,9 +132,8 @@ async function createExperimentExport(expName, requestingUserId) {
       try {
         const itemId = history.itemId;
         const teacherUserName = history.conditionTypeE?.split('/')[0];
-        const teacherId = history.teacherId;
         history = getHistory(history);
-        if(Roles.userIsInRole(requestingUserId, 'admin') || teacherUserName == requestingUserName || teacherId == requestingUserId){
+        if(userIsAdmin || tdf.ownerId == requestingUserId || teacherUserName == requestingUserName){
           const dynamicStimTagValues = await getValuesOfStimTagList(stims, itemId, listOfDynamicStimTags);
           for (const tag of Object.keys(dynamicStimTagValues)) {
             history["CF (" + tag + ")"] = dynamicStimTagValues[tag];
