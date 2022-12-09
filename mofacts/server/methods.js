@@ -59,6 +59,7 @@ const prefixLength = Meteor.settings.SymSpell.prefixLength ? parseInt(Meteor.set
 const symSpell = new SymSpell(maxEditDistance, prefixLength);
 serverConsole(Meteor.settings.frequencyDictionaryLocation)
 symSpell.loadDictionary(Meteor.settings.frequencyDictionaryLocation, 0, 1);
+symSpell.loadBigramDictionary(Meteor.settings.bigramDictionaryLocation, 0, 2);
 process.env.MAIL_URL = Meteor.settings.MAIL_URL;
 const adminUsers = Meteor.settings.initRoles.admins;
 const ownerEmail = Meteor.settings.owner;
@@ -2316,9 +2317,15 @@ Meteor.methods({
   },
 
   getSymSpellCorrection: async function(userAnswer, s2, maxEditDistance = 1) {
-    const verbosity = 2
-    let corrections = symSpell.lookup(userAnswer, verbosity, maxEditDistance);
-    let words = corrections.map( correction => correction.term );
+    serverConsole('getSymSpellCorrection', userAnswer, s2, maxEditDistance);
+    let corrections; 
+    if(userAnswer.split(' ').length == 1)
+      corrections = symSpell.lookup(userAnswer, 2, maxEditDistance);
+    else
+      corrections = symSpell.lookupCompound(userAnswer, maxEditDistance);
+    serverConsole(corrections)
+    
+    const words = corrections.map( correction => correction.term );
     for(let word of words){
       if(word.localeCompare(s2) === 0)
         return true;
