@@ -692,7 +692,11 @@ function GetClozables(da$$4) {
       clozable$$1[i$$15] = new Clozable(inputRecord.words, inputRecord.start, inputRecord.stop, inputRecord.trace, inputRecord.prob, tags$$1);
     }
 
-    return clozable$$1;
+    let arg00$$3;
+    arg00$$3 = (0, _Seq.filter)(function predicate$$9(c$$2) {
+      return !(0, _Array.equalsWith)(_Util.comparePrimitives, c$$2.words, ["."]);
+    }, clozable$$1);
+    return Array.from(arg00$$3);
   }, da$$4.sentences, Array);
 }
 
@@ -997,8 +1001,8 @@ function GetAllClozeForHumanEvaluation2021061121(nlpJsonOption$$3, stringArrayJs
           array$$34 = (0, _Array.map)(function mapping$$23(id$$3) {
             return _arg1$$6.fields[0].coreference.clusters[id$$3];
           }, sa$$4.cor.clusters, Array);
-          array$$35 = array$$34.filter(function predicate$$9(c$$2) {
-            return c$$2.length > 1;
+          array$$35 = array$$34.filter(function predicate$$10(c$$3) {
+            return c$$3.length > 1;
           });
           chainsLengthTwoOrMore = array$$35.length;
           const array$$36 = clozables$$3[i$$18];
@@ -1032,7 +1036,7 @@ function GetAllClozeForHumanEvaluation2021061121(nlpJsonOption$$3, stringArrayJs
 }
 
 function RemoveOverlappingClozables(clozables$$4) {
-  const clozablesOut = Array.from((clozables$$4.filter(function predicate$$10(cl$$3) {
+  const clozablesOut = Array.from((clozables$$4.filter(function predicate$$11(cl$$3) {
     return cl$$3.words.length < 4;
   })));
 
@@ -1100,7 +1104,7 @@ function MakeItemWithTranformations(sa$$5, cl$$4) {
   }, cl$$4.tags);
   paOption = (0, _List.tryHead)(list$$7);
   let tags$$2;
-  tags$$2 = (0, _List.filter)(function predicate$$11(_arg3$$1) {
+  tags$$2 = (0, _List.filter)(function predicate$$12(_arg3$$1) {
     switch (_arg3$$1.tag) {
       case 12:
       case 14:
@@ -1114,21 +1118,21 @@ function MakeItemWithTranformations(sa$$5, cl$$4) {
         }
     }
   }, cl$$4.tags);
-  var $target$$164, cr$$2, pa$$1;
+  var $target$$167, cr$$2, pa$$1;
 
   if (crOption$$2 != null) {
     if (paOption != null) {
-      $target$$164 = 0;
+      $target$$167 = 0;
       cr$$2 = crOption$$2;
       pa$$1 = paOption;
     } else {
-      $target$$164 = 1;
+      $target$$167 = 1;
     }
   } else {
-    $target$$164 = 1;
+    $target$$167 = 1;
   }
 
-  switch ($target$$164) {
+  switch ($target$$167) {
     case 0:
       {
         const paItem = (0, _RegExp.replace)(pa$$1, "\\b" + cloze$$4 + "\\b", blank);
@@ -1235,11 +1239,11 @@ function GetAcronymMap(input$$9) {
         const pattern = " ";
         words$$1 = (0, _AllenNLP.Split)(pattern, input$$10);
         let firstLetterString;
-        let arg00$$4;
-        arg00$$4 = (0, _Array.map)(function mapping$$26(w) {
+        let arg00$$5;
+        arg00$$5 = (0, _Array.map)(function mapping$$26(w) {
           return w[0];
         }, words$$1, Array);
-        firstLetterString = arg00$$4.join("");
+        firstLetterString = arg00$$5.join("");
         const letterRegex = (0, _RegExp.create)(acronym);
         const lm = (0, _RegExp.match)(letterRegex, firstLetterString.toLocaleUpperCase());
 
@@ -1313,7 +1317,7 @@ function GetSelectCloze(nlpJsonOption$$4, sentenceCountOption, itemCountOption, 
         array$$42 = (0, _Array.mapIndexed)(function mapping$$28(i$$19, s$$1) {
           return [s$$1, _arg1$$8.fields[0].clozables[i$$19]];
         }, _arg1$$8.fields[0].sentences, Array);
-        array$$43 = array$$42.filter(function predicate$$12(tupledArg$$10) {
+        array$$43 = array$$42.filter(function predicate$$13(tupledArg$$10) {
           let value$$15;
           value$$15 = (0, _RegExp.isMatch)(badSentenceRegex, tupledArg$$10[0].sen);
           return !value$$15;
@@ -1322,33 +1326,33 @@ function GetSelectCloze(nlpJsonOption$$4, sentenceCountOption, itemCountOption, 
           return [tupledArg$$11[0], (RemoveOverlappingClozables(tupledArg$$11[1]))];
         }, array$$43, Array);
         array$$46 = (0, _Array.map)(function mapping$$30(tupledArg$$12) {
-          return [tupledArg$$12[0], (tupledArg$$12[1].filter(function predicate$$13(cl$$7) {
+          return [tupledArg$$12[0], (tupledArg$$12[1].filter(function predicate$$14(cl$$7) {
             return cl$$7.words.length < 4;
           }))];
         }, array$$45, Array);
-        array$$48 = array$$46.filter(function predicate$$14(tupledArg$$13) {
+        array$$48 = array$$46.filter(function predicate$$15(tupledArg$$13) {
           return tupledArg$$13[1].length > 0;
         });
         array$$49 = (0, _Array.map)(function mapping$$31(tupledArg$$14) {
           return [tupledArg$$14[0], ((0, _Array.distinctBy)(function projection$$6(cl$$9) {
             return cl$$9.words;
           }, tupledArg$$14[1], {
-            Equals($x$$35, $y$$36) {
-              return (0, _Array.equalsWith)(_Util.comparePrimitives, $x$$35, $y$$36);
+            Equals($x$$37, $y$$38) {
+              return (0, _Array.equalsWith)(_Util.comparePrimitives, $x$$37, $y$$38);
             },
 
             GetHashCode: _Util.structuralHash
           }))];
         }, array$$48, Array);
         list$$9 = (0, _Array.toList)(array$$49);
-        patternInput$$1 = (0, _List.partition)(function predicate$$16(tupledArg$$15) {
+        patternInput$$1 = (0, _List.partition)(function predicate$$17(tupledArg$$15) {
           let chainsLengthTwoOrMore$$1;
           let array$$51;
           array$$51 = (0, _Array.map)(function mapping$$32(id$$4) {
             return _arg1$$8.fields[0].coreference.clusters[id$$4];
           }, tupledArg$$15[0].cor.clusters, Array);
-          chainsLengthTwoOrMore$$1 = array$$51.filter(function predicate$$15(c$$3) {
-            return c$$3.length > 1;
+          chainsLengthTwoOrMore$$1 = array$$51.filter(function predicate$$16(c$$4) {
+            return c$$4.length > 1;
           });
           return chainsLengthTwoOrMore$$1.length > 2;
         }, list$$9);
@@ -1400,8 +1404,8 @@ function GetSelectCloze(nlpJsonOption$$4, sentenceCountOption, itemCountOption, 
         let list$$20;
         let list$$19;
         list$$19 = (0, _List.collect)(function mapping$$35(tupledArg$$21) {
-          return (0, _List.map)(function mapping$$34(c$$4) {
-            return [tupledArg$$21[0], c$$4];
+          return (0, _List.map)(function mapping$$34(c$$5) {
+            return [tupledArg$$21[0], c$$5];
           }, tupledArg$$21[2]);
         }, clozeProbTuples);
         list$$20 = (0, _List.sortBy)(function projection$$12(tupledArg$$22) {
@@ -1418,8 +1422,8 @@ function GetSelectCloze(nlpJsonOption$$4, sentenceCountOption, itemCountOption, 
           GetHashCode: _Util.structuralHash
         });
         restClozableMap = (0, _Map.ofList)(elements$$4, {
-          Compare($x$$53, $y$$54) {
-            return $x$$53.CompareTo($y$$54);
+          Compare($x$$55, $y$$56) {
+            return $x$$55.CompareTo($y$$56);
           }
 
         });
@@ -1441,8 +1445,8 @@ function GetSelectCloze(nlpJsonOption$$4, sentenceCountOption, itemCountOption, 
           return [tupledArg$$23[0], new _Types.List(tupledArg$$23[1], cl$$12)];
         }, clozeProbTuples);
         allClozableMap = (0, _Map.ofList)(elements$$5, {
-          Compare($x$$55, $y$$56) {
-            return $x$$55.CompareTo($y$$56);
+          Compare($x$$57, $y$$58) {
+            return $x$$57.CompareTo($y$$58);
           }
 
         });
@@ -1472,8 +1476,8 @@ function GetSelectCloze(nlpJsonOption$$4, sentenceCountOption, itemCountOption, 
           return x$$7;
         }, array$$59, Array);
         importantClozeMap = (0, _Map.ofArray)(elements$$6, {
-          Compare($x$$59, $y$$60) {
-            return $x$$59.CompareTo($y$$60);
+          Compare($x$$61, $y$$62) {
+            return $x$$61.CompareTo($y$$62);
           }
 
         });
@@ -1594,9 +1598,9 @@ function GetSelectClozePercentage(percentage$$1, stringArrayJsonOption$$5, nlpJs
 
 function DoSimpleComputation(input$$14) {
   let strings$$21;
-  let source$$30;
-  const source$$29 = input$$14.split("");
-  source$$30 = (0, _Seq.reverse)(source$$29);
-  strings$$21 = source$$30;
+  let source$$31;
+  const source$$30 = input$$14.split("");
+  source$$31 = (0, _Seq.reverse)(source$$30);
+  strings$$21 = source$$31;
   return (0, _String.join)("", strings$$21);
 }

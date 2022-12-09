@@ -16,7 +16,6 @@ import {secsIntervalString, displayify, stringifyIfExists} from '../../../common
 import {routeToSignin} from '../../lib/router';
 import {createScheduleUnit, createModelUnit, createEmptyUnit} from './unitEngine';
 import {Answers} from './answerAssess';
-import {VAD} from '../../lib/vad';
 import {sessionCleanUp} from '../../lib/sessionUtils';
 
 export {
@@ -28,6 +27,7 @@ export {
   updateExperimentStateSync,
   restartMainCardTimeoutIfNecessary,
   getCurrentClusterAndStimIndices,
+  afterFeedbackCallback,
 };
 
 /*
@@ -115,6 +115,7 @@ turn it on, you need to set <showhistory>true</showhistory> in the
 // Global variables and helper functions for them
 
 let engine = null; // The unit engine for display (i.e. model or schedule)
+const hark = require('../../lib/hark');
 Session.set('buttonList', []);
 const scrollList = new Mongo.Collection(null); // local-only - no database
 Session.set('scrollListCount', 0);
@@ -338,7 +339,7 @@ function varLenDisplayTimeout() {
 // Clean up things if we navigate away from this page
 function leavePage(dest) {
   console.log('leaving page for dest: ' + dest);
-  if (dest != '/card' && dest != '/instructions' && dest != '/voice' && document.location.pathname != '/instructions') {
+  if (dest != '/card' && dest != '/instructions' && document.location.pathname != '/instructions') {
     console.log('resetting subtdfindex, dest: ' + dest);
     Session.set('subTdfIndex', null);
     sessionCleanUp();
@@ -393,7 +394,6 @@ Template.card.rendered = async function() {
   }
   //Gets the list of hidden items from the db on load of card. 
   Session.set('hiddenItems', await meteorCallAsync('getHiddenItems', Meteor.userId(), Session.get('currentTdfId')));
-  const audioInputDetectionInitialized = Session.get('VADInitialized');
 
   window.AudioContext = window.webkitAudioContext || window.AudioContext;
   window.URL = window.URL || window.webkitURL;
@@ -404,7 +404,7 @@ Template.card.rendered = async function() {
   // If user has enabled audio input initialize web audio (this takes a bit)
   // (this will eventually call cardStart after we redirect through the voice
   // interstitial and get back here again)
-  if (audioInputEnabled && !audioInputDetectionInitialized) {
+  if (audioInputEnabled) {
     initializeAudio();
   } else {
     cardStart();
@@ -426,7 +426,7 @@ Template.card.events({
     if(!Session.get('wasReportedForRemoval'))
       removeCardByUser();
       Session.set('wasReportedForRemoval', true)
-      afterAnswerFeedbackCallback(Date.now(), 'removal', "", false, false);
+      afterAnswerFeedbackCallback(Date.now(), trialStartTimestamp, 'removal', "", false, false);
   },
 
   'click #dialogueIntroExit': function() {
@@ -452,17 +452,17 @@ Template.card.events({
     handleUserForceCorrectInput(e, 'keypress');
   },
   'click #skipUnit': function() {
-    if(Roles.userIsInRole(Meteor.user(), ['admin', 'teacher'])){
+    if(Meteor.isDevelopment){
       unitIsFinished('Skipped by admin');
     }
   },
   'click #giveAnser': function() {
-    if(Roles.userIsInRole(Meteor.user(), ['admin',])){
+    if(Meteor.isDevelopment){
       giveAnswer();
     }
   },
   'click #giveWrongAnser': function() {
-    if(Roles.userIsInRole(Meteor.user(), ['admin',])){
+    if(Meteor.isDevelopment){
       giveWrongAnswer();
     }
   },
@@ -544,9 +544,9 @@ Template.card.helpers({
     }
   },
 
-  'interTrialMessage': () => getCurrentDeliveryParams().intertrialmessage,
+  'interTrialMessage': () => Session.get('currentDeliveryParams').intertrialmessage,
 
-  'displayFeedback': () => Session.get('displayFeedback') && getCurrentDeliveryParams().allowFeedbackTypeSelect,
+  'displayFeedback': () => Session.get('displayFeedback') && Session.get('currentDeliveryParams').allowFeedbackTypeSelect,
 
   'resetFeedbackSettingsFromIndex': () => Session.get('resetFeedbackSettingsFromIndex'),
 
@@ -574,7 +574,7 @@ Template.card.helpers({
     const text = Session.get('currentDisplay') ? Session.get('currentDisplay').text : undefined;
     const subWordCloze = Session.get('clozeQuestionParts') ? Session.get('clozeQuestionParts') : undefined;
     let display = false;
-    if(typeof clozeText != "undefined" || clozeText != "" || typeof subWordCloze != "undefined" || subWordCloze != "" || typeof text != "undefined" || text != ""){
+    if((typeof clozeText != "undefined" && clozeText != "") || (typeof subWordCloze != "undefined" && subWordCloze != "") || (typeof text != "undefined" && text != "")){
       display = true;
     }
     return display;
@@ -618,6 +618,8 @@ Template.card.helpers({
   'currentProgress': () => Session.get('questionIndex'),
 
   'displayReady': () => Session.get('displayReady'),
+
+  'isDevelopment': () => Meteor.isDevelopment,
 
   'displayReadyConverter': function(displayReady) {
     return displayReady ? '' : 'none';
@@ -760,7 +762,7 @@ Template.card.helpers({
 
   'dialogueCacheHint': () => Session.get('dialogueCacheHint'),
 
-  'questionIsRemovable': () => Session.get('numVisibleCards') > 3 && getCurrentDeliveryParams().allowstimulusdropping,
+  'questionIsRemovable': () => Session.get('numVisibleCards') > 3 && Session.get('currentDeliveryParams').allowstimulusdropping,
 
   'debugParms': () => Session.get('debugParms'),
 
@@ -817,7 +819,6 @@ function clearAudioContextAndRelatedVariables() {
   streamSource = null;
   Meteor.clearInterval(pollMediaDevicesInterval);
   pollMediaDevicesInterval = null;
-  Session.get('VADInitialized', false);
 }
 
 function reinitializeMediaDueToDeviceChange() {
@@ -1234,7 +1235,7 @@ function handleUserInput(e, source, simAnswerCorrect) {
 
   const trialEndTimeStamp = Date.now();
   const afterAnswerFeedbackCallbackWithEndTime = afterAnswerFeedbackCallback.bind(null,
-      trialEndTimeStamp, source, userAnswer);
+    trialEndTimeStamp, trialStartTimestamp, source, userAnswer);
 
   // Show user feedback and find out if they answered correctly
   // Note that userAnswerFeedback will display text and/or media - it is
@@ -1388,7 +1389,7 @@ function afterAnswerAssessmentCb(userAnswer, isCorrect, feedbackForAnswer, after
 
   const afterAnswerFeedbackCbBound = afterAnswerFeedbackCb.bind(null, isCorrect);
 
-  const currentDeliveryParams = getCurrentDeliveryParams();
+  const currentDeliveryParams = Session.get('currentDeliveryParams')
   if (currentDeliveryParams.scoringEnabled) {
     // Note that we track the score in the user progress object, but we
     // copy it to the Session object for template updates
@@ -1468,7 +1469,11 @@ async function showUserFeedback(isCorrect, feedbackMessage, afterAnswerFeedbackC
             // If the count down is finished, end interval and clear CountdownTimer
             if (distance < 0) {
               Meteor.clearInterval(CountdownTimerInterval);
-              document.getElementById("CountdownTimer").innerHTML = "";
+              if(window.currentAudioObj) {
+                $('#CountdownTimer').text('Continuing after feedback...');
+              } else {
+                $('#CountdownTimer').text('');
+              }
               Session.set('CurIntervalId', undefined);
             }
           }, 100);
@@ -1549,14 +1554,13 @@ async function giveWrongAnswer(){
   }
 }
 
-async function afterAnswerFeedbackCallback(trialEndTimeStamp, source, userAnswer, isTimeout, isCorrect) {
+async function afterAnswerFeedbackCallback(trialEndTimeStamp, trialStartTimeStamp, source, userAnswer, isTimeout, isCorrect) {
   Session.set('showDialogueText', false);
   //if the user presses the removal button after answering we need to shortcut the timeout
   const wasReportedForRemoval = source == 'removal';
-  Session.set("reviewTimeoutCompletedFirst", false);
 
   const testType = getTestType();
-  const deliveryParams = Session.get('currentDeliveryParams');
+  const deliveryParams = Session.get('currentDeliveryParams')
 
   let dialogueHistory;
   if (Session.get('dialogueHistory')) {
@@ -1568,42 +1572,85 @@ async function afterAnswerFeedbackCallback(trialEndTimeStamp, source, userAnswer
   clearCardTimeout();
 
   Session.set('feedbackTimeoutBegins', Date.now())
+  const answerLogRecord = gatherAnswerLogRecord(trialEndTimeStamp, trialStartTimeStamp, source, userAnswer, isCorrect,
+      testType, deliveryParams, dialogueHistory, wasReportedForRemoval);
+
+  Session.set('answerLogRecord', answerLogRecord);
+  Session.set('engine', engine);
+  Session.set('trialEndTimeStamp', trialEndTimeStamp);
+  Session.set('testType', testType);
+  Session.set('isCorrect', isCorrect);
+  Session.set('isTimeout', isTimeout);
+  Session.set('trialStartTimeStamp', trialStartTimeStamp);
+  const afterFeedbackCallbackBind = afterFeedbackCallback.bind(null, trialEndTimeStamp, trialStartTimeStamp, isTimeout, isCorrect, testType, deliveryParams, answerLogRecord, 'card')
   const timeout = Meteor.setTimeout(async function() {
-    Session.set('CurTimeoutId', undefined);
-    let reviewEnd = Date.now();
-    const answerLogRecord = gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect,
-        reviewEnd, testType, deliveryParams, dialogueHistory, wasReportedForRemoval);
+    afterFeedbackCallbackBind()
+  }, reviewTimeout)
+  Session.set('CurTimeoutId', timeout)
+
+  if(Session.get('unitType') == "model")
+    engine.calculateIndices().then(function(res, err) {
+      Session.set('engineIndices', res );
+    })
+  else
+    Session.set('engineIndices', undefined);
+}
+
+async function afterFeedbackCallback(trialEndTimeStamp, trialStartTimeStamp, isTimeout, isCorrect, testType, deliveryParams, answerLogRecord, callLocation) {
+  Session.set('CurTimeoutId', null)
+  const userLeavingTrial = callLocation != 'card';
+  let reviewEnd = Date.now();
+  Session.set('isTimeout', null);
+  Session.set('isCorrect', null);
+  Session.set('trialEndTimeStamp', null);
+  Session.set('answerLogRecord', null);
+  Session.set('engine', null);
+  Session.set('CurTimeoutId', undefined);
+  Session.set('trialStartTimeStamp', undefined);
+      
+  let {responseDuration, startLatency, endLatency, feedbackLatency} = getTrialTime(trialEndTimeStamp, trialStartTimeStamp, reviewEnd, testType);
+
+  const answerLogAction = isTimeout ? '[timeout]' : 'answer';
+  //if dialogueStart is set that means the user went through interactive dialogue
+  Session.set('dialogueTotalTime', undefined);
+  Session.set('dialogueHistory', undefined);
+  const newExperimentState = {
+    lastAction: answerLogAction,
+    lastActionTimeStamp: Date.now(),
+  };
   
-    // Give unit engine a chance to update any necessary stats
-    const practiceTime = answerLogRecord.CFEndLatency + answerLogRecord.CFFeedbackLatency;
+  if (testType !== 'i') {
+    const overallOutcomeHistory = Session.get('overallOutcomeHistory');
+    overallOutcomeHistory.push(isCorrect ? 1 : 0);
+    newExperimentState.overallOutcomeHistory = overallOutcomeHistory;
+    Session.set('overallOutcomeHistory', overallOutcomeHistory);
+  }
+
+  // Give unit engine a chance to update any necessary stats
+  const practiceTime = endLatency + feedbackLatency;
+  if(userLeavingTrial){
+    engine.cardAnswered(isCorrect, practiceTime);
+  } else {
     await engine.cardAnswered(isCorrect, practiceTime);
-    const answerLogAction = isTimeout ? '[timeout]' : 'answer';
-    //if dialogueStart is set that means the user went through interactive dialogue
-    Session.set('dialogueTotalTime', undefined);
-    Session.set('dialogueHistory', undefined);
-    const newExperimentState = {
-      lastAction: answerLogAction,
-      lastActionTimeStamp: Date.now(),
-    };
-    if (getTestType() !== 'i') {
-      const overallOutcomeHistory = Session.get('overallOutcomeHistory');
-      overallOutcomeHistory.push(isCorrect ? 1 : 0);
-      newExperimentState.overallOutcomeHistory = overallOutcomeHistory;
-      Session.set('overallOutcomeHistory', overallOutcomeHistory);
+  }
+  console.log('writing answerLogRecord to history:', answerLogRecord);
+  if(Meteor.user().profile === undefined || !Meteor.user().profile.impersonating){
+    try {
+      answerLogRecord.responseDuration = responseDuration;
+      answerLogRecord.CFStartLatency = startLatency;
+      answerLogRecord.CFEndLatency = endLatency;
+      answerLogRecord.CFFeedbackLatency = feedbackLatency;
+      Meteor.call('insertHistory', answerLogRecord);
+      updateExperimentStateSync(newExperimentState, 'card.afterAnswerFeedbackCallback');
+    } catch (e) {
+      console.log('error writing history record:', e);
+      throw new Error('error inserting history/updating state:', e);
     }
-    console.log('writing answerLogRecord to history:', answerLogRecord);
-    if(Meteor.user().profile === undefined || !Meteor.user().profile.impersonating){
-      try {
-        await meteorCallAsync('insertHistory', answerLogRecord);
-        updateExperimentStateSync(newExperimentState, 'card.afterAnswerFeedbackCallback');
-      } catch (e) {
-        console.log('error writing history record:', e);
-        throw new Error('error inserting history/updating state:', e);
-      }
-    } else {
-      console.log('no history saved. impersonation mode.');
-    }
-  
+  } else {
+    console.log('no history saved. impersonation mode.');
+  }
+
+  if(!userLeavingTrial){
     // Special: count the number of timeouts in a row. If autostopTimeoutThreshold
     // is specified and we have seen that many (or more) timeouts in a row, then
     // we leave the page. Note that autostopTimeoutThreshold defaults to 0 so that
@@ -1612,31 +1659,32 @@ async function afterAnswerFeedbackCallback(trialEndTimeStamp, source, userAnswer
       timeoutsSeen = 0; // Reset count
     } else {
       timeoutsSeen++;
-  
+
       // Figure out threshold (with default of 0)
       // Also note: threshold < 1 means no autostop at all
       const threshold = deliveryParams.autostopTimeoutThreshold;
-  
+
       if (threshold > 0 && timeoutsSeen >= threshold) {
         console.log('Hit timeout threshold', threshold, 'Quitting');
         leavePage('/profile');
         return; // We are totally done
       }
     }
-    hideUserFeedback();
-    $('#userAnswer').val('');
-    Session.set('feedbackTimeoutEnds', Date.now())
-    prepareCard();
-  }, reviewTimeout)
+    if(window.currentAudioObj) {
+      window.currentAudioObj.addEventListener('ended', async () => {
+        cardEnd();
+      });
+    } else {
+      cardEnd();
+    }
+  }
+}
 
-  Session.set('CurTimeoutId', timeout)
-  
-  if(Session.get('unitType') == "model")
-    engine.calculateIndices().then(function(res, err) {
-      Session.set('engineIndices', res );
-    })
-  else
-    Session.set('engineIndices', undefined);
+async function cardEnd() {
+  hideUserFeedback();
+  $('#userAnswer').val('');
+  Session.set('feedbackTimeoutEnds', Date.now())
+  prepareCard();
 }
 
 function getReviewTimeout(testType, deliveryParams, isCorrect, dialogueHistory, isTimeout) {
@@ -1679,9 +1727,7 @@ function getReviewTimeout(testType, deliveryParams, isCorrect, dialogueHistory, 
   return reviewTimeout;
 }
 
-// eslint-disable-next-line max-len
-function gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect, reviewEnd, testType, deliveryParams, dialogueHistory, wasReportedForRemoval) {
-  const feedbackType = deliveryParams.feedbackType || 'simple';
+function getTrialTime(trialEndTimeStamp, trialStartTimeStamp, reviewEnd, testType) {
   let feedbackLatency;
   if(Session.get('dialogueTotalTime')){
     feedbackLatency = Session.get('dialogueTotalTime');
@@ -1695,22 +1741,22 @@ function gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect,
 
   const firstActionTimestamp = firstKeypressTimestamp || trialEndTimeStamp;
   let responseDuration = trialEndTimeStamp - firstActionTimestamp;
-  let startLatency = firstActionTimestamp - trialStartTimestamp;
-  let endLatency = trialEndTimeStamp - trialStartTimestamp;
-  if( !firstActionTimestamp || !trialEndTimeStamp || !trialStartTimestamp || 
-    firstActionTimestamp < 0 || trialEndTimeStamp < 0 || trialStartTimestamp < 0 || endLatency < 0){
+  let startLatency = firstActionTimestamp - trialStartTimeStamp;
+  let endLatency = trialEndTimeStamp - trialStartTimeStamp;
+  if( !firstActionTimestamp || !trialEndTimeStamp || !trialStartTimeStamp || 
+    firstActionTimestamp < 0 || trialEndTimeStamp < 0 || trialStartTimeStamp < 0 || endLatency < 0){
     //something broke. The user probably didnt start answering the questing in 1970.
     alert('Something went wrong with your trial. Please restart the chapter.');
     const errorDescription = `One or more timestamps were set to 0 or null. 
     firstActionTimestamp: ${firstActionTimestamp}
     trialEndTimeStamp: ${trialEndTimeStamp}
-    trialStartTimestamp: ${trialStartTimestamp}`
+    trialStartTimeStamp: ${trialStartTimeStamp}`
     console.log(`responseDuration: ${responseDuration}
     startLatency: ${startLatency}
     endLatency: ${endLatency}
     firstKeypressTimestamp: ${firstKeypressTimestamp}
     trialEndTimeStamp: ${trialEndTimeStamp}
-    trialStartTimestamp: ${trialStartTimestamp}`)
+    trialStartTimeStamp: ${trialStartTimeStamp}`)
     const curUser = Meteor.userId();
     const curPage = document.location.pathname;
     const sessionVars = Session.all();
@@ -1722,7 +1768,6 @@ function gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect,
     leavePage('/profile');
     return;
   }
-
   // Don't count test type trials in progress reporting
   if (testType === 't') {
     endLatency = 0;
@@ -1733,6 +1778,12 @@ function gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect,
     endLatency = -1;
     startLatency = -1;
   }
+  return {responseDuration, startLatency, endLatency, feedbackLatency};
+}
+
+// eslint-disable-next-line max-len
+function gatherAnswerLogRecord(trialEndTimeStamp, trialStartTimeStamp, source, userAnswer, isCorrect, 
+  testType, deliveryParams, dialogueHistory, wasReportedForRemoval) {
 
   // Figure out button trial entries
   let buttonEntries = '';
@@ -1740,7 +1791,7 @@ function gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect,
   if (wasButtonTrial) {
     const wasDrill = (testType === 'd' || testType === 'm' || testType === 'n');
     // If we had a dialogue interaction restore this from the session variable as the screen was wiped
-    if (getCurrentDeliveryParams().feedbackType == 'dialogue' && !isCorrect && wasDrill) {
+    if (deliveryParams.feedbackType == 'dialogue' && !isCorrect && wasDrill) {
       buttonEntries = JSON.parse(JSON.stringify(Session.get('buttonEntriesTemp')));
     } else {
       buttonEntries = _.map(Session.get('buttonList'), (val) => val.buttonValue).join(',');
@@ -1819,7 +1870,7 @@ function gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect,
   }
 
   // hack
-  const sessionID = (new Date(trialStartTimestamp)).toUTCString().substr(0, 16) + ' ' + Session.get('currentTdfName');
+  const sessionID = (new Date(trialStartTimeStamp)).toUTCString().substr(0, 16) + ' ' + Session.get('currentTdfName');
   let outcome = 'incorrect';
   if (isCorrect) {
     outcome = 'correct';
@@ -1853,14 +1904,14 @@ function gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect,
     'conditionTypeE': Meteor.user().profile.entryPoint && 
         Meteor.user().profile.entryPoint !== 'direct' ? Meteor.user().profile.entryPoint : null,
 
-    'responseDuration': responseDuration,
+    'responseDuration': null,
 
     'levelUnit': Session.get('currentUnitNumber'),
     'levelUnitName': unitName,
     'levelUnitType': Session.get('unitType'),
     'problemName': problemName,
     'stepName': stepName, // this is no longer a valid field as we don't restore state one step at a time
-    'time': trialStartTimestamp,
+    'time': trialStartTimeStamp,
     'selection': '',
     'action': '',
     'input': _.trim(userAnswer),
@@ -1885,15 +1936,15 @@ function gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect,
     'CFDisplayedHintSyllables': hintsDisplayed,
     'CFOverlearning': false,
     'CFResponseTime': trialEndTimeStamp,
-    'CFStartLatency': startLatency,
-    'CFEndLatency': endLatency,
-    'CFFeedbackLatency': feedbackLatency,
+    'CFStartLatency': null,
+    'CFEndLatency': null,
+    'CFFeedbackLatency': null,
     'CFReviewEntry': _.trim($('#userForceCorrect').val()),
     'CFButtonOrder': buttonEntries,
     'CFItemRemoved': wasReportedForRemoval,
     'CFNote': '',
     'feedbackText': $('#UserInteraction').text() || '',
-    'feedbackType': feedbackType,
+    'feedbackType': deliveryParams.feedbackType,
     'dialogueHistory': dialogueHistory || null,
     'instructionQuestionResult': Session.get('instructionQuestionResult') || false,
     'hintLevel': whichHintLevel,
@@ -2249,11 +2300,7 @@ function beginQuestionAndInitiateUserInput(delayMs, deliveryParams) {
 function allowUserInput() {
   console.log('allow user input');
   inputDisabled = false;
-  const enableAudioPromptAndFeedback = Session.get('enableAudioPromptAndFeedback');
-  const audioPromptMode = Session.get('audioPromptMode');
-  if (!enableAudioPromptAndFeedback || !(audioPromptMode === 'question' || audioPromptMode === 'all')) {
-    startRecording();
-  }
+  startRecording();
 
   // Need timeout here so that the disable input timeout doesn't fire after this
   setTimeout(async function() {
@@ -2349,6 +2396,7 @@ function speakMessageIfAudioPromptFeedbackEnabled(msg, audioPromptSource) {
             }
             window.currentAudioObj = audioObj;
             window.currentAudioObj.addEventListener('ended', (event) => {
+              window.currentAudioObj = undefined;
               Session.set('recordingLocked', false);
               startRecording();
             });
@@ -2585,6 +2633,7 @@ window.audioContext = audioContext;
 let selectedInputDevice = null;
 let userMediaStream = null;
 let streamSource = null;
+let speechEvents = null;
 
 // The callback used in initializeAudio when an audio data stream becomes available
 function startUserMedia(stream) {
@@ -2610,72 +2659,49 @@ function startUserMedia(stream) {
   // function to process the audio data
   recorder.setProcessCallback(processLINEAR16);
 
-  // Set up options for voice activity detection code (vad.js)
-  const energyOffsetExp = 60 - Session.get('audioInputSensitivity');
-  const energyOffset = parseFloat('1e+' + energyOffsetExp);
-  const options = {
-    source: input,
-    energy_offset: energyOffset,
-    // On voice stop we want to send off the recorded audio (via the process callback)
-    // to the google speech api for processing (it only takes up to 15 second clips at a time)
-    voice_stop: function() {
-      // This will hopefully only be fired once while we're still on the voice.html interstitial,
-      // once VAD.js loads we should navigate back to card to start the practice set
-      if (!Session.get('VADInitialized')) {
-        console.log('VAD previously not initialized, now initialized');
-        Session.set('VADInitialized', true);
-        $('#voiceDetected').value = 'Voice detected, refreshing now...';
-        Session.set('inResume', true);
-        if (Session.get('pausedLocks')>0) {
-          const numRemainingLocks = Session.get('pausedLocks')-1;
-          Session.set('pausedLocks', numRemainingLocks);
-        }
-        Router.go('/card');
-        return;
-      } else if (!Session.get('recording') || Session.get('pausedLocks')>0) {
-        if (document.location.pathname != '/card' && document.location.pathname != '/instructions') {
-          leavePage(function() {
-            console.log('cleaning up page after nav away from card, voice_stop');
-          });
-          return;
+  // Set up options for voice activity detection code (hark.js)
+  speechEvents = hark(stream); //{interval: 50, play: false};
+
+  speechEvents.on('speaking', function() {
+    if (!Session.get('recording')) {
+      console.log('NOT RECORDING, VOICE START');
+      return;
+    } else {
+      console.log('VOICE START');
+      if (resetMainCardTimeout && timeoutFunc) {
+        if (Session.get('recording')) {
+          console.log('voice_start resetMainCardTimeout');
+          resetMainCardTimeout();
         } else {
-          console.log('NOT RECORDING, VOICE STOP');
-          return;
+          console.log('NOT RECORDING');
         }
       } else {
-        console.log('VOICE STOP');
-        recorder.stop();
-        Session.set('recording', false);
-        recorder.exportToProcessCallback();
+        console.log('RESETMAINCARDTIMEOUT NOT DEFINED');
       }
-    },
-    voice_start: function() {
-      if (!Session.get('recording')) {
-        console.log('NOT RECORDING, VOICE START');
+    }
+  });
+
+  speechEvents.on('stopped_speaking', function() {
+    if (!Session.get('recording') || Session.get('pausedLocks')>0) {
+      if (document.location.pathname != '/card' && document.location.pathname != '/instructions') {
+        leavePage(function() {
+          console.log('cleaning up page after nav away from card, voice_stop');
+        });
         return;
       } else {
-        console.log('VOICE START');
-        if (resetMainCardTimeout && timeoutFunc) {
-          if (Session.get('recording')) {
-            console.log('voice_start resetMainCardTimeout');
-            resetMainCardTimeout();
-          } else {
-            console.log('NOT RECORDING');
-          }
-        } else {
-          console.log('RESETMAINCARDTIMEOUT NOT DEFINED');
-        }
+        console.log('NOT RECORDING, VOICE STOP');
+        return;
       }
-    },
-  };
-  const vad = new VAD(options);
-  Session.set('VADInitialized', false);
+    } else {
+      console.log('VOICE STOP');
+      recorder.stop();
+      Session.set('recording', false);
+      recorder.exportToProcessCallback();
+    }
+  });
 
   console.log('Audio recorder ready');
-
-  // Navigate to the voice interstitial which gives VAD.js time to load so we're
-  // ready to transcribe when we finally come back to the practice set
-  Router.go('/voice');
+  cardStart();
 }
 
 function startRecording() {
@@ -2947,7 +2973,7 @@ async function resumeFromComponentState() {
 
 
 async function getFeedbackParameters(){
-  if(getCurrentDeliveryParams().allowFeedbackTypeSelect){
+  if(Session.get('currentDeliveryParams').allowFeedbackTypeSelect){
     Session.set('displayFeedback',true);
   } 
 }
@@ -3131,10 +3157,15 @@ async function processUserTimesLog() {
       // we might need to stick with the instructions *IF AND ONLY IF* the
       // lockout period hasn't finished (which prepareCard won't handle)
       if (engine.unitFinished()) {
-        const lockoutMins = Session.get('currentDeliveryParams').lockoutminutes;
+        let lockoutMins = Session.get('currentDeliveryParams').lockoutminutes;
         if (lockoutMins > 0) {
-          const unitStartTimestamp = Session.get('currentUnitStartTime');
-          const lockoutFreeTime = unitStartTimestamp + (lockoutMins * (60 * 1000)); // minutes to ms
+          let unitStartTimestamp = Session.get('currentUnitStartTime');
+          if(Meteor.user().profile?.lockouts && Meteor.user().profile.lockouts[Session.get('currentTdfId')] && 
+          Meteor.user().profile.lockouts[Session.get('currentTdfId')].currentLockoutUnit == Session.get('currentUnitNumber')){
+            unitStartTimestamp = Meteor.user().profile.lockouts[Session.get('currentTdfId')].lockoutTimeStamp;
+            lockoutMins = Meteor.user().profile.lockouts[Session.get('currentTdfId')].lockoutMinutes;
+          }
+          lockoutFreeTime = unitStartTimestamp + (lockoutMins * (60 * 1000)); // minutes to ms
           if (Date.now() < lockoutFreeTime && (typeof curTdfUnit.unitinstructions !== 'undefined') ){
             console.log('RESUME FINISHED: showing lockout instructions');
             leavePage('/instructions');
