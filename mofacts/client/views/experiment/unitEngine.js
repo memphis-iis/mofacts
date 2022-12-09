@@ -219,21 +219,8 @@ function defaultUnitEngine(curExperimentData) {
           }
         } 
       }else{
-        let answerLocation = currentQuestion.indexOf(' _');
-        if(answerLocation != -1){
-          var regex = regex = / _/gi, result, indecies = [];
-          while ( (result = regex.exec(currentQuestion)) ) {
-            indecies.push(result.index);
-          }
-          for(index in indecies){
-            let answerBlanks = ""
-            currentQuestion = currentQuestion.replaceAll("_","");
-            for(i=0;i<currentStimAnswerWordCount;i++){
-              answerBlanks += `&nbsp;<u>${blank + blank}</u>`;
-            }
-            currentQuestion = currentQuestion.slice(0,index) + answerBlanks + currentQuestion.slice(index);
-          }
-        }
+        const regex = /([_])+/g
+        currentQuestion = currentQuestion.replaceAll(regex, `<u>${blank + blank}</u>`)
       }
 
       console.log('setUpCardQuestionSyllables:', currentQuestion, currentQuestionPart2,

@@ -130,7 +130,9 @@ function GetDialogue(state) {
   return (0, _Promise.PromiseBuilder$$Run$$212F1D4B)(_PromiseImpl.promise, (0, _Promise.PromiseBuilder$$Delay$$62FBFDE1)(_PromiseImpl.promise, function () {
     var stringArrayJsonOption, input$$2;
     const errors = [];
-    const text$$1 = (0, _RegExp.replace)(state.ClozeItem, "(_ _|_)+", state.ClozeAnswer);
+    let text$$1;
+    const s = (0, _RegExp.replace)(state.ClozeItem, "(_ _|_)+", state.ClozeAnswer);
+    text$$1 = s.trim();
     return (state.Questions == null ? (stringArrayJsonOption = undefined, (0, _AllenNLP.GetNLP)(stringArrayJsonOption, text$$1)) : (input$$2 = (0, _AllenNLP.DocumentAnnotation$$$CreateEmpty)(), ((0, _AllenNLP.Promisify)(input$$2)))).then(function (_arg1) {
       var input$$3;
       return ((state.LastQuestion != null ? state.LastStudentAnswer != null : false) ? (0, _AllenNLP.GetTextualEntailment)(state.LastQuestion.Answer, state.LastStudentAnswer) : (input$$3 = (0, _AllenNLP.Entailment$$$CreateEmpty)(), ((0, _AllenNLP.Promisify)(input$$3)))).then(function (_arg2) {
@@ -416,20 +418,20 @@ function GetElaboratedDialogueState(correctAnswer, incorrectAnswer, clozeItem$$1
         const cs = (0, _CachedElaboratedFeedback.correctnessStatement)(incorrectAnswer, correctAnswer);
         const candidateSentences = (0, _String.replace)(_arg1$$1.fields[0].Feedback, cs, "").split(".");
         let jointOption;
-        jointOption = (0, _Array.tryFind)(function predicate$$4(s) {
-          if (s.toLocaleLowerCase().indexOf(incorrectAnswer.toLocaleLowerCase()) >= 0) {
-            return s.toLocaleLowerCase().indexOf(correctAnswer.toLocaleLowerCase()) >= 0;
+        jointOption = (0, _Array.tryFind)(function predicate$$4(s$$1) {
+          if (s$$1.toLocaleLowerCase().indexOf(incorrectAnswer.toLocaleLowerCase()) >= 0) {
+            return s$$1.toLocaleLowerCase().indexOf(correctAnswer.toLocaleLowerCase()) >= 0;
           } else {
             return false;
           }
         }, candidateSentences);
         let iaOption;
-        iaOption = (0, _Array.tryFind)(function predicate$$5(s$$1) {
-          return s$$1.toLocaleLowerCase().indexOf(incorrectAnswer.toLocaleLowerCase()) >= 0;
+        iaOption = (0, _Array.tryFind)(function predicate$$5(s$$2) {
+          return s$$2.toLocaleLowerCase().indexOf(incorrectAnswer.toLocaleLowerCase()) >= 0;
         }, candidateSentences);
         let caOption;
-        caOption = (0, _Array.tryFind)(function predicate$$6(s$$2) {
-          return s$$2.toLocaleLowerCase().indexOf(correctAnswer.toLocaleLowerCase()) >= 0;
+        caOption = (0, _Array.tryFind)(function predicate$$6(s$$3) {
+          return s$$3.toLocaleLowerCase().indexOf(correctAnswer.toLocaleLowerCase()) >= 0;
         }, candidateSentences);
         let patternInput$$1;
 
