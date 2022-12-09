@@ -102,10 +102,13 @@ function checkIfUserAnswerMatchesOtherAnswers(userAnswer, correctAnswer) {
   return false;
 }
 
-async function simpleStringMatch(userAnswer, correctAnswer, lfparameter, allowPhoneticMatching, useSpellingCorrection, fullAnswerStr) {
+async function simpleStringMatch(userAnswer, correctAnswer, lfparameter, fullAnswerStr) {
   const s1 = _.trim(userAnswer).toLowerCase();
   const s2 = _.trim(correctAnswer).toLowerCase();
   const fullAnswerText = _.trim(fullAnswerStr).toLowerCase();
+  const deliveryParams = Session.get('currentDeliveryParams');
+  const useSpellingCorrection = deliveryParams.useSpellingCorrection || false;
+  const allowPhoneticMatching = deliveryParams.allowPhoneticMatching || false;
 
   if (s1.localeCompare(s2) === 0) {
     // Exact match!
@@ -114,7 +117,7 @@ async function simpleStringMatch(userAnswer, correctAnswer, lfparameter, allowPh
   else {
     // See if they were close enough
     if (lfparameter || useSpellingCorrection) {
-      const checkOtherAnswers = Session.get('currentDeliveryParams').checkOtherAnswers;
+      const checkOtherAnswers = deliveryParams.checkOtherAnswers;
       // Check to see if the user answer is an exact match for any other answers in the stim file,
       // If not we'll do an edit distance calculation to determine if they were close enough to the correct answer
       let matchOther;
@@ -126,18 +129,19 @@ async function simpleStringMatch(userAnswer, correctAnswer, lfparameter, allowPh
       } 
     }
     if(useSpellingCorrection) {
-      const results = await meteorCallAsync('getSymSpellCorrection', s1);
-      if(results[0].term.localeCompare(s2) === 0) {
-        return 2; // Close enough
+      let editDistance = deliveryParams.editDistance ? deliveryParams.editDistance : 1;
+      const results = await meteorCallAsync('getSymSpellCorrection', s1, s2, editDistance);
+      if(results) {
+        return 2; //Close enough
       } 
       else if(allowPhoneticMatching) {//enable phonetic encoding
         const metaphone1 = doubleMetaphone(s1);
         const metaphone2 = doubleMetaphone(s2);
         if(compareMetaphones(metaphone1, metaphone2))
-          return 3; // Metaphone match
+          return 3; //Metaphone match
       } 
       else {
-        return 0; // No match
+        return 0; //No match
       }
     }
     if (lfparameter) {
@@ -177,7 +181,7 @@ function compareMetaphones(m1, m2){
 // match was exact, we return 1. If we matched on edit distance, we return 2.
 // We also support a |-only regex(-ish) format (which is also honored by our
 // regex search)
-async function stringMatch(stimStr, userAnswer, lfparameter, allowPhoneticMatching, useSpellingCorrection, userInput) {
+async function stringMatch(stimStr, userAnswer, lfparameter, userInput) {
   if (userInput === '' || userAnswer === ''){
     //user didnt enter a response.
     return 0;
@@ -188,14 +192,14 @@ async function stringMatch(stimStr, userAnswer, lfparameter, allowPhoneticMatchi
       if (checks[i].length < 1) {
         continue;
       } // No blank checks
-      const matched = await simpleStringMatch(userAnswer, checks[i], lfparameter, allowPhoneticMatching, useSpellingCorrection, stimStr);
+      const matched = await simpleStringMatch(userAnswer, checks[i], lfparameter, stimStr);
       if (matched !== 0) {
         return matched; // Match!
       }
     }
     return 0; // Nothing found
   } else {
-    return await simpleStringMatch(userAnswer, stimStr, lfparameter, allowPhoneticMatching, useSpellingCorrection, stimStr);
+    return await simpleStringMatch(userAnswer, stimStr, lfparameter, stimStr);
   }
 }
 
@@ -206,7 +210,7 @@ async function stringMatch(stimStr, userAnswer, lfparameter, allowPhoneticMatchi
 // the current levenshtein distance.
 // ALSO notice that we use the same return values as stringMatch: 0 for no
 // match, 1 for exact match, 2 for edit distance match
-async function regExMatch(regExStr, userAnswer, lfparameter, allowPhoneticMatching, useSpellingCorrection, fullAnswer) {
+async function regExMatch(regExStr, userAnswer, lfparameter, fullAnswer) {
   if (lfparameter && /^[\|A-Za-z0-9 ]+$/i.test(regExStr)) {
     // They have an edit distance parameter and the regex matching our
     // special condition - check it manually
@@ -215,7 +219,7 @@ async function regExMatch(regExStr, userAnswer, lfparameter, allowPhoneticMatchi
       if (checks[i].length < 1) {
         continue;
       } // No blank checks
-      const matched = await simpleStringMatch(userAnswer, checks[i], lfparameter, allowPhoneticMatching, useSpellingCorrection, fullAnswer);
+      const matched = await simpleStringMatch(userAnswer, checks[i], lfparameter, fullAnswer);
       if (matched !== 0) {
         return matched; // Match!
       }
@@ -230,7 +234,7 @@ async function regExMatch(regExStr, userAnswer, lfparameter, allowPhoneticMatchi
 // Return [isCorrect, matchText] where isCorrect is true if the user-supplied
 // answer matches the first branch and matchText is the text response from a
 // matching branch
-async function matchBranching(answer, userAnswer, lfparameter, allowPhoneticMatching, useSpellingCorrection) {
+async function matchBranching(answer, userAnswer, lfparameter) {
   let isCorrect = false;
   let matchText = '';
   const userAnswerCheck = _.trim(userAnswer).toLowerCase();
@@ -243,7 +247,7 @@ async function matchBranching(answer, userAnswer, lfparameter, allowPhoneticMatc
     }
 
     flds[0] = _.trim(flds[0]).toLowerCase();
-    const matched = await regExMatch(flds[0], userAnswerCheck, lfparameter, allowPhoneticMatching, useSpellingCorrection, answer);
+    const matched = await regExMatch(flds[0], userAnswerCheck, lfparameter, answer);
     if (matched !== 0) {
       matchText = _.trim(flds[1]);
       if (matched === 2) {
@@ -273,12 +277,12 @@ function _branchingCorrectText(answer) {
   return result[0];
 }
 
-async function checkAnswer(userAnswer, correctAnswer, originalAnswer, lfparameter, allowPhoneticMatching, useSpellingCorrection, userInput) {
+async function checkAnswer(userAnswer, correctAnswer, originalAnswer, lfparameter, userInput) {
   const answerDisplay = originalAnswer;
   let match = 0;
   let isCorrect; let matchText;
   if (answerIsBranched(correctAnswer)) {
-    [isCorrect, matchText] = await matchBranching(correctAnswer, userAnswer, lfparameter, useSpellingCorrection, allowPhoneticMatching);
+    [isCorrect, matchText] = await matchBranching(correctAnswer, userAnswer, lfparameter);
   } else {
     let dispAnswer = _.trim(answerDisplay);
     if (dispAnswer.indexOf('|') >= 0) {
@@ -291,12 +295,12 @@ async function checkAnswer(userAnswer, correctAnswer, originalAnswer, lfparamete
     let userAnswerWords = userAnswer.split(" ");
     let userFirstAnswer =  userAnswerWords.slice(0,answerWordsCount).join(" ");
     let userSecondAnswer = userAnswerWords.slice(answerWordsCount).join(" ");
-    match = await stringMatch(originalAnswer, userAnswer, lfparameter, allowPhoneticMatching, useSpellingCorrection, userInput);
+    match = await stringMatch(originalAnswer, userAnswer, lfparameter, userInput);
     if(match == 0){
-      match = await stringMatch(originalAnswer, userFirstAnswer, lfparameter, allowPhoneticMatching, useSpellingCorrection, userInput);
+      match = await stringMatch(originalAnswer, userFirstAnswer, lfparameter, userInput);
     }
     if(match == 0){
-      match = await stringMatch(originalAnswer, userSecondAnswer, lfparameter, allowPhoneticMatching, useSpellingCorrection, userInput);
+      match = await stringMatch(originalAnswer, userSecondAnswer, lfparameter, userInput);
     }
     if (match === 0) {
       isCorrect = false;
@@ -309,7 +313,7 @@ async function checkAnswer(userAnswer, correctAnswer, originalAnswer, lfparamete
       matchText = 'Close enough to the correct answer \''+ dispAnswer + '\'.';
     } else if (match === 3) {
       isCorrect = true;
-      matchText = 'That sounds like the answer but you\'re writing it the wrong way'
+      matchText = 'That sounds like the answer but you\'re writing it the wrong way, the correct answer is \''+ dispAnswer + '\'.';
     } else {
       console.log('MATCH ERROR: something fails in our comparison');
       isCorrect = false;
@@ -358,19 +362,18 @@ const Answers = {
   answerIsCorrect: async function(userInput, answer, originalAnswer, displayedAnswer, setspec, callback) {
     // Note that a missing or invalid lfparameter will result in a null value
     const lfparameter = parseFloat(setspec ? setspec.lfparameter || 0 : 0);
-    const allowPhoneticMatching = Session.get('currentDeliveryParams').allowPhoneticMatching || false;
-    const useSpellingCorrection = Session.get('currentDeliveryParams').useSpellingCorrection || false;
-    const feedbackType = Session.get('currentDeliveryParams').feedbackType;
+    const deliveryParams = Session.get('currentDeliveryParams');
+    const feedbackType = deliveryParams.feedbackType;
 
-    let fullTextIsCorrect = await checkAnswer(userInput, answer, originalAnswer, lfparameter, allowPhoneticMatching, useSpellingCorrection, undefined);
+    let fullTextIsCorrect = await checkAnswer(userInput, answer, originalAnswer, lfparameter, undefined);
 
     // Try again with original answer in case we did a syllable answer and they input the full response
     if (!fullTextIsCorrect.isCorrect && !!originalAnswer) {
       let userInputWithAddedSylls = displayedAnswer + userInput;
-      fullTextIsCorrect = await checkAnswer(userInputWithAddedSylls, originalAnswer, originalAnswer, lfparameter, allowPhoneticMatching, useSpellingCorrection, userInput);
+      fullTextIsCorrect = await checkAnswer(userInputWithAddedSylls, originalAnswer, originalAnswer, lfparameter, userInput);
       if ((!fullTextIsCorrect.isCorrect && !!originalAnswer) || fullTextIsCorrect.matchText.split(' ')[0] == 'Close') {
         let userInputWithDelimitingSpace = displayedAnswer + ' ' + userInput;
-        fullTextIsCorrect = await checkAnswer(userInputWithDelimitingSpace, originalAnswer, originalAnswer, lfparameter, allowPhoneticMatching, useSpellingCorrection, userInput);
+        fullTextIsCorrect = await checkAnswer(userInputWithDelimitingSpace, originalAnswer, originalAnswer, lfparameter, userInput);
       }
     }
 

@@ -31,7 +31,7 @@ export {
 // The jshint inline option above suppresses a warning about using sqaure
 // brackets instead of dot notation - that's because we prefer square brackets
 // for creating some MongoDB queries
-//const SymSpell = require('node-symspell')
+const SymSpell = require('node-symspell')
 const fs = Npm.require('fs');
 const https = require('https')
 const { randomBytes } = require('crypto')
@@ -57,8 +57,14 @@ if (Meteor.settings.public.testLogin) {
 let highestStimuliSetId;
 let nextStimuliSetId;
 
-//const symSpell = new SymSpell(2, 7);
-//symSpell.loadDictionary(Meteor.settings.frequencyDictionaryLocation);
+// How large the distance between two words can be to be considered a match. Larger values result in a slower search. Defualt is 2.
+const maxEditDistance = Meteor.settings.SymSpell.maxEditDistance ? parseInt(Meteor.settings.SymSpell.maxEditDistance) : 2;
+// How big the prefix used for indexing is. Larger values will be result in a faster search, but will use more memory. Default is 7.
+const prefixLength = Meteor.settings.SymSpell.prefixLength ? parseInt(Meteor.settings.SymSpell.prefixLength) : 7;
+const symSpell = new SymSpell(maxEditDistance, prefixLength);
+serverConsole(Meteor.settings.frequencyDictionaryLocation)
+symSpell.loadDictionary(Meteor.settings.frequencyDictionaryLocation, 0, 1);
+symSpell.loadBigramDictionary(Meteor.settings.bigramDictionaryLocation, 0, 2);
 process.env.MAIL_URL = Meteor.settings.MAIL_URL;
 const adminUsers = Meteor.settings.initRoles.admins;
 const ownerEmail = Meteor.settings.owner;
@@ -2381,9 +2387,22 @@ Meteor.methods({
     }
   },
 
-  // getSymSpellCorrection: async function(userAnswer, maxEditDistance) {
-  //   return symSpell.lookupCompound(userAnswer, maxEditDistance)
-  // },
+  getSymSpellCorrection: async function(userAnswer, s2, maxEditDistance = 1) {
+    serverConsole('getSymSpellCorrection', userAnswer, s2, maxEditDistance);
+    let corrections; 
+    if(userAnswer.split(' ').length == 1)
+      corrections = symSpell.lookup(userAnswer, 2, maxEditDistance);
+    else
+      corrections = symSpell.lookupCompound(userAnswer, maxEditDistance);
+    serverConsole(corrections)
+    
+    const words = corrections.map( correction => correction.term );
+    for(let word of words){
+      if(word.localeCompare(s2) === 0)
+        return true;
+    }
+    return false;
+  },
 
   sendErrorReportSummaries: function() {
     sendErrorReportSummaries();
