@@ -390,6 +390,7 @@ function getCurrentDeliveryParams() {
     'allowPhoneticMatching': false,
     'useSpellingCorrection': false,
     'editDistance': 1,
+    'optimalThreshold': false,
   };
 
   // We've defined defaults - also define translatations for values
@@ -431,6 +432,7 @@ function getCurrentDeliveryParams() {
     'allowPhoneticMatching': xlateBool,
     'useSpellingCorrection': xlateBool,
     'editDistance': _.intval,
+    'optimalThreshold': _.intval,
   };
 
   let modified = false;
