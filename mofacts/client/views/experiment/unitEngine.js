@@ -554,12 +554,15 @@ function modelUnitEngine() {
     return {clusterIndex, stimIndex, hintLevelIndex};
   }
 
-  function findMaxProbCardAndHintLevel(cards, ceiling, hiddenItems) {
+  function findMaxProbCardAndHintLevel(cards, ceiling, hiddenItems, currentDeliveryParams) {
     console.log('findMaxProbCardAndHintLevel');
     let currentMax = 0;
     let clusterIndex=-1;
     let stimIndex=-1;
     let hintLevelIndex=-1;
+    if(currentDeliveryParams && currentDeliveryParams.optimalThreshold) {
+      ceiling = currentDeliveryParams.optimalThreshold;
+    }
 
     for (let i=0; i<cards.length; i++) {
       const card = cards[i];
@@ -594,7 +597,7 @@ function modelUnitEngine() {
     return {clusterIndex, stimIndex, hintLevelIndex};
   }
 
-  function findMinProbDistCard(cards, hiddenItems) {
+  function findMinProbDistCard(cards, hiddenItems, currentDeliveryParams) {
     console.log('findMinProbDistCard');
     let currentMin = 50.0;
     let clusterIndex=-1;
@@ -615,7 +618,7 @@ function modelUnitEngine() {
           optimalProb = Math.log(parameters[1]/(1-parameters[1]));
           if (!optimalProb) {
             // console.log("NO OPTIMAL PROB SPECIFIED IN STIM, DEFAULTING TO 0.90");
-            optimalProb = 0.90;
+            optimalProb = currentDeliveryParams.optimalThreshold || 0.90;
           }
           const dist = Math.abs(Math.log(stim.probabilityEstimate/(1-stim.probabilityEstimate)) - optimalProb);
           if (dist <= currentMin) {
@@ -643,7 +646,7 @@ function modelUnitEngine() {
     return {clusterIndex, stimIndex, hintLevelIndex};
   }
 
-  function findMaxProbCardThresholdCeilingPerCard(cards, hiddenItems) {
+  function findMaxProbCardThresholdCeilingPerCard(cards, hiddenItems, currentDeliveryParams) {
     console.log('findMaxProbCardThresholdCeilingPerCard');
     let currentMax = 0;
     let clusterIndex=-1;
@@ -663,7 +666,7 @@ function modelUnitEngine() {
           let thresholdCeiling=parameters[1];
           if (!thresholdCeiling) {
             //  console.log("NO THRESHOLD CEILING SPECIFIED IN STIM, DEFAULTING TO 0.90");
-            thresholdCeiling = 0.90;
+            thresholdCeiling = currentDeliveryParams.optimalThreshold || 0.90;
           }
           if (stim.probabilityEstimate > currentMax && stim.probabilityEstimate < thresholdCeiling) {
             currentMax = stim.probabilityEstimate;
@@ -1438,9 +1441,10 @@ function modelUnitEngine() {
       this.calculateCardProbabilities();
       const hiddenItems = Session.get('hiddenItems');
       const cards = cardProbabilities.cards;
+      const currentDeliveryParams = Session.get('currentDeliveryParams');
       switch (this.unitMode) {
         case 'thresholdCeiling':
-          indices = findMaxProbCardThresholdCeilingPerCard(cards, hiddenItems);
+          indices = findMaxProbCardThresholdCeilingPerCard(cards, hiddenItems, currentDeliveryParams);
           console.log('thresholdCeiling, indicies:', JSON.parse(JSON.stringify(indices)));
           if (indices.clusterIndex === -1) {
             console.log('thresholdCeiling failed, reverting to min prob');
@@ -1448,17 +1452,17 @@ function modelUnitEngine() {
           }
           break;
         case 'distance':
-          indices = findMinProbDistCard(cards, hiddenItems);
+          indices = findMinProbDistCard(cards, hiddenItems, currentDeliveryParams);
           break;
         case 'highest':
           // Magic number to indicate there is no real ceiling (probs should max out at 1.0)
-          indices = findMaxProbCardAndHintLevel(cards, 1.00001, hiddenItems);
+          indices = findMaxProbCardAndHintLevel(cards, 1.00001, hiddenItems, currentDeliveryParams);
           if (indices.clusterIndex === -1) {
             indices = findMinProbCardAndHintLevel(cards, hiddenItems);
           }
           break;
         default:
-          indices = findMaxProbCardAndHintLevel(cards, 0.90, hiddenItems);
+          indices = findMaxProbCardAndHintLevel(cards, 0.90, hiddenItems, currentDeliveryParams);
           if (indices.clusterIndex === -1) {
             indices = findMinProbCardAndHintLevel(cards, hiddenItems);
           }
