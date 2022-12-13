@@ -142,6 +142,11 @@ Template.profile.events({
     Router.go('/classEdit');
   },
 
+  'click #adminControlsBtn': function(event) {
+    event.preventDefault();
+    Router.go('/adminControls');
+  },
+
   'click #tdfAssignmentEditButton': function(event) {
     event.preventDefault();
     Router.go('/tdfAssignmentEdit');
