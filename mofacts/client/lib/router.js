@@ -233,6 +233,17 @@ Router.route('/contentUpload', {
   }
 })
 
+Router.route('/adminControls', {
+  name: 'client.adminControls',
+  action: function() {
+    if(Meteor.user() && Roles.userIsInRole(Meteor.user(), ['admin'])){
+      this.render('adminControls');
+    } else {
+      this.redirect('/');
+    }
+  }
+})
+
 Router.route('/profile', {
   name: 'client.profile',
   action: function() {
