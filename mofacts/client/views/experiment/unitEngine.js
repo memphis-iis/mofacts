@@ -11,7 +11,7 @@ import {
   updateCurStudentPerformance,
   getAllCurrentStimAnswers
 } from '../../lib/currentTestingHelpers';
-import {updateExperimentState, updateExperimentStateSync} from './card';
+import {getCurrentClusterAndStimIndices, updateExperimentState, updateExperimentStateSync} from './card';
 import {MODEL_UNIT, SCHEDULE_UNIT} from '../../../common/Definitions';
 import {meteorCallAsync} from '../../index';
 import {displayify} from '../../../common/globalHelpers';
@@ -242,6 +242,8 @@ function defaultUnitEngine(curExperimentData) {
         imgSrc: curStim.imageStimulus,
         videoSrc: curStim.videoStimulus,
         clozeText: curStim.clozeStimulus || curStim.clozeText,
+        hintsEnabled: curStim.hintsEnabled
+
       }));
       if (curStim.alternateDisplays) {
         const numPotentialDisplays = curStim.alternateDisplays.length + 1;
@@ -256,6 +258,7 @@ function defaultUnitEngine(curExperimentData) {
             imgSrc: curAltDisplay.imageStimulus,
             videoSrc: curAltDisplay.videoStimulus,
             clozeText: curAltDisplay.clozeStimulus || curAltDisplay.clozeText,
+            hintsEnabled: curAltDisplay.hintsEnabled
           }));
         }
       }
@@ -301,9 +304,24 @@ function defaultUnitEngine(curExperimentData) {
 
       if (currentAnswerSyllables) {
         curStim.answerSyllables = currentAnswerSyllables;
-        curStim.hintLevel = whichHintLevel;
+        curStim.hintLevel = 0;
+        //check for tdf hints enabled
+        tdfHintsEnabled = hintsEnabled = Session.get('currentTdfFile').tdfs.tutor.setspec.hintsEnabled;
+        //check for stim hints enabled
+        stimHintsEnabled = currentDisplay.hintsEnabled;
+        //if both are enabled, use hints
+        if (tdfHintsEnabled && stimHintsEnabled) {
+          curStim.hintLevel = whichHintLevel;
+        }
+        //if only tdf hints are enabled, use hints
+        else if (tdfHintsEnabled && !stimHintsEnabled) {
+          curStim.hintLevel = whichHintLevel;
+        }
+        //if only stim hints are enabled, use hints
+        else if (!tdfHintsEnabled && stimHintsEnabled) {
+          curStim.hintLevel = whichHintLevel;
+        }
       }
-
       Session.set('currentAnswerSyllables', currentAnswerSyllables);
       Session.set('currentAnswer', currentAnswer);
       Session.set('clozeQuestionParts', clozeQuestionParts);
