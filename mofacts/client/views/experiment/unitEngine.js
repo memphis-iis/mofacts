@@ -306,20 +306,32 @@ function defaultUnitEngine(curExperimentData) {
         curStim.answerSyllables = currentAnswerSyllables;
         curStim.hintLevel = 0;
         //check for tdf hints enabled
-        tdfHintsEnabled = hintsEnabled = Session.get('currentTdfFile').tdfs.tutor.setspec.hintsEnabled;
+        const TDFId = Session.get('currentTdfId');
+        const AllTDFS = Session.get('allTdfs');
+        //search for tdf with matching id
+        const currentTdfFile = AllTDFS.find(tdf => tdf._id === TDFId);
+        tdfHintsEnabled = currentTdfFile.content.tdfs.tutor.setspec.hintsEnabled == "true";
         //check for stim hints enabled
         stimHintsEnabled = currentDisplay.hintsEnabled;
         //if both are enabled, use hints
         if (tdfHintsEnabled && stimHintsEnabled) {
           curStim.hintLevel = whichHintLevel;
+          console.log('HintLevel: setUpCardQuestionAndAnswerGlobals',whichHintLevel);
         }
         //if only tdf hints are enabled, use hints
         else if (tdfHintsEnabled && !stimHintsEnabled) {
           curStim.hintLevel = whichHintLevel;
+          console.log('HintLevel: setUpCardQuestionAndAnswerGlobals',whichHintLevel);
         }
         //if only stim hints are enabled, use hints
         else if (!tdfHintsEnabled && stimHintsEnabled) {
           curStim.hintLevel = whichHintLevel;
+          console.log('HintLevel: setUpCardQuestionAndAnswerGlobals',whichHintLevel);
+        }
+        //if neither are enabled, do not use hints
+        else {
+          curStim.hintLevel = 0;
+          console.log('HintLevel: setUpCardQuestionAndAnswerGlobals, Hints Disabled',whichHintLevel);
         }
       }
       Session.set('currentAnswerSyllables', currentAnswerSyllables);
