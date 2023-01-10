@@ -72,6 +72,12 @@ Session.set('experimentXCond', '');
 Session.set('clusterMapping', '');
 
 
+
+//Set Default Template
+Router.configure({
+  layoutTemplate: 'DefaultLayout'
+});
+
 function routeToSignin() {
   console.log('routeToSignin');
   // If the isExperiment cookie is set we always for experiment mode. This
@@ -150,7 +156,8 @@ const defaultBehaviorRoutes = [
   'signInSouthwest',
   'signUp',
   'tabwarning',
-  'resetPassword'
+  'resetPassword',
+  'test'
 ];
 
 const restrictedRoutes = [
