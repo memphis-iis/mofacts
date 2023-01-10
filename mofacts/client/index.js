@@ -203,7 +203,7 @@ Template.DefaultLayout.events({
     Session.set('pausedLocks', Session.get('pausedLocks')+1);
     Session.set('errorReportStart', new Date());
     //set the modalTemplate session variable to the reportError template
-    Session.set('modalTemplate', 'reportingModal');
+    Session.set('modalTemplate', 'errorReportModal');
     console.log("modalTemplate: " + Session.get('modalTemplate'));
   },
 
@@ -250,6 +250,12 @@ Template.DefaultLayout.events({
       }
     });
   },
+});
+
+Template.errorReportModal.events({
+});
+
+Template.helpModal.events({
 });
 
 // Global template helpers
