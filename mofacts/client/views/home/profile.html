@@ -1,7 +1,7 @@
 <!-- MAIN profile template -->
 <template name="profile">
   <script defer src="https://use.fontawesome.com/releases/v5.0.9/js/all.js" integrity="sha384-8iPTk2s/jMVj81dnzb/iFR2sdA7u06vHJyyLlAd4snFpCl/SnyUjRrbdJsw1pGIl" crossorigin="anonymous"></script>
-    <div class="container">
+    <div class="container-fluid">
         {{#if isImpersonating}}
         <div class='text-center alert alert-warning'>
                 Impersonation Mode. Nothing will be logged. Log out to reset.
@@ -71,12 +71,13 @@
         {{/unless}}
 
         {{#if isInRole 'admin,teacher'}}
+        <br>
         {{>profileDebugToggles}}    
         <br><br>
 
             <div class="row">
-                <div class="col-md-offset-3 col-md-6">
-                    <button id="tdfPracticeBtn" class="btn btn-primary" type="button" data-toggle="collapse" data-target="#testButtonContainer" aria-expanded="false" aria-controls="testButtonContainer">
+                <div class="col-md-12">
+                    <button id="tdfPracticeBtn" class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#testButtonContainer" aria-expanded="false" aria-controls="testButtonContainer">
                         TDF Practice +
                     </button>
                 </div>
@@ -146,14 +147,14 @@
             </div>
             <br><br>
             <div class="row">
-                <div class="col-md-offset-3 col-md-6">
+                <div class="col-md-offset-3 col-md-12">
                     <button type="button" id="instructorReportingButton" class="button btn  navbar-btn">Instructor Reporting</button>
                 </div>
             </div>
             <br><br>
             {{#if isInRole 'admin'}}
             <div class="row">
-                <div class="col-md-offset-3 col-md-6">
+                <div class="col-md-offset-3 col-md-12">
                     <button id="adminControlsBtn" class="btn btn-primary" type="button">
                         Admin Control Panel
                     </button>
@@ -161,8 +162,8 @@
             </div>
             <br><br>
             <div class="row">
-                <div class="col-md-offset-3 col-md-6">
-                    <button id="showDisabledTdfsBtn" class="btn btn-primary" type="button" data-toggle="collapse" data-target="#showDisabledTdfsContainer" aria-expanded="false" aria-controls="showDisabledTdfsContainer">
+                <div class="col-md-offset-3 col-md-12">
+                    <button id="showDisabledTdfsBtn" class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#showDisabledTdfsContainer" aria-expanded="false" aria-controls="showDisabledTdfsContainer">
                         Show Disabled TDFs +
                     </button>
                 </div>
@@ -199,57 +200,57 @@
             <br><br>
             {{/if}}
             <div class="row">
-                <div class="col-md-offset-3 col-md-6">
+                <div class="col-md-offset-3 col-md-12">
                     <button type="button" id="mechTurkButton" class="button btn  navbar-btn">Mechanical Turk</button>
                 </div>
             </div>
             <br><br>
             <div class="row">
-                <div class="col-md-offset-3 col-md-6">
+                <div class="col-md-offset-3 col-md-12">
                     <button type="button" id="contentUploadButton" class="button btn  navbar-btn">Content Uploads</button>
                 </div>
             </div>
             <br><br>
             <div class="row">
-                <div class="col-md-offset-3 col-md-6">
+                <div class="col-md-offset-3 col-md-12">
                     <button type="button" id="userProfileEditButton" class="button btn  navbar-btn">AWS User Profile Data</button>
                 </div>
             </div>
             <br><br>
             <div class="row">
-                <div class="col-md-offset-3 col-md-6">
+                <div class="col-md-offset-3 col-md-12">
                     <button type="button" id="dataDownloadButton" class="button btn  navbar-btn">Download User Log Data</button>
                 </div>
             </div>
             {{#if isInRole 'admin'}}
               <br><br>
               <div class="row">
-                  <div class="col-md-offset-3 col-md-6">
+                  <div class="col-md-offset-3 col-md-12">
                       <button type="button" id="userAdminButton" class="button btn  navbar-btn">User Admin</button>
                   </div>
               </div>
             {{/if}}
             <br><br>
             <div class="row">
-                <div class="col-md-offset-3 col-md-6">
+                <div class="col-md-offset-3 col-md-12">
                     <button type="button" id="classEditButton" class="button btn  navbar-btn">Class Edit</button>
                 </div>
             </div>
             <br><br>
             <div class="row">
-                <div class="col-md-offset-3 col-md-6">
+                <div class="col-md-offset-3 col-md-12">
                     <button type="button" id="tdfAssignmentEditButton" class="button btn  navbar-btn">Chapter Assignments</button>
                 </div>
             </div>
             <br><br>
             <div class="row">
-                <div class="col-md-offset-3 col-md-6">
+                <div class="col-md-offset-3 col-md-12">
                     <button type="button" id="wikiButton" class="button btn  navbar-btn">MoFACTs Manuals / Wiki</button>
                 </div>
             </div>
             <br><br>
             <div class="row">
-                <div class="col-md-offset-3 col-md-6">
+                <div class="col-md-offset-3 col-md-12">
                     <button type="button" id="contentGenerationButton" class="button btn  navbar-btn">Content Generation</button>
                 </div>
             </div>

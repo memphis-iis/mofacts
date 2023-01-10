@@ -121,7 +121,7 @@ Meteor.startup(function() {
   });
 });
 
-Template.body.onRendered(function() {
+Template.DefaultLayout.onRendered(function() {
   $('#errorReportingModal').on('hidden.bs.modal', function() {
     console.log('error reporting modal hidden');
     restartMainCardTimeoutIfNecessary();
@@ -161,7 +161,7 @@ Template.body.onRendered(function() {
   });
 });
 
-Template.body.events({
+Template.DefaultLayout.events({
   'click #homeButton': function(event) {
     event.preventDefault();
     if (window.currentAudioObj) {
@@ -192,7 +192,6 @@ Template.body.events({
     if (window.currentAudioObj) {
       window.currentAudioObj.pause();
     }
-    $('#helpModal').modal('show');
   },
   'click #helpCloseButton': function(event) {
     event.preventDefault();
@@ -203,7 +202,9 @@ Template.body.events({
     event.preventDefault();
     Session.set('pausedLocks', Session.get('pausedLocks')+1);
     Session.set('errorReportStart', new Date());
-    $('#errorReportingModal').modal('show');
+    //set the modalTemplate session variable to the reportError template
+    Session.set('modalTemplate', 'reportingModal');
+    console.log("modalTemplate: " + Session.get('modalTemplate'));
   },
 
   'click #resetFeedbackSettingsButton': function(event) {
@@ -211,12 +212,6 @@ Template.body.events({
     Session.set('pausedLocks', Session.get('pausedLocks')+1);
     Session.set('displayFeedback', true);
     Session.set('resetFeedbackSettingsFromIndex', true);
-  }, 
-  'click #wikiButton': function(event) {
-    window.open(
-      'https://github.com/memphis-iis/mofacts-ies/wiki',
-      '_blank'
-    );
   }, 
   'click #errorReportingSaveButton': function(event) {
     event.preventDefault();
@@ -258,6 +253,9 @@ Template.body.events({
 });
 
 // Global template helpers
+Template.registerHelper('modalTemplate', function() {
+  return Session.get('modalTemplate');
+});
 Template.registerHelper('isLoggedIn', function() {
   return haveMeteorUser();
 });

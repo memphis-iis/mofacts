@@ -192,31 +192,7 @@ legend {
     text-overflow: ellipsis; /*Changed to keep text from overflowing outside of the button*/
 }
 
-.navbar {
-    border-radius: 0;
-}
 
-.navbar-inverse {
-    background-color: #000000;
-}
-
-.navbar-inverse .navbar-brand {
-    color: white;
-    font-family: 'Lato', sans-serif;
-    font-size: 28px;
-}
-
-.navbar-inverse .navbar-nav > li > a {
-    color: white;
-    background-color: #000000;
-    font-family: 'Lato', sans-serif;
-}
-
-.navbar-inverse .navbar-nav > li > a:focus {
-    color: white;
-    background-color: #000000;
-    font-family: 'Lato', sans-serif;
-}
 
 .form-control {
     border-radius: 0;
@@ -239,12 +215,6 @@ legend {
     color:white;
 }
 
-/*Override button hover above for buttons on the navbar*/
-.navbar .btn:hover {
-    color:white;
-    background: #118C4E;
-    opacity: 0.65;
-}
 
 .btn-fix {
     width: auto;
@@ -332,11 +302,6 @@ input:focus {
     text-align: center;
 }
 
-.modal {
-    background-color: #C1E1A6;
-    font-family: "Lato",sans-serif;
-    color: #000000;
-}
 
 .switchButton {
     background: #118C4E;
