@@ -28,3 +28,4 @@ certs
 node_modules/
 !mofacts/private/tdf/*
 db/mongodump/*
+installer/src/obj/Debug/net6.0/*
