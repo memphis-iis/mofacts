@@ -203,7 +203,11 @@ Template.DefaultLayout.events({
     Session.set('pausedLocks', Session.get('pausedLocks')+1);
     Session.set('errorReportStart', new Date());
     //set the modalTemplate session variable to the reportError template
-    Session.set('modalTemplate', 'errorReportModal');
+    templateObject = {
+      template: 'errorReportModal',
+      title: 'Report an Error',
+    }
+    Session.set('modalTemplate', templateObject);
     console.log("modalTemplate: " + Session.get('modalTemplate'));
   },
 
@@ -250,17 +254,20 @@ Template.DefaultLayout.events({
       }
     });
   },
+  'click #wikiButton': function(event) {
+    event.preventDefault();
+    if (window.currentAudioObj) {
+      window.currentAudioObj.pause();
+    }
+    //open the wiki in a new tab
+    window.open('https://github.com/memphis-iis/mofacts-ies/wiki', '_blank');
+  },
 });
-
-Template.errorReportModal.events({
-});
-
-Template.helpModal.events({
-});
-
 // Global template helpers
 Template.registerHelper('modalTemplate', function() {
-  return Session.get('modalTemplate');
+  modalTemplate = Session.get('modalTemplate');
+  console.log('modalTemplate: ' + JSON.stringify(modalTemplate));
+  return modalTemplate.template;
 });
 Template.registerHelper('isLoggedIn', function() {
   return haveMeteorUser();
