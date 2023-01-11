@@ -1108,7 +1108,7 @@ async function getTdfNamesAssignedByInstructor(instructorID) {
       }
     }
   ]).toArray();
-  assignmentTdfFileNames = assignmentTdfFileNames.map(t => t.fileName)
+  assignmentTdfFileNames = [...new Set(assignmentTdfFileNames.map(item => item.fileName))] // remove duplicates
     serverConsole('assignmentTdfFileNames', assignmentTdfFileNames);
     return assignmentTdfFileNames;
   } catch (e) {
