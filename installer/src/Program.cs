@@ -23,87 +23,95 @@ Console.WriteLine("Press any key to continue...");
 // Check if we are running on Windows and if so, download the Windows installers of VirtualBox, Git, and Vagrant
 if (os.Contains("Windows"))
 {
-    Console.WriteLine("Warning: Running on Windows is not recommended. Please use Linux if possible. Vagrant and VirtualBox are notoriously slow on Windows.");
-    Console.WriteLine("Press any key to continue...");
-    Console.ReadKey();
-    //check if we are admin
+    Console.WriteLine("Checking if you are an administrator...");
     if (System.Security.Principal.WindowsIdentity.GetCurrent().Owner.IsWellKnown(System.Security.Principal.WellKnownSidType.BuiltinAdministratorsSid))
     {
-        // Download the Windows installers of VirtualBox, Git, and Vagrant
-        Console.WriteLine("Downloading Windows installers of VirtualBox, Git, and Vagrant...");
-        string[] urls = new string[] { "https://download.virtualbox.org/virtualbox/6.1.16/VirtualBox-6.1.16-140961-Win.exe", "https://releases.hashicorp.com/vagrant/2.3.3/vagrant_2.3.3_windows_i686.msi","https://github.com/git-for-windows/git/releases/download/v2.38.1.windows.1/Git-2.38.1-32-bit.exe"};
-        string[] filenames = new string[] { "VirtualBox-6.1.16-140961-Win.exe", "vagrant_2.3.3_windows_i686.msi", "Git-2.38.1-32-bit.exe" };
-        for (int i = 0; i < urls.Length; i++)
-        {
-            using (WebClient client = new WebClient())
-            {
-                client.DownloadFile(urls[i], filenames[i]);
-            }
-        }
-        Console.WriteLine("Download complete!");
-        //Install VirtualBox headless
-        Console.WriteLine("Installing VirtualBox...");
-        Process.Start("VirtualBox-6.1.16-140961-Win.exe", "/S");
-        Console.WriteLine("VirtualBox installed!");
-        //Install Vagrant headless
-        Console.WriteLine("Installing Vagrant...");
-        Process.Start("vagrant_2.3.3_windows_i686.msi", "/quiet");
-        Console.WriteLine("Vagrant installed!");
-        //Install Git headless
-        Console.WriteLine("Installing Git...");
-        Process.Start("Git-2.38.1-32-bit.exe", "/SILENT");
-        Console.WriteLine("Git installed!");
-        //clean up
-        Console.WriteLine("Cleaning up...");
-        File.Delete("VirtualBox-6.1.16-140961-Win.exe");
-        File.Delete("vagrant_2.3.3_windows_i686.msi");
-        File.Delete("Git-2.38.1-32-bit.exe");
-        Console.WriteLine("Clean up complete!");
-        //Make Directory for Mofacts in Program Files
-        Console.WriteLine("Creating Mofacts directory in Program Files...");
-        //If the directory already exists, delete it
-        if (Directory.Exists("C:\\Program Files\\Mofacts"))
-        {
-            Directory.Delete("C:\\Program Files\\Mofacts", true);
-        }
+        //create a directory for Mofacts in C:\Program Files
+        Console.WriteLine("Creating Mofacts directory in C:\\Program Files...");
         Directory.CreateDirectory(@"C:\Program Files\MoFaCTS");
-        //Use git to clone the Mofacts repository at https://github.com/memphis-iis/mofacts-ies.git into the Mofacts directory
+        //Check if git is installed
+        Console.WriteLine("Checking if Git is installed...");
+        if (File.Exists(@"C:\Program Files\Git\bin\git.exe"))
+        {
+            Console.WriteLine("Git is installed!");
+        }
+        else
+        {
+            Console.WriteLine("Git is not installed!");
+            Console.WriteLine("Downloading Git...");
+            //download git
+            WebClient client = new WebClient();
+            client.DownloadFile("https://github.com/git-for-windows/git/releases/download/v2.39.0.windows.2/Git-2.39.0.2-64-bit.exe", @"C:\Program Files\MoFaCTS\Git-Installer.exe");
+            Console.WriteLine("Git downloaded!");
+            Console.WriteLine("Installing Git...");
+            //install git
+            Process newProcess = new Process();
+            newProcess.StartInfo.FileName = @"C:\Program Files\MoFaCTS\Git-Installer.exe";
+            newProcess.StartInfo.Arguments = "/VERYSILENT /NORESTART /NOCANCEL /SP- /CLOSEAPPLICATIONS /RESTARTAPPLICATIONS /SUPPRESSMSGBOXES";
+            newProcess.Start();
+            newProcess.WaitForExit();
+            Console.WriteLine("Git installed!");
+        }
+        //Check if Node.js v12 is installed
+        Console.WriteLine("Checking if Node.js v12 is installed...");
+        if (File.Exists(@"C:\Program Files\nodejs\node.exe"))
+        {
+            Console.WriteLine("Node.js v12 is installed!");
+        }
+        else
+        {
+            Console.WriteLine("Node.js v12 is not installed!");
+            Console.WriteLine("Downloading Node.js v12...");
+            //download node.js v12
+            WebClient client = new WebClient();
+            client.DownloadFile("https://nodejs.org/dist/v12.22.7/node-v12.22.7-x64.msi", @"C:\Program Files\MoFaCTS\node-v12.22.7-x64.msi");
+            Console.WriteLine("Node.js v12 downloaded!");
+            Console.WriteLine("Installing Node.js v12...");
+            //install node.js v12
+            Process newProcess = new Process();
+            newProcess.StartInfo.FileName = @"C:\Program Files\MoFaCTS\node-v12.22.7-x64.msi";
+            newProcess.StartInfo.Arguments = "/quiet /norestart";
+            newProcess.Start();
+            newProcess.WaitForExit();
+            Console.WriteLine("Node.js v12 installed!");
+        }
+        // use npmn to install meteor 1.12
+        Console.WriteLine("Installing Meteor 1.12...");
+        Process newProcess = new Process();
+        newProcess.StartInfo.FileName = @"C:\Program Files\nodejs\npm.cmd";
+        newProcess.StartInfo.Arguments = "install -g meteor@^1.12";
+        newProcess.Start();
+        newProcess.WaitForExit();
+        Console.WriteLine("Meteor 1.12 installed!");
+        //use git to clone the Mofacts repository
         Console.WriteLine("Cloning Mofacts repository...");
-        //change directory to Program Files
-        Directory.SetCurrentDirectory(@"C:\Program Files\MoFaCTS");
-        //clone the repository form the github url, wait for it to finish
-        Process newProcess =Process.Start("git", "clone \"https://github.com/memphis-iis/mofacts-ies.git\"");
+        newProcess.StartInfo.FileName = @"C:\Program Files\Git\bin\git.exe";
+        newProcess.StartInfo.Arguments = "clone https://github.com/memphis-iis/mofacts-ies.git";
+        newProcess.StartInfo.WorkingDirectory = @"C:\Program Files\MoFaCTS";
+        newProcess.Start();
         newProcess.WaitForExit();
         Console.WriteLine("Mofacts repository cloned!");
-        //check if C:\Program Files\MoFaCTS\mofacts-ies exists, if so, delete it
-        if (Directory.Exists(@"C:\Program Files\MoFaCTS\mofacts-ies"))
-        {
-            Console.WriteLine("Deleting old Mofacts directory...");
-            Directory.Delete(@"C:\Program Files\MoFaCTS\mofacts-ies", true);
-            Console.WriteLine("Old Mofacts directory deleted!");
-        }
-        //change directory to mofacts-ies
-        Directory.SetCurrentDirectory(@"C:\Program Files\MoFaCTS\mofacts-ies");
-        //run vagrant up
-        Console.WriteLine("Running vagrant up for initial setup...");
-        Process.Start("vagrant", "up");
-        Console.WriteLine("vagrant up complete!");
-        //shutdown
-        Console.WriteLine("Shutting down initialization...");
-        //vagrant halt
-        Process.Start("vagrant", "halt");
-        //create mofacts_windows.bat
-        Console.WriteLine("Creating mofacts_windows.bat...");
-        File.WriteAllText(@"C:\Program Files\MoFaCTS\mofacts_windows.bat", "cd C:\\Program Files\\MoFaCTS\\mofacts-ies\r vagrant up");
-        Console.WriteLine("mofacts_windows.bat created!");
-        //copy mofacts_windows.bat to desktop
-        Console.WriteLine("Copying mofacts_windows.bat to desktop...");
-        File.Copy(@"C:\Program Files\MoFaCTS\mofacts_windows.bat", @"C:\Users\Public\Desktop\mofacts_windows.bat");
-        Console.WriteLine("Installation complete!");
-        Console.WriteLine("Please restart your computer to complete the installation.");
-        Console.WriteLine("You can now run Mofacts by running the mofacts_windows.bat file on your desktop.");
-        Console.WriteLine("Press any key to exit...");
-        Console.ReadKey();
+        //use cmd to run  meteor npm install
+        Console.WriteLine("Installing Mofacts dependencies...");
+        newProcess.StartInfo.FileName = @"C:\Windows\System32\cmd.exe";
+        newProcess.StartInfo.Arguments = "/c meteor npm install";
+        newProcess.StartInfo.WorkingDirectory = @"C:\Program Files\MoFaCTS\mofacts-ies";
+        newProcess.Start();
+        newProcess.WaitForExit();
+        Console.WriteLine("Mofacts dependencies installed!");
+        //create bat file to run meteor
+        Console.WriteLine("Creating bat file to run Mofacts...");
+        string[] lines = { "cd C:\\Program Files\\MoFaCTS\\mofacts-ies", "meteor" };
+        File.WriteAllLines(@"C:\Program Files\MoFaCTS\mofacts.bat", lines);
+        Console.WriteLine("Bat file created!");
+        //create desktop shortcut
+        Console.WriteLine("Creating desktop shortcut...");
+        string shortcutPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + @"\Mofacts.lnk";
+        IWshShortcut shortcut = (IWshShortcut)new WshShell().CreateShortcut(shortcutPath);
+        shortcut.Description = "Mofacts";
+        shortcut.TargetPath = @"C:\Program Files\MoFaCTS\mofacts.bat";
+        shortcut.Save();
+        Console.WriteLine("Desktop shortcut created!");
     } else {
         Console.WriteLine("You must be an administrator to run this program.");
         Console.WriteLine("Press any key to exit...");
