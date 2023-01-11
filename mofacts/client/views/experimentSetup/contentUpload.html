@@ -12,7 +12,7 @@
         {{/if}}
         <br>
         <div class="row"> 
-            <div class="col-md-2">
+            <div class="col-md-4">
                 <legend class="text-center">Upload Stimulus File(s)</legend>
                 <div class="form-group">
                     <span class="btn btn-default btn-file">
@@ -29,7 +29,7 @@
                 </div>
             </div>
 
-            <div class="col-md-2">
+            <div class="col-md-4">
                 <legend class="text-center">Upload TDF File(s)</legend>
                 <div class="form-group">
                     <span class="btn btn-default btn-file">
@@ -44,7 +44,7 @@
             </div>
 
 
-            <div class="col-md-2">
+            <div class="col-md-4">
                 <legend class="text-center">Upload Package</legend>
                 <div class="form-group">
                     <span class="btn btn-default btn-file">
@@ -57,11 +57,13 @@
                     Upload Package
                 </button>
             </div>
-            <div class="col-md-6 table-responsive">
+            </div>
+            <div class="row">
+            <div class="col-md-12 table-responsive">
                 <legend class="text-center">Your Uploaded Files</legend>
                 <p>*Deleting a stim will delete the corresponding TDF and all related history. Deleting is not recoverable.</p>
 
-                <p><span class="glyphicon glyphicon-download-alt" aria-hidden="true"></span>Download<br><span class="glyphicon glyphicon-share-alt" aria-hidden="true"></span>Export</p>
+                <p><span class="fa fa-download" aria-hidden="true"></span>Download<br><span class="fa fa-share" aria-hidden="true"></span>Export</p>
             
                 <table class="table table-striped table-bordered table-condensed">
                     <thead>
@@ -77,14 +79,14 @@
                             <tr>
                                 <td>tdf</td>
                                 <td>{{content.fileName}}</td>
-                                <td><button id="tdf-download-btn" value="{{_id}}" class="btn"><span class="glyphicon glyphicon-download-alt" aria-hidden="true"></span></button></td>
-                                <td><button id="tdf-delete-btn" value="{{_id}}" data-filename="{{fileName}}" class="btn"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></button></td>
+                                <td><button id="tdf-download-btn" value="{{_id}}" class="btn"><span class="fa fa-download" aria-hidden="true"></span></button></td>
+                                <td><button id="tdf-delete-btn" value="{{_id}}" data-filename="{{fileName}}" class="btn"><span class="fa fa-minus" aria-hidden="true"></span></button></td>
                             </tr>
                             <tr>
                                 <td>stim</td>
                                 <td>{{content.tdfs.tutor.setspec.stimulusfile}}</td>
-                                <td><button id="stim-download-btn" value="{{stimuliSetId}}" class="btn"><span class="glyphicon glyphicon-download-alt" aria-hidden="true"></span></button></td>
-                                <td><button id="stim-delete-btn" value="{{stimuliSetId}}" data-filename="{{fileName}}" class="btn"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></button></td>
+                                <td><button id="stim-download-btn" value="{{stimuliSetId}}" class="btn"><span class="fa fa-download" aria-hidden="true"></span></button></td>
+                                <td><button id="stim-delete-btn" value="{{stimuliSetId}}" data-filename="{{fileName}}" class="btn"><span class="fa fa-minus" aria-hidden="true"></span></button></td>
                             </tr>
                         {{/each}}
                         {{#each assetLink}}
@@ -102,10 +104,10 @@
                                 </td> -->
                                 <td>
                                     <a href="{{meta.link}}?download=true" download="{{name}}" target="_parent">
-                                        <button id="assetDownloadButton" value="{{_id}}" class="btn"><span class="glyphicon glyphicon-download-alt" aria-hidden="true"></span></button>
+                                        <button id="assetDownloadButton" value="{{_id}}" class="btn"><span class="fa fa-download" aria-hidden="true"></span></button>
                                     </a>
                                 </td>
-                                <td><button id="assetDeleteButton" value="{{_id}}" data-id="{{_id}}" class="btn"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></button></td>
+                                <td><button id="assetDeleteButton" value="{{_id}}" data-id="{{_id}}" class="btn"><span class="fa fa-minus" aria-hidden="true"></span></button></td>
                             </tr>
                         {{/each}}
                     </tbody>
