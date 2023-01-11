@@ -651,7 +651,7 @@ function modelUnitEngine() {
             optimalProb = currentDeliveryParams.optimalThreshold || 0.90;
           }
           const dist = Math.abs(Math.log(stim.probabilityEstimate/(1-stim.probabilityEstimate)) - optimalProb);
-          if (dist <= currentMin) {
+          if (dist < currentMin) {
             currentMin = dist;
             clusterIndex=i;
             stimIndex=j;
