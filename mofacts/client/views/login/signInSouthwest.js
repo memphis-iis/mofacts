@@ -70,7 +70,7 @@ function testLogin() {
           // Note that we force Meteor to think we have a user name so that
           // it doesn't try it as an email - this let's you test email-like
           // users, which you can promote to admin or teacher
-          Meteor.loginWithPassword({'username': testUserName}, testPassword, function(loginerror) {
+          Meteor.loginWithPassword({'username': testUserName}, testPassword, async function(loginerror) {
             if (typeof loginerror !== 'undefined') {
               console.log('ERROR: The user was not logged in on TEST sign in?', testUserName, 'Error:', loginerror);
               alert('It appears that you couldn\'t be logged in as ' + testUserName);
@@ -86,12 +86,11 @@ function testLogin() {
                 sectionName = "/" + Session.get('curClass').sectionName;
               }
               const entryPoint = `${Session.get('curTeacher').username}/${Session.get('curClass').courseName + sectionName}`
-              Meteor.call('setUserLoginData', entryPoint, Session.get('curTeacher'), Session.get('curClass'));
-              Meteor.call('setLoginMode',  'southwest');
+              await meteorCallAsync('setUserLoginData', entryPoint, 'southwest', Session.get('curTeacher'), Session.get('curClass'));
               Meteor.call('logUserAgentAndLoginTime', Meteor.userId(), navigator.userAgent);
               Meteor.call('updatePerformanceData', 'login', 'signinSouthwest.testLogin', Meteor.userId());
               Meteor.logoutOtherClients();
-              Router.go('/profileSouthwest');
+              Router.go('/profile');
             }
           });
         });
@@ -234,7 +233,7 @@ Template.signInSouthwest.events({
       if (!!data && !!data.error) {
         alert('Problem logging in: ' + data.error);
       } else {
-        Meteor.call('addUserToTeachersClass', Meteor.userId(), Session.get('curTeacher')._id, Session.get('curClass').sectionId, function(err, result) {
+        Meteor.call('addUserToTeachersClass', Meteor.userId(), Session.get('curTeacher')._id, Session.get('curClass').sectionId, async function(err, result) {
           if (err) {
             console.log('error adding user to teacher class: ' + err);
           }
@@ -244,12 +243,11 @@ Template.signInSouthwest.events({
             sectionName = "/" + Session.get('curClass').sectionName;
           }
           const entryPoint = `${Session.get('curTeacher').username}/${Session.get('curClass').courseName + sectionName}`
-          Meteor.call('setUserLoginData', entryPoint, Session.get('curTeacher'), Session.get('curClass'));
-          Meteor.call('setLoginMode', 'southwest');
+          await meteorCallAsync('setUserLoginData', entryPoint, 'southwest', Session.get('curTeacher'), Session.get('curClass'));
           Meteor.call('logUserAgentAndLoginTime', Meteor.userId(), navigator.userAgent);
           Meteor.call('updatePerformanceData', 'login', 'signinSouthwest.clickSamlLogin', Meteor.userId());
           Meteor.logoutOtherClients();
-          Router.go('/profileSouthwest');
+          Router.go('/profile');
         });
       }
     });

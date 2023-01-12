@@ -3,6 +3,7 @@ import {haveMeteorUser} from '../lib/currentTestingHelpers';
 import {instructContinue} from '../views/experiment/instructions';
 import {Cookie} from './cookies';
 import {displayify} from '../../common/globalHelpers';
+import {afterFeedbackCallback} from '../views/experiment/card'
 
 export {routeToSignin};
 /* router.js - the routing logic we use for the application.
@@ -155,7 +156,6 @@ const defaultBehaviorRoutes = [
 const restrictedRoutes = [
   'multiTdfSelect',
   'turkWorkflow',
-  'contentUpload',
   'dataDownload',
   'userProfileEdit',
   'userAdmin',
@@ -163,10 +163,7 @@ const restrictedRoutes = [
   'tdfAssignmentEdit',
   'instructorReporting',
   'studentReporting',
-  'voice',
-  'feedback',
-  'assetUpload',
-  'profileSouthwest'
+  'feedback'
 ];
 
 const getDefaultRouteAction = function(routeName) {
@@ -208,11 +205,13 @@ for (const route of defaultBehaviorRoutes) {
 Router.route('/', {
   name: 'client.index',
   action: function() {
-    if(Meteor.user()){
+    if(Meteor.user() && Meteor.user().profile.loginMode != 'experiment'){
       this.redirect('/profile');
     } else {
       // If they are navigating to "/" then we clear the (possible) cookie
       // keeping them in experiment mode
+      if(Meteor.user())
+        Meteor.logout();
       Cookie.set('isExperiment', '0', 1); // 1 day
       Cookie.set('experimentTarget', '', 1);
       Cookie.set('experimentXCond', '', 1);
@@ -222,7 +221,28 @@ Router.route('/', {
   },
 });
 
+Router.route('/contentUpload', {
+  name: 'client.contentUpload',
+  action: function() {
+    if(Meteor.user()){
+      this.subscribe('contentUpload').wait();
+      this.render('contentUpload');
+    } else {
+      this.redirect('/');
+    }
+  }
+})
 
+Router.route('/adminControls', {
+  name: 'client.adminControls',
+  action: function() {
+    if(Meteor.user() && Roles.userIsInRole(Meteor.user(), ['admin'])){
+      this.render('adminControls');
+    } else {
+      this.redirect('/');
+    }
+  }
+})
 
 Router.route('/profile', {
   name: 'client.profile',
@@ -237,7 +257,14 @@ Router.route('/profile', {
       if (loginMode === 'southwest') {
         console.log('southwest login, routing to southwest profile');
         Session.set('curModule', 'profileSouthwest');
-        this.redirect('/profileSouthwest');
+        this.render('/profile');
+      } else if (loginMode === 'experiment') {
+        Meteor.logout();
+        Cookie.set('isExperiment', '0', 1); // 1 day
+        Cookie.set('experimentTarget', '', 1);
+        Cookie.set('experimentXCond', '', 1);
+        Session.set('curModule', 'signinoauth');
+        this.redirect('/signIn');
       } else { // Normal login mode
         console.log('else, progress');
         Session.set('curModule', 'profile');
@@ -443,6 +470,20 @@ Router.route('/card', {
       this.redirect('/');
     }
   },
+  unload: async function() {
+    let timeout = Session.get('CurTimeoutId')
+    if(Meteor.user() && timeout){
+      Meteor.clearTimeout(timeout);
+      let trialEndTimeStamp = Session.get('trialEndTimeStamp');
+      let trialStartTimeStamp = Session.get('trialStartTimeStamp');
+      let isTimeout = Session.get('isTimeout');
+      let isCorrect = Session.get('isCorrect');
+      let testType = Session.get('testType');
+      let deliveryParams = Session.get('currentDeliveryParams');
+      let answerLogRecord = Session.get('answerLogRecord');
+      afterFeedbackCallback(trialEndTimeStamp, trialStartTimeStamp, isTimeout, isCorrect, testType, deliveryParams, answerLogRecord, 'router');
+    }
+  }
 });
 
 // We track the start time for instructions, which means we need to track

@@ -390,11 +390,19 @@ function getCurrentDeliveryParams() {
     'allowPhoneticMatching': false,
     'useSpellingCorrection': false,
     'editDistance': 1,
+    'optimalThreshold': false,
   };
 
   // We've defined defaults - also define translatations for values
   function xlateBool(v) {
     return v ? _.trim(v).toLowerCase() === 'true' : false;
+  }
+
+  function randListItem(list) {
+    if(Array.isArray(list)) {
+      return list[Math.floor(Math.random() * list.length)];
+    }
+    return list;
   }
 
   const xlations = {
@@ -424,6 +432,7 @@ function getCurrentDeliveryParams() {
     'allowPhoneticMatching': xlateBool,
     'useSpellingCorrection': xlateBool,
     'editDistance': _.intval,
+    'optimalThreshold': _.intval,
   };
 
   let modified = false;
@@ -435,7 +444,8 @@ function getCurrentDeliveryParams() {
   if (currUnit) {
     // We have a unit
     if (currUnit.deliveryparams) {
-      sourceDelParams = currUnit.deliveryparams;
+      // We may have multiple delivery params - select one
+      sourceDelParams = randListItem(currUnit.deliveryparams);
     }
   } else {
     // No unit - we look for the top-level deliveryparams
