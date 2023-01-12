@@ -16,7 +16,7 @@ Package.on_use(function (api) {
 
 Package.onTest((api) => {
   // Sets up a dependency on this package.
-  api.use('steffo:meteor-accounts-saml-iis-version-2-10-2020');
+  api.use('slocal-test:steffo:meteor-accounts-saml@0.0.18');
   // Use the Mocha test framework.
   api.use('practicalmeteor:mocha@2.4.5_2');
 });

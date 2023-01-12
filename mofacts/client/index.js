@@ -121,7 +121,7 @@ Meteor.startup(function() {
   });
 });
 
-Template.body.onRendered(function() {
+Template.DefaultLayout.onRendered(function() {
   $('#errorReportingModal').on('hidden.bs.modal', function() {
     console.log('error reporting modal hidden');
     restartMainCardTimeoutIfNecessary();
@@ -161,7 +161,7 @@ Template.body.onRendered(function() {
   });
 });
 
-Template.body.events({
+Template.DefaultLayout.events({
   'click #homeButton': function(event) {
     event.preventDefault();
     if (window.currentAudioObj) {
@@ -192,7 +192,6 @@ Template.body.events({
     if (window.currentAudioObj) {
       window.currentAudioObj.pause();
     }
-    $('#helpModal').modal('show');
   },
   'click #helpCloseButton': function(event) {
     event.preventDefault();
@@ -203,7 +202,13 @@ Template.body.events({
     event.preventDefault();
     Session.set('pausedLocks', Session.get('pausedLocks')+1);
     Session.set('errorReportStart', new Date());
-    $('#errorReportingModal').modal('show');
+    //set the modalTemplate session variable to the reportError template
+    templateObject = {
+      template: 'errorReportModal',
+      title: 'Report an Error',
+    }
+    Session.set('modalTemplate', templateObject);
+    console.log("modalTemplate: " + Session.get('modalTemplate'));
   },
 
   'click #resetFeedbackSettingsButton': function(event) {
@@ -211,12 +216,6 @@ Template.body.events({
     Session.set('pausedLocks', Session.get('pausedLocks')+1);
     Session.set('displayFeedback', true);
     Session.set('resetFeedbackSettingsFromIndex', true);
-  }, 
-  'click #wikiButton': function(event) {
-    window.open(
-      'https://github.com/memphis-iis/mofacts-ies/wiki',
-      '_blank'
-    );
   }, 
   'click #errorReportingSaveButton': function(event) {
     event.preventDefault();
@@ -255,9 +254,21 @@ Template.body.events({
       }
     });
   },
+  'click #wikiButton': function(event) {
+    event.preventDefault();
+    if (window.currentAudioObj) {
+      window.currentAudioObj.pause();
+    }
+    //open the wiki in a new tab
+    window.open('https://github.com/memphis-iis/mofacts-ies/wiki', '_blank');
+  },
 });
-
 // Global template helpers
+Template.registerHelper('modalTemplate', function() {
+  modalTemplate = Session.get('modalTemplate');
+  console.log('modalTemplate: ' + JSON.stringify(modalTemplate));
+  return modalTemplate.template;
+});
 Template.registerHelper('isLoggedIn', function() {
   return haveMeteorUser();
 });

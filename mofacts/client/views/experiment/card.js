@@ -1432,18 +1432,20 @@ async function showUserFeedback(isCorrect, feedbackMessage, afterAnswerFeedbackC
     $('#UserInteraction').html('<p class="text-align alert alert-danger">' + buttonImageFeedback +
       '</p><img style="background: url(' + correctImageSrc +
       '); background-size:100%; background-repeat: no-repeat;" disabled="" \
-      class="btn-alt btn-block btn-image btn-responsive">').show();
+      class="btn-alt btn-block btn-image btn-responsive">').show().attr("hidden",false);
   } else {
     $('#UserInteraction')
         .removeClass('alert-success alert-danger')
         .addClass('text-align alert')
         .addClass(isCorrect ? 'alert-success' : 'alert-danger')
         .text(feedbackMessage)
-        .show();
+        .attr("hidden",false)
+        .show()
         if(!isCorrect){
           $('#CountdownTimer')
             .addClass('text-align')
             .text('Continuing in: ')
+            .attr("hidden",false)
             .show();
 
           var countDownStart = new Date().getTime();
@@ -1510,7 +1512,7 @@ async function showUserFeedback(isCorrect, feedbackMessage, afterAnswerFeedbackC
 let afterUserFeedbackForceCorrectCb = undefined;
 function doClearForceCorrect(doForceCorrect, afterAnswerFeedbackCbBound) {
   if (doForceCorrect) {
-    $('#forceCorrectionEntry').show();
+    $('#forceCorrectionEntry').show().attr("hidden",false);
 
     if (getTestType() === 'n') {
       const prompt = Session.get('currentDeliveryParams').forcecorrectprompt;
@@ -2134,7 +2136,7 @@ async function newQuestionHandler() {
     $('#textEntryRow').hide();
     setUpButtonTrial();
   } else {
-    $('#textEntryRow').show();
+    $('#textEntryRow').show().attr("hidden",false);
   }
 
   // If this is a study-trial and we are displaying a cloze, then we should
@@ -2154,7 +2156,7 @@ async function newQuestionHandler() {
   checkSimulation();
 
   if (Session.get('showOverlearningText')) {
-    $('#overlearningRow').show();
+    $('#overlearningRow').show().attr("hidden",false);
   }
 }
 
@@ -3001,7 +3003,7 @@ async function removeCardByUser() {
   Session.set('CurTimeoutId', undefined);
   Session.set('CurIntervalId', undefined);
   document.getElementById("CountdownTimer").innerHTML = "";
-  $('#removalFeedback').show();
+  $('#removalFeedback').show().attr("hidden",false);
 
   let clusterIndex = Session.get('clusterIndex');
   let stims = getStimCluster(clusterIndex).stims; 

@@ -94,9 +94,6 @@ let donutOptionsMasteredItems = {
   generateGradient: true
 };
 
-//Set Tooltips
-// Select all elements with data-toggle="tooltips" in the document
-$('[data-toggle="tooltip"]').tooltip();
 
 Template.studentReporting.helpers({
   studentReportingTdfs: () => Session.get('studentReportingTdfs'),
