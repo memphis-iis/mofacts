@@ -11,7 +11,7 @@ import {
   updateCurStudentPerformance,
   getAllCurrentStimAnswers
 } from '../../lib/currentTestingHelpers';
-import {updateExperimentState, updateExperimentStateSync} from './card';
+import {getCurrentClusterAndStimIndices, updateExperimentState, updateExperimentStateSync} from './card';
 import {MODEL_UNIT, SCHEDULE_UNIT} from '../../../common/Definitions';
 import {meteorCallAsync} from '../../index';
 import {displayify} from '../../../common/globalHelpers';
@@ -219,21 +219,8 @@ function defaultUnitEngine(curExperimentData) {
           }
         } 
       }else{
-        let answerLocation = currentQuestion.indexOf(' _');
-        if(answerLocation != -1){
-          var regex = regex = / _/gi, result, indecies = [];
-          while ( (result = regex.exec(currentQuestion)) ) {
-            indecies.push(result.index);
-          }
-          for(let index of indecies){
-            let answerBlanks = ""
-            currentQuestion = currentQuestion.replaceAll("_","");
-            for(i=0;i<currentStimAnswerWordCount;i++){
-              answerBlanks += `&nbsp;<u>${blank + blank}</u>`;
-            }
-            currentQuestion = currentQuestion.slice(0,index) + answerBlanks + currentQuestion.slice(index);
-          }
-        }
+        const regex = /([_])+/g
+        currentQuestion = currentQuestion.replaceAll(regex, `<u>${blank + blank}</u>`)
       }
 
       console.log('setUpCardQuestionSyllables:', currentQuestion, currentQuestionPart2,
@@ -255,6 +242,8 @@ function defaultUnitEngine(curExperimentData) {
         imgSrc: curStim.imageStimulus,
         videoSrc: curStim.videoStimulus,
         clozeText: curStim.clozeStimulus || curStim.clozeText,
+        hintsEnabled: curStim.hintsEnabled
+
       }));
       if (curStim.alternateDisplays) {
         const numPotentialDisplays = curStim.alternateDisplays.length + 1;
@@ -269,6 +258,7 @@ function defaultUnitEngine(curExperimentData) {
             imgSrc: curAltDisplay.imageStimulus,
             videoSrc: curAltDisplay.videoStimulus,
             clozeText: curAltDisplay.clozeStimulus || curAltDisplay.clozeText,
+            hintsEnabled: curAltDisplay.hintsEnabled
           }));
         }
       }
@@ -314,9 +304,36 @@ function defaultUnitEngine(curExperimentData) {
 
       if (currentAnswerSyllables) {
         curStim.answerSyllables = currentAnswerSyllables;
-        curStim.hintLevel = whichHintLevel;
+        curStim.hintLevel = 0;
+        //check for tdf hints enabled
+        const TDFId = Session.get('currentTdfId');
+        const AllTDFS = Session.get('allTdfs');
+        //search for tdf with matching id
+        const currentTdfFile = AllTDFS.find(tdf => tdf._id === TDFId);
+        tdfHintsEnabled = currentTdfFile.content.tdfs.tutor.setspec.hintsEnabled == "true";
+        //check for stim hints enabled
+        stimHintsEnabled = currentDisplay.hintsEnabled;
+        //if both are enabled, use hints
+        if (tdfHintsEnabled && stimHintsEnabled) {
+          curStim.hintLevel = whichHintLevel;
+          console.log('HintLevel: setUpCardQuestionAndAnswerGlobals',whichHintLevel);
+        }
+        //if only tdf hints are enabled, use hints
+        else if (tdfHintsEnabled && !stimHintsEnabled) {
+          curStim.hintLevel = whichHintLevel;
+          console.log('HintLevel: setUpCardQuestionAndAnswerGlobals',whichHintLevel);
+        }
+        //if only stim hints are enabled, use hints
+        else if (!tdfHintsEnabled && stimHintsEnabled) {
+          curStim.hintLevel = whichHintLevel;
+          console.log('HintLevel: setUpCardQuestionAndAnswerGlobals',whichHintLevel);
+        }
+        //if neither are enabled, do not use hints
+        else {
+          curStim.hintLevel = 0;
+          console.log('HintLevel: setUpCardQuestionAndAnswerGlobals, Hints Disabled',whichHintLevel);
+        }
       }
-
       Session.set('currentAnswerSyllables', currentAnswerSyllables);
       Session.set('currentAnswer', currentAnswer);
       Session.set('clozeQuestionParts', clozeQuestionParts);
@@ -567,12 +584,15 @@ function modelUnitEngine() {
     return {clusterIndex, stimIndex, hintLevelIndex};
   }
 
-  function findMaxProbCardAndHintLevel(cards, ceiling, hiddenItems) {
+  function findMaxProbCardAndHintLevel(cards, ceiling, hiddenItems, currentDeliveryParams) {
     console.log('findMaxProbCardAndHintLevel');
     let currentMax = 0;
     let clusterIndex=-1;
     let stimIndex=-1;
     let hintLevelIndex=-1;
+    if(currentDeliveryParams && currentDeliveryParams.optimalThreshold) {
+      ceiling = currentDeliveryParams.optimalThreshold;
+    }
 
     for (let i=0; i<cards.length; i++) {
       const card = cards[i];
@@ -607,7 +627,7 @@ function modelUnitEngine() {
     return {clusterIndex, stimIndex, hintLevelIndex};
   }
 
-  function findMinProbDistCard(cards, hiddenItems) {
+  function findMinProbDistCard(cards, hiddenItems, currentDeliveryParams) {
     console.log('findMinProbDistCard');
     let currentMin = 50.0;
     let clusterIndex=-1;
@@ -628,10 +648,10 @@ function modelUnitEngine() {
           optimalProb = Math.log(parameters[1]/(1-parameters[1]));
           if (!optimalProb) {
             // console.log("NO OPTIMAL PROB SPECIFIED IN STIM, DEFAULTING TO 0.90");
-            optimalProb = 0.90;
+            optimalProb = currentDeliveryParams.optimalThreshold || 0.90;
           }
           const dist = Math.abs(Math.log(stim.probabilityEstimate/(1-stim.probabilityEstimate)) - optimalProb);
-          if (dist <= currentMin) {
+          if (dist < currentMin) {
             currentMin = dist;
             clusterIndex=i;
             stimIndex=j;
@@ -656,7 +676,7 @@ function modelUnitEngine() {
     return {clusterIndex, stimIndex, hintLevelIndex};
   }
 
-  function findMaxProbCardThresholdCeilingPerCard(cards, hiddenItems) {
+  function findMaxProbCardThresholdCeilingPerCard(cards, hiddenItems, currentDeliveryParams) {
     console.log('findMaxProbCardThresholdCeilingPerCard');
     let currentMax = 0;
     let clusterIndex=-1;
@@ -676,7 +696,7 @@ function modelUnitEngine() {
           let thresholdCeiling=parameters[1];
           if (!thresholdCeiling) {
             //  console.log("NO THRESHOLD CEILING SPECIFIED IN STIM, DEFAULTING TO 0.90");
-            thresholdCeiling = 0.90;
+            thresholdCeiling = currentDeliveryParams.optimalThreshold || 0.90;
           }
           if (stim.probabilityEstimate > currentMax && stim.probabilityEstimate < thresholdCeiling) {
             currentMax = stim.probabilityEstimate;
@@ -1451,9 +1471,10 @@ function modelUnitEngine() {
       this.calculateCardProbabilities();
       const hiddenItems = Session.get('hiddenItems');
       const cards = cardProbabilities.cards;
+      const currentDeliveryParams = Session.get('currentDeliveryParams');
       switch (this.unitMode) {
         case 'thresholdCeiling':
-          indices = findMaxProbCardThresholdCeilingPerCard(cards, hiddenItems);
+          indices = findMaxProbCardThresholdCeilingPerCard(cards, hiddenItems, currentDeliveryParams);
           console.log('thresholdCeiling, indicies:', JSON.parse(JSON.stringify(indices)));
           if (indices.clusterIndex === -1) {
             console.log('thresholdCeiling failed, reverting to min prob');
@@ -1461,17 +1482,17 @@ function modelUnitEngine() {
           }
           break;
         case 'distance':
-          indices = findMinProbDistCard(cards, hiddenItems);
+          indices = findMinProbDistCard(cards, hiddenItems, currentDeliveryParams);
           break;
         case 'highest':
           // Magic number to indicate there is no real ceiling (probs should max out at 1.0)
-          indices = findMaxProbCardAndHintLevel(cards, 1.00001, hiddenItems);
+          indices = findMaxProbCardAndHintLevel(cards, 1.00001, hiddenItems, currentDeliveryParams);
           if (indices.clusterIndex === -1) {
             indices = findMinProbCardAndHintLevel(cards, hiddenItems);
           }
           break;
         default:
-          indices = findMaxProbCardAndHintLevel(cards, 0.90, hiddenItems);
+          indices = findMaxProbCardAndHintLevel(cards, 0.90, hiddenItems, currentDeliveryParams);
           if (indices.clusterIndex === -1) {
             indices = findMinProbCardAndHintLevel(cards, hiddenItems);
           }

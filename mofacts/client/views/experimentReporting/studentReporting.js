@@ -203,9 +203,6 @@ async function drawDashboard(studentId, selectedTdfId){
     }
   }
   console.log('selectedTdfIdProgressReportParams',selectedTdfIdProgressReportParams);
-  if(typeof selectedTdfIdProgressReportParams === "undefined"){
-    selectedTdfIdProgressReportParams = [0.7,30,60,30,90,60];
-  } 
   const [optimumDifficulty, difficultyHistory, masteryDisplay, masteryHistory, timeToMasterDisplay, timeToMasterHistory] = selectedTdfIdProgressReportParams;
   console.log('expanded params',  optimumDifficulty, difficultyHistory, masteryDisplay, masteryHistory, timeToMasterDisplay, timeToMasterHistory);
   //Get Student Data

@@ -2,26 +2,22 @@ import {meteorCallAsync} from '../..';
 import {blankPassword} from '../../lib/currentTestingHelpers';
 import {sessionCleanUp} from '../../lib/sessionUtils';
 import {displayify} from '../../../common/globalHelpers';
+import {selectTdf} from '../home/profile'
 import {routeToSignin} from '../../lib/router';
-
-
-Template.signIn.onCreated(async function() {
-  Session.set('loginMode', 'password');
- 
-  let verifiedTeachers = await meteorCallAsync('getAllTeachers');
-  console.log('verifiedTeachers', verifiedTeachers);
-
-  console.log('got teachers');
-  Session.set('showTestLogins', true);
-  Session.set('teachers', verifiedTeachers);
-});
 
 Template.signIn.onRendered(async function() {
   if (Session.get('loginMode') !== 'experiment') {
     console.log('password signin, setting login mode');
     Session.set('loginMode', 'password');
+ 
+    let verifiedTeachers = await meteorCallAsync('getAllTeachers');
+    console.log('verifiedTeachers', verifiedTeachers);
+  
+    console.log('got teachers');
+    Session.set('showTestLogins', true);
+    Session.set('teachers', verifiedTeachers);
   }
-  if(Meteor.userId()){
+  if(Meteor.userId() && Meteor.user().profile.loginMode !== 'experiment'){
     console.log("already logged in")
     Router.go("/profile");
   }
@@ -88,7 +84,7 @@ Template.signIn.events({
       loginStyle: 'popup',
     };
 
-    Meteor.loginWithGoogle(options, function(err) {
+    Meteor.loginWithGoogle(options, async function(err) {
       if (err) {
         $('#signInButton').prop('disabled', false);
         // error handling
@@ -104,8 +100,7 @@ Template.signIn.events({
       }
       Meteor.call('logUserAgentAndLoginTime', Meteor.userId(), navigator.userAgent);
       Meteor.call('updatePerformanceData', 'login', 'signinOauth.clickSigninButton', Meteor.userId());
-      Meteor.call('setUserEntryPoint', `direct`);
-      Meteor.call('setLoginMode', Session.get('loginMode'));
+      await meteorCallAsync('setUserLoginData', `direct`, Session.get('loginMode'));
       Meteor.logoutOtherClients();
       Router.go('/profile');
     });
@@ -158,10 +153,10 @@ Template.signIn.helpers({
 // Implementation functions
 
 // Called after we have signed in
-function signinNotify() {
+function signinNotify(landingPage = '/profile') {
   if(Session.get('curTeacher') && Session.get('curClass')){
     Meteor.call('addUserToTeachersClass', Meteor.userId(), Session.get('curTeacher')._id, Session.get('curClass').sectionId,
-    function(err, result) {
+    async function(err, result) {
       if (err) {
         console.log('error adding user to teacher class: ' + err);
         alert(err);
@@ -173,8 +168,7 @@ function signinNotify() {
         sectionName = "/" + Session.get('curClass').sectionName;
       }
       const entryPoint = `${Session.get('curTeacher').username}/${Session.get('curClass').courseName + sectionName}`
-      Meteor.call('setUserLoginData', entryPoint, Session.get('curTeacher'), Session.get('curClass'));
-      Meteor.call('setLoginMode', Session.get('loginMode'));
+      await meteorCallAsync('setUserLoginData', entryPoint, Session.get('loginMode'), Session.get('curTeacher'), Session.get('curClass'));
 
     });
   }
@@ -186,7 +180,8 @@ function signinNotify() {
     Meteor.call('logUserAgentAndLoginTime', Meteor.userId(), navigator.userAgent);
   }
   Meteor.logoutOtherClients();
-  Router.go('/profile');
+  if(landingPage)
+    Router.go(landingPage);
 }
 
 function userPasswordCheck() {
@@ -210,15 +205,37 @@ function userPasswordCheck() {
       sessionCleanUp();
       Session.set('experimentPasswordRequired', true);
       console.log('username:' + newUsername + ',password:' + newPassword);
-      Meteor.loginWithPassword(newUsername, newPassword, function(error) {
+      Meteor.loginWithPassword(newUsername, newPassword, async function(error) {
         if (typeof error !== 'undefined') {
           console.log('ERROR: The user was not logged in on experiment sign in?', newUsername, 'Error:', error);
           alert('It appears that you couldn\'t be logged in as ' + newUsername);
           $('#signInButton').prop('disabled', false);
         } else {
-          signinNotify();
-          Meteor.call('setUserEntryPoint', `direct`);
-          Meteor.call('setLoginMode', Session.get('loginMode'));
+          let experimentTarget = Session.get('experimentTarget');
+          if (experimentTarget) experimentTarget = experimentTarget.toLowerCase();
+          let foundExpTarget = await meteorCallAsync('getTdfByExperimentTarget', experimentTarget);
+          const setspec = foundExpTarget.content.tdfs.tutor.setspec ? foundExpTarget.content.tdfs.tutor.setspec : null;
+          const ignoreOutOfGrammarResponses = setspec.speechIgnoreOutOfGrammarResponses ?
+          setspec.speechIgnoreOutOfGrammarResponses.toLowerCase() == 'true' : false;
+          const speechOutOfGrammarFeedback = setspec.speechOutOfGrammarFeedback ?
+          setspec.speechOutOfGrammarFeedback : 'Response not in answer set';
+
+          if (foundExpTarget) {
+            selectTdf(
+                foundExpTarget._id,
+                setspec.lessonname,
+                foundExpTarget.stimuliSetId,
+                ignoreOutOfGrammarResponses,
+                speechOutOfGrammarFeedback,
+                'Auto-selected by experiment target ' + experimentTarget,
+                foundExpTarget.content.isMultiTdf,
+                false,
+                setspec,
+                true
+            );
+          }
+          signinNotify(false);
+          await meteorCallAsync('setUserLoginData', 'direct', Session.get('loginMode'));
         }
       });
 
@@ -252,15 +269,37 @@ function userPasswordCheck() {
 
         sessionCleanUp();
 
-        Meteor.loginWithPassword(newUsername, newPassword, function(error) {
+        Meteor.loginWithPassword(newUsername, newPassword, async function(error) {
           if (typeof error !== 'undefined') {
             console.log('ERROR: The user was not logged in on experiment sign in?', newUsername, 'Error:', error);
             alert('It appears that you couldn\'t be logged in as ' + newUsername);
             $('#signInButton').prop('disabled', false);
           } else {
-            signinNotify();
-            Meteor.call('setUserEntryPoint', `direct`);
-            Meteor.call('setLoginMode', Session.get('loginMode'));
+            let experimentTarget = Session.get('experimentTarget');
+            if (experimentTarget) experimentTarget = experimentTarget.toLowerCase();
+            let foundExpTarget = await meteorCallAsync('getTdfByExperimentTarget', experimentTarget);
+            const setspec = foundExpTarget.content.tdfs.tutor.setspec ? foundExpTarget.content.tdfs.tutor.setspec : null;
+            const ignoreOutOfGrammarResponses = setspec.speechIgnoreOutOfGrammarResponses ?
+            setspec.speechIgnoreOutOfGrammarResponses.toLowerCase() == 'true' : false;
+            const speechOutOfGrammarFeedback = setspec.speechOutOfGrammarFeedback ?
+            setspec.speechOutOfGrammarFeedback : 'Response not in answer set';
+
+            if (foundExpTarget) {
+              selectTdf(
+                  foundExpTarget._id,
+                  setspec.lessonname,
+                  foundExpTarget.stimuliSetId,
+                  ignoreOutOfGrammarResponses,
+                  speechOutOfGrammarFeedback,
+                  'Auto-selected by experiment target ' + experimentTarget,
+                  foundExpTarget.content.isMultiTdf,
+                  false,
+                  setspec,
+                  true
+              );
+            }
+            signinNotify(false);
+            await meteorCallAsync('setUserLoginData', 'direct', Session.get('loginMode'));
           }
         });
       });
@@ -271,7 +310,7 @@ function userPasswordCheck() {
   }
 
   // If we're here, we're NOT in experimental mode
-  Meteor.loginWithPassword(newUsername, newPassword, function(error) {
+  Meteor.loginWithPassword(newUsername, newPassword, async function(error) {
     if (typeof error !== 'undefined') {
       console.log('Login error: ' + error);
       $('#invalidLogin').show();
@@ -289,8 +328,7 @@ function userPasswordCheck() {
         return;
       }    
       signinNotify();
-      Meteor.call('setUserEntryPoint', `direct`);
-      Meteor.call('setLoginMode', Session.get('loginMode'));
+      await meteorCallAsync('setUserLoginData', 'direct', Session.get('loginMode'));
     }
   });
 }
@@ -343,7 +381,7 @@ function testLogin() {
     // Note that we force Meteor to think we have a user name so that
     // it doesn't try it as an email - this let's you test email-like
     // users, which you can promote to admin or teacher
-    Meteor.loginWithPassword({'username': testUserName}, testPassword, function(error) {
+    Meteor.loginWithPassword({'username': testUserName}, testPassword, async function(error) {
       if (typeof error !== 'undefined') {
         console.log('ERROR: The user was not logged in on TEST sign in?', testUserName, 'Error:', error);
         alert('It appears that you couldn\'t be logged in as ' + testUserName);
@@ -356,8 +394,7 @@ function testLogin() {
         }
         Meteor.call('logUserAgentAndLoginTime', Meteor.userId(), navigator.userAgent);
         Meteor.call('updatePerformanceData', 'login', 'signinOauth.testLogin', Meteor.userId());
-        Meteor.call('setUserEntryPoint', `direct`);
-        Meteor.call('setLoginMode', Session.get('loginMode'));
+        await meteorCallAsync('setUserLoginData', 'direct', Session.get('loginMode'));
         Meteor.logoutOtherClients();
         Router.go('/profile');
       }
