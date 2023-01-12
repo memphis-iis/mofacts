@@ -138,7 +138,7 @@ Template.profileSouthwest.rendered = async function() {
         audioHtml += '<span><i class="fa fa-microphone"></i>&nbsp;</span>';
       }
       if (enableAudioPromptAndFeedback) {
-        audioHtml += '<span class="glyphicon glyphicon-headphones">&nbsp;</span>';
+        audioHtml += '<span class="fa fa-headphones">&nbsp;</span>';
       }
       innerBtnHtml = name + "<br>" + audioHtml;
 
