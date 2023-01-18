@@ -353,37 +353,6 @@ async function getAllTdfs() {
   return tdfs;
 }
 
-async function getAllStims() {
-  serverConsole('getAllStims');
-  return await Items.rawCollection().aggregate([
-    {
-      $group: {
-        _id: {
-          stimulusFileName: "$stimulusFileName",
-          stimuliSetId: "$stimuliSetId"
-        }
-      },
-    },
-    {
-      $project:{
-        _id: 0,
-        stimulusFileName: "$_id.stimulusFileName",
-        stimuliSetId: "$_id.stimuliSetId"
-      }
-    }
-  ]).toArray();
-}
-
-async function getStimuliSetsForIdSet(stimuliSetIds) {
-  const stimSetsStr = stimuliSetIds.join(',');
-  const stimSets = Items.find({stimuliSetId: {$in: [stimSetsStr]}}, {sort: {stimulusKC: 1}});
-  const ret = [];
-  for (const stim of stimSets) {
-    ret.push(getItem(stim));
-  }
-  return ret;
-}
-
 async function getProbabilityEstimatesByKCId(relevantKCIds) { // {clusterIndex:[stimKCId,stimKCId],...}
   //theres gotta be a more efficient way to do this
   let allKCIDs = []
@@ -414,8 +383,15 @@ async function getProbabilityEstimatesByKCId(relevantKCIds) { // {clusterIndex:[
 }
 
 async function getReponseKCMap() {
-  const responseKCStuff = await Items.rawCollection().aggregate([{
-    $group: {
+  const responseKCStuff = await Tdfs.rawCollection().aggregate([
+    {
+      $unwind: {
+        path: "$stimuli",
+        preserveNullAndEmptyArrays: false
+      }
+    },
+    {
+      $group: {
       _id: "$correctResponse",
       "doc": { "$first": "$$ROOT" }
       }
@@ -423,7 +399,23 @@ async function getReponseKCMap() {
     {
       $replaceRoot: {
         newRoot: "$doc"
-    }
+      }
+    },
+    {
+      $project: {
+        "stimuliSetId": "$stimuli.stimuliSetId",
+        "stimulusFileName": "$stimuli.stimulusFileName",
+        "stimulusKC": "$stimuli.stimulusKC",
+        "clusterKC": "$stimuli.clusterKC",
+        "responseKC": "$stimuli.responseKC",
+        "params": "$stimuli.params",
+        "correctResponse": "$stimuli.correctResponse",
+        "incorrectResponses": "$stimuli.incorrectResponses",
+        "itemResponseType": "$stimuli.itemResponseType",
+        "clozeStimulus": "$stimuli.clozeStimulus",
+        "textStimulus": "$stimuli.textStimulus",
+        "syllables": "$stimuli.syllables"
+      }
   }]).toArray();
   const responseKCMap = {};
   for (const row of responseKCStuff) {
@@ -446,8 +438,23 @@ async function getComponentStatesByUserIdTDFIdAndUnitNum(userId, TDFId) {
 async function setComponentStatesByUserIdTDFIdAndUnitNum(userId, TDFId, componentStates) {
   serverConsole('setComponentStatesByUserIdTDFIdAndUnitNum, ', userId, TDFId);
   const responseKCMap = await getReponseKCMap();
-  const newResponseKCRet = Items.find({}, {sort: {responseKC: -1}, limit: 1}).fetch();
-  let newResponseKC = newResponseKCRet.responsekc + 1;
+  const newResponseKCRet = Tdfs.rawCollection().aggregate([
+    { 
+      $addFields: {
+        "maxResponseKC": {
+          $max: "$stimuli.responseKC"
+        }
+      }
+    },
+    {
+      $sort: {
+        "maxResponseKC": -1
+      }
+    },
+    {
+      $limit: 1
+    }]).toArray()
+  let newResponseKC = newResponseKCRet.maxResponseKC + 1;
   let c = ComponentStates.find({userId: userId, TDFId: TDFId}).fetch();
   for (const componentState of componentStates) {
     componentState.userId = userId;
@@ -525,27 +532,181 @@ async function processPackageUpload(path, owner){
 
       try {
         for(const stim of unzippedFiles.filter(f => f.type == 'stim')){
-          results.concat(await saveContentFile(stim.type, stim.name, stim.contents, owner, stim.path));
+          for(const tdf of unzippedFiles.filter(f => f.type == 'tdf')){
+            if(tdf.path.split(tdf.name)[0] == stim.path.split(stim.name)[0]){
+              let combinedFile = await combineStimAndTdfFiles(stim, tdf, owner);
+              Tdfs.upsert({stimuliSetId: combinedFile.stimuliSetId}, combinedFile);
+            }
+          }
         }
       } catch(e) {
         serverConsole('processPackageUpload ERROR,', path, ',', e + ' on file: ' + filePath);
         throw new Meteor.Error('package upload failed at stim upload: ' + e + ' on file: ' + filePath)
       }
 
-      try {
-        for(const tdf of unzippedFiles.filter(f => f.type == 'tdf')){
-          results.concat(await saveContentFile(tdf.type, tdf.name, tdf.contents, owner, tdf.path));
-        }
-      } catch(e) {
-        serverConsole('processPackageUpload ERROR,', path, ',', e + ' on file: ' + filePath);
-        throw new Meteor.Error('package upload failed at tdf upload: ' + e + ' on file: ' + filePath)
-      }
-
-      return results;
+      //return results;
     } catch(e) {
       serverConsole('processPackageUpload ERROR,', path, ',', e + ' on file: ' + filePath);
       throw new Meteor.Error('package upload failed at initialization: ' + e + ' on file: ' + filePath)
     }
+}
+
+async function combineStimAndTdfFiles(stim, tdf, ownerId){
+  let stimulusFileName = stim.name;
+  let stimJSON = stim.contents;
+  let formattedStims = [];
+  let tdfFilename = tdf.name;
+  let Tdf = tdf.contents.tutor;
+  let lessonName = _.trim(Tdf.tutor.setspec.lessonname);
+  if (lessonName.length < 1) {
+    results.result = false;
+    results.errmsg = 'TDF has no lessonname - it cannot be valid';
+
+    return results;
+  }
+
+  const existingTdf = Tdfs.findOne({stimulusFileName: stimulusFileName});
+  const responseKCMap = await getReponseKCMap();
+  let stimuliSetId = existingTdf?.stimuliSetId
+  if (!stimuliSetId) {
+    stimuliSetId = nextStimuliSetId;
+    nextStimuliSetId += 1;
+  }
+  serverConsole('getAssociatedStimSetIdForStimFile', stimulusFileName, stimuliSetId);
+  
+  const oldStimFormat = {
+    'fileName': stimulusFileName,
+    'stimuli': stimJSON,
+    'owner': ownerId,
+    'source': 'repo',
+  };
+  const newFormatItems = getNewItemFormat(oldStimFormat, stimulusFileName, stimuliSetId, responseKCMap);
+  const existingStims = existingTdf?.stimuli;
+  serverConsole('existingStims', existingStims);
+  let newStims = [];
+  let stimulusKC;
+  let maxStimulusKC = 0;
+  if (existingStims && existingStims.length > 0) {
+    for (const newStim of newFormatItems) {
+      stimulusKC = newStim.stimulusKC;
+      if (stimulusKC > maxStimulusKC) {
+        maxStimulusKC = stimulusKC;
+      }
+      let matchingStim = existingStims.find((x) => x.stimulusKC == stimulusKC);
+      if (!matchingStim) {
+        serverConsole('matchingstims') 
+        newStims.push(newStim);
+        continue;
+      }
+      matchingStim = getItem(matchingStim);
+      const mergedStim = Object.assign(matchingStim, newStim);
+      let curAnswerSylls
+      try{
+        if(mergedStim.syllables && mergedStim.syllables.length < 1){
+          serverConsole('fetching syllables for ' + stim.correctResponse);
+          curAnswerSylls = getSyllablesForWord(mergedStim.correctResponse.replace(/\./g, '_').split('~')[0]);
+        }
+      }
+      catch (e) {
+        serverConsole('error fetching syllables for ' + stim.correctResponse + ': ' + JSON.stringify(e));
+        curAnswerSylls = [stim.correctResponse];
+      }
+      if(mergedStim.imageStimulus && mergedStim.imageStimulus.split('http').length == 1){
+        //image is not a url
+        const imageFilePathArray = mergedStim.imageStimulus.split('/');
+        const imageFileName = imageFilePathArray[imageFilePathArray.length - 1];
+        serverConsole('grabbing link for image', imageFileName);
+        const image = await DynamicAssets.findOne({name: imageFileName, userId: ownerId});
+        const imageLink = image.meta.link;
+        mergedStim.imageStimulus = imageLink;
+      }
+      mergedStim.syllables = curAnswerSylls;
+      formattedStims.push(mergedStim);
+    }
+  } else {
+    newStims = newFormatItems;
+  }
+  serverConsole('!!!newStims:', newStims);
+  for (const stim of newStims) {
+    if(stim.stimulusKC > maxStimulusKC){
+      maxStimulusKC = stim.stimulusKC;
+    }
+    let curAnswerSylls
+    try{
+      serverConsole('fetching syllables for ' + stim.correctResponse);
+      curAnswerSylls = [stim.correctResponse];
+      //curAnswerSylls = getSyllablesForWord(stim.correctResponse.replace(/\./g, '_').split('~')[0]);
+    }
+    catch (e) {
+      serverConsole('error fetching syllables for ' + stim.correctResponse + ': ' + JSON.stringify(e));
+      curAnswerSylls = [stim.correctResponse];
+    }
+    stim.syllables = curAnswerSylls;
+    if(stim.imageStimulus && stim.imageStimulus.split('http').length == 1){
+      //image is not a url
+      const imageFilePathArray = stim.imageStimulus.split('/');
+      const imageFileName = imageFilePathArray[imageFilePathArray.length - 1];
+      serverConsole('grabbing link for image', imageFileName);
+      const image = await DynamicAssets.findOne({name: imageFileName, userId: ownerId});
+      const imageLink = image.meta.link;
+      stim.imageStimulus = imageLink;
+    }
+    formattedStims.push(stim);
+  }
+
+  const tips = Tdf.tutor.setspec.tips;
+  let newFormatttedTips = [];
+  if(tips){
+    for(const tip of tips){
+      if(tip.split('<img').length > 1){
+        const imageName = tip.split('<img')[1].split('src="')[1].split('"')[0];
+        const image = await DynamicAssets.collection.findOne({userId: ownerId, name: imageName});
+        if(image){
+          const imageLink = image.meta.link;
+          newFormatttedTips.push(tip.replace(imageName, imageLink));
+          serverConsole('imageLink', imageLink);
+        }
+      }
+    }
+  }
+  if(newFormatttedTips.length > 0){
+    Tdf.tutor.setspec.tips = newFormatttedTips;
+  }
+  const tdfJSON = {'fileName': tdfFilename, 'tdfs': Tdf, 'ownerId': ownerId, 'source': 'upload'};
+  const prev = await getTdfByFileName(tdfFilename);
+  if (prev && prev._id) {
+    serverConsole('updating tdf', tdfFilename, formattedStims);
+    if (hasGeneratedTdfs(tdfJSON)) {
+      const tdfGenerator = new DynamicTdfGenerator(tdfJSON.tdfs, tdfFilename, ownerId, 'repo', formattedStims);
+      const generatedTdf = tdfGenerator.getGeneratedTdf();
+      delete generatedTdf.createdAt;
+      tdfJSONtoUpsert = generatedTdf;
+    } else {
+      tdfJSONtoUpsert = tdfJSON;
+    }
+  } else {
+    serverConsole('inserting tdf', tdfFilename, formattedStims);
+    let tdfJSONtoUpsert;
+    if (hasGeneratedTdfs(tdfJSON)) {
+      const tdfGenerator = new DynamicTdfGenerator(tdfJSON.tdfs, tdfFilename, ownerId, 'repo', formattedStims);
+      const generatedTdf = tdfGenerator.getGeneratedTdf();
+      tdfJSONtoUpsert = generatedTdf;
+    } else {
+      tdfJSON.createdAt = new Date();
+      tdfJSONtoUpsert = tdfJSON;
+    }
+  }
+  return {
+    tdfFileName: tdf.name,
+    stimulusFileName: stimulusFileName,
+    path: tdf.path.split(tdf.name)[0],
+    content: tdfJSONtoUpsert,
+    rawStimuliFile: stim.contents, //raw stimuli
+    stimuli: formattedStims, //formatted stimuli for use in the app
+    stimuliSetId: stimuliSetId,
+    ownerId: ownerId,
+    visibility: 'profileOnly'
+  };
 }
 
 async function saveMediaFile(media, owner){
@@ -637,15 +798,15 @@ async function saveContentFile(type, filename, filecontents, owner, packagePath 
 
         return results;
       } else {
-        const associatedStimSetIdRet = Items.findOne({stimulusFileName: stimFileName});
-        const stimuliSetId = associatedStimSetIdRet ? associatedStimSetIdRet.stimuliSetId : null;
+        const tdf = Tdfs.findOne({stimulusFileName: stimFileName});
+        const stimuliSetId = tdf ? tdf.stimuliSetId : null;
         if (isEmpty(stimuliSetId)) {
           results.result = false;
           results.errmsg = 'Please upload stimulus file before uploading a TDF';
         } else {
           try {
             const rec = {'fileName': filename, 'tdfs': json, 'ownerId': ownerId, 'source': 'upload'};
-            await upsertTDFFile(filename, rec, ownerId);
+            await upsertTDFFile(filename, rec, ownerId, packagePath);
             //Update Stim Cache every upload
             Meteor.call('updateStimSyllables', stimuliSetId);
             results.result = true;
@@ -700,58 +861,6 @@ function _branchingCorrectText(answer) {
 
   result = result.split('|');
   return result[0];
-}
-
-// TODO: move this to function through existing upsert functions
-async function insertStimTDFPair(newStimJSON, wrappedTDF, sourceSentences) {
-  //PostgresReversion
-  const maxStimuliSetId = Items.find().sort({stimuliSetId: -1}).limit(1);
-  const newStimuliSetId = maxStimuliSetId + 1;
-  wrappedTDF.stimuliSetId = newStimuliSetId;
-  for (const stim of newStimJSON) {
-    stim.stimuliSetId = newStimuliSetId;
-  }
-  //PostgresReversion
-  const maxStimulusKC = Items.find({}, { sort: {stimulusKC: -1}}).limit(1).stimulusKC;
-  const curNewKCBase = (Math.floor(maxStimulusKC / KC_MULTIPLE) * KC_MULTIPLE) + KC_MULTIPLE;// + 1
-
-  let curNewStimulusKC = curNewKCBase;
-  let curNewClusterKC = curNewKCBase;
-
-  const responseKCMap = await getReponseKCMap();
-  const maxResponseKC = 1;
-  serverConsole('!!!insertStimTDFPair:', maxStimuliSetId, newStimuliSetId, maxStimulusKC, curNewKCBase);
-  let curNewResponseKC = maxResponseKC + 1;
-
-  const stimulusKCTranslationMap = {};
-  const clusterKCTranslationMap = {};
-  for (const stim of newStimJSON) {
-    if (isEmpty(stimulusKCTranslationMap[stim.stimulusKC])) {
-      stimulusKCTranslationMap[stim.stimulusKC] = curNewStimulusKC;
-      curNewStimulusKC += 1;
-    }
-    if (isEmpty(clusterKCTranslationMap[stim.clusterKC])) {
-      clusterKCTranslationMap[stim.clusterKC] = curNewClusterKC;
-      curNewClusterKC += 1;
-    }
-
-    const stimAnswerText = getDisplayAnswerText(stim.correctResponse);
-    if (isEmpty(responseKCMap[stimAnswerText])) {
-      responseKCMap[stimAnswerText] = curNewResponseKC;
-      curNewResponseKC += 1;
-    }
-    stim.stimulusKC = stimulusKCTranslationMap[stim.stimulusKC];
-    stim.responseKC = responseKCMap[stimAnswerText];
-    stim.clusterKC = clusterKCTranslationMap[stim.clusterKC];
-    if (!stim.incorrectResponses) stim.incorrectResponses = null;
-    if (!stim.alternateDisplays) stim.alternateDisplays = null;
-    Items.insert(stim);
-  }
-  const newTDFId = Tdfs.insert(wrappedTDF);
-  if (sourceSentences) {
-    itemSourceSentences.insert({stimuliSetId: newStimuliSetId, sourceSentences: sourceSentences});
-  }
-  return newTDFId;
 }
 
 async function getSourceSentences(stimuliSetId) {
@@ -1228,9 +1337,11 @@ async function addUserToTeachersClass(userId, teacherID, sectionId) {
 async function getStimDisplayTypeMap() {
   try {
     serverConsole('getStimDisplayTypeMap');
-    const items = Items.find().fetch();
+    const tdfs = Tdfs.find().fetch();
+    const items = tdfs.map((tdf) => tdf.stimuli).flat();
     let map = {};
     for(let item of items){
+      if(!item) continue;
       if(!map[item.stimuliSetId]){
         map[item.stimuliSetId] = {
           hasCloze: false,
@@ -1260,6 +1371,7 @@ async function getStimDisplayTypeMap() {
         map[item.stimuliSetId].hasVideo = true;
       }
     }
+    serverConsole('getStimDisplayTypeMap', map);
     return map;
   } catch (e) {
     serverConsole('getStimDisplayTypeMap ERROR,', e);
@@ -1415,39 +1527,38 @@ async function getListOfStimTagsByTDFFileNames(TDFFileNames){
   return Array.from(allTagsInStimFile);
 }
 
-async function getStimuliSetByFilename(stimFilename) {
-  //Postgres Reversion
-  idRet = Items.findOne({stimulusFileName: stimFilename});
-  const stimuliSetId = idRet ? idRet.stimuliSetId : null;
-  if (isEmpty(stimuliSetId)) return null;
-  return await getStimuliSetById(stimuliSetId);
-}
-
-async function getStimuliSetIdByFilename(stimFilename) {
-  idRet = Items.findOne({stimulusFileName: stimFilename});
-  const stimuliSetId = idRet ? idRet.stimuliSetId : null;
-  return stimuliSetId;
-}
-
 async function getStimuliSetById(stimuliSetId) {
-  return Items.find({stimuliSetId: stimuliSetId}, {sort: {stimulusKC: 1}}).fetch();
+  return Tdfs.rawCollection.aggregate([
+    {
+      $match: { stimuliSetId: stimuliSetId }
+    }, {
+      $unwind: { path: "$stimuli" }
+    }, {
+      $replaceRoot: { newRoot: "$stimuli" }
+    }, {
+      $sort: { stimulusKC: 1 }
+    }]).toArray();
+}
+
+async function getStimuliSetByFileName(stimulusFileName) {
+  return Tdfs.rawCollection.aggregate([
+    {
+      $match: { stimulusFileName: stimulusFileName }
+    }, {
+      $unwind: { path: "$stimuli" }
+    }, {
+      $replaceRoot: { newRoot: "$stimuli" }
+    }, {
+      $sort: { stimulusKC: 1 }
+    }]).toArray();
 }
 
 async function getStimCountByStimuliSetId(stimuliSetId) {
   // PostgresReversion Staged
-  let ret = Items.find({$count: {stimuliSetId: stimuliSetId}}, {sort: {stimulusKC: 1}}).fetch();
+  let ret = await getStimuliSetById(stimuliSetId);
   return ret.count;
 }
-async function getItemsByFileName(stimFileName) {
-  // PostgresReversion Staged
-  let itemRet = Items.find({stimulusFileName: stimFileName}, {$sort: {stimulusKC: 1}}).fetch();
-  const items = [];
-  for (const item of itemRet) {
-    items.push(getItem(item));
-  }
-  serverConsole(items[0]);
-  return items;
-}
+
 async function getStudentReportingData(userId, TDFId, hintLevel) {
   //creates a list of the correctness of the first 5 times a user answers.
   const correctnessAcrossRepetitions = await ComponentStates.rawCollection().aggregate([{
@@ -1541,7 +1652,7 @@ async function getStudentReportingData(userId, TDFId, hintLevel) {
 
 async function getStimSetFromLearningSessionByClusterList(stimuliSetId, clusterList){
   serverConsole('getStimSetFromLearningSessionByClusterList', stimuliSetId, clusterList);
-  const itemRet = Items.find({stimuliSetId: stimuliSetId}, {sort: {stimulusKC: 1}}).fetch();
+  const itemRet = await getStimuliSetById(stimuliSetId);
   let learningSessionItem = [];
   for(let item of itemRet){
     if(clusterList.includes(item.clusterKC) && learningSessionItem.includes(item.stimulusKC) === false){
@@ -1973,37 +2084,27 @@ function hasGeneratedTdfs(TDFjson) {
 
 // TODO rework for input in a new format as well as the current assumption of the old format
 async function upsertStimFile(stimulusFileName, stimJSON, ownerId, packagePath = null) {
+
+  let formattedStims = [];
+
   if(packagePath){
     packagePath = packagePath.split('/')[0];
   }
-  serverConsole('upsertStimFile', stimulusFileName);
+  const responseKCMap = await getReponseKCMap();
+  let stimuliSetId = Tdfs.findOne({"content.tdfs.tutor.setspec.stimulusfile": stimulusFileName})?.stimuliSetId
+  if (!stimuliSetId) {
+    throw new Error('No matching TDF file found');
+  }
+  serverConsole('getAssociatedStimSetIdForStimFile', stimulusFileName, stimuliSetId);
+  
   const oldStimFormat = {
     'fileName': stimulusFileName,
     'stimuli': stimJSON,
     'owner': ownerId,
     'source': 'repo',
   };
-  const responseKCMap = await getReponseKCMap();
-  const associatedStimSetIdRet = Items.findOne({stimulusFileName: stimulusFileName})
-  serverConsole('getAssociatedStimSetIdForStimFile', stimulusFileName, associatedStimSetIdRet);
-  let stimuliSetId;
-  if (associatedStimSetIdRet) {
-    stimuliSetId = associatedStimSetIdRet.stimuliSetId;
-    serverConsole('stimuliSetId1:', stimuliSetId, associatedStimSetIdRet);
-  } else {
-    stimuliSetId = nextStimuliSetId;
-    nextStimuliSetId += 1;
-    serverConsole('stimuliSetId2:', stimuliSetId, nextStimuliSetId);
-  }
-
-  Stims.insert({
-    'stimuliSetId': stimuliSetId,
-    'fileName': stimulusFileName,
-    'stimuli': stimJSON,
-    'owner': ownerId,
-  })
   const newFormatItems = getNewItemFormat(oldStimFormat, stimulusFileName, stimuliSetId, responseKCMap);
-  const existingStims = await Items.find({stimulusFileName: stimulusFileName}).fetch();
+  const existingStims = await getStimuliSetById(stimuliSetId);
   serverConsole('existingStims', existingStims);
   let newStims = [];
   let stimulusKC;
@@ -2042,27 +2143,8 @@ async function upsertStimFile(stimulusFileName, stimJSON, ownerId, packagePath =
         const imageLink = image.meta.link;
         mergedStim.imageStimulus = imageLink;
       }
-      Items.update({stimulusFileName: stimulusFileName, stimulusKC: stimulusKC},{$set: {
-        stimuliSetId: mergedStim.stimuliSetId,
-        parentStimulusFileName: mergedStim.parentStimulusFileName,
-        stimulusKC: mergedStim.stimulusKC,
-        clusterKC: mergedStim.clusterKC,
-        responseKC: mergedStim.responsKC,
-        params: mergedStim.params,
-        optimalProb: mergedStim.optimalProb,
-        correctResponse: mergedStim.correctResponse,
-        incorrectResponses: mergedStim.incorrectResponses,
-        itemResponseType: mergedStim.itemResponseType,
-        speechHintExclusionList: mergedStim.speechHintExclusionList,
-        clozeStimulus: mergedStim.clozeStimulus,
-        textStimulus: mergedStim.textStimulus,
-        audioStimulus: mergedStim.audioStimulus,
-        imageStimulus: mergedStim.imageStimulus,
-        videoStimulus: mergedStim.videoStimulus,
-        aleternateDisplays: mergedStim.aleternateDisplays,
-        tags: mergedStim.tags,
-        syllables: curAnswerSylls
-      }})
+      mergedStim.syllables = curAnswerSylls;
+      formattedStims.push(mergedStim);
     }
   } else {
     newStims = newFormatItems;
@@ -2091,72 +2173,86 @@ async function upsertStimFile(stimulusFileName, stimJSON, ownerId, packagePath =
       const imageLink = image.meta.link;
       stim.imageStimulus = imageLink;
     }
-    Items.insert(stim);
+    formattedStims.push(stim);
   }
-  //Update Stim Cache every upload
-  Meteor.call('updateStimSyllables', stimuliSetId);
-  // We may have less stims than in previous versions of an uploaded stim file
-  // Items.remove({stimulusKC: {$gt: maxStimulusKC, $lt: (Math.floor(maxStimulusKC / 10000) + 1) * 10000}});
+  Tdfs.upsert({stimuliSetId: stimuliSetId}, {$set: {
+    stimulusFileName: stimulusFileName,
+    stimuliSetId: stimuliSetId, 
+    rawStimuliFile: stimJSON, //raw stimuli
+    stimuli: formattedStims, //formatted stimuli for use in the app
+  }});
 }
 
 
 
-async function upsertTDFFile(tdfFilename, tdfJSON, ownerId) {
+async function upsertTDFFile(tdfFilename, tdfJSON, ownerId, packagePath = null) {
   serverConsole('upsertTDFFile', tdfFilename);
-  const prev = await getTdfByFileName(tdfFilename);
-  let stimFileName;
-  let skipStimSet = false;
-  let stimSet;
-  let stimSetId;
-  if (tdfJSON.tdfs.tutor.setspec.stimulusfile) {
-    stimFileName = tdfJSON.tdfs.tutor.setspec.stimulusfile;
-    stimSet = await getStimuliSetByFilename(stimFileName);
-    stimSetId = await getStimuliSetIdByFilename(stimFileName);
-  } else {
-    skipStimSet = true;
+  serverConsole('tdfJSON', tdfJSON);
+  let stimulusFileName = tdfJSON.tdfs.tutor.setspec.stimulusfile;
+  let Tdf = tdfJSON.tdfs;
+  let lessonName = _.trim(Tdf.tutor.setspec.lessonname);
+  let stimuliSetId = Tdfs.findOne({stimulusFileName: stimulusFileName})?.stimuliSetId
+  if (!stimuliSetId) {
+    stimuliSetId = nextStimuliSetId;
+    nextStimuliSetId += 1;
   }
-  if (!stimSet && !skipStimSet) throw new Error('no stimset for tdf:', tdfFilename);
+  if (lessonName.length < 1) {
+    results.result = false;
+    results.errmsg = 'TDF has no lessonname - it cannot be valid';
+
+    return results;
+  }
+  const tips = Tdf.tutor.setspec.tips;
+  let newFormatttedTips = [];
+  if(tips){
+    for(const tip of tips){
+      if(tip.split('<img').length > 1){
+        const imageName = tip.split('<img')[1].split('src="')[1].split('"')[0];
+        const image = await DynamicAssets.collection.findOne({userId: ownerId, name: imageName});
+        if(image){
+          const imageLink = image.meta.link;
+          newFormatttedTips.push(tip.replace(imageName, imageLink));
+          serverConsole('imageLink', imageLink);
+        }
+      }
+    }
+  }
+  if(newFormatttedTips.length > 0){
+    Tdf.tutor.setspec.tips = newFormatttedTips;
+  }
+  tdfJSON = {'fileName': tdfFilename, 'tdfs': Tdf, 'ownerId': ownerId, 'source': 'upload'};
+  const prev = await getTdfByFileName(tdfFilename);
+  let tdfJSONtoUpsert;
   if (prev && prev._id) {
-    serverConsole('updating tdf', tdfFilename, stimSet);
-    let tdfJSONtoUpsert;
+    formattedStims = prev.formattedStims;
+    serverConsole('updating tdf', tdfFilename, formattedStims);
     if (hasGeneratedTdfs(tdfJSON)) {
-      const tdfGenerator = new DynamicTdfGenerator(tdfJSON.tdfs, tdfFilename, ownerId, 'repo', stimSet);
+      const tdfGenerator = new DynamicTdfGenerator(tdfJSON.tdfs, tdfFilename, ownerId, 'repo', formattedStims);
       const generatedTdf = tdfGenerator.getGeneratedTdf();
       delete generatedTdf.createdAt;
       tdfJSONtoUpsert = generatedTdf;
     } else {
       tdfJSONtoUpsert = tdfJSON;
     }
-    Tdfs.update({_id: prev._id},{$set:{
-      ownerId: ownerId,
-      stimuliSetId: stimSetId,
-      content: tdfJSONtoUpsert
-    }});
   } else {
-    serverConsole('inserting tdf', tdfFilename, stimSet);
-    let tdfJSONtoUpsert;
+    formattedStims = [];
+    serverConsole('inserting tdf', tdfFilename, formattedStims);
     if (hasGeneratedTdfs(tdfJSON)) {
-      const tdfGenerator = new DynamicTdfGenerator(tdfJSON.tdfs, tdfFilename, ownerId, 'repo', stimSet);
+      const tdfGenerator = new DynamicTdfGenerator(tdfJSON.tdfs, tdfFilename, ownerId, 'repo', formattedStims);
       const generatedTdf = tdfGenerator.getGeneratedTdf();
       tdfJSONtoUpsert = generatedTdf;
     } else {
       tdfJSON.createdAt = new Date();
       tdfJSONtoUpsert = tdfJSON;
     }
-    let stimuliSetId;
-    if (tdfJSON.tdfs.tutor.setspec.stimulusfile) {
-      const stimFileName = tdfJSON.tdfs.tutor.setspec.stimulusfile;
-      const associatedStimSetIdRet = Items.findOne({stimulusFileName: stimFileName});
-      if (associatedStimSetIdRet) {
-        stimuliSetId = associatedStimSetIdRet.stimuliSetId;
-      } else {
-        throw new Error('No matching stimulus file found');
-      }
-    } else {
-      stimuliSetId = null; // Root condition tdfs have no stimulisetid
-    }
-    Tdfs.insert({ownerId: ownerId, stimuliSetId: stimuliSetId, content: tdfJSONtoUpsert, visibility: 'profileOnly'});
   }
+  Tdfs.upsert({stimuliSetId: stimuliSetId}, {$set: {
+    tdfFileName: tdfFilename,
+    path: packagePath,
+    content: tdfJSONtoUpsert,
+    ownerId: ownerId,
+    visibility: 'profileOnly'
+  }});
 }
 
 function setUserLoginData(entryPoint, loginMode, curTeacher = undefined, curClass = undefined){
@@ -2719,11 +2815,9 @@ const methods = {
 }
 
 const asyncMethods = {
-  getAllTdfs, getAllStims, getTdfById, getTdfByFileName, getTdfByExperimentTarget, getTdfIDsAndDisplaysAttemptedByUserId,
+  getAllTdfs, getTdfById, getTdfByFileName, getTdfByExperimentTarget, getTdfIDsAndDisplaysAttemptedByUserId,
 
-  getLearningSessionItems, getStimDisplayTypeMap, getStimuliSetById, getStimuliSetsForIdSet,
-
-  getStimuliSetByFilename, getSourceSentences, 
+  getLearningSessionItems, getStimDisplayTypeMap, getStimuliSetById, getSourceSentences, 
 
   getAllCourses, getAllCourseSections, getAllCoursesForInstructor, getAllCourseAssignmentsForInstructor,
 
@@ -2735,7 +2829,7 @@ const asyncMethods = {
   
   getStudentPerformanceForClassAndTdfId, getStimSetFromLearningSessionByClusterList,
 
-  getExperimentState, setExperimentState, insertStimTDFPair,
+  getExperimentState, setExperimentState, getStimuliSetByFileName,
 
   getProbabilityEstimatesByKCId, getReponseKCMap, processPackageUpload,
 
@@ -2747,7 +2841,7 @@ const asyncMethods = {
 
   getHiddenItems, getUserLastFeedbackTypeFromHistory,
 
-  getTdfIdByStimSetIdAndFileName, getItemsByFileName, checkForUserException, 
+  getTdfIdByStimSetIdAndFileName, checkForUserException, 
   
   makeGoogleTTSApiCall: async function(TDFId, message, audioPromptSpeakingRate, audioVolume, selectedVoice) {
     const ttsAPIKey = await getTdfTTSAPIKey(TDFId);
@@ -2815,16 +2909,23 @@ const asyncMethods = {
   },
 
 
-  updateStimSyllables: async function(stimSetId) {
-    StimSyllables.remove({filename: stimSetId});
+  updateStimSyllables: async function(stimuliSetId) {
     serverConsole('updateStimSyllables');
-    const curStimuliSet = Items.find({stimuliSetId: stimSetId}).fetch();
-    if (curStimuliSet) {
+    const stimuli = await Tdfs.rawCollection().aggregate([
+      {
+        $match: { stimuliSetId: stimuliSetId }
+      }, {
+        $unwind: { path: "$stimuli" }
+      }, {
+        $replaceRoot: { newRoot: "$stimuli" }
+      }]).toArray();
+    
+    if (stimuli) {
+      serverConsole(stimuli);
       const answerSyllableMap = {};
-      for (const stim of curStimuliSet) {
+      for (const stim of stimuli) {
         if(!stim.syllables){
           let syllableArray;
-          let syllableGenerationError;
           const answer = stim.correctResponse;
           const safeAnswer = answer.replace(/\./g, '_').split('~')[0];
           try{
@@ -2838,11 +2939,12 @@ const asyncMethods = {
             syllableArray = [answer];
             syllableGenerationError = e;
           }
-          Items.upsert({_id: stim._id}, { $set: {syllables: syllableArray}})
+          stimuli[stim].syllables = syllableArray;
         }
       }
+      Tdfs.update({'stimuliSetId': stimuliSetId}, {$set: {'stimuli': stimuli}});
       serverConsole('after updateStimSyllables');
-      serverConsole(stimSetId);
+      serverConsole(stimuliSetId);
     }
   },
 
@@ -2927,7 +3029,6 @@ const asyncMethods = {
       Assignments.remove({TDFId: tdfId});
       Histories.remove({TDFId: tdfId});
     }
-    Items.remove({stimuliSetId: stimSetId});
     Tdfs.remove({stimuliSetId: stimSetId});
     Stims.remove({stimuliSetId: stimSetId});
     res = "Stim and related TDFS deleted.";
@@ -2940,7 +3041,7 @@ Meteor.methods(functionTimerWrapper(methods, asyncMethods));
 
 Meteor.startup(async function() {
 
-  highestStimuliSetId = Items.findOne({}, {sort: {stimuliSetId: -1}, limit: 1 });
+  highestStimuliSetId = Tdfs.findOne({}, {sort: {stimuliSetId: -1}, limit: 1 });
   nextStimuliSetId = highestStimuliSetId && highestStimuliSetId.stimuliSetId ? parseInt(highestStimuliSetId.stimuliSetId) + 1 : 1;
 
   // Let anyone looking know what config is in effect
