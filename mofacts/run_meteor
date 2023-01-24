@@ -31,7 +31,7 @@ CL=$*
 if [ ${#CL} -lt 1 ]; then
     echo "Running meteor with --settings ./settings.json"
     # meteor --release 1.4.2.7 --settings ./settings.json
-    meteor --settings ./settings.json
+    MOCHA_REPORTER=xunit SERVER_MOCHA_OUTPUT=$PWD/unit_server.xml CLIENT_MOCHA_OUTPUT=$PWD/unit_client.xml meteor test --full-app --driver-package meteortesting:mocha --settings ./settings.json
 else
     echo "Running meteor with your command line (did you remember --settings?)"
     meteor "$@"
