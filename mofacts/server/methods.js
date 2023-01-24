@@ -1528,7 +1528,7 @@ async function getListOfStimTagsByTDFFileNames(TDFFileNames){
 }
 
 async function getStimuliSetById(stimuliSetId) {
-  return Tdfs.rawCollection.aggregate([
+  return Tdfs.rawCollection().aggregate([
     {
       $match: { stimuliSetId: stimuliSetId }
     }, {
@@ -2093,7 +2093,8 @@ async function upsertStimFile(stimulusFileName, stimJSON, ownerId, packagePath =
   const responseKCMap = await getReponseKCMap();
   let stimuliSetId = Tdfs.findOne({"content.tdfs.tutor.setspec.stimulusfile": stimulusFileName})?.stimuliSetId
   if (!stimuliSetId) {
-    throw new Error('No matching TDF file found');
+    stimuliSetId = nextStimuliSetId;
+    nextStimuliSetId += 1;
   }
   serverConsole('getAssociatedStimSetIdForStimFile', stimulusFileName, stimuliSetId);
   
@@ -2175,7 +2176,7 @@ async function upsertStimFile(stimulusFileName, stimJSON, ownerId, packagePath =
     }
     formattedStims.push(stim);
   }
-  Tdfs.upsert({stimuliSetId: stimuliSetId}, {$set: {
+  Tdfs.upsert({"content.tdfs.tutor.setspec.stimulusfile": stimulusFileName}, {$set: {
     stimulusFileName: stimulusFileName,
     stimuliSetId: stimuliSetId, 
     rawStimuliFile: stimJSON, //raw stimuli
