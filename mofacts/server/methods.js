@@ -1877,12 +1877,37 @@ function sendErrorReportSummaries() {
         const unsentErrorReport = unsentErrorReports[index2];
         const userWhoReportedError = Meteor.users.findOne({_id: unsentErrorReport.user});
         const userWhoReportedErrorUsername = userWhoReportedError ? userWhoReportedError.username : 'UNKNOWN';
+        //make a nice email body for the user who reported the error
+        textIndividual = 'Hi ' + userWhoReportedErrorUsername + ', \n\n' +
+                          'Thank you for reporting an error on ' + thisServerUrl + '. ' +
+                          'We have received your error report and will investigate it. ' +
+                          'If you have any additional information that you think might be helpful, ' +
+                          'please reply to this email. \n\n' +
+                          'Error details: \n' +
+                          'Page: ' + unsentErrorReport.page + '\n' +
+                          'Time: ' + unsentErrorReport.time + '\n' +
+                          'Description: ' + unsentErrorReport.description + '\n' +
+                          'User Agent: ' + unsentErrorReport.userAgent + '\n\n' +
+                          'Thanks again for your help! \n\n' +
+                          'The Mofacts Team';
+        // text for the all errors report
         text = text + 'User: ' + userWhoReportedErrorUsername + ', page: ' + unsentErrorReport.page +
                ', time: ' + unsentErrorReport.time + ', description: ' + unsentErrorReport.description +
                ', userAgent: ' + unsentErrorReport.userAgent + ' \n';
-        sentErrorReports.add(unsentErrorReport._id);
+        //send email to user who reported error and to admin
+        try{
+          //check if user has an email address
+          if (userWhoReportedError.emails.length > 0 ) {
+            toIndividual = userWhoReportedError.emails[0].address + ', ' + admin;
+          subjectIndividual = 'Mofacts Error Report - ' + thisServerUrl;
+          sentErrorReports.add(unsentErrorReport._id);
+          sendEmail(toIndividual, admin, subjectIndividual, textIndividual);
+          }
+        }
+        catch (err) {
+          serverConsole(err);
+        }
       }
-
       try {
         sendEmail(admin, from, subject, text);
       } catch (err) {
