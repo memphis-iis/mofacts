@@ -8,6 +8,8 @@ import {instructContinue} from './views/experiment/instructions.js';
 import {routeToSignin} from './lib/router.js';
 import { init } from "meteor/simonsimcity:client-session-timeout";
 
+export {checkUserSession}
+
 // This redirects to the SSL version of the page if we're not on it
 const forceSSL = Meteor.settings.public.forceSSL || false;
 console.log('forceSSL', forceSSL);
@@ -15,27 +17,24 @@ if (location.protocol !== 'https:' && forceSSL) {
   location.href = location.href.replace(/^http:/, 'https:');
 }
 
-try{
-  //Prevents new tab
-  const channel = new BroadcastChannel('tab');
-
-  channel.postMessage('another-tab');
-  // note that listener is added after posting the message
-
-  channel.addEventListener('message', (msg) => {
-    if (msg.data === 'another-tab') {
-      Router.go('/tabwarning');
+async function checkUserSession(){
+  const currentSessionId = Meteor.default_connection._lastSessionId;
+  const lastSessionId = Meteor.user().profile.lastSessionId;
+  const lastSessionIdTimestampServer = Meteor.user().profile.lastSessionIdTimestamp;
+  const lastSessionIdTimestampClient = Session.get('lastSessionIdTimestamp');
+  if(lastSessionIdTimestampClient){
+    //user previously logged in this session
+    if (lastSessionId !== currentSessionId && lastSessionIdTimestampClient < lastSessionIdTimestampServer) {
+      // This is an expired session
+      Router.go('/tabwarning')
     }
-  });
-}
-catch{
-  //IE + Safari 3.1 - 15.3 support
-  localStorage.openpages = Date.now();
-  window.addEventListener('storage', function (e) {
-    if(e.key == 'openpages') {
-      Router.go('/tabwarning');
-    }
-  }, false);
+  } else {
+    //user has not logged in this session
+    const currentSessionIdTimestamp = new Date().getTime();
+    Meteor.call('setUserSessionId', currentSessionId, currentSessionIdTimestamp);
+    Session.set('lastSessionId', currentSessionId);
+    Session.set('lastSessionIdTimestamp', currentSessionIdTimestamp);
+  }
 }
 
 if((navigator.userAgent.indexOf("Opera") || navigator.userAgent.indexOf('OPR')) != -1 ) {
