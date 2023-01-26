@@ -2521,6 +2521,11 @@ const methods = {
     };
   },
 
+  setUserSessionId: function(sessionId, sessionIdTimestamp) {
+    const userID = Meteor.userId();
+    Meteor.users.update(userID, {$set: {'profile.lastSessionId': sessionId, 'profile.lastSessionIdTimestamp': sessionIdTimestamp}});
+  },
+
   deleteUserSpeechAPIKey: function() {
     const userID = Meteor.userId();
     GoogleSpeechAPIKeys.remove(userID);
