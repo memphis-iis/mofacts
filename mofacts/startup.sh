@@ -3,7 +3,7 @@
 
 
 # Define variables
-METEOR_DIR="$HOME/mofacts/mofacts"
+METEOR_DIR="mofacts/mofacts/"
 
 # Define functions
 function start_meteor (){

@@ -99,6 +99,7 @@ Template.signInOauth.onRendered(waitOnConfig);
 
 Template.signInOauth.events({
   'click #signInButtonOAuth': function(event) {
+    Meteor.logout();
     $('#signInButton').prop('disabled', true);
     event.preventDefault();
     console.log('Google Login Proceeding');
@@ -134,6 +135,7 @@ Template.signInOauth.events({
   'keypress .accept-enter-key': function(event) {
     const key = event.keyCode || event.which;
     if (key == 13) {
+      Meteor.logout();
       event.preventDefault();
       $('#testSignInButton').prop('disabled', true);
       testLogin();
@@ -141,6 +143,7 @@ Template.signInOauth.events({
   },
 
   'click #testSignInButton': function(event) {
+    Meteor.logout();
     $('#testSignInButton').prop('disabled', true);
     event.preventDefault();
     testLogin();

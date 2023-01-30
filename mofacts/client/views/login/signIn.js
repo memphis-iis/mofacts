@@ -47,12 +47,14 @@ Template.signIn.onRendered(async function() {
 
 Template.signIn.events({
   'click #signInButton': function(event) {
+    Meteor.logout();
     event.preventDefault();
     $('#signInButton').prop('disabled', true);
     userPasswordCheck();
   },
 
   'click #signUpButton': function(event) {
+    Meteor.logout();
     event.preventDefault();
     Router.go('/signup');
   },
@@ -68,12 +70,14 @@ Template.signIn.events({
   'keypress .accept-enter-key': function(event) {
     const key = event.keyCode || event.which;
     if (key == 13) {
+      Meteor.logout();
       event.preventDefault();
       $('#signInButton').prop('disabled', true);
       userPasswordCheck();
     }
   },
   'click #signInButtonOAuth': function(event) {
+    Meteor.logout();
     $('#signInButton').prop('disabled', true);
     event.preventDefault();
     console.log('Google Login Proceeding');
