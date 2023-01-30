@@ -298,7 +298,10 @@ Session.set('speechAPIKey', null);
 
 Template.profile.rendered = async function() {
   sessionCleanUp();
-  Session.set('showSpeechAPISetup', true);
+  if(Roles.userIsInRole(Meteor.userId(), 'admin,teacher'))
+    Session.set('showSpeechAPISetup', true);
+  else
+    Session.set('showSpeechAPISetup', false);
   let allTdfs;
   if(Meteor.user().profile.loginMode === 'southwest') {
     const curSectionId = Meteor.user().profile.curClass.sectionId;
