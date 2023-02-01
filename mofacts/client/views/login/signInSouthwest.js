@@ -219,6 +219,7 @@ Template.signInSouthwest.helpers({
 
 Template.signInSouthwest.events({
   'click .saml-login': function(event) {
+    Meteor.logout();
     event.preventDefault();
     console.log('saml login');
     const provider = event.target.getAttribute('data-provider');
@@ -268,6 +269,7 @@ Template.signInSouthwest.events({
   'keypress .accept-enter-key': function(event) {
     const key = event.keyCode || event.which;
     if (key == 13) {
+      Meteor.logout();
       event.preventDefault();
       $('#signInButton').prop('disabled', true);
       testLogin();
@@ -275,6 +277,7 @@ Template.signInSouthwest.events({
   },
 
   'click #signInButton': function(event) {
+    Meteor.logout();
     $('#signInButton').prop('disabled', true);
     event.preventDefault();
     testLogin();
