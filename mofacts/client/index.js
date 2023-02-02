@@ -277,7 +277,7 @@ Template.registerHelper('showFeedbackResetButton', function() {
   return Session.get('curModule') == 'card' && Session.get('currentTdfFile').tdfs.tutor.unit[Session.get('currentUnitNumber')].deliveryparams.allowFeedbackTypeSelect
 });
 Template.registerHelper('isInTrial', function() {
-  return Session.get('curModule') == 'card'
+  return Session.get('curModule') == 'card' || Session.get('curModule') == 'instructions';
 });
 Template.registerHelper('isInSession', function() {
   return (Session.get('curModule') == 'profile');
