@@ -2517,7 +2517,7 @@ function speechAPICallback(err, data){
     transcript = response['results'][0]['alternatives'][0]['transcript'].toLowerCase();
     console.log('transcript: ' + transcript);
     if (ignoreOutOfGrammarResponses) {
-      if (transcript == 'skip') {
+      if (transcript == 'enter') {
         ignoredOrSilent = false;
       } else if (answerGrammar.indexOf(transcript) == -1) { // Answer not in grammar, ignore and reset/re-record
         console.log('ANSWER OUT OF GRAMMAR, IGNORING');
