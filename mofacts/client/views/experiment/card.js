@@ -27,7 +27,6 @@ export {
   updateExperimentStateSync,
   restartMainCardTimeoutIfNecessary,
   getCurrentClusterAndStimIndices,
-  afterFeedbackCallback,
 };
 
 /*
@@ -1574,14 +1573,6 @@ async function afterAnswerFeedbackCallback(trialEndTimeStamp, trialStartTimeStam
   Session.set('feedbackTimeoutBegins', Date.now())
   const answerLogRecord = gatherAnswerLogRecord(trialEndTimeStamp, trialStartTimeStamp, source, userAnswer, isCorrect,
       testType, deliveryParams, dialogueHistory, wasReportedForRemoval);
-
-  Session.set('answerLogRecord', answerLogRecord);
-  Session.set('engine', engine);
-  Session.set('trialEndTimeStamp', trialEndTimeStamp);
-  Session.set('testType', testType);
-  Session.set('isCorrect', isCorrect);
-  Session.set('isTimeout', isTimeout);
-  Session.set('trialStartTimeStamp', trialStartTimeStamp);
   const afterFeedbackCallbackBind = afterFeedbackCallback.bind(null, trialEndTimeStamp, trialStartTimeStamp, isTimeout, isCorrect, testType, deliveryParams, answerLogRecord, 'card')
   const timeout = Meteor.setTimeout(async function() {
     afterFeedbackCallbackBind()
@@ -1600,13 +1591,6 @@ async function afterFeedbackCallback(trialEndTimeStamp, trialStartTimeStamp, isT
   Session.set('CurTimeoutId', null)
   const userLeavingTrial = callLocation != 'card';
   let reviewEnd = Date.now();
-  Session.set('isTimeout', null);
-  Session.set('isCorrect', null);
-  Session.set('trialEndTimeStamp', null);
-  Session.set('answerLogRecord', null);
-  Session.set('engine', null);
-  Session.set('CurTimeoutId', undefined);
-  Session.set('trialStartTimeStamp', undefined);
       
   let {responseDuration, startLatency, endLatency, feedbackLatency} = getTrialTime(trialEndTimeStamp, trialStartTimeStamp, reviewEnd, testType);
 
