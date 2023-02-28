@@ -24,7 +24,7 @@
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
-      <div class="col-6 text-start">
+      <div class="col-3 text-start">
         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
           <li class="nav-item">
             <a class="nav-link active" aria-current="page" href="profile">
@@ -41,23 +41,40 @@
           </li>
         </ul>
       </div>
-      <div class="col-6 justify-content-end d-flex">
-          <ul class="navbar-nav me-0">
-            {{#if isLoggedIn}}
-                {{#if isNormal}}
-                  {{#if isInSession}}
-                    <li><button class="nav-link active btn" id="wikiButton" target="_blank">Wiki</button></li>
-                  {{/if}}
-                  {{#if isInTrial}}
-                    <li><button class="nav-link active btn" id="helpButton">Help</button></li>
-                  {{/if}}
-                  <li><button class="nav-link active btn" id="progressButton">Progress</button></li>
-                  <li><button class="nav-link active btn" id="errorReportButton" data-bs-toggle="modal" data-bs-target="#errorReportingModal">Report Error</button></li>
-                  <li><button class="nav-link active btn" id="logoutButton">Logout</button></li>
-               {{/if}}
+      <div class="col-9 justify-content-end d-flex">
+        {{#if isLoggedIn}}
+          <div class="nav navbar-nav navbar-right">
+            {{#if showPerformanceDetails}}
+              <li><s1>Time: {{curStudentPerformance.totalTimeDisplay}} min,</s1></li>
+              &nbsp;
+              <li><s1>Correct: {{curStudentPerformance.percentCorrect}},</s1></li>
+              &nbsp;
+              <li><s1>Count: {{curStudentPerformance.count}}</s1></li>
+              &nbsp;
+              <!-- <td style="line-height:50px;"><s1>Score:</s1>&nbsp;<span class="badge">{{currentScore}}</span>
+              &nbsp; -->
             {{/if}}
-          </ul>
-        </div>
+            <li><s1>{{username}}</s1></li>
+            &nbsp;
+            &nbsp;
+            {{#if showFeedbackResetButton}}
+              <li><button id="resetFeedbackSettingsButton" class="nav-link active btn">Feedback Settings</button></li>
+              &nbsp;
+            {{/if}}
+            {{#if isNormal}}
+              {{#if isInSession}}
+                <li><button class="nav-link active btn" id="wikiButton" target="_blank">Wiki</button></li>
+              {{/if}}
+              {{#if isInTrial}}
+                <li><button class="nav-link active btn" id="helpButton">Help</button></li>
+              {{/if}}
+              <li><button class="nav-link active btn" id="progressButton">Progress</button></li>
+              <li><button class="nav-link active btn" id="errorReportButton" data-bs-toggle="modal" data-bs-target="#errorReportingModal">Report Error</button></li>
+              <li><button class="nav-link active btn" id="logoutButton">Logout</button></li>
+            {{/if}}
+          </div>
+        {{/if}}
+      </div>
     </div>
   </nav>
   <!-- main page content -->
