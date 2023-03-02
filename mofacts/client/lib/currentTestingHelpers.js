@@ -133,7 +133,8 @@ async function setStudentPerformance(studentID, studentUsername, tdfId) {
   console.log('setStudentPerformance:', studentID, studentUsername, tdfId);
   let studentPerformanceData;
   let studentPerformanceDataRet;
-  studentPerformanceDataRet = await meteorCallAsync('getStudentPerformanceByIdAndTDFId', studentID, tdfId);
+  let resetStudentPerformance = getCurrentDeliveryParams().resetStudentPerformance
+  studentPerformanceDataRet = await meteorCallAsync('getStudentPerformanceByIdAndTDFId', studentID, tdfId, undefined ,resetStudentPerformance);
   if (isEmpty(studentPerformanceDataRet)) {
     studentPerformanceData = {
       numCorrect: 0,
@@ -391,6 +392,7 @@ function getCurrentDeliveryParams() {
     'useSpellingCorrection': false,
     'editDistance': 1,
     'optimalThreshold': false,
+    'resetStudentPerformance': false
   };
 
   // We've defined defaults - also define translatations for values
@@ -433,6 +435,7 @@ function getCurrentDeliveryParams() {
     'useSpellingCorrection': xlateBool,
     'editDistance': _.intval,
     'optimalThreshold': _.intval,
+    'resetStudentPerformance': xlateBool
   };
 
   let modified = false;

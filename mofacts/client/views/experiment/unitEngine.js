@@ -1040,7 +1040,9 @@ function modelUnitEngine() {
           clusterKC: (curKCBase + i),
           hintLevel: null,
           priorCorrect: 0,
+          currentUnitPriorCorrect: 0,
           priorIncorrect: 0,
+          currentUnitPriorIncorrect: 0,
           curSessionPriorCorrect: 0,
           curSessionPriorIncorrect: 0,
           hasBeenIntroduced: false,
@@ -1070,8 +1072,10 @@ function modelUnitEngine() {
             stimulusKC,
             hintLevel: 0,
             priorCorrect: 0,
-            priorIncorrect: 0,
+            currentUnitPriorCorrect: 0,
             curSessionPriorCorrect: 0,
+            priorIncorrect: 0,
+            currentUnitPriorIncorrect: 0,
             curSessionPriorIncorrect: 0,
             hasBeenIntroduced: false,
             outcomeStack: [],
@@ -1100,8 +1104,10 @@ function modelUnitEngine() {
               KCId: reponseKCMap[response],
               hintLevel: null,
               priorCorrect: 0,
-              priorIncorrect: 0,
+              currentUnitPriorCorrect: 0,
               curSessionPriorCorrect: 0,
+              priorIncorrect: 0,
+              currentUnitPriorIncorrect: 0,
               curSessionPriorIncorrect: 0,
               firstSeen: 0,
               lastSeen: 0,
@@ -1145,6 +1151,8 @@ function modelUnitEngine() {
         trialsSinceLastSeen: card.trialsSinceLastSeen,
         priorCorrect: card.priorCorrect,
         priorIncorrect: card.priorIncorrect,
+        currentUnitPriorCorrect: card.currentUnitPriorCorrect,
+        currentUnitPriorIncorrect: card.currentUnitPriorIncorrect,
         curSessionPriorCorrect: 0,
         curSessionPriorIncorrect: 0,
         priorStudy: card.priorStudy,
@@ -1165,6 +1173,8 @@ function modelUnitEngine() {
         priorIncorrect: stim.priorIncorrect,
         curSessionPriorCorrect: stim.curSessionPriorCorrect,
         curSessionPriorIncorrect: stim.curSessionPriorIncorrect,
+        currentUnitPriorCorrect: stim.currentUnitPriorCorrect,
+        currentUnitPriorIncorrect: stim.currentUnitPriorIncorrect,
         priorStudy: stim.priorStudy,
         totalPracticeDuration: stim.totalPracticeDuration,
         outcomeStack: stim.outcomeStack,
@@ -1180,6 +1190,8 @@ function modelUnitEngine() {
         lastSeen: response.lastSeen,
         priorCorrect: response.priorCorrect,
         priorIncorrect: response.priorIncorrect,
+        currentUnitPriorCorrect: response.currentUnitPriorCorrect,
+        currentUnitPriorIncorrect: response.currentUnitPriorIncorrect,
         curSessionPriorCorrect: 0,
         curSessionPriorIncorrect: 0,
         priorStudy: response.priorStudy,
@@ -1678,21 +1690,23 @@ function modelUnitEngine() {
       card.previousCalculatedProbabilities.push(currentStimProbability);
 
       console.log('cardAnswered, curTrialInfo:', currentStimProbability, card, stim);
-      if (wasCorrect) card.priorCorrect += 1;
-      else card.priorIncorrect += 1;
-
-      card.outcomeStack.push(wasCorrect ? 1 : 0);
-
       if (wasCorrect) {
+        card.priorCorrect += 1;
+        card.curentUnitPriorCorrec += 1;
         stim.priorCorrect += 1;
         stim.curSessionPriorCorrect += 1;
+        stim.curentUnitPriorCorrec += 1;
       }
       else {
+        card.priorIncorrect += 1;
+        card.curentUnitPriorIncorrec += 1;
         stim.priorIncorrect += 1;
         stim.curSessionPriorIncorrect += 1;
+        stim.curentUnitPriorIncorrec += 1;
       }
 
       // This is called from processUserTimesLog() so this both works in memory and restoring from userTimesLog
+      card.outcomeStack.push(wasCorrect ? 1 : 0);
       stim.outcomeStack.push(wasCorrect ? 1 : 0);
 
       // "Response" stats
@@ -1701,8 +1715,14 @@ function modelUnitEngine() {
       let resp;
       if (answerText && answerText in cardProbabilities.responses) {
         resp = cardProbabilities.responses[answerText];
-        if (wasCorrect) resp.priorCorrect += 1;
-        else resp.priorIncorrect += 1;
+        if (wasCorrect) {
+          resp.priorCorrect += 1;
+          resp.curentUnitPriorCorrec += 1;
+        }
+        else {
+          resp.priorIncorrect += 1;
+          resp.curentUnitPriorIncorrec += 1;
+        }
 
         resp.outcomeStack.push(wasCorrect ? 1 : 0);
       } else {
