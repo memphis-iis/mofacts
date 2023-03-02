@@ -443,6 +443,10 @@ async function getComponentStatesByUserIdTDFIdAndUnitNum(userId, TDFId) {
   return componentStates;
 }
 
+async function clearCurUnitProgress(userId, TDFId) {
+  ComponentStates.update({userId: userId, TDFId: TDFId}, {$set: {'currentUnitPriorCorrect': 0, 'currentUnitPriorIncorrect': 0}}, {multi: true});
+}
+
 async function setComponentStatesByUserIdTDFIdAndUnitNum(userId, TDFId, componentStates) {
   serverConsole('setComponentStatesByUserIdTDFIdAndUnitNum, ', userId, TDFId);
   const responseKCMap = await getReponseKCMap();
@@ -1551,7 +1555,7 @@ async function getStimSetFromLearningSessionByClusterList(stimuliSetId, clusterL
   return learningSessionItem;
 }
 
-async function getStudentPerformanceByIdAndTDFId(userId, TDFId, stimIds=null) {
+async function getStudentPerformanceByIdAndTDFId(userId, TDFId, stimIds=null, onlyCurrentUnit=false) {
   serverConsole('getStudentPerformanceByIdAndTDFId', userId, TDFId, stimIds);
   const innerQuery = {
     userId: userId,
@@ -1563,6 +1567,10 @@ async function getStudentPerformanceByIdAndTDFId(userId, TDFId, stimIds=null) {
     innerQuery.KCId = {$in: stimIds};
   }
 
+  const cond = onlyCurrentUnit ? ['$currentUnitPriorCorrect', '$currentUnitPriorIncorrect'] : ['$priorCorrect', '$priorIncorrect']
+  const numCorrect = onlyCurrentUnit ? '$currentUnitPriorCorrect' : '$priorCorrect';
+  const numIncorrect = onlyCurrentUnit ? '$currentUnitPriorIncorrect' : '$priorIncorrect';
+
   const query = [{
     $match: innerQuery,
   },
@@ -1570,7 +1578,7 @@ async function getStudentPerformanceByIdAndTDFId(userId, TDFId, stimIds=null) {
     $addFields: {
       introduced: {
         $cond: {
-          if: {$or: ['$priorCorrect', '$priorIncorrect']},
+          if: {$or: cond},
           then: 1,
           else: 0,
         },
@@ -1582,8 +1590,8 @@ async function getStudentPerformanceByIdAndTDFId(userId, TDFId, stimIds=null) {
     $group: {
       _id: null,
       totalStimCount: {$sum: '$totalStimCount'},
-      numCorrect: {$sum: '$priorCorrect'},
-      numIncorrect: {$sum: '$priorIncorrect'},
+      numCorrect: {$sum: numCorrect},
+      numIncorrect: {$sum: numIncorrect},
       totalPracticeDuration: {$sum: '$totalPracticeDuration'},
       stimsIntroduced: {$sum: '$introduced'},
     },
@@ -1596,8 +1604,8 @@ async function getStudentPerformanceByIdAndTDFId(userId, TDFId, stimIds=null) {
 
   const studentPerformance = await ComponentStates.rawCollection().aggregate(query).toArray();
   if (!studentPerformance[0]) return null;
-  serverConsole('query', query);
-  serverConsole('studentPerformance', studentPerformance[0]);
+  // serverConsole('query', query);
+  // serverConsole('studentPerformance', studentPerformance[0]);
   return studentPerformance[0];
 }
 
@@ -2771,7 +2779,7 @@ const asyncMethods = {
 
   getComponentStatesByUserIdTDFIdAndUnitNum, setComponentStatesByUserIdTDFIdAndUnitNum,
 
-  insertHistory, getHistoryByTDFfileName, 
+  insertHistory, getHistoryByTDFfileName, clearCurUnitProgress,
 
   loadStimsAndTdfsFromPrivate, getListOfStimTags, getStudentReportingData,
 

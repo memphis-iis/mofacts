@@ -2010,12 +2010,14 @@ async function unitIsFinished(reason) {
   const curUnitNum = Session.get('currentUnitNumber');
   const newUnitNum = curUnitNum + 1;
   const curTdfUnit = curTdf.tdfs.tutor.unit[newUnitNum];
+  const currentDeliveryParams = getCurrentDeliveryParams();
+  const resetStudentPerformance = currentDeliveryParams.resetStudentPerformance
 
   Session.set('questionIndex', 0);
   Session.set('clusterIndex', undefined);
   Session.set('currentUnitNumber', newUnitNum);
   Session.set('currentTdfUnit', curTdfUnit);
-  Session.set('currentDeliveryParams', getCurrentDeliveryParams());
+  Session.set('currentDeliveryParams', currentDeliveryParams);
   Session.set('currentUnitStartTime', Date.now());
   Session.set('feedbackUnset', true);
   Session.set('feedbackTypeFromHistory', undefined);
@@ -2051,6 +2053,13 @@ async function unitIsFinished(reason) {
   } else {
     // nothing for now
   }
+
+  if(resetStudentPerformance){
+    const studentUsername = Session.get('studentUsername') || Meteor.user().username;
+    await meteorCallAsync('clearCurUnitProgress', Meteor.userId(), Session.get('currentTdfId'));
+    await setStudentPerformance(Meteor.userId(), studentUsername, Session.get('currentTdfId'));
+  }
+
   const res = await updateExperimentState(newExperimentState, 'card.unitIsFinished');
   console.log('unitIsFinished,updateExperimentState', res);
   leavePage(leaveTarget);  
