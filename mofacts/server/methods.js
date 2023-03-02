@@ -2479,6 +2479,13 @@ const methods = {
     return createdId;
   },
 
+  //setUserTheme - sets the user's theme in profile
+  setUserTheme: function(theme) {
+    console.log('setUserTheme', theme);
+    Meteor.users.update(Meteor.userId(), { $set: { 'profile.theme': theme }});
+    //verify that the theme was set
+  },
+
   //Impersonate User
   impersonate: function(userId) {
     check(userId, String);

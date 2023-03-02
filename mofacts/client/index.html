@@ -10,7 +10,6 @@
   </style>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
   <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.0/css/all.css" integrity="sha384-lZN37f5QGtY3VHgisS14W3ExzMWZxybE1SJSEsQp9S+oqd12jhcu+A56Ebc1zFSJ" crossorigin="anonymous">
-  <link href="/styles/main.css" rel="stylesheet">
 </head>
 
 <body>
@@ -43,6 +42,11 @@
       </div>
       <div class="col-9 justify-content-end d-flex">
         {{#if isLoggedIn}}
+          <div class="nav navbar-nav navbar-right">
+            <s1>
+            {{> setTheme}}
+            </s1>
+          </div>
           <div class="nav navbar-nav navbar-right">
             {{#if showPerformanceDetails}}
               <li><s1>Time: {{curStudentPerformance.totalTimeDisplay}} min,</s1></li>
