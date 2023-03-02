@@ -6,6 +6,7 @@ import {meteorCallAsync} from '../..';
 import {sessionCleanUp} from '../../lib/sessionUtils';
 import {routeToSignin} from '../../lib/router';
 import {getAudioPromptModeFromPage, getAudioInputFromPage} from './profileAudioToggles';
+import {checkUserSession} from '../../index'
 
 export {selectTdf};
 
@@ -298,6 +299,7 @@ Session.set('speechAPIKey', null);
 
 Template.profile.rendered = async function() {
   sessionCleanUp();
+  await checkUserSession()
   Session.set('showSpeechAPISetup', true);
   let allTdfs;
   if(Meteor.user().profile.loginMode === 'southwest') {
