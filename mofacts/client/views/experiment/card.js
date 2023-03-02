@@ -17,6 +17,7 @@ import {routeToSignin} from '../../lib/router';
 import {createScheduleUnit, createModelUnit, createEmptyUnit} from './unitEngine';
 import {Answers} from './answerAssess';
 import {sessionCleanUp} from '../../lib/sessionUtils';
+import {checkUserSession} from '../../index'
 
 export {
   speakMessageIfAudioPromptFeedbackEnabled,
@@ -361,6 +362,7 @@ function leavePage(dest) {
 }
 
 Template.card.rendered = async function() {
+  await checkUserSession();
   console.log('RENDERED----------------------------------------------');
   // Catch page navigation events (like pressing back button) so we can call our cleanup method
   window.onpopstate = function() {
