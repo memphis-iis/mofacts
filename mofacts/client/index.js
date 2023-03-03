@@ -90,6 +90,15 @@ function redoCardImage() {
 
   $('#cardQuestionImg').css('height', heightStr).css('width', widthStr);
 }
+//change the theme of the page onlogin
+Accounts.onLogin(function() {
+  //get theme from user profile
+  var theme = Meteor.user().profile.theme;
+  //change #theme href to theme
+  $('#theme').attr('href', theme);
+  //set the theme select to the theme
+  $('#themeSelect').val(theme);
+});
 
 Meteor.startup(function() {
   console.logs = [];
@@ -125,6 +134,21 @@ Template.DefaultLayout.onRendered(function() {
     console.log('error reporting modal hidden');
     restartMainCardTimeoutIfNecessary();
   });
+  //load css into head based on user's preferences
+  const user = Meteor.user();
+  if (user && user.profile && user.profile.css) {
+    css = user.profile.theme;
+    //if that field returns undefined, set it to /classic.css
+    if (!css) {
+      css = '/styles/classic.css';
+    }
+    //link that css file url to the head
+    $('head').append('<link id="theme" rel="stylesheet" href="' + css + '" type="text/css" />');
+    console.log('css loaded, ', css);
+  } else {
+    //use classic css
+    $('head').append('<link id="theme" rel="stylesheet" href="/styles/classic.css" type="text/css" />');
+  }
 
   $('#helpModal').on('hidden.bs.modal', function() {
     if (window.currentAudioObj) {
