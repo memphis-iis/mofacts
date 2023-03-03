@@ -1,5 +1,0 @@
-FROM mongo:3.2
-
-ENV MONGO_INITDB_DATABASE meteor
-
-COPY ./mongoFixtures.js /docker-entrypoint-initdb.d/mongoFixtures.js

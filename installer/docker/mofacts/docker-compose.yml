@@ -1,0 +1,11 @@
+version: "3.7"
+
+services:
+  docs:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ./app:/app
+      - ./mofacts_config:/mofacts_config
+      - ./bundle:/bundle

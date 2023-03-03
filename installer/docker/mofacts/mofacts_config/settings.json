@@ -1,0 +1,22 @@
+{   
+    "logNotice": "MoFACTs Docker Release",
+    "public": {
+        "testLogin": false
+    },
+    "google": {
+        "clientId": "",
+        "secret": ""
+    },
+    "owner": "rustyhaner@gmail.com",
+    "initRoles": {
+        "admins": [],
+        "teachers": []
+    },
+    "definitionalFeedbackDataLocation":"/mofacts_config/definitionalFeedbackCache.json",
+    "elaboratedFeedbackDataLocation":"/mofacts_config/elaboratedFeedbackCache.json",
+    "debug":false,
+    "ROOT_URL": "",
+    "MOGO_URL": "",
+    "MAIL_URL": ""
+}  
+  
