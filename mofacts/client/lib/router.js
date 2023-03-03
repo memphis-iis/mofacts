@@ -157,7 +157,7 @@ const defaultBehaviorRoutes = [
   'signUp',
   'tabwarning',
   'resetPassword',
-  'test'
+  'setTheme',
 ];
 
 const restrictedRoutes = [
