@@ -1138,7 +1138,7 @@ async function setExperimentState(userId, TDFId, newExperimentState, where) { //
     GlobalExperimentStates.update({userId: userId, TDFId: TDFId}, {$set: {experimentState: updatedExperimentState}})
     return updatedExperimentState;
   }
-  GlobalExperimentStates.insert({userId: userId, TDFId: TDFId, experimentState: {}});
+  GlobalExperimentStates.insert({userId: userId, TDFId: TDFId, experimentState: newExperimentState});
 
   return TDFId;
 }
