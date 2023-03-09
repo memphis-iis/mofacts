@@ -2083,11 +2083,10 @@ function scheduleUnitEngine() {
     // Cluster Numbers
     const clusterList = [];
     extractDelimFields(unitClusterList, clusterList);
-    const clusterMapping = Session.get('clusterMapping');
     for (let i = 0; i < clusterList.length; ++i) {
       const nums = rangeVal(clusterList[i]);
       for (let j = 0; j < nums.length; ++j) {
-        settings.clusterNumbers.push(clusterMapping[nums[j]]);
+        settings.clusterNumbers.push(_.intval(nums[j]));
       }
     }
 
