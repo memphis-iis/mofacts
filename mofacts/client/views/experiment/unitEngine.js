@@ -1781,11 +1781,8 @@ function scheduleUnitEngine() {
     const settings = loadAssessmentSettings(setspec, unit);
     console.log('ASSESSMENT SESSION LOADED FOR SCHEDULE CREATION');
     console.log('settings:', settings);
-    const clusterMapping = Session.get('clusterMapping');
+
     // Shuffle clusters at start
-    if (clusterMapping) {
-      settings.clusterNumbers = clusterMapping.slice(0, settings.clusterNumbers.length);
-    }
     if (settings.randomClusters) {
       shuffle(settings.clusterNumbers);
     }
