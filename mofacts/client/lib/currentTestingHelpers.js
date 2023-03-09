@@ -189,10 +189,8 @@ function getStimCount() {
 // current sessions cluster mapping.
 // Note that the cluster mapping goes from current session index to raw index in order of the stim file
 function getStimCluster(clusterMappedIndex=0) {
-  const isLearningSession = Session.get('unitType') == MODEL_UNIT;
   const clusterMapping = Session.get('clusterMapping');
-  const rawIndex = isLearningSession ?
-      clusterMapping[clusterMappedIndex] : clusterMappedIndex; // Only learning sessions use cluster mapping
+  const rawIndex = clusterMapping ? clusterMapping[clusterMappedIndex] : clusterMappedIndex;
   const cluster = {
     shufIndex: clusterMappedIndex, // Tack these on for later logging purposes
     clusterIndex: rawIndex,
