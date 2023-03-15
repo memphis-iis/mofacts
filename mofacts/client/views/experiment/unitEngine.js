@@ -307,6 +307,9 @@ function defaultUnitEngine(curExperimentData) {
         curStim.hintLevel = 0;
         //check for tdf hints enabled
         const TDFId = Session.get('currentTdfId');
+        if(!Session.get('allTdfs')){
+          Session.set('allTdfs', await meteorCallAsync('getAllTdfs'));
+        }
         const AllTDFS = Session.get('allTdfs');
         //search for tdf with matching id
         const currentTdfFile = AllTDFS.find(tdf => tdf._id === TDFId);
