@@ -1116,14 +1116,18 @@ function playCurrentSound(onEndCallback) {
 
   const currentAudioSrc = Session.get('currentDisplay').audioSrc;
   console.log('currentAudioSrc: ' + currentAudioSrc);
-
-  // Reset sound and play it
-  currentSound = soundsDict[currentAudioSrc];
-  onEndCallbackDict[currentAudioSrc] = onEndCallback;
-
-  // In case our caller checks before the sound has a chance to load, we
-  // mark the howler instance as playing
-  currentSound.isCurrentlyPlaying = true;
+  if(currentAudioSrc.slice(0, 4) == 'http'){
+    currentSound = new Audio(currentAudioSrc)
+    currentSound.onended = onEndCallback
+    currentSound.isCurrentlyPlaying = true;
+  } else {
+    // Reset sound and play it
+    currentSound = soundsDict[currentAudioSrc];
+    // In case our caller checks before the sound has a chance to load, we
+    // mark the howler instance as playing
+    onEndCallbackDict[currentAudioSrc] = onEndCallback;
+    currentSound.isCurrentlyPlaying = true;
+  }
   currentSound.play();
 }
 
@@ -1384,9 +1388,9 @@ function afterAnswerAssessmentCb(userAnswer, isCorrect, feedbackForAnswer, after
   Session.set('isRefutation', undefined);
   if (isCorrect == null && correctAndText != null) {
     isCorrect = correctAndText.isCorrect;
-  }
-  if (correctAndText.matchText.split(' ')[0] != 'Incorrect.' && !isCorrect && userAnswer != ''){
-    Session.set('isRefutation', true);
+    if (userAnswer != '[timeout]' && userAnswer != '' && !isCorrect && correctAndText.matchText.split(' ')[0] != 'Incorrect.'){
+      Session.set('isRefutation', true);
+    }
   }
 
   const afterAnswerFeedbackCbBound = afterAnswerFeedbackCb.bind(null, isCorrect);

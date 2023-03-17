@@ -2066,14 +2066,17 @@ async function upsertStimFile(stimulusFileName, stimJSON, ownerId, packagePath =
         serverConsole('error fetching syllables for ' + stim.correctResponse + ': ' + JSON.stringify(e));
         curAnswerSylls = [stim.correctResponse];
       }
-      if(mergedStim.imageStimulus && mergedStim.imageStimulus.split('http').length == 1){
+      if(mergedStim.imageStimulus && mergedStim.imageStimulus.slice(0, 4) != 'http'){
         //image is not a url
-        const imageFilePathArray = mergedStim.imageStimulus.split('/');
-        const imageFileName = imageFilePathArray[imageFilePathArray.length - 1];
-        serverConsole('grabbing link for image', imageFileName);
-        const image = await DynamicAssets.findOne({name: imageFileName, userId: ownerId});
-        const imageLink = image.meta.link;
-        mergedStim.imageStimulus = imageLink;
+        mergedStim.imageStimulus = await getStimLink(mergedStim.imageStimulus, ownerId);
+      }
+      if(mergedStim.audioStimulus && mergedStim.audioStimulus.slice(0, 4) != 'http'){
+        //audio is not a url
+        mergedStim.audioStimulus = await getStimLink(mergedStim.audioStimulus, ownerId);
+      }
+      if(mergedStim.videoStimulus && mergedStim.videoStimulus.slice(0, 4) != 'http'){
+        //video is not a url
+        mergedStim.videoStimulus = await getStimLink(mergedStim.videoStimulus, ownerId);
       }
       Items.update({stimulusFileName: stimulusFileName, stimulusKC: stimulusKC},{$set: {
         stimuliSetId: mergedStim.stimuliSetId,
@@ -2115,14 +2118,17 @@ async function upsertStimFile(stimulusFileName, stimJSON, ownerId, packagePath =
       curAnswerSylls = [stim.correctResponse];
     }
     stim.syllables = curAnswerSylls;
-    if(stim.imageStimulus && stim.imageStimulus.split('http').length == 1){
+    if(stim.imageStimulus && stim.imageStimulus.slice(0, 4) != 'http'){
       //image is not a url
-      const imageFilePathArray = stim.imageStimulus.split('/');
-      const imageFileName = imageFilePathArray[imageFilePathArray.length - 1];
-      serverConsole('grabbing link for image', imageFileName);
-      const image = await DynamicAssets.findOne({name: imageFileName, userId: ownerId});
-      const imageLink = image.meta.link;
-      stim.imageStimulus = imageLink;
+      stim.imageStimulus = await getStimLink(stim.imageStimulus, ownerId);
+    }
+    if(stim.audioStimulus && stim.audioStimulus.slice(0, 4) != 'http'){
+      //audio is not a url
+      stim.audioStimulus = await getStimLink(stim.audioStimulus, ownerId);
+    }
+    if(stim.videoStimulus && stim.videoStimulus.slice(0, 4) != 'http'){
+      //video is not a url
+      stim.videoStimulus = await getStimLink(stim.videoStimulus, ownerId);
     }
     Items.insert(stim);
   }
@@ -2132,7 +2138,14 @@ async function upsertStimFile(stimulusFileName, stimJSON, ownerId, packagePath =
   // Items.remove({stimulusKC: {$gt: maxStimulusKC, $lt: (Math.floor(maxStimulusKC / 10000) + 1) * 10000}});
 }
 
-
+async function getStimLink(stim, ownerId){
+  serverConsole('grabbing link for stim', stim);
+  const filePathArray = stim.split('/');
+  const fileName = filePathArray[filePathArray.length - 1];
+  const stimulusAssetLink = await DynamicAssets.findOne({name: fileName, userId: ownerId});
+  const stimulusAssetLinkLink = stimulusAssetLink.meta.link;
+  return stimulusAssetLinkLink;
+}
 
 async function upsertTDFFile(tdfFilename, tdfJSON, ownerId) {
   serverConsole('upsertTDFFile', tdfFilename);
