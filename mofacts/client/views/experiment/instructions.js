@@ -326,11 +326,10 @@ Template.instructions.helpers({
   },
 
   displayContinueButton: function(){
-    if(typeof Session.get('instructionQuestionResults') === "undefined" && typeof Session.get('currentTdfFile').tdfs.tutor.unit[0].unitinstructionsquestion !== "undefined"){
-      return false;
-    } else {
-      return true;
-    }
+    const unitInstructionsExist = typeof Session.get('currentTdfFile').tdfs.tutor.unit[Session.get('currentUnitNumber')].unitinstructions !== "undefined";
+    const instructionQuestionExists = typeof Session.get('instructionQuestionResults') === "undefined";
+    const unitInstructionsQuestionExists = typeof Session.get('currentTdfFile').tdfs.tutor.unit[Session.get('currentUnitNumber')].unitinstructionsquestion !== "undefined";
+    return !(unitInstructionsExist && instructionQuestionExists && unitInstructionsQuestionExists);
   },
 
   islockout: function() {
@@ -363,7 +362,7 @@ Template.instructions.helpers({
 Template.instructions.rendered = function() {
   // Make sure lockout interval timer is running
   lockoutKick();
-  if(typeof Session.get('currentTdfFile').tdfs.tutor.unit[0].unitinstructions !== "undefined"){
+  if(typeof Session.get('currentTdfFile').tdfs.tutor.unit[Session.get('currentUnitNumber')].unitinstructions !== "undefined"){
     $('#continueBar').show();
   }
 };
