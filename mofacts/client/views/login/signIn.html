@@ -1,77 +1,58 @@
 <template name="signIn">
     <div class="container">
-        <div class="row">
-            <div class="col-xs-12 col-sm-12 col-md-10 col-lg-10">
-                <legend>Sign In</legend>
+        <!-- page header -->
+        <div class="row text-center">
+            <div class="col-lg-4 offset-lg-4 col-md-6 col-md-offset-4 col-sm-8 col-sm-offset-2 col-xs-12 spacer">
+                <h1>MoFaCTS</h1>
+                <span id="serverErrors"></span>
             </div>
         </div>
-
-
-          <div class="row" hidden="true" id="classSelection">
-            <label>Please click on the link corresponding to your class</label>
-            {{#each curTeacherClasses}}
-              <ul>
-                {{#if checkSectionExists this.sectionname}}
-                  <li><a href="#" onclick="setClass('{{this.sectionId}}')">{{this.courseName}} - {{this.sectionname}}</a></li>
-                {{else}}
-                  <li><a href="#" onclick="setClass('{{this.sectionId}}')">{{this.courseName}}</a></li>
-                {{/if}}
-              </ul>
-            {{/each}}
-          </div>
-        <div class="row login">
-            <div class="col-xs-12 col-sm-10 col-md-4 col-lg-4">
-                {{#if isExperiment}}
-                <div class="form-group">
-                    <input class="form-control accept-enter-key" type="text" id="signInUsername" value="" placeholder="Your Amazon TURK ID or Assigned Student ID">
-                </div>
-                  {{#if experimentPasswordRequired}}
-                    <div class="form-group">
-                        <input class="form-control accept-enter-key" type="password" id="password" value="" placeholder="Password">
-                    </div>
-                  {{/if}}
-                {{else}}
-                <div class="form-group">
-                    <input class="form-control accept-enter-key" type="text" id="signInUsername" value="" placeholder="Username">
-                    <span class="help-inline danger errcheck" id="invalidLogin" hidden >Username password pair not found!</span>
-                </div>
-                <div class="form-group">
-                    <input class="form-control accept-enter-key" type="password" id="password" value="" placeholder="Password">
-                </div>
-                <a href="signup">I don't have an account</a> | <a href="resetPassword">I forgot my password</a><br>
-                
-                {{/if}}
-
-                <div class="form-group">
-                    <button type="button" id="signInButton" class="btn ">Sign In</button>
-                    <span class="help-inline danger errcheck" id="serverErrors" hidden ></span>
-                </div>
-                {{#unless isExperiment}}
-                <div class="form-group">
-                    <button type="button" id="signInButtonOAuth" class="btn ">Sign In / Up with Google</button>
-                </div>
-                {{/unless}}
+        <!-- class link selection -->
+        <div class="row text-center" hidden="true" id="classSelection">
+            <div class="col-lg-4 offset-lg-4 col-md-6 col-md-offset-4 col-sm-8 col-sm-offset-2 col-xs-12 spacer">
+                <label>Please click on the link corresponding to your class</label>
+                {{#each curTeacherClasses}}
+                <ul>
+                    {{#if checkSectionExists this.sectionname}}
+                    <li><a href="#" onclick="setClass('{{this.sectionId}}')">{{this.courseName}} - {{this.sectionname}}</a></li>
+                    {{else}}
+                    <li><a href="#" onclick="setClass('{{this.sectionId}}')">{{this.courseName}}</a></li>
+                    {{/if}}
+                </ul>
+                {{/each}}
             </div>
         </div>
-        {{#if showTestLogin}}
+        <!-- centered login form -->
+        <div class="row text-center login-form spacer">
+            <div class="col-lg-4 offset-lg-4 col-md-6 col-md-offset-4 col-sm-8 col-sm-offset-2 col-xs-12">
+                <form>
+                    {{#if isExperiment}}
+                        <input  type="text" id="signInUsername" value="" placeholder="Username"><br>
+                        {{#if experimentPasswordRequired}}
+                            <input  type="password" id="password" value="" placeholder="Password"><br><br>
+                        {{/if}}
+                    {{else}}
+                        <input  type="text" id="signInUsername" value="" placeholder="Username"><br>
+                        <input  type="password" id="password" value="" placeholder="Password"><br><br>
+                        <span class="help-inline danger errcheck" id="invalidLogin" hidden >Username password pair not found!</span>
+                    {{/if}}
+                    {{#if showTestLogin}}
+                        <a id="testSignInButton">Test Login (password not required)</a>
+                        <br>
+                    {{/if}}
+                    <button type="button" id="signInButton" class="btn">Sign In</button>
+                    <button type="button" id="signUpButton" class="btn">Sign Up</button>
+                </form>
+            </div>
+        </div>
         {{#unless isExperiment}}
-        <div class="col-xs-12 col-sm-10 col-md-3 col-lg-3">
-            <div class="form-group">
-                <label for="testUsername">Test User Name</label>
-                <input class="form-control accept-enter-key" type="text" id="testUsername" value="" placeholder="Username">
+        <!-- login with sso and google -->
+        <div class="row text-center large-spacer login-sso-options">
+            <div class="col-lg-4 offset-lg-4 col-md-6 col-md-offset-4 col-sm-8 col-sm-offset-2 col-xs-12 large-spacer">
+                <button type="button" id="signInButtonOAuth" class="btn">Sign In with Google</button><br><br>
+                <button type="button" id="signInWithSSOButton" class="btn">Sign In with SSO</button>
             </div>
-            <div class="form-group">
-                <a class="btn btn-default btn-danger" id="testSignInButton" href="#">
-                     Test Sign In
-                </a>
-            </div>
-            <br>
         </div>
         {{/unless}}
-    {{/if}}
-
-        {{#if isNormal}}
-            {{> about}}
-        {{/if}}
     </div>
 </template>
