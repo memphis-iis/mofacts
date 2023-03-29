@@ -14,6 +14,7 @@ let lockoutHandled = false;
 let serverNotify = null;
 // Will get set on first periodic check and cleared when we leave the page
 let displayTimeStart = null;
+Session.set('lockoutElapsed', true);
 
 function startLockoutInterval() {
   clearLockoutInterval();
@@ -126,6 +127,8 @@ function lockoutPeriodicCheck() {
   if (Date.now() >= lockoutFreeTime) {
     // All done - clear out time remaining, hide the display, enable the
     // continue button, and stop the lockout timer
+    //set the lockoutElapsed to true
+    Session.set('lockoutElapsed', true);
     if (!lockoutHandled) {
       $('#lockoutTimeRemaining').html('');
       $('#lockoutDisplay').hide();
@@ -136,7 +139,8 @@ function lockoutPeriodicCheck() {
     }
   } else {
     // Still locked - handle and then bail
-
+    //set the lockoutElapsed to false
+    Session.set('lockoutElapsed', false);
     // Figure out how to display time remaining
     const timeLeft = Math.floor((lockoutFreeTime - Date.now()) / 1000.0);
     const timeLeftDisplay = 'Time Remaining: ' + secsIntervalString(timeLeft);
@@ -329,7 +333,8 @@ Template.instructions.helpers({
     const unitInstructionsExist = typeof Session.get('currentTdfFile').tdfs.tutor.unit[Session.get('currentUnitNumber')].unitinstructions !== "undefined";
     const instructionQuestionExists = typeof Session.get('instructionQuestionResults') === "undefined";
     const unitInstructionsQuestionExists = typeof Session.get('currentTdfFile').tdfs.tutor.unit[Session.get('currentUnitNumber')].unitinstructionsquestion !== "undefined";
-    return !(unitInstructionsExist && instructionQuestionExists && unitInstructionsQuestionExists);
+    lockoutElapsed = Session.get('lockoutElapsed');
+    return !(unitInstructionsExist && instructionQuestionExists && unitInstructionsQuestionExists && lockoutElapsed);
   },
 
   islockout: function() {
