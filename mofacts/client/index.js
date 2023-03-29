@@ -296,7 +296,7 @@ Template.registerHelper('isLoggedIn', function() {
   return haveMeteorUser();
 });
 Template.registerHelper('showPerformanceDetails', function() {
-  return (Session.get('curModule') == 'card' || Session.get('curModule') == 'instructions') && Session.get('scoringEnabled');
+  return ((Session.get('curModule') == 'card' || Session.get('curModule') !== 'instructions') && Session.get('scoringEnabled') && Session.get('unitType') != 'schedule');
 });
 Template.registerHelper('currentScore', function() {
   return Session.get('currentScore');
