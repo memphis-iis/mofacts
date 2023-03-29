@@ -314,7 +314,7 @@ function userPasswordCheck() {
     if (typeof error !== 'undefined') {
       console.log('Login error: ' + error);
       $('#invalidLogin').show();
-      $('#serverErrors').html(error).show();
+      alert('Your username or password was incorrect. Please try again.');
       $('#signInButton').prop('disabled', false);
     } else {
       if (newPassword === blankPassword(newUsername)) {
@@ -348,7 +348,7 @@ function testLogin() {
     return;
   }
 
-  const testUserName = _.trim($('#testUsername').val()).toUpperCase();
+  const testUserName = _.trim($('#signInUsername').val()).toUpperCase();
   if (!testUserName) {
     console.log('No TEST user name specified');
     alert('No TEST user name specified');
