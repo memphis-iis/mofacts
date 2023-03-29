@@ -10,6 +10,9 @@
   </style>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
   <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.0/css/all.css" integrity="sha384-lZN37f5QGtY3VHgisS14W3ExzMWZxybE1SJSEsQp9S+oqd12jhcu+A56Ebc1zFSJ" crossorigin="anonymous">
+  <link href='https://fonts.googleapis.com/css?family=League Spartan' rel='stylesheet'>
+  <link href='https://fonts.googleapis.com/css?family=Josefin Sans' rel='stylesheet'>
+  <link href='https://fonts.googleapis.com/css?family=Arimo' rel='stylesheet'>
 </head>
 
 <body>
@@ -18,6 +21,7 @@
 
 
 <template name="DefaultLayout">
+  {{#if isLoggedIn}}
   <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
     <div class="container">
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
@@ -28,13 +32,11 @@
           <li class="nav-item">
             <a class="nav-link active" aria-current="page" href="profile">
               MoFaCTS
-              {{#if isLoggedIn}}
-                  {{#if isInRole 'admin,teacher'}}
-                      {{#if isInRole 'admin'}} Administrator {{/if}}
-                      {{#if isInRole 'teacher'}} Teacher {{/if}}
-                  {{else}}
-                      Student
-                  {{/if}}
+                {{#if isInRole 'admin,teacher'}}
+                    {{#if isInRole 'admin'}} Administrator {{/if}}
+                    {{#if isInRole 'teacher'}} Teacher {{/if}}
+                {{else}}
+                    Student
                 {{/if}}
             </a>
           </li>
@@ -85,6 +87,7 @@
       </div>
     </div>
   </nav>
+  {{/if}}
   <!-- main page content -->
   <div class="container" id="container-yield">
     {{> yield}}

@@ -138,16 +138,22 @@ Template.DefaultLayout.onRendered(function() {
   const user = Meteor.user();
   if (user && user.profile && user.profile.css) {
     css = user.profile.theme;
-    //if that field returns undefined, set it to /classic.css
+    //if that field returns undefined, set it to /neo.css
     if (!css) {
-      css = '/styles/classic.css';
+      css = '/styles/neo.css';
     }
     //link that css file url to the head
     $('head').append('<link id="theme" rel="stylesheet" href="' + css + '" type="text/css" />');
     console.log('css loaded, ', css);
   } else {
-    //use classic css
-    $('head').append('<link id="theme" rel="stylesheet" href="/styles/classic.css" type="text/css" />');
+    //use neo css if light theme is set or if no theme is set as a browser preference
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
+      console.log('light theme');
+      $('head').append('<link id="theme" rel="stylesheet" href="/styles/neo.css" type="text/css" />');
+    } else {
+      console.log('dark theme');
+      $('head').append('<link id="theme" rel="stylesheet" href="/styles/neo-dark.css" type="text/css" />');
+    }
   }
 
   $('#helpModal').on('hidden.bs.modal', function() {
@@ -296,11 +302,12 @@ Template.registerHelper('isLoggedIn', function() {
   return haveMeteorUser();
 });
 Template.registerHelper('showPerformanceDetails', function() {
-  return (Session.get('curModule') == 'card' || Session.get('curModule') == 'instructions') && Session.get('scoringEnabled');
+  return ((Session.get('curModule') == 'card' || Session.get('curModule') !== 'instructions') && Session.get('scoringEnabled') && Session.get('unitType') != 'schedule');
 });
 Template.registerHelper('currentScore', function() {
   return Session.get('currentScore');
 });
+
 Template.registerHelper('isNormal', function() {
   return Session.get('loginMode') !== 'experiment';
 });

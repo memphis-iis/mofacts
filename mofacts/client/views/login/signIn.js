@@ -348,7 +348,7 @@ function testLogin() {
     return;
   }
 
-  const testUserName = _.trim($('#testUsername').val()).toUpperCase();
+  const testUserName = _.trim($('#signInUsername').val()).toUpperCase();
   if (!testUserName) {
     console.log('No TEST user name specified');
     alert('No TEST user name specified');
