@@ -2399,6 +2399,52 @@ const methods = {
     }
   },
 
+  getAccessorsTDFID: function(TDFId){
+    const tdf = Tdfs.findOne({_id: TDFId});
+    if(tdf){
+      const accessors = tdf.accessors || [];
+      return accessors;
+    } else {
+      return [];
+    }
+  },
+
+  getAccessors: function(TDFId){
+    const accessors = Meteor.users.find({'accessedTDFs': TDFId}).fetch();
+    return accessors;
+  },
+
+  getAccessableTDFSForUser: function(userId){
+    serverConsole('getAccessableTDFSForUser', userId);
+    const accessableTDFs = Meteor.users.findOne({_id: userId}).accessedTDFs || [];
+    const TDFs = Tdfs.find({_id: {$in: accessableTDFs}}).fetch();
+    return {accessableTDFs, TDFs};
+  },
+
+  getAssignableTDFSForUser: function(userId){
+    serverConsole('getAssignableTDFSForUser', userId);
+    const assignableTDFs = Tdfs.find({$or: [{ownerId: userId}, {accessors: {$elemMatch: {userId: userId}}}]}).fetch();
+    return assignableTDFs;
+  },
+
+  assignAccessors: function(TDFId, accessors, revokedAccessors){
+    serverConsole('assignAccessors', TDFId, accessors, revokedAccessors)
+    Tdfs.update({_id: TDFId}, {$set: {'accessors': accessors}});
+    const userIds = accessors.map((x) => x.userId);
+    Meteor.users.update({'_id': {$in: userIds}}, {$addToSet: {'accessedTDFs': TDFId}}, {multi: true});
+    Meteor.users.update({'_id': {$in: revokedAccessors}}, {$pull: {'accessedTDFs': TDFId}}, {multi: true});
+  },
+
+  transferDataOwnership: function(TDFId, newOwnerId, oldOwnerId){
+    let query = Roles.userIsInRole(oldOwnerId, 'admin') ? {_id: TDFId} : {_id: TDFId, ownerId: oldOwnerId};
+    if(oldOwnerId && newOwnerId){
+        serverConsole('transferring data ownership for ' + TDFId + ' to ' + newOwnerId);
+        Tdfs.update(query, {$set: {'ownerId': newOwnerId}})
+    } else {
+        serverConsole('transferDataOwnership failed, TDF or newOwner not found');
+    }
+  },
+
   resetPasswordWithSecret: function(email, secret, newPassword){
     user = Meteor.users.findOne({username: email});
     userId = user._id;
@@ -3374,7 +3420,7 @@ Router.route('data-by-file', {
       return;
     }
 
-    const fileName = exp.split('.json')[0] + '-data.txt';;
+    const fileName = exp.split('.json')[0] + '-data.txt';
 
     response.writeHead(200, {
       'Content-Type': 'text/tab-separated-values',
