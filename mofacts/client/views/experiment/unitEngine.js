@@ -1045,7 +1045,6 @@ function modelUnitEngine() {
           priorCorrect: 0,
           currentUnitPriorCorrect: 0,
           priorIncorrect: 0,
-          currentUnitPriorIncorrect: 0,
           curSessionPriorCorrect: 0,
           curSessionPriorIncorrect: 0,
           hasBeenIntroduced: false,
@@ -1078,7 +1077,6 @@ function modelUnitEngine() {
             currentUnitPriorCorrect: 0,
             curSessionPriorCorrect: 0,
             priorIncorrect: 0,
-            currentUnitPriorIncorrect: 0,
             curSessionPriorIncorrect: 0,
             hasBeenIntroduced: false,
             outcomeStack: [],
@@ -1110,7 +1108,6 @@ function modelUnitEngine() {
               currentUnitPriorCorrect: 0,
               curSessionPriorCorrect: 0,
               priorIncorrect: 0,
-              currentUnitPriorIncorrect: 0,
               curSessionPriorIncorrect: 0,
               firstSeen: 0,
               lastSeen: 0,
@@ -1154,8 +1151,6 @@ function modelUnitEngine() {
         trialsSinceLastSeen: card.trialsSinceLastSeen,
         priorCorrect: card.priorCorrect,
         priorIncorrect: card.priorIncorrect,
-        currentUnitPriorCorrect: card.currentUnitPriorCorrect,
-        currentUnitPriorIncorrect: card.currentUnitPriorIncorrect,
         curSessionPriorCorrect: 0,
         curSessionPriorIncorrect: 0,
         priorStudy: card.priorStudy,
@@ -1176,8 +1171,6 @@ function modelUnitEngine() {
         priorIncorrect: stim.priorIncorrect,
         curSessionPriorCorrect: stim.curSessionPriorCorrect,
         curSessionPriorIncorrect: stim.curSessionPriorIncorrect,
-        currentUnitPriorCorrect: stim.currentUnitPriorCorrect,
-        currentUnitPriorIncorrect: stim.currentUnitPriorIncorrect,
         priorStudy: stim.priorStudy,
         totalPracticeDuration: stim.totalPracticeDuration,
         outcomeStack: stim.outcomeStack,
@@ -1193,8 +1186,6 @@ function modelUnitEngine() {
         lastSeen: response.lastSeen,
         priorCorrect: response.priorCorrect,
         priorIncorrect: response.priorIncorrect,
-        currentUnitPriorCorrect: response.currentUnitPriorCorrect,
-        currentUnitPriorIncorrect: response.currentUnitPriorIncorrect,
         curSessionPriorCorrect: 0,
         curSessionPriorIncorrect: 0,
         priorStudy: response.priorStudy,
@@ -1695,17 +1686,17 @@ function modelUnitEngine() {
       console.log('cardAnswered, curTrialInfo:', currentStimProbability, card, stim);
       if (wasCorrect) {
         card.priorCorrect += 1;
-        card.curentUnitPriorCorrec += 1;
+        card.overallPriorCorrect += 1;
         stim.priorCorrect += 1;
         stim.curSessionPriorCorrect += 1;
-        stim.curentUnitPriorCorrec += 1;
+        stim.overallPriorCorrect += 1;
       }
       else {
         card.priorIncorrect += 1;
-        card.curentUnitPriorIncorrec += 1;
+        card.overallPriorIncorrect += 1;
         stim.priorIncorrect += 1;
         stim.curSessionPriorIncorrect += 1;
-        stim.curentUnitPriorIncorrec += 1;
+        stim.overallPriorIncorrect += 1;
       }
 
       // This is called from processUserTimesLog() so this both works in memory and restoring from userTimesLog
@@ -1720,11 +1711,11 @@ function modelUnitEngine() {
         resp = cardProbabilities.responses[answerText];
         if (wasCorrect) {
           resp.priorCorrect += 1;
-          resp.curentUnitPriorCorrec += 1;
+          resp.overallPriorCorrect += 1;
         }
         else {
           resp.priorIncorrect += 1;
-          resp.curentUnitPriorIncorrec += 1;
+          resp.overallPriorIncorrect += 1;
         }
 
         resp.outcomeStack.push(wasCorrect ? 1 : 0);
