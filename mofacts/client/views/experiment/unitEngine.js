@@ -1659,6 +1659,7 @@ function modelUnitEngine() {
       const {whichStim} = this.findCurrentCardInfo();
       const stim = card.stims[whichStim];
       stim.totalPracticeDuration += practiceTime;
+      stim.allTimeTotalPracticeDuration += practiceTime;
 
       updateCurStudentPerformance(wasCorrect, practiceTime);
 
