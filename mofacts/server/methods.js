@@ -444,7 +444,7 @@ async function getComponentStatesByUserIdTDFIdAndUnitNum(userId, TDFId) {
 }
 
 async function clearCurUnitProgress(userId, TDFId) {
-  ComponentStates.update({userId: userId, TDFId: TDFId}, {$set: {'currentUnitPriorCorrect': 0, 'currentUnitPriorIncorrect': 0}}, {multi: true});
+  ComponentStates.update({userId: userId, TDFId: TDFId}, {$set: {'priorCorrect': 0, 'priorIncorrect': 0, 'totalPracticeDuration': 0}}, {multi: true});
 }
 
 async function setComponentStatesByUserIdTDFIdAndUnitNum(userId, TDFId, componentStates) {
@@ -1452,6 +1452,7 @@ async function getItemsByFileName(stimFileName) {
   serverConsole(items[0]);
   return items;
 }
+
 async function getStudentReportingData(userId, TDFId, hintLevel) {
   //creates a list of the correctness of the first 5 times a user answers.
   const correctnessAcrossRepetitions = await ComponentStates.rawCollection().aggregate([{
@@ -1567,10 +1568,6 @@ async function getStudentPerformanceByIdAndTDFId(userId, TDFId, stimIds=null, on
     innerQuery.KCId = {$in: stimIds};
   }
 
-  const cond = onlyCurrentUnit ? ['$currentUnitPriorCorrect', '$currentUnitPriorIncorrect'] : ['$priorCorrect', '$priorIncorrect']
-  const numCorrect = onlyCurrentUnit ? '$currentUnitPriorCorrect' : '$priorCorrect';
-  const numIncorrect = onlyCurrentUnit ? '$currentUnitPriorIncorrect' : '$priorIncorrect';
-
   const query = [{
     $match: innerQuery,
   },
@@ -1578,7 +1575,7 @@ async function getStudentPerformanceByIdAndTDFId(userId, TDFId, stimIds=null, on
     $addFields: {
       introduced: {
         $cond: {
-          if: {$or: cond},
+          if: {$or: ['$priorCorrect', '$priorIncorrect']},
           then: 1,
           else: 0,
         },
@@ -1590,9 +1587,12 @@ async function getStudentPerformanceByIdAndTDFId(userId, TDFId, stimIds=null, on
     $group: {
       _id: null,
       totalStimCount: {$sum: '$totalStimCount'},
-      numCorrect: {$sum: numCorrect},
-      numIncorrect: {$sum: numIncorrect},
+      numCorrect: {$sum: '$priorCorrect'},
+      numIncorrect: {$sum:  '$priorIncorrect'},
       totalPracticeDuration: {$sum: '$totalPracticeDuration'},
+      allTimeNumCorrect: {$sum: '$allTimeCorrect'},
+      allTimeNumIncorrect: {$sum: '$allTimeIncorrect'},
+      allTimePracticeDuration: {$sum: '$allTimeTotalPracticeDuration'},
       stimsIntroduced: {$sum: '$introduced'},
     },
   },
