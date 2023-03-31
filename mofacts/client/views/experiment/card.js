@@ -2026,7 +2026,6 @@ async function unitIsFinished(reason) {
   Session.set('curUnitInstructionsSeen', false);
 
   const resetStudentPerformance = Session.get('currentDeliveryParams').resetStudentPerformance
-
   let leaveTarget;
   if (newUnitNum < curTdf.tdfs.tutor.unit.length) {
     // Just hit a new unit - we need to restart with instructions
