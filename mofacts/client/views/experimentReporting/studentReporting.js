@@ -219,11 +219,11 @@ async function drawDashboard(studentId, selectedTdfId){
     console.log(`masteryEstimateData(${timeToMasterHistory} trials)`, masteryEstimateData);
     console.log(`difficultyData(${difficultyHistory} trials)`, difficultyData);
     let {totalStimCount, stimsIntroduced} = curStudentGraphData;
-    const {numCorrect, numIncorrect, totalPracticeDuration} = curStudentTotalData;
-    totalAttempts = parseFloat(numCorrect) + parseFloat(numIncorrect);
+    const {allTimeNumCorrect, allTimeNumIncorrect, allTimePracticeDuration} = curStudentTotalData;
+    totalAttempts = parseFloat(allTimeNumCorrect) + parseFloat(allTimeNumIncorrect);
     console.log('totalAttempts', totalAttempts);
-    percentCorrect = (parseFloat(numCorrect) / totalAttempts) * 100;
-    totalPracticeDurationInMinutes = totalPracticeDuration / 60000;
+    percentCorrect = (parseFloat(allTimeNumCorrect) / totalAttempts) * 100;
+    totalPracticeDurationInMinutes = allTimePracticeDuration / 60000;
     totalPracticeDurationMinutesDisplay = totalPracticeDurationInMinutes.toFixed();
     percentStimsSeen = parseFloat(stimsIntroduced - numDroppedStims) / parseFloat(totalStimCount - numDroppedStims) * 100;
     speedOfLearning = Math.log(1+parseFloat(speedOfLearningData.stimsIntroduced)) * 100;
