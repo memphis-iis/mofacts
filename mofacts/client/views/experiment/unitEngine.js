@@ -1043,7 +1043,8 @@ function modelUnitEngine() {
           clusterKC: (curKCBase + i),
           hintLevel: null,
           priorCorrect: 0,
-          currentUnitPriorCorrect: 0,
+          allTimeCorrect: 0,
+          allTimeIncorrect: 0,
           priorIncorrect: 0,
           curSessionPriorCorrect: 0,
           curSessionPriorIncorrect: 0,
@@ -1052,6 +1053,7 @@ function modelUnitEngine() {
           lastSeen: 0,
           firstSeen: 0,
           totalPracticeDuration: 0,
+          allTimeTotalPracticeDuration: 0,
           otherPracticeTime: 0,
           previousCalculatedProbabilities: [],
           priorStudy: 0,
@@ -1074,7 +1076,8 @@ function modelUnitEngine() {
             stimulusKC,
             hintLevel: 0,
             priorCorrect: 0,
-            currentUnitPriorCorrect: 0,
+            allTimeCorrect: 0,
+            allTimeIncorrect: 0,
             curSessionPriorCorrect: 0,
             priorIncorrect: 0,
             curSessionPriorIncorrect: 0,
@@ -1083,6 +1086,7 @@ function modelUnitEngine() {
             lastSeen: 0,
             firstSeen: 0,
             totalPracticeDuration: 0,
+            allTimeTotalPracticeDuration: 0,
             otherPracticeTime: 0,
             previousCalculatedProbabilities: [],
             priorStudy: 0,
@@ -1105,13 +1109,15 @@ function modelUnitEngine() {
               KCId: reponseKCMap[response],
               hintLevel: null,
               priorCorrect: 0,
-              currentUnitPriorCorrect: 0,
+              allTimeCorrect: 0,
+              allTimeIncorrect: 0,
               curSessionPriorCorrect: 0,
               priorIncorrect: 0,
               curSessionPriorIncorrect: 0,
               firstSeen: 0,
               lastSeen: 0,
               totalPracticeDuration: 0,
+              allTimeTotalPracticeDuration: 0,
               priorStudy: 0,
               outcomeStack: [],
               instructionQuestionResult: null,
@@ -1151,10 +1157,13 @@ function modelUnitEngine() {
         trialsSinceLastSeen: card.trialsSinceLastSeen,
         priorCorrect: card.priorCorrect,
         priorIncorrect: card.priorIncorrect,
+        allTimeCorrect: card.allTimeCorrect,
+        allTimeIncorrect: card.allTimeIncorrect,
         curSessionPriorCorrect: 0,
         curSessionPriorIncorrect: 0,
         priorStudy: card.priorStudy,
         totalPracticeDuration: card.totalPracticeDuration,
+        allTimeTotalPracticeDuration: card.allTimeTotalPracticeDuration,
         outcomeStack: card.outcomeStack,
         instructionQuestionResult: Session.get('instructionQuestionResult'),
       };
@@ -1169,10 +1178,13 @@ function modelUnitEngine() {
         hintLevel: Session.get('hintLevel') || null,
         priorCorrect: stim.priorCorrect,
         priorIncorrect: stim.priorIncorrect,
+        allTimeCorrect: stim.allTimeCorrect,
+        allTimeIncorrect: stim.allTimeIncorrect,
         curSessionPriorCorrect: stim.curSessionPriorCorrect,
         curSessionPriorIncorrect: stim.curSessionPriorIncorrect,
         priorStudy: stim.priorStudy,
         totalPracticeDuration: stim.totalPracticeDuration,
+        allTimeTotalPracticeDuration: stim.allTimeTotalPracticeDuration,
         outcomeStack: stim.outcomeStack,
         instructionQuestionResult: null,
       };
@@ -1186,10 +1198,13 @@ function modelUnitEngine() {
         lastSeen: response.lastSeen,
         priorCorrect: response.priorCorrect,
         priorIncorrect: response.priorIncorrect,
+        allTimeCorrect: response.allTimeCorrect,
+        allTimeIncorrect: response.allTimeIncorrect,
         curSessionPriorCorrect: 0,
         curSessionPriorIncorrect: 0,
         priorStudy: response.priorStudy,
         totalPracticeDuration: response.totalPracticeDuration,
+        allTimeTotalPracticeDuration: response.allTimeTotalPracticeDuration,
         outcomeStack: response.outcomeStack,
         responseText: Object.entries(cardProbabilities.responses).find(r => r[1] == response)[0], // not actually in db, need to lookup/assign kcid when loading
         instructionQuestionResult: null,
@@ -1236,11 +1251,14 @@ function modelUnitEngine() {
           hintLevel: null,
           trialsSinceLastSeen: card.trialsSinceLastSeen,
           priorCorrect: card.priorCorrect,
+          allTimeCorrect: card.allTimeCorrect,
           priorIncorrect: card.priorIncorrect,
+          allTimeIncorrect: card.allTimeIncorrect,
           curSessionPriorCorrect: 0,
           curSessionPriorIncorrect: 0,
           priorStudy: card.priorStudy,
           totalPracticeDuration: card.totalPracticeDuration,
+          allTimeTotalPracticeDuration: card.allTimeTotalPracticeDuration,
           outcomeStack: typeof card.outcomeStack == 'string' ?  card.outcomeStack.split(','):  card.outcomeStack,
           instructionQuestionResult: Session.get('instructionQuestionResult'),
         };
@@ -1257,11 +1275,14 @@ function modelUnitEngine() {
             lastSeen: stim.lastSeen,
             hintLevel: Session.get('hintLevel') || null,
             priorCorrect: stim.priorCorrect,
+            allTimeCorrect: stim.allTimeCorrect,
             priorIncorrect: stim.priorIncorrect,
+            allTimeIncorrect: stim.allTimeIncorrect,
             curSessionPriorCorrect: stim.curSessionPriorCorrect,
             curSessionPriorIncorrect: stim.curSessionPriorIncorrect,
             priorStudy: stim.priorStudy,
             totalPracticeDuration: stim.totalPracticeDuration,
+            allTimeTotalPracticeDuration: stim.allTimeTotalPracticeDuration,
             outcomeStack: typeof stim.outcomeStack == 'string' ?  stim.outcomeStack.split(','):  stim.outcomeStack,
             instructionQuestionResult: null,
           };
@@ -1279,11 +1300,14 @@ function modelUnitEngine() {
           firstSeen: response.firstSeen,
           lastSeen: response.lastSeen,
           priorCorrect: response.priorCorrect,
+          allTimeCorrect: response.allTimeCorrect,
           priorIncorrect: response.priorIncorrect,
+          allTimeIncorrect: response.allTimeIncorrect,
           curSessionPriorCorrect: 0,
           curSessionPriorIncorrect: 0,
           priorStudy: response.priorStudy,
           totalPracticeDuration: response.totalPracticeDuration,
+          allTimeTotalPracticeDuration: response.allTimeTotalPracticeDuration,
           outcomeStack: typeof response.outcomeStack == 'string' ?  response.outcomeStack.split(','):  response.outcomeStack,
           responseText, // not actually in db, need to lookup/assign kcid when loading
           instructionQuestionResult: null,
@@ -1363,8 +1387,8 @@ function modelUnitEngine() {
           const clusterKC = componentCard.KCId;
           const cardIndex = clusterKC % curKCBase;
           const componentData = _.pick(componentCard,
-              ['firstSeen', 'lastSeen', 'outcomeStack','hintLevel', 'priorCorrect', 'priorIncorrect', 'priorStudy',
-                'totalPracticeDuration', 'trialsSinceLastSeen']);
+              ['firstSeen', 'lastSeen', 'outcomeStack','hintLevel', 'priorCorrect', 'priorIncorrect', 'allTimeCorrect', 'allTimeIncorrect', 'priorStudy',
+                'totalPracticeDuration', 'allTimeTotalPracticeDuration', 'trialsSinceLastSeen']);
           componentData.clusterKC = clusterKC;
           Object.assign(cards[cardIndex], componentData);
           cards[cardIndex].hasBeenIntroduced = componentData.firstSeen > 0;
@@ -1380,8 +1404,8 @@ function modelUnitEngine() {
             const stimulusKC = componentStim.KCId;
             const stimIndex = cards[cardIndex].stims.findIndex((x) => x.stimulusKC == stimulusKC);
             const componentStimData = _.pick(componentStim,
-                ['firstSeen', 'lastSeen', 'outcomeStack','hintLevel', 'priorCorrect', 'priorIncorrect', 'curSessionPriorCorrect', 'curSessionPriorIncorrect', 'priorStudy',
-                  'totalPracticeDuration']);
+                ['firstSeen', 'lastSeen', 'outcomeStack','hintLevel', 'priorCorrect', 'priorIncorrect', 'allTimeCorrect', 'allTimeIncorrect', 'curSessionPriorCorrect', 'curSessionPriorIncorrect', 'priorStudy',
+                'allTimeTotalPracticeDuration', 'totalPracticeDuration']);
             Object.assign(cards[cardIndex].stims[stimIndex], componentStimData);
             cards[cardIndex].stims[stimIndex].hasBeenIntroduced = componentStim.firstSeen > 0;
             const stimProbs = stimProbabilityEstimates[stimulusKC] || [];
@@ -1687,17 +1711,17 @@ function modelUnitEngine() {
       console.log('cardAnswered, curTrialInfo:', currentStimProbability, card, stim);
       if (wasCorrect) {
         card.priorCorrect += 1;
-        card.overallPriorCorrect += 1;
+        card.allTimeCorrect += 1;
         stim.priorCorrect += 1;
         stim.curSessionPriorCorrect += 1;
-        stim.overallPriorCorrect += 1;
+        stim.allTimeCorrect += 1;
       }
       else {
         card.priorIncorrect += 1;
-        card.overallPriorIncorrect += 1;
+        card.allTimeIncorrect += 1;
         stim.priorIncorrect += 1;
         stim.curSessionPriorIncorrect += 1;
-        stim.overallPriorIncorrect += 1;
+        stim.allTimeIncorrect += 1;
       }
 
       // This is called from processUserTimesLog() so this both works in memory and restoring from userTimesLog
@@ -1712,11 +1736,11 @@ function modelUnitEngine() {
         resp = cardProbabilities.responses[answerText];
         if (wasCorrect) {
           resp.priorCorrect += 1;
-          resp.overallPriorCorrect += 1;
+          resp.allTimeCorrect += 1;
         }
         else {
           resp.priorIncorrect += 1;
-          resp.overallPriorIncorrect += 1;
+          resp.allTimeIncorrect += 1;
         }
 
         resp.outcomeStack.push(wasCorrect ? 1 : 0);
