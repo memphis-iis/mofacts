@@ -47,6 +47,7 @@ input{
     background-color: #577c42;
     color: white;
 }
+
 .login-sso-options button{
     font-family: 'Josefin Sans';
     color: black !important;
@@ -62,4 +63,28 @@ input{
 .login-sso-options button:hover{
     background-color: #577c42;
     color: white;
+}
+
+/* navibar template */
+.navbar{
+    background-color: #7ed957;
+    color: white;
+    font-family: 'Josefin Sans';
+    font-size: 20px;
+    font-weight: 900;
+}
+
+.navbar .navbar-brand{
+    font-family: 'League Spartan' !important;
+    font-size: 30px;
+    font-weight: 900;
+    color: white;
+}
+
+/* footer template */
+.footer{
+    color: white;
+    font-family: 'Josefin Sans';
+    font-size: 10px;
+    font-weight: 900;
 }
