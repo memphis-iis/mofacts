@@ -228,6 +228,22 @@ Router.route('/', {
   },
 });
 
+Router.route('/FileManagement', {
+  name: 'client.FileManagement',
+  waitOn: function() {
+    return [Meteor.subscribe('ownedTDFS'), Meteor.subscribe('ownedStims')];
+  },
+  action: function() {
+    if(this.ready()){
+      if(Meteor.user()) {
+        this.render('FileManagement');
+      } else {
+        this.redirect('/');
+      }
+    }
+  }
+})
+
 Router.route('/contentUpload', {
   name: 'client.contentUpload',
   action: function() {

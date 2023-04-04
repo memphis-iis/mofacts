@@ -16,7 +16,7 @@ import { _ } from 'core-js';
 export {
   getTdfByFileName,
   getTdfById,
-  getHistoryByTDFfileName,
+  getHistoryByTDFID,
   getListOfStimTags,
   getListOfStimTagsByTDFFileNames,
   getStimuliSetById,
@@ -46,6 +46,14 @@ if (Meteor.isServer) {
   Meteor.publish('contentUpload', function() {
     return Tdfs.find({'content.ownerId': Meteor.userId()})
   })
+
+  Meteor.publish('ownedTDFS', function() {
+    return Tdfs.find({'ownerId': Meteor.userId()})
+  });
+
+  Meteor.publish('ownedStims', function() {
+    return Stims.find({'owner': Meteor.userId()})
+  });
 }
 
 if (process.env.METEOR_SETTINGS_WORKAROUND) {
@@ -1170,8 +1178,8 @@ async function insertHistory(historyRecord) {
   Histories.insert(historyRecord)
 }
 
-async function getHistoryByTDFfileName(TDFfileName) {
-  const history = Histories.find({conditionTypeA: TDFfileName}).fetch();
+async function getHistoryByTDFID(TDFId) {
+  const history = Histories.find({TDFId: TDFId}).fetch();
   return history;
 }
 
@@ -2028,8 +2036,8 @@ async function upsertStimFile(stimulusFileName, stimJSON, ownerId, packagePath =
     nextStimuliSetId += 1;
     serverConsole('stimuliSetId2:', stimuliSetId, nextStimuliSetId);
   }
-
-  Stims.insert({
+  await Stims.remove({fileName: stimulusFileName, owner: ownerId})
+  Stims.upsert({owner: ownerId, fileName: stimulusFileName}, {
     'stimuliSetId': stimuliSetId,
     'fileName': stimulusFileName,
     'stimuli': stimJSON,
@@ -2399,6 +2407,61 @@ const methods = {
     }
   },
 
+  getAccessorsTDFID: function(TDFId){
+    const tdf = Tdfs.findOne({_id: TDFId});
+    if(tdf){
+      const accessors = tdf.accessors || [];
+      return accessors;
+    } else {
+      return [];
+    }
+  },
+
+  getAccessors: function(TDFId){
+    const accessors = Meteor.users.find({'accessedTDFs': TDFId}).fetch();
+    return accessors;
+  },
+
+  getAccessableTDFSForUser: function(userId){
+    serverConsole('getAccessableTDFSForUser', userId);
+    const accessableTDFs = Meteor.users.findOne({_id: userId}).accessedTDFs || [];
+    const TDFs = Tdfs.find({_id: {$in: accessableTDFs}}).fetch();
+    return {accessableTDFs, TDFs};
+  },
+
+  getAssignableTDFSForUser: function(userId){
+    serverConsole('getAssignableTDFSForUser', userId);
+    const assignableTDFs = Tdfs.find({$or: [{ownerId: userId}, {accessors: {$elemMatch: {userId: userId}}}]}).fetch();
+    return assignableTDFs;
+  },
+
+  assignAccessors: function(TDFId, accessors, revokedAccessors){
+    serverConsole('assignAccessors', TDFId, accessors, revokedAccessors)
+    Tdfs.update({_id: TDFId}, {$set: {'accessors': accessors}});
+    const userIds = accessors.map((x) => x.userId);
+    Meteor.users.update({'_id': {$in: userIds}}, {$addToSet: {'accessedTDFs': TDFId}}, {multi: true});
+    Meteor.users.update({'_id': {$in: revokedAccessors}}, {$pull: {'accessedTDFs': TDFId}}, {multi: true});
+  },
+
+  transferDataOwnership: function(fileId, fileType, newOwnerId, oldOwnerId){
+    let query;
+    if(fileType == 'TDF'){
+      query = Roles.userIsInRole(oldOwnerId, 'admin') ? {_id: fileId} : {_id: fileId, ownerId: oldOwnerId};
+    } else { 
+      fileId = parseInt(fileId);
+      query = Roles.userIsInRole(oldOwnerId, 'admin') ? {stimuliSetId: fileId} : {stimuliSetId: fileId, owner: oldOwnerId};
+    }
+    if(oldOwnerId && newOwnerId){
+      serverConsole('transferring data ownership for', fileType, fileId, 'to', newOwnerId);
+      if(fileType == 'TDF')
+        Tdfs.update(query, {$set: {'ownerId': newOwnerId}})
+      else
+        Stims.update(query, {$set: {'owner': newOwnerId}})
+    } else {
+        serverConsole(`transferDataOwnership failed, ${fileType} or newOwner not found`);
+    }
+  },
+
   resetPasswordWithSecret: function(email, secret, newPassword){
     user = Meteor.users.findOne({username: email});
     userId = user._id;
@@ -2657,7 +2720,8 @@ const methods = {
 
   deleteTDFFile: function(tdfId){
     serverConsole("Remove TDF File:", tdfId);
-    if(tdfId){
+    let TDF = Tdfs.findOne({_id: tdfId, ownerId: Meteor.userId()});
+    if(TDF){
       ComponentStates.remove({TDFId: tdfId});
       Assignments.remove({TDFId: tdfId});
       Histories.remove({TDFId: tdfId});
@@ -2719,8 +2783,9 @@ const methods = {
   },
 
   downloadStimFile: function(stimuliSetId) {
+    serverConsole('downloadStimFile: ' + stimuliSetId);
+    stimuliSetId = parseInt(stimuliSetId);
     let stims = Stims.find({'stimuliSetId': stimuliSetId}).fetch();
-    serverConsole(stims);
     return stims;
   },
 
@@ -2759,7 +2824,6 @@ const methods = {
     return ownerMap;
   },
 
-
   getTdfsAssignedToCourseId: (courseId) => {
     const tdfs = Assignments.find({courseId: courseId}).fetch();
     return tdfs;
@@ -2773,7 +2837,22 @@ const methods = {
 
   getVerbosity: function() {
     return verbosityLevel
-  }
+  },
+
+  getTdfsByOwnerId: (ownerId) => {
+    const tdfs = Tdfs.find({'ownerId': ownerId}).fetch();
+    return tdfs || [];
+  },
+
+  getStimsByOwnerId: (ownerId) => {
+    serverConsole('getStimsByOwnerId: ' + ownerId);
+    const stims = Stims.find({'owner': ownerId}).fetch();
+    for(let stim of stims) {
+      let lessonName = Tdfs.findOne({stimuliSetId: stim.stimuliSetId}).content.tdfs.tutor.setspec.lessonname
+      stim.lessonName = lessonName
+    }
+    return stims || [];
+  },
 }
 
 const asyncMethods = {
@@ -2799,7 +2878,7 @@ const asyncMethods = {
 
   getComponentStatesByUserIdTDFIdAndUnitNum, setComponentStatesByUserIdTDFIdAndUnitNum,
 
-  insertHistory, getHistoryByTDFfileName, clearCurUnitProgress,
+  insertHistory, getHistoryByTDFID, clearCurUnitProgress,
 
   loadStimsAndTdfsFromPrivate, getListOfStimTags, getStudentReportingData,
 
@@ -2871,7 +2950,6 @@ const asyncMethods = {
   resetCurSessionTrialsCount: async function(userId, TDFId) {
     ComponentStates.update({userId: userId, TDFId: TDFId}, {$set: {curSessionPriorCorrect: 0, curSessionPriorIncorrect: 0}});
   },
-
 
   updateStimSyllables: async function(stimSetId) {
     StimSyllables.remove({filename: stimSetId});
@@ -2976,20 +3054,26 @@ const asyncMethods = {
   },
   deleteStimFile: async function(stimSetId) {
     stimSetId = parseInt(stimSetId);
-    let tdfs = Tdfs.find({stimuliSetId: stimSetId}).fetch();
-    serverConsole(tdfs);
-    for(let tdf of tdfs) {
-      tdfId = tdf._id;
-      GlobalExperimentStates.remove({TDFId: tdfId});
-      ComponentStates.remove({TDFId: tdfId});
-      Assignments.remove({TDFId: tdfId});
-      Histories.remove({TDFId: tdfId});
+    let stim = Stims.findOne({stimuliSetId: stimSetId, owner: Meteor.userId()})
+    if(stim){
+      let tdfs = Tdfs.find({stimuliSetId: stimSetId}).fetch();
+      serverConsole(tdfs);
+      for(let tdf of tdfs) {
+        tdfId = tdf._id;
+        GlobalExperimentStates.remove({TDFId: tdfId});
+        ComponentStates.remove({TDFId: tdfId});
+        Assignments.remove({TDFId: tdfId});
+        Histories.remove({TDFId: tdfId});
+      }
+      Items.remove({stimuliSetId: stimSetId});
+      Tdfs.remove({stimuliSetId: stimSetId});
+      Stims.remove({stimuliSetId: stimSetId});
+      res = "Stim and related TDFS deleted.";
+      return res;
+    } else {
+      res = "Stim not found.";
+      return res;
     }
-    Items.remove({stimuliSetId: stimSetId});
-    Tdfs.remove({stimuliSetId: stimSetId});
-    Stims.remove({stimuliSetId: stimSetId});
-    res = "Stim and related TDFS deleted.";
-    return res;
   },
 }
 
@@ -3374,7 +3458,7 @@ Router.route('data-by-file', {
       return;
     }
 
-    const fileName = exp.split('.json')[0] + '-data.txt';;
+    const fileName = exp.split('.json')[0] + '-data.txt';
 
     response.writeHead(200, {
       'Content-Type': 'text/tab-separated-values',

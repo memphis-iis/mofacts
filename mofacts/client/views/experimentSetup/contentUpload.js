@@ -1,5 +1,6 @@
 import {meteorCallAsync} from '../..';
 import { ReactiveVar } from 'meteor/reactive-var';
+export {doFileUpload};
 
 Template.contentUpload.helpers({
   TdfFiles: function() {
