@@ -131,9 +131,6 @@ Template.dataDownload.helpers({
   'user': function() {
     return Meteor.user() ? Meteor.user().username : false;
   },
-  'fileAccessors': function() {
-    return Session.get('fileAccessors');
-  },
   'accessableFiles': function() {
     Meteor.call('getAccessableTDFSForUser', Meteor.userId(), function(err, result) {
       if (err) {
