@@ -16,7 +16,7 @@ import { _ } from 'core-js';
 export {
   getTdfByFileName,
   getTdfById,
-  getHistoryByTDFfileName,
+  getHistoryByTDFID,
   getListOfStimTags,
   getListOfStimTagsByTDFFileNames,
   getStimuliSetById,
@@ -1170,8 +1170,8 @@ async function insertHistory(historyRecord) {
   Histories.insert(historyRecord)
 }
 
-async function getHistoryByTDFfileName(TDFfileName) {
-  const history = Histories.find({conditionTypeA: TDFfileName}).fetch();
+async function getHistoryByTDFID(TDFId) {
+  const history = Histories.find({TDFId: TDFId}).fetch();
   return history;
 }
 
@@ -2845,7 +2845,7 @@ const asyncMethods = {
 
   getComponentStatesByUserIdTDFIdAndUnitNum, setComponentStatesByUserIdTDFIdAndUnitNum,
 
-  insertHistory, getHistoryByTDFfileName, clearCurUnitProgress,
+  insertHistory, getHistoryByTDFID, clearCurUnitProgress,
 
   loadStimsAndTdfsFromPrivate, getListOfStimTags, getStudentReportingData,
 
