@@ -161,17 +161,18 @@ Template.FileManagement.events({
   },
   'click #fileDelete': function(event) {
     event.preventDefault();
-    let fileId = event.currentTarget.getAttribute('data-fileId');
-    let fileType = event.currentTarget.getAttribute('data-fileType');
-    let func = fileType == 'Stim' ? 'deleteStimFile' : 'deleteTDFFile';
-    Meteor.call(func, fileId, function(err, res){
-      if(err){
-        console.log(err)
-      }
-      else{
-        console.log(res)
-      }
-    })
+    if(window.confirm('Are you sure you want to delete this file? All the data associated with this file will be deleted.')){
+      let fileId = event.currentTarget.getAttribute('data-fileId');
+      let fileType = event.currentTarget.getAttribute('data-fileType');
+      let func = fileType == 'Stim' ? 'deleteStimFile' : 'deleteTDFFile';
+      Meteor.call(func, fileId, function(err, res){
+        if(err){
+          console.log(err)
+        }
+        else{
+          alert('File Deleted Successfully')
+        }
+      })
+    }
   }
-
 });
