@@ -701,7 +701,7 @@ Template.card.helpers({
   },
 
   'hideResponse': function() {
-    return getTestType() === 'f';
+    return getTestType() !== 'f';
   },
 
   'fontSizeClass': function() {
