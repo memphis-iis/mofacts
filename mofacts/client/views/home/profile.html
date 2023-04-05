@@ -1,5 +1,9 @@
 <!-- MAIN profile template -->
 <template name="profile">
+  <div class="row profile-summary mobile-20vh">
+    <div class="name-circle">
+    </div>
+  </div>
   <script defer src="https://use.fontawesome.com/releases/v5.0.9/js/all.js" integrity="sha384-8iPTk2s/jMVj81dnzb/iFR2sdA7u06vHJyyLlAd4snFpCl/SnyUjRrbdJsw1pGIl" crossorigin="anonymous"></script>
     <div class="container-fluid">
         {{#if isImpersonating}}
@@ -202,6 +206,14 @@
             <div class="row">
                 <div class="col-md-offset-3 col-md-12">
                     <button type="button" id="mechTurkButton" class="button btn  navbar-btn">Mechanical Turk</button>
+                </div>
+            </div>
+            <br><br>
+            <div class="row">
+                <div class="col-md-offset-3 col-md-12">
+                    <button id="FileManagementButton" class="btn btn-primary" type="button">
+                        Manage Lessons
+                    </button>
                 </div>
             </div>
             <br><br>

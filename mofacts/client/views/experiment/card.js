@@ -2014,19 +2014,18 @@ async function unitIsFinished(reason) {
   const curUnitNum = Session.get('currentUnitNumber');
   const newUnitNum = curUnitNum + 1;
   const curTdfUnit = curTdf.tdfs.tutor.unit[newUnitNum];
-  const currentDeliveryParams = getCurrentDeliveryParams();
-  const resetStudentPerformance = currentDeliveryParams.resetStudentPerformance
 
   Session.set('questionIndex', 0);
   Session.set('clusterIndex', undefined);
   Session.set('currentUnitNumber', newUnitNum);
   Session.set('currentTdfUnit', curTdfUnit);
-  Session.set('currentDeliveryParams', currentDeliveryParams);
+  Session.set('currentDeliveryParams', getCurrentDeliveryParams());
   Session.set('currentUnitStartTime', Date.now());
   Session.set('feedbackUnset', true);
   Session.set('feedbackTypeFromHistory', undefined);
   Session.set('curUnitInstructionsSeen', false);
 
+  const resetStudentPerformance = Session.get('currentDeliveryParams').resetStudentPerformance
   let leaveTarget;
   if (newUnitNum < curTdf.tdfs.tutor.unit.length) {
     // Just hit a new unit - we need to restart with instructions
