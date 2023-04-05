@@ -147,11 +147,14 @@ async function setStudentPerformance(studentID, studentUsername, tdfId) {
   } else {
     studentPerformanceData = {
       numCorrect: parseInt(studentPerformanceDataRet.numCorrect) || 0,
+      allTimeCorrect: parseInt(studentPerformanceDataRet.allTimeCorrect) || 0,
+      allTimeIncorrect: parseInt(studentPerformanceDataRet.allTimeIncorrect) || 0,
       numIncorrect: parseInt(studentPerformanceDataRet.numIncorrect) || 0,
       lastSeen: parseInt(studentPerformanceDataRet.lastSeen) || 0,
       stimsSeen:  parseInt(studentPerformanceDataRet.stimsSeen)  || 0,
       totalStimCount: parseInt(studentPerformanceDataRet.totalStimCount) || 0,
-      totalPracticeDuration: parseInt(studentPerformanceDataRet.totalPracticeDuration) || 0
+      totalPracticeDuration: parseInt(studentPerformanceDataRet.totalPracticeDuration) || 0,
+      allTimeTotalPracticeDuration: parseInt(studentPerformanceDataRet.allTimeTotalPracticeDuration) || 0,
     };
   }
   const count = (parseInt(studentPerformanceData.numCorrect) + parseInt(studentPerformanceData.numIncorrect));
