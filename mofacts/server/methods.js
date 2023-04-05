@@ -43,16 +43,13 @@ if (Meteor.isServer) {
     return DynamicAssets.collection.find();
   });
 
-  Meteor.publish('contentUpload', function() {
-    return Tdfs.find({'content.ownerId': Meteor.userId()})
-  })
-
-  Meteor.publish('ownedTDFS', function() {
-    return Tdfs.find({'ownerId': Meteor.userId()})
+  Meteor.publish('ownedFiles', function() {
+    return [Tdfs.find({'ownerId': Meteor.userId()}), Stims.find({'owner': Meteor.userId()})]
   });
 
-  Meteor.publish('ownedStims', function() {
-    return Stims.find({'owner': Meteor.userId()})
+  Meteor.publish('accessableFiles', function() {
+    const accessableFileIds = Meteor.users.findOne({_id: this.userId}).accessedTDFs;
+    return Tdfs.find({_id: {$in: accessableFileIds}})
   });
 }
 

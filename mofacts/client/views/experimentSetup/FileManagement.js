@@ -123,30 +123,23 @@ Template.FileManagement.events({
   },
   'click #downloadStimFile': function(event) {
     event.preventDefault();
-    let stimuliSetId = event.currentTarget.getAttribute('data-fileId');
-    Meteor.call('downloadStimFile', stimuliSetId, function(err, res){
-      if(err){
-        console.log(err)
-      }
-      else{
-        const stim = res[0];
-        let blob = new Blob([JSON.stringify(stim.stimuli,null,2)], { type: 'application/json' });
-        let url = window.URL.createObjectURL(blob);
-        let downloadFileName = stim.fileName.trim();
-        var a = document.createElement("a");
-        document.body.appendChild(a);
-        a.style = "display: none";
-        a.href = url;
-        a.download = downloadFileName;
-        a.click();
-        window.URL.revokeObjectURL(url);
-      }
-    }
-  )},
+    let stimuliSetId = parseInt(event.currentTarget.getAttribute('data-fileId'));
+    let stim = Stims.findOne({stimuliSetId: stimuliSetId})
+    let blob = new Blob([JSON.stringify(stim.stimuli,null,2)], { type: 'application/json' });
+    let url = window.URL.createObjectURL(blob);
+    let downloadFileName = stim.fileName.trim();
+    var a = document.createElement("a");
+    document.body.appendChild(a);
+    a.style = "display: none";
+    a.href = url;
+    a.download = downloadFileName;
+    a.click();
+    window.URL.revokeObjectURL(url);
+  },
   'click #downloadTDFFile': function(event) {
     event.preventDefault();
     let TDFId = event.currentTarget.getAttribute('data-fileId');
-    let selectedTdf = Session.get('allTdfs').find(x => x._id == TDFId);
+    let selectedTdf = Tdfs.findOne({_id: TDFId});
     console.log('downloading tdf id', TDFId);
     let blob = new Blob([JSON.stringify(selectedTdf.content.tdfs,null,2)], { type: 'application/json' });
     let url = window.URL.createObjectURL(blob);

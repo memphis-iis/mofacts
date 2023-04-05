@@ -231,7 +231,7 @@ Router.route('/', {
 Router.route('/FileManagement', {
   name: 'client.FileManagement',
   waitOn: function() {
-    return [Meteor.subscribe('ownedTDFS'), Meteor.subscribe('ownedStims')];
+    return Meteor.subscribe('ownedFiles');
   },
   action: function() {
     if(this.ready()){
@@ -246,9 +246,11 @@ Router.route('/FileManagement', {
 
 Router.route('/contentUpload', {
   name: 'client.contentUpload',
+  waitOn: function() {
+    return [Meteor.subscribe('ownedFiles'), Meteor.subscribe('files.assets.all')];
+  },
   action: function() {
     if(Meteor.user()){
-      this.subscribe('contentUpload').wait();
       this.render('contentUpload');
     } else {
       this.redirect('/');
