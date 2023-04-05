@@ -1,0 +1,235 @@
+/* body template */
+body{
+    background-color: #1a1a1a;
+    color: white;
+}
+/* font template */
+a{
+    color: #7ed957;
+}
+h1{
+    font-family: 'League Spartan';
+    font-size: 40px;
+    font-weight: 900;
+}
+
+/* margin template */
+.spacer{
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+.large-spacer{
+    margin-top: 60px;
+    margin-bottom: 60px;
+}
+
+/* elements template */
+input{
+    border: 1px solid #7ed957;
+    border-radius: 35px;
+    padding: 5px;
+    margin: 5px;
+    padding-left: 10px;
+    width:100%;
+    font-family: 'Josefin Sans';
+    color:white;
+    background-color: #1a1a1a;
+}
+
+/* specific elements template */
+.login-form{
+    justify-content: stretch;
+}
+.login-form button{
+    font-family: 'Josefin Sans';
+    color: black !important;
+    border: 1px solid #7ed957;
+    border-radius: 35px;
+    margin: auto;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    background-color: #7ed957;
+    color: white;
+    width: 40%;
+}
+
+.login-form button:hover{
+    background-color: #577c42;
+    color: white;
+}
+
+.login-form .form-select{
+    border: 1px solid #7ed957;
+    border-radius: 35px;
+    padding: 5px;
+    margin: 5px;
+    padding-left: 10px;
+    width:100%;
+    font-family: 'Josefin Sans';
+    color:white;
+    background-color: #1a1a1a;
+}
+
+.login-form.form-select:hover{
+    background-color: #577c42;
+    color: white;
+}
+
+.login-form .form-select option{
+    color: black;
+}
+
+.login-sso-options button{
+    font-family: 'Josefin Sans';
+    color: black !important;
+    border: 1px solid #7ed957;
+    border-radius: 35px;
+    margin: auto;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    background-color: #7ed957;
+    color: white;
+    width: 100%;
+}
+.login-sso-options button:hover{
+    background-color: #577c42;
+    color: white;
+}
+/* navibar template */
+@media screen and (min-width: 720px) {
+    .navbar{
+        background-color: #7ed957;
+        color: black;
+        font-family: 'Josefin Sans';
+        font-size: 20px;
+        font-weight: 900;
+    }
+    
+    .navbar .navbar-brand{
+        font-family: 'League Spartan' !important;
+        font-size: 30px;
+        font-weight: 900;
+        height: 40px;
+        color: black;
+    }
+    
+}
+@media screen and (max-width: 720px) {
+    .navbar{
+        background-color: #1a1a1a;
+        color: white;
+        vertical-align: top;
+        font-family: 'Josefin Sans';
+        font-size: 20px;
+        font-weight: 900;
+    }
+
+    .navbar a{
+        color: white;
+    }
+    
+    .navbar .navbar-brand{
+        min-height:12vh;
+        font-family: 'League Spartan' !important;
+        font-size: 30px;
+        font-weight: 900;
+        color: white;
+        position: absolute;
+        top: 0;
+        left: 5px;
+    }        
+}
+
+/* profile Summary template */
+.profile-summary{
+    background-color: #1a1a1a;
+    height:20vh;
+    background: url('/images/background.jpg');
+    background-size: cover;
+    width: 110%;
+    position: absolute;
+    left: 0;
+}
+@media screen and (max-width: 720px) {
+    .profile-summary .name-circle{
+        background-color: #7ed957;
+        border-radius: 50%;
+        width: 100px;
+        height: 100px;
+        position: absolute;
+        top: -35px;
+        left: 30px;
+        border: 2px solid #00bf63;
+    }
+}
+@media screen and (min-width: 720px) {
+    .profile-summary .name-circle{
+        background-color: #7ed957;
+        border-radius: 50%;
+        width: 100px;
+        height: 100px;
+        position: absolute;
+        top: -20px;
+        left: 30vw;
+        border: 2px solid #00bf63;
+    }
+}
+    
+}
+
+
+/* modal template */
+.modal{
+    background-color: #1a1a1a;
+    color: white;
+}
+.modal-content{
+    background-color: #1a1a1a;
+    color: white;
+}
+
+
+.modal-header{
+    font-family: 'League Spartan' !important;
+    font-size: 30px;
+    font-weight: 900;
+    color: white;
+    border: none;
+}
+
+/* footer template */
+.footer{
+    color: white;
+    font-family: 'Josefin Sans';
+    font-size: 10px;
+    font-weight: 900;
+}
+
+
+/* mobile helpers */
+@media only screen and (max-width: 720px) {
+    .mobile-10vh{
+        height: 10vh !important;
+    }
+    .mobile-20vh{
+        height: 20vh !important;
+    }
+    .mobile-30vh{
+        height: 30vh !important;
+    }
+    .mobile-40vh{
+        height: 40vh !important;
+    }
+    .mobile-50vh{
+        height: 50vh !important;
+    }
+    .mobile-60vh{
+        height: 60vh !important;
+    }
+    .mobile-70vh{
+        height: 70vh !important;
+    }
+    .mobile-80vh{
+        height: 80vh !important;
+    }
+}
