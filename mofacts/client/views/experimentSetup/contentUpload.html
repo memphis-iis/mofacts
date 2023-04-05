@@ -82,9 +82,11 @@
                                 <td><button id="tdf-download-btn" value="{{_id}}" class="btn"><span class="fa fa-download" aria-hidden="true"></span></button></td>
                                 <td><button id="tdf-delete-btn" value="{{_id}}" data-filename="{{fileName}}" class="btn"><span class="fa fa-minus" aria-hidden="true"></span></button></td>
                             </tr>
+                        {{/each}}
+                        {{#each StimFiles}}
                             <tr>
                                 <td>stim</td>
-                                <td>{{content.tdfs.tutor.setspec.stimulusfile}}</td>
+                                <td>{{this.fileName}}</td>
                                 <td><button id="stim-download-btn" value="{{stimuliSetId}}" class="btn"><span class="fa fa-download" aria-hidden="true"></span></button></td>
                                 <td><button id="stim-delete-btn" value="{{stimuliSetId}}" data-filename="{{fileName}}" class="btn"><span class="fa fa-minus" aria-hidden="true"></span></button></td>
                             </tr>
@@ -93,15 +95,10 @@
                             <tr>
                                 <td>
                                     {{ext}}
-                                    <!-- <a class="imageLink" data-link="{{this.meta.link}}">{{this.name}}</a><br> -->
                                 </td>
                                 <td>
                                     {{name}}
                                 </td>
-                                <!-- <td>
-                                    {{meta.link}}
-                                    
-                                </td> -->
                                 <td>
                                     <a href="{{meta.link}}?download=true" download="{{name}}" target="_parent">
                                         <button id="assetDownloadButton" value="{{_id}}" class="btn"><span class="fa fa-download" aria-hidden="true"></span></button>
