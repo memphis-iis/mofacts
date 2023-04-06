@@ -512,3 +512,182 @@ p.admin-info-p {
     margin-left: 15%;
     text-align: center;
 }
+
+/* classic adaptation /*
+/* profile Summary template */
+.profile-summary{
+    display:none;
+    background-color: #1a1a1a;
+    height:200px;
+    background: url('/images/background.jpg');
+    background-size: cover;
+    width: 100vw;
+    position: relative;
+    color:white;
+}
+
+.profile-summary-text{
+    height: 110px;
+}
+
+.profile-summary input{
+    border: 1px solid #7ed957;
+    border-radius: 35px;
+    padding: 5px;
+    padding-left: 5px;
+    margin: 5px;
+    padding-left: 10px;
+    font-family: 'Josefin Sans';
+    color: black;
+    background-color: white;
+    margin-left: auto;
+    max-width: 75vw;
+}
+
+
+@media screen and (max-width: 720px) {
+    .profile-summary{
+        border-bottom: #00bf63 2px solid;
+    }
+    .profile-summary .name-circle{
+        background-color: #7ed957;
+        border-radius: 50%;
+        width: 100px;
+        height: 100px;
+        margin-top: -29px;
+        border: 2px solid #00bf63;
+    }
+    .profile-summary input{
+        margin-left: 0px;
+    }
+    
+}
+@media screen and (min-width: 720px){
+    .profile-summary .name-circle{
+        background-color: #7ed957;
+        border-radius: 50%;
+        width: 100px;
+        height: 100px;
+        margin-top: -29px;
+        border: 5px solid #00bf63;
+
+    }
+}
+
+/* temporary */
+.name-circle{
+    display: none;
+}
+
+.profile-summary .name-circle span{
+    color:white;
+    text-align: center;
+    width: 75px;
+    display: block;
+    height: 100px;
+    font-size: 50px;
+    margin-top: 5px;
+    font-weight: bold;
+}
+
+/* navibar template */
+@media screen and (min-width: 720px) {
+    .navbar{
+        color: black;
+        font-family: 'Josefin Sans';
+        font-size: 20px;
+        font-weight: 900;
+    }
+    
+    .navbar .navbar-brand{
+        font-family: 'League Spartan' !important;
+        font-size: 30px;
+        font-weight: bolder;
+        height: 40px;
+        color: black;
+
+    }
+    
+}
+@media screen and (max-width: 720px) {
+    .navbar{
+        color: white;
+        vertical-align: top;
+        font-family: 'Josefin Sans';
+        font-size: 20px;
+        font-weight: 900;
+        height: 80px;
+        border-bottom: #00bf63 2px solid;
+    }
+
+    .navbar a{
+        color: white;
+    }
+    
+    .navbar .navbar-brand{
+        min-height:12vh;
+        font-family: 'League Spartan' !important;
+        font-size: 30px;
+        font-weight: bolder;
+        color: black;
+        position: absolute;
+        top: 0;
+        left: 5px;
+    }        
+}
+
+.navbar .dropdown{
+    position: absolute;
+    right: 50px;
+    color:white;
+    height:30px;
+    position: absolute;
+    top:0px;
+}
+.dropdown-menu{
+    background-color: #C1E1A6;
+    color: white;
+    font-family: 'Arimo';
+    font-size: 15px;
+    font-weight: 900;
+    border: 1px solid #1a1a1a;
+    border-radius: 2px;
+    margin-left: -14vw;
+    width: 20vw;
+    margin-top: 26px !important;
+    /* animate slide down */
+    -webkit-animation: slideDown 0.5s ease-in-out;
+    -moz-animation: slideDown 0.5s ease-in-out;
+    animation: slideDown 0.5s ease-in-out;
+  }
+
+  .dropdown-menu .dropdown-item{
+    color:black;
+    font-weight: normal;
+    margin-top: 10px;
+    background-color: #C1E1A6;
+}
+
+.dropdown-menu .dropdown-item:hover{
+    color:black;
+    font-weight: normal;
+    margin-top: 10px;
+    background-color: #118C4E;
+}
+.dropdown-menu .dropdown-divider{
+    background-color: #494f56;
+    color: white;
+    font-family: 'Arimo';
+    font-weight: bold;
+    padding: 20px;
+}
+
+#practiceTDFSearchResults{
+    position: relative;
+    top: 20px;
+    background-color: #00bf63;
+    color: black;
+    border: 1px solid #7ed957;
+    border-radius: 5px;
+    opacity: 0;
+}

@@ -1,9 +1,97 @@
 <!-- MAIN profile template -->
 <template name="profile">
-  <div class="row profile-summary mobile-20vh">
-    <div class="name-circle">
+    <div class="row profile-summary mobile-20vh">
+        <div class="container">
+        <div class="row">
+            <div class="col-12 offset-md-2 offset-sm-1 offset-lg-1 offset-2">
+                <table>
+                    <tr>
+                        <td>
+                            <div class="name-circle">
+                                <span class="mx-auto">
+                                    PP
+                                </span>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="ms-2">
+                                {{#if isInRole 'admin, teacher'}}
+                                <b>{{studentUsername}}</b>
+                                <i>
+                                {{#if isInRole 'admin'}}
+                                    Administrator
+                                    {{#if isInRole 'teacher'}}
+                                        / Teacher
+                                    {{/if}}
+                                {{else}}
+                                    Teacher
+                                {{/if}}
+                                </i>
+                              {{else}}
+                                <b>{{currentUser.username}}</b>
+                                <i>Student</i>
+                              {{/if}}
+                            </span>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+            <div class="row">
+                <div class="col-12 offset-md-2 offset-sm-1 offset-lg-1 offset-2 mt-auto">
+                    <div class="row profile-summary-text">
+                        <div class="col-12 col-md-6 mt-auto">
+                            <!-- tip -->
+                            <i class="fa fa-lightbulb-o" style="font-size:24px"></i>
+                            This is a tip
+                        </div>
+                        <div class="col-12 col-md-5 mt-auto d-flex align-items-end">
+                            <div class="row" style="position: relative; top: 55px;">
+                                <div class="col-12" style="">
+                                    <input type="text" id="practiceTDFSearch" class="form-control" placeholder="Search for module">
+                                </div>
+                                <div class="col-12" id="practiceTDFSearchResults">
+                                    {{#if enabledTdfs}}
+                                        {{#each enabledTdfs}}
+                                        <div class='col-xs-12 col-sm-12 col-md-3 col-lg-3 text-center'>
+                                            <button id="{{this.tdfid}}" class="btn btn-block btn-responsive tdfButton" name="{{this.name}}"
+                                                data-tdfid="{{this.tdfid}}"
+                                                data-lessonname="{{this.name}}"
+                                                data-currentStimuliSetId="{{this.currentStimuliSetId}}"
+                                                data-tdffilename="{{this.fileName}}"
+                                                data-ignoreOutOfGrammarResponses="{{this.ignoreOutOfGrammarResponses}}"
+                                                data-speechOutOfGrammarFeedback="{{this.speechOutOfGrammarFeedback}}"
+                                                data-isMultiTdf="{{this.isMultiTdf}}">
+                                                <!-- add disabled="{{this.isOverDue}}" to this to enable due date lockouts -->
+                                                {{this.name}}
+                                            {{#if this.dueDate}}
+                                                <br>
+                                                <small>Due: {{this.dueDate}}</small>
+                                            {{/if}}
+                                            {{#if this.enableAudioPromptAndFeedback}}
+                                                <br>
+                                                <p style="display:inline-block" title="Audio Output available for this module"><span class="fa fa-headphones"></span></p>
+                                            {{/if}}
+                                            <p style="display:inline-block">&nbsp;&nbsp;&nbsp;</p>
+                                            {{#if this.audioInputEnabled}}
+                                                <p style="display:inline-block" title="Speech Input available for this module"><i class="fa fa-microphone"></i></p>
+                                            {{/if}}
+                                        </button>
+                                        </div>
+                                    {{/each}}
+                                    {{else}}
+                                        <div class="col-12">
+                                            <p class="text-center">No modules available</p>
+                                        </div>
+                                    {{/if}}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-  </div>
   <script defer src="https://use.fontawesome.com/releases/v5.0.9/js/all.js" integrity="sha384-8iPTk2s/jMVj81dnzb/iFR2sdA7u06vHJyyLlAd4snFpCl/SnyUjRrbdJsw1pGIl" crossorigin="anonymous"></script>
     <div class="container-fluid">
         {{#if isImpersonating}}
