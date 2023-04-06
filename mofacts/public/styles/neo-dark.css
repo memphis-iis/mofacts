@@ -30,7 +30,6 @@ input{
     padding: 5px;
     margin: 5px;
     padding-left: 10px;
-    width:100%;
     font-family: 'Josefin Sans';
     color:white;
     background-color: #1a1a1a;
@@ -39,6 +38,9 @@ input{
 /* specific elements template */
 .login-form{
     justify-content: stretch;
+}
+.login-form input{
+    width:100%;
 }
 .login-form button{
     font-family: 'Josefin Sans';
@@ -108,9 +110,10 @@ input{
     .navbar .navbar-brand{
         font-family: 'League Spartan' !important;
         font-size: 30px;
-        font-weight: 900;
+        font-weight: bolder;
         height: 40px;
         color: black;
+
     }
     
 }
@@ -122,6 +125,8 @@ input{
         font-family: 'Josefin Sans';
         font-size: 20px;
         font-weight: 900;
+        height: 80px;
+        border-bottom: #00bf63 2px solid;
     }
 
     .navbar a{
@@ -132,7 +137,7 @@ input{
         min-height:12vh;
         font-family: 'League Spartan' !important;
         font-size: 30px;
-        font-weight: 900;
+        font-weight: bolder;
         color: white;
         position: absolute;
         top: 0;
@@ -140,41 +145,110 @@ input{
     }        
 }
 
+.navbar .dropdown{
+    position: absolute;
+    right: 50px;
+    color:white;
+    height:30px;
+    position: absolute;
+    top:0px;
+}
+.dropdown-menu{
+    background-color: #1a1a1a;
+    color: white;
+    font-family: 'Arimo';
+    font-size: 28px;
+    font-weight: 900;
+    border: 1px solid #7ed957;
+    border-radius: 2px;
+    margin-left: -14vw;
+    width: 20vw;
+    margin-top: 26px !important;
+  }
+.dropdown-item{
+    color:white;
+    font-weight: normal;
+
+}
+
+.dropdown-menu .dropdown-divider{
+    background-color: #494f56;
+    color: white;
+    margin-top: -10px;
+    height:50px;
+    font-family: 'Arimo';
+    font-weight: bold;
+}
+
 /* profile Summary template */
 .profile-summary{
     background-color: #1a1a1a;
-    height:20vh;
+    height:200px;
     background: url('/images/background.jpg');
     background-size: cover;
-    width: 110%;
-    position: absolute;
-    left: 0;
+    width: 100vw;
+    position: relative;
 }
+
+.profile-summary-text{
+    height: 110px;
+}
+
+.profile-summary input{
+    border: 1px solid #7ed957;
+    border-radius: 35px;
+    padding: 5px;
+    padding-left: 5px;
+    margin: 5px;
+    margin-right: 5px;
+    margin-left: 5px;
+    padding-left: 10px;
+    font-family: 'Josefin Sans';
+    color: black;
+    background-color: white;
+    margin-left: auto;
+    margin-right: 120px;
+}
+
+
 @media screen and (max-width: 720px) {
+    .profile-summary{
+        border-bottom: #00bf63 2px solid;
+    }
     .profile-summary .name-circle{
         background-color: #7ed957;
         border-radius: 50%;
         width: 100px;
         height: 100px;
-        position: absolute;
-        top: -35px;
-        left: 30px;
+        margin-top: -29px;
         border: 2px solid #00bf63;
     }
-}
-@media screen and (min-width: 720px) {
-    .profile-summary .name-circle{
-        background-color: #7ed957;
-        border-radius: 50%;
-        width: 100px;
-        height: 100px;
-        position: absolute;
-        top: -20px;
-        left: 30vw;
-        border: 2px solid #00bf63;
+    .profile-summary input{
+        margin-left: 0px;
     }
-}
     
+}
+@media screen and (min-width: 720px){
+    .profile-summary .name-circle{
+        background-color: #7ed957;
+        border-radius: 50%;
+        width: 100px;
+        height: 100px;
+        margin-top: -29px;
+        border: 5px solid #00bf63;
+
+    }
+}
+
+.profile-summary .name-circle span{
+    color:black;
+    text-align: center;
+    width: 75px;
+    display: block;
+    height: 100px;
+    font-size: 50px;
+    margin-top: 5px;
+    font-weight: bold;
 }
 
 
@@ -205,7 +279,18 @@ input{
     font-weight: 900;
 }
 
-
+/* content */
+.btn-primary, .btn{
+    background-color: #7ed957;
+    border: 1px solid #7ed957;
+    color: black;
+}
+a{
+    color: #7ed957;
+}
+a:hover{
+    color: #577c42;
+}
 /* mobile helpers */
 @media only screen and (max-width: 720px) {
     .mobile-10vh{
