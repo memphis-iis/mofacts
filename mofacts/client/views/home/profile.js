@@ -89,6 +89,23 @@ Template.profile.helpers({
 // Template Events
 
 Template.profile.events({
+
+  //TDF Search
+  'click #practiceTDFSearch': function(event, instance) {
+    const search = event.target.value;
+    const enabledTdfs = instance.enabledTdfs.get();
+    const filteredTdfs = enabledTdfs.filter((tdf) => {
+      return tdf.lessonName.toLowerCase().includes(search.toLowerCase());
+    });
+    instance.filteredTdfs.set(filteredTdfs);
+    console.log('filteredTdfs', filteredTdfs);
+    //change opacity of search results
+    $('#practiceTDFSearchResults').css('opacity', '1');
+  },
+  //if the user clicks outside of the search box, hide the search results
+  'focusout #practiceTDFSearch': function(event, instance) {
+    $('#practiceTDFSearchResults').css('opacity', '0');
+  },
   // Start a TDF
   'click .tdfButton': function(event) {
     event.preventDefault();
