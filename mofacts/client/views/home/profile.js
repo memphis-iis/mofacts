@@ -95,7 +95,7 @@ Template.profile.events({
     const search = event.target.value;
     const enabledTdfs = instance.enabledTdfs.get();
     const filteredTdfs = enabledTdfs.filter((tdf) => {
-      return tdf.lessonName.toLowerCase().includes(search.toLowerCase());
+      return tdf.tdfs.tutor.setspec.lessonname.toLowerCase().includes(search.toLowerCase());
     });
     instance.filteredTdfs.set(filteredTdfs);
     console.log('filteredTdfs', filteredTdfs);
@@ -233,8 +233,8 @@ Template.profile.events({
     const checked = event.target.checked;
     instance.showTdfAdminInfo.set(checked);
   },
-  //if practiceTDFSearch is changed, filter enabled tdfs reactive var and set filteredtdfs reactive var to the filtered list
-  'keyup #practiceTDFSearch': function(event, instance) {
+  //if TDFTagSearch is changed, filter enabled tdfs reactive var and set filteredtdfs reactive var to the filtered list
+  'keyup #TDFTagSearch': function(event, instance) {
     const search = event.target.value;
     const enabledTdfs = instance.enabledTdfs.get();
     //filter tdf based off of tdf.tdfs.setspec.tags array
@@ -255,11 +255,11 @@ Template.profile.events({
       instance.filteredTdfs.set(filteredTdfs);
     }
   },
-  //if tdf-tag-search is clicked, change #practiceTDFSearch input value to the value of the tag
+  //if tdf-tag-search is clicked, change #TDFTagSearch input value to the value of the tag
   'click .tdf-tag': function(event) {
     const search = $(event.target).attr('data-tag');
-    $('#practiceTDFSearch').val(search);
-    $('#practiceTDFSearch').trigger('keyup');
+    $('#TDFTagSearch').val(search);
+    $('#TDFTagSearch').trigger('keyup');
   }
 });
 
