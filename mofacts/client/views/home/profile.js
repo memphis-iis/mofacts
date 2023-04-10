@@ -99,6 +99,12 @@ Template.profile.events({
     });
     instance.filteredTdfs.set(filteredTdfs);
     console.log('filteredTdfs', filteredTdfs);
+    //change opacity of search results
+    $('#practiceTDFSearchResults').css('opacity', '1');
+  },
+  //if the user clicks outside of the search box, hide the search results
+  'focusout #practiceTDFSearch': function(event, instance) {
+    $('#practiceTDFSearchResults').css('opacity', '0');
   },
   // Start a TDF
   'click .tdfButton': function(event) {
