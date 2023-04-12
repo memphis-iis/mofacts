@@ -12,8 +12,11 @@ Template.contentUpload.helpers({
   currentUpload() {
     return Template.instance().currentUpload.get();
   },
-  assetLink: function() {
+  assets: function() {
     const files = DynamicAssets.find().fetch();
+    files.forEach((file) => {
+      file.link = DynamicAssets.link(file)
+    });
     return files;
   },
 });
@@ -108,9 +111,19 @@ Template.contentUpload.events({
     $('#stim-file-info').html(outputLabel);
   },
 
-  'change #fileInput'(e, template) {
-    if (e.currentTarget.files && e.currentTarget.files[0]) {
-      for(let file of e.currentTarget.files){
+  'change #upload-package': function(event) {
+    const curFiles = Array.from($('#upload-package').prop('files'));
+    let outputLabel = curFiles[0].name;
+    if (curFiles.length > 1) {
+      outputLabel += ' + ' + (curFiles.length-1) + ' more...';
+    }
+    $('#package-file-info').html(outputLabel);
+  },
+
+  'click #doUploadPackage'(e, template) {
+    const files = $('#upload-package').prop('files');
+    if (files) {
+      for(let file of files){
         // We upload only one file, in case
         // multiple files were selected
         const foundFile = DynamicAssets.findOne({name: file.name, userId: Meteor.userId()})
@@ -129,7 +142,8 @@ Template.contentUpload.events({
         }
       }
     }
-
+    $('#upload-package').val('');
+    $('#upload-package').parent().find('.file-info').html('');
   },
   'click #deleteAllAssetsPrompt'(e, template) {
     e.preventDefault();
@@ -228,9 +242,10 @@ async function doPackageUpload(file, template){
     if (error) {
       alert(`Error during upload: ${error}`);
     } else {
+      const link = DynamicAssets.link(fileObj);
       if(fileObj.ext == "zip"){
         console.log('package detected')
-        Meteor.call('processPackageUpload', fileObj.path, Meteor.userId(), function(err,res){
+        Meteor.call('processPackageUpload', fileObj, Meteor.userId(), link, function(err,res){
           if(err){
             alert(err);
           } else {
