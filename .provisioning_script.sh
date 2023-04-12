@@ -147,4 +147,4 @@ printf "\n\nPrintMotd no\n" >> "$SSHDBASE.new"
 sudo cp "$SSHDBASE.new" "$SSHDSRC"
 
 #add startup script to bashrc
-echo "bash ~/mofacts/mofacts/startup.sh" >> ~/.bashrc
+#echo "bash ~/mofacts/mofacts/startup.sh" >> ~/.bashrc
