@@ -132,14 +132,267 @@
     </div>
   
     <div class="container-fluid">
+        
         {{#if isImpersonating}}
         <div class='text-center alert alert-warning'>
                 Impersonation Mode. Nothing will be logged. Log out to reset.
         </div>
         {{/if}}
         <br>
-        <p class="text-center">To get started, select a tdf from the search box</p> 
-        {{> profileAudioToggles}}
+        {{#unless isInRole 'admin,teacher'}}
+        <br>
+            <div class="row" id="testButtonContainer">
+                <br>
+                {{>profileAudioToggles}}
+                <legend class="text-center">
+                    Practice modules:
+                </legend>
+            </div>
+        {{#if class}}
+            <legend class="text-center">
+                Course: {{class.courseName}}
+            </legend>
+            {{/if}}
+            <!-- search by tag form -->
+            <div class="row" style="margin: 10px;">
+                <h4><label for="TDFTagSearch" class="form-label">Tag Search:</label></h4>
+                <input id="TDFTagSearch" class="form-control margin-auto" type="text" placeholder="tag" alt="tdf search box">
+                {{#if tdfTags}}
+                    <div class="row">
+                        <div class="col-md-12">
+                            <ul class="list-inline">
+                                {{#each tdfTags}}
+                                    <li><a href="#" class="tdf-tag" data-tag="{{this.tag}}">{{this.tag}}({{this.count}})</a></li>
+                                {{/each}}
+                            </ul>
+                        </div>
+                    </div>
+                {{/if}}
+            </div>
+            {{#each enabledTdfs}}
+                <div class='col-xs-12 col-sm-12 col-md-3 col-lg-3 text-center'>
+                    <button id="{{this.tdfid}}" class="btn btn-block btn-responsive tdfButton" style="height: 80px;" name="{{this.name}}"
+                        data-tdfid="{{this.tdfid}}"
+                        data-lessonname="{{this.name}}"
+                        data-currentStimuliSetId="{{this.currentStimuliSetId}}"
+                        data-tdffilename="{{this.fileName}}"
+                        data-ignoreOutOfGrammarResponses="{{this.ignoreOutOfGrammarResponses}}"
+                        data-speechOutOfGrammarFeedback="{{this.speechOutOfGrammarFeedback}}"
+                        data-isMultiTdf="{{this.isMultiTdf}}">
+                        <!-- add disabled="{{this.isOverDue}}" to this to enable due date lockouts -->
+                        {{this.name}}
+                    {{#if this.dueDate}}
+                        <br>
+                        <small>Due: {{this.dueDate}}</small>
+                    {{/if}}
+                    {{#if this.enableAudioPromptAndFeedback}}
+                        <br>
+                        <p style="display:inline-block" title="Audio Output available for this module"><span class="fa fa-headphones"></span></p>
+                    {{/if}}
+                    <p style="display:inline-block">&nbsp;&nbsp;&nbsp;</p>
+                    {{#if this.audioInputEnabled}}
+                        <p style="display:inline-block" title="Speech Input available for this module"><i class="fa fa-microphone"></i></p>
+                    {{/if}}
+                </button>
+                </div>
+            {{/each}}
+        {{/unless}}
+
+        {{#if isInRole 'admin,teacher'}}
+        <br>
+        {{>profileDebugToggles}}    
+        <br><br>
+
+            <div class="row">
+                <div class="col-md-12">
+                    <button id="tdfPracticeBtn" class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#testButtonContainer" aria-expanded="false" aria-controls="testButtonContainer">
+                        TDF Practice +
+                    </button>
+                </div>
+            </div>
+            <div class="row collapse" id="testButtonContainer">
+                <br>
+                {{>profileAudioToggles}}
+                <legend class="text-center">
+                    Practice modules:
+                    <br>
+                    <div class="row" style="border:1px black;">
+                        <h5 style="color:black;"><i class="fa fa-microphone"></i> Voice recognition enabled.</h5>
+                        <h5><span class="fa fa-headphones"></span>Text to Speech enabled</h5>
+                    </div>
+                    <h4><input type="checkbox" name="simulation" id="simulation" checked={{simulationChecked}}> Simulate if TDF param present?</h4>
+                    {{#if isInRole 'admin'}}
+                        <h4><input type="checkbox" name="tdf-admin-info" id="tdf-admin-info"> Show TDF admin info</h4>
+                        {{#if showTdfAdminInfo}}
+                            <button id="disable-tdfs-btn" class="btn btn-default">Disable selected TDFs</button>
+                        {{/if}}
+                    {{/if}} 
+                </legend>
+                {{#if showTdfs}}
+                    <!-- search by tag form -->
+                    <div class="row" style="margin: 10px;">
+                        <h4><label for="TDFTagSearch" class="form-label">Tag Search:</label></h4>
+                        <input id="TDFTagSearch" class="form-control margin-auto" type="text" placeholder="tag" alt="tdf search box">
+                        {{#if tdfTags}}
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <ul class="list-inline">
+                                        {{#each tdfTags}}
+                                            <li><a href="#" class="tdf-tag" data-tag="{{this.tag}}">{{this.tag}}({{this.count}})</a></li>
+                                        {{/each}}
+                                    </ul>
+                                </div>
+                            </div>
+                        {{/if}}
+                    </div>
+                    {{#each enabledTdfs}}
+                        <div class='col-xs-12 col-sm-12 col-md-3 col-lg-3 text-center'>
+                            <button id="{{this.tdfid}}" class="btn btn-block btn-responsive tdfButton" type="button" name="{{this.name}}"
+                            data-tdfid="{{this.tdfid}}"
+                            data-lessonname="{{this.name}}"
+                            data-currentStimuliSetId="{{this.currentStimuliSetId}}"
+                            data-ignoreOutOfGrammarResponses="{{this.ignoreOutOfGrammarResponses}}"
+                            data-speechOutOfGrammarFeedback="{{this.speechOutOfGrammarFeedback}}"
+                            data-isMultiTdf="{{this.isMultiTdf}}">{{this.name}}<br>
+                            {{#if this.enableAudioPromptAndFeedback}}
+                                <p style="display:inline-block" title="Audio Output available for this module"><span class="fa fa-headphones"></span></p>
+                            {{/if}}
+                            <p style="display:inline-block">&nbsp;&nbsp;&nbsp;</p>
+                            {{#if this.audioInputEnabled}}
+                                <p style="display:inline-block" title="Speech Input available for this module"><i class="fa fa-microphone"></i></p>
+                            {{/if}}
+                            </button>
+                            {{#if isInRole 'admin'}}
+                                {{#if showTdfAdminInfo}}
+                                    <input type="checkbox" id="select-disable" name="tdf-toggle-checkbox" uid="{{this.tdfid}}"/>
+                                    <p class="admin-info-p" id="tdf-src">src: {{this.source}}</p>
+                                    <p class="admin-info-p" id="tdf-owner">own: {{tdfOwnersMap this.ownerId}}</p>
+                                {{/if}}
+                            {{/if}}
+                        </div>
+                    {{/each}}
+                {{/if}}
+            </div>
+            <br><br>
+            <div class="row">
+                <div class="col-md-offset-3 col-md-12">
+                    <button type="button" id="instructorReportingButton" class="button btn  navbar-btn">Instructor Reporting</button>
+                </div>
+            </div>
+            <br><br>
+            {{#if isInRole 'admin'}}
+            <div class="row">
+                <div class="col-md-offset-3 col-md-12">
+                    <button id="adminControlsBtn" class="btn btn-primary" type="button">
+                        Admin Control Panel
+                    </button>
+                </div>
+            </div>
+            <br><br>
+            <div class="row">
+                <div class="col-md-offset-3 col-md-12">
+                    <button id="showDisabledTdfsBtn" class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#showDisabledTdfsContainer" aria-expanded="false" aria-controls="showDisabledTdfsContainer">
+                        Show Disabled TDFs +
+                    </button>
+                </div>
+            </div>
+            <div class="row collapse" id="showDisabledTdfsContainer">
+                <div class="col-md-offset-2 col-md-8 responsiveTable">
+                    <legend class="text-center">Disabled TDFs</legend>
+                    <button id="enable-tdfs-btn" class="btn btn-default">Enabled selected TDFs</button>  
+
+                    <table class="table table-striped table-bordered table-condensed">
+                        <thead>
+                            <tr>
+                                <th>Enable?</th>
+                                <th>Name</th>
+                                <th>Owner</th>
+                                <th>Source</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {{#each disabledTdfs}}
+                                <tr>
+                                    <td>
+                                        <input type="checkbox" id="select-enable" name="tdf-toggle-checkbox" uid="{{this.tdfid}}"/>
+                                    </td>
+                                    <td>{{this.name}}</td>
+                                    <td>{{tdfOwnersMap this.ownerid}}</td>
+                                    <td>{{this.source}}</td>
+                                </tr>
+                            {{/each}}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <br><br>
+            {{/if}}
+            <div class="row">
+                <div class="col-md-offset-3 col-md-12">
+                    <button type="button" id="mechTurkButton" class="button btn  navbar-btn">Mechanical Turk</button>
+                </div>
+            </div>
+            <br><br>
+            <div class="row">
+                <div class="col-md-offset-3 col-md-12">
+                    <button id="FileManagementButton" class="btn btn-primary" type="button">
+                        Manage Lessons
+                    </button>
+                </div>
+            </div>
+            <br><br>
+            <div class="row">
+                <div class="col-md-offset-3 col-md-12">
+                    <button type="button" id="contentUploadButton" class="button btn  navbar-btn">Content Uploads</button>
+                </div>
+            </div>
+            <br><br>
+            <div class="row">
+                <div class="col-md-offset-3 col-md-12">
+                    <button type="button" id="userProfileEditButton" class="button btn  navbar-btn">AWS User Profile Data</button>
+                </div>
+            </div>
+            <br><br>
+            <div class="row">
+                <div class="col-md-offset-3 col-md-12">
+                    <button type="button" id="dataDownloadButton" class="button btn  navbar-btn">Download User Log Data</button>
+                </div>
+            </div>
+            {{#if isInRole 'admin'}}
+              <br><br>
+              <div class="row">
+                  <div class="col-md-offset-3 col-md-12">
+                      <button type="button" id="userAdminButton" class="button btn  navbar-btn">User Admin</button>
+                  </div>
+              </div>
+            {{/if}}
+            <br><br>
+            <div class="row">
+                <div class="col-md-offset-3 col-md-12">
+                    <button type="button" id="classEditButton" class="button btn  navbar-btn">Class Edit</button>
+                </div>
+            </div>
+            <br><br>
+            <div class="row">
+                <div class="col-md-offset-3 col-md-12">
+                    <button type="button" id="tdfAssignmentEditButton" class="button btn  navbar-btn">Chapter Assignments</button>
+                </div>
+            </div>
+            <br><br>
+            <div class="row">
+                <div class="col-md-offset-3 col-md-12">
+                    <button type="button" id="wikiButton" class="button btn  navbar-btn">MoFACTs Manuals / Wiki</button>
+                </div>
+            </div>
+            <br><br>
+            <div class="row">
+                <div class="col-md-offset-3 col-md-12">
+                    <button type="button" id="contentGenerationButton" class="button btn  navbar-btn">Content Generation</button>
+                </div>
+            </div>
+        {{/if}}
+
+        <br><br>
         {{> about}}
     </div>
 </template>

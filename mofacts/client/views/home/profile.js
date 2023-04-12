@@ -119,7 +119,7 @@ Template.profile.events({
       });
   },
   //TDF Search
-  'mouseover #practiceTDFSearch': function(event, instance) {
+  'click #practiceTDFSearch': function(event, instance) {
     $('#practiceTDFSearchResultsContainer').css('opacity', '1');
   },
   'keyup #practiceTDFSearch': function(event, instance) {
