@@ -12,7 +12,7 @@
             <div class="col-lg-4 offset-lg-4 col-md-6 col-md-offset-4 col-sm-8 col-sm-offset-2 col-xs-12">
                 <form>
                     {{#if isExperiment}}
-                        <input  type="text" id="signInUsername" value="" placeholder="Username"><br>
+                        <input  type="text" id="signInUsername" value="" placeholder="Amazon Turk ID"><br>
                         {{#if experimentPasswordRequired}}
                             <input  type="password" id="password" value="" placeholder="Password"><br><br>
                         {{/if}}
@@ -22,11 +22,15 @@
                         <span class="help-inline danger errcheck" id="invalidLogin" hidden >Username password pair not found!</span>
                     {{/if}}
                     {{#if showTestLogin}}
+                    <br>
                         <a id="testSignInButton">Test Login (password not required)</a>
                         <br>
                     {{/if}}
                     <button type="button" id="signInButton" class="btn">Sign In</button>
-                    <button type="button" id="signUpButton" class="btn">Sign Up</button>
+                    {{#unless isExperiment}}
+                        <button type="button" id="signUpButton" class="btn">Sign Up</button>
+                    {{/unless}}
+
                 </form>
             </div>
         </div>

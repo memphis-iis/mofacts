@@ -16,6 +16,7 @@ export {selectTdf};
 Template.profile.created = function() {
   this.showTdfs = new ReactiveVar(false);
   this.enabledTdfs = new ReactiveVar([]);
+  this.recentTdfs = new ReactiveVar([]);
   this.filteredTdfs = new ReactiveVar(false);
   this.disabledTdfs = new ReactiveVar([]);
   this.tdfsToDisable = new ReactiveVar([]);
@@ -63,6 +64,9 @@ Template.profile.helpers({
     }
     return Template.instance().enabledTdfs.get();
   },
+  recentTdfs: () => {
+    return Template.instance().recentTdfs.get();
+  },
 
   tdfTags: () => {
     return Template.instance().tdfTags.get();
@@ -89,22 +93,54 @@ Template.profile.helpers({
 // Template Events
 
 Template.profile.events({
-
+  //Enable TDF
+  'click .enableTdf': function(event, instance) {
+      Meteor.call('toggleTdfPresence', event.target.tdfid, ENABLED, function(err, result) {
+        if (err) {
+          console.log(err);
+          alert('Error enabling TDF');
+        } else {
+          console.log('TDF enabled');
+          //update the enabledTdfs reactive var
+          const enabledTdfs = instance.enabledTdfs.get();
+          const tdfToEnable = enabledTdfs.find((tdf) => {
+            return tdf.tdfs.tutor.setspec._id === event.target.tdfid;
+          });
+          tdfToEnable.enabled = true;
+          instance.enabledTdfs.set(enabledTdfs);
+          //update the disabledTdfs reactive var
+          const disabledTdfs = instance.disabledTdfs.get();
+          const tdfToDisable = disabledTdfs.find((tdf) => {
+            return tdf.tdfs.tutor.setspec._id === event.target.tdfid;
+          });
+          tdfToDisable.enabled = false;
+          instance.disabledTdfs.set(disabledTdfs);
+        }
+      });
+  },
   //TDF Search
-  'click #practiceTDFSearch': function(event, instance) {
+  'mouseover #practiceTDFSearch': function(event, instance) {
+    $('#practiceTDFSearchResultsContainer').css('opacity', '1');
+  },
+  'keyup #practiceTDFSearch': function(event, instance) {
     const search = event.target.value;
     const enabledTdfs = instance.enabledTdfs.get();
-    const filteredTdfs = enabledTdfs.filter((tdf) => {
+    filteredTdfs = enabledTdfs.filter((tdf) => {
       return tdf.tdfs.tutor.setspec.lessonname.toLowerCase().includes(search.toLowerCase());
     });
+    //also search tags
+    filteredTdfs = filteredTdfs.concat(enabledTdfs.filter((tdf) => {
+      return tdf.tdfs.tutor.setspec.tags && tdf.tdfs.tutor.setspec.tags.toLowerCase().includes(search.toLowerCase());
+    }));
+    
     instance.filteredTdfs.set(filteredTdfs);
     console.log('filteredTdfs', filteredTdfs);
     //change opacity of search results
-    $('#practiceTDFSearchResults').css('opacity', '1');
+    $('#practiceTDFSearchResultsContainer').css('opacity', '1');
   },
   //if the user clicks outside of the search box, hide the search results
   'focusout #practiceTDFSearch': function(event, instance) {
-    $('#practiceTDFSearchResults').css('opacity', '0');
+    $('#practiceTDFSearchResultsContainer').css('opacity', '0');
   },
   // Start a TDF
   'click .tdfButton': function(event) {
@@ -124,6 +160,23 @@ Template.profile.events({
     );
   },
 
+  'click .tdfLink' : function(event) {
+    event.preventDefault();
+    console.log(event);
+    console.log('tdfLink clicked');
+    const target = $(event.currentTarget);
+    selectTdf(
+      target.data('tdfid'),
+      target.data('lessonname'),
+      target.data('currentstimulisetid'),
+      target.data('ignoreoutofgrammarresponses'),
+      target.data('speechoutofgrammarfeedback'),
+      'User button click',
+      target.data('ismultitdf'),
+      false,
+    );
+  },
+        
   'click #simulation': function(event, template) {
     const checked = template.$('#simulation').prop('checked');
     Session.set('runSimulation', checked);
@@ -330,6 +383,8 @@ Template.profile.rendered = async function() {
   } else {
     allTdfs = await meteorCallAsync('getAllTdfs');
   }
+
+
   console.log('allTdfs', allTdfs, typeof(allTdfs));
   Session.set('allTdfs', allTdfs);
 
@@ -523,6 +578,23 @@ Template.profile.rendered = async function() {
         false,
     );
   }
+    //get all recent tdfs for user
+    const recentTdfs = await meteorCallAsync('getUserRecentTDFs', Meteor.userId());
+    
+    //match them with enabled tdfs where recentTdfs._id = enabledTdfs.tdfid
+    const enabledRecentTdfs = [];
+    recentTdfs.forEach((recentTdf) => {
+      enabledTdfs.forEach((enabledTdf) => {
+        if (recentTdf._id === enabledTdf.tdfid) {
+          //if match and enabledRecentTdfs does not already contain the tdf, add it
+          if (!enabledRecentTdfs.includes(enabledTdf)) {
+            enabledRecentTdfs.push(enabledTdf);
+          }
+        }
+      });
+    });
+    this.recentTdfs.set(enabledRecentTdfs);
+    console.log('recentTdfs', enabledRecentTdfs);
 };
 
 // Actual logic for selecting and starting a TDF
@@ -575,7 +647,7 @@ async function selectTdf(currentTdfId, lessonName, currentStimuliSetId, ignoreOu
     audioPromptFeedbackVolume = setspec.audioPromptFeedbackVolume || 0;
     feedbackType = setspec.feedbackType;
     audioPromptFeedbackVoice = setspec.audioPromptFeedbackVoice || 'en-US-Standard-A';
-  }
+  }  
   else {
     audioPromptMode = getAudioPromptModeFromPage();
     audioInputEnabled = getAudioInputFromPage();
