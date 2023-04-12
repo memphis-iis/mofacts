@@ -2140,7 +2140,7 @@ async function upsertStimFile(stimulusFileName, stimJSON, ownerId, packagePath =
       //audio is not a url
       stim.audioStimulus = await getStimLink(stim.audioStimulus, ownerId);
     }
-    if(stim.videoStimulus && isInternalAsset(mergedStim.videoStimulus)){
+    if(stim.videoStimulus && isInternalAsset(stim.videoStimulus)){
       //video is not a url
       stim.videoStimulus = await getStimLink(stim.videoStimulus, ownerId);
     }
