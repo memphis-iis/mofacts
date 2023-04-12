@@ -516,9 +516,8 @@ p.admin-info-p {
 /* classic adaptation /*
 /* profile Summary template */
 .profile-summary{
-    display:none;
     background-color: #1a1a1a;
-    height:200px;
+    height:170px;
     background: url('/images/background.jpg');
     background-size: cover;
     width: 100vw;
@@ -541,7 +540,8 @@ p.admin-info-p {
     color: black;
     background-color: white;
     margin-left: auto;
-    max-width: 75vw;
+    width: 250px;
+    margin-top: 90px;
 }
 
 
@@ -575,9 +575,7 @@ p.admin-info-p {
 }
 
 /* temporary */
-.name-circle{
-    display: none;
-}
+
 
 .profile-summary .name-circle span{
     color:white;
@@ -636,17 +634,19 @@ p.admin-info-p {
     }        
 }
 
-.navbar .dropdown{
-    position: absolute;
-    right: 50px;
-    color:white;
-    height:30px;
-    position: absolute;
-    top:0px;
+.gearMenu{
+    margin-left:auto;
+    margin-top: 5px;
 }
+
+.navbarScroll{
+    width:100%
+}
+
+
 .dropdown-menu{
     background-color: #C1E1A6;
-    color: white;
+    color: black;
     font-family: 'Arimo';
     font-size: 15px;
     font-weight: 900;
@@ -682,12 +682,62 @@ p.admin-info-p {
     padding: 20px;
 }
 
-#practiceTDFSearchResults{
+/* practiceTDFSearch should be centered in small screens */
+@media screen and (max-width: 720px) {
+    #practiceTDFSearch{
+        margin-left: auto;
+        margin-right: auto;
+        width: 80%;
+    }
+    #practiceTDFSearchResultsContainer{
+        position: relative;
+        top: 20px;
+        opacity: 0;
+        width: 80%;
+    }
+}
+#practiceTDFSearchResultsContainer{
     position: relative;
     top: 20px;
-    background-color: #00bf63;
-    color: black;
-    border: 1px solid #7ed957;
-    border-radius: 5px;
     opacity: 0;
+}
+
+#practiceTDFSearchResults{
+    margin-left: auto;
+    max-width: 250px;
+    background-color: #C1E1A6;
+    color: black;
+    border: 1px solid black;
+    border-radius: 5px;
+    list-style: none;
+}
+#practiceTDFSearchResults .divider{
+    padding: 5px;
+    padding-left: 10px;
+    padding-right: 10px;
+    font-family: 'Josefin Sans';
+    font-size: 15px;
+    font-weight: normal;
+    background-color: #118C4E;
+}
+
+.tdfMenu{
+    list-style: none;
+}
+
+.tdfMenu li{
+    list-style-type: none;
+    padding: 5px;
+    padding-left: 10px;
+    padding-right: 10px;
+    font-family: 'Josefin Sans';
+    font-size: 15px;
+    font-weight: normal;
+    margin-top: 10px;
+}
+
+.tdfMenu li a{
+    /*remove underline*/
+    text-decoration: none !important;
+    color: black !important;
 }

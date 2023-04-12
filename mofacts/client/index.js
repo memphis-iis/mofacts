@@ -308,6 +308,61 @@ Template.DefaultLayout.events({
     //open the wiki in a new tab
     window.open('https://github.com/memphis-iis/mofacts-ies/wiki', '_blank');
   },
+  'click #mechTurkButton': function(event) {
+    event.preventDefault();
+    Router.go('/turkWorkflow');
+  },
+
+  'click #contentUploadButton': function(event) {
+    event.preventDefault();
+    Router.go('/contentUpload');
+  },
+
+  'click #dataDownloadButton': function(event) {
+    event.preventDefault();
+    Router.go('/dataDownload');
+  },
+
+  'click #userProfileEditButton': function(event) {
+    event.preventDefault();
+    Router.go('/userProfileEdit');
+  },
+
+  'click #userAdminButton': function(event) {
+    event.preventDefault();
+    Router.go('/userAdmin');
+  },
+
+  'click #classEditButton': function(event) {
+    event.preventDefault();
+    Router.go('/classEdit');
+  },
+
+  'click #adminControlsBtn': function(event) {
+    event.preventDefault();
+    Router.go('/adminControls');
+  },
+
+  'click #tdfAssignmentEditButton': function(event) {
+    event.preventDefault();
+    Router.go('/tdfAssignmentEdit');
+  },
+
+  'click #instructorReportingButton': function(event) {
+    event.preventDefault();
+    Router.go('/instructorReporting');
+  },
+
+  'click #contentGenerationButton': function(event) {
+    event.preventDefault();
+    Router.go('/contentGeneration');
+  },
+
+  'click #FileManagementButton': function(event) {
+    event.preventDefault();
+    Router.go('/FileManagement');
+  },
+
 });
 // Global template helpers
 Template.registerHelper('modalTemplate', function() {

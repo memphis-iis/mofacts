@@ -1180,6 +1180,17 @@ async function getHistoryByTDFID(TDFId) {
   return history;
 }
 
+async function getUserRecentTDFs(userId) {
+  const history = Histories.find({userId: userId}, {sort: {time: -1}, limit: 5}).fetch();
+  //get all tdfs that match the history
+  const recentTDFs = [];
+  for (const historyRecord of history) {
+    const tdf = Tdfs.findOne({_id: historyRecord.TDFId});
+    recentTDFs.push(tdf);
+  }
+  return recentTDFs;
+}
+
 function getAllTeachers(southwestOnly=false) {
   const query = {'roles': 'teacher'};
   if (southwestOnly) query['username']=/southwest[.]tn[.]edu/i;
@@ -2875,9 +2886,9 @@ const asyncMethods = {
 
   getComponentStatesByUserIdTDFIdAndUnitNum, setComponentStatesByUserIdTDFIdAndUnitNum,
 
-  insertHistory, getHistoryByTDFID, clearCurUnitProgress,
+  insertHistory, getHistoryByTDFID, getUserRecentTDFs, clearCurUnitProgress,
 
-  loadStimsAndTdfsFromPrivate, getListOfStimTags, getStudentReportingData,
+  loadStimsAndTdfsFromPrivate, getListOfStimTags, getStudentReportingData, 
 
   getHiddenItems, getUserLastFeedbackTypeFromHistory,
 
