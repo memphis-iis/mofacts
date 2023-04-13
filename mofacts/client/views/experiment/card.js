@@ -874,6 +874,23 @@ function initializeAudio() {
   }
 }
 
+function audioPlayFunction(source) {
+  if (soundsDict[source]) {
+    soundsDict[source].isCurrentlyPlaying = true;
+  }
+  console.log('Sound played');
+}
+
+function audioEndFunction(source){
+  if (soundsDict[source]) {
+    soundsDict[source].isCurrentlyPlaying = false;
+  }
+  if (onEndCallbackDict[source]) {
+    onEndCallbackDict[source]();
+  }
+  console.log('Sound completed');
+}
+
 function preloadAudioFiles() {
   const allSrcs = getCurrentStimDisplaySources('audioStimulus');
   console.log('allSrcs,audio', allSrcs);
@@ -882,21 +899,8 @@ function preloadAudioFiles() {
     let sound;
     if(source.includes('http')){
       sound = new Audio(source);
-      sound.addEventListener("play", function() {
-        if (soundsDict[source]) {
-          soundsDict[source].isCurrentlyPlaying = true;
-        }
-        console.log('Sound played');
-      });
-      sound.addEventListener("ended", function(){
-        if (soundsDict[source]) {
-          soundsDict[source].isCurrentlyPlaying = false;
-        }
-        if (onEndCallbackDict[source]) {
-          onEndCallbackDict[source]();
-        }
-        console.log('Sound completed');
-      });
+      sound.addEventListener("play", audioPlayFunction(source));
+      sound.addEventListener("ended", audioEndFunction(source));
     } else {
       // eslint-disable-next-line no-undef
       sound = new Howl({
@@ -908,24 +912,9 @@ function preloadAudioFiles() {
         // Must do an Immediately Invoked Function Expression otherwise question
         // is captured as a closure and will change to the last value in the loop
         // by the time we call this
-        onplay: (function(source) {
-          if (soundsDict[source]) {
-            soundsDict[source].isCurrentlyPlaying = true;
-          }
-          console.log('Sound played');
-        })(source),
+        onplay: audioPlayFunction(source),
 
-        onend: (function(source) {
-          return function() {
-            if (soundsDict[source]) {
-              soundsDict[source].isCurrentlyPlaying = false;
-            }
-            if (onEndCallbackDict[source]) {
-              onEndCallbackDict[source]();
-            }
-            console.log('Sound completed');
-          };
-        })(source),
+        onend: audioEndFunction(source),
       });
     }
     soundsDict[source] = sound;
