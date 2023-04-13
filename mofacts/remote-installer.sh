@@ -86,6 +86,9 @@ cp ../settings.json .
 sed -i 's/"logNotice": ".*"/"logNotice": "Build Config"/' settings.json
 sed -i 's/"testLogin": .*/"testLogin": false/' settings.json
 
+#change any directory paths in settings.json that match /home/vagrant/mofacts/mofacts_depends/ to /mofacts_depends/
+sed -i 's/\/home\/vagrant\/mofacts\/mofacts_depends\//\/mofacts_depends\//g' settings.json
+
 # Deploy the app
 mup setup
 mup deploy
