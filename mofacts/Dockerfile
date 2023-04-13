@@ -4,6 +4,9 @@ FROM abernix/meteord:node-12-base
 # Copy the app to the container
 COPY . /app
 
+# Copy dependencies
+COPY ../mofacts_depends /mofacts_depends/
+
 # Set the working directory to the app directory
 WORKDIR /app
 
