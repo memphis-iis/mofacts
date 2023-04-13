@@ -99,7 +99,7 @@ Template.profile.events({
         if (err) {
           console.log(err);
           alert('Error enabling TDF');
-        } else {
+        } else {ll
           console.log('TDF enabled');
           //update the enabledTdfs reactive var
           const enabledTdfs = instance.enabledTdfs.get();
@@ -130,7 +130,10 @@ Template.profile.events({
     });
     //also search tags
     filteredTdfs = filteredTdfs.concat(enabledTdfs.filter((tdf) => {
-      return tdf.tdfs.tutor.setspec.tags && tdf.tdfs.tutor.setspec.tags.toLowerCase().includes(search.toLowerCase());
+      //these are arrays, so we need to check if any of the tags match the search
+      return tdf.tdfs.tutor.setspec.tags.some((tag) => {
+        return tag.toLowerCase().includes(search.toLowerCase());
+      });
     }));
     
     instance.filteredTdfs.set(filteredTdfs);
