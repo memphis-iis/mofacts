@@ -43,6 +43,10 @@ if (Meteor.isServer) {
     return DynamicAssets.collection.find();
   });
 
+  Meteor.publish('assets', function(ownerId) {
+    return DynamicAssets.collection.find({userId: ownerId});
+  });
+
   Meteor.publish('ownedFiles', function() {
     return [Tdfs.find({'ownerId': Meteor.userId()}), Stims.find({'owner': Meteor.userId()})]
   });
