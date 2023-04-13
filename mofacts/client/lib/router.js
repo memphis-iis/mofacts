@@ -487,6 +487,9 @@ Router.route('/classes/:_teacher/:_class', {
 
 Router.route('/card', {
   name: 'client.card',
+  waitOn: function() {
+    return Meteor.subscribe('assets', Session.get('currentTdfFile').ownerId);
+  },
   action: function() {
     if (Meteor.user()) {
       Session.set('curModule', 'card');

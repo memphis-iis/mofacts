@@ -874,40 +874,50 @@ function initializeAudio() {
   }
 }
 
+function audioPlayFunction(source) {
+  if (soundsDict[source]) {
+    soundsDict[source].isCurrentlyPlaying = true;
+  }
+  console.log('Sound played');
+}
+
+function audioEndFunction(source){
+  if (soundsDict[source]) {
+    soundsDict[source].isCurrentlyPlaying = false;
+  }
+  if (onEndCallbackDict[source]) {
+    onEndCallbackDict[source]();
+  }
+  console.log('Sound completed');
+}
+
 function preloadAudioFiles() {
   const allSrcs = getCurrentStimDisplaySources('audioStimulus');
   console.log('allSrcs,audio', allSrcs);
   soundsDict = {};
   for (const source of allSrcs) {
-    // eslint-disable-next-line no-undef
-    soundsDict[source] = new Howl({
-      preload: true,
-      src: [
-        source,
-      ],
+    let sound;
+    if(source.includes('http')){
+      sound = new Audio(source);
+      sound.addEventListener("play", audioPlayFunction(source));
+      sound.addEventListener("ended", audioEndFunction(source));
+    } else {
+      // eslint-disable-next-line no-undef
+      sound = new Howl({
+        preload: true,
+        src: [
+          source,
+        ],
 
-      // Must do an Immediately Invoked Function Expression otherwise question
-      // is captured as a closure and will change to the last value in the loop
-      // by the time we call this
-      onplay: (function(source) {
-        if (soundsDict[source]) {
-          soundsDict[source].isCurrentlyPlaying = true;
-        }
-        console.log('Sound played');
-      })(source),
+        // Must do an Immediately Invoked Function Expression otherwise question
+        // is captured as a closure and will change to the last value in the loop
+        // by the time we call this
+        onplay: audioPlayFunction(source),
 
-      onend: (function(source) {
-        return function() {
-          if (soundsDict[source]) {
-            soundsDict[source].isCurrentlyPlaying = false;
-          }
-          if (onEndCallbackDict[source]) {
-            onEndCallbackDict[source]();
-          }
-          console.log('Sound completed');
-        };
-      })(source),
-    });
+        onend: audioEndFunction(source),
+      });
+    }
+    soundsDict[source] = sound;
   }
 }
 
@@ -1113,21 +1123,12 @@ function clearPlayingSound() {
 function playCurrentSound(onEndCallback) {
   // We currently only play one sound at a time
   clearPlayingSound();
-
   const currentAudioSrc = Session.get('currentDisplay').audioSrc;
   console.log('currentAudioSrc: ' + currentAudioSrc);
-  if(currentAudioSrc.slice(0, 4) == 'http'){
-    currentSound = new Audio(currentAudioSrc)
-    currentSound.onended = onEndCallback
-    currentSound.isCurrentlyPlaying = true;
-  } else {
-    // Reset sound and play it
-    currentSound = soundsDict[currentAudioSrc];
-    // In case our caller checks before the sound has a chance to load, we
-    // mark the howler instance as playing
-    onEndCallbackDict[currentAudioSrc] = onEndCallback;
-    currentSound.isCurrentlyPlaying = true;
-  }
+  // Reset sound and play it
+  currentSound = soundsDict[currentAudioSrc];
+  onEndCallbackDict[currentAudioSrc] = onEndCallback;
+  currentSound.isCurrentlyPlaying = true;
   currentSound.play();
 }
 
@@ -2198,6 +2199,14 @@ function startQuestionTimeout() {
   // We do this little shuffle of session variables so the display will update all at the same time
   const currentDisplayEngine = Session.get('currentDisplayEngine');
   const closeQuestionParts = Session.get('clozeQuestionParts');
+
+  // make sure we get the right audio source
+  if(currentDisplayEngine) {
+    if(currentDisplayEngine.audioSrc && !soundsDict[currentDisplayEngine.audioSrc]) {
+      let source = DynamicAssets.findOne({name: currentDisplayEngine.audioSrc}).link()
+      currentDisplayEngine.audioSrc = source;
+    }
+  }
 
   console.log('startQuestionTimeout, closeQuestionParts', closeQuestionParts);
 
