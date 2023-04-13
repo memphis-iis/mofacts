@@ -691,14 +691,14 @@ p.admin-info-p {
     #practiceTDFSearchResultsContainer{
         position: relative;
         top: 20px;
-        opacity: 0;
+        visibility: hidden;
         width: 80%;
     }
 }
 #practiceTDFSearchResultsContainer{
     position: relative;
     top: 65px;
-    opacity: 0;
+    visibility: hidden;
 }
 
 #practiceTDFSearchResults{
