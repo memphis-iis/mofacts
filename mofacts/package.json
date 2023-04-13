@@ -29,7 +29,8 @@
     "@types/underscore": "^1.11.4",
     "chai": "^4.3.7",
     "eslint": "^7.28.0",
-    "eslint-config-google": "^0.14.0"
+    "eslint-config-google": "^0.14.0",
+    "node": "^12.22.12"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

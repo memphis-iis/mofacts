@@ -1,3 +1,13 @@
+# Prompt for admin privileges
+if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator")) {
+  Start-Process powershell.exe "-NoProfile -ExecutionPolicy Bypass -File `"$PSCommandPath`"" -Verb RunAs
+  exit
+}
+
+# Get the absolute path of the current directory
+$scriptPath = Split-Path -Parent -Path $MyInvocation.MyCommand.Definition
+$absolutePath = (Get-Item -Path $scriptPath).FullName
+
 # Check if Chocolatey is installed
 if (-not (Get-Command choco -ErrorAction SilentlyContinue)) {
     Write-Host "Chocolatey is not installed. Installing..."
@@ -24,13 +34,13 @@ if (-not (Get-Command docker -ErrorAction SilentlyContinue)) {
 }
 
 # Navigate to the root directory of your Meteor app
-cd ".\mofacts"
+cd "$absolutePath\mofacts"
 
 # Install the necessary Meteor packages
 meteor npm install
 
 # Set the Node.js version to use
-meteor npm install --save-dev node@12
+meteor npm install --save-dev node@$nodeVersion
 
 # Build the Meteor app
 meteor build --architecture=os.linux.x86_64 ../build
@@ -42,7 +52,4 @@ tar -xzf ../build/$appName.tar.gz -C ../build
 docker build -t $appName:latest ../build
 
 # Run the Docker container
-docker run -p 3000:3000 $appName:latest &
-
-# Launch the app in the default browser
-Start-Process -FilePath "http://localhost:3000"
+docker run -p 3000:80 $appName:latest
