@@ -3,6 +3,9 @@ import {doFileUpload} from './contentUpload';
 
 Template.FileManagement.onRendered(async function() {
   const allTeachers = await meteorCallAsync('getAllTeachers');
+  if(!Session.get('allTdfs')){
+    Session.set('allTdfs', await meteorCallAsync('getAllTdfs'));
+  }
   Session.set('allUsersWithTeacherRole', allTeachers);
 });
 
@@ -20,9 +23,15 @@ Template.FileManagement.helpers({
     return Tdfs.find().fetch();
   },
   'stimLessonName': function(stimSetId) {
-    return Session.get('allTdfs').filter(function(tdf) {
+    let curStimsTDF = Session.get('allTdfs').filter(function(tdf) {
       return tdf.stimuliSetId === stimSetId;
-    })[0].content.tdfs.tutor.setspec.lessonname;
+    })[0];
+    if(curStimsTDF){
+      return curStimsTDF.content.tdfs.tutor.setspec.lessonname;
+    }
+    else{
+      return 'No Lesson Name Found';
+    }
   }
 });
 
@@ -157,7 +166,7 @@ Template.FileManagement.events({
     if(window.confirm('Are you sure you want to delete this file? All the data associated with this file will be deleted.')){
       let fileId = event.currentTarget.getAttribute('data-fileId');
       let fileType = event.currentTarget.getAttribute('data-fileType');
-      let func = fileType == 'Stim' ? 'deleteStimFile' : 'deleteTDFFile';
+      let func = fileType == 'stim' ? 'deleteStimFile' : 'deleteTDFFile';
       Meteor.call(func, fileId, function(err, res){
         if(err){
           console.log(err)
