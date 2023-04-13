@@ -93,7 +93,7 @@ sudo mount --bind "$HOME/.meteor/packages" packages
 meteor npm install --save babel-runtime --no-bin-links
 
 #install meteor up deployer
-npm install -g mup
+npm install -g mup mup-docker-deploy
 
 # Set up dynamic config
 bash /vagrant/scripts/server/setDynamicConfig.sh
@@ -103,6 +103,11 @@ sudo apt-get purge -y landscape-client landscape-common
 sudo rm -f /etc/update-motd/*
 sudo rm -f /etc/motd
 sudo touch /etc/motd
+
+#install docker and docker-compose
+sudo apt-get install -y docker.io
+sudo apt-get install -y docker-compose
+
 
 
 # Spit out some messages for the user - to do this we'll need to create a message
