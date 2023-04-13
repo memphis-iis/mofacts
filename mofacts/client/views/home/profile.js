@@ -135,12 +135,12 @@ Template.profile.events({
     
     instance.filteredTdfs.set(filteredTdfs);
     console.log('filteredTdfs', filteredTdfs);
-    //change opacity of search results
-    $('#practiceTDFSearchResultsContainer').css('opacity', '1');
+    //change visibility of search results
+    $('#practiceTDFSearchResultsContainer').css('visibility', 'visible');
   },
   //if the user clicks outside of the search box, hide the search results
   'focusout #practiceTDFSearch': function(event, instance) {
-    $('#practiceTDFSearchResultsContainer').css('opacity', '0');
+    $('#practiceTDFSearchResultsContainer').css('visibility', 'hidden');
   },
   // Start a TDF
   'click .tdfButton': function(event) {
