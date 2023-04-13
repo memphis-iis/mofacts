@@ -487,7 +487,9 @@ async function setComponentStatesByUserIdTDFIdAndUnitNum(userId, TDFId, componen
 }
 
 // Package Uploader
-async function processPackageUpload(path, owner){
+async function processPackageUpload(fileObj, owner, zipLink){
+  DynamicAssets.collection.update({_id: fileObj._id}, {$set: {'meta.link': zipLink}});
+  let path = fileObj.path;
   let results
   let unzippedFiles
   let filePath
@@ -559,9 +561,9 @@ async function processPackageUpload(path, owner){
 
 async function saveMediaFile(media, owner){
   serverConsole("Uploading:", media.name);
-  const foundFile = DynamicAssets.collection.findOne({userId: owner, name: media.name})
+  const foundFile = DynamicAssets.findOne({userId: owner, name: media.name})
   if(foundFile){
-    DynamicAssets.collection.remove({_id: foundFile._id});
+    DynamicAssets.remove({_id: foundFile._id});
     serverConsole(`File ${media.name} already exists, overwritting.`);
   }
   else{
@@ -2033,8 +2035,7 @@ async function upsertStimFile(stimulusFileName, stimJSON, ownerId, packagePath =
     nextStimuliSetId += 1;
     serverConsole('stimuliSetId2:', stimuliSetId, nextStimuliSetId);
   }
-  await Stims.remove({fileName: stimulusFileName, owner: ownerId})
-  Stims.upsert({owner: ownerId, fileName: stimulusFileName}, {
+  Stims.upsert({'stimuliSetId': stimuliSetId}, {
     'stimuliSetId': stimuliSetId,
     'fileName': stimulusFileName,
     'stimuli': stimJSON,
@@ -2083,27 +2084,35 @@ async function upsertStimFile(stimulusFileName, stimJSON, ownerId, packagePath =
         //video is not a url
         mergedStim.videoStimulus = await getStimLink(mergedStim.videoStimulus, ownerId);
       }
-      Items.update({stimulusFileName: stimulusFileName, stimulusKC: stimulusKC},{$set: {
-        stimuliSetId: mergedStim.stimuliSetId,
-        parentStimulusFileName: mergedStim.parentStimulusFileName,
-        stimulusKC: mergedStim.stimulusKC,
-        clusterKC: mergedStim.clusterKC,
-        responseKC: mergedStim.responsKC,
-        params: mergedStim.params,
-        optimalProb: mergedStim.optimalProb,
-        correctResponse: mergedStim.correctResponse,
-        incorrectResponses: mergedStim.incorrectResponses,
-        itemResponseType: mergedStim.itemResponseType,
-        speechHintExclusionList: mergedStim.speechHintExclusionList,
-        clozeStimulus: mergedStim.clozeStimulus,
-        textStimulus: mergedStim.textStimulus,
-        audioStimulus: mergedStim.audioStimulus,
-        imageStimulus: mergedStim.imageStimulus,
-        videoStimulus: mergedStim.videoStimulus,
-        aleternateDisplays: mergedStim.aleternateDisplays,
-        tags: mergedStim.tags,
-        syllables: curAnswerSylls
-      }})
+      let first = true;
+      Items.find({stimulusFileName: stimulusFileName, stimulusKC: stimulusKC}).forEach((item) => {
+        if(first){
+          Items.update({_id: item._id},{$set: {
+            stimuliSetId: mergedStim.stimuliSetId,
+            parentStimulusFileName: mergedStim.parentStimulusFileName,
+            stimulusKC: mergedStim.stimulusKC,
+            clusterKC: mergedStim.clusterKC,
+            responseKC: mergedStim.responsKC,
+            params: mergedStim.params,
+            optimalProb: mergedStim.optimalProb,
+            correctResponse: mergedStim.correctResponse,
+            incorrectResponses: mergedStim.incorrectResponses,
+            itemResponseType: mergedStim.itemResponseType,
+            speechHintExclusionList: mergedStim.speechHintExclusionList,
+            clozeStimulus: mergedStim.clozeStimulus,
+            textStimulus: mergedStim.textStimulus,
+            audioStimulus: mergedStim.audioStimulus,
+            imageStimulus: mergedStim.imageStimulus,
+            videoStimulus: mergedStim.videoStimulus,
+            aleternateDisplays: mergedStim.aleternateDisplays,
+            tags: mergedStim.tags,
+            syllables: curAnswerSylls
+          }});
+        } else {
+          Items.remove({_id: item._id});
+        }
+        first = false;
+      });
     }
   } else {
     newStims = newFormatItems;
@@ -2123,15 +2132,15 @@ async function upsertStimFile(stimulusFileName, stimJSON, ownerId, packagePath =
       curAnswerSylls = [stim.correctResponse];
     }
     stim.syllables = curAnswerSylls;
-    if(stim.imageStimulus && stim.imageStimulus.slice(0, 4) != 'http'){
+    if(stim.imageStimulus && isInternalAsset(stim.imageStimulus)){
       //image is not a url
       stim.imageStimulus = await getStimLink(stim.imageStimulus, ownerId);
     }
-    if(stim.audioStimulus && stim.audioStimulus.slice(0, 4) != 'http'){
+    if(stim.audioStimulus && isInternalAsset(stim.audioStimulus)){
       //audio is not a url
       stim.audioStimulus = await getStimLink(stim.audioStimulus, ownerId);
     }
-    if(stim.videoStimulus && stim.videoStimulus.slice(0, 4) != 'http'){
+    if(stim.videoStimulus && isInternalAsset(stim.videoStimulus)){
       //video is not a url
       stim.videoStimulus = await getStimLink(stim.videoStimulus, ownerId);
     }
@@ -2139,17 +2148,24 @@ async function upsertStimFile(stimulusFileName, stimJSON, ownerId, packagePath =
   }
   //Update Stim Cache every upload
   Meteor.call('updateStimSyllables', stimuliSetId);
-  // We may have less stims than in previous versions of an uploaded stim file
-  // Items.remove({stimulusKC: {$gt: maxStimulusKC, $lt: (Math.floor(maxStimulusKC / 10000) + 1) * 10000}});
+  // We may have fewer stims than in previous versions of an uploaded stim file
+  Items.remove({stimulusKC: {$gt: maxStimulusKC}, stimuliSetId: stimuliSetId});
 }
 
 async function getStimLink(stim, ownerId){
   serverConsole('grabbing link for stim', stim);
   const filePathArray = stim.split('/');
-  const fileName = filePathArray[filePathArray.length - 1];
-  const stimulusAssetLink = await DynamicAssets.findOne({name: fileName, userId: ownerId});
-  const stimulusAssetLinkLink = stimulusAssetLink.meta.link;
-  return stimulusAssetLinkLink;
+  let fileName;
+  if(stim.includes('/'))
+    fileName = filePathArray[filePathArray.length - 1];
+  else
+    fileName = stim;
+  const stimulusAsset = await DynamicAssets.findOne({name: fileName, userId: ownerId});
+  return stimulusAsset.link();
+}
+
+function isInternalAsset(string) {
+  return string.slice(0, 4) != 'http' || string.includes(Meteor.absoluteUrl());
 }
 
 async function upsertTDFFile(tdfFilename, tdfJSON, ownerId) {
@@ -2168,7 +2184,7 @@ async function upsertTDFFile(tdfFilename, tdfJSON, ownerId) {
   }
   if (!stimSet && !skipStimSet) throw new Error('no stimset for tdf:', tdfFilename);
   if (prev && prev._id) {
-    serverConsole('updating tdf', tdfFilename, stimSet);
+    serverConsole('updating tdf', tdfFilename);
     let tdfJSONtoUpsert;
     if (hasGeneratedTdfs(tdfJSON)) {
       const tdfGenerator = new DynamicTdfGenerator(tdfJSON.tdfs, tdfFilename, ownerId, 'repo', stimSet);
@@ -2184,7 +2200,7 @@ async function upsertTDFFile(tdfFilename, tdfJSON, ownerId) {
       content: tdfJSONtoUpsert
     }});
   } else {
-    serverConsole('inserting tdf', tdfFilename, stimSet);
+    serverConsole('inserting tdf', tdfFilename);
     let tdfJSONtoUpsert;
     if (hasGeneratedTdfs(tdfJSON)) {
       const tdfGenerator = new DynamicTdfGenerator(tdfJSON.tdfs, tdfFilename, ownerId, 'repo', stimSet);
