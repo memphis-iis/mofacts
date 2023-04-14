@@ -170,7 +170,10 @@ const restrictedRoutes = [
   'tdfAssignmentEdit',
   'instructorReporting',
   'studentReporting',
-  'feedback'
+  'feedback',
+  'experimentSettings',
+  'classControlPanel',
+  'contentControlPanel'
 ];
 
 const getDefaultRouteAction = function(routeName) {
