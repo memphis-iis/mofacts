@@ -1,56 +1,29 @@
-FROM python:3.8-slim-buster
+FROM node:12
 
-# Install system dependencies
-RUN apt-get update && \
-    apt-get install -y curl
+# Install Meteor
+RUN curl https://install.meteor.com/ | sh
 
-# Install SpacyAPI
-RUN curl https://raw.githubusercontent.com/aolney/SpacyAPI/master/docker/Dockerfile | docker build -
-
-# Install AllenNLP Demo
-RUN docker pull allennlp/demo
-
-# Install Paraphrase Server
-RUN docker pull aolney/paraphrase-server
-
-# Install Illinois Wikifier Server
-RUN docker pull aolney/illinois-wikifier-server
-
-# Install Longform QA Service
-RUN docker pull aolney/longform-qa-service
-
-# Install Elasticsearch
-RUN docker pull docker.elastic.co/elasticsearch/elasticsearch:7.14.1
-
-# Use Node.js version 14
-FROM node:14
-
-# Set the working directory
+# Create app directory
 WORKDIR /usr/src/app
 
-# Copy the package.json and package-lock.json files
-COPY package*.json ./
-
 # Install app dependencies
+COPY package*.json ./
 RUN npm install
 
-# Copy the rest of the application code
-COPY ../build /usr/src/app/build
+# Copy app source code
+COPY . .
 
-# Copy dependencies
-COPY ../mofacts_depends /mofacts_depends/
+# Build Meteor app
+RUN meteor build --directory /usr/src/app/build --server-only --architecture=os.linux.x86_64
 
-# Build the Meteor app
-RUN npm run build
+# Change working directory to the built app
+WORKDIR /usr/src/app/build/bundle
+
+# Install production dependencies
+RUN (cd programs/server && npm install --production)
 
 # Expose port 80
 EXPOSE 80
 
 # Start the app
 CMD ["node", "main.js"]
-
-# Expose ports for the containers
-EXPOSE 5000 8000 8080 8090 5005 9200 80 4567
-
-# Start the containers
-CMD ["docker-compose", "up"]

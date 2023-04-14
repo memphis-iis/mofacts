@@ -92,9 +92,6 @@ sudo mount --bind "$HOME/.meteor/packages" packages
 #meteor update
 meteor npm install --save babel-runtime --no-bin-links
 
-#install meteor up deployer
-npm install -g mup mup-docker-deploy
-
 # Set up dynamic config
 bash /vagrant/scripts/server/setDynamicConfig.sh
 
