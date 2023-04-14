@@ -32,6 +32,10 @@
 
   # Install Docker Compose
   bash -c "sudo apt-get install -y libffi-dev libssl-dev"
+  bash -c "sudo apt-get install -y python3 python3-pip"
+  bash -c "sudo apt-get remove python-configparser"
+  bash -c "sudo pip3 -v install docker-compose"
+  
 
   # Inside the Ubuntu shell, install Node.js 12.x
   bash -c "curl -sL https://deb.nodesource.com/setup_12.x | sudo -E bash -"
@@ -50,5 +54,5 @@
   bash -c "sudo mkdir /mofacts"
   bash -c "sudo mount --bind $wslpath /mofacts"
   
-  #use bash to cd to /mofacts/mofacts and run docker build and docker-compose up
-  bash -c "cd /mofacts/mofacts && sudo docker build -t mofacts ."
+  # run the meteor app
+  bash -c "cd /mofacts/mofacts && ./run_meteor"
