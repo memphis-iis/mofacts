@@ -1,38 +1,53 @@
 <template name="nav">
     <!-- bootstrap 5 navigation -->
     <nav class="navbar navbar-expand-lg">
-        <div class="row">
+        <div class="row" style="width:100%;">
           <div class="col-2">
-            <a class="navbar-brand" href="#">MoFaCTs</a>
+            <a class="navbar-brand" href="/profile">MoFaCTs</a>
           </div>
-          <div class="justify-content-end col-10" id="navbarScroll">
+          <div class="col-10" id="navbarScroll">
             <ul class="navbar-nav">
-              <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle" href="#" id="navbarScrollingDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                  <!-- circle profile icon -->
-                <span class="navbar-text profile-circle">
-            
-                </span>
-                    <!-- menu icon -->
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-list" viewBox="0 0 16 16">
-                        <path d="M2 11.5A.5.5 0 0 1 2.5 11h11a.5.5 0 0 1 0 1h-11a.5.5 0 0 1-.5-.5zm0-3A.5.5 0 0 1 2.5 8h11a.5.5 0 0 1 0 1h-11a.5.5 0 0 1-.5-.5zm0-3A.5.5 0 0 1 2.5 5h11a.5.5 0 0 1 0 1h-11a.5.5 0 0 1-.5-.5z"/>
-                    </svg>
-                </a>
-                <ul class="dropdown-menu position-absolute text-center">
-                    <li><a  class="dropdown-item" id="homeButton">Profile</a></li>
-                    {{#if isNormal}}
-                        {{#if isInSession}}
-                            <li><a  class="dropdown-item" id="wikiButton" target="_blank">Wiki</a></li>
+              <div class="gearMenu">
+                <li class="nav-item dropdown gearMenu">
+                  <a class="nav-link dropdown-toggle" href="#" id="navbarScrollingDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <!-- circle profile icon -->
+                      <!-- menu icon -->
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-list" viewBox="0 0 16 16">
+                          <path d="M2 11.5A.5.5 0 0 1 2.5 11h11a.5.5 0 0 1 0 1h-11a.5.5 0 0 1-.5-.5zm0-3A.5.5 0 0 1 2.5 8h11a.5.5 0 0 1 0 1h-11a.5.5 0 0 1-.5-.5zm0-3A.5.5 0 0 1 2.5 5h11a.5.5 0 0 1 0 1h-11a.5.5 0 0 1-.5-.5z"/>
+                      </svg>
+                  </a>
+                  <ul class="dropdown-menu position-absolute text-center">
+                      <li><a  class="dropdown-item" id="homeButton">Profile</a></li>
+                      <li><a class="dropdown-item" id="gearMenu">Settings</a></li>
+                      {{#if isNormal}}
+                          {{#if isInSession}}
+                              <li><a  class="dropdown-item" id="wikiButton" target="_blank">Wiki</a></li>
+                          {{/if}}
+                          {{#if isInTrial}}
+                              <li><a  class="dropdown-item" id="helpButton">Help</a></li>
+                          {{/if}}
+                      <li><a class="dropdown-item" id="progressButton">Progress</a></li>
+                      {{#if isInRole 'admin,teacher'}}
+                        <li><a class="dropdown-item" id="instructorReportingButton">Instructor Reporting</a></li>
+                        {{# if isInRole 'admin'}}
+                          <li><a class="dropdown-item" id="adminReportingButton">Admin Panel</a></li>
                         {{/if}}
-                        {{#if isInTrial}}
-                            <li><a  class="dropdown-item" id="helpButton">Help</a></li>
-                        {{/if}}
-                    <li><a class="dropdown-item" id="progressButton">Progress</a></li>
-                    <li><a  class="dropdown-item" id="errorReportButton" data-bs-toggle="modal" data-bs-target="#errorReportingModal">Report Error</a></li>
-                    <li><a  class="dropdown-item" id="logoutButton">Logout</a></li>
-                  {{/if}}
-                </ul>
-              </li>
+                        <li><a class="dropdown-item" id="adminControlsBtn">Mechanical Turk</a></li>
+                        <li><a class="dropdown-item" id="FileManagementButton">Manage Lessons</a></li>
+                        <li><a class="dropdown-item" id="contentUploadButton">Content Uploads</a></li>
+                        <li><a class="dropdown-item" id="userProfileEditButton">AWS User Profile Data</a></li>
+                        <li><a class="dropdown-item" id="userAdminButton">User Management</a></li>
+                        <li><a class="dropdown-item" id="classEditButton">Class Managment</a></li>
+                        <li><a class="dropdown-item" id="tdfAssignmentEditButton">Chapter Assignments</a></li>
+                        <li><a class="dropdown-item" id="dataDownloadButton">Data Download</a></li>
+                        <li><a class="dropdown-item" id="contentGenerationButton">Content Generation</a></li>
+                      {{/if}}
+                      <li><a  class="dropdown-item" id="errorReportButton" data-bs-toggle="modal" data-bs-target="#errorReportingModal">Report Error</a></li>
+                      <li><a  class="dropdown-item" id="logoutButton">Logout</a></li>
+                    {{/if}}
+                  </ul>
+                </li>
+              </div>
             </ul>
           </div>
         </div>

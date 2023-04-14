@@ -7,9 +7,9 @@
                 <table>
                     <tr>
                         <td>
-                            <div class="name-circle">
+                            <div class="name-circle" hidden>
                                 <span class="mx-auto">
-                                    PP
+                                    
                                 </span>
                             </div>
                         </td>
@@ -31,6 +31,7 @@
                                 <b>{{currentUser.username}}</b>
                                 <i>Student</i>
                               {{/if}}
+                              <br>
                             </span>
                         </td>
                     </tr>
@@ -38,53 +39,90 @@
             </div>
         </div>
             <div class="row">
-                <div class="col-12 offset-md-2 offset-sm-1 offset-lg-1 offset-2 mt-auto">
-                    <div class="row profile-summary-text">
-                        <div class="col-12 col-md-6 mt-auto">
-                            <!-- tip -->
-                            <i class="fa fa-lightbulb-o" style="font-size:24px"></i>
-                            This is a tip
+                <div class="col-12 mt-auto">
+                    <div class="row profile-summary-text">                        
+                        <div class="col-12" style="">
+                            <input type="text" id="practiceTDFSearch" class="form-control" placeholder="Select a TDF...">
                         </div>
-                        <div class="col-12 col-md-5 mt-auto d-flex align-items-end">
-                            <div class="row" style="position: relative; top: 55px;">
-                                <div class="col-12" style="">
-                                    <input type="text" id="practiceTDFSearch" class="form-control" placeholder="Search for module">
-                                </div>
-                                <div class="col-12" id="practiceTDFSearchResults">
-                                    {{#if enabledTdfs}}
-                                        {{#each enabledTdfs}}
-                                        <div class='col-xs-12 col-sm-12 col-md-3 col-lg-3 text-center'>
-                                            <button id="{{this.tdfid}}" class="btn btn-block btn-responsive tdfButton" name="{{this.name}}"
-                                                data-tdfid="{{this.tdfid}}"
-                                                data-lessonname="{{this.name}}"
-                                                data-currentStimuliSetId="{{this.currentStimuliSetId}}"
-                                                data-tdffilename="{{this.fileName}}"
-                                                data-ignoreOutOfGrammarResponses="{{this.ignoreOutOfGrammarResponses}}"
-                                                data-speechOutOfGrammarFeedback="{{this.speechOutOfGrammarFeedback}}"
-                                                data-isMultiTdf="{{this.isMultiTdf}}">
-                                                <!-- add disabled="{{this.isOverDue}}" to this to enable due date lockouts -->
-                                                {{this.name}}
-                                            {{#if this.dueDate}}
-                                                <br>
-                                                <small>Due: {{this.dueDate}}</small>
-                                            {{/if}}
-                                            {{#if this.enableAudioPromptAndFeedback}}
-                                                <br>
-                                                <p style="display:inline-block" title="Audio Output available for this module"><span class="fa fa-headphones"></span></p>
-                                            {{/if}}
-                                            <p style="display:inline-block">&nbsp;&nbsp;&nbsp;</p>
-                                            {{#if this.audioInputEnabled}}
-                                                <p style="display:inline-block" title="Speech Input available for this module"><i class="fa fa-microphone"></i></p>
-                                            {{/if}}
-                                        </button>
-                                        </div>
+                        <div class="col-12 text-center" id="practiceTDFSearchResultsContainer">
+                            <div class="col-12 text-center" id="practiceTDFSearchResults">
+                                {{#if recentTdfs}}
+                                <div class="divider">Recent</div>
+                                <ul class="tdfMenu"> 
+                                {{#each recentTdfs}}
+                                    <li>
+                                        <a id="{{this.tdfid}}" class="tdfLink" name="{{this.name}}"
+                                        data-tdfid="{{this.tdfid}}"
+                                        data-lessonname="{{this.name}}"
+                                        data-currentStimuliSetId="{{this.currentStimuliSetId}}"
+                                        data-tdffilename="{{this.fileName}}"
+                                        data-ignoreOutOfGrammarResponses="{{this.ignoreOutOfGrammarResponses}}"
+                                        data-speechOutOfGrammarFeedback="{{this.speechOutOfGrammarFeedback}}"
+                                        data-isMultiTdf="{{this.isMultiTdf}}">
+                                        <!-- add disabled="{{this.isOverDue}}" to this to enable due date lockouts -->
+                                        {{this.name}}
+                                        {{#if this.enableAudioPromptAndFeedback}}
+                                        <span class="fa fa-headphones"></span>
+                                        {{/if}}
+                                        {{#if this.audioInputEnabled}}
+                                        <span class="fa fa-microphone"></span>
+                                        {{/if}}
+                                    </a>
+                                    </li>
                                     {{/each}}
-                                    {{else}}
-                                        <div class="col-12">
-                                            <p class="text-center">No modules available</p>
-                                        </div>
+
+                                    <a id="{{this.tdfid}}" class="tdfLink" name="{{this.name}}"
+                                    data-tdfid="{{this.tdfid}}"
+                                    data-lessonname="{{this.name}}"
+                                    data-currentStimuliSetId="{{this.currentStimuliSetId}}"
+                                    data-tdffilename="{{this.fileName}}"
+                                    data-ignoreOutOfGrammarResponses="{{this.ignoreOutOfGrammarResponses}}"
+                                    data-speechOutOfGrammarFeedback="{{this.speechOutOfGrammarFeedback}}"
+                                    data-isMultiTdf="{{this.isMultiTdf}}">
+                                    <!-- add disabled="{{this.isOverDue}}" to this to enable due date lockouts -->
+                                    {{this.name}}
+                                    {{#if this.enableAudioPromptAndFeedback}}
+                                    <span class="fa fa-headphones"></span>
                                     {{/if}}
-                                </div>
+                                    {{#if this.audioInputEnabled}}
+                                    <span class="fa fa-microphone"></span>
+                                    {{/if}}
+                                    </a>
+                                </ul>
+                                {{/if}}
+                                {{#if enabledTdfs}}
+                                <div class="divider">Results</div>
+                                <ul class="tdfMenu">
+                                    {{#each enabledTdfs}}
+                                    <li>
+                                    <a id="{{this.tdfid}}" class="tdfLink" name="{{this.name}}"
+                                        data-tdfid="{{this.tdfid}}"
+                                        data-lessonname="{{this.name}}"
+                                        data-currentStimuliSetId="{{this.currentStimuliSetId}}"
+                                        data-tdffilename="{{this.fileName}}"
+                                        data-ignoreOutOfGrammarResponses="{{this.ignoreOutOfGrammarResponses}}"
+                                        data-speechOutOfGrammarFeedback="{{this.speechOutOfGrammarFeedback}}"
+                                        data-isMultiTdf="{{this.isMultiTdf}}">
+                                        <!-- add disabled="{{this.isOverDue}}" to this to enable due date lockouts -->
+                                        {{this.name}}
+                                        {{#if this.enableAudioPromptAndFeedback}}
+                                        <span class="fa fa-headphones"></span>
+                                        {{/if}}
+                                        {{#if this.audioInputEnabled}}
+                                        <span class="fa fa-microphone"></span>
+                                        {{/if}}
+                                    </a>
+                                    </li>
+                                {{/each}}
+                                </ul>
+                                {{else}}
+                                    <div class="divider">Results</div>
+                                    <div class="col-12">
+                                        <ul class="tdfMenu">
+                                            <li class="tdfLink">No modules available</li>
+                                        </ul>
+                                    </div>
+                                {{/if}}
                             </div>
                         </div>
                     </div>
@@ -92,18 +130,17 @@
             </div>
         </div>
     </div>
-  <script defer src="https://use.fontawesome.com/releases/v5.0.9/js/all.js" integrity="sha384-8iPTk2s/jMVj81dnzb/iFR2sdA7u06vHJyyLlAd4snFpCl/SnyUjRrbdJsw1pGIl" crossorigin="anonymous"></script>
+  
     <div class="container-fluid">
+        
         {{#if isImpersonating}}
         <div class='text-center alert alert-warning'>
                 Impersonation Mode. Nothing will be logged. Log out to reset.
         </div>
         {{/if}}
-
-
+        <br>
         {{#unless isInRole 'admin,teacher'}}
-            <br>
-
+        <br>
             <div class="row" id="testButtonContainer">
                 <br>
                 {{>profileAudioToggles}}
@@ -111,8 +148,7 @@
                     Practice modules:
                 </legend>
             </div>
-
-            {{#if class}}
+        {{#if class}}
             <legend class="text-center">
                 Course: {{class.courseName}}
             </legend>
