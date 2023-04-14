@@ -1,4 +1,4 @@
-version: '3.8'
+version: '3.3'
 
 services:
   spacyapi:
@@ -43,6 +43,3 @@ services:
     build: ./mofacts
     ports:
       - "80:80"
-    
-
-    

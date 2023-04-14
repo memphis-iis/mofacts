@@ -1,35 +1,54 @@
-# Check if script is being run as administrator, otherwise ask for it
-if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
-  Write-Warning "This script needs to be run as an administrator. Please run PowerShell as administrator and try again."
-  Exit 1
-}
+  # Check if the script is running as admin and re-launch it as admin if it's not
+  if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
+      Start-Process powershell.exe -Verb RunAs -ArgumentList @('-NoExit', '-Command', $PSCommandPath)
+      exit
+  }
 
-# Check if Chocolatey is installed, otherwise install it
-if (-not (Get-Command choco -ErrorAction SilentlyContinue)) {
-  Write-Host "Chocolatey is not installed. Installing Chocolatey..."
-  Set-ExecutionPolicy Bypass -Scope Process -Force
-  [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072
-  iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
-}
+  # Check if WSL2 is installed and install it if not
+  if (!(Get-WindowsOptionalFeature -Online -FeatureName Microsoft-Windows-Subsystem-Linux).State -eq 'Enabled') {
+      Enable-WindowsOptionalFeature -Online -FeatureName Microsoft-Windows-Subsystem-Linux -NoRestart
+      Write-Host "Please restart your computer and run this script again."
+      return
+  }
 
-# Check if Node.js 12 is installed, otherwise install it
-if (-not (Get-Command node -ErrorAction SilentlyContinue) -or ((node -v) -notlike "v12*")) {
-  Write-Host "Node.js 12 is not installed. Installing Node.js 12..."
-  choco install nodejs.install --version=12.22.7 -y
-}
+  # Check if Ubuntu 20.04 is installed and install it if not
+  $ubuntuAppName = "CanonicalGroupLimited.Ubuntu20.04onWindows"
+  if (-not (Get-AppxPackage -Name $ubuntuAppName -ErrorAction SilentlyContinue)) {
+      Invoke-WebRequest -Uri https://aka.ms/wslubuntu2004 -OutFile Ubuntu.appx -UseBasicParsing
+      Add-AppxPackage .\Ubuntu.appx
+      Remove-Item .\Ubuntu.appx
+  }
 
-# Check if Meteor is installed, otherwise install it
-if (-not (Test-Path "$env:LOCALAPPDATA\meteor\meteor.bat")) {
-  Write-Host "Meteor is not installed. Installing Meteor..."
-  Invoke-Expression (New-Object Net.WebClient).DownloadString('https://install.meteor.com/')
-}
+  # Open a new PowerShell instance and execute the script inside the Ubuntu shell
+  $wslPath = (Get-AppxPackage -Name $ubuntuAppName).InstallLocation + "\ubuntu2004.exe"
+  Start-Process $wslPath -ArgumentList "pwsh.exe -NoExit -Command `"$($PSCommandPath -replace "'", "''")`"" -Wait
 
-# Navigate to the ./mofacts folder
-cd ./mofacts
 
-#install meteor packages
-meteor npm install
+  
+  # Inside the Ubuntu shell, install Docker
+  bash -c "curl -fsSL https://get.docker.com -o get-docker.sh"
+  bash -c "sudo sh get-docker.sh"
+  bash -c "sudo service docker start"
 
-# Run the project
-Write-Host "Running project..."
-meteor run
+  # Install Docker Compose
+  bash -c "sudo apt-get install -y libffi-dev libssl-dev"
+
+  # Inside the Ubuntu shell, install Node.js 12.x
+  bash -c "curl -sL https://deb.nodesource.com/setup_12.x | sudo -E bash -"
+  bash -c "sudo apt-get install -y nodejs"
+
+  # Inside the Ubuntu shell, install Meteor 1.12.x with npm
+  bash -c "sudo npm install -g meteor@1.12"
+
+  # Inside the Ubuntu shell, install Meteor Up and Mup Docker Deploy using npm
+  bash -c "sudo npm install -g mup mup-docker-deploy"
+
+  #use wslpath to convert the scripts path to the Linux path  
+  $wslpath = bash.exe -c "wslpath -u '$(Get-Location)'"
+
+  #mount the windows wsl path to the Linux path /mofacts
+  bash -c "sudo mkdir /mofacts"
+  bash -c "sudo mount --bind $wslpath /mofacts"
+  
+  #use bash to cd to /mofacts/mofacts and run docker build and docker-compose up
+  bash -c "cd /mofacts/mofacts && sudo docker build -t mofacts ."
