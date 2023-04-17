@@ -1461,7 +1461,6 @@ async function showUserFeedback(isCorrect, feedbackMessage, afterAnswerFeedbackC
         if(!isCorrect){
           $('#CountdownTimer')
             .addClass('text-align')
-            .text('Continuing in: ')
             .attr("hidden",false)
             .show();
 
@@ -1476,14 +1475,8 @@ async function showUserFeedback(isCorrect, feedbackMessage, afterAnswerFeedbackC
             var now = new Date().getTime()
             var distance = countDownStart - now;
             var seconds = Math.ceil((distance % (1000 * 60)) / 1000);
-    
-            try{
-              document.getElementById("CountdownTimer").innerHTML = 'Continuing in: ' + seconds + "s";
-            }
-            catch{
-              Meteor.clearInterval(CountdownTimerInterval);
-              Session.set('CurIntervalId', undefined);
-            }
+
+            document.getElementById("CountdownTimer").innerHTML = 'Continuing in: ' + seconds + "s";
     
             // If the count down is finished, end interval and clear CountdownTimer
             if (distance < 0) {
