@@ -250,6 +250,8 @@ async function doPackageUpload(file, template){
             alert(err);
           } else {
             alert("Package upload succeded.");
+            if(res.stimSetId)
+              Meteor.call('updateStimSyllables', res.stimSetId);
           }
         });
       }
