@@ -895,9 +895,11 @@ function preloadAudioFiles() {
   const allSrcs = getCurrentStimDisplaySources('audioStimulus');
   console.log('allSrcs,audio', allSrcs);
   soundsDict = {};
-  for (const source of allSrcs) {
+  for (const src of allSrcs) {
     let sound;
-    if(source.includes('http')){
+    let source = DynamicAssets.findOne({name: src});
+    if(source) {
+      source = source.link();
       sound = new Audio(source);
       sound.addEventListener("play", audioPlayFunction(source));
       sound.addEventListener("ended", audioEndFunction(source));
@@ -906,18 +908,18 @@ function preloadAudioFiles() {
       sound = new Howl({
         preload: true,
         src: [
-          source,
+          src,
         ],
 
         // Must do an Immediately Invoked Function Expression otherwise question
         // is captured as a closure and will change to the last value in the loop
         // by the time we call this
-        onplay: audioPlayFunction(source),
+        onplay: audioPlayFunction(src),
 
-        onend: audioEndFunction(source),
+        onend: audioEndFunction(src),
       });
     }
-    soundsDict[source] = sound;
+    soundsDict[src] = sound;
   }
 }
 
@@ -926,11 +928,19 @@ function preloadImages() {
   console.log('curStimImgSrcs: ', curStimImgSrcs);
   imagesDict = {};
   let img;
-  for (const src of curStimImgSrcs) {
-    img = new Image();
-    img.src = src;
-    console.log('img:' + img);
-    imagesDict[src] = img;
+  for (let src of curStimImgSrcs) {
+    if(!src.includes('http')){
+      link = DynamicAssets.findOne({name: src}).link();
+      img = new Image();
+      img.src = link;
+      console.log('img:' + img);
+      imagesDict[src] = img;
+    } else {
+      img = new Image();
+      img.src = src;
+      console.log('img:' + img);
+      imagesDict[src] = img;
+    }
   }
   console.log('imagesDict: ', imagesDict);
 }
@@ -1451,7 +1461,6 @@ async function showUserFeedback(isCorrect, feedbackMessage, afterAnswerFeedbackC
         if(!isCorrect){
           $('#CountdownTimer')
             .addClass('text-align')
-            .text('Continuing in: ')
             .attr("hidden",false)
             .show();
 
@@ -1466,14 +1475,8 @@ async function showUserFeedback(isCorrect, feedbackMessage, afterAnswerFeedbackC
             var now = new Date().getTime()
             var distance = countDownStart - now;
             var seconds = Math.ceil((distance % (1000 * 60)) / 1000);
-    
-            try{
-              document.getElementById("CountdownTimer").innerHTML = 'Continuing in: ' + seconds + "s";
-            }
-            catch{
-              Meteor.clearInterval(CountdownTimerInterval);
-              Session.set('CurIntervalId', undefined);
-            }
+
+            document.getElementById("CountdownTimer").innerHTML = 'Continuing in: ' + seconds + "s";
     
             // If the count down is finished, end interval and clear CountdownTimer
             if (distance < 0) {

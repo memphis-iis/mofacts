@@ -43,8 +43,8 @@ if (Meteor.isServer) {
     return DynamicAssets.collection.find();
   });
 
-  Meteor.publish('assets', function(ownerId) {
-    return DynamicAssets.collection.find({userId: ownerId});
+  Meteor.publish('assets', function(ownerId, stimSetId) {
+    return DynamicAssets.collection.find({userId: ownerId, "meta.stimuliSetId": stimSetId});
   });
 
   Meteor.publish('ownedFiles', function() {
@@ -529,15 +529,8 @@ async function processPackageUpload(fileObj, owner, zipLink){
         };
         unzippedFiles.push(fileMeta);
       }
-      try {
-        for(const media of unzippedFiles.filter(f => f.type == 'media')){
-          await saveMediaFile(media, owner);
-        }
-      } catch(e) {
-        serverConsole('processPackageUpload ERROR,', path, ',', e + ' on file: ' + filePath);
-        throw new Meteor.Error('package upload failed at media upload: ' + e + ' on file: ' + filePath)
-      }
-
+      const stimFileName = unzippedFiles.filter(f => f.type == 'stim')[0].name;
+      const stimSetId = await getStimuliSetIdByFilename(stimFileName);
       try {
         for(const stim of unzippedFiles.filter(f => f.type == 'stim')){
           results.concat(await saveContentFile(stim.type, stim.name, stim.contents, owner, stim.path));
@@ -555,16 +548,23 @@ async function processPackageUpload(fileObj, owner, zipLink){
         serverConsole('processPackageUpload ERROR,', path, ',', e + ' on file: ' + filePath);
         throw new Meteor.Error('package upload failed at tdf upload: ' + e + ' on file: ' + filePath)
       }
-
-      return results;
+      try {
+        for(const media of unzippedFiles.filter(f => f.type == 'media')){
+          await saveMediaFile(media, owner, stimSetId);
+        }
+      } catch(e) {
+        serverConsole('processPackageUpload ERROR,', path, ',', e + ' on file: ' + filePath);
+        throw new Meteor.Error('package upload failed at media upload: ' + e + ' on file: ' + filePath)
+      }
+      return {results, stimSetId};
     } catch(e) {
       serverConsole('processPackageUpload ERROR,', path, ',', e + ' on file: ' + filePath);
       throw new Meteor.Error('package upload failed at initialization: ' + e + ' on file: ' + filePath)
     }
 }
 
-async function saveMediaFile(media, owner){
-  serverConsole("Uploading:", media.name);
+async function saveMediaFile(media, owner, stimSetId){
+  serverConsole("Uploading:", media.name, stimSetId);
   const foundFile = DynamicAssets.findOne({userId: owner, name: media.name})
   if(foundFile){
     DynamicAssets.remove({_id: foundFile._id});
@@ -575,12 +575,12 @@ async function saveMediaFile(media, owner){
   }
   DynamicAssets.write(media.contents, {
     name: media.name,
-    userId: owner
+    userId: owner,
   }, (error, fileRef) => {
     if (error) {
       serverConsole(`File ${media.name} could not be uploaded`, error)
     } else {
-      const metadata = { link: DynamicAssets.link(fileRef) }
+      const metadata = { link: DynamicAssets.link(fileRef), stimuliSetId: stimSetId }
       DynamicAssets.collection.update({_id: fileRef._id}, {$set: {meta: metadata}});
     }
   });
@@ -661,8 +661,6 @@ async function saveContentFile(type, filename, filecontents, owner, packagePath 
           try {
             const rec = {'fileName': filename, 'tdfs': json, 'ownerId': ownerId, 'source': 'upload'};
             await upsertTDFFile(filename, rec, ownerId);
-            //Update Stim Cache every upload
-            Meteor.call('updateStimSyllables', stimuliSetId);
             results.result = true;
           } catch (err) {
             results.result=false;
@@ -2050,137 +2048,25 @@ async function upsertStimFile(stimulusFileName, stimJSON, ownerId, packagePath =
     nextStimuliSetId += 1;
     serverConsole('stimuliSetId2:', stimuliSetId, nextStimuliSetId);
   }
-  Stims.upsert({'stimuliSetId': stimuliSetId}, {
+  Stims.remove({stimuliSetId: stimuliSetId})
+  Stims.insert({
     'stimuliSetId': stimuliSetId,
     'fileName': stimulusFileName,
     'stimuli': stimJSON,
     'owner': ownerId,
   })
-  const newFormatItems = getNewItemFormat(oldStimFormat, stimulusFileName, stimuliSetId, responseKCMap);
-  const existingStims = await Items.find({stimulusFileName: stimulusFileName}).fetch();
-  serverConsole('existingStims', existingStims);
-  let newStims = [];
-  let stimulusKC;
+  await Items.remove({stimuliSetId: stimuliSetId})
+  const newStims = getNewItemFormat(oldStimFormat, stimulusFileName, stimuliSetId, responseKCMap);
   let maxStimulusKC = 0;
-  if (existingStims && existingStims.length > 0) {
-    for (const newStim of newFormatItems) {
-      stimulusKC = newStim.stimulusKC;
-      if (stimulusKC > maxStimulusKC) {
-        maxStimulusKC = stimulusKC;
-      }
-      let matchingStim = existingStims.find((x) => x.stimulusKC == stimulusKC);
-      if (!matchingStim) {
-        serverConsole('matchingstims') 
-        newStims.push(newStim);
-        continue;
-      }
-      matchingStim = getItem(matchingStim);
-      const mergedStim = Object.assign(matchingStim, newStim);
-      let curAnswerSylls
-      try{
-        if(mergedStim.syllables && mergedStim.syllables.length < 1){
-          serverConsole('fetching syllables for ' + stim.correctResponse);
-          curAnswerSylls = getSyllablesForWord(mergedStim.correctResponse.replace(/\./g, '_').split('~')[0]);
-        }
-      }
-      catch (e) {
-        serverConsole('error fetching syllables for ' + stim.correctResponse + ': ' + JSON.stringify(e));
-        curAnswerSylls = [stim.correctResponse];
-      }
-      if(mergedStim.imageStimulus && mergedStim.imageStimulus.slice(0, 4) != 'http'){
-        //image is not a url
-        mergedStim.imageStimulus = await getStimLink(mergedStim.imageStimulus, ownerId);
-      }
-      if(mergedStim.audioStimulus && mergedStim.audioStimulus.slice(0, 4) != 'http'){
-        //audio is not a url
-        mergedStim.audioStimulus = await getStimLink(mergedStim.audioStimulus, ownerId);
-      }
-      if(mergedStim.videoStimulus && mergedStim.videoStimulus.slice(0, 4) != 'http'){
-        //video is not a url
-        mergedStim.videoStimulus = await getStimLink(mergedStim.videoStimulus, ownerId);
-      }
-      let first = true;
-      Items.find({stimulusFileName: stimulusFileName, stimulusKC: stimulusKC}).forEach((item) => {
-        if(first){
-          Items.update({_id: item._id},{$set: {
-            stimuliSetId: mergedStim.stimuliSetId,
-            parentStimulusFileName: mergedStim.parentStimulusFileName,
-            stimulusKC: mergedStim.stimulusKC,
-            clusterKC: mergedStim.clusterKC,
-            responseKC: mergedStim.responsKC,
-            params: mergedStim.params,
-            optimalProb: mergedStim.optimalProb,
-            correctResponse: mergedStim.correctResponse,
-            incorrectResponses: mergedStim.incorrectResponses,
-            itemResponseType: mergedStim.itemResponseType,
-            speechHintExclusionList: mergedStim.speechHintExclusionList,
-            clozeStimulus: mergedStim.clozeStimulus,
-            textStimulus: mergedStim.textStimulus,
-            audioStimulus: mergedStim.audioStimulus,
-            imageStimulus: mergedStim.imageStimulus,
-            videoStimulus: mergedStim.videoStimulus,
-            aleternateDisplays: mergedStim.aleternateDisplays,
-            tags: mergedStim.tags,
-            syllables: curAnswerSylls
-          }});
-        } else {
-          Items.remove({_id: item._id});
-        }
-        first = false;
-      });
-    }
-  } else {
-    newStims = newFormatItems;
-  }
   serverConsole('!!!newStims:', newStims);
   for (const stim of newStims) {
     if(stim.stimulusKC > maxStimulusKC){
       maxStimulusKC = stim.stimulusKC;
     }
     let curAnswerSylls
-    try{
-      serverConsole('fetching syllables for ' + stim.correctResponse);
-      curAnswerSylls = getSyllablesForWord(stim.correctResponse.replace(/\./g, '_').split('~')[0]);
-    }
-    catch (e) {
-      serverConsole('error fetching syllables for ' + stim.correctResponse + ': ' + JSON.stringify(e));
-      curAnswerSylls = [stim.correctResponse];
-    }
     stim.syllables = curAnswerSylls;
-    if(stim.imageStimulus && isInternalAsset(stim.imageStimulus)){
-      //image is not a url
-      stim.imageStimulus = await getStimLink(stim.imageStimulus, ownerId);
-    }
-    if(stim.audioStimulus && isInternalAsset(stim.audioStimulus)){
-      //audio is not a url
-      stim.audioStimulus = await getStimLink(stim.audioStimulus, ownerId);
-    }
-    if(stim.videoStimulus && isInternalAsset(stim.videoStimulus)){
-      //video is not a url
-      stim.videoStimulus = await getStimLink(stim.videoStimulus, ownerId);
-    }
     Items.insert(stim);
   }
-  //Update Stim Cache every upload
-  Meteor.call('updateStimSyllables', stimuliSetId);
-  // We may have fewer stims than in previous versions of an uploaded stim file
-  Items.remove({stimulusKC: {$gt: maxStimulusKC}, stimuliSetId: stimuliSetId});
-}
-
-async function getStimLink(stim, ownerId){
-  serverConsole('grabbing link for stim', stim);
-  const filePathArray = stim.split('/');
-  let fileName;
-  if(stim.includes('/'))
-    fileName = filePathArray[filePathArray.length - 1];
-  else
-    fileName = stim;
-  const stimulusAsset = await DynamicAssets.findOne({name: fileName, userId: ownerId});
-  return stimulusAsset.link();
-}
-
-function isInternalAsset(string) {
-  return string.slice(0, 4) != 'http' || string.includes(Meteor.absoluteUrl());
 }
 
 async function upsertTDFFile(tdfFilename, tdfJSON, ownerId) {
@@ -2993,6 +2879,7 @@ const asyncMethods = {
           const safeAnswer = answer.replace(/\./g, '_').split('~')[0];
           try{
             if(!answerSyllableMap[safeAnswer]){
+              serverConsole('fetching syllables for ' + safeAnswer);
               answerSyllableMap[safeAnswer] = getSyllablesForWord(safeAnswer);
             }
             syllableArray = answerSyllableMap[safeAnswer]
