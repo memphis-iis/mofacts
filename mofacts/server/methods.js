@@ -2048,13 +2048,13 @@ async function upsertStimFile(stimulusFileName, stimJSON, ownerId, packagePath =
     nextStimuliSetId += 1;
     serverConsole('stimuliSetId2:', stimuliSetId, nextStimuliSetId);
   }
-  Stims.upsert({'stimuliSetId': stimuliSetId}, {
+  Stims.remove({stimuliSetId: stimuliSetId})
+  Stims.insert({
     'stimuliSetId': stimuliSetId,
     'fileName': stimulusFileName,
     'stimuli': stimJSON,
     'owner': ownerId,
   })
-  // We may have fewer stims than in previous versions of an uploaded stim file
   await Items.remove({stimuliSetId: stimuliSetId})
   const newStims = getNewItemFormat(oldStimFormat, stimulusFileName, stimuliSetId, responseKCMap);
   let maxStimulusKC = 0;
@@ -2064,14 +2064,6 @@ async function upsertStimFile(stimulusFileName, stimJSON, ownerId, packagePath =
       maxStimulusKC = stim.stimulusKC;
     }
     let curAnswerSylls
-    // try{
-    //   serverConsole('fetching syllables for ' + stim.correctResponse);
-    //   curAnswerSylls = getSyllablesForWord(stim.correctResponse.replace(/\./g, '_').split('~')[0]);
-    // }
-    // catch (e) {
-    //   serverConsole('error fetching syllables for ' + stim.correctResponse + ': ' + JSON.stringify(e));
-    //   curAnswerSylls = [stim.correctResponse];
-    // }
     stim.syllables = curAnswerSylls;
     Items.insert(stim);
   }
