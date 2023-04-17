@@ -3,11 +3,9 @@
   <nav class="navbar navbar-expand-lg">
       <div class="row" style="width:100%;">
         <div class="col-2">
-          <a class="navbar-brand" href="/profile">
-            {{#if isInSession}}
-              MoFaCTs
-            {{/if}}
-            </a>
+          {{#if isNormal}}
+            <a class="navbar-brand" href="/profile">MoFaCTs</a>
+          {{/if}}
         </div>
         <div class="col-10" id="navbarScroll">
           <ul class="navbar-nav">
