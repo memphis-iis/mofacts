@@ -17,6 +17,7 @@ import {routeToSignin} from '../../lib/router';
 import {createScheduleUnit, createModelUnit, createEmptyUnit} from './unitEngine';
 import {Answers} from './answerAssess';
 import {sessionCleanUp} from '../../lib/sessionUtils';
+import {checkUserSession} from '../../index'
 
 export {
   speakMessageIfAudioPromptFeedbackEnabled,
@@ -361,6 +362,7 @@ function leavePage(dest) {
 }
 
 Template.card.rendered = async function() {
+  await checkUserSession();
   console.log('RENDERED----------------------------------------------');
   // Catch page navigation events (like pressing back button) so we can call our cleanup method
   window.onpopstate = function() {
@@ -699,7 +701,7 @@ Template.card.helpers({
   },
 
   'hideResponse': function() {
-    return getTestType() === 'f';
+    return getTestType() !== 'f';
   },
 
   'fontSizeClass': function() {
@@ -872,40 +874,52 @@ function initializeAudio() {
   }
 }
 
+function audioPlayFunction(source) {
+  if (soundsDict[source]) {
+    soundsDict[source].isCurrentlyPlaying = true;
+  }
+  console.log('Sound played');
+}
+
+function audioEndFunction(source){
+  if (soundsDict[source]) {
+    soundsDict[source].isCurrentlyPlaying = false;
+  }
+  if (onEndCallbackDict[source]) {
+    onEndCallbackDict[source]();
+  }
+  console.log('Sound completed');
+}
+
 function preloadAudioFiles() {
   const allSrcs = getCurrentStimDisplaySources('audioStimulus');
   console.log('allSrcs,audio', allSrcs);
   soundsDict = {};
-  for (const source of allSrcs) {
-    // eslint-disable-next-line no-undef
-    soundsDict[source] = new Howl({
-      preload: true,
-      src: [
-        source,
-      ],
+  for (const src of allSrcs) {
+    let sound;
+    let source = DynamicAssets.findOne({name: src});
+    if(source) {
+      source = source.link();
+      sound = new Audio(source);
+      sound.addEventListener("play", audioPlayFunction(source));
+      sound.addEventListener("ended", audioEndFunction(source));
+    } else {
+      // eslint-disable-next-line no-undef
+      sound = new Howl({
+        preload: true,
+        src: [
+          src,
+        ],
 
-      // Must do an Immediately Invoked Function Expression otherwise question
-      // is captured as a closure and will change to the last value in the loop
-      // by the time we call this
-      onplay: (function(source) {
-        if (soundsDict[source]) {
-          soundsDict[source].isCurrentlyPlaying = true;
-        }
-        console.log('Sound played');
-      })(source),
+        // Must do an Immediately Invoked Function Expression otherwise question
+        // is captured as a closure and will change to the last value in the loop
+        // by the time we call this
+        onplay: audioPlayFunction(src),
 
-      onend: (function(source) {
-        return function() {
-          if (soundsDict[source]) {
-            soundsDict[source].isCurrentlyPlaying = false;
-          }
-          if (onEndCallbackDict[source]) {
-            onEndCallbackDict[source]();
-          }
-          console.log('Sound completed');
-        };
-      })(source),
-    });
+        onend: audioEndFunction(src),
+      });
+    }
+    soundsDict[src] = sound;
   }
 }
 
@@ -914,11 +928,19 @@ function preloadImages() {
   console.log('curStimImgSrcs: ', curStimImgSrcs);
   imagesDict = {};
   let img;
-  for (const src of curStimImgSrcs) {
-    img = new Image();
-    img.src = src;
-    console.log('img:' + img);
-    imagesDict[src] = img;
+  for (let src of curStimImgSrcs) {
+    if(!src.includes('http')){
+      link = DynamicAssets.findOne({name: src}).link();
+      img = new Image();
+      img.src = link;
+      console.log('img:' + img);
+      imagesDict[src] = img;
+    } else {
+      img = new Image();
+      img.src = src;
+      console.log('img:' + img);
+      imagesDict[src] = img;
+    }
   }
   console.log('imagesDict: ', imagesDict);
 }
@@ -1111,16 +1133,11 @@ function clearPlayingSound() {
 function playCurrentSound(onEndCallback) {
   // We currently only play one sound at a time
   clearPlayingSound();
-
   const currentAudioSrc = Session.get('currentDisplay').audioSrc;
   console.log('currentAudioSrc: ' + currentAudioSrc);
-
   // Reset sound and play it
   currentSound = soundsDict[currentAudioSrc];
   onEndCallbackDict[currentAudioSrc] = onEndCallback;
-
-  // In case our caller checks before the sound has a chance to load, we
-  // mark the howler instance as playing
   currentSound.isCurrentlyPlaying = true;
   currentSound.play();
 }
@@ -1382,9 +1399,9 @@ function afterAnswerAssessmentCb(userAnswer, isCorrect, feedbackForAnswer, after
   Session.set('isRefutation', undefined);
   if (isCorrect == null && correctAndText != null) {
     isCorrect = correctAndText.isCorrect;
-  }
-  if (correctAndText.matchText.split(' ')[0] != 'Incorrect.' && !isCorrect && userAnswer != ''){
-    Session.set('isRefutation', true);
+    if (userAnswer != '[timeout]' && userAnswer != '' && !isCorrect && correctAndText.matchText.split(' ')[0] != 'Incorrect.'){
+      Session.set('isRefutation', true);
+    }
   }
 
   const afterAnswerFeedbackCbBound = afterAnswerFeedbackCb.bind(null, isCorrect);
@@ -1444,7 +1461,6 @@ async function showUserFeedback(isCorrect, feedbackMessage, afterAnswerFeedbackC
         if(!isCorrect){
           $('#CountdownTimer')
             .addClass('text-align')
-            .text('Continuing in: ')
             .attr("hidden",false)
             .show();
 
@@ -1459,14 +1475,8 @@ async function showUserFeedback(isCorrect, feedbackMessage, afterAnswerFeedbackC
             var now = new Date().getTime()
             var distance = countDownStart - now;
             var seconds = Math.ceil((distance % (1000 * 60)) / 1000);
-    
-            try{
-              document.getElementById("CountdownTimer").innerHTML = 'Continuing in: ' + seconds + "s";
-            }
-            catch{
-              Meteor.clearInterval(CountdownTimerInterval);
-              Session.set('CurIntervalId', undefined);
-            }
+
+            document.getElementById("CountdownTimer").innerHTML = 'Continuing in: ' + seconds + "s";
     
             // If the count down is finished, end interval and clear CountdownTimer
             if (distance < 0) {
@@ -2019,6 +2029,7 @@ async function unitIsFinished(reason) {
   Session.set('feedbackTypeFromHistory', undefined);
   Session.set('curUnitInstructionsSeen', false);
 
+  const resetStudentPerformance = Session.get('currentDeliveryParams').resetStudentPerformance
   let leaveTarget;
   if (newUnitNum < curTdf.tdfs.tutor.unit.length) {
     // Just hit a new unit - we need to restart with instructions
@@ -2049,6 +2060,13 @@ async function unitIsFinished(reason) {
   } else {
     // nothing for now
   }
+
+  if(resetStudentPerformance){
+    const studentUsername = Session.get('studentUsername') || Meteor.user().username;
+    await meteorCallAsync('clearCurUnitProgress', Meteor.userId(), Session.get('currentTdfId'));
+    await setStudentPerformance(Meteor.userId(), studentUsername, Session.get('currentTdfId'));
+  }
+
   const res = await updateExperimentState(newExperimentState, 'card.unitIsFinished');
   console.log('unitIsFinished,updateExperimentState', res);
   leavePage(leaveTarget);  
@@ -2184,6 +2202,14 @@ function startQuestionTimeout() {
   // We do this little shuffle of session variables so the display will update all at the same time
   const currentDisplayEngine = Session.get('currentDisplayEngine');
   const closeQuestionParts = Session.get('clozeQuestionParts');
+
+  // make sure we get the right audio source
+  if(currentDisplayEngine) {
+    if(currentDisplayEngine.audioSrc && !soundsDict[currentDisplayEngine.audioSrc]) {
+      let source = DynamicAssets.findOne({name: currentDisplayEngine.audioSrc}).link()
+      currentDisplayEngine.audioSrc = source;
+    }
+  }
 
   console.log('startQuestionTimeout, closeQuestionParts', closeQuestionParts);
 

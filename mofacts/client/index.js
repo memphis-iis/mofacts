@@ -8,6 +8,8 @@ import {instructContinue} from './views/experiment/instructions.js';
 import {routeToSignin} from './lib/router.js';
 import { init } from "meteor/simonsimcity:client-session-timeout";
 
+export {checkUserSession}
+
 // This redirects to the SSL version of the page if we're not on it
 const forceSSL = Meteor.settings.public.forceSSL || false;
 console.log('forceSSL', forceSSL);
@@ -15,27 +17,24 @@ if (location.protocol !== 'https:' && forceSSL) {
   location.href = location.href.replace(/^http:/, 'https:');
 }
 
-try{
-  //Prevents new tab
-  const channel = new BroadcastChannel('tab');
-
-  channel.postMessage('another-tab');
-  // note that listener is added after posting the message
-
-  channel.addEventListener('message', (msg) => {
-    if (msg.data === 'another-tab') {
-      Router.go('/tabwarning');
+async function checkUserSession(){
+  const currentSessionId = Meteor.default_connection._lastSessionId;
+  const lastSessionId = Meteor.user().profile.lastSessionId;
+  const lastSessionIdTimestampServer = Meteor.user().profile.lastSessionIdTimestamp;
+  const lastSessionIdTimestampClient = Session.get('lastSessionIdTimestamp');
+  if(lastSessionIdTimestampClient){
+    //user previously logged in this session
+    if (lastSessionId !== currentSessionId && lastSessionIdTimestampClient < lastSessionIdTimestampServer) {
+      // This is an expired session
+      Router.go('/tabwarning')
     }
-  });
-}
-catch{
-  //IE + Safari 3.1 - 15.3 support
-  localStorage.openpages = Date.now();
-  window.addEventListener('storage', function (e) {
-    if(e.key == 'openpages') {
-      Router.go('/tabwarning');
-    }
-  }, false);
+  } else {
+    //user has not logged in this session
+    const currentSessionIdTimestamp = new Date().getTime();
+    Meteor.call('setUserSessionId', currentSessionId, currentSessionIdTimestamp);
+    Session.set('lastSessionId', currentSessionId);
+    Session.set('lastSessionIdTimestamp', currentSessionIdTimestamp);
+  }
 }
 
 if((navigator.userAgent.indexOf("Opera") || navigator.userAgent.indexOf('OPR')) != -1 ) {
@@ -91,6 +90,32 @@ function redoCardImage() {
 
   $('#cardQuestionImg').css('height', heightStr).css('width', widthStr);
 }
+//change the theme of the page onlogin
+Accounts.onLogin(function() {
+  //get theme from user profile
+  var theme = Meteor.user().profile.theme;
+  //if that field returns undefined, set it to /classic.css
+  if (!theme) {
+    theme = '/styles/classic.css';
+  }
+  //change #theme href to theme
+  $('#theme').attr('href', theme);
+  //set the theme select to the theme
+  $('#themeSelect').val(theme);
+});
+
+//change the theme of the page onlogin to /neo or /neo-dark depending on browser
+Accounts.onLogout(function() {
+  //if the browser's preference is dark, set the theme to /neo-dark
+  if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+    $('#theme').attr('href', '/styles/neo-dark.css');
+    $('#themeSelect').val('/styles/neo-dark.css');
+  } else {
+    //otherwise, set the theme to /neo
+    $('#theme').attr('href', '/styles/neo.css');
+    $('#themeSelect').val('/styles/neo.css');
+  }
+});
 
 Meteor.startup(function() {
   console.logs = [];
@@ -126,6 +151,27 @@ Template.DefaultLayout.onRendered(function() {
     console.log('error reporting modal hidden');
     restartMainCardTimeoutIfNecessary();
   });
+  //load css into head based on user's preferences
+  const user = Meteor.user();
+  if (user && user.profile && user.profile.css) {
+    css = user.profile.theme;
+    //if that field returns undefined, set it to /neo.css
+    if (!css) {
+      css = '/styles/neo.css';
+    }
+    //link that css file url to the head
+    $('head').append('<link id="theme" rel="stylesheet" href="' + css + '" type="text/css" />');
+    console.log('css loaded, ', css);
+  } else {
+    //use neo css if light theme is set or if no theme is set as a browser preference
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
+      console.log('light theme');
+      $('head').append('<link id="theme" rel="stylesheet" href="/styles/neo.css" type="text/css" />');
+    } else {
+      console.log('dark theme');
+      $('head').append('<link id="theme" rel="stylesheet" href="/styles/neo-dark.css" type="text/css" />');
+    }
+  }
 
   $('#helpModal').on('hidden.bs.modal', function() {
     if (window.currentAudioObj) {
@@ -262,6 +308,61 @@ Template.DefaultLayout.events({
     //open the wiki in a new tab
     window.open('https://github.com/memphis-iis/mofacts-ies/wiki', '_blank');
   },
+  'click #mechTurkButton': function(event) {
+    event.preventDefault();
+    Router.go('/turkWorkflow');
+  },
+
+  'click #contentUploadButton': function(event) {
+    event.preventDefault();
+    Router.go('/contentUpload');
+  },
+
+  'click #dataDownloadButton': function(event) {
+    event.preventDefault();
+    Router.go('/dataDownload');
+  },
+
+  'click #userProfileEditButton': function(event) {
+    event.preventDefault();
+    Router.go('/userProfileEdit');
+  },
+
+  'click #userAdminButton': function(event) {
+    event.preventDefault();
+    Router.go('/userAdmin');
+  },
+
+  'click #classEditButton': function(event) {
+    event.preventDefault();
+    Router.go('/classEdit');
+  },
+
+  'click #adminControlsBtn': function(event) {
+    event.preventDefault();
+    Router.go('/adminControls');
+  },
+
+  'click #tdfAssignmentEditButton': function(event) {
+    event.preventDefault();
+    Router.go('/tdfAssignmentEdit');
+  },
+
+  'click #instructorReportingButton': function(event) {
+    event.preventDefault();
+    Router.go('/instructorReporting');
+  },
+
+  'click #contentGenerationButton': function(event) {
+    event.preventDefault();
+    Router.go('/contentGeneration');
+  },
+
+  'click #FileManagementButton': function(event) {
+    event.preventDefault();
+    Router.go('/FileManagement');
+  },
+
 });
 // Global template helpers
 Template.registerHelper('modalTemplate', function() {
@@ -273,11 +374,12 @@ Template.registerHelper('isLoggedIn', function() {
   return haveMeteorUser();
 });
 Template.registerHelper('showPerformanceDetails', function() {
-  return (Session.get('curModule') == 'card' || Session.get('curModule') == 'instructions') && Session.get('scoringEnabled');
+  return ((Session.get('curModule') == 'card' || Session.get('curModule') !== 'instructions') && Session.get('scoringEnabled') && Session.get('unitType') != 'schedule');
 });
 Template.registerHelper('currentScore', function() {
   return Session.get('currentScore');
 });
+
 Template.registerHelper('isNormal', function() {
   return Session.get('loginMode') !== 'experiment';
 });

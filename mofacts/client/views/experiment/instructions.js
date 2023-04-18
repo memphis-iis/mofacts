@@ -130,6 +130,7 @@ function lockoutPeriodicCheck() {
       $('#lockoutTimeRemaining').html('');
       $('#lockoutDisplay').hide();
       $('#continueButton').prop('disabled', false);
+      $('#continueBar').show();
       // Since the interval will continue to fire, we need to know we've
       // done this
       lockoutHandled = true;
@@ -325,14 +326,6 @@ Template.instructions.helpers({
     return Session.get('currentTdfUnit').unitinstructionsquestion;
   },
 
-  displayContinueButton: function(){
-    if(typeof Session.get('instructionQuestionResults') === "undefined" && typeof Session.get('currentTdfFile').tdfs.tutor.unit[0].unitinstructionsquestion !== "undefined"){
-      return false;
-    } else {
-      return true;
-    }
-  },
-
   islockout: function() {
     return currLockOutMinutes() > 0;
   },
@@ -363,7 +356,12 @@ Template.instructions.helpers({
 Template.instructions.rendered = function() {
   // Make sure lockout interval timer is running
   lockoutKick();
-  if(typeof Session.get('currentTdfFile').tdfs.tutor.unit[0].unitinstructions !== "undefined"){
+  const unitInstructionsExist = typeof Session.get('currentTdfFile').tdfs.tutor.unit[Session.get('currentUnitNumber')].unitinstructions !== "undefined";
+  const instructionQuestionExists = typeof Session.get('instructionQuestionResults') === "undefined";
+  const unitInstructionsQuestionExists = typeof Session.get('currentTdfFile').tdfs.tutor.unit[Session.get('currentUnitNumber')].unitinstructionsquestion !== "undefined";
+  const displayContinueBotton = unitInstructionsExist || instructionQuestionExists || unitInstructionsQuestionExists;
+  const lockout = currLockOutMinutes() > 0;
+  if(!lockout && displayContinueBotton){
     $('#continueBar').show();
   }
 };
