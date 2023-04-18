@@ -3,7 +3,6 @@ import {haveMeteorUser} from '../lib/currentTestingHelpers';
 import {instructContinue} from '../views/experiment/instructions';
 import {Cookie} from './cookies';
 import {displayify} from '../../common/globalHelpers';
-import {afterFeedbackCallback} from '../views/experiment/card'
 
 export {routeToSignin};
 /* router.js - the routing logic we use for the application.
@@ -157,7 +156,7 @@ const defaultBehaviorRoutes = [
   'signUp',
   'tabwarning',
   'resetPassword',
-  'test'
+  'setTheme',
 ];
 
 const restrictedRoutes = [
@@ -170,7 +169,10 @@ const restrictedRoutes = [
   'tdfAssignmentEdit',
   'instructorReporting',
   'studentReporting',
-  'feedback'
+  'feedback',
+  'experimentSettings',
+  'classControlPanel',
+  'contentControlPanel'
 ];
 
 const getDefaultRouteAction = function(routeName) {
@@ -228,11 +230,29 @@ Router.route('/', {
   },
 });
 
+Router.route('/FileManagement', {
+  name: 'client.FileManagement',
+  waitOn: function() {
+    return Meteor.subscribe('ownedFiles');
+  },
+  action: function() {
+    if(this.ready()){
+      if(Meteor.user()) {
+        this.render('FileManagement');
+      } else {
+        this.redirect('/');
+      }
+    }
+  }
+})
+
 Router.route('/contentUpload', {
   name: 'client.contentUpload',
+  waitOn: function() {
+    return [Meteor.subscribe('ownedFiles'), Meteor.subscribe('files.assets.all')];
+  },
   action: function() {
     if(Meteor.user()){
-      this.subscribe('contentUpload').wait();
       this.render('contentUpload');
     } else {
       this.redirect('/');
@@ -469,6 +489,9 @@ Router.route('/classes/:_teacher/:_class', {
 
 Router.route('/card', {
   name: 'client.card',
+  waitOn: function() {
+    return Meteor.subscribe('assets', Session.get('currentTdfFile').ownerId, Session.get('currentStimuliSetId'));
+  },
   action: function() {
     if (Meteor.user()) {
       Session.set('curModule', 'card');
@@ -477,20 +500,6 @@ Router.route('/card', {
       this.redirect('/');
     }
   },
-  unload: async function() {
-    let timeout = Session.get('CurTimeoutId')
-    if(Meteor.user() && timeout){
-      Meteor.clearTimeout(timeout);
-      let trialEndTimeStamp = Session.get('trialEndTimeStamp');
-      let trialStartTimeStamp = Session.get('trialStartTimeStamp');
-      let isTimeout = Session.get('isTimeout');
-      let isCorrect = Session.get('isCorrect');
-      let testType = Session.get('testType');
-      let deliveryParams = Session.get('currentDeliveryParams');
-      let answerLogRecord = Session.get('answerLogRecord');
-      afterFeedbackCallback(trialEndTimeStamp, trialStartTimeStamp, isTimeout, isCorrect, testType, deliveryParams, answerLogRecord, 'router');
-    }
-  }
 });
 
 // We track the start time for instructions, which means we need to track

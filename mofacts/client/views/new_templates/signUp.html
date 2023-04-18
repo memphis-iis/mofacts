@@ -1,0 +1,37 @@
+<template name="signUp">
+    <div class="container">
+        <div class="row">
+            <div class="col-xs-offset-1 col-xs-10 col-sm-offset-1 col-sm-10 col-md-offset-1 col-md-10 col-lg-offset-1 col-lg-10">
+                <legend>Sign Up</legend>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-xs-offset-1 col-xs-6 col-sm-offset-1 col-sm-4 col-md-offset-1 col-md-2 col-lg-offset-1 col-lg-2">
+
+                <div class="form-group">
+                    <input class="form-control" type="text" id="signUpUsername" value="" placeholder="Email">
+                    <span class="help-inline danger errcheck" id="usernameTooShort" hidden >Must be at least 6 characters long!</span>
+                </div>
+
+                <div class="form-group">
+                    <input class="form-control" type="password" id="password1" value="" placeholder="Password">
+                    <span class="help-inline danger errcheck" id="passwordTooShort" hidden >Must be at least 6 characters long!</span>
+                </div>
+
+                <div class="form-group">
+                    <input class="form-control" type="password" id="password2" value="" placeholder="Re-Type Password">
+                    <span class="help-inline danger errcheck" id="passwordMustMatch" hidden >Password fields must match!</span>
+                </div>
+
+                <div class="form-group">
+                    <button type="button" id="signUpButton" class="btn ">Sign Up</button>
+                    <span class="help-inline danger errcheck" id="serverErrors" hidden ></span>
+                </div>
+                <br>
+            </div>
+        </div>
+
+        {{> about}}
+    </div>
+</template>

@@ -26,7 +26,7 @@
 import {
   getTdfByFileName,
   getStimuliSetById,
-  getHistoryByTDFfileName,
+  getHistoryByTDFID,
   getListOfStimTagsByTDFFileNames,
   serverConsole} from './methods';
 import {outputFields} from '../common/Definitions';
@@ -127,13 +127,13 @@ async function createExperimentExport(expName, requestingUserId) {
     const tdf = await getTdfByFileName(expName);
     const stimuliSetId = tdf.stimuliSetId;
     const stims = await getStimuliSetById(stimuliSetId);
-    const histories = await getHistoryByTDFfileName(expName);
+    const histories = await getHistoryByTDFID(tdf._id);
     for (let history of histories) {
       try {
         const itemId = history.itemId;
         const teacherUserName = history.conditionTypeE?.split('/')[0];
         history = getHistory(history);
-        if(userIsAdmin || tdf.ownerId == requestingUserId || teacherUserName == requestingUserName){
+        if(userIsAdmin ||  teacherUserName == requestingUserName || teacherUserName == 'undefined'){
           const dynamicStimTagValues = await getValuesOfStimTagList(stims, itemId, listOfDynamicStimTags);
           for (const tag of Object.keys(dynamicStimTagValues)) {
             history["CF (" + tag + ")"] = dynamicStimTagValues[tag];

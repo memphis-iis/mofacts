@@ -133,7 +133,8 @@ async function setStudentPerformance(studentID, studentUsername, tdfId) {
   console.log('setStudentPerformance:', studentID, studentUsername, tdfId);
   let studentPerformanceData;
   let studentPerformanceDataRet;
-  studentPerformanceDataRet = await meteorCallAsync('getStudentPerformanceByIdAndTDFId', studentID, tdfId);
+  let resetStudentPerformance = getCurrentDeliveryParams().resetStudentPerformance
+  studentPerformanceDataRet = await meteorCallAsync('getStudentPerformanceByIdAndTDFId', studentID, tdfId, undefined ,resetStudentPerformance);
   if (isEmpty(studentPerformanceDataRet)) {
     studentPerformanceData = {
       numCorrect: 0,
@@ -146,11 +147,14 @@ async function setStudentPerformance(studentID, studentUsername, tdfId) {
   } else {
     studentPerformanceData = {
       numCorrect: parseInt(studentPerformanceDataRet.numCorrect) || 0,
+      allTimeCorrect: parseInt(studentPerformanceDataRet.allTimeCorrect) || 0,
+      allTimeIncorrect: parseInt(studentPerformanceDataRet.allTimeIncorrect) || 0,
       numIncorrect: parseInt(studentPerformanceDataRet.numIncorrect) || 0,
       lastSeen: parseInt(studentPerformanceDataRet.lastSeen) || 0,
       stimsSeen:  parseInt(studentPerformanceDataRet.stimsSeen)  || 0,
       totalStimCount: parseInt(studentPerformanceDataRet.totalStimCount) || 0,
-      totalPracticeDuration: parseInt(studentPerformanceDataRet.totalPracticeDuration) || 0
+      totalPracticeDuration: parseInt(studentPerformanceDataRet.totalPracticeDuration) || 0,
+      allTimeTotalPracticeDuration: parseInt(studentPerformanceDataRet.allTimeTotalPracticeDuration) || 0,
     };
   }
   const count = (parseInt(studentPerformanceData.numCorrect) + parseInt(studentPerformanceData.numIncorrect));
@@ -188,10 +192,8 @@ function getStimCount() {
 // current sessions cluster mapping.
 // Note that the cluster mapping goes from current session index to raw index in order of the stim file
 function getStimCluster(clusterMappedIndex=0) {
-  const isLearningSession = Session.get('unitType') == MODEL_UNIT;
   const clusterMapping = Session.get('clusterMapping');
-  const rawIndex = isLearningSession ?
-      clusterMapping[clusterMappedIndex] : clusterMappedIndex; // Only learning sessions use cluster mapping
+  const rawIndex = clusterMapping ? clusterMapping[clusterMappedIndex] : clusterMappedIndex;
   const cluster = {
     shufIndex: clusterMappedIndex, // Tack these on for later logging purposes
     clusterIndex: rawIndex,
@@ -391,6 +393,7 @@ function getCurrentDeliveryParams() {
     'useSpellingCorrection': false,
     'editDistance': 1,
     'optimalThreshold': false,
+    'resetStudentPerformance': false
   };
 
   // We've defined defaults - also define translatations for values
@@ -433,6 +436,7 @@ function getCurrentDeliveryParams() {
     'useSpellingCorrection': xlateBool,
     'editDistance': _.intval,
     'optimalThreshold': _.intval,
+    'resetStudentPerformance': xlateBool
   };
 
   let modified = false;

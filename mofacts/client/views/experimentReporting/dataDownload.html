@@ -37,11 +37,43 @@
 
     <div class="col-md-12" id="downloadContainer">
         <legend class="downloadLegend">Data Downloads</legend>
-        <ul class="downloadContainerList" id="expDataDownloadContainer">
-            <li><a class="exp-data-link" id="userDataDownloadLink" target="_blank" href>Download all TDF data for current user: {{user}}</a></li>
-            {{#each dataDownloads}}
-                <li><a class="exp-data-link" id="dataDownloadLink" target="_blank" data-fileName="{{this.content.fileName}}" href>Download: {{this.disp}}</a></li>
+        <a class="exp-data-link" id="userDataDownloadLink" target="_blank" href>Download all TDF data for current user: {{user}}</a>
+        <table class="table table-responsive">
+            <thead>
+            <tr>
+                <th scope="col">Lesson Name</th>
+                <th scope="col">File Name</th>
+                <th scope="col" style="text-align: right;" class="col-4 justify-content-end"></th>
+            </tr>
+            </thead>
+            <tbody>
+                {{#each dataDownloads}}
+                <tr>
+                    <th scope="row">{{this.content.tdfs.tutor.setspec.lessonname}}</th>
+                    <td>{{this.content.fileName}}</td>
+                    <td style="text-align: right;">
+                        <div class="col-2" style="display: inline-block">
+                            <button class="btn btn-secondary" type="button" id="dataDownloadLink" data-fileName="{{this.content.fileName}}" aria-expanded="false">
+                                <span class="fa fa-download"></span>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
             {{/each}}
-        </ul>
+            {{#each accessableFiles}}
+            <tr>
+                <th scope="row">{{this.content.tdfs.tutor.setspec.lessonname}}</th>
+                <td>{{this.content.fileName}}</td>
+                <td style="text-align: right;">
+                    <div class="col-2" style="display: inline-block">
+                        <button class="btn btn-secondary" type="button" id="dataDownloadLink" data-fileName="{{this.content.fileName}}" aria-expanded="false">
+                            <span class="fa fa-download"></span>
+                        </button>
+                    </div>
+                </td>
+            </tr>
+            {{/each}}
+            </tbody>
+        </table>
     </div>
 </template>

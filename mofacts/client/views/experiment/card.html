@@ -94,11 +94,11 @@
             {{#if study}}
             <div class="row">
                 <div class="col-xs-offset-2 col-xs-8 col-sm-offset-4 col-sm-4 col-md-offset-4 col-md-4 col-lg-offset-4 col-lg-4 {{fontSizeClass}}">
-                    {{#unless clozeCard}}
-                        {{#unless hideResponse}}
+                    {{#if clozeCard}}
+                        {{#if hideResponse}}
                             <p id="answerLabel" class="alert alert-info">{{displayAnswer}}</p>
-                        {{/unless}}
-                    {{/unless}}
+                        {{/if}}
+                    {{/if}}
                     <div>
                         {{#if skipstudy}}
                         <button type='button' id='continueStudy' name='continueStudy' class='btn btn-block btn-responsive' disabled>
@@ -280,22 +280,12 @@
 
     <!-- Use a fixed footer if we have something to show -->
     {{#if haveDispTimeout}}
-    <nav class="navbar navbar-inverse navbar-fixed-bottom" role="navigation">
-        <div class="container">
-            <div class="navbar-header" style="width:100%">
-                <ul class="nav nav-justified">
-                    <li>&nbsp;</li>
-                    <li>
-                        <button type="button" id="continueButton" class="button btn navbar-btn text-center" style="text-align:center; white-space:nowrap;" disabled>
-                            Continue
-                            <span id="displayTimeoutMsg"></span>
-                        </button>
-                    </li>
-                    <li>&nbsp;</li>
-                </ul>
-            </div>  <!-- close header -->
-        </div>  <!-- close container -->
-    </nav>  <!-- close nav -->
+    <div id="continueBar" >
+        <span id="displayTimeoutMsg"></span>
+        <button type="button" id="continueButton" class="marginLeftAndRight button btn btn-primary text-center" style="text-align:center; white-space: nowrap;">
+            Continue
+        </button>
+    </div> 
     {{/if}}
 
 </template>
