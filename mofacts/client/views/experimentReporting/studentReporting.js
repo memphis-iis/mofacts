@@ -111,7 +111,7 @@ Template.studentReporting.helpers({
   stimsSeenPredictedProbability: () => Session.get('stimsSeenPredictedProbability'),
   stimsNotSeenPredictedProbability: () => Session.get('stimsNotSeenPredictedProbability'),
   stimCount: () => Session.get('stimCount'),
-  stimsSeen: () => Session.get('stimsSeen'),
+  stimsSeen: () => Session.get('stimsIntroduced'),
   itemMasteryRate: () => Session.get('itemMasteryRate'),
   itemMasteryTime: () => Session.get('itemMasteryTime'),
   displayItemsMasteredPerMinute: () => Session.get('displayItemMasteryRate'),
@@ -235,7 +235,7 @@ async function drawDashboard(studentId, selectedTdfId){
     itemMasteryRateEstimated = parseFloat(masteryEstimateData.stimsIntroduced) / totalPracticeDurationMasteryEstMinutes
     estimatedTimeMastery = itemMasteryRateEstimated * (parseFloat(totalStimCount) - parseFloat(stimsIntroduced));
     Session.set('stimCount',parseFloat(totalStimCount) - numDroppedStims);
-    Session.set('stimsSeen',stimsIntroduced - numDroppedStims);
+    Session.set('stimsIntroduced',stimsIntroduced - numDroppedStims);
     Session.set('curTotalAttempts',totalAttempts);
     Session.set('practiceDuration', totalPracticeDurationMinutesDisplay);
     Session.set('itemMasteryRate', itemMasteryRate.toFixed(2));

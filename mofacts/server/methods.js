@@ -1629,6 +1629,27 @@ async function getStudentPerformanceByIdAndTDFId(userId, TDFId, stimIds=null, on
   return studentPerformance[0];
 }
 
+async function syncESAndGES(userId, TDFId){
+  serverConsole('syncESAndGES', userId, TDFId);
+  let studentPerformance = await getStudentPerformanceByIdAndTDFId(userId, TDFId);
+  if (studentPerformance) {
+    studentPerformance.count = studentPerformance.numCorrect + studentPerformance.numIncorrect;
+    await setStudentPerformanceByIdAndTDFId(userId, TDFId, studentPerformance);
+  }
+}
+
+async function getStudentPerformanceByIdAndTDFIdFromGES(userId, TDFId){
+  serverConsole('getStudentPerformanceByIdAndTDFIdFromGES', userId, TDFId);
+  const experimentState = await GlobalExperimentStates.findOne({userId: userId, TDFId: TDFId});
+  if (!experimentState.studentPerformance) return null;
+  return experimentState.studentPerformance;
+}
+
+async function setStudentPerformanceByIdAndTDFId(userId, TDFId, studentPerformance) {
+  serverConsole('setStudentPerformanceByIdAndTDFId', userId, TDFId, studentPerformance);
+  await GlobalExperimentStates.update({userId: userId, TDFId: TDFId}, {$set: {studentPerformance: studentPerformance}});
+}
+
 async function getStudentPerformanceByIdAndTDFIdFromHistory(userId, TDFId, returnRows=null) {
   // used to grab a limited sample of the student's performance
   // serverConsole('getStudentPerformanceByIdAndTDFIdFromHistory', userId, TDFId, returnRows);
@@ -2075,6 +2096,7 @@ async function upsertStimFile(stimulusFileName, stimJSON, ownerId, packagePath =
     stim.syllables = curAnswerSylls;
     Items.insert(stim);
   }
+  await ComponentStates.remove({KCId: {$gt: maxStimulusKC, $lt: Math.floor(maxStimulusKC / 10000) * 10000 + 10000}});
 }
 
 async function upsertTDFFile(tdfFilename, tdfJSON, ownerId) {
@@ -2102,6 +2124,10 @@ async function upsertTDFFile(tdfFilename, tdfJSON, ownerId) {
       tdfJSONtoUpsert = generatedTdf;
     } else {
       tdfJSONtoUpsert = tdfJSON;
+    }
+    if(prev.content.tdfs.tutor.setspec.shuffleclusters != tdfJSON.tdfs.tutor.setspec.shuffleclusters){
+      serverConsole('sufflecluster changed, resetting cluster mapping');
+      await GlobalExperimentStates.update({TDFId: prev._id}, {$set: {"experimentState.clusterMapping": null}}, {multi: true});
     }
     Tdfs.update({_id: prev._id},{$set:{
       ownerId: ownerId,
@@ -2794,9 +2820,9 @@ const asyncMethods = {
   
   getStudentPerformanceForClassAndTdfId, getStimSetFromLearningSessionByClusterList,
 
-  getExperimentState, setExperimentState, insertStimTDFPair,
+  getExperimentState, setExperimentState, insertStimTDFPair, getStudentPerformanceByIdAndTDFIdFromGES,
 
-  getProbabilityEstimatesByKCId, getReponseKCMap, processPackageUpload,
+  getProbabilityEstimatesByKCId, getReponseKCMap, processPackageUpload, setStudentPerformanceByIdAndTDFId,
 
   getComponentStatesByUserIdTDFIdAndUnitNum, setComponentStatesByUserIdTDFIdAndUnitNum,
 
@@ -3004,7 +3030,11 @@ const asyncMethods = {
 Meteor.methods(functionTimerWrapper(methods, asyncMethods));
 
 Meteor.startup(async function() {
-
+  let ges = await GlobalExperimentStates.find().fetch();
+  for(let ge of ges) {//
+    serverConsole('updating GES', ge._id);
+    //await syncESAndGES(ge.userId, ge.TDFId);
+  }
   highestStimuliSetId = Items.findOne({}, {sort: {stimuliSetId: -1}, limit: 1 });
   nextStimuliSetId = highestStimuliSetId && highestStimuliSetId.stimuliSetId ? parseInt(highestStimuliSetId.stimuliSetId) + 1 : 1;
 
