@@ -195,8 +195,19 @@ async function doFileUpload(fileElementSelector, fileType, fileDescrip) {
       try {
         const result = await meteorCallAsync('saveContentFile', fileType, name, fileData);
         if (!result.result) {
-          console.log(fileDescrip + ' save failed', result);
-          errorStack.push('The ' + fileDescrip + ' file was not saved: ' + result.errmsg);
+          if(result.data && result.data.res == 'awaitClientTDF'){
+            console.log('Client TDF could break experiment, asking for confirmation');
+            if(confirm(`The uploaded package contains a TDF file that could break the experiment. Do you want to continue?\nFile Name: ${result.data.TDF.content.fileName}`)){
+              Meteor.call('tdfUpdateConfirmed', result.data.TDF, function(err,res){
+                if(err){
+                  alert(err);
+                }
+              });
+            }
+          } else {
+            console.log(fileDescrip + ' save failed', result);
+            errorStack.push('The ' + fileDescrip + ' file was not saved: ' + result.errmsg);
+          }
         } else {
           console.log(fileDescrip + ' Saved:', result);
         }
@@ -245,14 +256,25 @@ async function doPackageUpload(file, template){
       const link = DynamicAssets.link(fileObj);
       if(fileObj.ext == "zip"){
         console.log('package detected')
-        Meteor.call('processPackageUpload', fileObj, Meteor.userId(), link, function(err,res){
+        Meteor.call('processPackageUpload', fileObj, Meteor.userId(), link, function(err,result){
           if(err){
             alert(err);
-          } else {
-            alert("Package upload succeded.");
-            if(res.stimSetId)
-              Meteor.call('updateStimSyllables', res.stimSetId);
+          } 
+          for(res of result.results){
+            if (res.data && res.data.res == 'awaitClientTDF') {
+              console.log('Client TDF could break experiment, asking for confirmation');
+              if(confirm(`The uploaded package contains a TDF file that could break the experiment. Do you want to continue?\nFile Name: ${res.data.TDF.content.fileName}`)){
+                Meteor.call('tdfUpdateConfirmed', res.data.TDF, function(err,res){
+                  if(err){
+                    alert(err);
+                  }
+                });
+              }
+            }
           }
+          alert("Package upload succeded.");
+          if(res.stimSetId)
+            Meteor.call('updateStimSyllables', res.stimSetId);
         });
       }
     }

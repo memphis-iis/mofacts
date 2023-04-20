@@ -494,73 +494,74 @@ async function setComponentStatesByUserIdTDFIdAndUnitNum(userId, TDFId, componen
 async function processPackageUpload(fileObj, owner, zipLink){
   DynamicAssets.collection.update({_id: fileObj._id}, {$set: {'meta.link': zipLink}});
   let path = fileObj.path;
-  let results
+  let results = [];
   let unzippedFiles
   let filePath
   let fileName
   let extension
-    try{
-      results = [];
-      const unzipper = Npm.require('unzipper');
-      const zip = await unzipper.Open.file(path);
-      unzippedFiles = [];
-      for(const file of zip.files){
-        let fileContents = await file.buffer();
-        filePath = file.path;
-        const filePathArray = filePath.split("/");
-        fileName = filePathArray[filePathArray.length - 1];
-        const fileNameArray = fileName.split(".");
-        extension = fileNameArray[fileNameArray.length - 1];
-        let type;
-        if(extension == "json"){
-          serverConsole(fileName);
-          fileContents = JSON.parse(fileContents.toString());
-          type = fileContents.setspec ? 'stim' : 'tdf'
-        }
-        else {
-          type = 'media'
-        }
-        const fileMeta = { 
-          name: fileName,
-          path: filePath,
-          extension: extension,
-          contents: fileContents,
-          type: type
-        };
-        unzippedFiles.push(fileMeta);
+  try{
+    const unzipper = Npm.require('unzipper');
+    const zip = await unzipper.Open.file(path);
+    unzippedFiles = [];
+    for(const file of zip.files){
+      let fileContents = await file.buffer();
+      filePath = file.path;
+      const filePathArray = filePath.split("/");
+      fileName = filePathArray[filePathArray.length - 1];
+      const fileNameArray = fileName.split(".");
+      extension = fileNameArray[fileNameArray.length - 1];
+      let type;
+      if(extension == "json"){
+        serverConsole(fileName);
+        fileContents = JSON.parse(fileContents.toString());
+        type = fileContents.setspec ? 'stim' : 'tdf'
       }
-      const stimFileName = unzippedFiles.filter(f => f.type == 'stim')[0].name;
-      const stimSetId = await getStimuliSetIdByFilename(stimFileName);
-      try {
-        for(const stim of unzippedFiles.filter(f => f.type == 'stim')){
-          results.concat(await saveContentFile(stim.type, stim.name, stim.contents, owner, stim.path));
-        }
-      } catch(e) {
-        serverConsole('processPackageUpload ERROR,', path, ',', e + ' on file: ' + filePath);
-        throw new Meteor.Error('package upload failed at stim upload: ' + e + ' on file: ' + filePath)
+      else {
+        type = 'media'
       }
-
-      try {
-        for(const tdf of unzippedFiles.filter(f => f.type == 'tdf')){
-          results.concat(await saveContentFile(tdf.type, tdf.name, tdf.contents, owner, tdf.path));
-        }
-      } catch(e) {
-        serverConsole('processPackageUpload ERROR,', path, ',', e + ' on file: ' + filePath);
-        throw new Meteor.Error('package upload failed at tdf upload: ' + e + ' on file: ' + filePath)
+      const fileMeta = { 
+        name: fileName,
+        path: filePath,
+        extension: extension,
+        contents: fileContents,
+        type: type
+      };
+      unzippedFiles.push(fileMeta);
+    }
+    const stimFileName = unzippedFiles.filter(f => f.type == 'stim')[0].name;
+    const stimSetId = await getStimuliSetIdByFilename(stimFileName);
+    try {
+      for(const stim of unzippedFiles.filter(f => f.type == 'stim')){
+        results.push(await saveContentFile(stim.type, stim.name, stim.contents, owner, stim.path));
       }
-      try {
-        for(const media of unzippedFiles.filter(f => f.type == 'media')){
-          await saveMediaFile(media, owner, stimSetId);
-        }
-      } catch(e) {
-        serverConsole('processPackageUpload ERROR,', path, ',', e + ' on file: ' + filePath);
-        throw new Meteor.Error('package upload failed at media upload: ' + e + ' on file: ' + filePath)
-      }
-      return {results, stimSetId};
     } catch(e) {
       serverConsole('processPackageUpload ERROR,', path, ',', e + ' on file: ' + filePath);
-      throw new Meteor.Error('package upload failed at initialization: ' + e + ' on file: ' + filePath)
+      throw new Meteor.Error('package upload failed at stim upload: ' + e + ' on file: ' + filePath)
     }
+
+    try {
+      for(const tdf of unzippedFiles.filter(f => f.type == 'tdf')){
+        const tdfResults = await saveContentFile(tdf.type, tdf.name, tdf.contents, owner, tdf.path);
+        results.push(tdfResults);
+        serverConsole('tdfResults', tdfResults);
+      }
+    } catch(e) {
+      serverConsole('processPackageUpload ERROR,', path, ',', e + ' on file: ' + filePath);
+      throw new Meteor.Error('package upload failed at tdf upload: ' + e + ' on file: ' + filePath)
+    }
+    try {
+      for(const media of unzippedFiles.filter(f => f.type == 'media')){
+        await saveMediaFile(media, owner, stimSetId);
+      }
+    } catch(e) {
+      serverConsole('processPackageUpload ERROR,', path, ',', e + ' on file: ' + filePath);
+      throw new Meteor.Error('package upload failed at media upload: ' + e + ' on file: ' + filePath)
+    }
+    return {results, stimSetId};
+  } catch(e) {
+    serverConsole('processPackageUpload ERROR,', path, ',', e + ' on file: ' + filePath);
+    throw new Meteor.Error('package upload failed at initialization: ' + e + ' on file: ' + filePath)
+  }
 }
 
 async function saveMediaFile(media, owner, stimSetId){
@@ -660,8 +661,14 @@ async function saveContentFile(type, filename, filecontents, owner, packagePath 
         } else {
           try {
             const rec = {'fileName': filename, 'tdfs': json, 'ownerId': ownerId, 'source': 'upload'};
-            await upsertTDFFile(filename, rec, ownerId);
-            results.result = true;
+            const ret = await upsertTDFFile(filename, rec, ownerId);
+            if(ret.res == 'awaitClientTDF'){
+              serverConsole('awaitClientTDF', ret)
+              results.result = false;
+              results.data = ret;
+            } else {
+              results.result = true;
+            }
           } catch (err) {
             results.result=false;
             results.errmsg=err.toString();
@@ -2117,15 +2124,18 @@ async function upsertTDFFile(tdfFilename, tdfJSON, ownerId) {
     } else {
       tdfJSONtoUpsert = tdfJSON;
     }
-    if(prev.content.tdfs.tutor.setspec.shuffleclusters != tdfJSON.tdfs.tutor.setspec.shuffleclusters){
-      serverConsole('sufflecluster changed, resetting cluster mapping');
-      await GlobalExperimentStates.update({TDFId: prev._id}, {$set: {"experimentState.clusterMapping": null}}, {multi: true});
-    }
-    Tdfs.update({_id: prev._id},{$set:{
+    let updateObj = {
+      _id: prev._id,
       ownerId: ownerId,
       stimuliSetId: stimSetId,
       content: tdfJSONtoUpsert
-    }});
+    }
+    if(prev.content.tdfs.tutor.setspec.shuffleclusters != tdfJSON.tdfs.tutor.setspec.shuffleclusters){
+      serverConsole('sufflecluster changed, alerting user');
+      return {res: 'awaitClientTDF', TDF: updateObj}
+    } else {
+      Tdfs.update({_id: prev._id},{$set:updateObj});
+    }
   } else {
     serverConsole('inserting tdf', tdfFilename);
     let tdfJSONtoUpsert;
@@ -2151,6 +2161,11 @@ async function upsertTDFFile(tdfFilename, tdfJSON, ownerId) {
     }
     Tdfs.insert({ownerId: ownerId, stimuliSetId: stimuliSetId, content: tdfJSONtoUpsert, visibility: 'profileOnly'});
   }
+}
+
+function tdfUpdateConfirmed(updateObj){
+  serverConsole('tdfUpdateConfirmed', updateObj);
+  Tdfs.update({_id: updateObj._id},{$set:updateObj});
 }
 
 function setUserLoginData(entryPoint, loginMode, curTeacher = undefined, curClass = undefined){
@@ -2818,7 +2833,7 @@ const asyncMethods = {
 
   getComponentStatesByUserIdTDFIdAndUnitNum, setComponentStatesByUserIdTDFIdAndUnitNum,
 
-  insertHistory, getHistoryByTDFID, getUserRecentTDFs, clearCurUnitProgress,
+  insertHistory, getHistoryByTDFID, getUserRecentTDFs, clearCurUnitProgress, tdfUpdateConfirmed,
 
   loadStimsAndTdfsFromPrivate, getListOfStimTags, getStudentReportingData, 
 
