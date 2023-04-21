@@ -1621,7 +1621,6 @@ async function getStudentPerformanceByIdAndTDFId(userId, TDFId, stimIds=null, on
       allTimeNumIncorrect: {$sum: '$allTimeIncorrect'},
       allTimePracticeDuration: {$sum: '$allTimeTotalPracticeDuration'},
       stimsIntroduced: {$sum: '$introduced'},
-      priorStudy: {$sum: '$priorStudy'},
       count: {$sum: '$timesSeen'},
     },
   },
