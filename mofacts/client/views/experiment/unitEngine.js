@@ -1464,9 +1464,9 @@ function modelUnitEngine() {
         numQuestionsAnsweredCurrentSession,
         numCorrectAnswers,
       });
-      const cardIndex = Session.get('currentExperimentState').shufIndex;
-      const whichStim = Session.get('currentExperimentState').whichStim;
-      const whichHintLevel = Session.get('currentExperimentState').whichHintLevel;
+      const cardIndex = Session.get('currentExperimentState').shufIndex || 0;
+      const whichStim = Session.get('currentExperimentState').whichStim || 0;
+      const whichHintLevel = Session.get('currentExperimentState').whichHintLevel || 0;
       setCurrentCardInfo(cardIndex, whichStim, whichHintLevel);
     },
     getCardProbabilitiesNoCalc: function() {
