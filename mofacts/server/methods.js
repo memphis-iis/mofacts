@@ -453,7 +453,7 @@ async function getComponentStatesByUserIdTDFIdAndUnitNum(userId, TDFId) {
 }
 
 async function clearCurUnitProgress(userId, TDFId) {
-  ComponentStates.update({userId: userId, TDFId: TDFId}, {$set: {'priorCorrect': 0, 'priorIncorrect': 0, 'totalPracticeDuration': 0}}, {multi: true});
+  ComponentStates.update({userId: userId, TDFId: TDFId}, {$set: {'priorCorrect': 0, 'priorIncorrect': 0, 'totalPracticeDuration': 0, 'timesSeen': 0}}, {multi: true});
 }
 
 async function setComponentStatesByUserIdTDFIdAndUnitNum(userId, TDFId, componentStates) {
@@ -1621,12 +1621,13 @@ async function getStudentPerformanceByIdAndTDFId(userId, TDFId, stimIds=null, on
       allTimeNumIncorrect: {$sum: '$allTimeIncorrect'},
       allTimePracticeDuration: {$sum: '$allTimeTotalPracticeDuration'},
       stimsIntroduced: {$sum: '$introduced'},
-      priorStudy: {$sum: '$priorStudy'}
+      priorStudy: {$sum: '$priorStudy'},
+      count: {$sum: '$timesSeen'},
     },
   },
   {
     $addFields: {
-      count: {$sum: ['$priorCorrect', '$priorIncorrect', '$priorStudy']}
+      count: {$sum: ['$priorCorrect', '$priorIncorrect', '$count']}
     },
   },
   {
