@@ -1661,6 +1661,7 @@ function modelUnitEngine() {
       const cards = cardProbabilities.cards;
       const cluster = getStimCluster(Session.get('clusterIndex'));
       const card = _.prop(cards, cluster.shufIndex);
+      const testType = getTestType();
       console.log('cardAnswered, card: ', card, 'cluster.shufIndex: ', cluster.shufIndex);
 
       _.each(cards, function(otherCard, index) {
@@ -1685,14 +1686,14 @@ function modelUnitEngine() {
       stim.totalPracticeDuration += practiceTime;
       stim.allTimeTotalPracticeDuration += practiceTime;
 
-      updateCurStudentPerformance(wasCorrect, practiceTime);
+      updateCurStudentPerformance(wasCorrect, practiceTime, testType);
 
       // Study trials are a special case: we don't update any of the
       // metrics below. As a result, we just calculate probabilities and
       // leave. Note that the calculate call is important because this is
       // the only place we call it after init *and* something might have
       // changed during question selection
-      if (getTestType() === 's') {
+      if (testType === 's') {
         this.saveComponentStatesSync();
         return;
       }
