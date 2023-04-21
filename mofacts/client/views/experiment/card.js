@@ -1895,10 +1895,11 @@ function gatherAnswerLogRecord(trialEndTimeStamp, trialStartTimeStamp, source, u
 
   // hack
   const sessionID = (new Date(trialStartTimeStamp)).toUTCString().substr(0, 16) + ' ' + Session.get('currentTdfName');
-  let outcome = 'incorrect';
-  if (isCorrect) {
+  let outcome = '';
+  if (!isStudy)
+    outcome = 'incorrect';
+  if (isCorrect) 
     outcome = 'correct';
-  }
   const answerLogRecord = {
     'itemId': _id,
     'KCId': stimulusKC,
