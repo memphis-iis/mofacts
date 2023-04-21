@@ -1092,6 +1092,7 @@ function modelUnitEngine() {
             priorStudy: 0,
             parameter: parameter,
             instructionQuestionResult: null,
+            timesSeen: 0,
           });
           stimulusKC += 1;
 
@@ -1187,6 +1188,7 @@ function modelUnitEngine() {
         allTimeTotalPracticeDuration: stim.allTimeTotalPracticeDuration,
         outcomeStack: stim.outcomeStack,
         instructionQuestionResult: null,
+        timesSeen: stim.timesSeen,
       };
       const responseState = {
         userId,
@@ -1285,6 +1287,7 @@ function modelUnitEngine() {
             allTimeTotalPracticeDuration: stim.allTimeTotalPracticeDuration,
             outcomeStack: typeof stim.outcomeStack == 'string' ?  stim.outcomeStack.split(','):  stim.outcomeStack,
             instructionQuestionResult: null,
+            timesSeen: stim.timesSeen,
           };
           componentStates.push(stimState);
         }
@@ -1685,6 +1688,7 @@ function modelUnitEngine() {
       const stim = card.stims[whichStim];
       stim.totalPracticeDuration += practiceTime;
       stim.allTimeTotalPracticeDuration += practiceTime;
+      stim.timesSeen += 1;
 
       updateCurStudentPerformance(wasCorrect, practiceTime, testType);
 
