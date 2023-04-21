@@ -1092,6 +1092,7 @@ function modelUnitEngine() {
             priorStudy: 0,
             parameter: parameter,
             instructionQuestionResult: null,
+            timesSeen: 0,
           });
           stimulusKC += 1;
 
@@ -1187,6 +1188,7 @@ function modelUnitEngine() {
         allTimeTotalPracticeDuration: stim.allTimeTotalPracticeDuration,
         outcomeStack: stim.outcomeStack,
         instructionQuestionResult: null,
+        timesSeen: stim.timesSeen,
       };
       const responseState = {
         userId,
@@ -1285,6 +1287,7 @@ function modelUnitEngine() {
             allTimeTotalPracticeDuration: stim.allTimeTotalPracticeDuration,
             outcomeStack: typeof stim.outcomeStack == 'string' ?  stim.outcomeStack.split(','):  stim.outcomeStack,
             instructionQuestionResult: null,
+            timesSeen: stim.timesSeen,
           };
           componentStates.push(stimState);
         }
@@ -1661,6 +1664,7 @@ function modelUnitEngine() {
       const cards = cardProbabilities.cards;
       const cluster = getStimCluster(Session.get('clusterIndex'));
       const card = _.prop(cards, cluster.shufIndex);
+      const testType = getTestType();
       console.log('cardAnswered, card: ', card, 'cluster.shufIndex: ', cluster.shufIndex);
 
       _.each(cards, function(otherCard, index) {
@@ -1684,15 +1688,16 @@ function modelUnitEngine() {
       const stim = card.stims[whichStim];
       stim.totalPracticeDuration += practiceTime;
       stim.allTimeTotalPracticeDuration += practiceTime;
+      stim.timesSeen += 1;
 
-      updateCurStudentPerformance(wasCorrect, practiceTime);
+      updateCurStudentPerformance(wasCorrect, practiceTime, testType);
 
       // Study trials are a special case: we don't update any of the
       // metrics below. As a result, we just calculate probabilities and
       // leave. Note that the calculate call is important because this is
       // the only place we call it after init *and* something might have
       // changed during question selection
-      if (getTestType() === 's') {
+      if (testType === 's') {
         this.saveComponentStatesSync();
         return;
       }
