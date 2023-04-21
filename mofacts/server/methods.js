@@ -662,7 +662,7 @@ async function saveContentFile(type, filename, filecontents, owner, packagePath 
           try {
             const rec = {'fileName': filename, 'tdfs': json, 'ownerId': ownerId, 'source': 'upload'};
             const ret = await upsertTDFFile(filename, rec, ownerId);
-            if(ret.res == 'awaitClientTDF'){
+            if(ret && ret.res == 'awaitClientTDF'){
               serverConsole('awaitClientTDF', ret)
               results.result = false;
               results.data = ret;
