@@ -130,8 +130,8 @@ Template.profile.events({
     });
     //also search tags
     filteredTdfs = filteredTdfs.concat(enabledTdfs.filter((tdf) => {
-      //these are arrays, so we need to check if any of the tags match the search
-      return tdf.tdfs.tutor.setspec.tags.some((tag) => {
+      //these are arrays, so we need to check if any of the tags match the search, note that the field may be undefined
+      return tdf.tdfs.tutor.setspec.tags && tdf.tdfs.tutor.setspec.tags.some((tag) => {
         return tag.toLowerCase().includes(search.toLowerCase());
       });
     }));
