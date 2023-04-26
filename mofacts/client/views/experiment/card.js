@@ -879,58 +879,36 @@ function preloadAudioFiles() {
   console.log('allSrcs,audio', allSrcs);
   soundsDict = {};
   for (const src of allSrcs) {
-    let sound;
-    let source = DynamicAssets.findOne({name: src});
-    if(source) {
-      source = source.link();
-      sound = new Audio(source);
-      sound.onplay = function (source) {
-        let src = source.target.fileName
-        if (soundsDict[src]) {
-          soundsDict[src].isCurrentlyPlaying = true;
-        }
-        console.log('Sound played');
+    let source = src;
+    if(!src.includes('http')){
+      try {
+        source = DynamicAssets.findOne({name: src}).link();
       }
-      sound.onended = function (source) {
-        let src = source.target.fileName
-        if (soundsDict[src]) {
-          soundsDict[src].isCurrentlyPlaying = false;
-        }
-        if (onEndCallbackDict[src]) {
-          onEndCallbackDict[src]();
-        }
-        console.log('Sound completed');
+      catch (e) {
+        console.error('Error getting audio file: ' + e);
+        alert('Could not load audio file: ' + src + '. ')
+        Router.go('/profile')
       }
-      sound.fileName = src;
-    } else {
-      // eslint-disable-next-line no-undef
-      sound = new Howl({
-        preload: true,
-        src: [
-          src,
-        ],
-
-        // Must do an Immediately Invoked Function Expression otherwise question
-        // is captured as a closure and will change to the last value in the loop
-        // by the time we call this
-        onplay: function (src) {
-          if (soundsDict[source]) {
-            soundsDict[source].isCurrentlyPlaying = true;
-          }
-          console.log('Sound played');
-        },
-
-        onend: function (src) {
-          if (soundsDict[source]) {
-            soundsDict[source].isCurrentlyPlaying = false;
-          }
-          if (onEndCallbackDict[source]) {
-            onEndCallbackDict[source]();
-          }
-          console.log('Sound completed');
-        },
-      });
     }
+    let sound = new Audio(source);
+    sound.onplay = function (source) {
+      let src = source.target.fileName
+      if (soundsDict[src]) {
+        soundsDict[src].isCurrentlyPlaying = true;
+      }
+      console.log('Sound played');
+    }
+    sound.onended = function (source) {
+      let src = source.target.fileName
+      if (soundsDict[src]) {
+        soundsDict[src].isCurrentlyPlaying = false;
+      }
+      if (onEndCallbackDict[src]) {
+        onEndCallbackDict[src]();
+      }
+      console.log('Sound completed');
+    }
+    sound.fileName = src;
     soundsDict[src] = sound;
   }
 }
