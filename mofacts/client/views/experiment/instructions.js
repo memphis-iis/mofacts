@@ -287,6 +287,7 @@ function instructContinue() {
     };
 
     const res = await updateExperimentState(newExperimentState, 'instructions.instructContinue');
+    Session.set('curUnitInstructionsSeen', true);
     console.log('instructions,new experiment state:', newExperimentState);
     console.log('instructContinue', res);
     Session.set('inResume', true);

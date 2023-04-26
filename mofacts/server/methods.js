@@ -55,6 +55,10 @@ if (Meteor.isServer) {
     const accessableFileIds = Meteor.users.findOne({_id: this.userId}).accessedTDFs;
     return Tdfs.find({_id: {$in: accessableFileIds}})
   });
+
+  Meteor.publish('userComponentStates', function(tdfId) {
+    return ComponentStates.find({userId: this.userId, TDFId: tdfId});
+  })
 }
 
 if (process.env.METEOR_SETTINGS_WORKAROUND) {
@@ -438,14 +442,8 @@ async function getReponseKCMap() {
   return responseKCMap;
 }
 
-// by currentTdfId, not currentRootTDFId
-async function getComponentStatesByUserIdTDFIdAndUnitNum(userId, TDFId) {
-  const componentStates = ComponentStates.find({ userId: userId, TDFId: TDFId }, { sort: { KCId: -1 } }).fetch();
-  return componentStates;
-}
-
 async function clearCurUnitProgress(userId, TDFId) {
-  ComponentStates.update({userId: userId, TDFId: TDFId}, {$set: {'priorCorrect': 0, 'priorIncorrect': 0, 'totalPracticeDuration': 0}}, {multi: true});
+  ComponentStates.update({userId: userId, TDFId: TDFId}, {$set: {'priorCorrect': 0, 'priorIncorrect': 0, 'totalPracticeDuration': 0, 'timesSeen': 0}}, {multi: true});
 }
 
 async function setComponentStatesByUserIdTDFIdAndUnitNum(userId, TDFId, componentStates) {
@@ -501,239 +499,92 @@ async function setComponentStatesByUserIdTDFIdAndUnitNum(userId, TDFId, componen
 async function processPackageUpload(fileObj, owner, zipLink){
   DynamicAssets.collection.update({_id: fileObj._id}, {$set: {'meta.link': zipLink}});
   let path = fileObj.path;
-  let results
+  let results = [];
   let unzippedFiles
   let filePath
   let fileName
   let extension
-    try{
-      results = [];
-      const unzipper = Npm.require('unzipper');
-      const zip = await unzipper.Open.file(path);
-      unzippedFiles = [];
-      for(const file of zip.files){
-        let fileContents = await file.buffer();
-        filePath = file.path;
-        const filePathArray = filePath.split("/");
-        fileName = filePathArray[filePathArray.length - 1];
-        const fileNameArray = fileName.split(".");
-        extension = fileNameArray[fileNameArray.length - 1];
-        let type;
-        if(extension == "json"){
-          serverConsole(fileName);
-          fileContents = JSON.parse(fileContents.toString());
-          type = fileContents.setspec ? 'stim' : 'tdf'
-        }
-        else {
-          type = 'media'
-        }
-        const fileMeta = { 
-          name: fileName,
-          path: filePath,
-          extension: extension,
-          contents: fileContents,
-          type: type
-        };
-        unzippedFiles.push(fileMeta);
+  try{
+    const unzipper = Npm.require('unzipper');
+    const zip = await unzipper.Open.file(path);
+    unzippedFiles = [];
+    for(const file of zip.files){
+      let fileContents = await file.buffer();
+      filePath = file.path;
+      const filePathArray = filePath.split("/");
+      fileName = filePathArray[filePathArray.length - 1];
+      const fileNameArray = fileName.split(".");
+      extension = fileNameArray[fileNameArray.length - 1];
+      let type;
+      if(extension == "json"){
+        serverConsole(fileName);
+        fileContents = JSON.parse(fileContents.toString());
+        type = fileContents.setspec ? 'stim' : 'tdf'
       }
-      const stimFileName = unzippedFiles.filter(f => f.type == 'stim')[0].name;
-      const stimSetId = await getStimuliSetIdByFilename(stimFileName);
-      try {
-        for(const stim of unzippedFiles.filter(f => f.type == 'stim')){
-          for(const tdf of unzippedFiles.filter(f => f.type == 'tdf')){
-            if(tdf.path.split(tdf.name)[0] == stim.path.split(stim.name)[0]){
-              let combinedFile = await combineStimAndTdfFiles(stim, tdf, owner);
-              Tdfs.upsert({stimuliSetId: combinedFile.stimuliSetId}, combinedFile);
-            }
-          }
-        }
-      } catch(e) {
-        serverConsole('processPackageUpload ERROR,', path, ',', e + ' on file: ' + filePath);
-        throw new Meteor.Error('package upload failed at stim upload: ' + e + ' on file: ' + filePath)
+      else {
+        type = 'media'
       }
-
-      try {
-        for(const tdf of unzippedFiles.filter(f => f.type == 'tdf')){
-          results.concat(await saveContentFile(tdf.type, tdf.name, tdf.contents, owner, tdf.path));
-        }
-      } catch(e) {
-        serverConsole('processPackageUpload ERROR,', path, ',', e + ' on file: ' + filePath);
-        throw new Meteor.Error('package upload failed at tdf upload: ' + e + ' on file: ' + filePath)
+      const fileMeta = { 
+        name: fileName,
+        path: filePath,
+        extension: extension,
+        contents: fileContents,
+        type: type
+      };
+      unzippedFiles.push(fileMeta);
+    }
+    serverConsole('unzippedFiles', unzippedFiles);
+    const stimFileName = unzippedFiles.filter(f => f.type == 'stim')[0].name;
+    const stimSetId = await getStimuliSetIdByFilename(stimFileName);
+    try {
+      for(const stim of unzippedFiles.filter(f => f.type == 'stim')){
+        results.push(await saveContentFile(stim.type, stim.name, stim.contents, owner, stim.path));
       }
-      try {
-        for(const media of unzippedFiles.filter(f => f.type == 'media')){
-          await saveMediaFile(media, owner, stimSetId);
-        }
-      } catch(e) {
-        serverConsole('processPackageUpload ERROR,', path, ',', e + ' on file: ' + filePath);
-        throw new Meteor.Error('package upload failed at media upload: ' + e + ' on file: ' + filePath)
-      }
-      return {results, stimSetId};
     } catch(e) {
       serverConsole('processPackageUpload ERROR,', path, ',', e + ' on file: ' + filePath);
-      throw new Meteor.Error('package upload failed at initialization: ' + e + ' on file: ' + filePath)
+      throw new Meteor.Error('package upload failed at stim upload: ' + e + ' on file: ' + filePath)
     }
+
+    try {
+      for(const tdf of unzippedFiles.filter(f => f.type == 'tdf')){
+        const tdfResults = await saveContentFile(tdf.type, tdf.name, tdf.contents, owner, tdf.path);
+        results.push(tdfResults);
+        serverConsole('tdfResults', tdfResults);
+      }
+    } catch(e) {
+      serverConsole('processPackageUpload ERROR,', path, ',', e + ' on file: ' + filePath);
+      throw new Meteor.Error('package upload failed at tdf upload: ' + e + ' on file: ' + filePath)
+    }
+    try {
+      for(const media of unzippedFiles.filter(f => f.type == 'media')){
+        await saveMediaFile(media, owner, stimSetId);
+      }
+    } catch(e) {
+      serverConsole('processPackageUpload ERROR,', path, ',', e + ' on file: ' + filePath);
+      throw new Meteor.Error('package upload failed at media upload: ' + e + ' on file: ' + filePath)
+    }
+    return {results, stimSetId};
+  } catch(e) {
+    serverConsole('processPackageUpload ERROR,', path, ',', e + ' on file: ' + filePath);
+    throw new Meteor.Error('package upload failed at initialization: ' + e + ' on file: ' + filePath)
+  }
 }
 
-async function combineStimAndTdfFiles(stim, tdf, ownerId){
-  let stimulusFileName = stim.name;
-  let stimJSON = stim.contents;
-  let formattedStims = [];
-  let tdfFilename = tdf.name;
-  let Tdf = tdf.contents.tutor;
-  let lessonName = _.trim(Tdf.tutor.setspec.lessonname);
-  if (lessonName.length < 1) {
-    results.result = false;
-    results.errmsg = 'TDF has no lessonname - it cannot be valid';
-
-    return results;
-  }
-
-  const existingTdf = Tdfs.findOne({stimulusFileName: stimulusFileName});
-  const responseKCMap = await getReponseKCMap();
-  let stimuliSetId = existingTdf?.stimuliSetId
-  if (!stimuliSetId) {
-    stimuliSetId = nextStimuliSetId;
-    nextStimuliSetId += 1;
-  }
-  serverConsole('getAssociatedStimSetIdForStimFile', stimulusFileName, stimuliSetId);
-  
-  const oldStimFormat = {
-    'fileName': stimulusFileName,
-    'stimuli': stimJSON,
-    'owner': ownerId,
-    'source': 'repo',
-  };
-  const newFormatItems = getNewItemFormat(oldStimFormat, stimulusFileName, stimuliSetId, responseKCMap);
-  const existingStims = existingTdf?.stimuli;
-  serverConsole('existingStims', existingStims);
-  let newStims = [];
-  let stimulusKC;
-  let maxStimulusKC = 0;
-  if (existingStims && existingStims.length > 0) {
-    for (const newStim of newFormatItems) {
-      stimulusKC = newStim.stimulusKC;
-      if (stimulusKC > maxStimulusKC) {
-        maxStimulusKC = stimulusKC;
-      }
-      let matchingStim = existingStims.find((x) => x.stimulusKC == stimulusKC);
-      if (!matchingStim) {
-        serverConsole('matchingstims') 
-        newStims.push(newStim);
-        continue;
-      }
-      matchingStim = getItem(matchingStim);
-      const mergedStim = Object.assign(matchingStim, newStim);
-      let curAnswerSylls
-      try{
-        if(mergedStim.syllables && mergedStim.syllables.length < 1){
-          serverConsole('fetching syllables for ' + stim.correctResponse);
-          curAnswerSylls = getSyllablesForWord(mergedStim.correctResponse.replace(/\./g, '_').split('~')[0]);
-        }
-      }
-      catch (e) {
-        serverConsole('error fetching syllables for ' + stim.correctResponse + ': ' + JSON.stringify(e));
-        curAnswerSylls = [stim.correctResponse];
-      }
-      if(mergedStim.imageStimulus && mergedStim.imageStimulus.split('http').length == 1){
-        //image is not a url
-        const imageFilePathArray = mergedStim.imageStimulus.split('/');
-        const imageFileName = imageFilePathArray[imageFilePathArray.length - 1];
-        serverConsole('grabbing link for image', imageFileName);
-        const image = await DynamicAssets.findOne({name: imageFileName, userId: ownerId});
-        const imageLink = image.meta.link;
-        mergedStim.imageStimulus = imageLink;
-      }
-      mergedStim.syllables = curAnswerSylls;
-      formattedStims.push(mergedStim);
-    }
-  } else {
-    newStims = newFormatItems;
-  }
-  serverConsole('!!!newStims:', newStims);
-  for (const stim of newStims) {
-    if(stim.stimulusKC > maxStimulusKC){
-      maxStimulusKC = stim.stimulusKC;
-    }
-    let curAnswerSylls
-    try{
-      serverConsole('fetching syllables for ' + stim.correctResponse);
-      curAnswerSylls = [stim.correctResponse];
-      //curAnswerSylls = getSyllablesForWord(stim.correctResponse.replace(/\./g, '_').split('~')[0]);
-    }
-    catch (e) {
-      serverConsole('error fetching syllables for ' + stim.correctResponse + ': ' + JSON.stringify(e));
-      curAnswerSylls = [stim.correctResponse];
-    }
-    stim.syllables = curAnswerSylls;
-    if(stim.imageStimulus && stim.imageStimulus.split('http').length == 1){
-      //image is not a url
-      const imageFilePathArray = stim.imageStimulus.split('/');
-      const imageFileName = imageFilePathArray[imageFilePathArray.length - 1];
-      serverConsole('grabbing link for image', imageFileName);
-      const image = await DynamicAssets.findOne({name: imageFileName, userId: ownerId});
-      const imageLink = image.meta.link;
-      stim.imageStimulus = imageLink;
-    }
-    formattedStims.push(stim);
-  }
-
-  const tips = Tdf.tutor.setspec.tips;
-  let newFormatttedTips = [];
-  if(tips){
-    for(const tip of tips){
-      if(tip.split('<img').length > 1){
-        const imageName = tip.split('<img')[1].split('src="')[1].split('"')[0];
-        const image = await DynamicAssets.collection.findOne({userId: ownerId, name: imageName});
-        if(image){
-          const imageLink = image.meta.link;
-          newFormatttedTips.push(tip.replace(imageName, imageLink));
-          serverConsole('imageLink', imageLink);
-        }
-      }
+async function combineStimAndTdfFiles(){
+  const TDFS = await Tdfs.find({}).fetch();
+  for(const tdf of TDFS){
+    const stimulusFileName = await Items.findOne({stimuliSetId: tdf.stimuliSetId})?.stimulusFileName;
+    const stimuli = await Items.find({stimuliSetId: tdf.stimuliSetId}).fetch();
+    console.log(stimuli)
+    if(stimuli){
+      tdf.stimuli = stimuli;
+      tdf.stimulusFileName = stimulusFileName;
+      await Tdfs.update({_id: tdf._id}, tdf);
     }
   }
-  if(newFormatttedTips.length > 0){
-    Tdf.tutor.setspec.tips = newFormatttedTips;
-  }
-  const tdfJSON = {'fileName': tdfFilename, 'tdfs': Tdf, 'ownerId': ownerId, 'source': 'upload'};
-  const prev = await getTdfByFileName(tdfFilename);
-  if (prev && prev._id) {
-    serverConsole('updating tdf', tdfFilename, formattedStims);
-    if (hasGeneratedTdfs(tdfJSON)) {
-      const tdfGenerator = new DynamicTdfGenerator(tdfJSON.tdfs, tdfFilename, ownerId, 'repo', formattedStims);
-      const generatedTdf = tdfGenerator.getGeneratedTdf();
-      delete generatedTdf.createdAt;
-      tdfJSONtoUpsert = generatedTdf;
-    } else {
-      tdfJSONtoUpsert = tdfJSON;
-    }
-  } else {
-    serverConsole('inserting tdf', tdfFilename, formattedStims);
-    let tdfJSONtoUpsert;
-    if (hasGeneratedTdfs(tdfJSON)) {
-      const tdfGenerator = new DynamicTdfGenerator(tdfJSON.tdfs, tdfFilename, ownerId, 'repo', formattedStims);
-      const generatedTdf = tdfGenerator.getGeneratedTdf();
-      tdfJSONtoUpsert = generatedTdf;
-    } else {
-      tdfJSON.createdAt = new Date();
-      tdfJSONtoUpsert = tdfJSON;
-    }
-  }
-  return {
-    tdfFileName: tdf.name,
-    stimulusFileName: stimulusFileName,
-    path: tdf.path.split(tdf.name)[0],
-    content: tdfJSONtoUpsert,
-    rawStimuliFile: stim.contents, //raw stimuli
-    stimuli: formattedStims, //formatted stimuli for use in the app
-    stimuliSetId: stimuliSetId,
-    ownerId: ownerId,
-    visibility: 'profileOnly'
-  };
 }
 
-async function saveMediaFile(media, owner){
+async function saveMediaFile(media, owner, stimSetId){
   serverConsole("Uploading:", media.name);
   const foundFile = DynamicAssets.collection.findOne({userId: owner, name: media.name})
   if(foundFile){
@@ -830,8 +681,14 @@ async function saveContentFile(type, filename, filecontents, owner, packagePath 
         } else {
           try {
             const rec = {'fileName': filename, 'tdfs': json, 'ownerId': ownerId, 'source': 'upload'};
-            await upsertTDFFile(filename, rec, ownerId);
-            results.result = true;
+            const ret = await upsertTDFFile(filename, rec, ownerId);
+            if(ret && ret.res == 'awaitClientTDF'){
+              serverConsole('awaitClientTDF', ret)
+              results.result = false;
+              results.data = ret;
+            } else {
+              results.result = true;
+            }
           } catch (err) {
             results.result=false;
             results.errmsg=err.toString();
@@ -1274,10 +1131,6 @@ function insertHiddenItem(userId, stimulusKC, tdfId) {
   ComponentStates.update({userId: userId, TDFId: tdfId, KCId: stimulusKC, componentType: "stimulus"}, {$set: {showItem: false}});
 }
 
-async function getHiddenItems(userId, tdfId) {
-  const hiddenItems = ComponentStates.find({userId: userId, TDFId: tdfId, componentType: 'stimulus', showItem: false}).fetch();
-  return hiddenItems;
-}
 async function getUserLastFeedbackTypeFromHistory(tdfID) {
   const userHistory =  Histories.findOne({TDFId: tdfID, userId: Meteor.userId}, {sort: {time: -1}})?.feedbackType
   let feedbackType = 'undefined';
@@ -1586,101 +1439,16 @@ async function getStimuliSetByFileName(stimulusFileName) {
     }]).toArray();
 }
 
+async function getStimuliSetIdByFilename(stimFilename) {
+  idRet = Tdfs.findOne({stimulusFileName: stimFilename});
+  const stimuliSetId = idRet ? idRet.stimuliSetId : null;
+  return stimuliSetId;
+}
+
 async function getStimCountByStimuliSetId(stimuliSetId) {
   // PostgresReversion Staged
   let ret = await getStimuliSetById(stimuliSetId);
   return ret.count;
-}
-
-async function getStudentReportingData(userId, TDFId, hintLevel) {
-  //creates a list of the correctness of the first 5 times a user answers.
-  const correctnessAcrossRepetitions = await ComponentStates.rawCollection().aggregate([{
-    $match: {
-      userId: userId,
-      TDFId: TDFId,
-      componentType: 'stimulus',
-      showItem: true,
-      outcomeStack: { $exists: true, $not: {$size: 0} }
-    }
-  },
-  {
-    $unwind: {
-      path: "$outcomeStack",
-      includeArrayIndex: 'ordinality'
-    }
-  },
-  {
-    $group: {
-      _id: "$ordinality",
-      "ordinality": { "$first": "$ordinality"},
-      "numCorrect": { "$sum": "$outcomeStack" },
-      "numTotal": { "$sum": 1}
-    }
-  },
-  {
-    $match: {
-      _id: {"$lt": 5}
-    }
-  },
-  {
-    $sort: {
-      ordinality: 1
-    }
-  },
-  {
-    $project: {
-      _id: 0,
-      numCorrect: 1,
-      numTotal: 1,
-      'percentCorrect': {
-        $round: {
-          $multiply: [{$divide: ['$numCorrect', '$numTotal']}, 100]
-        }
-      },
-    }
-  }]).toArray();
-  const probEstimates = await ComponentStates.rawCollection().aggregate([{
-    $match: {
-      "userId": userId,
-      "TDFId": TDFId,
-      "componentType": 'stimulus'
-    }
-  },
-  {
-    $lookup: {
-      from: 'stimuli',
-      localField: 'KCId',
-      foreignField: 'stimulusKC',
-      as: 'items'
-    }
-  },
-  {
-    $unwind: {
-      path: "$items",
-      preserveNullAndEmptyArrays: true
-    }
-  },
-  {
-    $project: {
-      _id: 0,
-      "clozeStimulus": {
-        $cond: { 
-          if:{
-            $eq: ["$items.textStimulus", ""]
-          }, 
-          then:"$items.clozeStimulus", 
-          else: '$items.textStimulus'
-        }
-      },
-      'probabilityEstimate': {
-        $round: {
-          $multiply: ['$probabilityEstimate', 100]
-        }
-      },
-      'lastSeen': '$lastSeen'
-    }
-  }]).toArray();
-  return {correctnessAcrossRepetitions, probEstimates};
 }
 
 async function getStimSetFromLearningSessionByClusterList(stimuliSetId, clusterList){
@@ -1695,7 +1463,7 @@ async function getStimSetFromLearningSessionByClusterList(stimuliSetId, clusterL
   return learningSessionItem;
 }
 
-async function getStudentPerformanceByIdAndTDFId(userId, TDFId, stimIds=null, onlyCurrentUnit=false) {
+async function getStudentPerformanceByIdAndTDFId(userId, TDFId, stimIds=null) {
   serverConsole('getStudentPerformanceByIdAndTDFId', userId, TDFId, stimIds);
   const innerQuery = {
     userId: userId,
@@ -1733,6 +1501,12 @@ async function getStudentPerformanceByIdAndTDFId(userId, TDFId, stimIds=null, on
       allTimeNumIncorrect: {$sum: '$allTimeIncorrect'},
       allTimePracticeDuration: {$sum: '$allTimeTotalPracticeDuration'},
       stimsIntroduced: {$sum: '$introduced'},
+      count: {$sum: '$timesSeen'},
+    },
+  },
+  {
+    $addFields: {
+      count: {$sum: ['$priorCorrect', '$priorIncorrect', '$count']}
     },
   },
   {
@@ -2219,9 +1993,9 @@ async function upsertTDFFile(tdfFilename, tdfJSON, ownerId, packagePath = null) 
     for(const tip of tips){
       if(tip.split('<img').length > 1){
         const imageName = tip.split('<img')[1].split('src="')[1].split('"')[0];
-        const image = await DynamicAssets.collection.findOne({userId: ownerId, name: imageName});
+        const image = await DynamicAssets.findOne({userId: ownerId, name: imageName});
         if(image){
-          const imageLink = image.meta.link;
+          const imageLink = image.link();
           newFormatttedTips.push(tip.replace(imageName, imageLink));
           serverConsole('imageLink', imageLink);
         }
@@ -2245,6 +2019,18 @@ async function upsertTDFFile(tdfFilename, tdfJSON, ownerId, packagePath = null) 
     } else {
       tdfJSONtoUpsert = tdfJSON;
     }
+    let updateObj = {
+      _id: prev._id,
+      ownerId: ownerId,
+      stimuliSetId: stimuliSetId,
+      content: tdfJSONtoUpsert
+    }
+    if(prev.content.tdfs.tutor.setspec.shuffleclusters != tdfJSON.tdfs.tutor.setspec.shuffleclusters){
+      serverConsole('sufflecluster changed, alerting user');
+      return {res: 'awaitClientTDF', TDF: updateObj}
+    } else {
+      Tdfs.update({_id: prev._id},{$set:updateObj});
+    }
   } else {
     formattedStims = [];
     serverConsole('inserting tdf', tdfFilename, formattedStims);
@@ -2264,6 +2050,11 @@ async function upsertTDFFile(tdfFilename, tdfJSON, ownerId, packagePath = null) 
     ownerId: ownerId,
     visibility: 'profileOnly'
   }});
+}
+
+function tdfUpdateConfirmed(updateObj){
+  serverConsole('tdfUpdateConfirmed', updateObj);
+  Tdfs.update({_id: updateObj._id},{$set:updateObj});
 }
 
 function setUserLoginData(entryPoint, loginMode, curTeacher = undefined, curClass = undefined){
@@ -2925,15 +2716,11 @@ const asyncMethods = {
 
   getExperimentState, setExperimentState, getStimuliSetByFileName,
 
-  getProbabilityEstimatesByKCId, getReponseKCMap, processPackageUpload,
+  getProbabilityEstimatesByKCId, getReponseKCMap, processPackageUpload, setComponentStatesByUserIdTDFIdAndUnitNum,
 
-  getComponentStatesByUserIdTDFIdAndUnitNum, setComponentStatesByUserIdTDFIdAndUnitNum,
+  insertHistory, getHistoryByTDFID, getUserRecentTDFs, clearCurUnitProgress, tdfUpdateConfirmed,
 
-  insertHistory, getHistoryByTDFID, getUserRecentTDFs, clearCurUnitProgress,
-
-  loadStimsAndTdfsFromPrivate, getListOfStimTags, getStudentReportingData, 
-
-  getHiddenItems, getUserLastFeedbackTypeFromHistory,
+  loadStimsAndTdfsFromPrivate, getListOfStimTags, getUserLastFeedbackTypeFromHistory,
 
   getTdfIdByStimSetIdAndFileName, checkForUserException, 
   
@@ -3146,7 +2933,7 @@ const asyncMethods = {
 Meteor.methods(functionTimerWrapper(methods, asyncMethods));
 
 Meteor.startup(async function() {
-
+  //await combineStimAndTdfFiles();
   highestStimuliSetId = Tdfs.findOne({}, {sort: {stimuliSetId: -1}, limit: 1 });
   nextStimuliSetId = highestStimuliSetId && highestStimuliSetId.stimuliSetId ? parseInt(highestStimuliSetId.stimuliSetId) + 1 : 1;
 

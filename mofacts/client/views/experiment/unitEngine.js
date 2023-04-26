@@ -1092,6 +1092,7 @@ function modelUnitEngine() {
             priorStudy: 0,
             parameter: parameter,
             instructionQuestionResult: null,
+            timesSeen: 0,
           });
           stimulusKC += 1;
 
@@ -1187,6 +1188,7 @@ function modelUnitEngine() {
         allTimeTotalPracticeDuration: stim.allTimeTotalPracticeDuration,
         outcomeStack: stim.outcomeStack,
         instructionQuestionResult: null,
+        timesSeen: stim.timesSeen,
       };
       const responseState = {
         userId,
@@ -1285,6 +1287,7 @@ function modelUnitEngine() {
             allTimeTotalPracticeDuration: stim.allTimeTotalPracticeDuration,
             outcomeStack: typeof stim.outcomeStack == 'string' ?  stim.outcomeStack.split(','):  stim.outcomeStack,
             instructionQuestionResult: null,
+            timesSeen: stim.timesSeen,
           };
           componentStates.push(stimState);
         }
@@ -1347,8 +1350,7 @@ function modelUnitEngine() {
       let hiddenItems = Session.get('hiddenItems');
       if (hiddenItems === undefined) hiddenItems = []
 
-      const componentStates = await meteorCallAsync('getComponentStatesByUserIdTDFIdAndUnitNum',
-          Meteor.userId(), Session.get('currentTdfId'));
+      const componentStates = await ComponentStates.find({}, { sort: { KCId: -1 } }).fetch()
       console.log('loadComponentStates,componentStates:', componentStates);
 
       const clusterStimKCs = {};
@@ -1461,9 +1463,9 @@ function modelUnitEngine() {
         numQuestionsAnsweredCurrentSession,
         numCorrectAnswers,
       });
-      const cardIndex = Session.get('currentExperimentState').shufIndex;
-      const whichStim = Session.get('currentExperimentState').whichStim;
-      const whichHintLevel = Session.get('currentExperimentState').whichHintLevel;
+      const cardIndex = Session.get('currentExperimentState').shufIndex || 0;
+      const whichStim = Session.get('currentExperimentState').whichStim || 0;
+      const whichHintLevel = Session.get('currentExperimentState').whichHintLevel || 0;
       setCurrentCardInfo(cardIndex, whichStim, whichHintLevel);
     },
     getCardProbabilitiesNoCalc: function() {
@@ -1661,6 +1663,7 @@ function modelUnitEngine() {
       const cards = cardProbabilities.cards;
       const cluster = getStimCluster(Session.get('clusterIndex'));
       const card = _.prop(cards, cluster.shufIndex);
+      const testType = getTestType();
       console.log('cardAnswered, card: ', card, 'cluster.shufIndex: ', cluster.shufIndex);
 
       _.each(cards, function(otherCard, index) {
@@ -1684,15 +1687,16 @@ function modelUnitEngine() {
       const stim = card.stims[whichStim];
       stim.totalPracticeDuration += practiceTime;
       stim.allTimeTotalPracticeDuration += practiceTime;
+      stim.timesSeen += 1;
 
-      updateCurStudentPerformance(wasCorrect, practiceTime);
+      updateCurStudentPerformance(wasCorrect, practiceTime, testType);
 
       // Study trials are a special case: we don't update any of the
       // metrics below. As a result, we just calculate probabilities and
       // leave. Note that the calculate call is important because this is
       // the only place we call it after init *and* something might have
       // changed during question selection
-      if (getTestType() === 's') {
+      if (testType === 's') {
         this.saveComponentStatesSync();
         return;
       }

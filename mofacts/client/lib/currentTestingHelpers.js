@@ -112,18 +112,20 @@ function haveMeteorUser() {
   return (!!Meteor.userId() && !!Meteor.user() && !!Meteor.user().username);
 }
 
-function updateCurStudentPerformance(isCorrect, endLatency) {
+function updateCurStudentPerformance(isCorrect, practiceTime, testType) {
   // Update running user metrics total,
   // note this assumes curStudentPerformance has already been initialized on initial page entry
   const curUserPerformance = Session.get('curStudentPerformance');
-  console.log('updateCurStudentPerformance', isCorrect, endLatency,
+  console.log('updateCurStudentPerformance', isCorrect, practiceTime,
       JSON.parse(JSON.stringify((Session.get('curStudentPerformance')))));
+  if (testType !== 's') {
+    if (isCorrect) curUserPerformance.numCorrect = curUserPerformance.numCorrect + 1;
+    curUserPerformance.percentCorrect = ((curUserPerformance.numCorrect / curUserPerformance.count)*100).toFixed(2) + '%';
+    curUserPerformance.stimsSeen = parseInt(curUserPerformance.stimsSeen);
+    curUserPerformance.totalStimCount = parseInt(curUserPerformance.totalStimCount);
+  }
   curUserPerformance.count = curUserPerformance.count + 1;
-  if (isCorrect) curUserPerformance.numCorrect = curUserPerformance.numCorrect + 1;
-  curUserPerformance.percentCorrect = ((curUserPerformance.numCorrect / curUserPerformance.count)*100).toFixed(2) + '%';
-  curUserPerformance.stimsSeen = parseInt(curUserPerformance.stimsSeen);
-  curUserPerformance.totalStimCount = parseInt(curUserPerformance.totalStimCount);
-  curUserPerformance.totalTime = parseInt(curUserPerformance.totalTime) + endLatency;
+  curUserPerformance.totalTime = parseInt(curUserPerformance.totalTime) + practiceTime;
   curUserPerformance.totalTimeDisplay = (curUserPerformance.totalTime / (1000*60)).toFixed(1);
   Session.set('constantTotalTime',curUserPerformance.totalTimeDisplay);
   Session.set('curStudentPerformance', curUserPerformance);
@@ -132,10 +134,8 @@ function updateCurStudentPerformance(isCorrect, endLatency) {
 async function setStudentPerformance(studentID, studentUsername, tdfId) {
   console.log('setStudentPerformance:', studentID, studentUsername, tdfId);
   let studentPerformanceData;
-  let studentPerformanceDataRet;
-  let resetStudentPerformance = getCurrentDeliveryParams().resetStudentPerformance
-  studentPerformanceDataRet = await meteorCallAsync('getStudentPerformanceByIdAndTDFId', studentID, tdfId, undefined ,resetStudentPerformance);
-  if (isEmpty(studentPerformanceDataRet)) {
+  studentPerformanceData = await meteorCallAsync('getStudentPerformanceByIdAndTDFId', studentID, tdfId);
+  if (isEmpty(studentPerformanceData)) {
     studentPerformanceData = {
       numCorrect: 0,
       numIncorrect: 0,
@@ -143,32 +143,34 @@ async function setStudentPerformance(studentID, studentUsername, tdfId) {
       lastSeen: 0,
       totalStimCount: 0,
       totalPracticeDuration: 0,
+      count: 0,
     };
   } else {
     studentPerformanceData = {
-      numCorrect: parseInt(studentPerformanceDataRet.numCorrect) || 0,
-      allTimeCorrect: parseInt(studentPerformanceDataRet.allTimeCorrect) || 0,
-      allTimeIncorrect: parseInt(studentPerformanceDataRet.allTimeIncorrect) || 0,
-      numIncorrect: parseInt(studentPerformanceDataRet.numIncorrect) || 0,
-      lastSeen: parseInt(studentPerformanceDataRet.lastSeen) || 0,
-      stimsSeen:  parseInt(studentPerformanceDataRet.stimsSeen)  || 0,
-      totalStimCount: parseInt(studentPerformanceDataRet.totalStimCount) || 0,
-      totalPracticeDuration: parseInt(studentPerformanceDataRet.totalPracticeDuration) || 0,
-      allTimeTotalPracticeDuration: parseInt(studentPerformanceDataRet.allTimeTotalPracticeDuration) || 0,
+      numCorrect: parseInt(studentPerformanceData.numCorrect) || 0,
+      allTimeCorrect: parseInt(studentPerformanceData.allTimeCorrect) || 0,
+      allTimeIncorrect: parseInt(studentPerformanceData.allTimeIncorrect) || 0,
+      numIncorrect: parseInt(studentPerformanceData.numIncorrect) || 0,
+      lastSeen: parseInt(studentPerformanceData.lastSeen) || 0,
+      stimsSeen:  parseInt(studentPerformanceData.stimsSeen)  || 0,
+      totalStimCount: parseInt(studentPerformanceData.totalStimCount) || 0,
+      totalPracticeDuration: parseInt(studentPerformanceData.totalPracticeDuration) || 0,
+      allTimeTotalPracticeDuration: parseInt(studentPerformanceData.allTimeTotalPracticeDuration) || 0,
+      count: parseInt(studentPerformanceData.count) || 0,
     };
   }
-  const count = (parseInt(studentPerformanceData.numCorrect) + parseInt(studentPerformanceData.numIncorrect));
-  const percentCorrect = (count > 0) ? ((studentPerformanceData.numCorrect / count)*100).toFixed(2) + '%' : 'N/A';
+  const divisor = studentPerformanceData.numCorrect + studentPerformanceData.numIncorrect
+  const percentCorrect = (divisor > 0) ? ((studentPerformanceData.numCorrect / divisor)*100).toFixed(2) + '%' : 'N/A';
   const studentPerformance = {
     'username': studentUsername,
-    'count': count,
+    'count': studentPerformanceData.count,
     'percentCorrect': percentCorrect,
     'numCorrect': studentPerformanceData.numCorrect,
     'stimsSeen': studentPerformanceData.stimsSeen,
     'totalStimCount': studentPerformanceData.totalStimCount,
     'totalTime': studentPerformanceData.totalPracticeDuration,
     // convert from ms to min
-    'totalTimeDisplay': (studentPerformanceData.totalPracticeDuration / (60 * 1000)).toFixed(0),
+    'totalTimeDisplay': (studentPerformanceData.totalPracticeDuration / (60 * 1000)).toFixed(1),
   };
   Session.set('curStudentPerformance', studentPerformance);
   console.log('setStudentPerformance,output:', studentPerformanceData, studentPerformance);
