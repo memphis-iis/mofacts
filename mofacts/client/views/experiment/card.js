@@ -395,7 +395,8 @@ Template.card.rendered = async function() {
     }
   }
   //Gets the list of hidden items from the db on load of card. 
-  Session.set('hiddenItems', await meteorCallAsync('getHiddenItems', Meteor.userId(), Session.get('currentTdfId')));
+  const hiddenItems = ComponentStates.find({componentType: 'stimulus', showItem: false}).fetch();
+  Session.set('hiddenItems', hiddenItems);
 
   window.AudioContext = window.webkitAudioContext || window.AudioContext;
   window.URL = window.URL || window.webkitURL;
@@ -874,23 +875,6 @@ function initializeAudio() {
   }
 }
 
-function audioPlayFunction(source) {
-  if (soundsDict[source]) {
-    soundsDict[source].isCurrentlyPlaying = true;
-  }
-  console.log('Sound played');
-}
-
-function audioEndFunction(source){
-  if (soundsDict[source]) {
-    soundsDict[source].isCurrentlyPlaying = false;
-  }
-  if (onEndCallbackDict[source]) {
-    onEndCallbackDict[source]();
-  }
-  console.log('Sound completed');
-}
-
 function preloadAudioFiles() {
   const allSrcs = getCurrentStimDisplaySources('audioStimulus');
   console.log('allSrcs,audio', allSrcs);
@@ -901,8 +885,24 @@ function preloadAudioFiles() {
     if(source) {
       source = source.link();
       sound = new Audio(source);
-      sound.addEventListener("play", audioPlayFunction(source));
-      sound.addEventListener("ended", audioEndFunction(source));
+      sound.onplay = function (source) {
+        let src = source.target.fileName
+        if (soundsDict[src]) {
+          soundsDict[src].isCurrentlyPlaying = true;
+        }
+        console.log('Sound played');
+      }
+      sound.onended = function (source) {
+        let src = source.target.fileName
+        if (soundsDict[src]) {
+          soundsDict[src].isCurrentlyPlaying = false;
+        }
+        if (onEndCallbackDict[src]) {
+          onEndCallbackDict[src]();
+        }
+        console.log('Sound completed');
+      }
+      sound.fileName = src;
     } else {
       // eslint-disable-next-line no-undef
       sound = new Howl({
@@ -914,9 +914,22 @@ function preloadAudioFiles() {
         // Must do an Immediately Invoked Function Expression otherwise question
         // is captured as a closure and will change to the last value in the loop
         // by the time we call this
-        onplay: audioPlayFunction(src),
+        onplay: function (src) {
+          if (soundsDict[source]) {
+            soundsDict[source].isCurrentlyPlaying = true;
+          }
+          console.log('Sound played');
+        },
 
-        onend: audioEndFunction(src),
+        onend: function (src) {
+          if (soundsDict[source]) {
+            soundsDict[source].isCurrentlyPlaying = false;
+          }
+          if (onEndCallbackDict[source]) {
+            onEndCallbackDict[source]();
+          }
+          console.log('Sound completed');
+        },
       });
     }
     soundsDict[src] = sound;
@@ -1883,10 +1896,11 @@ function gatherAnswerLogRecord(trialEndTimeStamp, trialStartTimeStamp, source, u
 
   // hack
   const sessionID = (new Date(trialStartTimeStamp)).toUTCString().substr(0, 16) + ' ' + Session.get('currentTdfName');
-  let outcome = 'incorrect';
-  if (isCorrect) {
+  let outcome = '';
+  if (!isStudy)
+    outcome = 'incorrect';
+  if (isCorrect) 
     outcome = 'correct';
-  }
   const answerLogRecord = {
     'itemId': _id,
     'KCId': stimulusKC,

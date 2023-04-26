@@ -490,7 +490,10 @@ Router.route('/classes/:_teacher/:_class', {
 Router.route('/card', {
   name: 'client.card',
   waitOn: function() {
-    return Meteor.subscribe('assets', Session.get('currentTdfFile').ownerId, Session.get('currentStimuliSetId'));
+    return [ 
+      Meteor.subscribe('assets', Session.get('currentTdfFile').ownerId, Session.get('currentStimuliSetId')),
+      Meteor.subscribe('userComponentStates', Session.get('currentTdfId'))
+    ]
   },
   action: function() {
     if (Meteor.user()) {
@@ -511,7 +514,6 @@ Router.route('/instructions', {
     Session.set('instructionClientStart', Date.now());
     Session.set('curModule', 'instructions');
     Session.set('fromInstructions', true);
-    Session.set('curUnitInstructionsSeen', true);
     this.render('instructions');
   },
   onAfterAction: function() {
