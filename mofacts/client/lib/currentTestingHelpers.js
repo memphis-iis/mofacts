@@ -116,6 +116,7 @@ function updateCurStudentPerformance(isCorrect, practiceTime, testType) {
   // Update running user metrics total,
   // note this assumes curStudentPerformance has already been initialized on initial page entry
   const curUserPerformance = Session.get('curStudentPerformance');
+  curUserPerformance.count = curUserPerformance.count + 1;
   console.log('updateCurStudentPerformance', isCorrect, practiceTime,
       JSON.parse(JSON.stringify((Session.get('curStudentPerformance')))));
   if (testType !== 's') {
@@ -124,7 +125,6 @@ function updateCurStudentPerformance(isCorrect, practiceTime, testType) {
     curUserPerformance.stimsSeen = parseInt(curUserPerformance.stimsSeen);
     curUserPerformance.totalStimCount = parseInt(curUserPerformance.totalStimCount);
   }
-  curUserPerformance.count = curUserPerformance.count + 1;
   curUserPerformance.totalTime = parseInt(curUserPerformance.totalTime) + practiceTime;
   curUserPerformance.totalTimeDisplay = (curUserPerformance.totalTime / (1000*60)).toFixed(1);
   Session.set('constantTotalTime',curUserPerformance.totalTimeDisplay);
