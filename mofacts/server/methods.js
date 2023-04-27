@@ -395,7 +395,7 @@ async function getProbabilityEstimatesByKCId(relevantKCIds) { // {clusterIndex:[
   return {clusterProbs, individualStimProbs};
 }
 
-async function getReponseKCMap() {
+async function getResponseKCMap() {
   const responseKCStuff = await Tdfs.rawCollection().aggregate([
     {
       $unwind: {
@@ -405,7 +405,7 @@ async function getReponseKCMap() {
     },
     {
       $group: {
-      _id: "$correctResponse",
+      _id: "$stimuli.correctResponse",
       "doc": { "$first": "$$ROOT" }
       }
     },
@@ -446,10 +446,8 @@ async function clearCurUnitProgress(userId, TDFId) {
   ComponentStates.update({userId: userId, TDFId: TDFId}, {$set: {'priorCorrect': 0, 'priorIncorrect': 0, 'totalPracticeDuration': 0, 'timesSeen': 0}}, {multi: true});
 }
 
-async function setComponentStatesByUserIdTDFIdAndUnitNum(userId, TDFId, componentStates) {
-  serverConsole('setComponentStatesByUserIdTDFIdAndUnitNum, ', userId, TDFId);
-  const responseKCMap = await getReponseKCMap();
-  const newResponseKCRet = Tdfs.rawCollection().aggregate([
+async function getMaxResponseKC(){
+  const responseKC = await Tdfs.rawCollection().aggregate([
     { 
       $addFields: {
         "maxResponseKC": {
@@ -465,6 +463,13 @@ async function setComponentStatesByUserIdTDFIdAndUnitNum(userId, TDFId, componen
     {
       $limit: 1
     }]).toArray()
+  return responseKC[0].maxResponseKC;
+}
+
+async function setComponentStatesByUserIdTDFIdAndUnitNum(userId, TDFId, componentStates) {
+  serverConsole('setComponentStatesByUserIdTDFIdAndUnitNum, ', userId, TDFId);
+  const responseKCMap = await getResponseKCMap();
+  const newResponseKCRet = await getMaxResponseKC();
   let newResponseKC = newResponseKCRet.maxResponseKC + 1;
   let c = ComponentStates.find({userId: userId, TDFId: TDFId}).fetch();
   for (const componentState of componentStates) {
@@ -1223,7 +1228,7 @@ async function addUserToTeachersClass(userId, teacherID, sectionId) {
 async function getStimDisplayTypeMap() {
   try {
     serverConsole('getStimDisplayTypeMap');
-    const tdfs = Tdfs.find().fetch();
+    const tdfs = await Tdfs.find().fetch();
     const items = tdfs.map((tdf) => tdf.stimuli).flat();
     let map = {};
     for(let item of items){
@@ -1925,7 +1930,7 @@ async function upsertStimFile(stimulusFileName, stimJSON, ownerId, packagePath =
   if(packagePath){
     packagePath = packagePath.split('/')[0];
   }
-  const responseKCMap = await getReponseKCMap();
+  const responseKCMap = await getResponseKCMap();
   let stimuliSetId = Tdfs.findOne({"content.tdfs.tutor.setspec.stimulusfile": stimulusFileName})?.stimuliSetId
   if (!stimuliSetId) {
     stimuliSetId = nextStimuliSetId;
@@ -2714,9 +2719,9 @@ const asyncMethods = {
   
   getStudentPerformanceForClassAndTdfId, getStimSetFromLearningSessionByClusterList,
 
-  getExperimentState, setExperimentState, getStimuliSetByFileName,
+  getExperimentState, setExperimentState, getStimuliSetByFileName, getMaxResponseKC,
 
-  getProbabilityEstimatesByKCId, getReponseKCMap, processPackageUpload, setComponentStatesByUserIdTDFIdAndUnitNum,
+  getProbabilityEstimatesByKCId, getResponseKCMap, processPackageUpload, setComponentStatesByUserIdTDFIdAndUnitNum,
 
   insertHistory, getHistoryByTDFID, getUserRecentTDFs, clearCurUnitProgress, tdfUpdateConfirmed,
 
