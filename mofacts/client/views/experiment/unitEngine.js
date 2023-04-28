@@ -11,7 +11,7 @@ import {
   updateCurStudentPerformance,
   getAllCurrentStimAnswers
 } from '../../lib/currentTestingHelpers';
-import {getCurrentClusterAndStimIndices, updateExperimentState, updateExperimentStateSync} from './card';
+import {updateExperimentState} from './card';
 import {MODEL_UNIT, SCHEDULE_UNIT} from '../../../common/Definitions';
 import {meteorCallAsync} from '../../index';
 import {displayify} from '../../../common/globalHelpers';
@@ -263,7 +263,6 @@ function defaultUnitEngine(curExperimentData) {
         }
       }
       const originalDisplay = JSON.parse(JSON.stringify(currentDisplay));
-      Session.set('originalDisplay', originalDisplay);
       newExperimentState.originalDisplay = originalDisplay;
 
       let currentQuestion = currentDisplay.clozeText || currentDisplay.text;
@@ -273,8 +272,6 @@ function defaultUnitEngine(curExperimentData) {
       const correctAnswer = Answers.getDisplayAnswerText(currentStimAnswer);
       const cacheWords = await meteorCallAsync('getMatchingDialogueCacheWordsForAnswer', correctAnswer);
       Session.set('dialogueCacheHint', cacheWords.join(','));
-
-      Session.set('originalAnswer', currentStimAnswer);
       newExperimentState.originalAnswer = currentStimAnswer;
       currentStimAnswer = currentStimAnswer.toLowerCase();
 
@@ -285,7 +282,6 @@ function defaultUnitEngine(curExperimentData) {
         currentQuestionPart2 = prompts[1];
       }
       Session.set('originalQuestion', currentQuestion);
-      Session.set('originalQuestion2', currentQuestionPart2);
       newExperimentState.originalQuestion = currentQuestion;
       newExperimentState.originalQuestion2 = currentQuestionPart2;
 
@@ -337,10 +333,7 @@ function defaultUnitEngine(curExperimentData) {
           console.log('HintLevel: setUpCardQuestionAndAnswerGlobals, Hints Disabled',whichHintLevel);
         }
       }
-      Session.set('currentAnswerSyllables', currentAnswerSyllables);
-      Session.set('currentAnswer', currentAnswer);
       Session.set('clozeQuestionParts', clozeQuestionParts);
-      Session.set('currentQuestionPart2', currentQuestionPart2PostSylls);
       newExperimentState.currentAnswerSyllables = currentAnswerSyllables;
       newExperimentState.currentAnswer = currentAnswer;
       newExperimentState.clozeQuestionParts = clozeQuestionParts || null;
@@ -352,8 +345,6 @@ function defaultUnitEngine(curExperimentData) {
       } else if (currentDisplay.text) {
         currentDisplay.text = currentQuestionPostSylls;
       }
-
-      Session.set('currentDisplayEngine', currentDisplay);
       newExperimentState.currentDisplayEngine = currentDisplay;
 
       return newExperimentState;
@@ -1285,7 +1276,7 @@ function modelUnitEngine() {
       }
 
       for (const [responseText, response] of Object.entries(cardProbabilities.responses)) {
-        const _id = responseIDMap[KCId];
+        const _id = responseIDMap[response.KCId];
         const responseState = {
           userId,
           TDFId,
@@ -1508,7 +1499,7 @@ function modelUnitEngine() {
       return indices;
     },
 
-    selectNextCard: async function(indices) {
+    selectNextCard: async function(indices, curExperimentState) {
       // The cluster (card) index, the cluster version (stim index), and
       // whether or not we should show the overlearning text is determined
       // here. See calculateCardProbabilities for how prob.probability is
@@ -1576,7 +1567,7 @@ function modelUnitEngine() {
       newExperimentState.questionIndex = 1;
 
       Session.set('questionIndex', 0); // questionIndex doesn't have any meaning for a model
-      Session.set('showOverlearningText', false);
+      curExperimentState.showOverlearningText = false;
 
       updateCardAndStimData(cardIndex, whichStim);
 
@@ -1626,7 +1617,7 @@ function modelUnitEngine() {
 
       try {
         this.saveComponentStatesSync();
-        updateExperimentState(newExperimentState, 'unitEngine.modelUnitEngine.selectNextCard');
+        updateExperimentState(newExperimentState, 'unitEngine.modelUnitEngine.selectNextCard', curExperimentState);
       } catch (e) {
         console.log('error in select next card server calls:', e);
         throw new Error('error in select next card server calls:', e);
@@ -2129,7 +2120,7 @@ function scheduleUnitEngine() {
       return schedule;
     },
 
-    selectNextCard: async function() {
+    selectNextCard: async function(indices, curExperimentState) {
       const questionIndex = Session.get('questionIndex');
       const sched = this.getSchedule();
       const questInfo = sched.q[questionIndex];
@@ -2156,14 +2147,14 @@ function scheduleUnitEngine() {
 
       Session.set('testType', questInfo.testType);
       Session.set('questionIndex', questionIndex + 1);
-      Session.set('showOverlearningText', false); // No overlearning in a schedule
+      curExperimentState.showOverlearningText = false;
 
       console.log('SCHEDULE UNIT card selection => ',
           'cluster-idx-unmapped:', curClusterIndex,
           'whichStim:', curStimIndex,
       );
 
-      updateExperimentStateSync(newExperimentState, 'question');
+      updateExperimentState(newExperimentState, 'question', curExperimentState);
     },
 
     findCurrentCardInfo: function() {

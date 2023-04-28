@@ -48,4 +48,13 @@ ComponentStates.allow({
   insert: function(userId, doc) {
     return userId === doc.userId;
   }
-})
+});
+
+GlobalExperimentStates.allow({
+  update: function(userId, doc, fieldNames, modifier) {
+    return userId === doc.userId;
+  },
+  insert: function(userId, doc) {
+    return userId === doc.userId;
+  }
+});

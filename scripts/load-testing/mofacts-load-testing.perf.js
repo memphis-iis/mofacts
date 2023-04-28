@@ -35,7 +35,7 @@ export default () => {
 	step.repeat(1000, 'Trials', async browser => {
 		await browser.wait(Until.elementIsVisible(By.css('#userAnswer')));
 		await browser.wait(Until.elementIsEnabled(By.css('#userAnswer')));
-		let correctAnswer = await browser.evaluate(() => Session.get('currentAnswer'))
+		let correctAnswer = await browser.evaluate(() => GlobalExperimentStates.findOne().experimentState.currentAnswer)
 		let rand = Math.floor(Math.random() * 11)
 		let answer = rand >= 5 ? correctAnswer : 'an incorrect answer'
 		await browser.type(By.css('#userAnswer'), answer)
