@@ -37,29 +37,7 @@ const fs = Npm.require('fs');
 const https = require('https')
 const { randomBytes } = require('crypto')
 let verbosityLevel = 0; //0 = only output serverConsole logs, 1 = only output function times, 2 = output serverConsole and function times
-
-if (Meteor.isServer) {
-  Meteor.publish('files.assets.all', function () {
-    return DynamicAssets.collection.find();
-  });
-
-  Meteor.publish('assets', function(ownerId, stimSetId) {
-    return DynamicAssets.collection.find({userId: ownerId, "meta.stimuliSetId": stimSetId});
-  });
-
-  Meteor.publish('ownedFiles', function() {
-    return [Tdfs.find({'ownerId': Meteor.userId()}), Stims.find({'owner': Meteor.userId()})]
-  });
-
-  Meteor.publish('accessableFiles', function() {
-    const accessableFileIds = Meteor.users.findOne({_id: this.userId}).accessedTDFs;
-    return Tdfs.find({_id: {$in: accessableFileIds}})
-  });
-
-  Meteor.publish('userComponentStates', function(tdfId) {
-    return ComponentStates.find({userId: this.userId, TDFId: tdfId});
-  })
-}
+const baseSyllableURL = 'http://localhost:4567/syllables/';
 
 if (process.env.METEOR_SETTINGS_WORKAROUND) {
   Meteor.settings = JSON.parse(process.env.METEOR_SETTINGS_WORKAROUND);
@@ -287,36 +265,6 @@ function createAwsHmac(secretKey, dataString) {
       .createHmac('sha1', secretKey)
       .update(dataString)
       .digest('base64');
-}
-
-async function getTdfQueryNames(tdfFileName) {
-  let tdfQueryNames = [];
-  if (tdfFileName === ALL_TDFS) {
-    const tdfsRet = tdfs.find({},{ "fileName": 1 }).fetch();
-    for (const tdfFileName of tdfsRet) {
-      tdfQueryNames.push(tdfFileName);
-    }
-  } else if (tdfFileName) {
-    tdfQueryNames = [tdfFileName];
-  }
-  return tdfQueryNames;
-}
-
-async function getLearningSessionItems(tdfFileName) {
-  const learningSessionItems = [];
-  const tdfQueryNames = await getTdfQueryNames(tdfFileName);
-  tdfQueryNames.forEach(async function(tdfQueryName) {
-    if (!learningSessionItems[tdfQueryName]) {
-      learningSessionItems[tdfQueryName] = {};
-    }
-    const tdf = await getTdfByFileName(tdfQueryName);
-    if (tdf.content.isMultiTdf) {
-      setLearningSessionItemsMulti(learningSessionItems[tdfQueryName], tdf);
-    } else {
-      setLearningSessionItems(learningSessionItems[tdfQueryName], tdf);
-    }
-  });
-  return learningSessionItems;
 }
 
 async function getTdfIdByStimSetIdAndFileName(stimuliSetId, fileName){
@@ -2125,7 +2073,6 @@ async function makeHTTPSrequest(options, request){
   });
 }
 
-const baseSyllableURL = 'http://localhost:4567/syllables/';
 function getSyllablesForWord(word) {
   const syllablesURL = baseSyllableURL + word;
   const result = HTTP.call('GET', syllablesURL);
@@ -2707,7 +2654,7 @@ const methods = {
 const asyncMethods = {
   getAllTdfs, getTdfById, getTdfByFileName, getTdfByExperimentTarget, getTdfIDsAndDisplaysAttemptedByUserId,
 
-  getLearningSessionItems, getStimDisplayTypeMap, getStimuliSetById, getSourceSentences, 
+  getStimDisplayTypeMap, getStimuliSetById, getSourceSentences, 
 
   getAllCourses, getAllCourseSections, getAllCoursesForInstructor, getAllCourseAssignmentsForInstructor,
 
@@ -2927,10 +2874,6 @@ const asyncMethods = {
       res = "Stim not found.";
       return res;
     }
-    Tdfs.remove({stimuliSetId: stimSetId});
-    Stims.remove({stimuliSetId: stimSetId});
-    res = "Stim and related TDFS deleted.";
-    return res;
   },
 }
 

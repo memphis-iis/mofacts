@@ -492,7 +492,9 @@ Router.route('/card', {
   waitOn: function() {
     return [ 
       Meteor.subscribe('assets', Session.get('currentTdfFile').ownerId, Session.get('currentStimuliSetId')),
-      Meteor.subscribe('userComponentStates', Session.get('currentTdfId'))
+      Meteor.subscribe('userComponentStates', Session.get('currentTdfId')),
+      Meteor.subscribe('currentExperimentTdfs', Session.get('currentTdfId')),
+      Meteor.subscribe('userExperimentState', Session.get('currentTdfId')),
     ]
   },
   action: function() {
