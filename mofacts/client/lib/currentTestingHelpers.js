@@ -121,7 +121,8 @@ function updateCurStudentPerformance(isCorrect, practiceTime, testType) {
       JSON.parse(JSON.stringify((Session.get('curStudentPerformance')))));
   if (testType !== 's') {
     if (isCorrect) curUserPerformance.numCorrect = curUserPerformance.numCorrect + 1;
-    curUserPerformance.percentCorrect = ((curUserPerformance.numCorrect / curUserPerformance.count)*100).toFixed(2) + '%';
+    else curUserPerformance.numIncorrect = curUserPerformance.numIncorrect + 1;
+    curUserPerformance.percentCorrect = ((curUserPerformance.numCorrect / (curUserPerformance.numCorrect + curUserPerformance.numIncorrect))*100).toFixed(2) + '%';
     curUserPerformance.stimsSeen = parseInt(curUserPerformance.stimsSeen);
     curUserPerformance.totalStimCount = parseInt(curUserPerformance.totalStimCount);
   }
@@ -166,6 +167,7 @@ async function setStudentPerformance(studentID, studentUsername, tdfId) {
     'count': studentPerformanceData.count,
     'percentCorrect': percentCorrect,
     'numCorrect': studentPerformanceData.numCorrect,
+    'numIncorrect': studentPerformanceData.numIncorrect,
     'stimsSeen': studentPerformanceData.stimsSeen,
     'totalStimCount': studentPerformanceData.totalStimCount,
     'totalTime': studentPerformanceData.totalPracticeDuration,
