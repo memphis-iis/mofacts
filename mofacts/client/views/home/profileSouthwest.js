@@ -54,107 +54,101 @@ Template.profileSouthwest.rendered = async function() {
   Session.set('subTdfIndex', undefined);
   Session.set('showSpeechAPISetup', false);
   $('#expDataDownloadContainer').html('');
-  const allTdfs = await meteorCallAsync('getAllTdfs');
+  const allTdfs = Tdfs.find().fetch();
   Session.set('allTdfs', allTdfs);
-  const curSectionId = Meteor.user().profile.curClass.sectionId;
-  Meteor.call('getTdfsAssignedToStudent', Meteor.userId(), curSectionId, async function(err, result) {
-    console.log('err: ' + err + ', res: ' + result);
-    const assignedTdfs = result;
-    console.log('assignedTdfs: ', assignedTdfs);
-    // Check all the valid TDF's
-    assignedTdfs.forEach( function(tdf) {
-      const TDFId = tdf._id;
-      console.log('assignedTdfs', tdf);
-      const tdfObject = tdf.content;
-      const isMultiTdf = tdfObject.isMultiTdf;
+  // Check all the valid TDF's
+  allTdfs.forEach( function(tdf) {
+    const TDFId = tdf._id;
+    console.log('assignedTdfs', tdf);
+    const tdfObject = tdf.content;
+    const isMultiTdf = tdfObject.isMultiTdf;
 
-      // Make sure we have a valid TDF (with a setspec)
-      const setspec = tdfObject.tdfs.tutor.setspec;
+    // Make sure we have a valid TDF (with a setspec)
+    const setspec = tdfObject.tdfs.tutor.setspec;
 
-      if (!setspec) {
-        console.log('Invalid TDF - it will never work', tdfObject);
-        return;
-      }
+    if (!setspec) {
+      console.log('Invalid TDF - it will never work', tdfObject);
+      return;
+    }
 
-      const name = setspec.lessonname;
-      if (!name) {
-        console.log('Skipping TDF with no name', setspec);
-        return;
-      }
+    const name = setspec.lessonname;
+    if (!name) {
+      console.log('Skipping TDF with no name', setspec);
+      return;
+    }
 
-      const currentStimuliSetId = tdf.stimuliSetId;
+    const currentStimuliSetId = tdf.stimuliSetId;
 
-      const ignoreOutOfGrammarResponses = setspec.speechIgnoreOutOfGrammarResponses == 'true';
-      let speechOutOfGrammarFeedback = setspec.speechOutOfGrammarFeedback;
-      if (!speechOutOfGrammarFeedback) {
-        speechOutOfGrammarFeedback = 'Response not in answer set';
-      }
+    const ignoreOutOfGrammarResponses = setspec.speechIgnoreOutOfGrammarResponses == 'true';
+    let speechOutOfGrammarFeedback = setspec.speechOutOfGrammarFeedback;
+    if (!speechOutOfGrammarFeedback) {
+      speechOutOfGrammarFeedback = 'Response not in answer set';
+    }
 
-      let audioInputEnabled = setspec.audioInputEnabled == 'true';
-      const enableAudioPromptAndFeedback = setspec.enableAudioPromptAndFeedback == 'true';
+    let audioInputEnabled = setspec.audioInputEnabled == 'true';
+    const enableAudioPromptAndFeedback = setspec.enableAudioPromptAndFeedback == 'true';
 
-      //If the tdf has a due date, display
-      if(setspec.duedate){
-        innerBtnHtml += "<small>Due: " + setspec.duedate + "</small><br>";
-      }
+    //If the tdf has a due date, display
+    if(setspec.duedate){
+      innerBtnHtml += "<small>Due: " + setspec.duedate + "</small><br>";
+    }
 
-      //If the tdf is overdue, disable
-      const exception = getTDFExceptionStatus(Meteor.userId(), TDFId);
-      var exceptionDate = false;
-      if (exception) {
-        var exceptionRaw = new Date(exception);
-        var exceptionDate = exceptionRaw.getTime();
-      }
-      const curDate = new Date().getTime();
-      dueDate = setspec.duedate ? setspec.duedate : false;
-  
-      isOverDue = false;
-      if(dueDate) {
-        console.log("dueDate", dueDate, curDate, exceptionDate);
-        if(dueDate < curDate) {
-         isOverDue = true;
-        } 
+    //If the tdf is overdue, disable
+    const exception = getTDFExceptionStatus(Meteor.userId(), TDFId);
+    var exceptionDate = false;
+    if (exception) {
+      var exceptionRaw = new Date(exception);
+      var exceptionDate = exceptionRaw.getTime();
+    }
+    const curDate = new Date().getTime();
+    dueDate = setspec.duedate ? setspec.duedate : false;
+
+    isOverDue = false;
+    if(dueDate) {
+      console.log("dueDate", dueDate, curDate, exceptionDate);
+      if(dueDate < curDate) {
+        isOverDue = true;
       } 
-      if(isOverDue && exceptionDate){
-        if(exceptionDate < curDate) {
-          isOverDue = true;
-        }
+    } 
+    if(isOverDue && exceptionDate){
+      if(exceptionDate < curDate) {
+        isOverDue = true;
       }
+    }
 
 
-      const audioInputSpeechAPIKeyAvailable = !!setspec.speechAPIKey;
+    const audioInputSpeechAPIKeyAvailable = !!setspec.speechAPIKey;
 
-      // Only display the audio input available if enabled in tdf and tdf has key for it
-      audioInputEnabled = audioInputEnabled && audioInputSpeechAPIKeyAvailable;
-      const audioPromptTTSAPIKeyAvailable = !!setspec.textToSpeechAPIKey;
+    // Only display the audio input available if enabled in tdf and tdf has key for it
+    audioInputEnabled = audioInputEnabled && audioInputSpeechAPIKeyAvailable;
+    const audioPromptTTSAPIKeyAvailable = !!setspec.textToSpeechAPIKey;
 
-      // Only display the audio output available if enabled in tdf and tdf has key for it
-      const audioOutputEnabled = enableAudioPromptAndFeedback && audioPromptTTSAPIKeyAvailable;
+    // Only display the audio output available if enabled in tdf and tdf has key for it
+    const audioOutputEnabled = enableAudioPromptAndFeedback && audioPromptTTSAPIKeyAvailable;
 
 
-      //Display inner html for audio icons
-      let audioHtml = "";
-      if (audioInputEnabled) {
-        audioHtml += '<span><i class="fa fa-microphone"></i>&nbsp;</span>';
-      }
-      if (enableAudioPromptAndFeedback) {
-        audioHtml += '<span class="fa fa-headphones">&nbsp;</span>';
-      }
-      innerBtnHtml = name + "<br>" + audioHtml;
+    //Display inner html for audio icons
+    let audioHtml = "";
+    if (audioInputEnabled) {
+      audioHtml += '<span><i class="fa fa-microphone"></i>&nbsp;</span>';
+    }
+    if (enableAudioPromptAndFeedback) {
+      audioHtml += '<span class="fa fa-headphones">&nbsp;</span>';
+    }
+    innerBtnHtml = name + "<br>" + audioHtml;
 
-      addButton(
-          $('<button type=\'button\' id=\''+TDFId+'\' name=\''+name+'\'>')
-              .addClass('btn btn-block btn-responsive tdfButton')
-              .attr('data-tdfid', TDFId)
-              .attr('data-lessonname', name)
-              .attr('data-currentStimuliSetId', currentStimuliSetId)
-              .attr('data-ignoreOutOfGrammarResponses', ignoreOutOfGrammarResponses)
-              .attr('data-speechOutOfGrammarFeedback', speechOutOfGrammarFeedback)
-              .attr('data-isMultiTdf', isMultiTdf)
-              .attr('disabled', isOverDue)
-              .html(innerBtnHtml), audioInputEnabled, audioOutputEnabled,
-      );
-    });
+    addButton(
+        $('<button type=\'button\' id=\''+TDFId+'\' name=\''+name+'\'>')
+            .addClass('btn btn-block btn-responsive tdfButton')
+            .attr('data-tdfid', TDFId)
+            .attr('data-lessonname', name)
+            .attr('data-currentStimuliSetId', currentStimuliSetId)
+            .attr('data-ignoreOutOfGrammarResponses', ignoreOutOfGrammarResponses)
+            .attr('data-speechOutOfGrammarFeedback', speechOutOfGrammarFeedback)
+            .attr('data-isMultiTdf', isMultiTdf)
+            .attr('disabled', isOverDue)
+            .html(innerBtnHtml), audioInputEnabled, audioOutputEnabled,
+    );
   });
 };
 

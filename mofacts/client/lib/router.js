@@ -168,7 +168,6 @@ const restrictedRoutes = [
   'contentGeneration',
   'tdfAssignmentEdit',
   'instructorReporting',
-  'studentReporting',
   'feedback',
   'experimentSettings',
   'classControlPanel',
@@ -210,6 +209,18 @@ for (const route of defaultBehaviorRoutes) {
     action: getDefaultRouteAction(route),
   });
 }
+
+Router.route('/studentReporting', {
+  name: 'client.studentReporting',
+  waitOn: function() {
+    return [Meteor.subscribe('allTdfs', 'all')];
+  },
+  action: function() {
+    Session.set('curModule', routeName.toLowerCase());
+    console.log(routeName + ' ROUTE');
+    this.render(routeName);
+  }
+})
 
 Router.route('/', {
   name: 'client.index',
@@ -273,11 +284,22 @@ Router.route('/adminControls', {
 
 Router.route('/profile', {
   name: 'client.profile',
+  waitOn: function() {
+    let assignedTdfs = Meteor.user()?.profile?.assignedTdfs || 'all';
+    let curCourseId = Meteor.user()?.profile?.curClass?.courseId || 'undefined'
+    let allSubscriptions = [
+      Meteor.subscribe('allTdfs', assignedTdfs),
+      Meteor.subscribe('userExperimentState', assignedTdfs)
+    ];
+    if (curCourseId != 'undefined')
+      allSubscriptions.push(Meteor.subscribe('Assignments', curCourseId));
+    if (Roles.userIsInRole(Meteor.user(), ['admin'])) {
+      allSubscriptions.push(Meteor.subscribe('allUsers'));
+    }
+    return allSubscriptions;
+  },
   action: function() {
     if (Meteor.user()) {
-      if (Roles.userIsInRole(Meteor.user(), ['admin'])) {
-        this.subscribe('allUsers').wait();
-      }
       const loginMode = Meteor.user().profile.loginMode;
       console.log('loginMode: ' + loginMode);
 
@@ -493,7 +515,7 @@ Router.route('/card', {
     return [ 
       Meteor.subscribe('assets', Session.get('currentTdfFile').ownerId, Session.get('currentStimuliSetId')),
       Meteor.subscribe('userComponentStates', Session.get('currentTdfId')),
-      Meteor.subscribe('currentExperimentTdfs', Session.get('currentTdfId')),
+      Meteor.subscribe('allTdfs', Session.get('currentTdfId')),
       Meteor.subscribe('userExperimentState', Session.get('currentTdfId')),
     ]
   },

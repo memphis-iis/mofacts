@@ -80,13 +80,17 @@ function testLogin() {
                 const currentUser = Meteor.users.findOne({_id: Meteor.userId()}).username;
                 console.log(currentUser + ' was test logged in successfully! Current route is ',
                     Router.current().route.getName());
-              }
+              } 
+              const curClass = Session.get('curClass');
+              const curTeacher = Session.get('curTeacher');
               let sectionName = "";
-              if(Session.get('curClass').sectionName){
-                sectionName = "/" + Session.get('curClass').sectionName;
+              if(curClass.sectionName){
+                sectionName = "/" + curClass.sectionName;
               }
-              const entryPoint = `${Session.get('curTeacher').username}/${Session.get('curClass').courseName + sectionName}`
-              await meteorCallAsync('setUserLoginData', entryPoint, 'southwest', Session.get('curTeacher'), Session.get('curClass'));
+              
+              const asignedTDFIds = await meteorCallAsync('getTdfsAssignedToStudent', Meteor.userId(), curClass.sectionId)
+              const entryPoint = `${curTeacher.username}/${curClass.courseName + sectionName}`
+              await meteorCallAsync('setUserLoginData', entryPoint, 'southwest', curTeacher, curClass, asignedTDFIds);
               Meteor.call('logUserAgentAndLoginTime', Meteor.userId(), navigator.userAgent);
               Meteor.call('updatePerformanceData', 'login', 'signinSouthwest.testLogin', Meteor.userId());
               Meteor.logoutOtherClients();
@@ -233,17 +237,20 @@ Template.signInSouthwest.events({
       if (!!data && !!data.error) {
         alert('Problem logging in: ' + data.error);
       } else {
-        Meteor.call('addUserToTeachersClass', Meteor.userId(), Session.get('curTeacher')._id, Session.get('curClass').sectionId, async function(err, result) {
+        const curTeacher = Session.get('curTeacher');
+        const curClass = Session.get('curClass');
+        Meteor.call('addUserToTeachersClass', Meteor.userId(), curTeacher._id, curClass.sectionId, async function(err, result) {
           if (err) {
             console.log('error adding user to teacher class: ' + err);
           }
           console.log('addUserToTeachersClass result: ' + result);
           let sectionName = "";
-          if(Session.get('curClass').sectionName){
-            sectionName = "/" + Session.get('curClass').sectionName;
+          if(curClass.sectionName){
+            sectionName = "/" + curClass.sectionName;
           }
-          const entryPoint = `${Session.get('curTeacher').username}/${Session.get('curClass').courseName + sectionName}`
-          await meteorCallAsync('setUserLoginData', entryPoint, 'southwest', Session.get('curTeacher'), Session.get('curClass'));
+          const asignedTDFIds = await meteorCallAsync('getTdfsAssignedToStudent', Meteor.userId(), curClass.sectionId)
+          const entryPoint = `${curTeacher.username}/${curClass.courseName + sectionName}`
+          await meteorCallAsync('setUserLoginData', entryPoint, 'southwest', curTeacher, curClass, asignedTDFIds);
           Meteor.call('logUserAgentAndLoginTime', Meteor.userId(), navigator.userAgent);
           Meteor.call('updatePerformanceData', 'login', 'signinSouthwest.clickSamlLogin', Meteor.userId());
           Meteor.logoutOtherClients();

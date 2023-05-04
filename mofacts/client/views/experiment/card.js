@@ -2768,8 +2768,7 @@ function stopRecording() {
 // END WEB AUDIO SECTION
 
 async function getExperimentState() {
-  const curExperimentState = await meteorCallAsync('getExperimentState',
-      Meteor.userId(), Session.get('currentRootTdfId'));
+  const curExperimentState = GlobalExperimentStates.findOne({TDFId: Session.get('currentTdfId')}).experimentState;
   const sessExpState = Session.get('currentExperimentState');
   console.log('getExperimentState:', curExperimentState, sessExpState);
   Meteor.call('updatePerformanceData', 'utlQuery', 'card.getExperimentState', Meteor.userId());
@@ -2779,11 +2778,27 @@ async function getExperimentState() {
 
 function updateExperimentState(newState, codeCallLocation, unitEngineOverride = {}) {
   console.log('currentExperimentState:', curExperimentState);
-  let experimentId = Session.get('experimentId');
   if (unitEngineOverride && Object.keys(unitEngineOverride).length > 0)
     curExperimentState = unitEngineOverride;
   else if (!curExperimentState)
     curExperimentState = {};
+
+  let experimentId = curExperimentState._id;
+  if(!experimentId){
+    let globalExperimentState = GlobalExperimentStates.findOne({TDFId: newState.currentTdfId});
+    if(globalExperimentState){
+      experimentId = globalExperimentState._id;
+    } else {
+      curExperimentState = Object.assign(JSON.parse(JSON.stringify(curExperimentState)), newState);
+      GlobalExperimentStates.insert({
+        userId: Meteor.userId(),
+        TDFId: curExperimentState.currentTdfId,
+        experimentState: curExperimentState
+      });
+      console.log('updateExperimentState', codeCallLocation, '\nnew:', curExperimentState);
+      return Session.get('currentRootTdfId');
+    }
+  }
   delete curExperimentState._id;
   curExperimentState = Object.assign(JSON.parse(JSON.stringify(curExperimentState)), newState);
   GlobalExperimentStates.update({_id: experimentId}, {$set: {experimentState: curExperimentState}});
@@ -2824,7 +2839,7 @@ async function resumeFromComponentState() {
   // condition selection. It will be our responsibility to update
   // currentTdfId and currentStimuliSetId based on experimental conditions
   // (if necessary)
-  const rootTDFBoxed = await meteorCallAsync('getTdfById', Session.get('currentRootTdfId'));
+  const rootTDFBoxed = Tdfs.findOne({_id: Session.get('currentRootTdfId')});
   const rootTDF = rootTDFBoxed.content;
   if (!rootTDF) {
     console.log('PANIC: Unable to load the root TDF for learning', Session.get('currentRootTdfId'));
@@ -2852,7 +2867,8 @@ async function resumeFromComponentState() {
     } else {
       // Select condition and save it
       console.log('No previous experimental condition: Selecting from ' + setspec.condition.length);
-      conditionTdfId = await meteorCallAsync("getTdfIdByStimSetIdAndFileName", Session.get('currentStimuliSetId'), _.sample(setspec.condition));// Transform from tdffilename to tdfid
+      const shortFileName =  _.sample(setspec.condition).replace('.json', '').replace('.xml', '')
+      conditionTdfId = Tdfs.findOne({"content.fileName": shortFileName, stimuliSetId: stimuliSetId})._id;
       newExperimentState.conditionTdfId = conditionTdfId;
       newExperimentState.conditionNote = 'Selected from ' + _.display(setspec.condition.length) + ' conditions';
       console.log('Exp Condition', conditionTdfId, newExperimentState.conditionNote);
@@ -2868,7 +2884,7 @@ async function resumeFromComponentState() {
     // Now we have a different current TDF (but root stays the same)
     Session.set('currentTdfId', conditionTdfId);
 
-    const curTdf = await meteorCallAsync('getTdfById', conditionTdfId);
+    const curTdf = Tdfs.findOne({_id: conditionTdfId});
     Session.set('currentTdfFile', curTdf.content);
     Session.set('currentTdfName', curTdf.content.fileName);
 
@@ -2887,7 +2903,7 @@ async function resumeFromComponentState() {
   }
 
   const stimuliSetId = Session.get('currentStimuliSetId');
-  const stimuliSet = await meteorCallAsync('getStimuliSetById', stimuliSetId);
+  const stimuliSet = Tdfs.findOne({ stimuliSetId: stimuliSetId }).stimuli
 
   Session.set('currentStimuliSet', stimuliSet);
   Session.set('feedbackUnset', Session.get('fromInstructions') || Session.get('feedbackUnset'));
@@ -3140,6 +3156,7 @@ async function processUserTimesLog() {
   } else {
     await resetEngine(Session.get('currentUnitNumber'));
     newExperimentState.unitType = engine.unitType;
+    newExperimentState.TDFId = Session.get('currentTdfId');
 
     // Depends on unitType being set in initialized unit engine
     Session.set('currentDeliveryParams', getCurrentDeliveryParams());
