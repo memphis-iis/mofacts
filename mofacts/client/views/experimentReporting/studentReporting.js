@@ -188,7 +188,7 @@ async function updateDashboard(selectedTdfId){
 
 async function drawDashboard(studentId, selectedTdfId){
   // Get TDF Parameters
-  selectedTdf = await meteorCallAsync('getTdfById',selectedTdfId);
+  selectedTdf = Tdfs.findOne({_id: selectedTdfId});
   selectedTdfIdProgressReportParams = selectedTdf.content.tdfs.tutor.setspec.progressReporterParams;
   let curStimSetId = selectedTdf.stimuliSetId;
   let clusterlist = [];

@@ -40,3 +40,21 @@ DynamicAssets = new FilesCollection({
     return 'Please upload image, audio, or video fi with size equal or less than 10MB';
   }
 });
+
+ComponentStates.allow({
+  update: function(userId, doc, fieldNames, modifier) {
+    return userId === doc.userId;
+  },
+  insert: function(userId, doc) {
+    return userId === doc.userId;
+  }
+});
+
+GlobalExperimentStates.allow({
+  update: function(userId, doc, fieldNames, modifier) {
+    return userId === doc.userId;
+  },
+  insert: function(userId, doc) {
+    return userId === doc.userId;
+  }
+});

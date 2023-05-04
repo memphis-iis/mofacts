@@ -11,7 +11,7 @@ import {
   updateCurStudentPerformance,
   getAllCurrentStimAnswers
 } from '../../lib/currentTestingHelpers';
-import {getCurrentClusterAndStimIndices, updateExperimentState, updateExperimentStateSync} from './card';
+import {updateExperimentState} from './card';
 import {MODEL_UNIT, SCHEDULE_UNIT} from '../../../common/Definitions';
 import {meteorCallAsync} from '../../index';
 import {displayify} from '../../../common/globalHelpers';
@@ -263,7 +263,6 @@ function defaultUnitEngine(curExperimentData) {
         }
       }
       const originalDisplay = JSON.parse(JSON.stringify(currentDisplay));
-      Session.set('originalDisplay', originalDisplay);
       newExperimentState.originalDisplay = originalDisplay;
 
       let currentQuestion = currentDisplay.clozeText || currentDisplay.text;
@@ -273,8 +272,6 @@ function defaultUnitEngine(curExperimentData) {
       const correctAnswer = Answers.getDisplayAnswerText(currentStimAnswer);
       const cacheWords = await meteorCallAsync('getMatchingDialogueCacheWordsForAnswer', correctAnswer);
       Session.set('dialogueCacheHint', cacheWords.join(','));
-
-      Session.set('originalAnswer', currentStimAnswer);
       newExperimentState.originalAnswer = currentStimAnswer;
       currentStimAnswer = currentStimAnswer.toLowerCase();
 
@@ -285,7 +282,6 @@ function defaultUnitEngine(curExperimentData) {
         currentQuestionPart2 = prompts[1];
       }
       Session.set('originalQuestion', currentQuestion);
-      Session.set('originalQuestion2', currentQuestionPart2);
       newExperimentState.originalQuestion = currentQuestion;
       newExperimentState.originalQuestion2 = currentQuestionPart2;
 
@@ -337,10 +333,7 @@ function defaultUnitEngine(curExperimentData) {
           console.log('HintLevel: setUpCardQuestionAndAnswerGlobals, Hints Disabled',whichHintLevel);
         }
       }
-      Session.set('currentAnswerSyllables', currentAnswerSyllables);
-      Session.set('currentAnswer', currentAnswer);
       Session.set('clozeQuestionParts', clozeQuestionParts);
-      Session.set('currentQuestionPart2', currentQuestionPart2PostSylls);
       newExperimentState.currentAnswerSyllables = currentAnswerSyllables;
       newExperimentState.currentAnswer = currentAnswer;
       newExperimentState.clozeQuestionParts = clozeQuestionParts || null;
@@ -352,8 +345,6 @@ function defaultUnitEngine(curExperimentData) {
       } else if (currentDisplay.text) {
         currentDisplay.text = currentQuestionPostSylls;
       }
-
-      Session.set('currentDisplayEngine', currentDisplay);
       newExperimentState.currentDisplayEngine = currentDisplay;
 
       return newExperimentState;
@@ -411,6 +402,8 @@ function modelUnitEngine() {
   // creation, so if they leave in the middle of practice and come back to
   // the unit we'll start all over.
   const unitStartTimestamp = Date.now();
+
+  const responseIDMap = {};
 
   function getStimParameterArray(clusterIndex, whichStim) {
     return getStimCluster(clusterIndex).stims[whichStim].params.split(',').map((x) => _.floatval(x));
@@ -1036,8 +1029,9 @@ function modelUnitEngine() {
       const curKCBase = getStimKCBaseForCurrentStimuliSet();
       let stimulusKC = curKCBase;
       console.log('initializeActRModel', numQuestions, curKCBase);
-      const reponseKCMap = await meteorCallAsync('getReponseKCMap');
-      console.log('initializeActRModel,reponseKCMap', reponseKCMap);
+      const responseKCMap = await meteorCallAsync('getResponseKCMap');
+      Session.set('responseKCMap', responseKCMap)
+      console.log('initializeActRModel,responseKCMap', responseKCMap);
       for (i = 0; i < numQuestions; ++i) {
         const card = {
           clusterKC: (curKCBase + i),
@@ -1107,7 +1101,7 @@ function modelUnitEngine() {
           const response = stripSpacesAndLowerCase(Answers.getDisplayAnswerText(rawResponse));
           if (!(response in initResponses)) {
             initResponses[response] = {
-              KCId: reponseKCMap[response],
+              KCId: responseKCMap[response],
               hintLevel: null,
               priorCorrect: 0,
               allTimeCorrect: 0,
@@ -1146,6 +1140,7 @@ function modelUnitEngine() {
     saveSingleComponentState: function(stim, card, response) {
       const userId = Meteor.userId();
       const TDFId = Session.get('currentTdfId');
+      const responseKCMap = Session.get('responseKCMap')
       const cardState = {
         userId,
         TDFId,
@@ -1211,37 +1206,21 @@ function modelUnitEngine() {
         responseText: Object.entries(cardProbabilities.responses).find(r => r[1] == response)[0], // not actually in db, need to lookup/assign kcid when loading
         instructionQuestionResult: null,
       };
-      const componentStates = [cardState, stimState, responseState];
-      console.log('saveSingleComponentState', componentStates);
-      try{
-        if(!Meteor.user().profile.impersonating){
-          Meteor.call('setComponentStatesByUserIdTDFIdAndUnitNum',
-              Meteor.userId(), Session.get('currentTdfId'), componentStates);
-        }
-      }
-      catch (error){
-        console.error("Error saving componentstate.", error);
-        console.log('Component state may not have saved. Ending the trial now.');
-        alert('An unexpected error occured. Please check your internet connection and try again. The error has been reported to the administrators.');
-        const curUser = Meteor.userId();
-        const curPage = document.location.pathname;
-        const sessionVars = Session.all();
-        const userAgent = navigator.userAgent;
-        const logs = console.logs;
-        const currentExperimentState = Session.get('currentExperimentState');
-        Meteor.call('sendUserErrorReport', curUser, error, curPage, sessionVars,
-            userAgent, logs, currentExperimentState);
-        Router.go('/profile');
-      }
-      
+      response._id = responseIDMap[responseKCMap[responseState.responseText]];
+      if (ComponentStates.update({_id: card._id}, {$set: cardState}) == 0)
+        ComponentStates.insert(cardState);
+      if (ComponentStates.update({_id: stim._id}, {$set: stimState}) == 0)
+        ComponentStates.insert(stimState);
+      if (ComponentStates.update({_id: response._id}, {$set: responseState}) == 0)
+        ComponentStates.insert(responseState); 
     },
 
     saveComponentStatesSync: function() {
       const userId = Meteor.userId();
       const TDFId = Session.get('currentTdfId');
-      const componentStates = [];
       for (let cardIndex=0; cardIndex<cardProbabilities.cards.length; cardIndex++) {
         const card = cardProbabilities.cards[cardIndex];
+        const _id = card._id;
         const cardState = {
           userId,
           TDFId,
@@ -1264,9 +1243,11 @@ function modelUnitEngine() {
           outcomeStack: typeof card.outcomeStack == 'string' ?  card.outcomeStack.split(','):  card.outcomeStack,
           instructionQuestionResult: Session.get('instructionQuestionResult'),
         };
-        componentStates.push(cardState);
+        if (!ComponentStates.update({_id: _id}, {$set: cardState}))
+          ComponentStates.insert(cardState);
         for (let stimIndex=0; stimIndex<card.stims.length; stimIndex++) {
           const stim = card.stims[stimIndex];
+          const _id = stim._id;
           const stimState = {
             userId,
             TDFId,
@@ -1289,11 +1270,13 @@ function modelUnitEngine() {
             instructionQuestionResult: null,
             timesSeen: stim.timesSeen,
           };
-          componentStates.push(stimState);
+          if (!ComponentStates.update({_id: _id}, {$set: stimState}))
+            ComponentStates.insert(stimState);
         }
       }
 
       for (const [responseText, response] of Object.entries(cardProbabilities.responses)) {
+        const _id = responseIDMap[response.KCId];
         const responseState = {
           userId,
           TDFId,
@@ -1315,28 +1298,8 @@ function modelUnitEngine() {
           responseText, // not actually in db, need to lookup/assign kcid when loading
           instructionQuestionResult: null,
         };
-        componentStates.push(responseState);
-      }
-      console.log('saveComponentStates', componentStates);
-      try{
-        if(!Meteor.user().profile.impersonating){
-          Meteor.call('setComponentStatesByUserIdTDFIdAndUnitNum',
-              Meteor.userId(), Session.get('currentTdfId'), componentStates);
-        }
-      }
-      catch (error){
-        console.error("Error saving componentstate.", error);
-        console.log('Component state may not have saved. Ending the trial now.');
-        alert('An unexpected error occured. Please check your internet connection and try again. The error has been reported to the administrators.');
-        const curUser = Meteor.userId();
-        const curPage = document.location.pathname;
-        const sessionVars = Session.all();
-        const userAgent = navigator.userAgent;
-        const logs = console.logs;
-        const currentExperimentState = Session.get('currentExperimentState');
-        Meteor.call('sendUserErrorReport', curUser, error, curPage, sessionVars,
-            userAgent, logs, currentExperimentState);
-        Router.go('/profile');
+        if (!ComponentStates.update({_id: _id}, {$set: responseState})) 
+          ComponentStates.insert(responseState);
       }
     },
     loadComponentStates: async function() {// componentStates [{},{}]
@@ -1350,8 +1313,7 @@ function modelUnitEngine() {
       let hiddenItems = Session.get('hiddenItems');
       if (hiddenItems === undefined) hiddenItems = []
 
-      const componentStates = await meteorCallAsync('getComponentStatesByUserIdTDFIdAndUnitNum',
-          Meteor.userId(), Session.get('currentTdfId'));
+      const componentStates = await ComponentStates.find({}, { sort: { KCId: -1 } }).fetch()
       console.log('loadComponentStates,componentStates:', componentStates);
 
       const clusterStimKCs = {};
@@ -1390,7 +1352,7 @@ function modelUnitEngine() {
           const clusterKC = componentCard.KCId;
           const cardIndex = clusterKC % curKCBase;
           const componentData = _.pick(componentCard,
-              ['firstSeen', 'lastSeen', 'outcomeStack','hintLevel', 'priorCorrect', 'priorIncorrect', 'allTimeCorrect', 'allTimeIncorrect', 'priorStudy',
+              ['_id', 'firstSeen', 'lastSeen', 'outcomeStack','hintLevel', 'priorCorrect', 'priorIncorrect', 'allTimeCorrect', 'allTimeIncorrect', 'priorStudy',
                 'totalPracticeDuration', 'allTimeTotalPracticeDuration', 'trialsSinceLastSeen']);
           componentData.clusterKC = clusterKC;
           Object.assign(cards[cardIndex], componentData);
@@ -1407,7 +1369,7 @@ function modelUnitEngine() {
             const stimulusKC = componentStim.KCId;
             const stimIndex = cards[cardIndex].stims.findIndex((x) => x.stimulusKC == stimulusKC);
             const componentStimData = _.pick(componentStim,
-                ['firstSeen', 'lastSeen', 'outcomeStack','hintLevel', 'priorCorrect', 'priorIncorrect', 'allTimeCorrect', 'allTimeIncorrect', 'curSessionPriorCorrect', 'curSessionPriorIncorrect', 'priorStudy',
+                ['_id', 'firstSeen', 'lastSeen', 'outcomeStack','hintLevel', 'priorCorrect', 'priorIncorrect', 'allTimeCorrect', 'allTimeIncorrect', 'curSessionPriorCorrect', 'curSessionPriorIncorrect', 'priorStudy',
                 'allTimeTotalPracticeDuration', 'totalPracticeDuration']);
             Object.assign(cards[cardIndex].stims[stimIndex], componentStimData);
             cards[cardIndex].stims[stimIndex].hasBeenIntroduced = componentStim.firstSeen > 0;
@@ -1432,6 +1394,9 @@ function modelUnitEngine() {
                 card.stims.filter((x) => x.stimulusKC != stimulusKC).reduce((acc, stim) => acc +
                     stim.totalPracticeDuration, 0), 0);
           }
+        }
+        for (const response of responses){
+          responseIDMap[response.KCId] = response._id;
         }
         console.log('loadComponentStates2', cards, stims, probsMap, componentStates,
             clusterStimKCs, stimProbabilityEstimates);
@@ -1534,7 +1499,7 @@ function modelUnitEngine() {
       return indices;
     },
 
-    selectNextCard: async function(indices) {
+    selectNextCard: async function(indices, curExperimentState) {
       // The cluster (card) index, the cluster version (stim index), and
       // whether or not we should show the overlearning text is determined
       // here. See calculateCardProbabilities for how prob.probability is
@@ -1602,7 +1567,7 @@ function modelUnitEngine() {
       newExperimentState.questionIndex = 1;
 
       Session.set('questionIndex', 0); // questionIndex doesn't have any meaning for a model
-      Session.set('showOverlearningText', false);
+      curExperimentState.showOverlearningText = false;
 
       updateCardAndStimData(cardIndex, whichStim);
 
@@ -1652,7 +1617,7 @@ function modelUnitEngine() {
 
       try {
         this.saveComponentStatesSync();
-        updateExperimentState(newExperimentState, 'unitEngine.modelUnitEngine.selectNextCard');
+        updateExperimentState(newExperimentState, 'unitEngine.modelUnitEngine.selectNextCard', curExperimentState);
       } catch (e) {
         console.log('error in select next card server calls:', e);
         throw new Error('error in select next card server calls:', e);
@@ -2155,7 +2120,7 @@ function scheduleUnitEngine() {
       return schedule;
     },
 
-    selectNextCard: async function() {
+    selectNextCard: async function(indices, curExperimentState) {
       const questionIndex = Session.get('questionIndex');
       const sched = this.getSchedule();
       const questInfo = sched.q[questionIndex];
@@ -2182,14 +2147,14 @@ function scheduleUnitEngine() {
 
       Session.set('testType', questInfo.testType);
       Session.set('questionIndex', questionIndex + 1);
-      Session.set('showOverlearningText', false); // No overlearning in a schedule
+      curExperimentState.showOverlearningText = false;
 
       console.log('SCHEDULE UNIT card selection => ',
           'cluster-idx-unmapped:', curClusterIndex,
           'whichStim:', curStimIndex,
       );
 
-      updateExperimentStateSync(newExperimentState, 'question');
+      updateExperimentState(newExperimentState, 'question', curExperimentState);
     },
 
     findCurrentCardInfo: function() {
