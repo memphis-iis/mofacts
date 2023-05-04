@@ -98,17 +98,20 @@ Template.signIn.events({
       if (!!data && !!data.error) {
         alert('Problem logging in: ' + data.error);
       } else {
-        Meteor.call('addUserToTeachersClass', Meteor.userId(), Session.get('curTeacher')._id, Session.get('curClass').sectionId, async function(err, result) {
+        const curTeacher = Session.get('curTeacher');
+        const curClass = Session.get('curClass');
+        Meteor.call('addUserToTeachersClass', Meteor.userId(), curTeacher._id, curClass.sectionId, async function(err, result) {
           if (err) {
             console.log('error adding user to teacher class: ' + err);
           }
           console.log('addUserToTeachersClass result: ' + result);
           let sectionName = "";
-          if(Session.get('curClass').sectionName){
-            sectionName = "/" + Session.get('curClass').sectionName;
+          if(curClass.sectionName){
+            sectionName = "/" + curClass.sectionName;
           }
-          const entryPoint = `${Session.get('curTeacher').username}/${Session.get('curClass').courseName + sectionName}`
-          await meteorCallAsync('setUserLoginData', entryPoint, 'southwest', Session.get('curTeacher'), Session.get('curClass'));
+          const asignedTDFIds = await meteorCallAsync('getTdfsAssignedToStudent', Meteor.userId(), curClass.sectionId)
+          const entryPoint = `${curTeacher.username}/${curClass.courseName + sectionName}`
+          await meteorCallAsync('setUserLoginData', entryPoint, 'southwest', curTeacher, curClass, asignedTDFIds);
           Meteor.call('logUserAgentAndLoginTime', Meteor.userId(), navigator.userAgent);
           Meteor.call('updatePerformanceData', 'login', 'signinSouthwest.clickSamlLogin', Meteor.userId());
           Meteor.logoutOtherClients();
@@ -231,8 +234,10 @@ Template.signIn.helpers({
 
 // Called after we have signed in
 function signinNotify(landingPage = '/profile') {
-  if(Session.get('curTeacher') && Session.get('curClass')){
-    Meteor.call('addUserToTeachersClass', Meteor.userId(), Session.get('curTeacher')._id, Session.get('curClass').sectionId,
+  const curClass = Session.get('curClass');
+  const curTeacher = Session.get('curTeacher');
+  if(curTeacher && curClass){
+    Meteor.call('addUserToTeachersClass', Meteor.userId(), curTeacher._id, curClass.sectionId,
     async function(err, result) {
       if (err) {
         console.log('error adding user to teacher class: ' + err);
@@ -241,11 +246,12 @@ function signinNotify(landingPage = '/profile') {
       }
       console.log('addUserToTeachersClass result: ' + result);
       let sectionName = "";
-      if(Session.get('curClass').sectionName){
-        sectionName = "/" + Session.get('curClass').sectionName;
+      if(curClass.sectionName){
+        sectionName = "/" + curClass.sectionName;
       }
-      const entryPoint = `${Session.get('curTeacher').username}/${Session.get('curClass').courseName + sectionName}`
-      await meteorCallAsync('setUserLoginData', entryPoint, Session.get('loginMode'), Session.get('curTeacher'), Session.get('curClass'));
+      const asignedTDFIds = await meteorCallAsync('getTdfsAssignedToStudent', Meteor.userId(), curClass.sectionId)
+      const entryPoint = `${curTeacher.username}/${curClass.courseName + sectionName}`
+      await meteorCallAsync('setUserLoginData', entryPoint, Session.get('loginMode'), curTeacher, curClass, asignedTDFIds);
 
     });
   }
@@ -403,7 +409,7 @@ function userPasswordCheck() {
         alert('This login page is not for Mechanical Turk workers. Please use the link provided with your HIT');
         $('#signInButton').prop('disabled', false);
         return;
-      }    
+      }
       signinNotify();
       await meteorCallAsync('setUserLoginData', 'direct', Session.get('loginMode'));
     }

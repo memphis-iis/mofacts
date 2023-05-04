@@ -379,14 +379,7 @@ Template.profile.rendered = async function() {
   sessionCleanUp();
   await checkUserSession()
   Session.set('showSpeechAPISetup', true);
-  let allTdfs;
-  if(Meteor.user().profile.loginMode === 'southwest') {
-    const curSectionId = Meteor.user().profile.curClass.sectionId;
-    allTdfs = await meteorCallAsync('getTdfsAssignedToStudent', Meteor.userId(), curSectionId);
-  } else {
-    allTdfs = await meteorCallAsync('getAllTdfs');
-  }
-
+  let allTdfs = Tdfs.find().fetch();
 
   console.log('allTdfs', allTdfs, typeof(allTdfs));
   Session.set('allTdfs', allTdfs);
@@ -406,7 +399,7 @@ Template.profile.rendered = async function() {
 
   //Get all course tdfs
   const courseId = Meteor.user().profile.curClass ? Meteor.user().profile.curClass.courseId : null;
-  const courseTdfs = await meteorCallAsync('getTdfsAssignedToCourseId', courseId);
+  const courseTdfs = Assignments.find({courseId: courseId}).fetch()
   console.log('courseTdfs', courseTdfs, courseId);
 
   // Check all the valid TDF's
@@ -618,7 +611,7 @@ async function selectTdf(currentTdfId, lessonName, currentStimuliSetId, ignoreOu
   // current TDF should be changed due to an experimental condition
   Session.set('currentRootTdfId', currentTdfId);
   Session.set('currentTdfId', currentTdfId);
-  const tdfResponse = await meteorCallAsync('getTdfById', currentTdfId);
+  const tdfResponse = Tdfs.findOne({_id: currentTdfId});
   const curTdfContent = tdfResponse.content;
   const curTdfTips = tdfResponse.content.tdfs.tutor.setspec.tips;
   Session.set('currentTdfFile', curTdfContent);

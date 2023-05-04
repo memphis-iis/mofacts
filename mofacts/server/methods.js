@@ -267,12 +267,6 @@ function createAwsHmac(secretKey, dataString) {
       .digest('base64');
 }
 
-async function getTdfIdByStimSetIdAndFileName(stimuliSetId, fileName){
-  const shortFileName = fileName.replace('.json', '').replace('.xml', '');
-  let tdf = Tdfs.find({"content.fileName": shortFileName, stimuliSetId: stimuliSetId}).fetch()._id;
-  return tdf;
-}
-
 async function getTdfById(TDFId) {
   const tdf = Tdfs.findOne({_id: TDFId});
   return tdf;
@@ -1007,9 +1001,14 @@ async function getTdfsAssignedToStudent(userId, curSectionId) {
       "course.semester": curSemester,
       "section._id": curSectionId
     }
+  },
+  {
+    $project:{
+      _id: 1,
+    }
   }
 ]).toArray();
-return tdfs;
+return tdfs.map(tdf => tdf._id);
 }
 
 async function getTdfNamesAssignedByInstructor(instructorID) {
@@ -2010,13 +2009,14 @@ function tdfUpdateConfirmed(updateObj){
   Tdfs.update({_id: updateObj._id},{$set:updateObj});
 }
 
-function setUserLoginData(entryPoint, loginMode, curTeacher = undefined, curClass = undefined){
+function setUserLoginData(entryPoint, loginMode, curTeacher = undefined, curClass = undefined, assignedTdfs = 'all'){
   serverConsole(Meteor.userId());
   let query = { 
     'profile.entryPoint': entryPoint,
     'profile.curTeacher': curTeacher,
     'profile.curClass': curClass,
-    'profile.loginMode': loginMode
+    'profile.loginMode': loginMode,
+    'profile.assignedTdfs': assignedTdfs
   };
   if(Meteor.userId()){
     Meteor.users.update(Meteor.userId(), { $set: query })
@@ -2620,11 +2620,6 @@ const methods = {
     return ownerMap;
   },
 
-  getTdfsAssignedToCourseId: (courseId) => {
-    const tdfs = Assignments.find({courseId: courseId}).fetch();
-    return tdfs;
-  },
-
   setVerbosity: function(level) {
     level = parseInt(level);
     verbosityLevel = level;
@@ -2652,7 +2647,7 @@ const methods = {
 }
 
 const asyncMethods = {
-  getAllTdfs, getTdfById, getTdfByFileName, getTdfByExperimentTarget, getTdfIDsAndDisplaysAttemptedByUserId,
+  getAllTdfs, getTdfByFileName, getTdfByExperimentTarget, getTdfIDsAndDisplaysAttemptedByUserId,
 
   getStimDisplayTypeMap, getStimuliSetById, getSourceSentences, 
 
@@ -2674,7 +2669,7 @@ const asyncMethods = {
 
   loadStimsAndTdfsFromPrivate, getListOfStimTags, getUserLastFeedbackTypeFromHistory,
 
-  getTdfIdByStimSetIdAndFileName, checkForUserException, 
+  checkForUserException, 
   
   makeGoogleTTSApiCall: async function(TDFId, message, audioPromptSpeakingRate, audioVolume, selectedVoice) {
     const ttsAPIKey = await getTdfTTSAPIKey(TDFId);
