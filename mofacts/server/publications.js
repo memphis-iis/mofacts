@@ -24,7 +24,7 @@ Meteor.publish('userComponentStates', function(tdfId) {
 Meteor.publish('userExperimentState', function(tdfId) {
     if(tdfId == 'all'){
         return GlobalExperimentStates.find({userId: this.userId});
-    } else if (typeof tdfId === object) {
+    } else if (typeof tdfId === 'object') {
         return GlobalExperimentStates.find({userId: this.userId, TDFId: {$in: tdfId}});
     }
     return GlobalExperimentStates.find({userId: this.userId, TDFId: tdfId});
@@ -33,7 +33,7 @@ Meteor.publish('userExperimentState', function(tdfId) {
 Meteor.publish('allTdfs', function(tdfIds) {
     if(tdfIds == 'all'){
         return Tdfs.find();
-    } else if (typeof tdfId === object) {
+    } else if (typeof tdfId === 'object') {
         return Tdfs.find({_id: {$in: tdfIds}});
     }
     return Tdfs.find({_id: tdfIds});
