@@ -523,7 +523,7 @@ function modelUnitEngine() {
         const stimCluster = getStimCluster(i);
         for (let j=0; j<card.stims.length; j++) {
           const stim = card.stims[j];
-          if (hiddenItems.includes(stim.stimulusKC)) continue;
+          if (hiddenItems.includes(stim.stimulusKC) || !stim.canUse) continue;
           if (stim.probabilityEstimate <= currentMin) {
             currentMin = stim.probabilityEstimate;
             clusterIndex=i;
@@ -553,7 +553,7 @@ function modelUnitEngine() {
           const stimCluster = getStimCluster(i);
           for (let j=0; j<card.stims.length; j++) {
             const stim = card.stims[j];
-            if (hiddenItems.includes(stim.stimulusKC)) continue;
+            if (hiddenItems.includes(stim.stimulusKC) || !stim.canUse) continue;
             if (stim.probabilityEstimate <= currentMin) {
               currentMin = stim.probabilityEstimate;
               stimIndex = j;
@@ -598,7 +598,7 @@ function modelUnitEngine() {
         const stimCluster = getStimCluster(i);
         for (let j=0; j<card.stims.length; j++) {
           const stim = card.stims[j];
-          if (hiddenItems.includes(stim.stimulusKC)) continue;
+          if (hiddenItems.includes(stim.stimulusKC) || !stim.canUse) continue;
           if (stim.probabilityEstimate > currentMax && stim.probabilityEstimate < ceiling) {
             currentMax = stim.probabilityEstimate;
             clusterIndex=i;
@@ -639,7 +639,7 @@ function modelUnitEngine() {
         const stimCluster = getStimCluster(i);
         for (let j=0; j<card.stims.length; j++) {
           const stim = card.stims[j];
-          if (hiddenItems.includes(stim.stimulusKC)) continue;
+          if (hiddenItems.includes(stim.stimulusKC) || !stim.canUse) continue;
           const parameters = stim.parameter;
           optimalProb = Math.log(parameters[1]/(1-parameters[1]));
           if (!optimalProb) {
@@ -687,7 +687,7 @@ function modelUnitEngine() {
         const stimCluster = getStimCluster(i);
         for (let j=0; j<card.stims.length; j++) {
           const stim = card.stims[j];
-          if (hiddenItems.includes(stim.stimulusKC)) continue;
+          if (hiddenItems.includes(stim.stimulusKC) || !stim.canUse) continue;
           const parameters = stim.parameter;
           let thresholdCeiling=parameters[1];
           if (!thresholdCeiling) {
@@ -792,19 +792,24 @@ function modelUnitEngine() {
           parms = this.calculateSingleProb(i, j, 0, count, stimCluster);
           tdfDebugLog.push(parms.debugLog);
           
-          if(stimCluster.stims[j].textStimulus || stimCluster.stims[j].clozeStimulus){
-            for(let k=0; k<Math.min(hintLevelIndex, 3); k++){
-              let hintLevelParms = this.calculateSingleProb(i, j, k, count, stimCluster);
-              hintLevelProbabilities.push(hintLevelParms.probability);
-              console.log('cluster: ' + i + ', card: ' + j + ', input hintlevel: ' + k + ', output hintLevel: ' + hintLevelParms.hintLevel + ', output probability: ' + hintLevelParms.probability) + ', debug message:' + hintLevelParms.debugLog;
+          if(parms.available === undefined || parms.available){
+            stim.canUse = true;
+            if(stimCluster.stims[j].textStimulus || stimCluster.stims[j].clozeStimulus){
+              for(let k=0; k<Math.min(hintLevelIndex, 3); k++){
+                let hintLevelParms = this.calculateSingleProb(i, j, k, count, stimCluster);
+                hintLevelProbabilities.push(hintLevelParms.probability);
+                console.log('cluster: ' + i + ', card: ' + j + ', input hintlevel: ' + k + ', output hintLevel: ' + hintLevelParms.hintLevel + ', output probability: ' + hintLevelParms.probability) + ', debug message:' + hintLevelParms.debugLog;
+              }
+              stim.hintLevelProbabilites = hintLevelProbabilities;
+              console.log('hintLevel probabilities', hintLevelProbabilities);
             }
-            stim.hintLevelProbabilites = hintLevelProbabilities;
-            console.log('hintLevel probabilities', hintLevelProbabilities);
+          } else {
+            stim.canUse = false;
           }
-          stim.probFunctionParameters = parms;
           stim.probabilityEstimate = parms.probability;
+          stim.probFunctionParameters = parms;
           if(!typeof stim.probabilityEstimate == "number"){
-            throw 'Error: Probability Estimate is undefined, NaN, or less than or equal to 0.';
+            throw 'Error: Probability Estimate is undefined or NaN.';
           }
           ptemp[count]=Math.round(100*parms.probability)/100;
           count++;           
@@ -1087,6 +1092,7 @@ function modelUnitEngine() {
             parameter: parameter,
             instructionQuestionResult: null,
             timesSeen: 0,
+            canUse: true,
           });
           stimulusKC += 1;
 
