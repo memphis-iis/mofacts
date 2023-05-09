@@ -2009,7 +2009,7 @@ function tdfUpdateConfirmed(updateObj){
   Tdfs.update({_id: updateObj._id},{$set:updateObj});
 }
 
-function setUserLoginData(entryPoint, loginMode, curTeacher = undefined, curClass = undefined, assignedTdfs = 'all'){
+function setUserLoginData(entryPoint, loginMode, curTeacher = undefined, curClass = undefined, assignedTdfs = undefined){
   serverConsole(Meteor.userId());
   let query = { 
     'profile.entryPoint': entryPoint,
@@ -2751,7 +2751,8 @@ const asyncMethods = {
     if (stimuli) {
       serverConsole(stimuli);
       const answerSyllableMap = {};
-      for (const stim of stimuli) {
+      for (const i in stimuli) {
+        const stim = stimuli[i];
         if(!stim.syllables){
           let syllableArray;
           const answer = stim.correctResponse;
@@ -2768,7 +2769,7 @@ const asyncMethods = {
             syllableArray = [answer];
             syllableGenerationError = e;
           }
-          stimuli[stim].syllables = syllableArray;
+          stimuli[i].syllables = syllableArray;
         }
       }
       Tdfs.update({'stimuliSetId': stimuliSetId}, {$set: {'stimuli': stimuli}});

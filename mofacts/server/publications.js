@@ -22,21 +22,25 @@ Meteor.publish('userComponentStates', function(tdfId) {
 });
 
 Meteor.publish('userExperimentState', function(tdfId) {
-    if(tdfId == 'all'){
-        return GlobalExperimentStates.find({userId: this.userId});
-    } else if (typeof tdfId === 'object') {
+    if (typeof tdfId === 'object') {
         return GlobalExperimentStates.find({userId: this.userId, TDFId: {$in: tdfId}});
     }
     return GlobalExperimentStates.find({userId: this.userId, TDFId: tdfId});
 });
 
-Meteor.publish('allTdfs', function(tdfIds) {
-    if(tdfIds == 'all'){
-        return Tdfs.find();
-    } else if (typeof tdfId === 'object') {
+Meteor.publish('allUserExperimentState', function() {
+    return GlobalExperimentStates.find({userId: this.userId});
+});
+
+Meteor.publish('currentTdf', function(tdfId) {
+    if (typeof tdfId === 'object') {
         return Tdfs.find({_id: {$in: tdfIds}});
     }
-    return Tdfs.find({_id: tdfIds});
+    return Tdfs.find({_id: tdfId});
+});
+
+Meteor.publish('allTdfs', function() {
+    return Tdfs.find();
 });
 
 Meteor.publish('Assignments', function(courseId) {
