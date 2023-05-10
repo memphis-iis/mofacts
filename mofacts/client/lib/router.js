@@ -119,6 +119,9 @@ function routeToSignin() {
 
 Router.route('/experiment/:target?/:xcond?', {
   name: 'client.experiment',
+  waitOn: function() {
+    return Meteor.subscribe('tdfByExperimentTarget', this.params.target)
+  },
   action: async function() {
     Session.set('curModule', 'experiment');
     // We set our session variable and also set a cookie (so that we still
