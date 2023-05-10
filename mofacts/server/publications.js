@@ -43,6 +43,10 @@ Meteor.publish('allTdfs', function() {
     return Tdfs.find();
 });
 
+Meteor.publish('tdfByExperimentTarget', function(experimentTarget) {
+    return Tdfs.find({"content.tdfs.tutor.setspec.experimentTarget": experimentTarget});
+});
+
 Meteor.publish('Assignments', function(courseId) {
     return Assignments.find({courseId: courseId});
 });
