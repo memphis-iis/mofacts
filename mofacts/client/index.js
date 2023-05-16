@@ -153,26 +153,6 @@ Template.DefaultLayout.onRendered(function() {
   });
   //load css into head based on user's preferences
   const user = Meteor.user();
-  if (user && user.profile && user.profile.css) {
-    css = user.profile.theme;
-    //if that field returns undefined, set it to /neo.css
-    if (!css) {
-      css = '/styles/neo.css';
-    }
-    //link that css file url to the head
-    $('head').append('<link id="theme" rel="stylesheet" href="' + css + '" type="text/css" />');
-    console.log('css loaded, ', css);
-  } else {
-    //use neo css if light theme is set or if no theme is set as a browser preference
-    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
-      console.log('light theme');
-      $('head').append('<link id="theme" rel="stylesheet" href="/styles/neo.css" type="text/css" />');
-    } else {
-      console.log('dark theme');
-      $('head').append('<link id="theme" rel="stylesheet" href="/styles/neo-dark.css" type="text/css" />');
-    }
-  }
-
   $('#helpModal').on('hidden.bs.modal', function() {
     if (window.currentAudioObj) {
       window.currentAudioObj.play();
