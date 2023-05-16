@@ -2,9 +2,11 @@
     <div class="container">
         <!-- page header -->
         <div class="row text-center">
-            <div class="col-lg-4 offset-lg-4 col-md-6 col-md-offset-4 col-sm-8 col-sm-offset-2 col-xs-12 spacer">
-                <h1>MoFaCTS</h1>
+            <div class="col-lg-4 offset-lg-4 col-md-6 col-md-offset-4 col-sm-8 col-sm-offset-2 col-xs-12">
+                <div class="vh-10"></div>
+                <h1 align-bottom>MoFaCTS</h1>
                 <span id="serverErrors"></span>
+                <div class="vh-5"></div>
             </div>
         </div>
         <!-- centered login form -->
@@ -16,21 +18,18 @@
                         {{#if experimentPasswordRequired}}
                             <input  type="password" id="password" value="" placeholder="Password"><br><br>
                         {{/if}}
+                        <div class="vh-5"></div>
                     {{else}}
                         <input  type="text" id="signInUsername" value="" placeholder="Username"><br>
                         <input  type="password" id="password" value="" placeholder="Password"><br><br>
                         <span class="help-inline danger errcheck" id="invalidLogin" hidden >Username password pair not found!</span>
+                        <div class="vh-5"></div>
                     {{/if}}
                     {{#if showTestLogin}}
                     <br>
                         <a id="testSignInButton">Test Login (password not required)</a>
                         <br>
                     {{/if}}
-                    <button type="button" id="signInButton" class="btn">Sign In</button>
-                    {{#unless isExperiment}}
-                        <button type="button" id="signUpButton" class="btn">Sign Up</button>
-                    {{/unless}}
-
                 </form>
             </div>
         </div>
@@ -38,7 +37,11 @@
         <!-- login with sso and google -->
         <div class="row text-center large-spacer login-sso-options">
             <div class="col-lg-4 offset-lg-4 col-md-6 col-md-offset-4 col-sm-8 col-sm-offset-2 col-xs-12 large-spacer">
-                <button type="button" id="signInButtonOAuth" class="btn">Sign In with Google</button><br><br>
+                <button type="button" id="signInButton" class="btn">Sign In</button><br>
+                {{#unless isExperiment}}
+                    <button type="button" id="signUpButton" class="btn">Sign Up</button><br>
+                {{/unless}}
+                <button type="button" id="signInButtonOAuth" class="btn">Sign In with Google</button><br>
                 <button type="button" id="signInWithSSOButton" class="btn" data-bs-toggle="modal" data-bs-target="#classSelectModal">Class Select / SSO</button>
             </div>
         </div>
@@ -47,20 +50,15 @@
         {{/unless}}
         <!-- modal for sso login, hidden by default -->
         <div class="modal" id="classSelectModal" tabindex="-1">
-            <div class="modal-dialog">
+            <div class="modal-dialog fade-in-up">
                 <div class="modal-content">
                   <div class="modal-header">
-                    <h5 class="modal-title">Class Select</h5>
+                    <h5 class="modal-title text-center w-100 p-3">Please type in your organization's URL</h5>
                   </div>
                   <div class="modal-body login-form ">
                     <form class="spacer">
-                        <!-- institution select form -->
-                        <select id="institutionSelect" class="form-select" aria-label="Default select example">
-                            <option selected>Select your institution</option>
-                            {{#each institutions}}
-                                <option value="{{this.route}}">{{this.name}}</option>
-                            {{/each}}
-                        </select>
+                        <!-- SSO URL input -->
+                        <input type="text" id="ssoUrl" value="" class="w-100 p-3" placeholder="https://sso.example.com"><br>
                         <!-- hidden teacher select form -->
                         <select id="teacherSelect" class="form-select" aria-label="Default select example" hidden>
                             <option selected>Select your teacher</option>
@@ -80,6 +78,8 @@
                           {{/each}}
                         </select>
                     </form>
+                    <div class="vh-5"></div>
+                    <div class="vh-35 d-md-none d-lg-none"></div>
                     <div class="row text-center">
                         <button type="button" class="btn">Sign In</button>
                         <button type="button" class="btn" data-bs-dismiss="modal">Close</button>
