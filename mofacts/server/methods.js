@@ -1901,15 +1901,6 @@ async function upsertStimFile(stimulusFileName, stimJSON, ownerId, packagePath =
     }
     let curAnswerSylls
     stim.syllables = curAnswerSylls;
-    if(stim.imageStimulus && stim.imageStimulus.split('http').length == 1){
-      //image is not a url
-      const imageFilePathArray = stim.imageStimulus.split('/');
-      const imageFileName = imageFilePathArray[imageFilePathArray.length - 1];
-      serverConsole('grabbing link for image', imageFileName);
-      const image = await DynamicAssets.findOne({name: imageFileName, userId: ownerId});
-      const imageLink = image.meta.link;
-      stim.imageStimulus = imageLink;
-    }
     formattedStims.push(stim);
   }
   Tdfs.upsert({"content.tdfs.tutor.setspec.stimulusfile": stimulusFileName}, {$set: {
@@ -1918,9 +1909,8 @@ async function upsertStimFile(stimulusFileName, stimJSON, ownerId, packagePath =
     rawStimuliFile: stimJSON, //raw stimuli
     stimuli: formattedStims, //formatted stimuli for use in the app
   }});
+  updateStimSyllables(stimuliSetId, formattedStims)
 }
-
-
 
 async function upsertTDFFile(tdfFilename, tdfJSON, ownerId, packagePath = null) {
   serverConsole('upsertTDFFile', tdfFilename);
@@ -2737,17 +2727,12 @@ const asyncMethods = {
   },
 
 
-  updateStimSyllables: async function(stimuliSetId) {
+  updateStimSyllables: async function(stimuliSetId, stimuli = undefined) {
     serverConsole('updateStimSyllables');
-    const stimuli = await Tdfs.rawCollection().aggregate([
-      {
-        $match: { stimuliSetId: stimuliSetId }
-      }, {
-        $unwind: { path: "$stimuli" }
-      }, {
-        $replaceRoot: { newRoot: "$stimuli" }
-      }]).toArray();
-    
+    if(!stimuli){
+      const tdf = await Tdfs.findOne({ stimuliSetId: stimuliSetId });
+      stimuli = tdf.stimuli
+    }
     if (stimuli) {
       serverConsole(stimuli);
       const answerSyllableMap = {};
