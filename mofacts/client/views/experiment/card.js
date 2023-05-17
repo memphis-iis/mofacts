@@ -1088,7 +1088,7 @@ function getCurrentFalseResponses() {
     typeof(cluster.stims[curStimIndex].incorrectResponses) == 'undefined') {
     return []; // No false responses
   } else {
-    return cluster.stims[curStimIndex].incorrectResponses.split(',');
+    return cluster.stims[curStimIndex].incorrectResponses;
   }
 }
 
