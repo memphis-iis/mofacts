@@ -70,7 +70,7 @@ function getNewItemFormat(stimFile, stimulusFileName, stimuliSetId, responseKCMa
     cluster.stims.forEach((stim) => {
       let incorrectResponses = null;
       if (stim.response.incorrectResponses) {
-        incorrectResponses = stim.response.incorrectResponses.join(',');
+        incorrectResponses = stim.response.incorrectResponses;
       }
 
       let responseKC;
