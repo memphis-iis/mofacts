@@ -34,7 +34,7 @@ Meteor.publish('allUserExperimentState', function() {
 
 Meteor.publish('currentTdf', function(tdfId) {
     if (typeof tdfId === 'object') {
-        return Tdfs.find({_id: {$in: tdfIds}});
+        return Tdfs.find({_id: {$in: tdfId}});
     }
     return Tdfs.find({_id: tdfId});
 });
