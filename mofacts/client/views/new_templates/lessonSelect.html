@@ -1,0 +1,61 @@
+<template name="lessonSelect">
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-md-12">
+        <div class="row" style="margin: 10px;">
+            <input id="practiceTDFSearch" type="text" placeholder="Select a lesson" alt="tdf search box">
+        </div>
+        <!-- search by tag form -->
+        <div class="row full-width">
+            <div class="header-box">
+                {{#if searching}}
+                    Search Results
+                {{else}}
+                    Available Lessons
+                {{/if}}
+            </div> 
+        </div> 
+        {{#if enabledTdfs}}
+            <div class="row row-cols-sm-1 row-cols-md-2 row-cols-lg-6">
+            {{#each enabledTdfs}}    
+                <div class="col mx-auto">
+                    <button id="{{this.tdfid}}" class="btn width-100-percent tdfButton" type="button" name="{{this.name}}"
+                    data-tdfid="{{this.tdfid}}"
+                    data-lessonname="{{this.name}}"
+                    data-currentStimuliSetId="{{this.currentStimuliSetId}}"
+                    data-ignoreOutOfGrammarResponses="{{this.ignoreOutOfGrammarResponses}}"
+                    data-speechOutOfGrammarFeedback="{{this.speechOutOfGrammarFeedback}}"
+                    data-isMultiTdf="{{this.isMultiTdf}}">{{this.name}}
+                    {{#if this.enableAudioPromptAndFeedback}}
+                        <span class="fa fa-headphones"></span>
+                    {{/if}}
+                    {{#if this.audioInputEnabled}}
+                        <span class="fa fa-microphone"></span>
+                    {{/if}}
+                    </button>
+                </div>  
+            {{/each}}
+            </div>
+        {{else}}
+            {{#if searching}}
+                <p class="width-80-percent text-center">
+                    No results found.
+                </p>
+            {{else}}
+                <div class="row full-width">
+                    <div class="alert">
+                    <div class="alert-icon">
+                        <i class="fas fa-info-circle"></i>
+                    </div>
+                    There are no lessons available. Please contact your administrator.
+                    </div>
+                </div> 
+                <div class="mx-auto text-center">
+                    <button id="reportError" data-bs-toggle="modal" data-bs-target="#errorReportingModal" class="btn">Report an Error</button>
+                </div>
+            {{/if}}
+        {{/if}}
+      </div>
+    </div>
+  </div>
+</template>

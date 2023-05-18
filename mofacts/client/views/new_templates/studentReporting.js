@@ -7,7 +7,7 @@ import gauge, {
   BaseDonut,
   TextRenderer
 
-} from '../../lib/gauge.js';
+} from '../../lib/gauge';
 import { _ } from 'core-js';
 
 Session.set('studentReportingTdfs', []);
@@ -103,6 +103,7 @@ Template.studentReporting.helpers({
   curTotalAttempts: () => Session.get('curTotalAttempts') || 0,
   curStudentPerformance: () => Session.get('curStudentPerformance'),
   curTotalTime: () => Session.get('practiceDuration'),
+  noTime: () => Session.get('practiceDuration') === 0,
   curStudentPerformanceCorrectInInteger: function() {
     var percentCorrectInteger = parseFloat(Session.get('stimsSeenPercentCorrect')).toFixed(0);
     return percentCorrectInteger;
@@ -112,6 +113,7 @@ Template.studentReporting.helpers({
   stimsNotSeenPredictedProbability: () => Session.get('stimsNotSeenPredictedProbability'),
   stimCount: () => Session.get('stimCount'),
   stimsSeen: () => Session.get('stimsSeen'),
+  tooFewStims: () => Session.get('stimsSeen'),
   itemMasteryRate: () => Session.get('itemMasteryRate'),
   itemMasteryTime: () => Session.get('itemMasteryTime'),
   displayItemsMasteredPerMinute: () => Session.get('displayItemMasteryRate'),
@@ -121,6 +123,8 @@ Template.studentReporting.helpers({
 });
 
 Template.studentReporting.rendered = async function() {
+  console.log("toofewstims", Session.get('tooFewStims'));
+  console.log("noTime", Session.get('practiceDuration') === 0);
   Session.set('curTotalAttempts', 0);
   Session.set('practiceDuration', 0);
   window.onpopstate = function(event) {
@@ -163,6 +167,10 @@ Template.studentReporting.events({
     const selectedTdfId = $(event.currentTarget).val();
     updateDashboard(selectedTdfId)
   },
+  'click #go-to-lesson-select': function(event) {
+    event.preventDefault();
+    Router.go('/lessonSelect');
+  }
 });
 
 async function updateDashboard(selectedTdfId){
