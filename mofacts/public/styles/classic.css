@@ -7,6 +7,9 @@ body{
     background-color: #7ed957;
     border-color: #7ed957;
     color: #000000;
+    /* center button */
+    margin-left: auto;
+    margin-right: auto;
 }
 .btn:hover{
     background-color: #00cc00;
@@ -15,9 +18,15 @@ body{
 
 }
 .modal-dialog, .modal-content{
-    margin-top:25vh;
     background-color: #d9d9d9;
-    border-radius:35px;
+}
+
+.full-menu-content, .active-menu-button{
+    background-color: #d9d9d9 !important;
+    color: #000000;
+}
+.alert, .header-box{
+    background-color: #d9d9d9;
 }
 
 
@@ -29,22 +38,29 @@ h1{
     font: 55pt;
 }
 
-input{
+input, select{
     /* Josefin Sans */
     font-family: 'Josefin Sans';
-    border-width: 1px;
+    border-width: 3px;
     border-radius: 35px;
     padding: 5px;
     margin: 5px;
+    /*give margin to the left of the input*/
+    margin-left: 10px;
 }
 
 .btn{
     font-family: 'Josefin Sans';
     border-width: 1px;
     border-radius: 35px;
-    padding: 5px;
+    padding: 15px;
     margin: 5px;
-    min-width: 200px;
+    min-width: 250px;
+}
+
+.navbar button{
+    background-color: transparent;
+    border: none;
 }
 
 .footer{
@@ -53,15 +69,142 @@ input{
     font-family: 'Josefin Sans';
 }
 
-/* Desktop Screens */
-@media screen and (min-width: 1024px) {
-    
+.navbar-brand{
+    /* League Spartan */
+    font-family: 'League Spartan';
+    font-weight: 800;
+    font-size: 35px;
 }
 
-/* Mobile Screens */
+.modal-dialog, .modal-content{
+    border-radius:35px;
+}
+
+.full-menu{
+    height: 100%;
+    width: 100%;
+    position: fixed;
+    top:0px;
+    z-index: 1;
+    display: none;
+}
+.full-menu-background{
+    height: 100%;
+    width: 100%;
+    position: fixed;
+    top:0px;
+    z-index: 1;
+    background-color: rgba(0,0,0,0.6);
+    
+}
+.full-menu-content{
+    height: 100%;
+    /*border radius is 35px on left side*/
+    border-top-left-radius: 35px;
+    position: fixed;
+    top:0px;
+    z-index: 2;
+    /*animate in from right*/
+    
+}
+.full-menu-content li{
+    /* centered, joesfin sans, no bullets, 35pt font */
+    text-align: center;
+    font-family: 'Josefin Sans';
+    list-style-type: none;
+    padding: 10px;
+    margin: 10px;
+}
+
+.header-box{
+    width: 60vw;
+    margin-top: 5vh;
+    margin-bottom: 5vh;
+    margin-left: 20vw;
+    margin-right: 20vw;
+    padding: 5vh;
+    /* Joesfin Sans */
+    font-family: 'Josefin Sans';
+    font-size: 27px;
+    /* center text */
+    text-align: center;
+    border-radius: 35px;
+}
+
+.alert{
+    width: 60vw;
+    margin-top: 5vh;
+    margin-bottom: 5vh;
+    margin-left: 20vw;
+    margin-right: 20vw;
+    padding: 5vh;
+    /* Arimo */
+    font-family: 'Arimo';
+    font-size: 15pt;
+    /* center text */
+    text-align: center;
+    border-radius: 35px;
+}
+
+.alert-icon{
+    /*display an icon on the top left of the alert*/
+    float: left;
+    margin-right: 10px;
+    margin-top: -10vh;
+    width: 50px;
+    height: 50px;
+    /* font size should be 50px */
+    font-size: 50px;
+    /* circle */
+    border-radius: 50%;
+}
+/* Desktop Screens */
+@media screen and (min-width: 1024px) {
+    .full-menu-content{
+        width: 20vw;
+        margin-left: 80vw;
+    }
+    .full-menu-content li{
+        font-size: 15pt;
+    }
+}
+
+/* Adaptive  Screens */
 @media screen and (max-width: 1024px) {
-    .modal-dialog, .modal-content{
-        height: 100%;
+    .modal-dialog{
+        height: 50vh;
+        position: fixed;
+        top: 50%;
+        width: 90vw;
+        margin-left: 5vw;
+        /* reset bottom of border radius */
+        border-bottom-left-radius: 0px;
+        border-bottom-right-radius: 0px;
+    }
+    .full-menu-content{
+        width: 90vw;
+        margin-left: 10vw;
+    }
+    .full-menu-content li{
+        font-size: 25pt;
+    }
+    .alert{
+        width: 100%;
+        margin-top: 5vh;
+        margin-bottom: 5vh;
+        margin-right: -5px;
+        margin-left: 10px;
+        padding: 5vh;
+        border-radius: 0px;
+    }
+    .header-box{
+        width: 100%;
+        margin-top: 5vh;
+        margin-bottom: 5vh;
+        margin-right: -5px;
+        margin-left: 10px;
+        padding: 5vh;
+        border-radius: 0px;
     }
 }
 
@@ -113,4 +256,21 @@ input{
 }
 .vh-40{
     height: 40vh;
+}
+.full-width{
+    margin-left: -30px;
+    margin-right: -30px;
+    width: 100vw;
+    overflow: visible;
+}
+
+.width-100-percent{
+    width: 100%;
+}
+
+.width-80-percent{
+    width: 80%;
+    /*centered*/
+    margin-left: 10%;
+    margin-right: 10%;
 }

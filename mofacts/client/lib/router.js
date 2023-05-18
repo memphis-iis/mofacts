@@ -174,7 +174,8 @@ const restrictedRoutes = [
   'feedback',
   'experimentSettings',
   'classControlPanel',
-  'contentControlPanel'
+  'contentControlPanel',
+  'lessonSelect'
 ];
 
 const getDefaultRouteAction = function(routeName) {

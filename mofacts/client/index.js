@@ -153,6 +153,7 @@ Template.DefaultLayout.onRendered(function() {
   });
   //load css into head based on user's preferences
   const user = Meteor.user();
+
   $('#helpModal').on('hidden.bs.modal', function() {
     if (window.currentAudioObj) {
       window.currentAudioObj.play();
@@ -196,21 +197,7 @@ Template.DefaultLayout.events({
     Router.go('/profile');
   },
 
-  'click #progressButton': function(event) {
-    event.preventDefault();
-    if (window.currentAudioObj) {
-      window.currentAudioObj.pause();
-    }
-    // Clear out studentUsername in case we are a teacher/admin who previously
-    // navigated to this page for a particular student and want to see our own progress
-    Session.set('studentUsername', null);
-    Session.set('curStudentID', undefined);
-    Session.set('curStudentPerformance', undefined);
-    Session.set('curClass', undefined);
-    Session.set('instructorSelectedTdf', undefined);
-    Session.set('curClassPerformance', undefined);
-    Router.go('/studentReporting');
-  },
+
   'click #helpButton': function(event) {
     event.preventDefault();
     Session.set('pausedLocks', Session.get('pausedLocks')+1);
