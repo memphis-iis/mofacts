@@ -3,64 +3,62 @@
 <template name="contentUpload">
     <div class="container-fluid" style="padding: 0% 10%;">
         {{#if isInRole 'admin,teacher'}}
-            <div class="row">
+            <div class="header-box">
                 <h1 class="text-center">Asset Uploader</h1>
-                <p>This uploads your assets for use in experiments. It can also upload packaged zip files with TDF/stim/asset combinations. You may use video, audio, or image files as well. A link will be generated and available after upload. Note, it may take some time to complete large packages. Please wait until a prompt is given to navigate to a new page.</p>   
             </div>
+                This uploads your assets for use in experiments. It can also upload packaged zip files with TDF/stim/asset combinations. 
+                You may use video, audio, or image files as well. A link will be generated and available after upload. 
+                Note, it may take some time to complete large packages. Please wait until a prompt is given to navigate to a new page.
         {{else}}
-        <h2>You do not have access to this function.</h2>
+        <div class="alert">
+            <div class="alert-icon">
+              <i class="fas fa-info-circle"></i>
+            </div>
+            You do not have access to this feature. Please contact your teacher or administrator.
+          </div> 
         {{/if}}
-        <br>
+        <div class="vh-5"></div>
         <div class="row"> 
-            <div class="col-md-4">
-                <legend class="text-center">Upload Stimulus File(s)</legend>
-                <div class="form-group">
-                    <span class="btn btn-default btn-file">
-                        Browse
-                        <input type="file" class="form-control" name="upload-stim" id="upload-stim" value="" placeholder="Stimulus File" multiple>
-                        <span class='label label-info file-info' id="stim-file-info"></span>
-                    </span>
-                </div>
-                <div class="stim-upload-button-container">
-                    <button type='button' id='doUploadStim' class='btn btn-fix' style="margin-right: 2%;">
-                        Upload Stimulus File(s)
-                    </button>
-                    <div class="loader" id='stimUploadLoadingSymbol' style="margin-top: 1%" hidden></div>
+            <div class="col text-center ">
+                <h3 class="text-center">Upload Asset</h3>
+                <div class="row text-center">
+                    <div class="row">
+                        <select id="file-type" class="form-control" aria-placeholder="Select file type">\
+                            <option value="" disabled selected>Select Asset Type</option>
+                            <option value="stim">Stimulus File</option>
+                            <option value="tdf">TDF File</option>
+                            <option value="asset">Package</option>
+                        </select>
+                    </div>
+                    <div class="vh-5"></div>
+                    <div class="row">
+                        <input type="file" class="form-control" name="upload-file" id="upload-file" value="" placeholder="ZIP, JSON File" multiple>
+                    </div>
+                    <div class="vh-5"></div>
+                    <div class="row">
+                        <h4>Files in Queue:</h4>
+                        {{#if curFilesToUpload}}
+                            {{#each curFilesToUpload}}
+                                <li>{{this.name}} ({{this.fileType}})</li>
+                            {{/each}}
+                        {{else}}
+                            <p>No files selected.</p>
+                        {{/if}}
+                    </div>
+                    <div class="vh-5"></div>
+                    <div class="row">
+                        <button type='button' id='doUpload' class='btn'>
+                            Upload Asset File
+                            <div class="loader" id='stimUploadLoadingSymbol' style="margin-top: 1%" hidden></div>
+                        </button>
+                    </div>
                 </div>
             </div>
-
-            <div class="col-md-4">
-                <legend class="text-center">Upload TDF File(s)</legend>
-                <div class="form-group">
-                    <span class="btn btn-default btn-file">
-                        Browse
-                        <input type="file" class="form-control" name="upload-tdf" id="upload-tdf" value="" placeholder="TDF File" multiple>
-                        <span class='label label-info file-info' id="tdf-file-info"></span>
-                    </span>
-                </div>
-                <button type='button' id='doUploadTDF' class='btn btn-fix'>
-                    Upload TDF File(s)
-                </button>
-            </div>
-
-
-            <div class="col-md-4">
-                <legend class="text-center">Upload Package</legend>
-                <div class="form-group">
-                    <span class="btn btn-default btn-file">
-                        Browse
-                        <input id="upload-package" style="margin: auto; display:block;" type="file" multiple />
-                        <span class='label label-info file-info' id="package-file-info"></span>
-                    </span>
-                </div>
-                <button type='button' id='doUploadPackage' class='btn btn-fix'>
-                    Upload Package
-                </button>
-            </div>
-            </div>
+        </div> 
+        <div class="vh-5"></div>
             <div class="row">
             <div class="col-md-12 table-responsive">
-                <legend class="text-center">Your Uploaded Files</legend>
+                <h3 class="text-center">Your Assets</h3>
                 <p>*Deleting a stim will delete the corresponding TDF and all related history. Deleting is not recoverable.</p>
 
                 <p><span class="fa fa-download" aria-hidden="true"></span>Download<br><span class="fa fa-share" aria-hidden="true"></span>Export</p>
@@ -113,7 +111,7 @@
         </div>
 
         {{#if isInRole 'admin'}}
-            <h2>Admin Functions</h2>
+        <h3 class="text-center">Admin Functions</h3>
             <p>
                 <button class="btn btn-danger" id="deleteAllAssetsPrompt">Delete All Assets. This is NOT recoverable.</button>
                 <button class="btn btn-danger" style="display: none;" id="deleteAllAssetsConfirm" hidden>Are you sure? This is NOT recoverable.</button>

@@ -9,6 +9,7 @@ import {checkUserSession} from '../../index'
 
 export {selectTdf};
 
+
 Template.lessonSelect.created = function() {
     this.showTdfs = new ReactiveVar(false);
     this.enabledTdfs = new ReactiveVar([]);
@@ -100,7 +101,6 @@ Template.lessonSelect.helpers({
     recentTdfs: () => {
       return Template.instance().recentTdfs.get();
     },
-  
     tdfTags: () => {
       return Template.instance().tdfTags.get();
     },

@@ -1,37 +1,45 @@
 <template name="signUp">
     <div class="container">
-        <div class="row">
-            <div class="col-xs-offset-1 col-xs-10 col-sm-offset-1 col-sm-10 col-md-offset-1 col-md-10 col-lg-offset-1 col-lg-10">
-                <legend>Sign Up</legend>
+        <div class="vh-5"></div>
+        <div class="row text-center">
+            <div class="col-lg-4 offset-lg-4 col-md-6 col-md-offset-4 col-sm-8 col-sm-offset-2 col-xs-12">
+                <div class="vh-10"></div>
+                <h1 align-bottom>MoFaCTS</h1>
+                <span id="serverErrors"></span>
+                <div class="vh-5"></div>
             </div>
         </div>
-
-        <div class="row">
-            <div class="col-xs-offset-1 col-xs-6 col-sm-offset-1 col-sm-4 col-md-offset-1 col-md-2 col-lg-offset-1 col-lg-2">
+        <div class="row text-center">
+            <div class="col-lg-4 offset-lg-4 col-md-6 col-md-offset-4 col-sm-8 col-sm-offset-2 col-xs-12">
+                <p align-bottom>Welcome. Let's get started.</p>
+                <span id="serverErrors"></span>
+            </div>
+        </div>
+        <div class="row text-center login-form spacer">
+            <div class="col-lg-4 offset-lg-4 col-md-6 col-md-offset-4 col-sm-8 col-sm-offset-2 col-xs-12">
 
                 <div class="form-group">
-                    <input class="form-control" type="text" id="signUpUsername" value="" placeholder="Email">
-                    <span class="help-inline danger errcheck" id="usernameTooShort" hidden >Must be at least 6 characters long!</span>
+                    <input  type="text" id="signUpUsername" value="" placeholder="Email">
+                    <span id="usernameTooShort" hidden >Must be at least 6 characters long!</span>
                 </div>
 
                 <div class="form-group">
-                    <input class="form-control" type="password" id="password1" value="" placeholder="Password">
-                    <span class="help-inline danger errcheck" id="passwordTooShort" hidden >Must be at least 6 characters long!</span>
+                    <input  type="password" id="password1" value="" placeholder="Password">
+                    <span id="passwordTooShort" hidden >Must be at least 6 characters long!</span>
                 </div>
 
                 <div class="form-group">
-                    <input class="form-control" type="password" id="password2" value="" placeholder="Re-Type Password">
-                    <span class="help-inline danger errcheck" id="passwordMustMatch" hidden >Password fields must match!</span>
+                    <input  type="password" id="password2" value="" placeholder="Re-Type Password">
+                    <span id="passwordMustMatch" hidden >Password fields must match!</span>
                 </div>
-
+                <div class="vh-5"></div>
                 <div class="form-group">
                     <button type="button" id="signUpButton" class="btn ">Sign Up</button>
-                    <span class="help-inline danger errcheck" id="serverErrors" hidden ></span>
+                    <button type="button" id="signInButton" class="btn ">Sign In</button>
+                    <span id="serverErrors" hidden ></span>
                 </div>
                 <br>
             </div>
         </div>
-
-        {{> about}}
     </div>
 </template>

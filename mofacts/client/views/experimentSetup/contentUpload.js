@@ -9,6 +9,9 @@ Template.contentUpload.helpers({
   StimFiles: function() {
     return Stims.find();
   },
+  curFilesToUpload() {
+    return Template.instance().curFilesToUpload.get();
+  },
   currentUpload() {
     return Template.instance().currentUpload.get();
   },
@@ -21,8 +24,9 @@ Template.contentUpload.helpers({
   },
 });
 
-Template.contentUpload.onRendered(function() {
+Template.contentUpload.onCreated(function() {
   this.currentUpload = new ReactiveVar(false);
+  this.curFilesToUpload = new ReactiveVar([]);
 });
 
 
@@ -31,37 +35,50 @@ Template.contentUpload.onRendered(function() {
 
 Template.contentUpload.events({
   // Admin/Teachers - upload a TDF file
-  'click #doUploadTDF': async function(event) {
-    event.preventDefault();
-    await doFileUpload('#upload-tdf', 'tdf', 'TDF');
-
-    const stimDisplayTypeMap = await meteorCallAsync('getStimDisplayTypeMap');
-    Session.set('stimDisplayTypeMap', stimDisplayTypeMap);
+  'change #upload-file': function(event) {
+    //get files array from reactive var
+    const files = Template.instance().curFilesToUpload.get();
+    //add new files to array, appending the current file type from the dropdown
+    for (const file of Array.from($('#upload-file').prop('files'))) {
+      file.fileType = $('#file-type').val();
+      files.push(file);
+      //if file is a TDF, add a description field
+      if (file.fileType == 'tdf') {
+        file.fileDescrip = 'TDF'
+      } else if (file.fileType == 'stim') {
+        file.fileDescrip = 'Stimuli'
+      } else {
+        file.fileDescrip = 'Package'
+      }
+    }
+    //update reactive var with new array
+    console.log('files:', files);
+    Template.instance().curFilesToUpload.set(files);
+    //clear file input
+    $('#upload-file').val('');
   },
-
-  // Admin/Teachers - upload a Stimulus file
-  'click #doUploadStim': async function(event) {
+  'click #doUpload': async function(event) {
+    //get files array from reactive var
+    const files = Template.instance().curFilesToUpload.get();
     $('#stimUploadLoadingSymbol').show()
-    event.preventDefault();
-    await doFileUpload('#upload-stim', 'stim', 'Stimlus');
+    doFileUpload(files);
   },
-  'click #tdf-download-btn': function(event){
-    event.preventDefault();
-    const TDFId = event.currentTarget.getAttribute('value')
-    let selectedTdf = Tdfs.findOne({_id: TDFId});
-    console.log('downloading tdf id', TDFId);
-    let blob = new Blob([JSON.stringify(selectedTdf.content.tdfs,null,2)], { type: 'application/json' });
-    let url = window.URL.createObjectURL(blob);
-    let downloadFileName = selectedTdf.content.fileName.trim();
-    var a = document.createElement("a");
-    document.body.appendChild(a);
-    a.style = "display: none";
-    a.href = url;
-    a.download = downloadFileName;
-    a.click();
-    window.URL.revokeObjectURL(url);
-  },
-
+    'click #tdf-download-btn': function(event){
+      event.preventDefault();
+      const TDFId = event.currentTarget.getAttribute('value')
+      let selectedTdf = Tdfs.findOne({_id: TDFId});
+      console.log('downloading tdf id', TDFId);
+      let blob = new Blob([JSON.stringify(selectedTdf.content.tdfs,null,2)], { type: 'application/json' });
+      let url = window.URL.createObjectURL(blob);
+      let downloadFileName = selectedTdf.content.fileName.trim();
+      var a = document.createElement("a");
+      document.body.appendChild(a);
+      a.style = "display: none";
+      a.href = url;
+      a.download = downloadFileName;
+      a.click();
+      window.URL.revokeObjectURL(url);
+    },
   'click #tdf-delete-btn': function(event){
     const tdfId = event.currentTarget.getAttribute('value')
     Meteor.call('deleteTDFFile',tdfId);
@@ -92,59 +109,6 @@ Template.contentUpload.events({
     const stimuliSetId = event.currentTarget.getAttribute('value')
     Meteor.call('deleteStimFile',stimuliSetId);
   },
-
-  'change #upload-tdf': function(event) {
-    const curFiles = Array.from($('#upload-tdf').prop('files'));
-    let outputLabel = curFiles[0].name;
-    if (curFiles.length > 1) {
-      outputLabel += ' + ' + (curFiles.length-1) + ' more...';
-    }
-    $('#tdf-file-info').html(outputLabel);
-  },
-
-  'change #upload-stim': function(event) {
-    const curFiles = Array.from($('#upload-stim').prop('files'));
-    let outputLabel = curFiles[0].name;
-    if (curFiles.length > 1) {
-      outputLabel += ' + ' + (curFiles.length-1) + ' more...';
-    }
-    $('#stim-file-info').html(outputLabel);
-  },
-
-  'change #upload-package': function(event) {
-    const curFiles = Array.from($('#upload-package').prop('files'));
-    let outputLabel = curFiles[0].name;
-    if (curFiles.length > 1) {
-      outputLabel += ' + ' + (curFiles.length-1) + ' more...';
-    }
-    $('#package-file-info').html(outputLabel);
-  },
-
-  'click #doUploadPackage'(e, template) {
-    const files = $('#upload-package').prop('files');
-    if (files) {
-      for(let file of files){
-        // We upload only one file, in case
-        // multiple files were selected
-        const foundFile = DynamicAssets.findOne({name: file.name, userId: Meteor.userId()})
-        if(foundFile){
-          foundFile.remove(function (error){
-            if (error) {
-              console.log(`File ${file.name} could not be removed`, error)
-            }
-            else{
-              console.log(`File ${file.name} already exists, overwritting.`)
-              doPackageUpload(file, template)
-            }
-          });
-        } else {
-          doPackageUpload(file, template)
-        }
-      }
-    }
-    $('#upload-package').val('');
-    $('#upload-package').parent().find('.file-info').html('');
-  },
   'click #deleteAllAssetsPrompt'(e, template) {
     e.preventDefault();
     console.log('deleteAllAssetsPrompt clicked');
@@ -174,63 +138,107 @@ Template.contentUpload.events({
 // //////////////////////////////////////////////////////////////////////////
 // Our main logic for uploading files
 
-async function doFileUpload(fileElementSelector, fileType, fileDescrip) {
+async function doFileUpload(fileArray) {
+  //reorder fileArray so that packages are uploaded first, then stimuli, then tdfs
+  fileArray.sort((a, b) => {
+    if (a.fileType == 'package') {
+      return -1;
+    } else if (b.fileType == 'package') {
+      return 1;
+    } else if (a.fileType == 'stim') {
+      return -1;
+    } else if (b.fileType == 'stim') {
+      return 1;
+    } else {
+      return 0;
+    }
+  });
   let count = 0;
-  const files = $(fileElementSelector).prop('files');
+  const files = fileArray;
   console.log('files:', files);
   const errorStack = [];
 
   for (const file of files) {
-    count += 1;
-
-    const name = file.name;
-    if (name.indexOf('<') != -1 || name.indexOf('>') != -1 || name.indexOf(':') != -1 ||
-      name.indexOf('"') != -1 || name.indexOf('/') != -1 || name.indexOf('|') != -1 ||
-      name.indexOf('?') != -1 || name.indexOf('*') != -1) {
-      alert('Please remove the following characters from your filename: < > : " / | ? *');
+    //check if file type is package
+    if (file.fileType == 'package') {
+      //check if package exists in dynamicAssets
+      const existingFile = DynamicAssets.findOne({fileName: file.name});
+      if (existingFile) {
+        //atempts to delete existing file
+        try {
+          existingFile.remove();
+        } catch (e) {
+          console.log('error deleting existing file', e);
+          alert('Error deleting existing file. Please try again. If this error persists, please file a bug report.');
+        }
+      } else {
+        doPackageUpload(file, Template.instance());
+      }
     } else {
-      const fileData = await readFileAsDataURL(file);
-      console.log('Upload attempted for', name);
+      count += 1;
+      const name = file.name;
+      const fileType = file.fileType;
+      const fileDescrip = file.fileDescrip;
+      if (name.indexOf('<') != -1 || name.indexOf('>') != -1 || name.indexOf(':') != -1 ||
+        name.indexOf('"') != -1 || name.indexOf('/') != -1 || name.indexOf('|') != -1 ||
+        name.indexOf('?') != -1 || name.indexOf('*') != -1) {
+        alert('Please remove the following characters from your filename: < > : " / | ? *');
+      } else {
+        const fileData = await readFileAsDataURL(file);
+        console.log('Upload attempted for', name);
 
-      try {
-        const result = await meteorCallAsync('saveContentFile', fileType, name, fileData);
-        if (!result.result) {
-          if(result.data && result.data.res == 'awaitClientTDF'){
-            console.log('Client TDF could break experiment, asking for confirmation');
-            if(confirm(`The uploaded package contains a TDF file that could break the experiment. Do you want to continue?\nFile Name: ${result.data.TDF.content.fileName}`)){
-              Meteor.call('tdfUpdateConfirmed', result.data.TDF, function(err,res){
-                if(err){
-                  alert(err);
-                }
-              });
+        try {
+          const result = await meteorCallAsync('saveContentFile', fileType, name, fileData);
+          if (!result.result) {
+            if(result.data && result.data.res == 'awaitClientTDF'){
+              console.log('Client TDF could break experiment, asking for confirmation');
+              if(confirm(`The uploaded package contains a TDF file that could break the experiment. Do you want to continue?\nFile Name: ${result.data.TDF.content.fileName}`)){
+                Meteor.call('tdfUpdateConfirmed', result.data.TDF, function(err,res){
+                  if(err){
+                    alert(err);
+                  }
+                });
+              }
+            } else {
+              console.log(fileDescrip + ' save failed', result);
+              errorStack.push('The ' + fileDescrip + ' file was not saved: ' + result.errmsg);
             }
           } else {
-            console.log(fileDescrip + ' save failed', result);
-            errorStack.push('The ' + fileDescrip + ' file was not saved: ' + result.errmsg);
+            console.log(fileDescrip + ' Saved:', result);
           }
-        } else {
-          console.log(fileDescrip + ' Saved:', result);
+        } catch (error) {
+          console.log('Critical failure saving ' + fileDescrip, error);
+          errorStack.push('There was a critical failure saving your ' + fileDescrip + ' file:' + error);
         }
-      } catch (error) {
-        console.log('Critical failure saving ' + fileDescrip, error);
-        errorStack.push('There was a critical failure saving your ' + fileDescrip + ' file:' + error);
       }
     }
-  }
 
-  $('#stimUploadLoadingSymbol').hide()
-  
-  if (errorStack.length == 0) {
-    alert(count.toString() + ' files saved successfully');
-  } else {
-    alert('There were ' + errorStack.length + ' errors uploading files: ' + errorStack.join('\n'));
-  }
-  // Now we can clear the selected file
-  $(fileElementSelector).val('');
-  $(fileElementSelector).parent().find('.file-info').html('');
+    $('#stimUploadLoadingSymbol').hide()
+    
+    if (errorStack.length == 0) {
+      alert(count.toString() + ' files saved successfully');
+    } else {
+      alert('There were ' + errorStack.length + ' errors uploading files: ' + errorStack.join('\n'));
+    }
 
-  console.log(fileType, ':', fileDescrip, 'at ele', fileElementSelector, 'scheduled', count, 'uploads');
-}
+    //update the stimDisplayTypeMap
+    const stimDisplayTypeMap = await meteorCallAsync('getStimDisplayTypeMap');
+    Session.set('stimDisplayTypeMap', stimDisplayTypeMap);
+
+    //clear the file upload fields
+    $('#upload-file').val('');
+
+    //clear the reactive variables
+    Template.instance().currentUpload.set(false);
+    Template.instance().curFilesToUpload.set([]);
+
+    // Now we can clear the selected file
+    $('#upload-file').val('');
+    $('#upload-file').parent().find('.file-info').html('');
+
+    console.log(fileType, ':', fileDescrip, 'at ele', fileElementSelector, 'scheduled', count, 'uploads');
+    }
+  }
 
 
 
@@ -278,7 +286,6 @@ async function doPackageUpload(file, template){
         });
       }
     }
-    template.currentUpload.set(false);
   });
   upload.start();
 }

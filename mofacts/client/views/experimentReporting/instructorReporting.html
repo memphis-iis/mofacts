@@ -13,10 +13,12 @@
   }
   </style>
 {{#if isInRole 'admin, teacher'}}
-  <br /><br />
-    <legend class="text-center">Instructor Reporting</legend>
+  <div class="container">
+    <div class="header-box">
+     Instructor Reporting
+    </div> 
     <div id="mainContent">
-      <h3>Class Selection</h3>
+      <h3 class="text-center">Class Selection</h3>
       <select id="class-select">
         <option selected="selected" value="{{INVALID}}" disabled="true">Select a class</option>
         {{#each classes}}
@@ -24,7 +26,7 @@
         {{/each}}
       </select>
       <div>
-        <h3>Select Chapter</h3>
+        <h3 class="text-center">Select Chapter</h3>
         <select id="tdf-select" disabled="true">
             <option selected="selected" value="{{INVALID}}" disabled="true">Select a tdf</option>
             {{#each curInstructorReportingTdfs}}
@@ -36,18 +38,18 @@
         {{/if}}
       </div>
       <div>
-        <h3>Practice Deadline</h3>
+        <h3 class="text-center">Practice Deadline</h3>
         <input type="date" id="practice-deadline-date" name="practice-deadline-date-select" disabled="true">
         {{#if selectedTdfDueDate}}
-        <h3>Filter By Due Date ({{selectedTdfDueDate}})</h3>
+        <h3 class="text-center">Filter By Due Date ({{selectedTdfDueDate}})</h3>
         Enabled: <input type="checkbox" id="due-date-filter" name="due-date-filter-select"><br>
         Exception Date: <input type="date" id="exception-date" name="exception-date-select">
         {{else}}
-        <h3>Filter By Due Date</h3>
+        <h3 class="text-center">Filter By Due Date</h3>
         No due date set for this chapter.
         {{/if}}   
       </div>
-      <h3>Class Data</h3>
+      <h3 class="text-center">Class Data</h3>
       <div class="row">
         <table class="table table-instructorreport">
           <thead>
@@ -124,5 +126,7 @@
         </table>
       </div>
     </div>
+  </div>
 {{/if}}
+
 </template>
