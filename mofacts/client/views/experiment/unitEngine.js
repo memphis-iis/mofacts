@@ -1224,6 +1224,10 @@ function modelUnitEngine() {
     saveComponentStatesSync: function() {
       const userId = Meteor.userId();
       const TDFId = Session.get('currentTdfId');
+      
+      const cardStates = []
+      const stimStates = []
+      const responseStates = []
       for (let cardIndex=0; cardIndex<cardProbabilities.cards.length; cardIndex++) {
         const card = cardProbabilities.cards[cardIndex];
         const _id = card._id;
@@ -1249,8 +1253,7 @@ function modelUnitEngine() {
           outcomeStack: typeof card.outcomeStack == 'string' ?  card.outcomeStack.split(','):  card.outcomeStack,
           instructionQuestionResult: Session.get('instructionQuestionResult'),
         };
-        if (!ComponentStates.update({_id: _id}, {$set: cardState}))
-          ComponentStates.insert(cardState);
+        cardStates.push(cardState);
         for (let stimIndex=0; stimIndex<card.stims.length; stimIndex++) {
           const stim = card.stims[stimIndex];
           const _id = stim._id;
@@ -1276,8 +1279,7 @@ function modelUnitEngine() {
             instructionQuestionResult: null,
             timesSeen: stim.timesSeen,
           };
-          if (!ComponentStates.update({_id: _id}, {$set: stimState}))
-            ComponentStates.insert(stimState);
+          stimStates.push(stimState);
         }
       }
 
@@ -1304,8 +1306,13 @@ function modelUnitEngine() {
           responseText, // not actually in db, need to lookup/assign kcid when loading
           instructionQuestionResult: null,
         };
-        if (!ComponentStates.update({_id: _id}, {$set: responseState})) 
-          ComponentStates.insert(responseState);
+        responseStates.push(responseState);
+      }
+      let cstate = ComponentStates.findOne({userId: userId, TDFId: TDFId});
+      if (cstate) {
+        ComponentStates.update({_id: cstate._id}, {$set: {cardStates, stimStates, responseStates}});
+      } else {
+        ComponentStates.insert({userId, TDFId, cardStates, stimStates, responseStates});
       }
     },
     loadComponentStates: async function() {// componentStates [{},{}]
@@ -1319,7 +1326,7 @@ function modelUnitEngine() {
       let hiddenItems = Session.get('hiddenItems');
       if (hiddenItems === undefined) hiddenItems = []
 
-      const componentStates = await ComponentStates.find({}, { sort: { KCId: -1 } }).fetch()
+      const componentStates = ComponentStates.findOne();
       console.log('loadComponentStates,componentStates:', componentStates);
 
       const clusterStimKCs = {};
@@ -1336,7 +1343,7 @@ function modelUnitEngine() {
       const clusterProbabilityEstimates = probabilityEstimates.clusterProbs;
 
       // No prior history, we assume KCs could have been affected by other units using them
-      if (componentStates.length == 0) {
+      if (!componentStates) {
         console.log('loadcomponentstates,length==0:', cardProbabilities);
         for (let cardIndex=0; cardIndex<cards.length; cardIndex++) {
           const card = cardProbabilities.cards[cardIndex];
@@ -1349,9 +1356,9 @@ function modelUnitEngine() {
         console.log('loadComponentStates1', cards, probsMap, componentStates, clusterStimKCs, stimProbabilityEstimates);
       } else {
         const curKCBase = getStimKCBaseForCurrentStimuliSet();
-        const componentCards = componentStates.filter((x) => x.componentType == 'cluster');
-        const stims = componentStates.filter((x) => x.componentType == 'stimulus');
-        const responses = componentStates.filter((x) => x.componentType == 'response');
+        const componentCards = componentStates.cardStates;
+        const stims = componentStates.stimStates;
+        const responses = componentStates.responseStates;
 
         console.log('loadcomponentstates,length!=0:', cards, stims, responses, cardProbabilities);
         for (const componentCard of componentCards) {
@@ -1660,6 +1667,8 @@ function modelUnitEngine() {
       stim.totalPracticeDuration += practiceTime;
       stim.allTimeTotalPracticeDuration += practiceTime;
       stim.timesSeen += 1;
+      const answerText = stripSpacesAndLowerCase(Answers.getDisplayAnswerText(
+        cluster.stims[currentCardInfo.whichStim].correctResponse));
 
       updateCurStudentPerformance(wasCorrect, practiceTime, testType);
 
@@ -1669,7 +1678,7 @@ function modelUnitEngine() {
       // the only place we call it after init *and* something might have
       // changed during question selection
       if (testType === 's') {
-        this.saveComponentStatesSync();
+        this.saveSingleComponentState(stim, card, cardProbabilities.responses[answerText]);
         return;
       }
 
@@ -1705,8 +1714,6 @@ function modelUnitEngine() {
       stim.outcomeStack.push(wasCorrect ? 1 : 0);
 
       // "Response" stats
-      const answerText = stripSpacesAndLowerCase(Answers.getDisplayAnswerText(
-          cluster.stims[currentCardInfo.whichStim].correctResponse));
       let resp;
       if (answerText && answerText in cardProbabilities.responses) {
         resp = cardProbabilities.responses[answerText];
