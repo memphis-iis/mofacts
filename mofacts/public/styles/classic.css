@@ -3,6 +3,13 @@ body{
     background-color: #F2F2F2;
 }
 
+h3{
+    /* League Spartan */
+    font-family: 'League Spartan';
+    font-weight: 800;
+    padding: 10px;
+}
+
 .btn{
     background-color: #7ed957;
     border-color: #7ed957;
@@ -38,13 +45,35 @@ h1{
     font: 55pt;
 }
 
-input, select{
+input[type=text], input[type=password], select{
     /* Josefin Sans */
     font-family: 'Josefin Sans';
-    border-width: 3px;
+    border-width: 1px;
     border-radius: 35px;
     padding: 5px;
     margin: 5px;
+    /*give margin to the left of the input*/
+    margin-left: 10px;
+}
+
+input[type=file]{
+    /* Josefin Sans */
+    font-family: 'Josefin Sans';
+    border-width: 1px;
+    border-radius: 35px;
+    padding: 5px;
+    border-color: #7ed957;
+    /*give margin to the left of the input*/
+    margin-left: 10px;
+}
+
+select{
+    /* Josefin Sans */
+    font-family: 'Josefin Sans';
+    border-width: 1px;
+    border-radius: 35px;
+    padding: 5px;
+    border-color: #7ed957;
     /*give margin to the left of the input*/
     margin-left: 10px;
 }
@@ -117,33 +146,26 @@ input, select{
 }
 
 .header-box{
-    width: 60vw;
+    width: 100%;
     margin-top: 5vh;
     margin-bottom: 5vh;
-    margin-left: 20vw;
-    margin-right: 20vw;
+    margin-right: -5px;
+    margin-left: 10px;
     padding: 5vh;
-    /* Joesfin Sans */
-    font-family: 'Josefin Sans';
-    font-size: 27px;
-    /* center text */
+    border-radius: 0px;
+    font-size: 25px;
+    font-weight: bold;
     text-align: center;
-    border-radius: 35px;
 }
 
 .alert{
-    width: 60vw;
+    width: 100%;
     margin-top: 5vh;
     margin-bottom: 5vh;
-    margin-left: 20vw;
-    margin-right: 20vw;
+    margin-right: -5px;
+    margin-left: 10px;
     padding: 5vh;
-    /* Arimo */
-    font-family: 'Arimo';
-    font-size: 15pt;
-    /* center text */
-    text-align: center;
-    border-radius: 35px;
+    border-radius: 0px;
 }
 
 .alert-icon{
@@ -187,15 +209,6 @@ input, select{
     }
     .full-menu-content li{
         font-size: 25pt;
-    }
-    .alert{
-        width: 100%;
-        margin-top: 5vh;
-        margin-bottom: 5vh;
-        margin-right: -5px;
-        margin-left: 10px;
-        padding: 5vh;
-        border-radius: 0px;
     }
     .header-box{
         width: 100%;

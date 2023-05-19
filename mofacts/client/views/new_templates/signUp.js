@@ -107,3 +107,10 @@ Template.signUp.events({
     }
   },
 });
+
+Template.signUp.onRendered(function() {
+  //check if the user is already logged in
+  if (Meteor.userId()) {
+    Router.go('/profile');
+  }
+});

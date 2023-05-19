@@ -35,6 +35,9 @@
       </div>
     </nav>
     <div class="vh-5"> </div>
+    {{#if isInRole 'admin,teacher'}}
+     <li><a class="dropdown-item" id="lessonSelectButton">Home Menu</a></li>
+    {{/if}}
     <li><a class="dropdown-item" id="lessonSelectButton">Lesson Select</a></li>
     <li><a class="dropdown-item" id="progressButton">Progress Report</a></li>
     {{#if isInSession}}
