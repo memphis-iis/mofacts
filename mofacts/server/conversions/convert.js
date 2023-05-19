@@ -72,6 +72,9 @@ function getNewItemFormat(stimFile, stimulusFileName, stimuliSetId, responseKCMa
       if (stim.response.incorrectResponses) {
         incorrectResponses = stim.response.incorrectResponses;
       }
+      if (typeof incorrectResponses === 'string') {
+        incorrectResponses = incorrectResponses.split(',');
+      }
 
       let responseKC;
       const answerText = getDisplayAnswerText(stim.response.correctResponse);
