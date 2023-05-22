@@ -29,5 +29,9 @@ Template.nav.events({
       'click #lessonSelectButton': function(event) {
         $('#full-menu').hide();
         Router.go('/lessonSelect');
-    },
+      },
+      'click #profileButton': function(event) {
+        $('#full-menu').hide();
+        Router.go('/profile');
+      }
 });

@@ -1909,7 +1909,7 @@ async function upsertStimFile(stimulusFileName, stimJSON, ownerId, packagePath =
     rawStimuliFile: stimJSON, //raw stimuli
     stimuli: formattedStims, //formatted stimuli for use in the app
   }});
-  updateStimSyllables(stimuliSetId, formattedStims)
+  asyncMethods.updateStimSyllables(stimuliSetId, formattedStims);
 }
 
 async function upsertTDFFile(tdfFilename, tdfJSON, ownerId, packagePath = null) {

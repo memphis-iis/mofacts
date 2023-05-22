@@ -162,8 +162,7 @@ select{
     width: 100%;
     margin-top: 5vh;
     margin-bottom: 5vh;
-    margin-right: -5px;
-    margin-left: 10px;
+    margin-left: -20vw;
     padding: 5vh;
     border-radius: 0px;
 }
@@ -171,7 +170,7 @@ select{
 .alert-icon{
     /*display an icon on the top left of the alert*/
     float: left;
-    margin-right: 10px;
+    margin-left: 15vw;
     margin-top: -10vh;
     width: 50px;
     height: 50px;
@@ -194,9 +193,9 @@ select{
 /* Adaptive  Screens */
 @media screen and (max-width: 1024px) {
     .modal-dialog{
-        height: 50vh;
+        height: 70vh;
         position: fixed;
-        top: 50%;
+        top: 30%;
         width: 90vw;
         margin-left: 5vw;
         /* reset bottom of border radius */
@@ -218,6 +217,13 @@ select{
         margin-left: 10px;
         padding: 5vh;
         border-radius: 0px;
+    }
+    .alert{
+        margin-left: 0px;
+        margin-right: 0px;
+    }
+    .alert-icon{
+        margin-left:5vw;
     }
 }
 
@@ -273,7 +279,7 @@ select{
 .full-width{
     margin-left: -30px;
     margin-right: -30px;
-    width: 100vw;
+    width: 110vw;
     overflow: visible;
 }
 
@@ -287,3 +293,26 @@ select{
     margin-left: 10%;
     margin-right: 10%;
 }
+
+.align-center{
+    text-align: center;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* form switches */
+
+.form-switch .form-check-input:checked {
+    background-position: right center;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='%23fff'/%3e%3c/svg%3e");
+  }
+
+.form-switch .form-check-input {
+    width: 2em;
+    margin-left: -2.5em;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='%23fff'/%3e%3c/svg%3e");
+    background-color: rgba(126, 217, 87, 0.25);
+    background-position: left center;
+    border-radius: 2em;
+    transition: background-position .15s ease-in-out;
+  }

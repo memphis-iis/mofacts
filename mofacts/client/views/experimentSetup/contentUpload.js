@@ -62,6 +62,8 @@ Template.contentUpload.events({
     const files = Template.instance().curFilesToUpload.get();
     $('#stimUploadLoadingSymbol').show()
     doFileUpload(files);
+    //reset reactive var
+    Template.instance().curFilesToUpload.set([]);
   },
     'click #tdf-download-btn': function(event){
       event.preventDefault();
@@ -228,11 +230,7 @@ async function doFileUpload(fileArray) {
     //clear the file upload fields
     $('#upload-file').val('');
 
-    //clear the reactive variables
-    Template.instance().currentUpload.set(false);
-    Template.instance().curFilesToUpload.set([]);
-
-    // Now we can clear the selected file
+     // Now we can clear the selected file
     $('#upload-file').val('');
     $('#upload-file').parent().find('.file-info').html('');
 
