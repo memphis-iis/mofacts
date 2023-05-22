@@ -37,7 +37,7 @@
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title">Error Reporting</h5>
+        <h5 class="modal-title text-center">Error Reporting</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
@@ -58,8 +58,8 @@
         </div>
       </div>
       <div class="modal-footer">
-        <button type="button"  id="closeErrorReportingButton" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-        <button type="button" id="errorReportingSaveButton" class="btn btn-primary">Save changes</button>
+        <button type="button"  id="closeErrorReportingButton" class="btn btn-secondary  align-center" data-bs-dismiss="modal">Close</button>
+        <button type="button" id="errorReportingSaveButton" class="btn btn-primary  align-center">Save changes</button>
       </div>
     </div>
   </div>
@@ -92,4 +92,27 @@
     </div>
   </div>
 </div>
+
+<!-- audio settngs -->
+<div class="modal fade" id="audioModal" tabindex="-1" aria-labelledby="audioModal" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Audio Settings</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="modal-body">
+          <div class="row">
+            {{> profileAudioToggles}}
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button"  id="closeErrorReportingButton" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 </template>

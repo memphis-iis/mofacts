@@ -1,107 +1,46 @@
 <template name="profileAudioToggles">
-  <div class="padLeftAndRight row toggleSwitchContainer">
-    <div class="audio-button-containers">
-      <p style="font-size: larger;">Questions</p>
-        <div id="switch-feedback" class="switch-3 switch-candy">
-          <input class="audioPromptRadio" id="audioPromptQuestionOff" name="state-db" type="radio" checked="checked"/>
-          <label for="audioPromptQuestionOff" onclick="">I read the questions to myself.</label>
-        </div>
-        <div id="switch-feedback" class="switch-3 switch-candy">
-          <input class="audioPromptRadio" id="audioPromptQuestionOn" name="state-db" type="radio" />
-          <label for="audioPromptQuestionOn" onclick="">The computer reads the questions out loud.</label>
-        </div>
-        <div class="audioPromptQuestionGroup invisible" style="padding-left:2%;">
-          <h5 style="color:green; padding-left:8%">Requires <span class="fa fa-headphones"></span> icon. Headphones recommended.</h5>
-          <div style="display: inline-block; padding-left: 8%">
-            <label for="audioPromptVolume" class="audioPromptQuestionVolume">Volume: </label>
-            <input type="range" id="audioPromptQuestionVolume" min="-6" max="6" step=".5">
-          </div>
-          <div style="display: inline-block; padding-left: 8%;">
-            <label for="audioPromptQuestionSpeakingRate">Speed: </label>
-            <select type="select" id="audioPromptQuestionSpeakingRate">
-              <option value=".25">0.25</option>
-              <option value=".5">0.50</option>
-              <option value=".75">0.75</option>
-              <option value="1" selected>Normal</option>
-              <option value="1.25">1.25</option>
-              <option value="1.5">1.50</option>
-              <option value="1.75">1.75</option>
-              <option value="2">2</option>
-            </select>
-          </div>
-          <div style="padding-left: 8%">
-            <label for="audioPromptVoice" class="audioPromptVoice">Voice: </label>
-            <select type="select" id="audioPromptVoice">
-              <option value="en-US-Standard-A" selected>1</option>
-              <option value="en-US-Standard-B">2</option>
-              <option value="en-US-Standard-C">3</option>
-              <option value="en-US-Standard-D">4</option>
-              <option value="en-US-Standard-F">5</option>
-              <option value="en-US-Standard-G">6</option>
-              <option value="en-US-Standard-H">7</option>
-              <option value="en-US-Standard-I">8</option>
-              <option value="en-US-Standard-J">9</option>
-            </select>
-            <a href="#" id="audioPromptVoiceTest"><span class="fa fa-volumne-high"></span></a>
-          </div>
-        </div>
-    </div>
-    <div class="audio-button-containers">
-      <div class="flow">
-        <p style="font-size: larger;" id="audioInputTitle">Answers</p>
-        <div id="switch-input" class="switch-3 switch-candy">
-          <input class="audioInputRadio" id="audioInputOff" name="state-da" type="radio" checked="checked" />
-          <label for="audioInputOff" onclick="">I type the answers.</label>
-        </div>
-        <div id="switch-input" class="switch-3 switch-candy">
-          <input class="audioInputRadio" id="audioInputOn" name="state-da" type="radio" />
-          <label for="audioInputOn" onclick="">I say the answers out loud. </label>
-        </div>
+  <div class="row">
+    <div class="col-12">
+      <div class="form-check form-switch">
+        <label class="form-check-label" for="audioPromptQuestionOn">MoFaCTs reads the question to me</label>
+        <input class="form-check-input" type="checkbox" role="switch" id="audioPromptQuestionOn">
       </div>
-      <br/>
-      <div class="audioEnabledGroup invisible" style="padding-left:8%;">
-          <h5 style="color:green;">Requires <i class="fa fa-microphone"></i> icon. Headphones recommended. Requires a quiet environment and may not work on all systems. If the speech recognition doesn't work on your system please hit the home button. Progress is always saved.</h5>
+      <div class="form-check form-switch">
+        <label class="form-check-label" for="audioPromptFeedbackOn">MoFaCTs listens to my answers.</label>
+        <input class="form-check-input" type="checkbox" role="switch" id="audioPromptQuestionOn">
+      </div>
+      <div class="form-check form-switch">
+        <label class="form-check-label" for="audioInputOn">MoFACTs reads me
+          feedback.</label>
+        <input class="form-check-input" type="checkbox" role="switch" id="audioPromptQuestionOn">
+      </div>
+      <div class="audioEnabledGroup" style="display: none;">
+        <p style="color:green;">Requires <i class="fa fa-microphone"></i> icon. Headphones recommended. Requires a quiet environment and may not work on all systems. If the speech recognition doesn't work on your system please hit the home button. Progress is always saved.</p>
         <label for="audioInputSensitivity">
           <span>Audio sensitivity: Quiet Room</span>
         </label>
         <input type="range" style="width:200px" id="audioInputSensitivity" value="20" step="1" min="0" max="60">
-          <span style="font-weight: bold;">Noisy Room</span>
-      {{#if showSpeechAPISetup}}
-        <div class="audioEnabledGroup invisible">
-          {{#if speechAPIKeyIsSetup}}
-            <p style="color:green">Speech api key is setup</p>
-          {{else}}
-            <p style="color:red">Speech api key is not setup</p>
-          {{/if}}
-          <button id='setupAPIKey' class="marginBottom">Set up API Key</button>
-        </div>
-      {{/if}}
-    </div>
-    </div>
-    <div class="audio-button-containers">
-      <div class="flow">
-        <p style="font-size: larger;">Feedback</p>
-        <div id="switch-feedback" class="switch-3 switch-candy">
-          <input class="audioPromptRadio" id="audioPromptFeedbackOff" name="state-d" type="radio" checked="checked" />
-          <label for="audioPromptFeedbackOff" onclick="">I read the feedback to myself</label>
-        </div>
-        <div id="switch-feedback" class="switch-3 switch-candy">
-          <input class="audioPromptRadio" id="audioPromptFeedbackOn" name="state-d" type="radio" />
-          <label for="audioPromptFeedbackOn" onclick="">The computer reads the feedback out loud.</label>
-          <br />
-
-        </div>
+        <span style="font-weight: bold;">Noisy Room</span>
+        {{#if showSpeechAPISetup}}
+          <div class="audioEnabledGroup invisible">
+            {{#if speechAPIKeyIsSetup}}
+              <p style="color:green">Speech api key is setup</p>
+            {{else}}
+              <p style="color:red">Speech api key is not setup</p>
+            {{/if}}
+            <button id='setupAPIKey' class="marginBottom">Set up API Key</button>
+          </div>
+        {{/if}}
       </div>
-      <br/>
-      <div class="audioPromptFeedbackGroup invisible" style="padding-left:2%;">
+      <div class="audioPromptQuestionGroup" style="display: none;">
         <h5 style="color:green; padding-left:8%">Requires <span class="fa fa-headphones"></span> icon. Headphones recommended.</h5>
-        <div style="display: inline-block; padding-left:8%">
-          <label for="audioPromptFeedbackVolume" class="audioPromptFeedbackVolume">Volume: </label>
-          <input type="range" id="audioPromptFeedbackVolume" min="-6" max="6" step=".5">
+        <div style="display: inline-block; padding-left: 8%">
+          <label for="audioPromptVolume" class="audioPromptQuestionVolume">Volume: </label>
+          <input type="range" id="audioPromptQuestionVolume" min="-6" max="6" step=".5">
         </div>
-        <div style="display: inline-block; padding-left:8%">
-          <label for="audioPromptFeedbackSpeakingRate">Speed: </label>
-          <select type="select" id="audioPromptFeedbackSpeakingRate">
+        <div style="display: inline-block; padding-left: 8%;">
+          <label for="audioPromptQuestionSpeakingRate">Speed: </label>
+          <select type="select" id="audioPromptQuestionSpeakingRate">
             <option value=".25">0.25</option>
             <option value=".5">0.50</option>
             <option value=".75">0.75</option>
@@ -113,8 +52,8 @@
           </select>
         </div>
         <div style="padding-left: 8%">
-          <label for="audioPromptFeedbackVoice" class="audioPromptFeedbackVoice">Voice: </label>
-          <select type="select" id="audioPromptFeedbackVoice">
+          <label for="audioPromptVoice" class="audioPromptVoice">Voice: </label>
+          <select type="select" id="audioPromptVoice">
             <option value="en-US-Standard-A" selected>1</option>
             <option value="en-US-Standard-B">2</option>
             <option value="en-US-Standard-C">3</option>
@@ -125,37 +64,9 @@
             <option value="en-US-Standard-I">8</option>
             <option value="en-US-Standard-J">9</option>
           </select>
-          <a href="#" id="audioPromptFeedbackVoiceTest"><span class="fa fa-volume-high"></span></a>
-        </div>
-      </div>
-    </div>
-    <div id="headphonesSuggestedDiv" class="invisible">
-      <h6 color="green">Headphones are suggested with both speech input and output enabled.</h6>
-    </div>
-    <div id='speechAPIModal' class="modal fade">
-      <div class="modal-dialog" role="document">
-        <div class="modal-content">
-          <div class="modal-header">
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-              <span aria-hidden="true">&times;</span>
-              <span class="sr-only">Close</span>
-            </button>
-            <h4 class="modal-title">Google Speech API Key Setup</h4>
-          </div>
-          <div class="modal-body">
-            <p>If you haven't already please enable the Google Speech API
-              and generate a Google Speech API key by following the instructions
-              <a href="https://support.google.com/cloud/answer/6158862?hl=en" target="_blank">here</a>.</p>
-            <label>Google Speech API Key:</label>
-            <input type="text" id='speechAPIKey'>
-          </div>
-          <div class="modal-footer">
-            <button id='speechAPISubmit' type="button" class="btn-primary flow">Save changes</button>
-            <button id='speechAPIDelete' type="button" class="btn-danger flow">Delete API Key</button>
-          </div>
+          <a href="#" id="audioPromptVoiceTest"><span class="fa fa-volumne-high"></span></a>
         </div>
       </div>
     </div>
   </div>
-  <br/>
 </template>

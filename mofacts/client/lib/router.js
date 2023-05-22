@@ -175,7 +175,6 @@ const restrictedRoutes = [
   'experimentSettings',
   'classControlPanel',
   'contentControlPanel',
-  'lessonSelect'
 ];
 
 const getDefaultRouteAction = function(routeName) {
@@ -325,6 +324,33 @@ Router.route('/profile', {
         Session.set('curModule', 'profile');
         this.render('profile');
       }
+    } else {
+      this.redirect('/');
+    }
+  },
+});
+
+Router.route('/lessonSelect', {
+  name: 'client.lessonSelect',
+  waitOn: function() {
+    let assignedTdfs = Meteor.user()?.profile?.assignedTdfs;
+    let curCourseId = Meteor.user()?.profile?.curClass?.courseId || 'undefined'
+    let allSubscriptions = [
+      Meteor.subscribe('allUserExperimentState', assignedTdfs)
+    ];
+    if (curCourseId != undefined)
+      allSubscriptions.push(Meteor.subscribe('Assignments', curCourseId));
+    if (Roles.userIsInRole(Meteor.user(), ['admin']))
+      allSubscriptions.push(Meteor.subscribe('allUsers'));
+    if (assignedTdfs === undefined || assignedTdfs === 'all')
+      allSubscriptions.push(Meteor.subscribe('allTdfs'));
+    else 
+      allSubscriptions.push(Meteor.subscribe('currentTdf', assignedTdfs));
+    return allSubscriptions;
+  },
+  action: function() {
+    if (Meteor.user()) {
+      this.render('lessonSelect');
     } else {
       this.redirect('/');
     }

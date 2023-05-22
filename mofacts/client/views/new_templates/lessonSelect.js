@@ -276,7 +276,7 @@ Template.lessonSelect.helpers({
       this.tdfTags.set(tdfTags);
   
   
-      if ((tdf.visibility == 'profileOnly' || tdf.visibility == 'enabled') && tdfObject.isAssigned) {
+      if ((tdf.visibility == 'profileOnly' || tdf.visibility == 'enabled' || typeof tdf.visibility === "undefined") && tdfObject.isAssigned) {
         enabledTdfs.push(tdfObject);
       } else {
         disabledTdfs.push(tdfObject);

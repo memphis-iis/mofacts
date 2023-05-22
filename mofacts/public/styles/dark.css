@@ -423,6 +423,8 @@ div.show-axis[data-y-axis]::after {
  background-color: #ccc;
  -webkit-transition: .4s;
  transition: .4s;
+ max-width: 60px;
+ max-height: 35px;
 }
 
 .slider:before {
