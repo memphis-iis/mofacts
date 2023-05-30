@@ -2746,7 +2746,7 @@ function stopRecording() {
 // END WEB AUDIO SECTION
 
 async function getExperimentState() {
-  const curExperimentState = GlobalExperimentStates.findOne({TDFId: Session.get('currentTdfId')}).experimentState;
+  const curExperimentState = GlobalExperimentStates.findOne().experimentState;
   const sessExpState = Session.get('currentExperimentState');
   console.log('getExperimentState:', curExperimentState, sessExpState);
   Meteor.call('updatePerformanceData', 'utlQuery', 'card.getExperimentState', Meteor.userId());
