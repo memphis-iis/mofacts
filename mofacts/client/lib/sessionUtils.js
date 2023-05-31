@@ -1,4 +1,5 @@
 export {sessionCleanUp};
+import {curExperimentState} from "../views/experiment/card.js";
 
 /* *****************************************************************
  * All of our currently known session variables
@@ -64,7 +65,6 @@ function sessionCleanUp() {
   Session.set('hiddenItems', []);
   Session.set('numVisibleCards', 0);
 
-  Session.set('currentRootTdfId', undefined);
   Session.set('currentTdfName', undefined);
   Session.set('currentTdfId', undefined);
   Session.set('currentUnitNumber', undefined);
@@ -129,5 +129,14 @@ function sessionCleanUp() {
     window.audioContext.close();
     window.audioContext = null;
   }
+  if(curExperimentState){
+    let globalExperimentState = GlobalExperimentStates.findOne({TDFId: Session.get('currentRootTdfId')})
+    if(globalExperimentState){
+      curExperimentState = Object.assign(globalExperimentState.experimentState, curExperimentState)
+      GlobalExperimentStates.update({_id: globalExperimentState._id}, {$set: {experimentState: curExperimentState}});
+    }
+  }
+  Session.set('currentRootTdfId', undefined);
+  curExperimentState = null;
 }
 
