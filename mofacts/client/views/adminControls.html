@@ -1,6 +1,7 @@
 <!-- User Administration Template -->
 
 <template name="adminControls">
+<<<<<<< HEAD
         <div class="container-fluid" style="padding: 0% 10%;">
             <div class="header-box">
                 Admin Control Panel
@@ -37,5 +38,52 @@
                 </div>
             </div>
         </div>
+=======
+    {{#if isInRole 'admin'}}  
+        <br><br>
+        <div class="col-md-12 responsiveTable">
+            <h3>Admin Controls</h3>
+            <h4>Change Server Logging Level</h4>
+            <div class="form-check">
+                <input class="form-check-input serverVerbosityRadio" type="radio" name="flexRadioDefault" id="serverVerbosityRadio0">
+                <label class="form-check-label" for="serverVerbosityRadio0">
+                    Server Logs Only
+                </label>
+            </div>
+            <div class="form-check">
+                <input class="form-check-input serverVerbosityRadio" type="radio" name="flexRadioDefault" id="serverVerbosityRadio1">
+                <label class="form-check-label" for="serverVerbosityRadio1">
+                    Function Times Only
+                </label>
+            </div>
+            <div class="form-check">
+                <input class="form-check-input serverVerbosityRadio" type="radio" name="flexRadioDefault" id="serverVerbosityRadio2">
+                <label class="form-check-label" for="serverVerbosityRadio2">
+                    Server Logs and Function Times
+                </label>
+            </div>
+        </div>
+        <br><br>
+        <h4>Change Clinet Logging Level</h4>
+        <div class="form-check">
+            <input class="form-check-input clientVerbosityRadio" type="radio" name="flexRadioDefault" id="clientVerbosityRadio0">
+            <label class="form-check-label" for="clientVerbosityRadio0">
+                No Logging (fastest)
+            </label>
+        </div>
+        <div class="form-check">
+            <input class="form-check-input clientVerbosityRadio" type="radio" name="flexRadioDefault" id="clientVerbosityRadio1">
+            <label class="form-check-label" for="clientVerbosityRadio1">
+                Function Calls Only (slower)
+            </label>
+        </div>
+        <div class="form-check">
+            <input class="form-check-input clientVerbosityRadio" type="radio" name="flexRadioDefault" id="clientVerbosityRadio2">
+            <label class="form-check-label" for="clientVerbosityRadio2">
+                Full Logging (slowest)
+            </label>
+        </div>
+    {{/if}}
+>>>>>>> 6c45862c (Implement Verbosity Level Changing)
 </template>
     

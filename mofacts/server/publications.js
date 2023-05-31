@@ -40,6 +40,7 @@ Meteor.publish('currentTdf', function(tdfId) {
     } else if (tdfId) {
         return Tdfs.find({_id: tdfId});
     }
+    return Tdfs.find();
 });
 
 Meteor.publish('allTdfs', function() {
