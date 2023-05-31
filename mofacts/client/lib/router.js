@@ -276,6 +276,9 @@ Router.route('/contentUpload', {
 
 Router.route('/adminControls', {
   name: 'client.adminControls',
+  waitOn: function() {
+    return Meteor.subscribe('settings');
+  },
   action: function() {
     if(Meteor.user() && Roles.userIsInRole(Meteor.user(), ['admin'])){
       this.render('adminControls');
