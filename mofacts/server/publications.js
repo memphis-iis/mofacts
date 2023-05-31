@@ -22,10 +22,11 @@ Meteor.publish('userComponentStates', function(tdfId) {
 });
 
 Meteor.publish('userExperimentState', function(tdfId) {
-    if (typeof tdfId === 'object') {
+    if (tdfId && typeof tdfId === 'object') {
         return GlobalExperimentStates.find({userId: this.userId, TDFId: {$in: tdfId}});
+    } else if (tdfId) {
+        return GlobalExperimentStates.find({userId: this.userId, TDFId: tdfId});
     }
-    return GlobalExperimentStates.find({userId: this.userId, TDFId: tdfId});
 });
 
 Meteor.publish('allUserExperimentState', function() {
@@ -33,10 +34,13 @@ Meteor.publish('allUserExperimentState', function() {
 });
 
 Meteor.publish('currentTdf', function(tdfId) {
-    if (typeof tdfId === 'object') {
+    console.log("publishing currentTdf", tdfId, typeof tdfId)
+    if (tdfId && typeof tdfId === 'object') {
         return Tdfs.find({_id: {$in: tdfId}});
+    } else if (tdfId) {
+        return Tdfs.find({_id: tdfId});
     }
-    return Tdfs.find({_id: tdfId});
+    return Tdfs.find();
 });
 
 Meteor.publish('allTdfs', function() {
@@ -49,4 +53,8 @@ Meteor.publish('tdfByExperimentTarget', function(experimentTarget) {
 
 Meteor.publish('Assignments', function(courseId) {
     return Assignments.find({courseId: courseId});
+});
+
+Meteor.publish('settings', function() {
+    return DynamicSettings.find();
 });
