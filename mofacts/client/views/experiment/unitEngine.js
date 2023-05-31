@@ -13,7 +13,7 @@ import {
 } from '../../lib/currentTestingHelpers';
 import {updateExperimentState} from './card';
 import {MODEL_UNIT, SCHEDULE_UNIT} from '../../../common/Definitions';
-import {meteorCallAsync} from '../../index';
+import {meteorCallAsync, clientConsole} from '../../index';
 import {displayify} from '../../../common/globalHelpers';
 import {Answers} from './answerAssess';
 
@@ -25,19 +25,6 @@ async function create(func, curExperimentData) {
   const engine = _.extend(defaultUnitEngine(curExperimentData), func());
   await engine.init();
   return engine;
-}
-
-function clientConsole(...args) {
-  let verbosityLevel = 0;
-  let logVerbosityLevel = args.shift();
-  if(verbosityLevel == 0) return;
-  if (logVerbosityLevel > verbosityLevel) return;
-  const disp = [(new Date()).toString()];
-  for (let i = 0; i < args.length; ++i) {
-    disp.push(args[i]);
-  }
-  // eslint-disable-next-line no-invalid-this
-  console.log.apply(this, disp);
 }
 
 // eslint-disable-next-line no-undef
