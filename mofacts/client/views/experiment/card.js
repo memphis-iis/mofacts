@@ -28,6 +28,7 @@ export {
   restartMainCardTimeoutIfNecessary,
   getCurrentClusterAndStimIndices,
   afterFeedbackCallback,
+  curExperimentState
 };
 
 /*
@@ -341,6 +342,7 @@ function varLenDisplayTimeout() {
 function leavePage(dest) {
   console.log('leaving page for dest: ' + dest);
   if (dest != '/card' && dest != '/instructions' && document.location.pathname != '/instructions') {
+    curExperimentState = null;
     console.log('resetting subtdfindex, dest: ' + dest);
     Session.set('subTdfIndex', null);
     sessionCleanUp();
@@ -2746,7 +2748,7 @@ function stopRecording() {
 // END WEB AUDIO SECTION
 
 async function getExperimentState() {
-  const curExperimentState = GlobalExperimentStates.findOne().experimentState;
+  curExperimentState = GlobalExperimentStates.findOne().experimentState;
   const sessExpState = Session.get('currentExperimentState');
   console.log('getExperimentState:', curExperimentState, sessExpState);
   Meteor.call('updatePerformanceData', 'utlQuery', 'card.getExperimentState', Meteor.userId());
@@ -2755,32 +2757,25 @@ async function getExperimentState() {
 }
 
 function updateExperimentState(newState, codeCallLocation, unitEngineOverride = {}) {
+  let globalExperimentState = GlobalExperimentStates.findOne({TDFId: newState.currentTdfId});
   console.log('currentExperimentState:', curExperimentState);
   if (unitEngineOverride && Object.keys(unitEngineOverride).length > 0)
     curExperimentState = unitEngineOverride;
-  else if (!curExperimentState)
-    curExperimentState = {};
-
-  let experimentId = curExperimentState._id;
-  if(!experimentId){
-    let globalExperimentState = GlobalExperimentStates.findOne({TDFId: newState.currentTdfId});
-    if(globalExperimentState){
-      experimentId = globalExperimentState._id;
-    } else {
-      curExperimentState = Object.assign(JSON.parse(JSON.stringify(curExperimentState)), newState);
-      GlobalExperimentStates.insert({
-        userId: Meteor.userId(),
-        TDFId: curExperimentState.currentTdfId,
-        experimentState: curExperimentState
-      });
-      console.log('updateExperimentState', codeCallLocation, '\nnew:', curExperimentState);
-      return Session.get('currentRootTdfId');
-    }
+  if (!curExperimentState){
+    curExperimentState = globalExperimentState?.experimentState || {};
   }
-  delete curExperimentState._id;
+  if(!globalExperimentState){
+    curExperimentState = Object.assign(JSON.parse(JSON.stringify(curExperimentState)), newState);
+    GlobalExperimentStates.insert({
+      userId: Meteor.userId(),
+      TDFId: curExperimentState.currentTdfId,
+      experimentState: curExperimentState
+    });
+    console.log('updateExperimentState', codeCallLocation, '\nnew:', curExperimentState);
+    return Session.get('currentRootTdfId');
+  }
   curExperimentState = Object.assign(JSON.parse(JSON.stringify(curExperimentState)), newState);
-  GlobalExperimentStates.update({_id: experimentId}, {$set: {experimentState: curExperimentState}});
-  curExperimentState._id = experimentId;
+  GlobalExperimentStates.update({_id: globalExperimentState._id}, {$set: {experimentState: curExperimentState}});
   console.log('updateExperimentState', codeCallLocation, '\nnew:', curExperimentState);
   return Session.get('currentRootTdfId');
 }
@@ -2828,13 +2823,13 @@ async function resumeFromComponentState() {
   const setspec = rootTDF.tdfs.tutor.setspec;
   const needExpCondition = (setspec.condition && setspec.condition.length);
 
-  const experimentState = await getExperimentState();
-  const newExperimentState = JSON.parse(JSON.stringify(experimentState));
+  curExperimentState = await getExperimentState();
+  const newExperimentState = JSON.parse(JSON.stringify(curExperimentState));
 
   // We must always check for experiment condition
   if (needExpCondition) {
     console.log('Experimental condition is required: searching');
-    const prevCondition = experimentState.conditionTdfId;
+    const prevCondition = curExperimentState.conditionTdfId;
 
     let conditionTdfId = null;
 
@@ -2919,7 +2914,7 @@ async function resumeFromComponentState() {
   // Note that we need to wait until the exp condition is selected above so
   // that we go to the correct TDF
   const stimCount = getStimCount();
-  let clusterMapping = experimentState.clusterMapping;
+  let clusterMapping = curExperimentState.clusterMapping;
   if (!clusterMapping) {
     // No cluster mapping! Need to create it and store for resume
     // We process each pair of shuffle/swap together and keep processing
@@ -2957,8 +2952,8 @@ async function resumeFromComponentState() {
   // Go ahead and save the cluster mapping we found/created
   Session.set('clusterMapping', clusterMapping);
 
-  if (experimentState.currentUnitNumber) {
-    Session.set('currentUnitNumber', experimentState.currentUnitNumber);
+  if (curExperimentState.currentUnitNumber) {
+    Session.set('currentUnitNumber', curExperimentState.currentUnitNumber);
   } else {
     Session.set('currentUnitNumber', 0);
     newExperimentState.currentUnitNumber = 0;
@@ -2969,8 +2964,8 @@ async function resumeFromComponentState() {
   Session.set('currentTdfUnit', curTdfUnit);
   console.log('resume, currentTdfUnit:', curTdfUnit);
 
-  if (experimentState.questionIndex) {
-    Session.set('questionIndex', experimentState.questionIndex);
+  if (curExperimentState.questionIndex) {
+    Session.set('questionIndex', curExperimentState.questionIndex);
   } else {
     Session.set('questionIndex', 0);
     newExperimentState.questionIndex = 0;
