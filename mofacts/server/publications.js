@@ -40,7 +40,10 @@ Meteor.publish('currentTdf', function(tdfId) {
     } else if (tdfId) {
         return Tdfs.find({_id: tdfId});
     }
+<<<<<<< HEAD
+=======
     return Tdfs.find();
+>>>>>>> a14c48ca (Implement Verbosity Level Changing)
 });
 
 Meteor.publish('allTdfs', function() {
