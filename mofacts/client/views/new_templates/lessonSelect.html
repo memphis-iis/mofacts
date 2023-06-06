@@ -8,16 +8,16 @@
         <!-- search by tag form -->
         {{#if searching}}
         {{else}}
+            {{#if recentTdfs}}
             <div class="row full-width">
                 <div class="header-box">
                     Recent Lessons
                 </div> 
             </div>
-            {{#if recentTdfs}}
-            <div class="row row-col-lg-6 row-col-md-3 row-col-sm-1 row-col-xs-1 full-width">
+            <div class="row  gy-5">
                 {{#each recentTdfs}}    
-                    <div class="col">
-                        <button id="{{this.tdfid}}" class="btn width-80-percent tdfButton" type="button" name="{{this.name}}"
+                <div class=" col-lg-3 col-md-3  col-xs-12">
+                        <button id="{{this.tdfid}}" class="btn  width-100-percent tdfButton" type="button" name="{{this.name}}"
                         data-tdfid="{{this.tdfid}}"
                         data-lessonname="{{this.name}}"
                         data-currentStimuliSetId="{{this.currentStimuliSetId}}"
@@ -34,10 +34,7 @@
                     </div>  
                 {{/each}}
             </div>
-        {{else}}
-        <p class="full-width text-center">
-            No recent lessons.
-        </p>
+            <br>
         {{/if}}
     {{/if}}
         <div class="row full-width">
@@ -50,10 +47,10 @@
             </div> 
         </div> 
         {{#if enabledTdfs}}
-            <div class="row row-col-lg-6 row-col-md-3 row-col-sm-1 row-col-xs-1 full-width">
+        <div class="row  gy-5">
                 {{#each enabledTdfs}}    
-                    <div class="col">
-                        <button id="{{this.tdfid}}" class="btn width-80-percent tdfButton" type="button" name="{{this.name}}"
+                <div class=" col-lg-3 col-md-3  col-xs-12">
+                        <button id="{{this.tdfid}}" class="btn  width-100-percent tdfButton" type="button" name="{{this.name}}"
                         data-tdfid="{{this.tdfid}}"
                         data-lessonname="{{this.name}}"
                         data-currentStimuliSetId="{{this.currentStimuliSetId}}"

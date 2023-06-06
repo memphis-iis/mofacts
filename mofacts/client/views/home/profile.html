@@ -11,83 +11,84 @@
         {{#unless isInRole 'admin,teacher'}}
             {{> studentReporting}}
         {{/unless}}
-        <div class="row row-col-lg-6 row-col-md-3 row-col-sm-1 row-col-xs-1 text-center">
+
         {{#if isInRole 'admin,teacher'}}
+        
         <div class="header-box">
             Admin / Teacher Menu
            </div> 
+           <div class="row  gy-5">
            
-                <div class="col">
-                    <button type="button" id="instructorReportingButton" class="button btn  navbar-btn">Instructor Reporting</button>
+                <div class=" col-lg-3 col-md-3  col-xs-12">
+                    <button type="button" id="instructorReportingButton" class="btn width-100-percent height-100-percent">Instructor Reporting</button><br>
                 </div>
-           
        
             {{#if isInRole 'admin'}}
 
-                <div class="col">
-                    <button id="adminControlsBtn" class="btn btn-primary" type="button">
+                <div class=" col-lg-3 col-md-3  col-xs-12">
+                    <button id="adminControlsBtn" class="btn width-100-percent height-100-percent" type="button">
                         Admin Control Panel
-                    </button>
+                    </button><br>
                 </div>
 
             {{/if}}
 
-                <div class="col">
-                    <button type="button" id="mechTurkButton" class="button btn  navbar-btn">Mechanical Turk</button>
+                <div class=" col-lg-3 col-md-3  col-xs-12">
+                    <button type="button" id="mechTurkButton" class="btn width-100-percent height-100-percent">Mechanical Turk</button><br>
                 </div>
 
          
-                <div class="col">
-                    <button id="FileManagementButton" class="btn btn-primary" type="button">
+                <div class=" col-lg-3 col-md-3  col-xs-12">
+                    <button id="FileManagementButton" class="btn width-100-percent height-100-percent" type="button">
                         File Management
-                    </button>
+                    </button><br>
                 </div>
 
 
-                <div class="col">
-                    <button type="button" id="contentUploadButton" class="button btn  navbar-btn">Asset Manager</button>
+                <div class=" col-lg-3 col-md-3  col-xs-12">
+                    <button type="button" id="contentUploadButton" class="btn width-100-percent height-100-percent">Asset Manager</button><br>
                 </div>
 
-                <div class="col">
-                    <button type="button" id="userProfileEditButton" class="button btn  navbar-btn">AWS User Profile Data</button>
+                <div class=" col-lg-3 col-md-3  col-xs-12">
+                    <button type="button" id="userProfileEditButton" class="btn width-100-percent height-100-percent">AWS User Profile Data</button><br>
                 </div>
 
-                <div class="col">
-                    <button type="button" id="dataDownloadButton" class="button btn  navbar-btn">Download User Log Data</button>
+                <div class=" col-lg-3 col-md-3  col-xs-12">
+                    <button type="button" id="dataDownloadButton" class="btn width-100-percent height-100-percent">Download User Log Data</button><br>
                 </div>
 
             {{#if isInRole 'admin'}}
              
-                  <div class="col">
-                      <button type="button" id="userAdminButton" class="button btn  navbar-btn">User Admin</button>
+                  <div class=" col-lg-3 col-md-3  col-xs-12">
+                      <button type="button" id="userAdminButton" class="btn width-100-percent height-100-percent">User Admin</button><br>
                   </div>
      
             {{/if}}
        
        
-                <div class="col">
-                    <button type="button" id="classEditButton" class="button btn  navbar-btn">Class Edit</button>
+                <div class=" col-lg-3 col-md-3  col-xs-12">
+                    <button type="button" id="classEditButton" class="btn width-100-percent height-100-percent">Class Edit</button><br>
                 </div>
  
        
-                <div class="col">
-                    <button type="button" id="tdfAssignmentEditButton" class="button btn  navbar-btn">Chapter Assignments</button>
+                <div class=" col-lg-3 col-md-3  col-xs-12">
+                    <button type="button" id="tdfAssignmentEditButton" class="btn width-100-percent height-100-percent">Chapter Assignments</button><br>
                 </div>
 
        
         
-                <div class="col">
-                    <button type="button" id="wikiButton" class="button btn  navbar-btn">MoFACTs Manuals / Wiki</button>
+                <div class=" col-lg-3 col-md-3  col-xs-12">
+                    <button type="button" id="wikiButton" class="btn width-100-percent height-100-percent">MoFACTs Manuals / Wiki</button><br>
                 </div>
      
        
     
-                <div class="col">
-                    <button type="button" id="contentGenerationButton" class="button btn  navbar-btn">Content Generation</button>
+                <div class=" col-lg-3 col-md-3  col-xs-12">
+                    <button type="button" id="contentGenerationButton" class="btn width-100-percent height-100-percent">Content Generation</button><br>
                 </div>
                 
-    
+            </div>
         {{/if}}
-        </div>
+
     </div>
 </template>
