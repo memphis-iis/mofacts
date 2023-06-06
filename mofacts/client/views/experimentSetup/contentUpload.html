@@ -2,53 +2,83 @@
 
 <template name="contentUpload">
     <div class="container-fluid" style="padding: 0% 10%;">
-        {{#if isInRole 'admin,teacher'}}
-            <div class="header-box">
-                <h1 class="text-center">Asset Uploader</h1>
-            </div>
-                This uploads your assets for use in experiments. It can also upload packaged zip files with TDF/stim/asset combinations. 
-                You may use video, audio, or image files as well. A link will be generated and available after upload. 
-                Note, it may take some time to complete large packages. Please wait until a prompt is given to navigate to a new page.
-        {{else}}
-        <div class="alert">
-            <div class="alert-icon">
-              <i class="fas fa-info-circle"></i>
-            </div>
-            You do not have access to this feature. Please contact your teacher or administrator.
-          </div> 
-        {{/if}}
+        <div class="header-box">
+            <h1 class="text-center">Asset Manager</h1>
+        </div>
+            This manages your assets, lessons, and stimuli for use in experiments. It can also upload packaged zip files with TDF/stim/asset combinations. 
+            You may use video, audio, or image files as well. Please wait until a prompt is given to navigate to a new page.
         <div class="vh-5"></div>
+        <div class="row">
+            <h3 class="text-center">Your Assets</h3>
+            <p>Deleting is not recoverable. Deleting stimuli will remove all related lessons and results.</p>
+
+        
+            <table class="table table-striped table-bordered table-condensed">
+                <thead>
+                    <tr>
+                        <th class="col-2">Type</th>
+                        <th class="col-6">Name</th>
+                        <th class="col-2">Download</th>
+                        <th class="col-2">Delete</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{#each TdfFiles}}
+                        <tr>
+                            <td>tdf</td>
+                            <td>{{content.fileName}}</td>
+                            <td><button id="tdf-download-btn" value="{{_id}}" class="btn-icon"><span class="fa fa-download" aria-hidden="true"></span></button></td>
+                            <td><button id="tdf-delete-btn" value="{{_id}}" data-filename="{{fileName}}" class="btn-icon"><span class="fa fa-minus" aria-hidden="true"></span></button></td>
+                        </tr>
+                    {{/each}}
+                    {{#each StimFiles}}
+                        <tr>
+                            <td>stim</td>
+                            <td>{{this.fileName}}</td>
+                            <td><button id="stim-download-btn" value="{{stimuliSetId}}" class="btn-icon"><span class="fa fa-download" aria-hidden="true"></span></button></td>
+                            <td><button id="stim-delete-btn" value="{{stimuliSetId}}" data-filename="{{fileName}}" class="btn-icon"><span class="fa fa-minus" aria-hidden="true"></span></button></td>
+                        </tr>
+                    {{/each}}
+                    {{#each assets}}
+                        <tr>
+                            <td>
+                                {{ext}}
+                            </td>
+                            <td>
+                                {{name}}
+                            </td>
+                            <td>
+                                <a href="{{link}}" download="{{name}}" target="_parent">
+                                    <button id="assetDownloadButton" value="{{_id}}" class="btn-icon"><span class="fa fa-download" aria-hidden="true"></span></button>
+                                </a>
+                            </td>
+                            <td><button id="assetDeleteButton" value="{{_id}}" data-id="{{_id}}" class="btn-icon"><span class="fa fa-minus" aria-hidden="true"></span></button></td>
+                        </tr>
+                    {{/each}}
+                </tbody>
+            </table>
+        </div>
         <div class="row"> 
             <div class="col text-center ">
                 <h3 class="text-center">Upload Asset</h3>
                 <div class="row text-center">
-                    <div class="row">
-                        <select id="file-type" class="form-control" aria-placeholder="Select file type">\
-                            <option value="" disabled selected>Select Asset Type</option>
-                            <option value="stim">Stimulus File</option>
-                            <option value="tdf">TDF File</option>
-                            <option value="asset">Package</option>
-                        </select>
-                    </div>
                     <div class="vh-5"></div>
                     <div class="row">
                         <input type="file" class="form-control" name="upload-file" id="upload-file" value="" placeholder="ZIP, JSON File" multiple>
                     </div>
                     <div class="vh-5"></div>
+                    {{#if curFilesToUpload}}
                     <div class="row">
                         <h4>Files in Queue:</h4>
-                        {{#if curFilesToUpload}}
                             {{#each curFilesToUpload}}
-                                <li>{{this.name}} ({{this.fileType}})</li>
+                                {{this.name}}<br>
                             {{/each}}
-                        {{else}}
-                            <p>No files selected.</p>
-                        {{/if}}
                     </div>
+                    {{/if}}
                     <div class="vh-5"></div>
                     <div class="row">
                         <button type='button' id='doUpload' class='btn'>
-                            Upload Asset File
+                            Upload Asset File(s)
                             <div class="loader" id='stimUploadLoadingSymbol' style="margin-top: 1%" hidden></div>
                         </button>
                     </div>
@@ -57,65 +87,15 @@
         </div> 
         <div class="vh-5"></div>
             <div class="row">
-            <div class="col-md-12 table-responsive">
-                <h3 class="text-center">Your Assets</h3>
-                <p>*Deleting a stim will delete the corresponding TDF and all related history. Deleting is not recoverable.</p>
-
-                <p><span class="fa fa-download" aria-hidden="true"></span>Download<br><span class="fa fa-share" aria-hidden="true"></span>Export</p>
-            
-                <table class="table table-striped table-bordered table-condensed">
-                    <thead>
-                        <tr>
-                            <th class="col-md-1">Type</th>
-                            <th class="col-md-6">Name</th>
-                            <th class="col-md-1">Download</th>
-                            <th class="col-md-1">Delete</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {{#each TdfFiles}}
-                            <tr>
-                                <td>tdf</td>
-                                <td>{{content.fileName}}</td>
-                                <td><button id="tdf-download-btn" value="{{_id}}" class="btn"><span class="fa fa-download" aria-hidden="true"></span></button></td>
-                                <td><button id="tdf-delete-btn" value="{{_id}}" data-filename="{{fileName}}" class="btn"><span class="fa fa-minus" aria-hidden="true"></span></button></td>
-                            </tr>
-                        {{/each}}
-                        {{#each StimFiles}}
-                            <tr>
-                                <td>stim</td>
-                                <td>{{this.fileName}}</td>
-                                <td><button id="stim-download-btn" value="{{stimuliSetId}}" class="btn"><span class="fa fa-download" aria-hidden="true"></span></button></td>
-                                <td><button id="stim-delete-btn" value="{{stimuliSetId}}" data-filename="{{fileName}}" class="btn"><span class="fa fa-minus" aria-hidden="true"></span></button></td>
-                            </tr>
-                        {{/each}}
-                        {{#each assets}}
-                            <tr>
-                                <td>
-                                    {{ext}}
-                                </td>
-                                <td>
-                                    {{name}}
-                                </td>
-                                <td>
-                                    <a href="{{link}}" download="{{name}}" target="_parent">
-                                        <button id="assetDownloadButton" value="{{_id}}" class="btn"><span class="fa fa-download" aria-hidden="true"></span></button>
-                                    </a>
-                                </td>
-                                <td><button id="assetDeleteButton" value="{{_id}}" data-id="{{_id}}" class="btn"><span class="fa fa-minus" aria-hidden="true"></span></button></td>
-                            </tr>
-                        {{/each}}
-                    </tbody>
-                </table>
-            </div>
         </div>
 
         {{#if isInRole 'admin'}}
         <h3 class="text-center">Admin Functions</h3>
             <p>
-                <button class="btn btn-danger" id="deleteAllAssetsPrompt">Delete All Assets. This is NOT recoverable.</button>
-                <button class="btn btn-danger" style="display: none;" id="deleteAllAssetsConfirm" hidden>Are you sure? This is NOT recoverable.</button>
+                This will delete all files. It will remove image and media assets, but will not remove lessons (TDFs) or stimuli from the database.
             </p>
+            <button class="btn width-80-percent" id="deleteAllAssetsPrompt">Delete All Uploaded Files. </button>
+                <button class="btn width-80-percent" style="display: none;" id="deleteAllAssetsConfirm" hidden>Are you sure? This is NOT recoverable.</button>
         {{/if}}
     </div>
 </template>

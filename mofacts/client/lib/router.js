@@ -219,6 +219,7 @@ Router.route('/studentReporting', {
     return [Meteor.subscribe('allTdfs', 'all')];
   },
   action: function() {
+    routeName = 'studentReporting';
     Session.set('curModule', routeName.toLowerCase());
     console.log(routeName + ' ROUTE');
     this.render(routeName);

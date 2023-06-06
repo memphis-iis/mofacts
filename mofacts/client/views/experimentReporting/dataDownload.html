@@ -1,8 +1,11 @@
 <template name="dataDownload">
+    <div class="header-box">
+        Data Downloads
+       </div> 
     {{#if isInRole 'admin'}}
-        <div class="col-md-12" id="teacherSelectContainer">
-            <legend class="downloadLegend">Teacher Select</legend>
-            <select id="teacherSelect" name="teacherSelect">
+        <div class="col-md-12 text-center" id="teacherSelectContainer">
+            <h3>Teacher Select</h3>
+            <select id="teacherSelect" name="teacherSelect" class="width-80-percent">
                 <option value="">Show all</option>
                 {{#each teachers}}
                     {{#if this.username}}
@@ -19,8 +22,8 @@
     {{/if}}
 
     {{#if showClasses}}
-        <div class="col-md-12" id="classSelectContainer">
-            <legend class="downloadLegend">Class Select</legend>
+        <div class="col-md-12 text-center" id="classSelectContainer">
+            <h3>Class Select</h3>
             <select id="classSelect" name="classSelect">
                 <option value="">Show all</option>
                 {{#each classes}}
@@ -35,45 +38,47 @@
         </div>
     {{/if}}
 
-    <div class="col-md-12" id="downloadContainer">
-        <legend class="downloadLegend">Data Downloads</legend>
+    <div class="col-md-12 text-center" id="downloadContainer">
+        <h3>Data Downloads</h3>
         <a class="exp-data-link" id="userDataDownloadLink" target="_blank" href>Download all TDF data for current user: {{user}}</a>
-        <table class="table table-responsive">
-            <thead>
-            <tr>
-                <th scope="col">Lesson Name</th>
-                <th scope="col">File Name</th>
-                <th scope="col" style="text-align: right;" class="col-4 justify-content-end"></th>
-            </tr>
-            </thead>
-            <tbody>
-                {{#each dataDownloads}}
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                <tr>
+                    <th scope="col">Lesson Name</th>
+                    <th scope="col">File Name</th>
+                    <th scope="col" style="text-align: right;" class="col-4 justify-content-end"></th>
+                </tr>
+                </thead>
+                <tbody>
+                    {{#each dataDownloads}}
+                    <tr>
+                        <th scope="row">{{this.content.tdfs.tutor.setspec.lessonname}}</th>
+                        <td>{{this.content.fileName}}</td>
+                        <td style="text-align: right;">
+                            <div class="col-2" style="display: inline-block">
+                                <button class="btn-icon" type="button" id="dataDownloadLink" data-fileName="{{this.content.fileName}}" aria-expanded="false">
+                                    <span class="fa fa-download"></span>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                {{/each}}
+                {{#each accessableFiles}}
                 <tr>
                     <th scope="row">{{this.content.tdfs.tutor.setspec.lessonname}}</th>
                     <td>{{this.content.fileName}}</td>
                     <td style="text-align: right;">
                         <div class="col-2" style="display: inline-block">
-                            <button class="btn btn-secondary" type="button" id="dataDownloadLink" data-fileName="{{this.content.fileName}}" aria-expanded="false">
+                            <button class="btn-icon" type="button" id="dataDownloadLink" data-fileName="{{this.content.fileName}}" aria-expanded="false">
                                 <span class="fa fa-download"></span>
                             </button>
                         </div>
                     </td>
                 </tr>
-            {{/each}}
-            {{#each accessableFiles}}
-            <tr>
-                <th scope="row">{{this.content.tdfs.tutor.setspec.lessonname}}</th>
-                <td>{{this.content.fileName}}</td>
-                <td style="text-align: right;">
-                    <div class="col-2" style="display: inline-block">
-                        <button class="btn btn-secondary" type="button" id="dataDownloadLink" data-fileName="{{this.content.fileName}}" aria-expanded="false">
-                            <span class="fa fa-download"></span>
-                        </button>
-                    </div>
-                </td>
-            </tr>
-            {{/each}}
-            </tbody>
-        </table>
+                {{/each}}
+                </tbody>
+            </table>
+        </div>
     </div>
 </template>

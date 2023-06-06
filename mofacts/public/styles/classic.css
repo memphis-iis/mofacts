@@ -10,7 +10,17 @@ h3{
     padding: 10px;
 }
 
-.btn{
+h5{
+    /* League Spartan */
+    font-family: 'League Spartan';
+    padding: 10px;
+}
+
+p{
+    padding:10px;
+}
+
+.btn, .btn-icon{
     background-color: #7ed957;
     border-color: #7ed957;
     color: #000000;
@@ -18,7 +28,7 @@ h3{
     margin-left: auto;
     margin-right: auto;
 }
-.btn:hover{
+.btn:hover, .btn-icon:hover{
     background-color: #00cc00;
     border-color: #7ed957;
     color: #000000;
@@ -26,14 +36,29 @@ h3{
 }
 .modal-dialog, .modal-content{
     background-color: #d9d9d9;
+    display: flex;
 }
 
+.modal-title{
+    /* League Spartan */
+    font-family: 'League Spartan';
+    font-weight: 800;
+    font-size: 35px;
+    /* center text */
+    justify-content: center;
+    display: inline-flex;
+    margin-left: auto;
+}
 .full-menu-content, .active-menu-button{
     background-color: #d9d9d9 !important;
     color: #000000;
 }
 .alert, .header-box{
     background-color: #d9d9d9;
+}
+
+thead{
+    background-color: #7ed957;
 }
 
 
@@ -45,6 +70,17 @@ h1{
     font: 55pt;
 }
 
+thead{
+    /* League Spartan */
+    font-family: 'League Spartan';
+    font-weight: 800;
+    /* border radius is 35px on left side*/
+    border: 1px solid #7ed957;
+    border-top-left-radius: 35px;
+    border-top-right-radius: 35px;
+    padding: 10px;
+}
+
 input[type=text], input[type=password], select{
     /* Josefin Sans */
     font-family: 'Josefin Sans';
@@ -54,6 +90,13 @@ input[type=text], input[type=password], select{
     margin: 5px;
     /*give margin to the left of the input*/
     margin-left: 10px;
+}
+
+input[type=radio]{
+    margin-bottom: 30px;
+    /*large checkbox*/
+    transform: scale(1.5);
+    padding: 10px;
 }
 
 input[type=file]{
@@ -85,6 +128,19 @@ select{
     padding: 15px;
     margin: 5px;
     min-width: 250px;
+}
+.btn-icon{
+    font-family: 'Josefin Sans';
+    border-width: 1px;
+    border-radius: 35px;
+    padding: 15px;
+    margin: 5px;
+    /* center icon */
+    text-align: center;
+    /* center text */
+    justify-content: center;
+    /* center icon */
+    align-items: center;
 }
 
 .navbar button{
@@ -124,6 +180,9 @@ select{
     top:0px;
     z-index: 1;
     background-color: rgba(0,0,0,0.6);
+    /* fade in */
+    animation: fadeIn 0.5s;
+    -webkit-animation: fadeIn 0.5s;
     
 }
 .full-menu-content{
@@ -147,11 +206,10 @@ select{
 
 .header-box{
     width: 100%;
-    margin-top: 5vh;
     margin-bottom: 5vh;
     margin-right: -5px;
     margin-left: 10px;
-    padding: 5vh;
+    padding: 3vh;
     border-radius: 0px;
     font-size: 25px;
     font-weight: bold;
@@ -162,7 +220,6 @@ select{
     width: 100%;
     margin-top: 5vh;
     margin-bottom: 5vh;
-    margin-left: -20vw;
     padding: 5vh;
     border-radius: 0px;
 }
@@ -170,7 +227,7 @@ select{
 .alert-icon{
     /*display an icon on the top left of the alert*/
     float: left;
-    margin-left: 15vw;
+    margin-left: 50px;
     margin-top: -10vh;
     width: 50px;
     height: 50px;
@@ -179,23 +236,33 @@ select{
     /* circle */
     border-radius: 50%;
 }
+
+.table-responsive table{
+    min-width: 100%;
+}
 /* Desktop Screens */
 @media screen and (min-width: 1024px) {
     .full-menu-content{
-        width: 20vw;
-        margin-left: 80vw;
+        width: 15vw;
+        margin-left: 85vw;
+        /* animate in from right */
+        animation: slide-in-right 0.5s forwards;
+        --webkit-animation: slide-in-right 0.5s forwards;
+        /* animate out to right */
+        animation: slide-out-right 0.5s forwards;
+        --webkit-animation: slide-out-right 0.5s forwards;
     }
     .full-menu-content li{
-        font-size: 15pt;
+        font-size: 12pt;
     }
 }
 
 /* Adaptive  Screens */
 @media screen and (max-width: 1024px) {
     .modal-dialog{
-        height: 70vh;
+        height: 50vh;
         position: fixed;
-        top: 30%;
+        top: 50%;
         width: 90vw;
         margin-left: 5vw;
         /* reset bottom of border radius */
@@ -207,15 +274,14 @@ select{
         margin-left: 10vw;
     }
     .full-menu-content li{
-        font-size: 25pt;
+        font-size: 20pt;
     }
     .header-box{
         width: 100%;
-        margin-top: 5vh;
         margin-bottom: 5vh;
         margin-right: -5px;
         margin-left: 10px;
-        padding: 5vh;
+        padding: 3vh;
         border-radius: 0px;
     }
     .alert{
@@ -225,6 +291,9 @@ select{
     .alert-icon{
         margin-left:5vw;
     }
+    .table-responsive table{
+        min-width: 90vw;
+    }
 }
 
 
@@ -232,6 +301,7 @@ select{
 /* fade in and slide up */
 .fade-in-up {
     animation: fadeInUp 0.5s ease-in-out;
+    -webkit-animation: fadeInUp 0.5s ease-in-out;
 }
 
 /* utility classes */
@@ -276,12 +346,7 @@ select{
 .vh-40{
     height: 40vh;
 }
-.full-width{
-    margin-left: -30px;
-    margin-right: -30px;
-    width: 110vw;
-    overflow: visible;
-}
+
 
 .width-100-percent{
     width: 100%;

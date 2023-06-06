@@ -1,18 +1,26 @@
 <template name="studentReporting">
   <div class="allContent">
     <div class="row">    
-      <select id="tdf-select" class="width-80-percent">
-          <option value="{{INVALID}}">Select a lesson</option>
-          <!-- <option value="xml">All</option> -->
-          {{#each studentReportingTdfs}}
-            <option value="{{this.TDFId}}">{{this.displayName}}</option>
-          {{/each}}
-      </select>
+      {{#if studentReportingTdfs}}
+        {{#if noTime}}
+        {{else}}
+          {{#if tooFewStims}}
+          {{else}}            
+            <select id="tdf-select" class="width-80-percent">
+             <option value="{{INVALID}}">Select a lesson</option>
+            <!-- <option value="xml">All</option> -->
+            {{#each studentReportingTdfs}}
+              <option value="{{this.TDFId}}">{{this.displayName}}</option>
+            {{/each}}
+            </select>
+          {{/if}}
+        {{/if}}
+      {{/if}}
       </div>
       <div class="row full-width">
           <div class="alert">
             <div class="alert-icon">
-              <i class="fas fa-info-circle"></i>
+              <i class="fa fa-info-circle" aria-hidden="true"></i>
             </div>
             {{#if noTime}}
               You have not started using the system.  Once you
@@ -28,7 +36,7 @@
       </div> 
       {{#if noTime}}
         <div class="vh-30"></div>
-        <button id="go-to-lesson-select" class="btn btn-primary">Start a Lesson</button>
+        <button id="go-to-lesson-select" class="btn btn-primary">Select a Lesson</button>
       {{else}}
       {{#if tooFewStims}}
           We do not have enough data to

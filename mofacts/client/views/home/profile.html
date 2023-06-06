@@ -8,13 +8,14 @@
                 Impersonation Mode. Nothing will be logged. Log out to reset.
         </div>
         {{/if}}
-        <br>
         {{#unless isInRole 'admin,teacher'}}
             {{> studentReporting}}
         {{/unless}}
         <div class="row row-col-lg-6 row-col-md-3 row-col-sm-1 row-col-xs-1 text-center">
         {{#if isInRole 'admin,teacher'}}
- 
+        <div class="header-box">
+            Admin / Teacher Menu
+           </div> 
            
                 <div class="col">
                     <button type="button" id="instructorReportingButton" class="button btn  navbar-btn">Instructor Reporting</button>
@@ -38,13 +39,13 @@
          
                 <div class="col">
                     <button id="FileManagementButton" class="btn btn-primary" type="button">
-                        Manage Lessons
+                        File Management
                     </button>
                 </div>
 
 
                 <div class="col">
-                    <button type="button" id="contentUploadButton" class="button btn  navbar-btn">Content Uploads</button>
+                    <button type="button" id="contentUploadButton" class="button btn  navbar-btn">Asset Manager</button>
                 </div>
 
                 <div class="col">

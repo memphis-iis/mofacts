@@ -276,7 +276,7 @@ Template.lessonSelect.helpers({
       this.tdfTags.set(tdfTags);
   
   
-      if ((tdf.visibility == 'profileOnly' || tdf.visibility == 'enabled' || typeof tdf.visibility === "undefined") && tdfObject.isAssigned) {
+      if ((tdf.visibility == 'profileOnly' || tdf.visibility == 'enabled' || typeof tdf.visibility === "undefined")) {
         enabledTdfs.push(tdfObject);
       } else {
         disabledTdfs.push(tdfObject);
@@ -548,4 +548,19 @@ Template.lessonSelect.helpers({
       Router.go('/multiTdfSelect');
     }
   }
+
+  function getAudioInputFromPage() {
+    return $('#audioInputOn').checked;
+  }
   
+  function getAudioPromptModeFromPage() {
+  if ($('#audioPromptFeedbackOn').checked && $('#audioPromptQuestionOn').checked) {
+    return 'all';
+  } else if ($('#audioPromptFeedbackOn').checked){
+    return 'feedback';
+  } else if ($('#audioPromptQuestionOn').checked) {
+    return 'question';
+  } else {
+    return 'silent';
+  }
+}
