@@ -122,12 +122,15 @@ select{
 }
 
 .btn{
-    font-family: 'Josefin Sans';
+    ont-family: 'Josefin Sans';
     border-width: 1px;
     border-radius: 35px;
     padding: 15px;
-    margin: 5px;
-    min-width: 250px;
+    /* margin-left: auto; */
+    /* margin-right: auto; */
+    width: 80%;
+    height: 100%;
+    padding: 10px;
 }
 .btn-icon{
     font-family: 'Josefin Sans';

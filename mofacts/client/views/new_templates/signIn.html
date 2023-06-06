@@ -37,12 +37,12 @@
         <!-- login with sso and google -->
         <div class="row text-center large-spacer login-sso-options">
             <div class="col-lg-4 offset-lg-4 col-md-6 col-md-offset-4 col-sm-8 col-sm-offset-2 col-xs-12 large-spacer">
-                <button type="button" id="signInButton" class="btn">Sign In</button><br>
+                <button type="button" id="signInButton" class="btn btn-fixed">Sign In</button><br>
                 {{#unless isExperiment}}
-                    <button type="button" id="signUpButton" class="btn">Sign Up</button><br>
+                    <button type="button" id="signUpButton" class="btn btn-fixed">Sign Up</button><br>
                 {{/unless}}
-                <button type="button" id="signInButtonOAuth" class="btn">Sign In with Google</button><br>
-                <button type="button" id="signInWithSSOButton" class="btn" data-bs-toggle="modal" data-bs-target="#classSelectModal">Class Select / SSO</button>
+                <button type="button" id="signInButtonOAuth" class="btn btn-fixed">Sign In with Google</button><br>
+                <button type="button" id="signInWithSSOButton" class="btn btn-fixed" data-bs-toggle="modal" data-bs-target="#classSelectModal">Class Select / SSO</button>
             </div>
         </div>
         <!-- footer -->
@@ -80,8 +80,8 @@
                     </form>
                         <div class="vh-5"></div>
                         <div class="row text-center">
-                        <button type="button" class="btn">Sign In</button>
-                        <button type="button" class="btn" data-bs-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-fixed">Sign In</button>
+                        <button type="button" class="btn btn-fixed" data-bs-dismiss="modal">Close</button>
                     </div>
                   </div>
                 </div>
