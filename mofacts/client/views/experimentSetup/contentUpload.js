@@ -40,16 +40,30 @@ Template.contentUpload.events({
     const files = Template.instance().curFilesToUpload.get();
     //add new files to array, appending the current file type from the dropdown
     for (const file of Array.from($('#upload-file').prop('files'))) {
-      file.fileType = $('#file-type').val();
-      files.push(file);
-      //if file is a TDF, add a description field
-      if (file.fileType == 'tdf') {
-        file.fileDescrip = 'TDF'
-      } else if (file.fileType == 'stim') {
-        file.fileDescrip = 'Stimuli'
+      //if the file has extension .json, read and parse it, if it is a TDF file it will have "tutor" field, if it is a stimuli file it will have "setspec" field
+      if (file.name.endsWith('.json')) {
+        console.log('JSON file:', file);
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const fileContent = JSON.parse(e.target.result);
+          //print file contents to console
+          console.log('fileContent:', fileContent);
+          if (fileContent.tutor) {
+            file.fileType = 'tdf';
+            file.fileDescrip = 'TDF'
+          } else if (fileContent.setspec) {
+            file.fileType = 'stim';
+            file.fileDescrip = 'Stimuli'
+          } else {
+            file.fileType = 'unknown';
+            file.fileDescrip = 'Unknown'      
+          }
+        };
+        reader.readAsText(file);
       } else {
-        file.fileDescrip = 'Package'
+        file.fileType = 'package';
       }
+      files.push(file);
     }
     //update reactive var with new array
     console.log('files:', files);

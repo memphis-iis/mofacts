@@ -352,6 +352,11 @@ Template.instructions.helpers({
       return true;
     }
   },
+    'curTdfName': function(){
+    lessonname = Session.get('currentTdfFile').tdfs.tutor.setspec.lessonname;
+    console.log("lessonname",lessonname);
+    return lessonname;
+  }
 });
 
 Template.instructions.rendered = function() {

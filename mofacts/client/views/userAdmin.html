@@ -1,9 +1,11 @@
 <!-- User Administration Template -->
 
 <template name="userAdmin">
+    <div class="header-box">
+        User Administration
+       </div> 
 {{#if isInRole 'admin,teacher'}}  
-    <br><br>
-    <div class="col-md-12 responsiveTable">
+    <div class="col-md-12">
         <h3>User Administration</h3>
         <h4>Upload User File</h4>
         <div class="row">

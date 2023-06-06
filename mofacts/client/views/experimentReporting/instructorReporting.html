@@ -19,7 +19,7 @@
     </div> 
     <div id="mainContent">
       <h3 class="text-center">Class Selection</h3>
-      <select id="class-select">
+      <select id="class-select" class="width-80-percent">
         <option selected="selected" value="{{INVALID}}" disabled="true">Select a class</option>
         {{#each classes}}
           <option value="{{this._id}}">{{this.courseName}}</option>
@@ -27,8 +27,8 @@
       </select>
       <div>
         <h3 class="text-center">Select Chapter</h3>
-        <select id="tdf-select" disabled="true">
-            <option selected="selected" value="{{INVALID}}" disabled="true">Select a tdf</option>
+        <select id="tdf-select" disabled="true" class="width-80-percent">
+            <option selected="selected" value="{{INVALID}}" disabled="true">Select a lesson</option>
             {{#each curInstructorReportingTdfs}}
               <option value="{{this.TDFId}}">{{this.displayName}}</option>
             {{/each}}
@@ -38,35 +38,36 @@
         {{/if}}
       </div>
       <div>
-        <h3 class="text-center">Practice Deadline</h3>
-        <input type="date" id="practice-deadline-date" name="practice-deadline-date-select" disabled="true">
         {{#if selectedTdfDueDate}}
-        <h3 class="text-center">Filter By Due Date ({{selectedTdfDueDate}})</h3>
-        Enabled: <input type="checkbox" id="due-date-filter" name="due-date-filter-select"><br>
-        Exception Date: <input type="date" id="exception-date" name="exception-date-select">
-        {{else}}
-        <h3 class="text-center">Filter By Due Date</h3>
-        No due date set for this chapter.
-        {{/if}}   
+          <h3 class="text-center">Practice Deadline</h3>
+          <input type="date" id="practice-deadline-date" name="practice-deadline-date-select" disabled="true" class="width-80-percent">
+          <h3 class="text-center">Filter By Due Date ({{selectedTdfDueDate}})</h3>
+          Enabled: <input type="checkbox" id="due-date-filter" name="due-date-filter-select"><br>
+          Exception Date: <input type="date" id="exception-date" name="exception-date-select">
+        {{/if}}
       </div>
       <h3 class="text-center">Class Data</h3>
-      <div class="row">
-        <table class="table table-instructorreport">
-          <thead>
-            <th scope="col">Student</th>
-            <th scope="col">% Correct</th>
-            <th scope="col">Count</th>
-            <th scope="col">Total Time (min)</th>
-            <th scope="col">Exceptions</th>
-            <th scope="col">Actions</th>
+      <div class="row table-responsive">
+        <table class="table table-striped table-bordered">
+          <thead class="table-light">
+            <th>Student</th>
+            <th>% Correct</th>
+            <th>Count</th>
+            <th>Total Time (min)</th>
+            <th>Exceptions</th>
+            <th>Actions</th>
           </thead>
           {{#if dueDateFilter}}
-          <thead><th>Completed Before Due Date:</th><th></th><th></th><th></th><th></th><th></th><th></th></thead>
+          <tr>
+            <td colspan="6">
+              Completed Before Due Date
+            </td>
+          </tr>  
           {{/if}}
           {{#if curClassStudentPerformance}}
             {{#each curClassStudentPerformance}}
               <tr id="{{this.userId}}">
-                <td scope="row"><a onclick="navigateToStudentReporting('{{this.username}}')">{{this.username}}</a></td>
+                <td><a onclick="navigateToStudentReporting('{{this.username}}')">{{this.username}}</a></td>
                 <td>{{this.percentCorrect}}</td>
                 <td>{{this.count}}</td>
                 <td>{{this.totalTimeMins}}</td>
@@ -115,14 +116,14 @@
               <tr><td colspan="6">No data available</td></tr>
             {{/if}}
           {{/if}}
-          <thead id="classReportingTotal">
-            <th>Totals</th>
-            <th>{{curClassPerformance.percentCorrect}}</th>
-            <th>{{curClassPerformance.count}}</th>
-            <th>{{curClassPerformance.totalTimeMins}}</th>
-            <th></th>
-            <th></th>
-          </thead>
+          <tfoot id="classReportingTotal">
+            <tf>Totals</tf>
+            <tf>{{curClassPerformance.percentCorrect}}</tf>
+            <tf>{{curClassPerformance.count}}</tf>
+            <tf>{{curClassPerformance.totalTimeMins}}</tf>
+            <tf></tf>
+            <tf></tf>
+          </tfoot>
         </table>
       </div>
     </div>

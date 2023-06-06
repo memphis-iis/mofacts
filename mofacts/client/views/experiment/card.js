@@ -316,6 +316,7 @@ function varLenDisplayTimeout() {
     } else {
       setDispTimeoutText(''); // Don't display 0 secs
     }
+    //set bootstrap progress bar
   } else if (elapsed <= display.maxSecs) {
     // Between min and max
     $('#continueButton').prop('disabled', false);
@@ -784,6 +785,11 @@ Template.card.helpers({
     }
     console.log("probability parms input",probParms);
     return probParms;
+  },
+  'curTdfName': function(){
+    lessonname = Session.get('currentTdfFile').tdfs.tutor.setspec.lessonname;
+    console.log("lessonname",lessonname);
+    return lessonname;
   }
 });
 
@@ -2364,6 +2370,7 @@ function scrollElementIntoView(selector, scrollType) {
 // loads before it and stopUserInput is erroneously executed afterwards due to timing issues
 let inputDisabled = undefined;
 function stopUserInput() {
+  $('#userAnswer').hide();
   console.log('stop user input');
   inputDisabled = true;
   stopRecording();

@@ -1,83 +1,81 @@
 <template name="FileManagement">
+    <div class="header-box">
+        File Management
+       </div> 
     <div class="col-md-12" id="downloadContainer">
-        <legend class="downloadLegend">Manage TDFs</legend>
-        <table class="table table-responsive">
-            <thead>
-            <tr>
-                <th scope="col">File Name</th>
-                <th scope="col">Lesson Name</th>
-                <th scope="col">Type</th>
-                <th scope="col" style="text-align: right;" class="col-4 justify-content-end">Actions</th>
-            </tr>
-            </thead>
-            <tbody>
-                {{#each ownedTDFS}}
+        <div class="table-responsive">
+            <table class="table-bordered">
+                <thead>
                 <tr>
-                    <th scope="row">{{this.content.fileName}}</th>
-                    <td>{{this.content.tdfs.tutor.setspec.lessonname}}</td>
-                    <td>TDF</td>
-                    <td style="text-align: right;">
-                        <div class="dropdown col-2" style="display: inline-block">
-                            <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
-                                <span class="fas fa-edit"></span>
-                            </button>
-                            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
-                                <li type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#transferOwnershipModal" id="TransferOwnershipButton" data-fileId="{{this._id}}" data-fileType="TDF">Transfer Ownership</li>
-                                <li type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#assignAccessorsModal" id="AssignAccessorsButton" data-fileId="{{this._id}}" data-fileType="TDF">Assign Accessors</li>
-                            </ul>
-                        </div>
-                        <div class="col-2" style="display: inline-block">
-                            <button class="btn btn-secondary" type="button" id="downloadTDFFile" data-fileId="{{this._id}}" aria-expanded="false">
-                                <span class="fa fa-download"></span>
-                            </button>
-                        </div>
-                        <div class="col-2" style="display: inline-block">
-                            <button class="btn btn-secondary" id="fileOverwrite" type="button" data-bs-toggle="modal" data-bs-target="#fileOverwriteModal" data-fileId="{{this._id}}" data-fileType="TDF">
-                                <span class="fa fa-upload"></span>
-                            </button>
-                        </div>
-                        <div class="col-2" style="display: inline-block">
-                            <button class="btn btn-secondary" id="fileDelete" type="button" data-fileId="{{this._id}}" data-fileType="TDF">
-                                <span class="fa fa-trash" aria-hidden="true"></span>
-                            </button>
-                        </div>
-                    </td>
+                    <th scope="col">File Name</th>
+                    <th scope="col">Lesson Name</th>
+                    <th scope="col">Type</th>
+                    <th scope="col">Actions</th>
                 </tr>
-            {{/each}}
-            {{#each ownedStims}}
-                <tr>
-                    <th scope="row">{{this.fileName}}</th>
-                    <td>{{stimLessonName this.stimuliSetId}}</td>
-                    <td>Stim</td>
-                    <td style="text-align: right;">
-                        <div class="dropdown col-2" style="display: inline-block">
-                            <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
-                                <span class="fas fa-edit"></span>
-                            </button>
-                            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
-                                <li type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#transferOwnershipModal" id="TransferOwnershipButton" data-fileId="{{this.stimuliSetId}}" data-fileType="Stim">Transfer Ownership</li>
-                            </ul>
-                        </div>
-                        <div class="col-2" style="display: inline-block">
-                            <button class="btn btn-secondary" type="button" id="downloadStimFile" data-fileId="{{this.stimuliSetId}}" aria-expanded="false">
-                                <span class="fa fa-download"></span>
-                            </button>
-                        </div>
-                        <div class="col-2" style="display: inline-block">
-                            <button class="btn btn-secondary" id="fileOverwrite" type="button" data-bs-toggle="modal" data-bs-target="#fileOverwriteModal" data-fileId="{{this.stimuliSetId}}" data-fileType="stim">
-                                <span class="fa fa-upload"></span>
-                            </button>
-                        </div>
-                        <div class="col-2" style="display: inline-block">
-                            <button class="btn btn-secondary" id="fileDelete" type="button" data-fileId="{{this.stimuliSetId}}" data-fileType="stim">
-                                <span class="fa fa-trash" aria-hidden="true"></span>
-                            </button>
-                        </div>
-                    </td>
-                </tr>
-            {{/each}}
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    {{#each ownedTDFS}}
+                    <tr>
+                        <th scope="row">{{this.content.fileName}}</th>
+                        <td>{{this.content.tdfs.tutor.setspec.lessonname}}</td>
+                        <td>TDF</td>
+                        <td style="text-align: right;">
+                          
+                                <button class="btn-icon dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <span class="fas fa-edit"></span>
+                                </button>
+                                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                                    <li type="button" class="btn-icon" data-bs-toggle="modal" data-bs-target="#transferOwnershipModal" id="TransferOwnershipButton" data-fileId="{{this._id}}" data-fileType="TDF">Transfer Ownership</li>
+                                    <li type="button" class="btn-icon" data-bs-toggle="modal" data-bs-target="#assignAccessorsModal" id="AssignAccessorsButton" data-fileId="{{this._id}}" data-fileType="TDF">Assign Accessors</li>
+                                </ul>
+                       
+                                <button class="btn-icon" type="button" id="downloadTDFFile" data-fileId="{{this._id}}" aria-expanded="false">
+                                    <span class="fa fa-download"></span>
+                                </button>
+                         
+                                <button class="btn-icon" id="fileOverwrite" type="button" data-bs-toggle="modal" data-bs-target="#fileOverwriteModal" data-fileId="{{this._id}}" data-fileType="TDF">
+                                    <span class="fa fa-upload"></span>
+                                </button>
+                          
+                                <button class="btn-icon" id="fileDelete" type="button" data-fileId="{{this._id}}" data-fileType="TDF">
+                                    <span class="fa fa-trash" aria-hidden="true"></span>
+                                </button>
+                 
+                        </td>
+                    </tr>
+                {{/each}}
+                {{#each ownedStims}}
+                    <tr>
+                        <th scope="row">{{this.fileName}}</th>
+                        <td>{{stimLessonName this.stimuliSetId}}</td>
+                        <td>Stim</td>
+                        <td style="text-align: right;">
+                          
+                                <button class="btn  dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <span class="fas fa-edit"></span>
+                                </button>
+                                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                                    <li type="button" class="btn-icon" data-bs-toggle="modal" data-bs-target="#transferOwnershipModal" id="TransferOwnershipButton" data-fileId="{{this.stimuliSetId}}" data-fileType="Stim">Transfer Ownership</li>
+                                </ul>
+                        
+                                <button class="btn-icon" type="button" id="downloadStimFile" data-fileId="{{this.stimuliSetId}}" aria-expanded="false">
+                                    <span class="fa fa-download"></span>
+                                </button>
+                         
+                                <button class="btn-icon" id="fileOverwrite" type="button" data-bs-toggle="modal" data-bs-target="#fileOverwriteModal" data-fileId="{{this.stimuliSetId}}" data-fileType="stim">
+                                    <span class="fa fa-upload"></span>
+                                </button>
+                         
+                                <button class="btn-icon" id="fileDelete" type="button" data-fileId="{{this.stimuliSetId}}" data-fileType="stim">
+                                    <span class="fa fa-trash" aria-hidden="true"></span>
+                                </button>
+               
+                        </td>
+                    </tr>
+                {{/each}}
+                </tbody>
+            </table>
+        </div>
     </div>
     <div class="modal fade" id="fileOverwriteModal" tabindex="-1" aria-labelledby="fileOverwriteModalLabel" aria-hidden="true">
         <div class="modal-dialog">
@@ -98,7 +96,7 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" id="doFileUpload" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#fileOverwriteModal">Upload File</button>
+                    <button type="button" id="doFileUpload" class="btn-icon" data-bs-toggle="modal" data-bs-target="#fileOverwriteModal">Upload File</button>
                 </div>
             </div>
         </div>
@@ -132,7 +130,7 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" id="transferOwnershipSaveButton" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#transferOwnershipModal">Save changes</button>
+                    <button type="button" id="transferOwnershipSaveButton" class="btn-icon" data-bs-toggle="modal" data-bs-target="#transferOwnershipModal">Save changes</button>
                 </div>
             </div>
         </div>
@@ -163,7 +161,7 @@
                                 </datalist>
                                 
                                 <div style="display: inline-block">
-                                    <button class="btn btn-secondary" type="button" id="addAcessor" aria-expanded="false">
+                                    <button class="btn-icon" type="button" id="addAcessor" aria-expanded="false">
                                         <span class="fa fa-plus"></span>
                                     </button>
                                 </div>
@@ -173,7 +171,7 @@
                                 <thead>
                                 <tr>
                                     <th scope="col">Accessor Name</th>
-                                    <th scope="col" style="text-align: right;" class="col-4 justify-content-end">Actions</th>
+                                    <th scope="col">Actions</th>
                                 </tr>
                                 </thead>
                                 <tbody>
@@ -182,7 +180,7 @@
                                             <th scope="row">{{this.name}}</th>
                                             <td style="text-align: right;">
                                                 <div style="display: inline-block">
-                                                    <button class="btn btn-secondary" type="button" id="removeAcessor" data-teacherid="{{this.userId}}" aria-expanded="false">
+                                                    <button class="btn-icon" type="button" id="removeAcessor" data-teacherid="{{this.userId}}" aria-expanded="false">
                                                         <span class="fas fa-minus"></span>
                                                     </button>
                                                 </div>
@@ -195,7 +193,7 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" id="assignAccessorsSaveButton" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#assignAccessorsModal">Save changes</button>
+                    <button type="button" id="assignAccessorsSaveButton" class="btn-icon" data-bs-toggle="modal" data-bs-target="#assignAccessorsModal">Save changes</button>
                 </div>
             </div>
         </div>

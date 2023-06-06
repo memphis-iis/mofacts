@@ -14,10 +14,10 @@
                 </div> 
             </div>
             {{#if recentTdfs}}
-            <div class="row row-cols-sm-1 row-cols-md-2 row-cols-lg-6">
+            <div class="row row-col-lg-6 row-col-md-3 row-col-sm-1 row-col-xs-1 full-width">
                 {{#each recentTdfs}}    
-                    <div class="col mx-auto">
-                        <button id="{{this.tdfid}}" class="btn width-100-percent tdfButton" type="button" name="{{this.name}}"
+                    <div class="col">
+                        <button id="{{this.tdfid}}" class="btn width-80-percent tdfButton" type="button" name="{{this.name}}"
                         data-tdfid="{{this.tdfid}}"
                         data-lessonname="{{this.name}}"
                         data-currentStimuliSetId="{{this.currentStimuliSetId}}"
@@ -35,7 +35,7 @@
                 {{/each}}
             </div>
         {{else}}
-        <p class="width-80-percent text-center">
+        <p class="full-width text-center">
             No recent lessons.
         </p>
         {{/if}}
@@ -50,33 +50,33 @@
             </div> 
         </div> 
         {{#if enabledTdfs}}
-            <div class="row row-cols-sm-1 row-cols-md-2 row-cols-lg-6">
-            {{#each enabledTdfs}}    
-                <div class="col mx-auto">
-                    <button id="{{this.tdfid}}" class="btn width-100-percent tdfButton" type="button" name="{{this.name}}"
-                    data-tdfid="{{this.tdfid}}"
-                    data-lessonname="{{this.name}}"
-                    data-currentStimuliSetId="{{this.currentStimuliSetId}}"
-                    data-ignoreOutOfGrammarResponses="{{this.ignoreOutOfGrammarResponses}}"
-                    data-speechOutOfGrammarFeedback="{{this.speechOutOfGrammarFeedback}}"
-                    data-isMultiTdf="{{this.isMultiTdf}}">{{this.name}}
-                    {{#if this.enableAudioPromptAndFeedback}}
-                        <span class="fa fa-headphones"></span>
-                    {{/if}}
-                    {{#if this.audioInputEnabled}}
-                        <span class="fa fa-microphone"></span>
-                    {{/if}}
-                    </button>
-                </div>  
-            {{/each}}
+            <div class="row row-col-lg-6 row-col-md-3 row-col-sm-1 row-col-xs-1 full-width">
+                {{#each enabledTdfs}}    
+                    <div class="col">
+                        <button id="{{this.tdfid}}" class="btn width-80-percent tdfButton" type="button" name="{{this.name}}"
+                        data-tdfid="{{this.tdfid}}"
+                        data-lessonname="{{this.name}}"
+                        data-currentStimuliSetId="{{this.currentStimuliSetId}}"
+                        data-ignoreOutOfGrammarResponses="{{this.ignoreOutOfGrammarResponses}}"
+                        data-speechOutOfGrammarFeedback="{{this.speechOutOfGrammarFeedback}}"
+                        data-isMultiTdf="{{this.isMultiTdf}}">{{this.name}}
+                        {{#if this.enableAudioPromptAndFeedback}}
+                            <span class="fa fa-headphones"></span>
+                        {{/if}}
+                        {{#if this.audioInputEnabled}}
+                            <span class="fa fa-microphone"></span>
+                        {{/if}}
+                        </button>
+                    </div>  
+                {{/each}}
             </div>
         {{else}}
             {{#if searching}}
-                <p class="width-80-percent text-center">
+                <p class="full-width text-center">
                     No results found.
                 </p>
             {{else}}
-            <p class="width-80-percent text-center">
+            <p class="full-width text-center">
                 There are no lessons loaded. Please contact your administrator
             </p>
             <div class="vh-5"></div>

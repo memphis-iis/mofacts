@@ -1,50 +1,39 @@
 <template name="instructions">
     <div class="container">
-        <div class="row">
-            {{#if backgroundImage}}
-            <div class="col-lg-12">
-                <img src="{{backgroundImage}}">
+        {{#if islockout}}
+        <div class="alert">
+            <div class="alert-icon">
+                <i class="fa fa-info-circle" aria-hidden="true"></i>
             </div>
+                <p>The lesson cannot continue just yet due to a lockout timer. Please wait before resuming.</p>
+        </div> 
+        {{else}}
+            <div class="row full-width">
+                <div class="header-box">
+                    <h3 class="text-center">{{curTdfName}}: Instructions</h3>
+                </div>
+            </div>
+            <div class="row">
+                {{#if backgroundImage}}
+                <div class="col-lg-12">
+                    <img src="{{backgroundImage}}">
+                </div>
+                {{/if}}
+            </div>
+            {{#if instructionText}}
+                <div class="row">
+                    <p>{{{instructionText}}}</p>
+                </div>
             {{/if}}
-        </div>
-
-        <div class="row">
-            <div class="col-lg-12">
-                <div class="body">
-                    <div>
-                        {{{instructionText}}}
-                    </div>
-                    {{#if instructionQuestion}}
-                        <div id="instructionQuestion"> 
-                            <h3>{{instructionQuestion}}</h3>
-                            <button id="instructionQuestionAffrimative" class="btnPaddedAndMinWidth btn btn-block  btn-responsive">Yes</button>
-                            <button id="instructionQuestionNegative" class="btnPaddedAndMinWidth btn btn-block  btn-responsive">No</button>
-                        </div>
-                    {{/if}}
-                </div>
-                
-
-                <br>
-                <div class="form-group">
-                    {{#if islockout}}
-                        <div id="lockoutDisplay" class="visible-text">
-                            <h3 id="lockoutMessage">
-                                The rest of the content has been locked until a
-                                certain amount of time has elapsed.
-                            </h3>
-                            <h2 id="lockoutTimeRemaining">&nbsp;</h2>
-                        </div>
-                    {{/if}}
-                </div>
+        {{/if}}          
+        {{#if allowcontinue}}
+            <div class="vh-5"></div>
+            <div id="continueBar" class="full-width text-center" >
+                <span id="displayTimeoutMsg"></span>
+                <button type="button" id="continueButton" class="btn width-80-percent mx-auto">
+                    Continue
+                </button>
             </div>
-        </div>
+        {{/if}}
     </div>
-    {{#if allowcontinue}}
-        <div id="continueBar" >
-            <span id="displayTimeoutMsg"></span>
-            <button type="button" id="continueButton" class="marginLeftAndRight button btn btn-primary text-center" style="text-align:center; white-space: nowrap;">
-                Continue
-            </button>
-        </div>
-    {{/if}}
 </template>

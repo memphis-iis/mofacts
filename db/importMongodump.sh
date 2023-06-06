@@ -1,3 +1,5 @@
 #! /bin/bash
 mongo MoFaCT --eval "db.dropDatabase()"
-mongorestore ./mongodump/
+
+#restore the dump from ./mongodump/
+mongorestore --db MoFaCT mongodump/MoFaCT
