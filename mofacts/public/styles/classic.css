@@ -156,6 +156,19 @@ select{
     /* center icon */
     align-items: center;
 }
+.btn-icon{
+    font-family: 'Josefin Sans';
+    border-width: 1px;
+    border-radius: 35px;
+    padding: 15px;
+    margin: 5px;
+    /* center icon */
+    text-align: center;
+    /* center text */
+    justify-content: center;
+    /* center icon */
+    align-items: center;
+}
 
 .navbar button{
     background-color: transparent;
