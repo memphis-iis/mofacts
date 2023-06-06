@@ -2865,6 +2865,7 @@ Meteor.startup(async function() {
   //await combineStimAndTdfFiles();
   highestStimuliSetId = Tdfs.findOne({}, {sort: {stimuliSetId: -1}, limit: 1 });
   nextStimuliSetId = highestStimuliSetId && highestStimuliSetId.stimuliSetId ? parseInt(highestStimuliSetId.stimuliSetId) + 1 : 1;
+  DynamicSettings.upsert({key: 'clientVerbosityLevel'}, {$set: {value: 1}});
 
   // Let anyone looking know what config is in effect
   serverConsole('Log Notice (from siteConfig):', getConfigProperty('logNotice'));

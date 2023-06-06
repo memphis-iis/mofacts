@@ -8,7 +8,7 @@ import {instructContinue} from './views/experiment/instructions.js';
 import {routeToSignin} from './lib/router.js';
 import { init } from "meteor/simonsimcity:client-session-timeout";
 
-export {checkUserSession}
+export {checkUserSession, clientConsole}
 
 // This redirects to the SSL version of the page if we're not on it
 const forceSSL = Meteor.settings.public.forceSSL || false;
@@ -57,9 +57,29 @@ const options = {
 };
 init(options);
 export {redoCardImage, meteorCallAsync};
-
+let verbosityLevel = 1;
 const meteorCallAsync = Promise.promisify(Meteor.call);
 
+function loadClientSettings() {
+  const handle = Meteor.subscribe('settings');
+  Tracker.autorun(function() {
+    if (handle.ready()) {
+      verbosityLevel = DynamicSettings.findOne({key: 'clientVerbosityLevel'}).value;
+    }
+  });
+}
+
+function clientConsole(...args) {
+  let logVerbosityLevel = args.shift();
+  if(verbosityLevel == 0) return;
+  if (logVerbosityLevel > verbosityLevel) return;
+  const disp = [(new Date()).toString()];
+  for (let i = 0; i < args.length; ++i) {
+    disp.push(args[i]);
+  }
+  // eslint-disable-next-line no-invalid-this
+  console.log.apply(this, disp);
+}
 // function meteorCallAsync(funcName, ...rest) {
 //   const promisedMeteorCall = Promise.promisify(Meteor.call);
 //   return promisedMeteorCall.apply(null, [funcName, rest]);
@@ -147,6 +167,7 @@ Meteor.startup(function() {
 });
 
 Template.DefaultLayout.onRendered(function() {
+  loadClientSettings();
   $('#errorReportingModal').on('hidden.bs.modal', function() {
     console.log('error reporting modal hidden');
     restartMainCardTimeoutIfNecessary();
