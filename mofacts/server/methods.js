@@ -338,6 +338,7 @@ async function getProbabilityEstimatesByKCId(relevantKCIds) { // {clusterIndex:[
 }
 
 async function getResponseKCMap() {
+  serverConsole('getResponseKCMap');
   const responseKCStuff = await Tdfs.rawCollection().aggregate([
     {
       $unwind: {
