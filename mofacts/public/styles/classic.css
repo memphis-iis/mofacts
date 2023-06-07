@@ -21,8 +21,8 @@ p{
 }
 
 .btn, .btn-icon{
-    background-color: #7ed957;
-    border-color: #7ed957;
+    background-color: #7ed957 !important;
+    border-color: #7ed957 !important;
     color: #000000;
     /* center button */
     margin-left: auto;
@@ -122,7 +122,7 @@ select{
 }
 
 .btn{
-    ont-family: 'Josefin Sans';
+    font-family: 'Josefin Sans';
     border-width: 1px;
     border-radius: 35px;
     padding: 15px;
@@ -131,6 +131,11 @@ select{
     width: 80%;
     height: 100%;
     padding: 10px;
+}
+.btn-fixed{
+    max-width: 250px;
+    height: inherit;
+    margin-bottom:20px;
 }
 .btn-icon{
     font-family: 'Josefin Sans';

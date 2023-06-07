@@ -1,202 +1,204 @@
 <template name="FileManagement">
-    <div class="header-box">
-        File Management
-       </div> 
-    <div class="col-md-12" id="downloadContainer">
-        <div class="table-responsive card">
-            <table class="table-bordered">
-                <thead>
-                <tr>
-                    <th scope="col">File Name</th>
-                    <th scope="col">Lesson Name</th>
-                    <th scope="col">Type</th>
-                    <th scope="col">Actions</th>
-                </tr>
-                </thead>
-                <tbody>
-                    {{#each ownedTDFS}}
+    <div class="container-fluid" style="padding: 0% 10%;">
+        <div class="header-box">
+            File Management
+        </div> 
+        <div class="col-md-12" id="downloadContainer">
+            <div class="table-responsive card">
+                <table class="table-bordered">
+                    <thead>
                     <tr>
-                        <th scope="row">{{this.content.fileName}}</th>
-                        <td>{{this.content.tdfs.tutor.setspec.lessonname}}</td>
-                        <td>TDF</td>
-                        <td style="text-align: right;">
-                          
-                                <button class="btn-icon dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
-                                    <span class="fas fa-edit"></span>
-                                </button>
-                                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
-                                    <li type="button" class="btn-icon" data-bs-toggle="modal" data-bs-target="#transferOwnershipModal" id="TransferOwnershipButton" data-fileId="{{this._id}}" data-fileType="TDF">Transfer Ownership</li>
-                                    <li type="button" class="btn-icon" data-bs-toggle="modal" data-bs-target="#assignAccessorsModal" id="AssignAccessorsButton" data-fileId="{{this._id}}" data-fileType="TDF">Assign Accessors</li>
-                                </ul>
-                       
-                                <button class="btn-icon" type="button" id="downloadTDFFile" data-fileId="{{this._id}}" aria-expanded="false">
-                                    <span class="fa fa-download"></span>
-                                </button>
-                         
-                                <button class="btn-icon" id="fileOverwrite" type="button" data-bs-toggle="modal" data-bs-target="#fileOverwriteModal" data-fileId="{{this._id}}" data-fileType="TDF">
-                                    <span class="fa fa-upload"></span>
-                                </button>
-                          
-                                <button class="btn-icon" id="fileDelete" type="button" data-fileId="{{this._id}}" data-fileType="TDF">
-                                    <span class="fa fa-trash" aria-hidden="true"></span>
-                                </button>
-                 
-                        </td>
+                        <th scope="col">File Name</th>
+                        <th scope="col">Lesson Name</th>
+                        <th scope="col">Type</th>
+                        <th scope="col">Actions</th>
                     </tr>
-                {{/each}}
-                {{#each ownedStims}}
-                    <tr>
-                        <th scope="row">{{this.fileName}}</th>
-                        <td>{{stimLessonName this.stimuliSetId}}</td>
-                        <td>Stim</td>
-                        <td style="text-align: right;">
-                          
-                                <button class="btn  dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
-                                    <span class="fas fa-edit"></span>
-                                </button>
-                                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
-                                    <li type="button" class="btn-icon" data-bs-toggle="modal" data-bs-target="#transferOwnershipModal" id="TransferOwnershipButton" data-fileId="{{this.stimuliSetId}}" data-fileType="Stim">Transfer Ownership</li>
-                                </ul>
-                        
-                                <button class="btn-icon" type="button" id="downloadStimFile" data-fileId="{{this.stimuliSetId}}" aria-expanded="false">
-                                    <span class="fa fa-download"></span>
-                                </button>
-                         
-                                <button class="btn-icon" id="fileOverwrite" type="button" data-bs-toggle="modal" data-bs-target="#fileOverwriteModal" data-fileId="{{this.stimuliSetId}}" data-fileType="stim">
-                                    <span class="fa fa-upload"></span>
-                                </button>
-                         
-                                <button class="btn-icon" id="fileDelete" type="button" data-fileId="{{this.stimuliSetId}}" data-fileType="stim">
-                                    <span class="fa fa-trash" aria-hidden="true"></span>
-                                </button>
-               
-                        </td>
-                    </tr>
-                {{/each}}
-                </tbody>
-            </table>
-        </div>
-    </div>
-    <div class="modal fade" id="fileOverwriteModal" tabindex="-1" aria-labelledby="fileOverwriteModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Overwrite File</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="modal-body">
-                        <div class="form-group">
-                            <span class="btn btn-default btn-file">
-                                Browse
-                                <input type="file" class="form-control" name="upload-file" id="upload-file" value="" placeholder="File">
-                                <span class='label label-info file-info' id="file-info"></span>
-                            </span>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" id="doFileUpload" class="btn-icon" data-bs-toggle="modal" data-bs-target="#fileOverwriteModal">Upload File</button>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="modal fade" id="transferOwnershipModal" tabindex="-1" aria-labelledby="transferOwnershipModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Transfer Ownership</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="modal-body">
-                        <div class="row">
-                            <div class="col-md-12 nav-box">
-                                <p>Transfer Ownership</p>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="dropdown col-12" style="display: inline-block">
-                                <input class="form-control col-12" list="ownersDataList" id="transferOwnershipDataList" placeholder="Type to search...">
-                                <datalist id="ownersDataList">
-                                    {{#each teachers}}
-                                        {{#if this.username}}
-                                            <option data-teacherId="{{this._id}}" value="{{this.username}}"></option>
-                                        {{/if}}
-                                    {{/each}}
-                                </datalist>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" id="transferOwnershipSaveButton" class="btn-icon" data-bs-toggle="modal" data-bs-target="#transferOwnershipModal">Save changes</button>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="modal fade" id="assignAccessorsModal" tabindex="-1" aria-labelledby="assignAccessorsModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Assign Accessors</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="modal-body">
-                        <div class="row">
-                            <div class="col-md-12 nav-box">
-                                <p>Assign Accessors</p>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="dropdown col-12" style="display: inline-block">
-                                <input class="col-8" list="accessorsDataList" id="assignAccessorDataList" placeholder="Type to search...">
-                                <datalist id="accessorsDataList">
-                                    {{#each teachers}}
-                                        {{#if this.username}}
-                                            <option data-teacherId="{{this._id}}" value="{{this.username}}"></option>
-                                        {{/if}}
-                                    {{/each}}
-                                </datalist>
-                                
-                                <div style="display: inline-block">
-                                    <button class="btn-icon" type="button" id="addAcessor" aria-expanded="false">
-                                        <span class="fa fa-plus"></span>
+                    </thead>
+                    <tbody>
+                        {{#each ownedTDFS}}
+                        <tr>
+                            <th scope="row">{{this.content.fileName}}</th>
+                            <td>{{this.content.tdfs.tutor.setspec.lessonname}}</td>
+                            <td>TDF</td>
+                            <td style="text-align: right;">
+                            
+                                    <button class="btn-icon dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <span class="fas fa-edit"></span>
                                     </button>
+                                    <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                                        <li type="button" class="btn-icon" data-bs-toggle="modal" data-bs-target="#transferOwnershipModal" id="TransferOwnershipButton" data-fileId="{{this._id}}" data-fileType="TDF">Transfer Ownership</li>
+                                        <li type="button" class="btn-icon" data-bs-toggle="modal" data-bs-target="#assignAccessorsModal" id="AssignAccessorsButton" data-fileId="{{this._id}}" data-fileType="TDF">Assign Accessors</li>
+                                    </ul>
+                        
+                                    <button class="btn-icon" type="button" id="downloadTDFFile" data-fileId="{{this._id}}" aria-expanded="false">
+                                        <span class="fa fa-download"></span>
+                                    </button>
+                            
+                                    <button class="btn-icon" id="fileOverwrite" type="button" data-bs-toggle="modal" data-bs-target="#fileOverwriteModal" data-fileId="{{this._id}}" data-fileType="TDF">
+                                        <span class="fa fa-upload"></span>
+                                    </button>
+                            
+                                    <button class="btn-icon" id="fileDelete" type="button" data-fileId="{{this._id}}" data-fileType="TDF">
+                                        <span class="fa fa-trash" aria-hidden="true"></span>
+                                    </button>
+                    
+                            </td>
+                        </tr>
+                    {{/each}}
+                    {{#each ownedStims}}
+                        <tr>
+                            <th scope="row">{{this.fileName}}</th>
+                            <td>{{stimLessonName this.stimuliSetId}}</td>
+                            <td>Stim</td>
+                            <td style="text-align: right;">
+                            
+                                    <button class="btn  dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <span class="fas fa-edit"></span>
+                                    </button>
+                                    <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                                        <li type="button" class="btn-icon" data-bs-toggle="modal" data-bs-target="#transferOwnershipModal" id="TransferOwnershipButton" data-fileId="{{this.stimuliSetId}}" data-fileType="Stim">Transfer Ownership</li>
+                                    </ul>
+                            
+                                    <button class="btn-icon" type="button" id="downloadStimFile" data-fileId="{{this.stimuliSetId}}" aria-expanded="false">
+                                        <span class="fa fa-download"></span>
+                                    </button>
+                            
+                                    <button class="btn-icon" id="fileOverwrite" type="button" data-bs-toggle="modal" data-bs-target="#fileOverwriteModal" data-fileId="{{this.stimuliSetId}}" data-fileType="stim">
+                                        <span class="fa fa-upload"></span>
+                                    </button>
+                            
+                                    <button class="btn-icon" id="fileDelete" type="button" data-fileId="{{this.stimuliSetId}}" data-fileType="stim">
+                                        <span class="fa fa-trash" aria-hidden="true"></span>
+                                    </button>
+                
+                            </td>
+                        </tr>
+                    {{/each}}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="modal fade" id="fileOverwriteModal" tabindex="-1" aria-labelledby="fileOverwriteModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Overwrite File</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="modal-body">
+                            <div class="form-group">
+                                <span class="btn btn-default btn-file">
+                                    Browse
+                                    <input type="file" class="form-control" name="upload-file" id="upload-file" value="" placeholder="File">
+                                    <span class='label label-info file-info' id="file-info"></span>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" id="doFileUpload" class="btn-icon" data-bs-toggle="modal" data-bs-target="#fileOverwriteModal">Upload File</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal fade" id="transferOwnershipModal" tabindex="-1" aria-labelledby="transferOwnershipModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Transfer Ownership</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="modal-body">
+                            <div class="row">
+                                <div class="col-md-12 nav-box">
+                                    <p>Transfer Ownership</p>
                                 </div>
                             </div>
-                        <div class="row">
-                            <table class="table table-responsive card">
-                                <thead>
-                                <tr>
-                                    <th scope="col">Accessor Name</th>
-                                    <th scope="col">Actions</th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                    {{#each fileAccessors}}
-                                        <tr>
-                                            <th scope="row">{{this.name}}</th>
-                                            <td style="text-align: right;">
-                                                <div style="display: inline-block">
-                                                    <button class="btn-icon" type="button" id="removeAcessor" data-teacherid="{{this.userId}}" aria-expanded="false">
-                                                        <span class="fas fa-minus"></span>
-                                                    </button>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    {{/each}}
-                                </tbody>
-                            </table>
+                            <div class="row">
+                                <div class="dropdown col-12" style="display: inline-block">
+                                    <input class="form-control col-12" list="ownersDataList" id="transferOwnershipDataList" placeholder="Type to search...">
+                                    <datalist id="ownersDataList">
+                                        {{#each teachers}}
+                                            {{#if this.username}}
+                                                <option data-teacherId="{{this._id}}" value="{{this.username}}"></option>
+                                            {{/if}}
+                                        {{/each}}
+                                    </datalist>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" id="assignAccessorsSaveButton" class="btn-icon" data-bs-toggle="modal" data-bs-target="#assignAccessorsModal">Save changes</button>
+                    <div class="modal-footer">
+                        <button type="button" id="transferOwnershipSaveButton" class="btn-icon" data-bs-toggle="modal" data-bs-target="#transferOwnershipModal">Save changes</button>
+                    </div>
                 </div>
             </div>
         </div>
+        <div class="modal fade" id="assignAccessorsModal" tabindex="-1" aria-labelledby="assignAccessorsModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Assign Accessors</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="modal-body">
+                            <div class="row">
+                                <div class="col-md-12 nav-box">
+                                    <p>Assign Accessors</p>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="dropdown col-12" style="display: inline-block">
+                                    <input class="col-8" list="accessorsDataList" id="assignAccessorDataList" placeholder="Type to search...">
+                                    <datalist id="accessorsDataList">
+                                        {{#each teachers}}
+                                            {{#if this.username}}
+                                                <option data-teacherId="{{this._id}}" value="{{this.username}}"></option>
+                                            {{/if}}
+                                        {{/each}}
+                                    </datalist>
+                                    
+                                    <div style="display: inline-block">
+                                        <button class="btn-icon" type="button" id="addAcessor" aria-expanded="false">
+                                            <span class="fa fa-plus"></span>
+                                        </button>
+                                    </div>
+                                </div>
+                            <div class="row">
+                                <table class="table table-responsive card">
+                                    <thead>
+                                    <tr>
+                                        <th scope="col">Accessor Name</th>
+                                        <th scope="col">Actions</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                        {{#each fileAccessors}}
+                                            <tr>
+                                                <th scope="row">{{this.name}}</th>
+                                                <td style="text-align: right;">
+                                                    <div style="display: inline-block">
+                                                        <button class="btn-icon" type="button" id="removeAcessor" data-teacherid="{{this.userId}}" aria-expanded="false">
+                                                            <span class="fas fa-minus"></span>
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        {{/each}}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" id="assignAccessorsSaveButton" class="btn-icon" data-bs-toggle="modal" data-bs-target="#assignAccessorsModal">Save changes</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        </div>
     </div>
-</div>
 </template>
