@@ -1,37 +1,39 @@
 <!-- User Administration Template -->
 
 <template name="adminControls">
-        <div class="header-box">
-            Admin Control Panel
-        </div> 
-        <div class="container">
-            <div class="row text-center">
-                <h3>Verbosity Level</h3>
-            </div>
-            <div class="row row-cols-2">
-                <div class="col text-right">
-                    <label class="form-check-label" for="verbosityRadio1">
-                        Server Logs Only
-                    </label>
+        <div class="container-fluid" style="padding: 0% 10%;">
+            <div class="header-box">
+                Admin Control Panel
+            </div> 
+            <div class="container">
+                <div class="row text-center">
+                    <h3>Verbosity Level</h3>
                 </div>
-                <div class="col">
-                    <input  type="radio" name="flexRadioDefault" id="verbosityRadio0">
-                </div>
-                <div class="col text-right">
-                    <label class="form-check-label" for="verbosityRadio1">
-                        Function Times Only
-                    </label>
-                </div>
-                <div class="col">
-                    <input  type="radio" name="flexRadioDefault" id="verbosityRadio1">
-                </div>
-                <div class="col text-right">
-                    <label class="form-check-label" for="verbosityRadio2">
-                        Server Logs and Function Times
-                    </label>
-                </div>
-                <div class="col">
-                    <input  type="radio" name="flexRadioDefault" id="verbosityRadio2">
+                <div class="row row-col-6s card">
+                    <div class="col-6 text-right">
+                        <label class="form-check-label" for="verbosityRadio1">
+                            Server Logs Only
+                        </label>
+                    </div>
+                    <div class="col-6">
+                        <input  type="radio" name="flexRadioDefault" id="verbosityRadio0">
+                    </div>
+                    <div class="col-6 text-right">
+                        <label class="form-check-label" for="verbosityRadio1">
+                            Function Times Only
+                        </label>
+                    </div>
+                    <div class="col-6">
+                        <input  type="radio" name="flexRadioDefault" id="verbosityRadio1">
+                    </div>
+                    <div class="col-6 text-right">
+                        <label class="form-check-label" for="verbosityRadio2">
+                            Server Logs and Function Times
+                        </label>
+                    </div>
+                    <div class="col-6">
+                        <input  type="radio" name="flexRadioDefault" id="verbosityRadio2">
+                    </div>
                 </div>
             </div>
         </div>
