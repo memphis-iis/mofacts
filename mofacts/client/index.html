@@ -36,17 +36,17 @@
 <div class="modal fade" id="errorReportingModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
-      <div class="modal-header text-center">
+      <div class="modal-header">
         <h3>We are sorry you encountered a problem.</h3>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
         <div class="modal-body">
-          <div class="row">
-            <div class="col-md-12">
-
-
-              <textarea id="errorDescription" placeholder="Describe the error here." rows="5"></textarea>
+          <div class="container">
+            <div class="row">
+              <div class="col-10 mx-auto">
+                <textarea id="errorDescription" placeholder="Describe the error here." rows="5"></textarea>
+              </div>
             </div>
           </div>
         </div>
@@ -54,6 +54,7 @@
       <div class="modal-footer">
         <button type="button" id="errorReportingSaveButton" class="btn width-80-percent">Submit Report</button>
       </div>
+      <div class="vh-5"></div>
     </div>
   </div>
 </div>
@@ -88,16 +89,20 @@
 
 <!-- audio settngs -->
 <div class="modal fade-in-up" id="audioModal" tabindex="-1" aria-labelledby="audioModal" aria-hidden="true">
-  <div class="modal-dialog">
+  <div class="modal-dialog" id="audio-modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title">Audio Settings</h5>
+        <h3 class="modal-title">Audio Settings</h3>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
         <div class="modal-body">
-          <div class="row">
-            {{> profileAudioToggles}}
+          <div class="container">
+            <div class="row">
+              <div class="col-10 mx-auto">
+                {{> profileAudioToggles}}
+              </div>
+            </div>
           </div>
         </div>
       </div>

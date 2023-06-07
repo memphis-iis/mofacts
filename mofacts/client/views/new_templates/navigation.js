@@ -5,6 +5,8 @@ Template.nav.events({
     },
     'click #progressButton': function(event) {
         event.preventDefault();
+        //hide the menu
+        $('#full-menu').hide();
         //check current users role, if admin or teacher
         //then go to progress page
         //else go to profile page

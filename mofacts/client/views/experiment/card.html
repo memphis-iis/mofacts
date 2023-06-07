@@ -45,7 +45,7 @@
                                 <div class="alert-icon">
                                     <i class="fa fa-question-circle" aria-hidden="true"></i>
                                 </div>
-                                    <h3>
+                                    <p>
                                     {{#if ifClozeDisplayTextExists}}
                                         {{#if textOrClozeCard}}
                                             {{#if subWordClozeCurrentQuestionExists}}
@@ -56,7 +56,7 @@
                                             {{/if}}
                                         {{/if}}
                                     {{/if}}
-                                    </h3>
+                                    </p>
                                 </div> 
                                 <div class="marginLeftAndRight h2" id="imageDisplay">
                                     {{#if imageCard}}
@@ -135,38 +135,39 @@
                         <div id="multipleChoiceContainer">
                             <!-- will contain multiple choice buttons which are dynamically added. -->
                             {{#if buttonTrial}}
-                            <table id="multipleChoiceTable" class="table text-center">
+                            <div id="multipleChoiceTable" class="row gy-3 row-cols-xs-1 row-cols-sm-2 row-cols-2 text-center">
                                 {{#if imageResponse}}
                                     {{#each buttonListImageRows}}
-                                    <tr>
+                                    <div class="col mx-auto">
                                         {{#each this}}
                                         {{#if audioEnabled}}
-                                            <td><label style="margin-bottom:0px">{{verbalChoice}}.</label></td>
-                                            <td>&nbsp;</td>
+                                            <label style="margin-bottom:0px">{{verbalChoice}}.</label>
+                                            <br>
+                             
                                         {{/if}}
-                                        <td class="td-img">
+                                
                                             <button style="background: url({{buttonValue}});background-size: 300px 150px;;background-repeat: no-repeat;" verbalChoice='{{verbalChoice}}' type='button' name='{{buttonName}}' class='btnPaddedAndMinWidth btn-alt btn-block multipleChoiceButton btn-image btn-responsive'>
                                             </button>
-                                        </td>
+                                     
                                         {{/each}}
-                                    </tr>
+                                    </div>
                                     {{/each}}
                                 {{else}}
                                     {{#each buttonList}}
-                                    <tr display={{displayReadyConverter (displayReady) }}>
+                                    <div display={{displayReadyConverter (displayReady) }} class="col mx-auto">
                                         {{#if audioEnabled}}
-                                        <td><label style="margin-bottom:0px">{{verbalChoice}}.</label></td>
-                                        <td>&nbsp;</td>
+                                        <label style="margin-bottom:0px">{{verbalChoice}}.</label>
+                                        <br>
                                         {{/if}}
-                                        <td>
-                                            <button verbalChoice='{{verbalChoice}}' type='button' name='{{buttonName}}' class='btnPaddedAndMinWidth btn btn-block multipleChoiceButton btn-responsive'>
-                                            {{buttonValue}}
-                                            </button>
-                                        </td>
-                                    </tr>
+                                    
+                                        <button verbalChoice='{{verbalChoice}}' type='button' name='{{buttonName}}' class='btnPaddedAndMinWidth btn btn-block multipleChoiceButton btn-responsive'>
+                                        {{buttonValue}}
+                                        </button>
+                                    
+                                    </div>
                                     {{/each}}
                                 {{/if}}
-                            </table>
+                            </div>
                             {{/if}}
                         </div>
                     </div>
