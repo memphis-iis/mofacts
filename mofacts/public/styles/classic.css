@@ -38,7 +38,13 @@ p{
     background-color: #d9d9d9;
     display: flex;
 }
-
+.modal-expanded{
+    height: 70vh !important;
+    top: 30% !important;
+    /* animate from bottom to top */
+    -webkit-animation: animatezoom 0.6s;
+    animation: animatezoom 0.6s;
+}
 .modal-title{
     /* League Spartan */
     font-family: 'League Spartan';
@@ -171,6 +177,9 @@ select{
 
 .modal-dialog, .modal-content{
     border-radius:35px;
+    /* fade in and out */
+    animation: fadeIn 0.5s;
+    -webkit-animation: fadeIn 0.5s;
 }
 
 .full-menu{
@@ -245,8 +254,16 @@ select{
     border-radius: 50%;
 }
 
+.modal-body{
+    padding: 0px;
+}
+
 .table-responsive table{
     min-width: 100%;
+}
+
+.modal-header{
+
 }
 /* Desktop Screens */
 @media screen and (min-width: 1024px) {
@@ -381,7 +398,8 @@ select{
   }
 
 .form-switch .form-check-input {
-    width: 2em;
+    width: 4em;
+    height: 3em;
     margin-left: -2.5em;
     background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='%23fff'/%3e%3c/svg%3e");
     background-color: rgba(126, 217, 87, 0.25);
@@ -389,3 +407,10 @@ select{
     border-radius: 2em;
     transition: background-position .15s ease-in-out;
   }
+
+.form-switch label{
+    display: inline-block;
+    margin-left: 5px;
+    padding: 15px;
+    font-size: 12pt;
+}

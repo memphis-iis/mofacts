@@ -76,8 +76,11 @@ function setAudioInputOnPage(audioInputEnabled) {
 function showHideheadphonesSuggestedDiv(show) {
   if (show) {
     $('#headphonesSuggestedDiv').removeClass('invisible');
+    //change the modal height to accomodate the new content
+    $('.modal-dialog').addClass('modal-expanded');
   } else {
     $('#headphonesSuggestedDiv').addClass('invisible');
+    $('.modal-dialog').removeClass('modal-expanded');
   }
 }
 
@@ -167,9 +170,11 @@ Template.profileAudioToggles.events({
     //if toggle is on, show the warning, else hide it
     if(event.currentTarget.checked){
       $('.audioEnabledGroup').show();
+      $('#audio-modal-dialog').addClass('modal-expanded');
       console.log('showing audio enabled group');
     }else{
       $('.audioEnabledGroup').hide();
+      $('#audio-modal-dialog').removeClass('modal-expanded');
       console.log('hiding audio enabled group');
     }
   },
