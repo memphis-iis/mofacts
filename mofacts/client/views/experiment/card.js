@@ -18,6 +18,7 @@ import {createScheduleUnit, createModelUnit, createEmptyUnit} from './unitEngine
 import {Answers} from './answerAssess';
 import {sessionCleanUp} from '../../lib/sessionUtils';
 import {checkUserSession} from '../../index'
+import {instructContinue, unitHasLockout} from './instructions';
 
 export {
   speakMessageIfAudioPromptFeedbackEnabled,
@@ -28,7 +29,7 @@ export {
   restartMainCardTimeoutIfNecessary,
   getCurrentClusterAndStimIndices,
   afterFeedbackCallback,
-  curExperimentState
+  initCard
 };
 
 /*
@@ -139,7 +140,6 @@ let timeoutName = null;
 let timeoutFunc = null;
 let timeoutDelay = null;
 let simTimeoutName = null;
-let curExperimentState = null;
 
 // Helper - return elapsed seconds since unit started. Note that this is
 // technically seconds since unit RESUME began (when we set currentUnitStartTime)
@@ -342,7 +342,7 @@ function varLenDisplayTimeout() {
 function leavePage(dest) {
   console.log('leaving page for dest: ' + dest);
   if (dest != '/card' && dest != '/instructions' && document.location.pathname != '/instructions') {
-    curExperimentState = null;
+    Session.set('currentExperimentState', undefined);
     console.log('resetting subtdfindex, dest: ' + dest);
     Session.set('subTdfIndex', null);
     sessionCleanUp();
@@ -352,6 +352,17 @@ function leavePage(dest) {
       clearAudioContextAndRelatedVariables();
     } else {
       console.log('NOT closing audio context');
+    }
+  } else if (dest === '/instructions') {
+    const unit = Session.get('currentTdfUnit');
+    const lockout = unitHasLockout() > 0;
+    const txt = unit.unitinstructions ? unit.unitinstructions.trim() : undefined;
+    const pic = unit.picture ? unit.picture.trim() : undefined;
+    const instructionsq = unit.unitinstructionsquestion ? unit.unitinstructionsquestion.trim() : undefined;
+    if (!txt && !pic && !instructionsq && !lockout) {
+      console.log('Instructions empty and no lockout: skipping', displayify(unit));
+      instructContinue();
+      return;
     }
   }
   clearCardTimeout();
@@ -363,7 +374,9 @@ function leavePage(dest) {
   }
 }
 
-Template.card.rendered = async function() {
+Template.card.rendered = initCard;
+
+async function initCard() {
   await checkUserSession();
   console.log('RENDERED----------------------------------------------');
   // Catch page navigation events (like pressing back button) so we can call our cleanup method
@@ -372,8 +385,8 @@ Template.card.rendered = async function() {
       leavePage('/card');
     }
   };
-  const globalExperimentState = GlobalExperimentStates.findOne();
-  curExperimentState = globalExperimentState.experimentState
+  const globalExperimentState = GlobalExperimentStates.findOne({TDFId: Session.get('currentTdfId')});
+  Session.set('currentExperimentState', globalExperimentState.experimentState)
   Session.set('experimentId', globalExperimentState._id);
   Session.set('scoringEnabled', undefined);
 
@@ -570,17 +583,17 @@ Template.card.helpers({
   'ReviewStudyCountdown': () => Session.get('ReviewStudyCountdown'),
 
   'subWordClozeCurrentQuestionExists': function() {
-    console.log('subWordClozeCurrentQuestionExists: ' + (typeof(curExperimentState.clozeQuestionParts) != 'undefined'));
-    return typeof(curExperimentState.clozeQuestionParts) != 'undefined' && curExperimentState.clozeQuestionParts !== null;
+    console.log('subWordClozeCurrentQuestionExists: ' + (typeof(Session.get('currentExperimentState').clozeQuestionParts) != 'undefined'));
+    return typeof(Session.get('currentExperimentState').clozeQuestionParts) != 'undefined' && Session.get('currentExperimentState').clozeQuestionParts !== null;
   },
 
   // For now we're going to assume syllable hints are contiguous. TODO: make this more generalizable
-  'subWordParts': () => curExperimentState.clozeQuestionParts || undefined,
+  'subWordParts': () => Session.get('currentExperimentState').clozeQuestionParts || undefined,
 
   'ifClozeDisplayTextExists': function (){
     const clozeText = Session.get('currentDisplay') ? Session.get('currentDisplay').clozeText : undefined;
     const text = Session.get('currentDisplay') ? Session.get('currentDisplay').text : undefined;
-    const subWordCloze = curExperimentState.clozeQuestionParts ? curExperimentState.clozeQuestionParts : undefined;
+    const subWordCloze = Session.get('currentExperimentState').clozeQuestionParts ? Session.get('currentExperimentState').clozeQuestionParts : undefined;
     let display = false;
     if((typeof clozeText != "undefined" && clozeText != "") || (typeof subWordCloze != "undefined" && subWordCloze != "") || (typeof text != "undefined" && text != "")){
       display = true;
@@ -618,10 +631,10 @@ Template.card.helpers({
   },
 
   'displayAnswer': function() {
-    return Answers.getDisplayAnswerText(GlobalExperimentStates.findOne().experimentState.currentAnswer);
+    return Answers.getDisplayAnswerText(GlobalExperimentStates.findOne({TDFId: Session.get('currentTdfId')}).experimentState.currentAnswer);
   },
 
-  'rawAnswer': ()=> GlobalExperimentStates.findOne().experimentState.currentAnswer,
+  'rawAnswer': ()=> GlobalExperimentStates.findOne({TDFId: Session.get('currentTdfId')}).experimentState.currentAnswer,
 
   'currentProgress': () => Session.get('questionIndex'),
 
@@ -1030,7 +1043,7 @@ function setUpButtonTrial() {
     throw new Error('Bad TDF/Stim file - no buttonOptions and no false responses');
   }
 
-  const currentAnswer = curExperimentState.originalAnswer;
+  const currentAnswer = Session.get('currentExperimentState').originalAnswer;
   const correctAnswer = Answers.getDisplayAnswerText(currentAnswer);
   const wrongButtonLimit = deliveryParams.falseAnswerLimit;
   if (wrongButtonLimit) {
@@ -1161,8 +1174,8 @@ function handleUserForceCorrectInput(e, source) {
       }
     } else {
       console.log('force correct non n type test');
-      const answer = Answers.getDisplayAnswerText(curExperimentState.currentAnswer).toLowerCase();
-      const originalAnswer = Answers.getDisplayAnswerText(curExperimentState.originalAnswer).toLowerCase();
+      const answer = Answers.getDisplayAnswerText(Session.get('currentExperimentState').currentAnswer).toLowerCase();
+      const originalAnswer = Answers.getDisplayAnswerText(Session.get('currentExperimentState').originalAnswer).toLowerCase();
       if (entry === answer || entry === originalAnswer) {
         console.log('force correct, correct answer');
         const afterUserFeedbackForceCorrectCbHolder = afterUserFeedbackForceCorrectCb;
@@ -1293,12 +1306,12 @@ async function userAnswerFeedback(userAnswer, isTimeout, simCorrect, afterAnswer
   // Answer assessment ->
   if (userAnswerWithTimeout != null) {
     displayAnswer = "";
-    if(Session.get('hintLevel') && curExperimentState.currentAnswerSyllables){
+    if(Session.get('hintLevel') && Session.get('currentExperimentState').currentAnswerSyllables){
       displayedHintLevel = Session.get('hintLevel') || 0;
-      answerSyllables = curExperimentState.currentAnswerSyllables.syllableArray || "";
+      answerSyllables = Session.get('currentExperimentState').currentAnswerSyllables.syllableArray || "";
       displayAnswer = answerSyllables.slice(0, displayedHintLevel).join("");
     }
-    Answers.answerIsCorrect(userAnswerWithTimeout, curExperimentState.currentAnswer, curExperimentState.originalAnswer,
+    Answers.answerIsCorrect(userAnswerWithTimeout, Session.get('currentExperimentState').currentAnswer, Session.get('currentExperimentState').originalAnswer,
     displayAnswer,setspec, afterAnswerAssessmentCbWithArgs);
   } else {
     afterAnswerAssessmentCbWithArgs(null);
@@ -1321,7 +1334,7 @@ async function writeCurrentToScrollList(userAnswer, isTimeout, simCorrect, justA
     setspec = Session.get('currentTdfFile').tdfs.tutor.setspec;
   }
 
-  const trueAnswer = Answers.getDisplayAnswerText(curExperimentState.currentAnswer);
+  const trueAnswer = Answers.getDisplayAnswerText(Session.get('currentExperimentState').currentAnswer);
 
   let userAnswerWithTimeout = null;
 
@@ -1339,7 +1352,7 @@ async function writeCurrentToScrollList(userAnswer, isTimeout, simCorrect, justA
     // Simulation! We know what they did
     isCorrect = simCorrect;
     historyUserAnswer = 'Simulated answer where correct==' + simCorrect;
-    historyCorrectMsg = Answers.getDisplayAnswerText(curExperimentState.currentAnswer);
+    historyCorrectMsg = Answers.getDisplayAnswerText(Session.get('currentExperimentState').currentAnswer);
   } else {
     // "Regular" answers
     userAnswerWithTimeout = userAnswer;
@@ -1378,7 +1391,7 @@ async function writeCurrentToScrollList(userAnswer, isTimeout, simCorrect, justA
   };
 
   if (userAnswerWithTimeout != null) {
-    Answers.answerIsCorrect(userAnswerWithTimeout, curExperimentState.currentAnswer, curExperimentState.originalAnswer,
+    Answers.answerIsCorrect(userAnswerWithTimeout, Session.get('currentExperimentState').currentAnswer, Session.get('currentExperimentState').originalAnswer,
     "",setspec, afterAnswerAssessment);
   } else {
     afterAnswerAssessment(null);
@@ -1423,7 +1436,7 @@ function afterAnswerAssessmentCb(userAnswer, isCorrect, feedbackForAnswer, after
     };
     if (currentDeliveryParams.feedbackType == 'dialogue' && !isCorrect) {
       speechTranscriptionTimeoutsSeen = 0;
-      initiateDialogue(userAnswer, afterAnswerFeedbackCbBound, curExperimentState, showUserFeedbackBound);
+      initiateDialogue(userAnswer, afterAnswerFeedbackCbBound, Session.get('currentExperimentState'), showUserFeedbackBound);
     } else {
       showUserFeedbackBound();
     }
@@ -1441,7 +1454,7 @@ async function showUserFeedback(isCorrect, feedbackMessage, afterAnswerFeedbackC
   if (!isCorrect && isButtonTrial && getResponseType() == 'image') {
     $('#UserInteraction').removeClass('text-align alert alert-success alert-danger').html('');
     const buttonImageFeedback = 'Incorrect.  The correct response is displayed below.';
-    const correctImageSrc = curExperimentState.originalAnswer;
+    const correctImageSrc = Session.get('currentExperimentState').originalAnswer;
     $('#UserInteraction').html('<p class="text-align alert alert-danger">' + buttonImageFeedback +
       '</p><img style="background: url(' + correctImageSrc +
       '); background-size:100%; background-repeat: no-repeat;" disabled="" \
@@ -1548,14 +1561,14 @@ function doClearForceCorrect(doForceCorrect, afterAnswerFeedbackCbBound) {
 
 async function giveAnswer(){
   if(Meteor.isDevelopment){
-    curAnswer = curExperimentState.currentAnswer.split('~')[0];
+    curAnswer = Session.get('currentExperimentState').currentAnswer.split('~')[0];
     handleUserInput({keyCode: ENTER_KEY, currentTarget: { name: curAnswer } }, 'buttonClick');
   }
 }
 
 async function giveWrongAnswer(){
   if(Meteor.isDevelopment){
-    curAnswer = curExperimentState.currentAnswer + '123456789321654986321';
+    curAnswer = Session.get('currentExperimentState').currentAnswer + '123456789321654986321';
     $('#userAnswer').val(curAnswer);
     Session.set('skipTimeout', true)
     handleUserInput({keyCode: ENTER_KEY}, 'keypress');
@@ -1812,7 +1825,7 @@ function gatherAnswerLogRecord(trialEndTimeStamp, trialStartTimeStamp, source, u
     count: 0,
     displaySyllableIndices: [],
   };
-  const sessCurrentAnswerSyllables = curExperimentState.currentAnswerSyllables;
+  const sessCurrentAnswerSyllables = Session.get('currentExperimentState').currentAnswerSyllables;
   if (typeof(sessCurrentAnswerSyllables) != 'undefined') {
     currentAnswerSyllables = {
       syllableArray: sessCurrentAnswerSyllables.syllableArray,
@@ -1832,7 +1845,7 @@ function gatherAnswerLogRecord(trialEndTimeStamp, trialStartTimeStamp, source, u
   const curTdf = Session.get('currentTdfFile');
   const unitName = _.trim(curTdf.tdfs.tutor.unit[Session.get('currentUnitNumber')].unitname);
 
-  const problemName = curExperimentState.originalDisplay;
+  const problemName = Session.get('currentExperimentState').originalDisplay;
   const stepName = problemName;
   // let stepCount = (state.stepNameSeen[stepName] || 0) + 1;
   // state.stepNameSeen[stepName] = stepCount;
@@ -1853,8 +1866,8 @@ function gatherAnswerLogRecord(trialEndTimeStamp, trialStartTimeStamp, source, u
   } else {
     shufIndex = cluster.shufIndex;
   }
-  const originalAnswer = curExperimentState.originalAnswer;
-  const currentAnswer = curExperimentState.currentAnswer;
+  const originalAnswer = Session.get('currentExperimentState').originalAnswer;
+  const currentAnswer = Session.get('currentExperimentState').currentAnswer;
   const fullAnswer = (typeof(originalAnswer) == 'undefined' || originalAnswer == '') ? currentAnswer : originalAnswer;
   const temp = _.trim((fullAnswer || '')).split('~');
   const correctAnswer = temp[0];
@@ -2103,7 +2116,7 @@ async function cardStart() {
     Session.set('buttonList', []);
 
     console.log('cards template rendered => Performing resume');
-    curExperimentState.showOverlearningText = false;
+    Session.get('currentExperimentState').showOverlearningText = false;
 
     Session.set('inResume', false); // Turn this off to keep from re-resuming
     resumeFromComponentState();
@@ -2120,7 +2133,7 @@ async function prepareCard() {
   if (engine.unitFinished()) {
     unitIsFinished('Unit Engine');
   } else {
-    await engine.selectNextCard(Session.get('engineIndices'), curExperimentState);
+    await engine.selectNextCard(Session.get('engineIndices'), Session.get('currentExperimentState'));
     await newQuestionHandler();
     Session.set('cardStartTimestamp', Date.now());
     Session.set('engineIndices', undefined);
@@ -2157,19 +2170,19 @@ async function newQuestionHandler() {
   // construct the question to display the actual information. Note that we
   // use a regex so that we can do a global(all matches) replace on 3 or
   // more underscores
-  if ((getTestType() === 's' || getTestType() === 'f') && !!(curExperimentState.currentDisplayEngine.clozeText)) {
-    const currentDisplay = curExperimentState.currentDisplayEngine;
-    const clozeQuestionFilledIn = Answers.clozeStudy(currentDisplay.clozeText, curExperimentState.currentAnswer);
+  if ((getTestType() === 's' || getTestType() === 'f') && !!(Session.get('currentExperimentState').currentDisplayEngine.clozeText)) {
+    const currentDisplay = Session.get('currentExperimentState').currentDisplayEngine;
+    const clozeQuestionFilledIn = Answers.clozeStudy(currentDisplay.clozeText, Session.get('currentExperimentState').currentAnswer);
     currentDisplay.clozeText = clozeQuestionFilledIn;
     const newExperimentState = {currentDisplayEngine: currentDisplay};
     updateExperimentState(newExperimentState, 'card.newQuestionHandler');
-    curExperimentState.currentDisplayEngine = currentDisplay;
+    Session.get('currentExperimentState').currentDisplayEngine = currentDisplay;
   }
 
   startQuestionTimeout();
   checkSimulation();
 
-  if (curExperimentState.showOverlearningText) {
+  if (Session.get('currentExperimentState').showOverlearningText) {
     $('#overlearningRow').show().attr("hidden",false);
   }
 }
@@ -2196,7 +2209,7 @@ function startQuestionTimeout() {
   }
 
   // We do this little shuffle of session variables so the display will update all at the same time
-  const currentDisplayEngine = curExperimentState.currentDisplayEngine;
+  const currentDisplayEngine = Session.get('currentExperimentState').currentDisplayEngine;
 
   // make sure we get the right audio source
   if(currentDisplayEngine) {
@@ -2206,7 +2219,7 @@ function startQuestionTimeout() {
     }
   }
 
-  console.log('startQuestionTimeout, closeQuestionParts', curExperimentState.clozeQuestionParts);
+  console.log('startQuestionTimeout, closeQuestionParts', Session.get('currentExperimentState').clozeQuestionParts);
 
   Session.set('displayReady', false);
   console.log('++++ CURRENT DISPLAY ++++');
@@ -2215,7 +2228,7 @@ function startQuestionTimeout() {
 
   const beginQuestionAndInitiateUserInputBound = beginQuestionAndInitiateUserInput.bind(null, delayMs, deliveryParams);
   const pipeline = checkAndDisplayTwoPartQuestion.bind(null,
-      deliveryParams, currentDisplayEngine, curExperimentState.clozeQuestionParts, beginQuestionAndInitiateUserInputBound);
+      deliveryParams, currentDisplayEngine, Session.get('currentExperimentState').clozeQuestionParts, beginQuestionAndInitiateUserInputBound);
   checkAndDisplayPrestimulus(deliveryParams, pipeline);
 }
 
@@ -2246,12 +2259,12 @@ function checkAndDisplayTwoPartQuestion(deliveryParams, currentDisplayEngine, cl
   // In either case we want to set up the current display now
   Session.set('displayReady', false);
   Session.set('currentDisplay', currentDisplayEngine);
-  curExperimentState.clozeQuestionParts = closeQuestionParts;
+  Session.get('currentExperimentState').clozeQuestionParts = closeQuestionParts;
   Session.set('displayReady', true);
 
   console.log('checking for two part questions');
   // Handle two part questions
-  const currentQuestionPart2 = curExperimentState.currentQuestionPart2;
+  const currentQuestionPart2 = Session.get('currentExperimentState').currentQuestionPart2;
   if (currentQuestionPart2) {
     console.log('two part question detected, displaying first part');
     const twoPartQuestionWrapper = {'text': currentQuestionPart2};
@@ -2263,7 +2276,7 @@ function checkAndDisplayTwoPartQuestion(deliveryParams, currentDisplayEngine, cl
       Session.set('currentDisplay', twoPartQuestionWrapper);
       Session.set('displayReady', true);
       console.log('displayReadyTrue, checkAndDisplayTwoPartQuestion');
-      curExperimentState.currentQuestionPart2 = undefined;
+      Session.get('currentExperimentState').currentQuestionPart2 = undefined;
       redoCardImage();
       nextStageCb();
     }, initialviewTimeDelay);
@@ -2748,7 +2761,7 @@ function stopRecording() {
 // END WEB AUDIO SECTION
 
 async function getExperimentState() {
-  curExperimentState = GlobalExperimentStates.findOne().experimentState;
+  let curExperimentState = GlobalExperimentStates.findOne({TDFId: Session.get('currentTdfId')}).experimentState;
   const sessExpState = Session.get('currentExperimentState');
   console.log('getExperimentState:', curExperimentState, sessExpState);
   Meteor.call('updatePerformanceData', 'utlQuery', 'card.getExperimentState', Meteor.userId());
@@ -2757,7 +2770,8 @@ async function getExperimentState() {
 }
 
 function updateExperimentState(newState, codeCallLocation, unitEngineOverride = {}) {
-  let globalExperimentState = GlobalExperimentStates.findOne({TDFId: newState.currentTdfId});
+  let globalExperimentState = GlobalExperimentStates.findOne({TDFId: Session.get('currentTdfId')});
+  let curExperimentState = Session.get('currentExperimentState');
   console.log('currentExperimentState:', curExperimentState);
   if (unitEngineOverride && Object.keys(unitEngineOverride).length > 0)
     curExperimentState = unitEngineOverride;
@@ -2777,6 +2791,7 @@ function updateExperimentState(newState, codeCallLocation, unitEngineOverride = 
   curExperimentState = Object.assign(JSON.parse(JSON.stringify(curExperimentState)), newState);
   GlobalExperimentStates.update({_id: globalExperimentState._id}, {$set: {experimentState: curExperimentState}});
   console.log('updateExperimentState', codeCallLocation, '\nnew:', curExperimentState);
+  Session.set('currentExperimentState', curExperimentState);
   return Session.get('currentRootTdfId');
 }
 
@@ -2823,7 +2838,8 @@ async function resumeFromComponentState() {
   const setspec = rootTDF.tdfs.tutor.setspec;
   const needExpCondition = (setspec.condition && setspec.condition.length);
 
-  curExperimentState = await getExperimentState();
+  let curExperimentState = await getExperimentState();
+  Session.set('currentExperimentState', curExperimentState);
   const newExperimentState = JSON.parse(JSON.stringify(curExperimentState));
 
   // We must always check for experiment condition
@@ -3034,6 +3050,7 @@ async function removeCardByUser() {
 async function processUserTimesLog() {
 // Get TDF info
   const tdfFile = Session.get('currentTdfFile');
+  const curExperimentState = Session.get('currentExperimentState');
   console.log('tdfFile', tdfFile);
 
   Session.set('overallOutcomeHistory', curExperimentState.overallOutcomeHistory || []);
@@ -3150,14 +3167,14 @@ async function processUserTimesLog() {
     const curTdfUnit = curTdf.tdfs.tutor.unit[Session.get('currentUnitNumber')];
     await setStudentPerformance(curUser._id, curUser.username, currentTdfId);
 
-    if (needFirstUnitInstructions && typeof curTdfUnit.unitinstructions !== 'undefined') {
-      // They haven't seen our first instruction yet
-      console.log('RESUME FINISHED: displaying initial instructions');
-      leavePage('/instructions');
-    } else if (resumeToQuestion) {
+    if (resumeToQuestion) {
       // Question outstanding: force question display and let them give an answer
       console.log('RESUME FINISHED: displaying current question');
       await newQuestionHandler();
+    } else if (needFirstUnitInstructions && typeof curTdfUnit.unitinstructions !== 'undefined') {
+      // They haven't seen our first instruction yet
+      console.log('RESUME FINISHED: displaying initial instructions');
+      leavePage('/instructions');
     } else {
       // If we get this far and the unit engine thinks the unit is finished,
       // we might need to stick with the instructions *IF AND ONLY IF* the

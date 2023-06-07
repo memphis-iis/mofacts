@@ -1,6 +1,6 @@
 import {meteorCallAsync} from '..';
 import {haveMeteorUser} from '../lib/currentTestingHelpers';
-import {instructContinue} from '../views/experiment/instructions';
+import {instructContinue, unitHasLockout} from '../views/experiment/instructions';
 import {Cookie} from './cookies';
 import {displayify} from '../../common/globalHelpers';
 
@@ -294,8 +294,7 @@ Router.route('/profile', {
     let assignedTdfs = Meteor.user()?.profile?.assignedTdfs;
     let curCourseId = Meteor.user()?.profile?.curClass?.courseId || 'undefined'
     let allSubscriptions = [
-      Meteor.subscribe('allUserExperimentState', assignedTdfs)
-    ];
+      Meteor.subscribe('allUserExperimentState', assignedTdfs)];
     if (curCourseId != undefined)
       allSubscriptions.push(Meteor.subscribe('Assignments', curCourseId));
     if (Roles.userIsInRole(Meteor.user(), ['admin']))
@@ -548,21 +547,20 @@ Router.route('/instructions', {
     Session.set('fromInstructions', true);
     this.render('instructions');
   },
-  onAfterAction: function() {
-    // If we've routed to the instructions but there's nothing to do then
-    // it's time to move on. We do NOT do this in onBeforeAction because
-    // we have instruction logic that needs to have handled and Iron Router
-    // doesn't like us setting up async re-routes.
+  onBeforeAction: function() {
     if (!haveMeteorUser()) {
       console.log('No one logged in - allowing template to handle');
     } else {
       const unit = Session.get('currentTdfUnit');
+      const lockout = unitHasLockout() > 0;
       const txt = unit.unitinstructions ? unit.unitinstructions.trim() : undefined;
       const pic = unit.picture ? unit.picture.trim() : undefined;
       const instructionsq = unit.unitinstructionsquestion ? unit.unitinstructionsquestion.trim() : undefined;
-      if (!txt && !pic && !instructionsq) {
+      if (!txt && !pic && !instructionsq && !lockout) {
         console.log('Instructions empty: skipping', displayify(unit));
         instructContinue();
+      } else {
+        this.next();
       }
     }
   },

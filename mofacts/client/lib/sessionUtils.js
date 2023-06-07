@@ -76,6 +76,8 @@ function sessionCleanUp() {
   Session.set('displayFeedback',undefined);
   Session.set('feedbackTypeFromHistory', undefined);
   Session.set('resetFeedbackSettingsFromIndex', false);
+  Session.set('currentRootTdfId', undefined);
+  Session.set('currentExperimentState', undefined);
 
   Session.set('clusterIndex', undefined);
 
@@ -129,14 +131,5 @@ function sessionCleanUp() {
     window.audioContext.close();
     window.audioContext = null;
   }
-  if(curExperimentState){
-    let globalExperimentState = GlobalExperimentStates.findOne({TDFId: Session.get('currentRootTdfId')})
-    if(globalExperimentState){
-      curExperimentState = Object.assign(globalExperimentState.experimentState, curExperimentState)
-      GlobalExperimentStates.update({_id: globalExperimentState._id}, {$set: {experimentState: curExperimentState}});
-    }
-  }
-  Session.set('currentRootTdfId', undefined);
-  curExperimentState = null;
 }
 
