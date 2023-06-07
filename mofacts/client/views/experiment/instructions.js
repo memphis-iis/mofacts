@@ -283,14 +283,13 @@ function getUnitsRemaining() {
 // SUPER-IMPORTANT: note that this can be called outside this template, so it
 // must only reference visible from anywhere on the client AND we take great
 // pains to not modify anything reactive until this function has returned
-function instructContinue(cb) {
+function instructContinue() {
   const curUnit = Session.get('currentTdfUnit');
 
   let feedbackText = curUnit.unitinstructions && curUnit.unitinstructions.length > 0 ?
     curUnit.unitinstructions.trim() : '';
   if (feedbackText.length < 1) feedbackText = curUnit.picture ? curUnit.picture.trim() : '';
 
-  const dest = cb ? cb : '/card';
 
   // Record the fact that we just showed instruction. Also - we use a call
   // back to redirect to the card display screen to make sure that everything
@@ -316,7 +315,7 @@ function instructContinue(cb) {
     console.log('instructions,new experiment state:', newExperimentState);
     console.log('instructContinue', res);
     Session.set('inResume', true);
-    leavePage(dest);
+    leavePage('/card');
     Session.set('fromInstructions', true);
     Session.set('enterKeyLock', false);
     console.log('releasing enterKeyLock in instructContinue');
