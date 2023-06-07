@@ -22,13 +22,13 @@
         <input type="range" style="width:200px" id="audioInputSensitivity" value="20" step="1" min="0" max="60">
         <span style="font-weight: bold;">Noisy Room</span>
         {{#if showSpeechAPISetup}}
-          <div class="audioEnabledGroup invisible">
+          <div class="audioEnabledGroup">
             {{#if speechAPIKeyIsSetup}}
               <p style="color:green">Speech api key is setup</p>
             {{else}}
               <p style="color:red">Speech api key is not setup</p>
             {{/if}}
-            <button id='setupAPIKey' class="marginBottom">Set up API Key</button>
+            <button id='setupAPIKey' class="btn">Set up API Key</button>
           </div>
         {{/if}}
       </div>
@@ -67,7 +67,7 @@
           <a href="#" id="audioPromptVoiceTest"><span class="fa fa-volumne-high"></span></a>
         </div>
       </div>
-      <div class="audioPromptFeedbackGroup invisible" style="padding-left:2%;">
+      <div class="audioPromptFeedbackGroup" style="padding-left:2%;" hidden>
         <h5 style="color:green; padding-left:8%">Requires <span class="fa fa-headphones"></span> icon. Headphones recommended.</h5>
         <div style="display: inline-block; padding-left:8%">
           <label for="audioPromptFeedbackVolume" class="audioPromptFeedbackVolume">Volume: </label>
@@ -103,7 +103,7 @@
         </div>
       </div>
     </div>
-    <div id="headphonesSuggestedDiv" class="invisible">
+    <div id="headphonesSuggestedDiv" hidden>
       <h6 color="green">Headphones are suggested with both speech input and output enabled.</h6>
     </div>
     <div id='speechAPIModal' class="modal fade">
@@ -130,5 +130,8 @@
         </div>
       </div>
     </div>
+  </div>
+  <div class="vh-5">
+    
   </div>
 </template>

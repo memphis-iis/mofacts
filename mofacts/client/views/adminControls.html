@@ -1,70 +1,7 @@
 <!-- User Administration Template -->
 
 <template name="adminControls">
-<<<<<<< HEAD
-<<<<<<< HEAD
-        <div class="container-fluid" style="padding: 0% 10%;">
-            <div class="header-box">
-                Admin Control Panel
-            </div> 
-            <div class="container">
-                <div class="row text-center">
-                    <h3>Verbosity Level</h3>
-                </div>
-                <div class="row row-col-6s card">
-                    <div class="col-6 text-right">
-                        <label class="form-check-label" for="verbosityRadio1">
-                            Server Logs Only
-                        </label>
-                    </div>
-                    <div class="col-6">
-                        <input  type="radio" name="flexRadioDefault" id="verbosityRadio0">
-                    </div>
-                    <div class="col-6 text-right">
-                        <label class="form-check-label" for="verbosityRadio1">
-                            Function Times Only
-                        </label>
-                    </div>
-                    <div class="col-6">
-                        <input  type="radio" name="flexRadioDefault" id="verbosityRadio1">
-                    </div>
-                    <div class="col-6 text-right">
-                        <label class="form-check-label" for="verbosityRadio2">
-                            Server Logs and Function Times
-                        </label>
-                    </div>
-                    <div class="col-6">
-                        <input  type="radio" name="flexRadioDefault" id="verbosityRadio2">
-                    </div>
-                </div>
-            </div>
-        </div>
-=======
-=======
->>>>>>> 3d696d3a (updates)
     {{#if isInRole 'admin'}}  
-        <br><br>
-        <div class="col-md-12 responsiveTable">
-            <h3>Admin Controls</h3>
-            <h4>Change Server Logging Level</h4>
-            <div class="form-check">
-                <input class="form-check-input serverVerbosityRadio" type="radio" name="flexRadioDefault" id="serverVerbosityRadio0">
-                <label class="form-check-label" for="serverVerbosityRadio0">
-                    Server Logs Only
-                </label>
-            </div>
-            <div class="form-check">
-                <input class="form-check-input serverVerbosityRadio" type="radio" name="flexRadioDefault" id="serverVerbosityRadio1">
-                <label class="form-check-label" for="serverVerbosityRadio1">
-                    Function Times Only
-                </label>
-            </div>
-            <div class="form-check">
-                <input class="form-check-input serverVerbosityRadio" type="radio" name="flexRadioDefault" id="serverVerbosityRadio2">
-                <label class="form-check-label" for="serverVerbosityRadio2">
-                    Server Logs and Function Times
-                </label>
-=======
         <div class="container-fluid" style="padding: 0% 10%;">
             <div class="header-box">
                 Admin Control Panel
@@ -99,11 +36,11 @@
                         <input  type="radio" name="flexRadioDefault" id="verbosityRadio2">
                     </div>
                 </div>
->>>>>>> d5c38e66 (updates)
             </div>
         </div>
-        <br><br>
-        <h4>Change Clinet Logging Level</h4>
+    {{/if}}
+    <div class="container">
+    <h4>Change Clinet Logging Level</h4>
         <div class="form-check">
             <input class="form-check-input clientVerbosityRadio" type="radio" name="flexRadioDefault" id="clientVerbosityRadio0">
             <label class="form-check-label" for="clientVerbosityRadio0">
@@ -122,7 +59,7 @@
                 Full Logging (slowest)
             </label>
         </div>
-    {{/if}}
->>>>>>> 6c45862c (Implement Verbosity Level Changing)
+    </div>
+
 </template>
     
