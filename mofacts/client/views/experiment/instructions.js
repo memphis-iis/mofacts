@@ -1,9 +1,9 @@
 import {secsIntervalString} from '../../../common/globalHelpers';
 import {haveMeteorUser} from '../../lib/currentTestingHelpers';
-import {updateExperimentState} from './card';
+import {updateExperimentState, initCard} from './card';
 import {routeToSignin} from '../../lib/router';
 
-export {instructContinue};
+export {instructContinue, unitHasLockout};
 // //////////////////////////////////////////////////////////////////////////
 // Instruction timer and leaving this page - we don't want to leave a
 // timer running!
@@ -39,7 +39,12 @@ function leavePage(dest) {
   if (typeof dest === 'function') {
     dest();
   } else {
-    Router.go(dest);
+    if(dest == '/card' && document.location.pathname == '/card'){
+      // we are already on the card page, so we need to force a reload
+      initCard();
+    } else {
+      Router.go(dest);
+    }
   }
 }
 
@@ -78,6 +83,24 @@ function currLockOutMinutes() {
       Meteor.call('setLockoutTimeStamp', new Date().getTime(), lockoutminutes, Session.get('currentUnitNumber'), Session.get('currentTdfId'));
     }
     logLockout(lockoutminutes);
+    return lockoutminutes;
+  }
+}
+
+function unitHasLockout() {
+  if(Meteor.user() && Meteor.user().profile.lockouts && Meteor.user().profile.lockouts[Session.get('currentTdfId')] &&
+  Meteor.user().profile.lockouts[Session.get('currentTdfId')].currentLockoutUnit == Session.get('currentUnitNumber')){
+    const userLockout = Meteor.user().profile.lockouts[Session.get('currentTdfId')];
+    const lockoutTimeStamp = userLockout.lockoutTimeStamp;
+    const lockoutMinutes = userLockout.lockoutMinutes;
+    const lockoutTime = lockoutTimeStamp + lockoutMinutes*60*1000;
+    const currTime = new Date().getTime();
+    if(currTime < lockoutTime){
+      const newLockoutMinutes = Math.ceil((lockoutTime - currTime)/(60*1000));
+      return newLockoutMinutes;
+    }
+  } else {
+    const lockoutminutes = parseInt(Session.get('currentDeliveryParams').lockoutminutes || 0);
     return lockoutminutes;
   }
 }
@@ -266,6 +289,7 @@ function instructContinue() {
   let feedbackText = curUnit.unitinstructions && curUnit.unitinstructions.length > 0 ?
     curUnit.unitinstructions.trim() : '';
   if (feedbackText.length < 1) feedbackText = curUnit.picture ? curUnit.picture.trim() : '';
+
 
   // Record the fact that we just showed instruction. Also - we use a call
   // back to redirect to the card display screen to make sure that everything
