@@ -3,10 +3,10 @@ export {getAudioPromptModeFromPage, getAudioInputFromPage};
 
 const showHideAudioEnabledGroup = function(show) {
   if (show) {
-    $('.audioEnabledGroup').removeClass('invisible');
+    $('.audioEnabledGroup').show();
     $('.audioEnabledGroup').addClass('flow');
   } else {
-    $('.audioEnabledGroup').addClass('invisible');
+    $('.audioEnabledGroup').hide();
     $('.audioEnabledGroup').removeClass('flow');
   }
 };
@@ -75,11 +75,11 @@ function setAudioInputOnPage(audioInputEnabled) {
 
 function showHideheadphonesSuggestedDiv(show) {
   if (show) {
-    $('#headphonesSuggestedDiv').removeClass('invisible');
+    $('#headphonesSuggestedDiv').show();
     //change the modal height to accomodate the new content
     $('.modal-dialog').addClass('modal-expanded');
   } else {
-    $('#headphonesSuggestedDiv').addClass('invisible');
+    $('#headphonesSuggestedDiv').hide();
     $('.modal-dialog').removeClass('modal-expanded');
   }
 }
@@ -88,27 +88,27 @@ function showHideAudioPromptGroupDependingOnAudioPromptMode(audioPromptMode) {
   switch (audioPromptMode) {
     case 'feedback':
       $('.audioPromptFeedbackGroup').addClass('flow');
-      $('.audioPromptFeedbackGroup').removeClass('invisible');
-      $('.audioPromptQuestionGroup').addClass('invisible');
+      $('.audioPromptFeedbackGroup').show();
+      $('.audioPromptQuestionGroup').hide();
       $('.audioPromptQuestionGroup').removeClass('flow');
       break;
     case 'question':
       $('.audioPromptQuestionGroup').addClass('flow');
-      $('.audioPromptQuestionGroup').removeClass('invisible');
-      $('.audioPromptFeedbackGroup').addClass('invisible');
+      $('.audioPromptQuestionGroup').show();
+      $('.audioPromptFeedbackGroup').hide();
       $('.audioPromptFeedbackGroup').removeClass('flow');
       break;
     case 'all':
       $('.audioPromptFeedbackGroup').addClass('flow');
-      $('.audioPromptFeedbackGroup').removeClass('invisible');
+      $('.audioPromptFeedbackGroup').show();
       $('.audioPromptQuestionGroup').addClass('flow');
-      $('.audioPromptQuestionGroup').removeClass('invisible');
+      $('.audioPromptQuestionGroup').show();
       break;
     case 'silent':
     default:
-      $('.audioPromptFeedbackGroup').addClass('invisible');
+      $('.audioPromptFeedbackGroup').hide();
       $('.audioPromptFeedbackGroup').removeClass('flow');
-      $('.audioPromptQuestionGroup').addClass('invisible');
+      $('.audioPromptQuestionGroup').hide();
       $('.audioPromptQuestionGroup').removeClass('flow');
       break;
   }

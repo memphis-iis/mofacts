@@ -38,13 +38,7 @@ p{
     background-color: #d9d9d9;
     display: flex;
 }
-.modal-expanded{
-    height: 70vh !important;
-    top: 30% !important;
-    /* animate from bottom to top */
-    -webkit-animation: animatezoom 0.6s;
-    animation: animatezoom 0.6s;
-}
+
 .modal-title{
     /* League Spartan */
     font-family: 'League Spartan';
@@ -297,6 +291,13 @@ select{
 
 /* Adaptive  Screens */
 @media screen and (max-width: 1024px) {
+    .modal-expanded{
+        height: 70vh !important;
+        top: 30% !important;
+        /* animate from bottom to top */
+        -webkit-animation: animatezoom 0.6s;
+        animation: animatezoom 0.6s;
+    }
     .modal-dialog{
         height: 50vh;
         position: fixed;
