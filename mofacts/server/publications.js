@@ -22,6 +22,7 @@ Meteor.publish('userComponentStates', function(tdfId) {
 });
 
 Meteor.publish('userExperimentState', function(tdfId) {
+    console.log("publishing userExperimentState", tdfId, typeof tdfId)
     if (tdfId && typeof tdfId === 'object') {
         return GlobalExperimentStates.find({userId: this.userId, TDFId: {$in: tdfId}});
     } else if (tdfId) {
