@@ -52,13 +52,21 @@
         <div class="modal" id="classSelectModal" tabindex="-1">
             <div class="modal-dialog fade-in-up">
                 <div class="modal-content">
-                  <div class="modal-header">
-                    <h5 class="modal-title text-center w-100 p-3">Please type in your organization's URL</h5>
-                  </div>
+                    <div class="modal-header">
+                        <h3 class="modal-title">SSO Login</h3>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                      </div>
                   <div class="modal-body login-form ">
+                    <p>
+                        Please enter your SSO URL and select your teacher and class.
+                    </p>
                     <form class="spacer">
                         <!-- SSO URL input -->
-                        <input type="text" id="ssoUrl" value="" class="w-100 p-3" placeholder="https://sso.example.com"><br>
+                        <div class="row">
+                            <div class="col mx-auto">
+                                <input type="text" id="ssoUrl" value="" class="mx-auto" placeholder="https://sso.example.com"><br>
+                            </div>
+                        </div>
                         <!-- hidden teacher select form -->
                         <select id="teacherSelect" class="form-select" aria-label="Default select example" hidden>
                             <option selected>Select your teacher</option>
@@ -79,9 +87,13 @@
                         </select>
                     </form>
                         <div class="vh-5"></div>
-                        <div class="row text-center">
-                        <button type="button" class="btn btn-fixed">Sign In</button>
-                        <button type="button" class="btn btn-fixed" data-bs-dismiss="modal">Close</button>
+                        <div class="row row-col-2 text-center">
+                            <div class="col">
+                                <button type="button" class="btn btn-fixed">Sign In</button>
+                            </div>
+                            <div>
+                                <button type="button" class="btn btn-fixed" data-bs-dismiss="modal">Close</button>
+                            </div>
                     </div>
                   </div>
                 </div>

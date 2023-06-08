@@ -138,25 +138,6 @@ Accounts.onLogout(function() {
 });
 
 Meteor.startup(function() {
-  console.logs = [];
-  console.defaultLog = console.log.bind(console);
-  console.log = function(...args) {
-    const convertedArgs = [];
-    for (const index in args) {
-      if (typeof(args[index]) != 'object') {
-        convertedArgs.push(args[index]);
-      } else {
-        try {
-          convertedArgs.push(JSON.stringify(args[index]));
-        } catch (e) {
-          convertedArgs.push(e);
-        }
-      }
-    }
-    console.logs = console.logs.concat(convertedArgs);
-    console.logs = console.logs.slice(0, 100000);
-    console.defaultLog.apply(null, args);
-  };
   Session.set('debugging', true);
   sessionCleanUp();
 

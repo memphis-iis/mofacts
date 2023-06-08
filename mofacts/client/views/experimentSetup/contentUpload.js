@@ -249,6 +249,7 @@ async function doFileUpload(fileArray) {
     $('#upload-file').parent().find('.file-info').html('');
 
     console.log(fileType, ':', fileDescrip, 'at ele', fileElementSelector, 'scheduled', count, 'uploads');
+    //alert('Upload complete');
     }
   }
 
