@@ -339,40 +339,9 @@ async function getProbabilityEstimatesByKCId(relevantKCIds) { // {clusterIndex:[
 
 async function getResponseKCMap() {
   serverConsole('getResponseKCMap');
-  const responseKCStuff = await Tdfs.rawCollection().aggregate([
-    {
-      $unwind: {
-        path: "$stimuli",
-        preserveNullAndEmptyArrays: false
-      }
-    },
-    {
-      $group: {
-      _id: "$stimuli.correctResponse",
-      "doc": { "$first": "$$ROOT" }
-      }
-    },
-    {
-      $replaceRoot: {
-        newRoot: "$doc"
-      }
-    },
-    {
-      $project: {
-        "stimuliSetId": "$stimuli.stimuliSetId",
-        "stimulusFileName": "$stimuli.stimulusFileName",
-        "stimulusKC": "$stimuli.stimulusKC",
-        "clusterKC": "$stimuli.clusterKC",
-        "responseKC": "$stimuli.responseKC",
-        "params": "$stimuli.params",
-        "correctResponse": "$stimuli.correctResponse",
-        "incorrectResponses": "$stimuli.incorrectResponses",
-        "itemResponseType": "$stimuli.itemResponseType",
-        "clozeStimulus": "$stimuli.clozeStimulus",
-        "textStimulus": "$stimuli.textStimulus",
-        "syllables": "$stimuli.syllables"
-      }
-  }]).toArray();
+
+  let responseKCStuff = Tdfs.find().fetch();
+  responseKCStuff = responseKCStuff.map(r => r.stimuli).flat();
   const responseKCMap = {};
   for (const row of responseKCStuff) {
     const correctresponse = row.correctResponse;
@@ -381,7 +350,6 @@ async function getResponseKCMap() {
     const answerText = getDisplayAnswerText(correctresponse);
     responseKCMap[answerText] = responsekc;
   }
-
   return responseKCMap;
 }
 
