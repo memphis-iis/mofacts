@@ -2,46 +2,65 @@
   <div class="allContent">
     <div class="row">    
       {{#if studentReportingTdfs}}
-        {{#if noTime}}
-        {{else}}
-          {{#if tooFewStims}}
-          {{else}}            
-            <select id="tdf-select" class="width-80-percent">
+             <select id="tdf-select" class="width-80-percent">
              <option value="{{INVALID}}">Select a lesson</option>
             <!-- <option value="xml">All</option> -->
             {{#each studentReportingTdfs}}
               <option value="{{this.TDFId}}">{{this.displayName}}</option>
             {{/each}}
             </select>
-          {{/if}}
-        {{/if}}
       {{/if}}
       </div>
       <div class="row full-width">
-          <div class="alert">
-            <div class="alert-icon">
-              <i class="fa fa-info-circle" aria-hidden="true"></i>
-            </div>
-            {{#if noTime}}
-              You have not started using the system.  Once you
-              have completed 30 questions on a lesson, we will
-              have a full report of your progress.
-            {{else}}
-              {{#if tooFewStims}}
-                We do not have enough data to
-                give a full report.  You have completed {{stimsSeen}} questions. Please complete at least 30 questions.
+            {{#if lastTdf}}
+              {{#if selectedTdf}}
+                {{#if tooFewStims}}
+                <div class="alert">
+                  <div class="alert-icon">
+                    <i class="fa fa-info-circle" aria-hidden="true"></i>
+                  </div>
+                    We do not have enough data to
+                    give a full report.  You have completed {{stimsSeen}} questions. Please complete at least 30 questions.
+                  </div>
+                {{/if}}
+              {{else}}
+              <div class="alert">
+                <div class="alert-icon">
+                  <i class="fa fa-info-circle" aria-hidden="true"></i>
+                </div>
+                  Please choose a Lesson in the dropdown above to see your progress.
+                </div>
               {{/if}}
+            {{else}}
+            <div class="alert">
+              <div class="alert-icon">
+                <i class="fa fa-info-circle" aria-hidden="true"></i>
+              </div>
+                You have not started using the system.  Once you
+                have completed 30 questions on a lesson, we will
+                have a full report of your progress.
+              </div>
             {{/if}}
-          </div> 
       </div> 
       {{#if noTime}}
         <div class="vh-30"></div>
         <button id="go-to-lesson-select" class="btn btn-primary">Select a Lesson</button>
       {{else}}
-      {{#if tooFewStims}}
-          We do not have enough data to
-          give a full report.  You have completed {{stimsSeen}} questions. Please complete at least 30 questions.
+      <div class="vh-30"></div>
+      <button id="go-to-lesson-continue" class="btn  tdfButton" type="button" name="{{selectedTdf.name}}"
+      data-tdfid="{{selectedTdf.tdfid}}"
+      data-lessonname="{{selectedTdf.name}}"
+      data-currentStimuliSetId="{{selectedTdf.currentStimuliSetId}}"
+      data-ignoreOutOfGrammarResponses="{{selectedTdf.ignoreOutOfGrammarResponses}}"
+      data-speechOutOfGrammarFeedback="{{selectedTdf.speechOutOfGrammarFeedback}}"
+      data-isMultiTdf="{{selectedTdf.isMultiTdf}}">Continue {{selectedTdf.lessonName}}
+      {{#if selectedTdf.enableAudioPromptAndFeedback}}
+          <span class="fa fa-headphones"></span>
       {{/if}}
+      {{#if selectedTdf.audioInputEnabled}}
+          <span class="fa fa-microphone"></span>
+      {{/if}}
+      </button>
     {{/if}}
       <div class="row">
         <div id="dashboardGauges" hidden>
