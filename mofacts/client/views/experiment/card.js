@@ -1485,7 +1485,7 @@ async function showUserFeedback(isCorrect, feedbackMessage, afterAnswerFeedbackC
             var distance = countDownStart - now;
             var seconds = Math.ceil((distance % (1000 * 60)) / 1000);
 
-            document.getElementById("CountdownTimer").innerHTML = 'Continuing in: ' + seconds + "s";
+            $('#CountdownTimer').text('Continuing in: ' + seconds + "s");
     
             // If the count down is finished, end interval and clear CountdownTimer
             if (distance < 0) {
@@ -3031,7 +3031,7 @@ async function removeCardByUser() {
   Meteor.clearInterval(Session.get('CurIntervalId'));
   Session.set('CurTimeoutId', undefined);
   Session.set('CurIntervalId', undefined);
-  document.getElementById("CountdownTimer").innerHTML = "";
+  $('#CountdownTimer').text('');
   $('#removalFeedback').show().attr("hidden",false);
 
   let clusterIndex = Session.get('clusterIndex');
