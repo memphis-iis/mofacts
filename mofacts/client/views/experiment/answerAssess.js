@@ -383,23 +383,10 @@ const Answers = {
         case 'refutational':
           Meteor.call('getSimpleFeedbackForAnswer', userInput, answerToCheck, function(err, res) {
             console.log('simpleFeedback, err: ', err, ', res: ', res);
-            if (typeof(err) != 'undefined') {
-              console.log('error with refutational feedback, meteor call: ', err);
-              console.log(res);
-              callback(fullTextIsCorrect);
-            } else if (res.tag != 0) {
-              console.log('error with refutational feedback, feedback call: ' + res.name);
-              console.log(res);
-              callback(fullTextIsCorrect);
-            } else if (res.tag == 0) {
-              console.log('refutationalFeedback,return:', res);
-              const refutationalFeedback = res.fields[0].Feedback || res.fields[0].feedback;
-
-              if (typeof(refutationalFeedback) != 'undefined' && refutationalFeedback != null) {
-                fullTextIsCorrect.matchText = refutationalFeedback;
-              }
-              callback(fullTextIsCorrect);
+            if (typeof(err) == 'undefined' && res != 'default feedback') {
+              fullTextIsCorrect.matchText = res;
             }
+            callback(fullTextIsCorrect);
           });
           break;
         case 'dialogue':
