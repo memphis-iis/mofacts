@@ -1,6 +1,6 @@
 import {meteorCallAsync} from '..';
 import {haveMeteorUser} from '../lib/currentTestingHelpers';
-import {instructContinue} from '../views/experiment/instructions';
+import {instructContinue, unitHasLockout} from '../views/experiment/instructions';
 import {Cookie} from './cookies';
 import {displayify} from '../../common/globalHelpers';
 
@@ -71,6 +71,12 @@ Session.set('experimentXCond', '');
 Session.set('clusterMapping', '');
 
 
+
+//Set Default Template
+Router.configure({
+  layoutTemplate: 'DefaultLayout'
+});
+
 function routeToSignin() {
   console.log('routeToSignin');
   // If the isExperiment cookie is set we always for experiment mode. This
@@ -113,6 +119,9 @@ function routeToSignin() {
 
 Router.route('/experiment/:target?/:xcond?', {
   name: 'client.experiment',
+  waitOn: function() {
+    return Meteor.subscribe('tdfByExperimentTarget', this.params.target)
+  },
   action: async function() {
     Session.set('curModule', 'experiment');
     // We set our session variable and also set a cookie (so that we still
@@ -149,7 +158,8 @@ const defaultBehaviorRoutes = [
   'signInSouthwest',
   'signUp',
   'tabwarning',
-  'resetPassword'
+  'resetPassword',
+  'setTheme',
 ];
 
 const restrictedRoutes = [
@@ -161,8 +171,10 @@ const restrictedRoutes = [
   'contentGeneration',
   'tdfAssignmentEdit',
   'instructorReporting',
-  'studentReporting',
-  'feedback'
+  'feedback',
+  'experimentSettings',
+  'classControlPanel',
+  'contentControlPanel'
 ];
 
 const getDefaultRouteAction = function(routeName) {
@@ -201,6 +213,18 @@ for (const route of defaultBehaviorRoutes) {
   });
 }
 
+Router.route('/studentReporting', {
+  name: 'client.studentReporting',
+  waitOn: function() {
+    return [Meteor.subscribe('allTdfs', 'all')];
+  },
+  action: function() {
+    Session.set('curModule', routeName.toLowerCase());
+    console.log(routeName + ' ROUTE');
+    this.render(routeName);
+  }
+})
+
 Router.route('/', {
   name: 'client.index',
   action: function() {
@@ -220,11 +244,29 @@ Router.route('/', {
   },
 });
 
+Router.route('/FileManagement', {
+  name: 'client.FileManagement',
+  waitOn: function() {
+    return Meteor.subscribe('ownedFiles');
+  },
+  action: function() {
+    if(this.ready()){
+      if(Meteor.user()) {
+        this.render('FileManagement');
+      } else {
+        this.redirect('/');
+      }
+    }
+  }
+})
+
 Router.route('/contentUpload', {
   name: 'client.contentUpload',
+  waitOn: function() {
+    return [Meteor.subscribe('ownedFiles'), Meteor.subscribe('files.assets.all')];
+  },
   action: function() {
     if(Meteor.user()){
-      this.subscribe('contentUpload').wait();
       this.render('contentUpload');
     } else {
       this.redirect('/');
@@ -234,6 +276,9 @@ Router.route('/contentUpload', {
 
 Router.route('/adminControls', {
   name: 'client.adminControls',
+  waitOn: function() {
+    return Meteor.subscribe('settings');
+  },
   action: function() {
     if(Meteor.user() && Roles.userIsInRole(Meteor.user(), ['admin'])){
       this.render('adminControls');
@@ -245,11 +290,23 @@ Router.route('/adminControls', {
 
 Router.route('/profile', {
   name: 'client.profile',
+  waitOn: function() {
+    let assignedTdfs = Meteor.user()?.profile?.assignedTdfs;
+    let curCourseId = Meteor.user()?.profile?.curClass?.courseId || 'undefined'
+    let allSubscriptions = [
+      Meteor.subscribe('allUserExperimentState', assignedTdfs)];
+    if (curCourseId != undefined)
+      allSubscriptions.push(Meteor.subscribe('Assignments', curCourseId));
+    if (Roles.userIsInRole(Meteor.user(), ['admin']))
+      allSubscriptions.push(Meteor.subscribe('allUsers'));
+    if (assignedTdfs === undefined || assignedTdfs === 'all')
+      allSubscriptions.push(Meteor.subscribe('allTdfs'));
+    else 
+      allSubscriptions.push(Meteor.subscribe('currentTdf', assignedTdfs));
+    return allSubscriptions;
+  },
   action: function() {
     if (Meteor.user()) {
-      if (Roles.userIsInRole(Meteor.user(), ['admin'])) {
-        this.subscribe('allUsers').wait();
-      }
       const loginMode = Meteor.user().profile.loginMode;
       console.log('loginMode: ' + loginMode);
 
@@ -461,6 +518,14 @@ Router.route('/classes/:_teacher/:_class', {
 
 Router.route('/card', {
   name: 'client.card',
+  waitOn: function() {
+    return [ 
+      Meteor.subscribe('assets', Session.get('currentTdfFile').ownerId, Session.get('currentStimuliSetId')),
+      Meteor.subscribe('userComponentStates', Session.get('currentTdfId')),
+      Meteor.subscribe('currentTdf', Session.get('currentTdfId')),
+      Meteor.subscribe('userExperimentState', Session.get('currentTdfId')),
+    ]
+  },
   action: function() {
     if (Meteor.user()) {
       Session.set('curModule', 'card');
@@ -468,7 +533,7 @@ Router.route('/card', {
     } else {
       this.redirect('/');
     }
-  }
+  },
 });
 
 // We track the start time for instructions, which means we need to track
@@ -480,24 +545,22 @@ Router.route('/instructions', {
     Session.set('instructionClientStart', Date.now());
     Session.set('curModule', 'instructions');
     Session.set('fromInstructions', true);
-    Session.set('curUnitInstructionsSeen', true);
     this.render('instructions');
   },
-  onAfterAction: function() {
-    // If we've routed to the instructions but there's nothing to do then
-    // it's time to move on. We do NOT do this in onBeforeAction because
-    // we have instruction logic that needs to have handled and Iron Router
-    // doesn't like us setting up async re-routes.
+  onBeforeAction: function() {
     if (!haveMeteorUser()) {
       console.log('No one logged in - allowing template to handle');
     } else {
       const unit = Session.get('currentTdfUnit');
+      const lockout = unitHasLockout() > 0;
       const txt = unit.unitinstructions ? unit.unitinstructions.trim() : undefined;
       const pic = unit.picture ? unit.picture.trim() : undefined;
       const instructionsq = unit.unitinstructionsquestion ? unit.unitinstructionsquestion.trim() : undefined;
-      if (!txt && !pic && !instructionsq) {
+      if (!txt && !pic && !instructionsq && !lockout) {
         console.log('Instructions empty: skipping', displayify(unit));
         instructContinue();
+      } else {
+        this.next();
       }
     }
   },

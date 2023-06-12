@@ -1,0 +1,45 @@
+version: '3.3'
+
+services:
+  spacyapi:
+    image: aolney/spacyapi
+    ports:
+      - 5000:5000
+
+  allennlp-demo:
+    image: allennlp/demo
+    ports:
+      - 8000:8000
+
+  paraphrase-server:
+    image: aolney/paraphrase-server
+    ports:
+      - 8080:8080
+
+  illinois-wikifier-server:
+    image: aolney/illinois-wikifier-server
+    ports:
+      - 8090:8090
+
+  longform-qa-service:
+    image: aolney/longform-qa-service
+    ports:
+      - 5005:5005
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.14.1
+    container_name: elasticsearch
+    environment:
+      - discovery.type=single-node
+    ports:
+      - 9200:9200
+
+  syllables:
+    build: ./syllables_subsystem
+    ports:
+      - "4567:4567"
+    
+  mofacts:
+    build: ./mofacts
+    ports:
+      - "80:80"

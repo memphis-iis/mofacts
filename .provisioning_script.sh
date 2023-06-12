@@ -92,9 +92,6 @@ sudo mount --bind "$HOME/.meteor/packages" packages
 #meteor update
 meteor npm install --save babel-runtime --no-bin-links
 
-#install meteor up deployer
-npm install -g mup
-
 # Set up dynamic config
 bash /vagrant/scripts/server/setDynamicConfig.sh
 
@@ -103,6 +100,11 @@ sudo apt-get purge -y landscape-client landscape-common
 sudo rm -f /etc/update-motd/*
 sudo rm -f /etc/motd
 sudo touch /etc/motd
+
+#install docker and docker-compose
+sudo apt-get install -y docker.io
+sudo apt-get install -y docker-compose
+
 
 
 # Spit out some messages for the user - to do this we'll need to create a message
@@ -147,4 +149,4 @@ printf "\n\nPrintMotd no\n" >> "$SSHDBASE.new"
 sudo cp "$SSHDBASE.new" "$SSHDSRC"
 
 #add startup script to bashrc
-echo "bash ~/mofacts/mofacts/startup.sh" >> ~/.bashrc
+#echo "bash ~/mofacts/mofacts/startup.sh" >> ~/.bashrc

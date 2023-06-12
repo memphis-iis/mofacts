@@ -1,17 +1,146 @@
 <!-- MAIN profile template -->
 <template name="profile">
-  <script defer src="https://use.fontawesome.com/releases/v5.0.9/js/all.js" integrity="sha384-8iPTk2s/jMVj81dnzb/iFR2sdA7u06vHJyyLlAd4snFpCl/SnyUjRrbdJsw1pGIl" crossorigin="anonymous"></script>
-    <div class="container">
+    <div class="row profile-summary mobile-20vh">
+        <div class="container">
+        <div class="row">
+            <div class="col-12 offset-md-2 offset-sm-1 offset-lg-1 offset-2">
+                <table>
+                    <tr>
+                        <td>
+                            <div class="name-circle" hidden>
+                                <span class="mx-auto">
+                                    
+                                </span>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="ms-2">
+                                {{#if isInRole 'admin, teacher'}}
+                                <b>{{studentUsername}}</b>
+                                <i>
+                                {{#if isInRole 'admin'}}
+                                    Administrator
+                                    {{#if isInRole 'teacher'}}
+                                        / Teacher
+                                    {{/if}}
+                                {{else}}
+                                    Teacher
+                                {{/if}}
+                                </i>
+                              {{else}}
+                                <b>{{currentUser.username}}</b>
+                                <i>Student</i>
+                              {{/if}}
+                              <br>
+                            </span>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+            <div class="row">
+                <div class="col-12 mt-auto">
+                    <div class="row profile-summary-text">                        
+                        <div class="col-12" style="">
+                            <input type="text" id="practiceTDFSearch" class="form-control" placeholder="Select a TDF...">
+                        </div>
+                        <div class="col-12 text-center" id="practiceTDFSearchResultsContainer">
+                            <div class="col-12 text-center" id="practiceTDFSearchResults">
+                                {{#if recentTdfs}}
+                                <div class="divider">Recent</div>
+                                <ul class="tdfMenu"> 
+                                {{#each recentTdfs}}
+                                    <li>
+                                        <a id="{{this.tdfid}}" class="tdfLink" name="{{this.name}}"
+                                        data-tdfid="{{this.tdfid}}"
+                                        data-lessonname="{{this.name}}"
+                                        data-currentStimuliSetId="{{this.currentStimuliSetId}}"
+                                        data-tdffilename="{{this.fileName}}"
+                                        data-ignoreOutOfGrammarResponses="{{this.ignoreOutOfGrammarResponses}}"
+                                        data-speechOutOfGrammarFeedback="{{this.speechOutOfGrammarFeedback}}"
+                                        data-isMultiTdf="{{this.isMultiTdf}}">
+                                        <!-- add disabled="{{this.isOverDue}}" to this to enable due date lockouts -->
+                                        {{this.name}}
+                                        {{#if this.enableAudioPromptAndFeedback}}
+                                        <span class="fa fa-headphones"></span>
+                                        {{/if}}
+                                        {{#if this.audioInputEnabled}}
+                                        <span class="fa fa-microphone"></span>
+                                        {{/if}}
+                                    </a>
+                                    </li>
+                                    {{/each}}
+
+                                    <a id="{{this.tdfid}}" class="tdfLink" name="{{this.name}}"
+                                    data-tdfid="{{this.tdfid}}"
+                                    data-lessonname="{{this.name}}"
+                                    data-currentStimuliSetId="{{this.currentStimuliSetId}}"
+                                    data-tdffilename="{{this.fileName}}"
+                                    data-ignoreOutOfGrammarResponses="{{this.ignoreOutOfGrammarResponses}}"
+                                    data-speechOutOfGrammarFeedback="{{this.speechOutOfGrammarFeedback}}"
+                                    data-isMultiTdf="{{this.isMultiTdf}}">
+                                    <!-- add disabled="{{this.isOverDue}}" to this to enable due date lockouts -->
+                                    {{this.name}}
+                                    {{#if this.enableAudioPromptAndFeedback}}
+                                    <span class="fa fa-headphones"></span>
+                                    {{/if}}
+                                    {{#if this.audioInputEnabled}}
+                                    <span class="fa fa-microphone"></span>
+                                    {{/if}}
+                                    </a>
+                                </ul>
+                                {{/if}}
+                                {{#if enabledTdfs}}
+                                <div class="divider">Results</div>
+                                <ul class="tdfMenu">
+                                    {{#each enabledTdfs}}
+                                    <li>
+                                    <a id="{{this.tdfid}}" class="tdfLink" name="{{this.name}}"
+                                        data-tdfid="{{this.tdfid}}"
+                                        data-lessonname="{{this.name}}"
+                                        data-currentStimuliSetId="{{this.currentStimuliSetId}}"
+                                        data-tdffilename="{{this.fileName}}"
+                                        data-ignoreOutOfGrammarResponses="{{this.ignoreOutOfGrammarResponses}}"
+                                        data-speechOutOfGrammarFeedback="{{this.speechOutOfGrammarFeedback}}"
+                                        data-isMultiTdf="{{this.isMultiTdf}}">
+                                        <!-- add disabled="{{this.isOverDue}}" to this to enable due date lockouts -->
+                                        {{this.name}}
+                                        {{#if this.enableAudioPromptAndFeedback}}
+                                        <span class="fa fa-headphones"></span>
+                                        {{/if}}
+                                        {{#if this.audioInputEnabled}}
+                                        <span class="fa fa-microphone"></span>
+                                        {{/if}}
+                                    </a>
+                                    </li>
+                                {{/each}}
+                                </ul>
+                                {{else}}
+                                    <div class="divider">Results</div>
+                                    <div class="col-12">
+                                        <ul class="tdfMenu">
+                                            <li class="tdfLink">No modules available</li>
+                                        </ul>
+                                    </div>
+                                {{/if}}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+  
+    <div class="container-fluid">
+        
         {{#if isImpersonating}}
         <div class='text-center alert alert-warning'>
                 Impersonation Mode. Nothing will be logged. Log out to reset.
         </div>
         {{/if}}
-
-
+        <br>
         {{#unless isInRole 'admin,teacher'}}
-            <br>
-
+        <br>
             <div class="row" id="testButtonContainer">
                 <br>
                 {{>profileAudioToggles}}
@@ -19,16 +148,15 @@
                     Practice modules:
                 </legend>
             </div>
-
-            {{#if class}}
+        {{#if class}}
             <legend class="text-center">
                 Course: {{class.courseName}}
             </legend>
             {{/if}}
             <!-- search by tag form -->
             <div class="row" style="margin: 10px;">
-                <h4><label for="practiceTDFSearch" class="form-label">Tag Search:</label></h4>
-                <input id="practiceTDFSearch" class="form-control margin-auto" type="text" placeholder="tag" alt="tdf search box">
+                <h4><label for="TDFTagSearch" class="form-label">Tag Search:</label></h4>
+                <input id="TDFTagSearch" class="form-control margin-auto" type="text" placeholder="tag" alt="tdf search box">
                 {{#if tdfTags}}
                     <div class="row">
                         <div class="col-md-12">
@@ -59,7 +187,7 @@
                     {{/if}}
                     {{#if this.enableAudioPromptAndFeedback}}
                         <br>
-                        <p style="display:inline-block" title="Audio Output available for this module"><span class="glyphicon glyphicon-headphones"></span></p>
+                        <p style="display:inline-block" title="Audio Output available for this module"><span class="fa fa-headphones"></span></p>
                     {{/if}}
                     <p style="display:inline-block">&nbsp;&nbsp;&nbsp;</p>
                     {{#if this.audioInputEnabled}}
@@ -71,12 +199,13 @@
         {{/unless}}
 
         {{#if isInRole 'admin,teacher'}}
+        <br>
         {{>profileDebugToggles}}    
         <br><br>
 
             <div class="row">
-                <div class="col-md-offset-3 col-md-6">
-                    <button id="tdfPracticeBtn" class="btn btn-primary" type="button" data-toggle="collapse" data-target="#testButtonContainer" aria-expanded="false" aria-controls="testButtonContainer">
+                <div class="col-md-12">
+                    <button id="tdfPracticeBtn" class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#testButtonContainer" aria-expanded="false" aria-controls="testButtonContainer">
                         TDF Practice +
                     </button>
                 </div>
@@ -89,7 +218,7 @@
                     <br>
                     <div class="row" style="border:1px black;">
                         <h5 style="color:black;"><i class="fa fa-microphone"></i> Voice recognition enabled.</h5>
-                        <h5><span class="glyphicon glyphicon-headphones"></span>Text to Speech enabled</h5>
+                        <h5><span class="fa fa-headphones"></span>Text to Speech enabled</h5>
                     </div>
                     <h4><input type="checkbox" name="simulation" id="simulation" checked={{simulationChecked}}> Simulate if TDF param present?</h4>
                     {{#if isInRole 'admin'}}
@@ -102,8 +231,8 @@
                 {{#if showTdfs}}
                     <!-- search by tag form -->
                     <div class="row" style="margin: 10px;">
-                        <h4><label for="practiceTDFSearch" class="form-label">Tag Search:</label></h4>
-                        <input id="practiceTDFSearch" class="form-control margin-auto" type="text" placeholder="tag" alt="tdf search box">
+                        <h4><label for="TDFTagSearch" class="form-label">Tag Search:</label></h4>
+                        <input id="TDFTagSearch" class="form-control margin-auto" type="text" placeholder="tag" alt="tdf search box">
                         {{#if tdfTags}}
                             <div class="row">
                                 <div class="col-md-12">
@@ -126,7 +255,7 @@
                             data-speechOutOfGrammarFeedback="{{this.speechOutOfGrammarFeedback}}"
                             data-isMultiTdf="{{this.isMultiTdf}}">{{this.name}}<br>
                             {{#if this.enableAudioPromptAndFeedback}}
-                                <p style="display:inline-block" title="Audio Output available for this module"><span class="glyphicon glyphicon-headphones"></span></p>
+                                <p style="display:inline-block" title="Audio Output available for this module"><span class="fa fa-headphones"></span></p>
                             {{/if}}
                             <p style="display:inline-block">&nbsp;&nbsp;&nbsp;</p>
                             {{#if this.audioInputEnabled}}
@@ -146,14 +275,14 @@
             </div>
             <br><br>
             <div class="row">
-                <div class="col-md-offset-3 col-md-6">
+                <div class="col-md-offset-3 col-md-12">
                     <button type="button" id="instructorReportingButton" class="button btn  navbar-btn">Instructor Reporting</button>
                 </div>
             </div>
             <br><br>
             {{#if isInRole 'admin'}}
             <div class="row">
-                <div class="col-md-offset-3 col-md-6">
+                <div class="col-md-offset-3 col-md-12">
                     <button id="adminControlsBtn" class="btn btn-primary" type="button">
                         Admin Control Panel
                     </button>
@@ -161,8 +290,8 @@
             </div>
             <br><br>
             <div class="row">
-                <div class="col-md-offset-3 col-md-6">
-                    <button id="showDisabledTdfsBtn" class="btn btn-primary" type="button" data-toggle="collapse" data-target="#showDisabledTdfsContainer" aria-expanded="false" aria-controls="showDisabledTdfsContainer">
+                <div class="col-md-offset-3 col-md-12">
+                    <button id="showDisabledTdfsBtn" class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#showDisabledTdfsContainer" aria-expanded="false" aria-controls="showDisabledTdfsContainer">
                         Show Disabled TDFs +
                     </button>
                 </div>
@@ -199,57 +328,65 @@
             <br><br>
             {{/if}}
             <div class="row">
-                <div class="col-md-offset-3 col-md-6">
+                <div class="col-md-offset-3 col-md-12">
                     <button type="button" id="mechTurkButton" class="button btn  navbar-btn">Mechanical Turk</button>
                 </div>
             </div>
             <br><br>
             <div class="row">
-                <div class="col-md-offset-3 col-md-6">
+                <div class="col-md-offset-3 col-md-12">
+                    <button id="FileManagementButton" class="btn btn-primary" type="button">
+                        Manage Lessons
+                    </button>
+                </div>
+            </div>
+            <br><br>
+            <div class="row">
+                <div class="col-md-offset-3 col-md-12">
                     <button type="button" id="contentUploadButton" class="button btn  navbar-btn">Content Uploads</button>
                 </div>
             </div>
             <br><br>
             <div class="row">
-                <div class="col-md-offset-3 col-md-6">
+                <div class="col-md-offset-3 col-md-12">
                     <button type="button" id="userProfileEditButton" class="button btn  navbar-btn">AWS User Profile Data</button>
                 </div>
             </div>
             <br><br>
             <div class="row">
-                <div class="col-md-offset-3 col-md-6">
+                <div class="col-md-offset-3 col-md-12">
                     <button type="button" id="dataDownloadButton" class="button btn  navbar-btn">Download User Log Data</button>
                 </div>
             </div>
             {{#if isInRole 'admin'}}
               <br><br>
               <div class="row">
-                  <div class="col-md-offset-3 col-md-6">
+                  <div class="col-md-offset-3 col-md-12">
                       <button type="button" id="userAdminButton" class="button btn  navbar-btn">User Admin</button>
                   </div>
               </div>
             {{/if}}
             <br><br>
             <div class="row">
-                <div class="col-md-offset-3 col-md-6">
+                <div class="col-md-offset-3 col-md-12">
                     <button type="button" id="classEditButton" class="button btn  navbar-btn">Class Edit</button>
                 </div>
             </div>
             <br><br>
             <div class="row">
-                <div class="col-md-offset-3 col-md-6">
+                <div class="col-md-offset-3 col-md-12">
                     <button type="button" id="tdfAssignmentEditButton" class="button btn  navbar-btn">Chapter Assignments</button>
                 </div>
             </div>
             <br><br>
             <div class="row">
-                <div class="col-md-offset-3 col-md-6">
+                <div class="col-md-offset-3 col-md-12">
                     <button type="button" id="wikiButton" class="button btn  navbar-btn">MoFACTs Manuals / Wiki</button>
                 </div>
             </div>
             <br><br>
             <div class="row">
-                <div class="col-md-offset-3 col-md-6">
+                <div class="col-md-offset-3 col-md-12">
                     <button type="button" id="contentGenerationButton" class="button btn  navbar-btn">Content Generation</button>
                 </div>
             </div>

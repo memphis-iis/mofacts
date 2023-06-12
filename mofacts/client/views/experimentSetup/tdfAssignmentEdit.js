@@ -27,9 +27,8 @@ Template.tdfAssignmentEdit.onRendered(async function() {
   console.log('assignments', assignments);
   curCourseAssignment = {courseName: '', courseId: undefined, tdfs: []};
 
-  const allTdfs = await meteorCallAsync('getAllTdfs');
-  console.log('allTdfs', allTdfs);
-  const allTdfObjects = allTdfs.map((tdf) => tdf.content);
+  const accessableTDFS = await meteorCallAsync('getAssignableTDFSForUser', Meteor.userId());
+  const allTdfObjects = accessableTDFS.map((tdf) => tdf.content);
   if (!Session.get('allTdfs')) Session.set('allTdfs', allTdfObjects);
   const allTdfDisplays = [];
   for (const i in allTdfObjects) {

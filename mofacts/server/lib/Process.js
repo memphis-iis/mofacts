@@ -282,7 +282,7 @@ function TextRequest$reflection() {
   return (0, _Reflection.record)("Process.TextRequest", [], TextRequest, () => [["text", _Reflection.string], ["model", _Reflection.string]]);
 }
 
-const endpoints = new Endpoints("http://141.225.12.235:8000/predict/semantic-role-labeling", "http://141.225.12.235:8000/predict/coreference-resolution", "http://141.225.12.235:8000/predict/dependency-parsing", "http://141.225.12.235:8001/sents");
+const endpoints = new Endpoints("http://127.0.0.1:8000/predict/semantic-role-labeling", "http://127.0.0.1:8000/predict/coreference-resolution", "http://127.0.0.1:8000/predict/dependency-parsing", "http://127.0.0.1:8001/sents");
 exports.endpoints = endpoints;
 
 function PostAPI(input$$1, endpoint) {

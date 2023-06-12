@@ -94,9 +94,6 @@ let donutOptionsMasteredItems = {
   generateGradient: true
 };
 
-//Set Tooltips
-// Select all elements with data-toggle="tooltips" in the document
-$('[data-toggle="tooltip"]').tooltip();
 
 Template.studentReporting.helpers({
   studentReportingTdfs: () => Session.get('studentReportingTdfs'),
@@ -191,7 +188,7 @@ async function updateDashboard(selectedTdfId){
 
 async function drawDashboard(studentId, selectedTdfId){
   // Get TDF Parameters
-  selectedTdf = await meteorCallAsync('getTdfById',selectedTdfId);
+  selectedTdf = Tdfs.findOne({_id: selectedTdfId});
   selectedTdfIdProgressReportParams = selectedTdf.content.tdfs.tutor.setspec.progressReporterParams;
   let curStimSetId = selectedTdf.stimuliSetId;
   let clusterlist = [];
@@ -222,11 +219,11 @@ async function drawDashboard(studentId, selectedTdfId){
     console.log(`masteryEstimateData(${timeToMasterHistory} trials)`, masteryEstimateData);
     console.log(`difficultyData(${difficultyHistory} trials)`, difficultyData);
     let {totalStimCount, stimsIntroduced} = curStudentGraphData;
-    const {numCorrect, numIncorrect, totalPracticeDuration} = curStudentTotalData;
-    totalAttempts = parseFloat(numCorrect) + parseFloat(numIncorrect);
+    const {allTimeNumCorrect, allTimeNumIncorrect, allTimePracticeDuration} = curStudentTotalData;
+    totalAttempts = parseFloat(allTimeNumCorrect) + parseFloat(allTimeNumIncorrect);
     console.log('totalAttempts', totalAttempts);
-    percentCorrect = (parseFloat(numCorrect) / totalAttempts) * 100;
-    totalPracticeDurationInMinutes = totalPracticeDuration / 60000;
+    percentCorrect = (parseFloat(allTimeNumCorrect) / totalAttempts) * 100;
+    totalPracticeDurationInMinutes = allTimePracticeDuration / 60000;
     totalPracticeDurationMinutesDisplay = totalPracticeDurationInMinutes.toFixed();
     percentStimsSeen = parseFloat(stimsIntroduced - numDroppedStims) / parseFloat(totalStimCount - numDroppedStims) * 100;
     speedOfLearning = Math.log(1+parseFloat(speedOfLearningData.stimsIntroduced)) * 100;
