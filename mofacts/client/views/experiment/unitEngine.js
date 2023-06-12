@@ -402,8 +402,6 @@ function modelUnitEngine() {
   // the unit we'll start all over.
   const unitStartTimestamp = Date.now();
 
-  const responseIDMap = {};
-
   function getStimParameterArray(clusterIndex, whichStim) {
     return getStimCluster(clusterIndex).stims[whichStim].params.split(',').map((x) => _.floatval(x));
   }
@@ -1216,13 +1214,43 @@ function modelUnitEngine() {
         responseText: Object.entries(cardProbabilities.responses).find(r => r[1] == response)[0], // not actually in db, need to lookup/assign kcid when loading
         instructionQuestionResult: null,
       };
-      response._id = responseIDMap[responseKCMap[responseState.responseText]];
-      if (ComponentStates.update({_id: card._id}, {$set: cardState}) == 0)
-        ComponentStates.insert(cardState);
-      if (ComponentStates.update({_id: stim._id}, {$set: stimState}) == 0)
-        ComponentStates.insert(stimState);
-      if (ComponentStates.update({_id: response._id}, {$set: responseState}) == 0)
-        ComponentStates.insert(responseState); 
+      const componentStates = ComponentStates.findOne({userId, TDFId});
+      if(componentStates){
+        let cardIndex = componentStates.cardStates.findIndex(function(item){
+          return item.KCId === card.clusterKC
+        });
+        let stimIndex = componentStates.stimStates.findIndex(function(item){
+          return item.KCId === stim.stimulusKC
+        });
+        let responseIndex = componentStates.responseStates.findIndex(function(item){
+          return item.responseText === responseState.responseText
+        });
+        if (cardIndex == -1)
+          componentStates.cardStates.push(cardState);
+        else
+          componentStates.cardStates[cardIndex] = cardState;
+        if (stimIndex == -1)
+          componentStates.stimStates.push(stimState);
+        else
+          componentStates.stimStates[stimIndex] = stimState;
+        if (responseIndex == -1)
+          componentStates.responseStates.push(responseState);
+        else
+          componentStates.responseStates[responseIndex] = responseState;
+        ComponentStates.update(componentStates._id, {$set: {
+          cardStates: componentStates.cardStates, 
+          stimStates: componentStates.stimStates, 
+          responseStates: componentStates.responseStates
+        }});
+      } else {
+        ComponentStates.insert({
+          userId: userId,
+          TDFId: TDFId,
+          cardStates: [cardState],
+          stimStates: [stimState],
+          responseStates: [responseState]
+        });
+      }
     },
 
     saveComponentStatesSync: function() {
@@ -1288,7 +1316,6 @@ function modelUnitEngine() {
       }
 
       for (const [responseText, response] of Object.entries(cardProbabilities.responses)) {
-        const _id = responseIDMap[response.KCId];
         const responseState = {
           userId,
           TDFId,
@@ -1411,9 +1438,6 @@ function modelUnitEngine() {
                 card.stims.filter((x) => x.stimulusKC != stimulusKC).reduce((acc, stim) => acc +
                     stim.totalPracticeDuration, 0), 0);
           }
-        }
-        for (const response of responses){
-          responseIDMap[response.KCId] = response._id;
         }
         clientConsole(2, 'loadComponentStates2', cards, stims, probsMap, componentStates,
             clusterStimKCs, stimProbabilityEstimates);
