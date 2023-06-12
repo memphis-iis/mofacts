@@ -162,7 +162,6 @@ Template.profile.events({
         false,
     );
   },
-
   'click .tdfLink' : function(event) {
     event.preventDefault();
     console.log(event);

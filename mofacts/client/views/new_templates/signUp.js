@@ -3,11 +3,13 @@ import {routeToSignin} from '../../lib/router';
 
 Template.signUp.events({
   'click #signInButton': function(event) {
+    Meteor.logout();
     event.preventDefault();
     routeToSignin();
   },
 
   'click #signUpButton': function(event) {
+    Meteor.logout();
     event.preventDefault();
 
     const formUsername = _.trim($('#signUpUsername').val());
