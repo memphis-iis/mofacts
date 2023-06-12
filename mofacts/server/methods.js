@@ -374,8 +374,8 @@ async function clearCurUnitProgress(userId, TDFId) {
       unit.responseStates[responseState].totalPracticeDuration = 0;
       unit.responseStates[responseState].timesSeen = 0;
     }
+    ComponentStates.update({_id: unit._id}, unit);
   }
-  ComponentStates.update({_id: unit._id}, unit);
 }
 
 async function getMaxResponseKC(){
