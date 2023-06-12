@@ -1,4 +1,5 @@
 export {sessionCleanUp};
+import {curExperimentState} from "../views/experiment/card.js";
 
 /* *****************************************************************
  * All of our currently known session variables
@@ -57,7 +58,6 @@ function sessionCleanUp() {
   Session.set('audioPromptVoice', undefined);
   Session.set('audioPromptFeedbackVoice', undefined);
   Session.set('buttonTrial', false);
-  Session.set('currentAnswerSyllables', undefined);
 
   Session.set('schedule', undefined);
 
@@ -65,7 +65,6 @@ function sessionCleanUp() {
   Session.set('hiddenItems', []);
   Session.set('numVisibleCards', 0);
 
-  Session.set('currentRootTdfId', undefined);
   Session.set('currentTdfName', undefined);
   Session.set('currentTdfId', undefined);
   Session.set('currentUnitNumber', undefined);
@@ -77,21 +76,16 @@ function sessionCleanUp() {
   Session.set('displayFeedback',undefined);
   Session.set('feedbackTypeFromHistory', undefined);
   Session.set('resetFeedbackSettingsFromIndex', false);
+  Session.set('currentRootTdfId', undefined);
+  Session.set('currentExperimentState', undefined);
 
   Session.set('clusterIndex', undefined);
-  Session.set('currentAnswer', undefined);
-  Session.set('originalAnswer', undefined);
 
   Session.set('dialogueCacheHint', undefined);
 
   Session.set('displayReady', undefined);
   Session.set('currentDisplay', undefined);
-  Session.set('currentDisplayEngine', undefined);
-  Session.set('originalDisplay', undefined);
-  Session.set('currentQuestionPart2', undefined);
   Session.set('originalQuestion', undefined);
-  Session.set('originalQuestion2', undefined);
-  Session.set('clozeQuestionParts', undefined);
   Session.set('engineIndices', undefined);
 
   Session.set('currentUnitStartTime', Date.now());
@@ -112,7 +106,6 @@ function sessionCleanUp() {
   Session.set('recording', false);
   Session.set('sampleRate', undefined);
   Session.set('unitType', undefined);
-  Session.set('showOverlearningText', undefined);
   Session.set('speechOutOfGrammarFeedback', undefined);
   Session.set('subTdfIndex', undefined);
   Session.set('testType', undefined);

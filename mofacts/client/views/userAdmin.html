@@ -54,48 +54,48 @@
 
                     <td>
                         {{#if admin}}
-                            <span class="glyphicon glyphicon-ok"></span>
+                            <i class="fa fa-check"></i>
                             Yes
                             <button type="button"
                                 class="btn btn-fix btn-primary btn-xs btn-user-change"
                                 data-userid="{{_id}}"
                                 data-rolename="admin"
                                 data-roleaction="remove"
-                            ><span class="glyphicon glyphicon-minus"></span> Remove from Admins
+                            ><i class="fa fa-minus"></i> Remove from Admins
                             </button>
                         {{else}}
-                            <span class="glyphicon glyphicon-remove"></span>
+                            <i class="fa fa-minus"></i>
                             No
                             <button type="button"
                                 class="btn btn-fix btn-danger btn-xs btn-user-change"
                                 data-userid="{{_id}}"
                                 data-rolename="admin"
                                 data-roleaction="add"
-                            ><span class="glyphicon glyphicon-plus"></span> Add to Admins
+                            ><span class="fa fa-plus"></span> Add to Admins
                             </button>
                         {{/if}}
                     </td>
 
                     <td>
                         {{#if teacher}}
-                            <span class="glyphicon glyphicon-ok"></span>
+                            <i class="fa fa-check"></i>
                             Yes
                             <button type="button"
                                 class="btn btn-fix btn-primary btn-xs btn-user-change"
                                 data-userid="{{_id}}"
                                 data-rolename="teacher"
                                 data-roleaction="remove"
-                            ><span class="glyphicon glyphicon-minus"></span> Remove from Teachers
+                            ><i class="fa fa-minus"></i> Remove from Teachers
                             </button>
                         {{else}}
-                            <span class="glyphicon glyphicon-remove"></span>
+                            <i class="fa fa-minus"></i>
                             No
                             <button type="button"
                                 class="btn btn-fix btn-danger btn-xs btn-user-change"
                                 data-userid="{{_id}}"
                                 data-rolename="teacher"
                                 data-roleaction="add"
-                            ><span class="glyphicon glyphicon-plus"></span> Add to Teachers
+                            ><span class="fa fa-plus"></span> Add to Teachers
                             </button>
                         {{/if}}
                     </td>
@@ -103,7 +103,7 @@
                             <button type="button"
                             class="btn btn-fix btn-danger btn-xs btn-impersonate"
                             data-userid="{{_id}}"
-                        ><span class="glyphicon glyphicon-blackboard"></span> Impersonate
+                        ><span class="fa fa-users"></span> Impersonate
                         </button>
                     </td>
                 </tr>

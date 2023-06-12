@@ -1,0 +1,11 @@
+<template name="experimentSettings">
+    <h3>
+        Experiment Settings
+    </h3>
+    {{#if isInRole 'admin'}}
+    {{>profileDebugToggles}}  
+    {{>adminControls}}  
+    {{/if}}
+    {{>profileAudioToggles}}
+    {{>setTheme}}
+</template>

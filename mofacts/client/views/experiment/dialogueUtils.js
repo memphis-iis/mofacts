@@ -132,9 +132,8 @@ function dialogueContinue() {
 function initiateDialogue(incorrectUserAnswer, callback, lookupFailCallback) {
   Session.set('dialogueStart', Date.now());
   Session.set('showDialogueText', true);
-  const clozeItem = Session.get('originalQuestion') || Session.get('currentDisplay').clozeText;
-  const clozeAnswer = Session.get('originalAnswer') || Session.get('currentAnswer');
-  // $('#textQuestion').css({'color': '#383d41', 'background-color': '#e2e3e5', 'border-color': '#d6d8db'})
+  const clozeItem = curExperimentState.originalQuestion || Session.get('currentDisplay').clozeText;
+  const clozeAnswer = curExperimentState.originalAnswer || GlobalExperimentStates.findOne({TDFId: Session.get('currentTdfId')}).experimentState.currentAnswer;
 
   Meteor.call('initializeTutorialDialogue', clozeAnswer, incorrectUserAnswer, clozeItem, (err, res)=>{
     if (err) {

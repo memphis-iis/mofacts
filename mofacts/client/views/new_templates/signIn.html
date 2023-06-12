@@ -1,0 +1,92 @@
+<template name="signIn">
+    <div class="container">
+        <!-- page header -->
+        <div class="row text-center">
+            <div class="col-lg-4 offset-lg-4 col-md-6 col-md-offset-4 col-sm-8 col-sm-offset-2 col-xs-12 spacer">
+                <h1>MoFaCTS</h1>
+                <span id="serverErrors"></span>
+            </div>
+        </div>
+        <!-- centered login form -->
+        <div class="row text-center login-form spacer">
+            <div class="col-lg-4 offset-lg-4 col-md-6 col-md-offset-4 col-sm-8 col-sm-offset-2 col-xs-12">
+                <form>
+                    {{#if isExperiment}}
+                        <input  type="text" id="signInUsername" value="" placeholder="Amazon Turk ID"><br>
+                        {{#if experimentPasswordRequired}}
+                            <input  type="password" id="password" value="" placeholder="Password"><br><br>
+                        {{/if}}
+                    {{else}}
+                        <input  type="text" id="signInUsername" value="" placeholder="Username"><br>
+                        <input  type="password" id="password" value="" placeholder="Password"><br><br>
+                        <span class="help-inline danger errcheck" id="invalidLogin" hidden >Username password pair not found!</span>
+                    {{/if}}
+                    {{#if showTestLogin}}
+                    <br>
+                        <a id="testSignInButton">Test Login (password not required)</a>
+                        <br>
+                    {{/if}}
+                    <button type="button" id="signInButton" class="btn">Sign In</button>
+                    {{#unless isExperiment}}
+                        <button type="button" id="signUpButton" class="btn">Sign Up</button>
+                    {{/unless}}
+
+                </form>
+            </div>
+        </div>
+        {{#unless isExperiment}}
+        <!-- login with sso and google -->
+        <div class="row text-center large-spacer login-sso-options">
+            <div class="col-lg-4 offset-lg-4 col-md-6 col-md-offset-4 col-sm-8 col-sm-offset-2 col-xs-12 large-spacer">
+                <button type="button" id="signInButtonOAuth" class="btn">Sign In with Google</button><br><br>
+                <button type="button" id="signInWithSSOButton" class="btn" data-bs-toggle="modal" data-bs-target="#classSelectModal">Class Select / SSO</button>
+            </div>
+        </div>
+        <!-- footer -->
+        {{> footer}}
+        {{/unless}}
+        <!-- modal for sso login, hidden by default -->
+        <div class="modal" id="classSelectModal" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5 class="modal-title">Class Select</h5>
+                  </div>
+                  <div class="modal-body login-form ">
+                    <form class="spacer">
+                        <!-- institution select form -->
+                        <select id="institutionSelect" class="form-select" aria-label="Default select example">
+                            <option selected>Select your institution</option>
+                            {{#each institutions}}
+                                <option value="{{this.route}}">{{this.name}}</option>
+                            {{/each}}
+                        </select>
+                        <!-- hidden teacher select form -->
+                        <select id="teacherSelect" class="form-select" aria-label="Default select example" hidden>
+                            <option selected>Select your teacher</option>
+                            {{#each teacher}}
+                                <option value="{{this.id}}">{{this.username}}</option>
+                            {{/each}}
+                        </select>
+                        <!-- hidden class select form -->
+                        <select id="classSelect" class="form-select" aria-label="Default select example" hidden>
+                            <option selected>Select your class</option>
+                            {{#each curTeacherClasses}}
+                              {{#if checkSectionExists this.sectionName}}
+                                <option value="{{this.sectionId}}">{{this.courseName}} - {{this.sectionName}}</option>
+                              {{else}}
+                                <option value="{{this.sectionId}}">{{this.courseName}}</option>
+                              {{/if}}
+                          {{/each}}
+                        </select>
+                    </form>
+                    <div class="row text-center">
+                        <button type="button" class="btn">Sign In</button>
+                        <button type="button" class="btn" data-bs-dismiss="modal">Close</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+        </div>
+    </div>
+</template>

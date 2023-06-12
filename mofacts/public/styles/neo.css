@@ -1,0 +1,90 @@
+/* font template */
+
+h1{
+    font-family: 'League Spartan';
+    font-size: 40px;
+    font-weight: 900;
+}
+
+/* margin template */
+.spacer{
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+.large-spacer{
+    margin-top: 60px;
+    margin-bottom: 60px;
+}
+
+/* elements template */
+input{
+    border: 1px solid #7ed957;
+    border-radius: 35px;
+    padding: 5px;
+    margin: 5px;
+    padding-left: 10px;
+    width:100%;
+    font-family: 'Josefin Sans';
+}
+
+/* specific elements template */
+.login-form{
+    justify-content: stretch;
+}
+.login-form button{
+    font-family: 'Josefin Sans';
+    color: black !important;
+    border: 1px solid #7ed957;
+    border-radius: 35px;
+    margin: auto;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    background-color: #7ed957;
+    color: white;
+    width: 40%;
+}
+.login-form button:hover{
+    background-color: #577c42;
+    color: white;
+}
+
+.login-sso-options button{
+    font-family: 'Josefin Sans';
+    color: black !important;
+    border: 1px solid #7ed957;
+    border-radius: 35px;
+    margin: auto;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    background-color: #7ed957;
+    color: white;
+    width: 100%;
+}
+.login-sso-options button:hover{
+    background-color: #577c42;
+    color: white;
+}
+
+/* navibar template */
+.navbar{
+    background-color: #7ed957;
+    color: white;
+    font-family: 'Josefin Sans';
+    font-size: 20px;
+    font-weight: 900;
+}
+
+.navbar .navbar-brand{
+    font-family: 'League Spartan' !important;
+    font-size: 30px;
+    font-weight: 900;
+    color: white;
+}
+
+/* footer template */
+.footer{
+    color: white;
+    font-family: 'Josefin Sans';
+    font-size: 10px;
+    font-weight: 900;
+}

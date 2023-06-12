@@ -18,6 +18,7 @@ Sections = new Meteor.Collection('section');
 SectionUserMap = new Meteor.Collection('section_user_map');
 UserTimesLog = new Meteor.Collection('userTimesLog');
 UserMetrics = new Meteor.Collection('userMetrics');
+DynamicSettings = new Meteor.Collection('dynaminc_settings');
 ScheduledTurkMessages = new Mongo.Collection('scheduledTurkMessages');
 GoogleSpeechAPIKeys = new Mongo.Collection('googleSpeechAPIKeys');
 ClozeEditHistory = new Mongo.Collection('clozeEditHistory');
@@ -38,5 +39,29 @@ DynamicAssets = new FilesCollection({
       return true;
     }
     return 'Please upload image, audio, or video fi with size equal or less than 10MB';
+  }
+});
+
+ComponentStates.allow({
+  update: function(userId, doc, fieldNames, modifier) {
+    return userId === doc.userId;
+  },
+  insert: function(userId, doc) {
+    return userId === doc.userId;
+  }
+});
+
+GlobalExperimentStates.allow({
+  update: function(userId, doc, fieldNames, modifier) {
+    return userId === doc.userId;
+  },
+  insert: function(userId, doc) {
+    return userId === doc.userId;
+  }
+});
+
+DynamicSettings.allow({
+  update: function(userId) {
+    return Roles.userIsInRole(userId, ['admin']);
   }
 });

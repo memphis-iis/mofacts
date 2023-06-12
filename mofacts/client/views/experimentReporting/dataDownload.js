@@ -77,10 +77,6 @@ Template.dataDownload.helpers({
       const name = tdf.content.tdfs.tutor.setspec.lessonname ? tdf.content.tdfs.tutor.setspec.lessonname : 'NO NAME';
       tdf.disp = name;
 
-      if (tdf.content.fileName != name) {
-        tdf.disp += ' (' + tdf.content.fileName + ')';
-      }
-
       return tdf;
     }).filter(function(tdf) {
       if (!_.isEmpty(Template.instance().selectedClassId.get())) {
@@ -135,6 +131,23 @@ Template.dataDownload.helpers({
   'user': function() {
     return Meteor.user() ? Meteor.user().username : false;
   },
+  'accessableFiles': function() {
+    Meteor.call('getAccessableTDFSForUser', Meteor.userId(), function(err, result) {
+      if (err) {
+        console.log(err);
+      } else {
+        console.log(result)
+        const dataDownloads = result.TDFs?.map(function(tdf) {
+          const name = tdf.content.tdfs.tutor.setspec.lessonname ? tdf.content.tdfs.tutor.setspec.lessonname : 'NO NAME';
+          tdf.disp = name;
+    
+          return tdf;
+        })
+        Session.set('accessableFiles', dataDownloads);
+      }
+    });
+    return Session.get('accessableFiles') || [];
+  },
 });
 
 Template.dataDownload.events({
@@ -179,6 +192,81 @@ Template.dataDownload.events({
     const path = `${sitePath}/data-by-class/${classId}`
     makeDataDownloadAPICall(path);
   },
+
+  'click #TransferOwnershipButton': function(event) {
+    let fileId = event.currentTarget.getAttribute('data-fileId');
+    Session.set('transferOwnershipFileId', fileId);
+  },
+
+  'click #AssignAccessorsButton': function(event) {
+    let fileId = event.currentTarget.getAttribute('data-fileId');
+    Meteor.call('getAccessorsTDFID', fileId, function(err, res){
+      if(err){
+        console.log(err)
+      }
+      else{
+        Session.set('fileAccessors', res);
+      }
+    })
+    Session.set('AssignAccessorsFileId', fileId);
+  },
+
+  'click #transferOwnershipSaveButton': function(event, instance) {
+    alert('Transfer ownership save button clicked');
+    const TDFId = Session.get('transferOwnershipFileId');
+    const newOwnerUserName = $('#transferOwnershipDataList').val();
+    const newOwnerId = $('#ownersDataList [value="' + newOwnerUserName + '"]').attr('data-teacherid');
+    Meteor.call('transferDataOwnership', TDFId, newOwnerId, Meteor.userId(), function(err, res){
+      if(err){
+        console.log(err)
+      }
+      else{
+        console.log(res)
+      }
+    })
+  },
+
+  'click #addAcessor': function(event, instance) {
+    const newAccessorUserName = $('#assignAccessorDataList').val();
+    const newAccessorId = $('#accessorsDataList [value="' + newAccessorUserName + '"]').attr('data-teacherid');
+    $('#assignAccessorDataList').val('');
+    let accessors = Session.get('fileAccessors') || [];
+    let removedAccessors = Session.get('removedAccessors') || [];
+    removedAccessors = removedAccessors.filter(function(accessor) {
+      return accessor !== newAccessorId;
+    });
+    accessors.push({name: newAccessorUserName, userId: newAccessorId});
+    Session.set('removedAccessors', removedAccessors);
+    Session.set('fileAccessors', accessors);
+  },
+
+  'click #removeAcessor': function(event, instance) {
+    const accessorID = event.currentTarget.getAttribute('data-teacherid');
+    let accessors = Session.get('fileAccessors') || [];
+    let removedAccessors = Session.get('removedAccessors') || [];
+    accessors = accessors.filter(function(accessor) {
+      return accessor.userId !== accessorID;
+    });
+    removedAccessors.push(accessorID);
+    Session.set('removedAccessors', removedAccessors);
+    Session.set('fileAccessors', accessors);
+    },
+
+  'click #assignAccessorsSaveButton': function(event) {
+    const fileId = Session.get('AssignAccessorsFileId');
+    const accessors = Session.get('fileAccessors');
+    const removedAccessors = Session.get('removedAccessors');
+    Meteor.call('assignAccessors', fileId, accessors, removedAccessors, function(err, res){
+      if(err){
+        console.log(err)  
+      } else {
+        console.log(res)
+        alert('Accessors Assigned Successfully');
+        Session.set('fileAccessors', []);
+        Session.set('removedAccessors', []);
+      }
+    });
+  }
 });
 
 function makeDataDownloadAPICall(path){

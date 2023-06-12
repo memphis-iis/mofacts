@@ -1,45 +1,62 @@
 module.exports = {
   servers: {
     one: {
-      host: '<target ip>',
-      username: '<server username>',
-      pem: '<server pem path>'
+      // TODO: set host address, username, and authentication method
+      host: '1.2.3.4',
+      username: 'root',
+      // pem: './path/to/pem'
+      // password: 'server-password'
+      // or neither for authenticate from ssh-agent
     }
   },
+
   app: {
-    name: 'MoFACTs-Postgres',
+    // TODO: change app name and path
+    name: 'app',
     path: '../',
-    volumes: {
-      '<server feedback location>': '/feedback'
+
+    servers: {
+      one: {},
     },
+
+    buildOptions: {
+      serverOnly: true,
+    },
+
+    env: {
+      // TODO: Change to your app's url
+      // If you are using ssl, it needs to start with https://
+      ROOT_URL: 'http://app.com',
+      MONGO_URL: 'mongodb://mongodb/meteor',
+      MONGO_OPLOG_URL: 'mongodb://mongodb/local',
+    },
+
     docker: {
-      image: 'abernix/meteord:node-12-base',
-      buildInstructions: [
-        'RUN echo "deb http://apt.postgresql.org/pub/repos/apt stretch-pgdg main" > /etc/apt/sources.list.d/pgdg.list',
-        'RUN apt-get update && apt-get install -y --allow-unauthenticated postgresql-9.3 postgresql-client-9.3 postgresql-contrib-9.3',
-        'USER postgres',
-        'RUN    /etc/init.d/postgresql start && psql --command "CREATE USER mofacts WITH SUPERUSER PASSWORD \'test101\';" && createdb -O mofacts mofacts',
-        'RUN echo "host all  all    0.0.0.0/0  md5" >> /etc/postgresql/9.3/main/pg_hba.conf',
-        'RUN echo "listen_addresses=\'*\'" >> /etc/postgresql/9.3/main/postgresql.conf',
-        'EXPOSE 5432',
-        'VOLUME  ["/etc/postgresql", "/var/log/postgresql", "/var/lib/postgresql"]'
-      ]
+      image: 'zodern/meteor:root',
     },
+
+    // Show progress bar while uploading bundle to server
+    // You might need to disable it on CI servers
+    enableUploadProgressBar: true
+  },
+
+  mongo: {
+    version: '4.4.12',
     servers: {
       one: {}
-    },
-    buildOptions: {
-      serverOnly: true
-    },
-    env: {
-      ROOT_URL: '<target ip>',
-      MONGO_URL: 'mongodb://localhost/mofacts'
     }
   },
-  mongo: {
-    version: '4.2.0',
-    servers: {
-      one: {}
-    }
-  }
+
+  // (Optional)
+  // Use the proxy to setup ssl or to route requests to the correct
+  // app when there are several apps
+
+  // proxy: {
+  //   domains: 'mywebsite.com,www.mywebsite.com',
+
+  //   ssl: {
+  //     // Enable Let's Encrypt
+  //     letsEncryptEmail: 'email@domain.com'
+  //   }
+  // }
 };

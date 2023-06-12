@@ -1,22 +1,28 @@
 import {meteorCallAsync} from '../..';
 import { ReactiveVar } from 'meteor/reactive-var';
+export {doFileUpload};
 
 Template.contentUpload.helpers({
   TdfFiles: function() {
     return Tdfs.find();
   },
+  StimFiles: function() {
+    return Stims.find();
+  },
   currentUpload() {
     return Template.instance().currentUpload.get();
   },
-  assetLink: function() {
+  assets: function() {
     const files = DynamicAssets.find().fetch();
+    files.forEach((file) => {
+      file.link = DynamicAssets.link(file)
+    });
     return files;
   },
 });
 
 Template.contentUpload.onRendered(function() {
   this.currentUpload = new ReactiveVar(false);
-  Meteor.subscribe('files.assets.all');
 });
 
 
@@ -41,8 +47,9 @@ Template.contentUpload.events({
   },
   'click #tdf-download-btn': function(event){
     event.preventDefault();
-    let selectedTdf = Session.get('allTdfs').find(x => x._id == event.currentTarget.getAttribute('value'));
-    console.log('downloading tdf id', event.currentTarget.getAttribute('value'));
+    const TDFId = event.currentTarget.getAttribute('value')
+    let selectedTdf = Tdfs.findOne({_id: TDFId});
+    console.log('downloading tdf id', TDFId);
     let blob = new Blob([JSON.stringify(selectedTdf.content.tdfs,null,2)], { type: 'application/json' });
     let url = window.URL.createObjectURL(blob);
     let downloadFileName = selectedTdf.content.fileName.trim();
@@ -68,20 +75,17 @@ Template.contentUpload.events({
   'click #stim-download-btn': async function(event){
     event.preventDefault();
     const stimSetId = parseInt(event.currentTarget.getAttribute('value'));
-    Meteor.call('downloadStimFile', stimSetId, function(err, res){
-      for(let stim of res){
-        let blob = new Blob([JSON.stringify(stim.stimuli,null,2)], { type: 'application/json' });
-        let url = window.URL.createObjectURL(blob);
-        let downloadFileName = stim.fileName.trim();
-        var a = document.createElement("a");
-        document.body.appendChild(a);
-        a.style = "display: none";
-        a.href = url;
-        a.download = downloadFileName;
-        a.click();
-        window.URL.revokeObjectURL(url);
-      }
-    })
+    const stimFile = Stims.findOne({'stimuliSetId': stimSetId})
+    let blob = new Blob([JSON.stringify(stimFile.stimuli,null,2)], { type: 'application/json' });
+    let url = window.URL.createObjectURL(blob);
+    let downloadFileName = stimFile.fileName.trim();
+    var a = document.createElement("a");
+    document.body.appendChild(a);
+    a.style = "display: none";
+    a.href = url;
+    a.download = downloadFileName;
+    a.click();
+    window.URL.revokeObjectURL(url);
   },
 
   'click #stim-delete-btn': function(event){
@@ -107,9 +111,19 @@ Template.contentUpload.events({
     $('#stim-file-info').html(outputLabel);
   },
 
-  'change #fileInput'(e, template) {
-    if (e.currentTarget.files && e.currentTarget.files[0]) {
-      for(let file of e.currentTarget.files){
+  'change #upload-package': function(event) {
+    const curFiles = Array.from($('#upload-package').prop('files'));
+    let outputLabel = curFiles[0].name;
+    if (curFiles.length > 1) {
+      outputLabel += ' + ' + (curFiles.length-1) + ' more...';
+    }
+    $('#package-file-info').html(outputLabel);
+  },
+
+  'click #doUploadPackage'(e, template) {
+    const files = $('#upload-package').prop('files');
+    if (files) {
+      for(let file of files){
         // We upload only one file, in case
         // multiple files were selected
         const foundFile = DynamicAssets.findOne({name: file.name, userId: Meteor.userId()})
@@ -128,7 +142,8 @@ Template.contentUpload.events({
         }
       }
     }
-
+    $('#upload-package').val('');
+    $('#upload-package').parent().find('.file-info').html('');
   },
   'click #deleteAllAssetsPrompt'(e, template) {
     e.preventDefault();
@@ -180,8 +195,19 @@ async function doFileUpload(fileElementSelector, fileType, fileDescrip) {
       try {
         const result = await meteorCallAsync('saveContentFile', fileType, name, fileData);
         if (!result.result) {
-          console.log(fileDescrip + ' save failed', result);
-          errorStack.push('The ' + fileDescrip + ' file was not saved: ' + result.errmsg);
+          if(result.data && result.data.res == 'awaitClientTDF'){
+            console.log('Client TDF could break experiment, asking for confirmation');
+            if(confirm(`The uploaded package contains a TDF file that could break the experiment. Do you want to continue?\nFile Name: ${result.data.TDF.content.fileName}`)){
+              Meteor.call('tdfUpdateConfirmed', result.data.TDF, function(err,res){
+                if(err){
+                  alert(err);
+                }
+              });
+            }
+          } else {
+            console.log(fileDescrip + ' save failed', result);
+            errorStack.push('The ' + fileDescrip + ' file was not saved: ' + result.errmsg);
+          }
         } else {
           console.log(fileDescrip + ' Saved:', result);
         }
@@ -227,14 +253,28 @@ async function doPackageUpload(file, template){
     if (error) {
       alert(`Error during upload: ${error}`);
     } else {
+      const link = DynamicAssets.link(fileObj);
       if(fileObj.ext == "zip"){
         console.log('package detected')
-        Meteor.call('processPackageUpload', fileObj.path, Meteor.userId(), function(err,res){
+        Meteor.call('processPackageUpload', fileObj, Meteor.userId(), link, function(err,result){
           if(err){
             alert(err);
-          } else {
-            alert("Package upload succeded.");
+          } 
+          for(res of result.results){
+            if (res.data && res.data.res == 'awaitClientTDF') {
+              console.log('Client TDF could break experiment, asking for confirmation');
+              if(confirm(`The uploaded package contains a TDF file that could break the experiment. Do you want to continue?\nFile Name: ${res.data.TDF.content.fileName}`)){
+                Meteor.call('tdfUpdateConfirmed', res.data.TDF, function(err,res){
+                  if(err){
+                    alert(err);
+                  }
+                });
+              }
+            }
           }
+          alert("Package upload succeded.");
+          if(res.stimSetId)
+            Meteor.call('updateStimSyllables', res.stimSetId);
         });
       }
     }

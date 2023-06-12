@@ -9,12 +9,19 @@ Template.signIn.onRendered(async function() {
   if (Session.get('loginMode') !== 'experiment') {
     console.log('password signin, setting login mode');
     Session.set('loginMode', 'password');
- 
+    
+    //get institutions
+    const institutions = [
+      {name: 'None', route: ''},
+      {name: 'Soutwest', route: 'signInSouthwest'}
+    ]
+    Session.set('institutions', institutions);
+    console.log('institutions', institutions);
+
     let verifiedTeachers = await meteorCallAsync('getAllTeachers');
     console.log('verifiedTeachers', verifiedTeachers);
   
     console.log('got teachers');
-    Session.set('showTestLogins', true);
     Session.set('teachers', verifiedTeachers);
   }
   if(Meteor.userId() && Meteor.user().profile.loginMode !== 'experiment'){
@@ -57,6 +64,75 @@ Template.signIn.events({
     Meteor.logout();
     event.preventDefault();
     Router.go('/signup');
+  },
+  
+  'change #institutionSelect': function(event) {
+    event.preventDefault();
+    console.log('institution select');
+    //if the value is not empty, route to the institution's signin page, else show teacher selection
+    if(event.target.value){
+      Router.go('/' + event.target.value);
+    } else {
+      document.getElementById('teacherSelect').hidden = false;
+    }
+  },
+  
+  'change #teacherSelect': function(event) {
+    event.preventDefault();
+    setTeacher(event.target.value);
+  },
+  'change #classSelect': function(event) {
+    event.preventDefault();
+    setClass(event.target.value);
+  },
+  'click #signInWithSSOModalButton': function(event) {
+    event.preventDefault();
+    console.log('saml login');
+    const provider = event.target.getAttribute('data-provider');
+    console.log('provider: ' + JSON.stringify(provider));
+    Meteor.loginWithSaml({
+      provider,
+    }, function(data, data2) {
+      console.log('callback');
+      // handle errors and result
+      console.log('data: ' + JSON.stringify(data));
+      console.log('data2: ' + JSON.stringify(data2));
+      if (!!data && !!data.error) {
+        alert('Problem logging in: ' + data.error);
+      } else {
+        const curTeacher = Session.get('curTeacher');
+        const curClass = Session.get('curClass');
+        Meteor.call('addUserToTeachersClass', Meteor.userId(), curTeacher._id, curClass.sectionId, async function(err, result) {
+          if (err) {
+            console.log('error adding user to teacher class: ' + err);
+          }
+          console.log('addUserToTeachersClass result: ' + result);
+          let sectionName = "";
+          if(curClass.sectionName){
+            sectionName = "/" + curClass.sectionName;
+          }
+          const asignedTDFIds = await meteorCallAsync('getTdfsAssignedToStudent', Meteor.userId(), curClass.sectionId)
+          const entryPoint = `${curTeacher.username}/${curClass.courseName + sectionName}`
+          await meteorCallAsync('setUserLoginData', entryPoint, 'southwest', curTeacher, curClass, asignedTDFIds);
+          Meteor.call('logUserAgentAndLoginTime', Meteor.userId(), navigator.userAgent);
+          Meteor.call('updatePerformanceData', 'login', 'signinSouthwest.clickSamlLogin', Meteor.userId());
+          Meteor.logoutOtherClients();
+          Router.go('/profile');
+        });
+      }
+    });
+  },
+
+  'click #courseLink': function(event) {
+    event.preventDefault();
+    const sectionId = event.target.getAttribute('section-id');
+    console.log(sectionId);
+    $('#classSelection').prop('hidden', 'true');
+    const allClasses = Session.get('curTeacherClasses');
+    const curClass = allClasses.find((aClass) => aClass.sectionId.includes(sectionId));
+    Session.set('curClass', curClass);
+    Session.set('curSectionId', sectionId)
+    $('.login').prop('hidden', '');
   },
 
   'focus #signInUsername': function(event) {
@@ -141,6 +217,7 @@ Template.signIn.helpers({
   isNormal: function() {
     return Session.get('loginMode') !== 'experiment';
   },
+  
   'showTestLogin': function() {
     return testUserEnabled();
   },
@@ -151,6 +228,9 @@ Template.signIn.helpers({
   'curTeacherSections': () => Session.get('sectionsByInstructorId'),
   
   'checkSectionExists': (sectionName) => sectionName != undefined && sectionName.length > 0,
+
+  'institutions': () => Session.get('institutions'),
+  
 });
 
 // //////////////////////////////////////////////////////////////////////////
@@ -158,8 +238,10 @@ Template.signIn.helpers({
 
 // Called after we have signed in
 function signinNotify(landingPage = '/profile') {
-  if(Session.get('curTeacher') && Session.get('curClass')){
-    Meteor.call('addUserToTeachersClass', Meteor.userId(), Session.get('curTeacher')._id, Session.get('curClass').sectionId,
+  const curClass = Session.get('curClass');
+  const curTeacher = Session.get('curTeacher');
+  if(curTeacher && curClass){
+    Meteor.call('addUserToTeachersClass', Meteor.userId(), curTeacher._id, curClass.sectionId,
     async function(err, result) {
       if (err) {
         console.log('error adding user to teacher class: ' + err);
@@ -168,11 +250,12 @@ function signinNotify(landingPage = '/profile') {
       }
       console.log('addUserToTeachersClass result: ' + result);
       let sectionName = "";
-      if(Session.get('curClass').sectionName){
-        sectionName = "/" + Session.get('curClass').sectionName;
+      if(curClass.sectionName){
+        sectionName = "/" + curClass.sectionName;
       }
-      const entryPoint = `${Session.get('curTeacher').username}/${Session.get('curClass').courseName + sectionName}`
-      await meteorCallAsync('setUserLoginData', entryPoint, Session.get('loginMode'), Session.get('curTeacher'), Session.get('curClass'));
+      const asignedTDFIds = await meteorCallAsync('getTdfsAssignedToStudent', Meteor.userId(), curClass.sectionId)
+      const entryPoint = `${curTeacher.username}/${curClass.courseName + sectionName}`
+      await meteorCallAsync('setUserLoginData', entryPoint, Session.get('loginMode'), curTeacher, curClass, asignedTDFIds);
 
     });
   }
@@ -318,7 +401,7 @@ function userPasswordCheck() {
     if (typeof error !== 'undefined') {
       console.log('Login error: ' + error);
       $('#invalidLogin').show();
-      $('#serverErrors').html(error).show();
+      alert('Your username or password was incorrect. Please try again.');
       $('#signInButton').prop('disabled', false);
     } else {
       if (newPassword === blankPassword(newUsername)) {
@@ -330,7 +413,7 @@ function userPasswordCheck() {
         alert('This login page is not for Mechanical Turk workers. Please use the link provided with your HIT');
         $('#signInButton').prop('disabled', false);
         return;
-      }    
+      }
       signinNotify();
       await meteorCallAsync('setUserLoginData', 'direct', Session.get('loginMode'));
     }
@@ -352,7 +435,7 @@ function testLogin() {
     return;
   }
 
-  const testUserName = _.trim($('#testUsername').val()).toUpperCase();
+  const testUserName = _.trim($('#signInUsername').val()).toUpperCase();
   if (!testUserName) {
     console.log('No TEST user name specified');
     alert('No TEST user name specified');
@@ -415,4 +498,21 @@ setClass = function(curClassID) {
   Session.set('curSectionId', curClass.sectionid)
   console.log("Class/Section Set", curClass, curClass.sectionid);
   $('.login').prop('hidden', '');
+};
+
+setTeacher = function(teacher) { // Shape: {_id:'{{this._id}}',username:'{{this.username}}'}
+  console.log(teacher);
+  Session.set('curTeacher', teacher);
+  $('#initialInstructorSelection').prop('hidden', 'true');
+  const curClasses = Session.get('classesByInstructorId')[teacher._id];
+  console.log('setTeacher', Session.get('classesByInstructorId'), teacher._id, teacher);
+
+  if (curClasses == undefined) {
+    $('#initialInstructorSelection').prop('hidden', '');
+    alert('Your instructor hasn\'t set up their classes yet.  Please contact them and check back in at a later time.');
+    Session.set('curTeacher', {});
+  } else {
+    Session.set('curTeacherClasses', curClasses);
+    $('#classSelection').prop('hidden', '');
+  }
 };
