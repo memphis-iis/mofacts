@@ -354,7 +354,28 @@ async function getResponseKCMap() {
 }
 
 async function clearCurUnitProgress(userId, TDFId) {
-  ComponentStates.update({userId: userId, TDFId: TDFId}, {$set: {'priorCorrect': 0, 'priorIncorrect': 0, 'totalPracticeDuration': 0, 'timesSeen': 0}}, {multi: true});
+  let unit = ComponentStates.findOne({userId: userId, TDFId: TDFId});
+  if(unit){
+    for(let cardState in unit.cardStates){
+      unit.cardStates[cardState].priorCorrect = 0;
+      unit.cardStates[cardState].priorIncorrect = 0;
+      unit.cardStates[cardState].totalPracticeDuration = 0;
+      unit.cardStates[cardState].timesSeen = 0;
+    } 
+    for(let stimState in unit.stimStates){
+      unit.stimStates[stimState].priorCorrect = 0;
+      unit.stimStates[stimState].priorIncorrect = 0;
+      unit.stimStates[stimState].totalPracticeDuration = 0;
+      unit.stimStates[stimState].timesSeen = 0;
+    }
+    for(let responseState in unit.responseStates){
+      unit.responseStates[responseState].priorCorrect = 0;
+      unit.responseStates[responseState].priorIncorrect = 0;
+      unit.responseStates[responseState].totalPracticeDuration = 0;
+      unit.responseStates[responseState].timesSeen = 0;
+    }
+  }
+  ComponentStates.update({_id: unit._id}, unit);
 }
 
 async function getMaxResponseKC(){
@@ -375,40 +396,6 @@ async function getMaxResponseKC(){
       $limit: 1
     }]).toArray()
   return responseKC[0].maxResponseKC;
-}
-
-async function setComponentStatesByUserIdTDFIdAndUnitNum(userId, TDFId, componentStates) {
-  serverConsole('setComponentStatesByUserIdTDFIdAndUnitNum, ', userId, TDFId);
-  const responseKCMap = await getResponseKCMap();
-  const newResponseKCRet = await getMaxResponseKC();
-  let newResponseKC = newResponseKCRet.maxResponseKC + 1;
-  let c = ComponentStates.find({userId: userId, TDFId: TDFId}).fetch();
-  for (const componentState of componentStates) {
-    componentState.userId = userId;
-    componentState.TDFId = TDFId;
-    if (componentState.componentType == 'response') {
-      if (!isEmpty(responseKCMap[componentState.responseText])) {
-        componentState.KCId = responseKCMap[componentState.responseText];
-      } else {
-        componentState.KCId = newResponseKC;
-        newResponseKC += 1;
-      }
-      delete componentState.responseText;
-    }
-    if (!componentState.trialsSinceLastSeen) {
-      componentState.trialsSinceLastSeen = null;
-    }
-    const curComponentState = c.find(cs => cs.KCId == componentState.KCId && cs.componentType == componentState.componentType)
-    if(curComponentState){
-      ComponentStates.update({_id: curComponentState._id}, componentState);
-    }
-    else{
-      serverConsole("ComponentState didn't exist before so we'll insert it")
-      ComponentStates.insert(componentState);
-    }
-  }
-  serverConsole('res:', {userId, TDFId});
-  return {userId, TDFId};
 }
 
 // Package Uploader
@@ -1049,7 +1036,21 @@ async function setExperimentState(userId, TDFId, newExperimentState, where) { //
 }
 
 function insertHiddenItem(userId, stimulusKC, tdfId) {
-  ComponentStates.update({userId: userId, TDFId: tdfId, KCId: stimulusKC, componentType: "stimulus"}, {$set: {showItem: false}});
+  let unit = ComponentStates.findOne({userId: userId, TDFId: tdfId})
+  let index = -1;
+  if (unit) {
+    index = unit.stimStates.findIndex(function(item){
+      return item.KCId === stimulusKC
+    });
+    if (index === -1) {
+      serverConsole('insertHiddenItem: stimulusKC not found in stimStates');
+      return;
+    } else {
+      unit.stimStates[index].showItem = false;
+      ComponentStates.update({_id: unit._id}, {$set: {stimStates: unit.stimStates}});
+    }
+  }
+  
 }
 
 async function getUserLastFeedbackTypeFromHistory(tdfID) {
@@ -2622,7 +2623,7 @@ const asyncMethods = {
 
   getExperimentState, setExperimentState, getStimuliSetByFileName, getMaxResponseKC,
 
-  getProbabilityEstimatesByKCId, getResponseKCMap, processPackageUpload, setComponentStatesByUserIdTDFIdAndUnitNum,
+  getProbabilityEstimatesByKCId, getResponseKCMap, processPackageUpload,
 
   insertHistory, getHistoryByTDFID, getUserRecentTDFs, clearCurUnitProgress, tdfUpdateConfirmed,
 
@@ -2692,7 +2693,22 @@ const asyncMethods = {
   },
 
   resetCurSessionTrialsCount: async function(userId, TDFId) {
-    ComponentStates.update({userId: userId, TDFId: TDFId}, {$set: {curSessionPriorCorrect: 0, curSessionPriorIncorrect: 0}});
+    let unit = ComponentStates.findOne({userId: userId, TDFId: TDFId});
+    if(unit) {
+      for(let cardState in unit.cardStates){
+        unit.cardStates[cardState].curSessionPriorCorrect = 0;
+        unit.cardStates[cardState].curSessionPriorIncorrect = 0;
+      } 
+      for(let stimState in unit.stimStates){
+        unit.stimStates[stimState].curSessionPriorCorrect = 0;
+        unit.stimStates[stimState].curSessionPriorIncorrect = 0;
+      }
+      for(let responseState in unit.responseStates){
+        unit.responseStates[responseState].curSessionPriorCorrect = 0;
+        unit.responseStates[responseState].curSessionPriorIncorrect = 0;
+      }
+    }
+    ComponentStates.update({_id: unit._id}, unit);
   },
 
 
