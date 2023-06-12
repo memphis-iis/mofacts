@@ -307,7 +307,7 @@ function defaultUnitEngine(curExperimentData) {
         curStim.answerSyllables = currentAnswerSyllables;
         curStim.hintLevel = 0;
         //check for tdf hints enabled
-        const currentTdfFile = Tdfs.findOne();
+        const currentTdfFile = Tdfs.findOne({_id: Session.get('currentTdfId')});
         tdfHintsEnabled = currentTdfFile.content.tdfs.tutor.setspec.hintsEnabled == "true";
         //check for stim hints enabled
         stimHintsEnabled = currentDisplay.hintsEnabled;
