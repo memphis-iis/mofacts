@@ -49,6 +49,7 @@ if (Meteor.settings.public.testLogin) {
 
 let highestStimuliSetId;
 let nextStimuliSetId;
+let nextEventId = 1;
 
 // How large the distance between two words can be to be considered a match. Larger values result in a slower search. Defualt is 2.
 const maxEditDistance = Meteor.settings.SymSpell.maxEditDistance ? parseInt(Meteor.settings.SymSpell.maxEditDistance) : 2;
@@ -1064,8 +1065,8 @@ async function getUserLastFeedbackTypeFromHistory(tdfID) {
 async function insertHistory(historyRecord) {
   const tdfFileName = historyRecord['Condition_Typea'];
   const dynamicTagFields = await getListOfStimTags(tdfFileName);
-  const eventId = Histories.findOne({}, {limit: 1, sort: {eventId: -1}})?.eventId + 1 || 1;
-  historyRecord.eventId = eventId
+  historyRecord.eventId = nextEventId;
+  nextEventId += 1;
   historyRecord.dynamicTagFields = dynamicTagFields || [];
   historyRecord.recordedServerTime = (new Date()).getTime();
   serverConsole('insertHistory', historyRecord);
@@ -2827,6 +2828,7 @@ Meteor.methods(functionTimerWrapper(methods, asyncMethods));
 Meteor.startup(async function() {
   //await combineStimAndTdfFiles();
   highestStimuliSetId = Tdfs.findOne({}, {sort: {stimuliSetId: -1}, limit: 1 });
+  nextEventId = Histories.findOne({}, {limit: 1, sort: {eventId: -1}})?.eventId + 1 || 1;
   nextStimuliSetId = highestStimuliSetId && highestStimuliSetId.stimuliSetId ? parseInt(highestStimuliSetId.stimuliSetId) + 1 : 1;
   DynamicSettings.upsert({key: 'clientVerbosityLevel'}, {$set: {value: 1}});
 
