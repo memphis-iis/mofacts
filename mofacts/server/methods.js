@@ -1387,61 +1387,39 @@ async function getStimSetFromLearningSessionByClusterList(stimuliSetId, clusterL
 
 async function getStudentPerformanceByIdAndTDFId(userId, TDFId, stimIds=null) {
   serverConsole('getStudentPerformanceByIdAndTDFId', userId, TDFId, stimIds);
-  const innerQuery = {
-    userId: userId,
-    TDFId: TDFId,
-    componentType: 'stimulus',
-  };
 
-  if (stimIds) {
-    innerQuery.KCId = {$in: stimIds};
+  const componentState = await ComponentStates.findOne({userId: userId, TDFId: TDFId});
+  if (!componentState) return null;
+  
+  const studentPerformance = {
+    totalStimCount: 0,
+    numCorrect: 0,
+    numIncorrect: 0,
+    totalPracticeDuration: 0,
+    allTimeNumCorrect: 0,
+    allTimeNumIncorrect: 0,
+    allTimePracticeDuration: 0,
+    stimsIntroduced: 0,
+    count: 0,
   }
-
-  const query = [{
-    $match: innerQuery,
-  },
-  {
-    $addFields: {
-      introduced: {
-        $cond: {
-          if: {$or: ['$priorCorrect', '$priorIncorrect']},
-          then: 1,
-          else: 0,
-        },
-      },
-      totalStimCount: 1,
-    },
-  },
-  {
-    $group: {
-      _id: null,
-      totalStimCount: {$sum: '$totalStimCount'},
-      numCorrect: {$sum: '$priorCorrect'},
-      numIncorrect: {$sum:  '$priorIncorrect'},
-      totalPracticeDuration: {$sum: '$totalPracticeDuration'},
-      allTimeNumCorrect: {$sum: '$allTimeCorrect'},
-      allTimeNumIncorrect: {$sum: '$allTimeIncorrect'},
-      allTimePracticeDuration: {$sum: '$allTimeTotalPracticeDuration'},
-      stimsIntroduced: {$sum: '$introduced'},
-      count: {$sum: '$timesSeen'},
-    },
-  },
-  {
-    $addFields: {
-      count: {$sum: ['$priorCorrect', '$priorIncorrect', '$count']}
-    },
-  },
-  {
-    $project: {
-      _id: 0,
-    },
-  }];
-
-  const studentPerformance = await ComponentStates.rawCollection().aggregate(query).toArray();
-  if (!studentPerformance[0]) return null;
+  const stimStates = componentState.stimStates;
+  for (const stimState of stimStates) {
+    if (stimIds && !stimIds.includes(stimState.KCId)) continue;
+    studentPerformance.totalStimCount++;
+    studentPerformance.numCorrect += stimState.priorCorrect;
+    studentPerformance.numIncorrect += stimState.priorIncorrect;
+    studentPerformance.totalPracticeDuration += stimState.totalPracticeDuration;
+    studentPerformance.allTimeNumCorrect += stimState.allTimeCorrect;
+    studentPerformance.allTimeNumIncorrect += stimState.allTimeIncorrect;
+    studentPerformance.allTimePracticeDuration += stimState.allTimeTotalPracticeDuration;
+    if (stimState.priorCorrect || stimState.priorIncorrect) {
+      studentPerformance.stimsIntroduced++;
+    }
+    studentPerformance.count += stimState.timesSeen;
+  }
   // serverConsole('query', query);
   // serverConsole('studentPerformance', studentPerformance[0]);
-  return studentPerformance[0];
+  return studentPerformance;
 }
 
 async function getStudentPerformanceByIdAndTDFIdFromHistory(userId, TDFId, returnRows=null) {
