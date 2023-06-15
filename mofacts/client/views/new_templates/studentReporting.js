@@ -18,22 +18,15 @@ Session.set('studentReportingTdfs', undefined);
 
 let gaugeOptionsSpeedOfLearning = {
   angle: 0,
-  lineWidth: 0.22,
-  radiusScale:0.9,
+  lineWidth: 0.3,
+  radiusScale: 1,
   pointer: {
     length: 0.5,
     strokeWidth: 0.05,
     color: '#000000'
   },
   staticZones: [
-     {strokeStyle: "#a1fa73", min: 0, max: 50, height: 2},
-     {strokeStyle: "#96fa59", min: 51, max: 100, height: 1.8},
-     {strokeStyle: "#96fa59", min: 101, max: 150, height: 1.6},
-     {strokeStyle: "#8dc346", min: 151, max: 200, height: 1.4},
-     {strokeStyle: "#979336", min: 201, max: 250, height: 1.2},
-     {strokeStyle: "#b36427", min: 251, max: 300, height: 1.2},
-     {strokeStyle: "#dc201a", min: 301, max: 350, height: 1},
-
+     {strokeStyle: "#7ed957", min: 0, max: 350, height: 1},
   ],
   renderTicks: {
     divisions: 5,
@@ -52,19 +45,15 @@ let gaugeOptionsSpeedOfLearning = {
 };
 let gaugeOptionsDifficulty = {
   angle: 0,
-  lineWidth: 0.22,
-  radiusScale:0.9,
+  lineWidth: 0.3,
+  radiusScale: 1,
   pointer: {
     length: 0.5,
     strokeWidth: 0.05,
     color: '#000000'
   },
   staticZones: [
-     {strokeStyle: "#F03E3E", min: 0, max: 6, height: 1},
-     {strokeStyle: "#FFDD00", min: 6, max: 12, height: 1},
-     {strokeStyle: "#30B32D", min: 12, max: 48, height: 1},
-     {strokeStyle: "#FFDD00", min: 48, max: 54, height: 1},
-     {strokeStyle: "#F03E3E", min: 54, max: 60, height: 1},
+    {strokeStyle: "#7ed957", min: 0, max: 350, height: 1},
 
   ],
   renderTicks: {
@@ -86,14 +75,14 @@ let donutOptionsMasteredItems = {
   angle: .4, // The length of each line
   lineWidth: 0.13, // The line thickness
   pointer: {
-    length: 0.9, // The radius of the inner circle
-    strokeWidth: 0.035, // The rotation offset
+    length: 1, // The radius of the inner circle
+    strokeWidth: 0, // The rotation offset
     color: '#333' // Fill color
   },
-  limitMax: 'true', // If true, the pointer will not go past the end of the gauge
-  colorStart: '#008351', // Colors
-  colorStop: '#008351', // just experiment with them
-  strokeColor: '#EEEEEE', // to see which ones work best for you
+  limitMax: 'false', // If true, the pointer will not go past the end of the gauge
+  colorStart: '#7ed957', // Colors
+  colorStop: '#7ed957', // just experiment with them
+  strokeColor: '#494f56', // to see which ones work best for you
   generateGradient: true
 };
 
@@ -116,7 +105,11 @@ Template.studentReporting.helpers({
   stimsNotSeenPredictedProbability: () => Session.get('stimsNotSeenPredictedProbability'),
   stimCount: () => Session.get('stimCount'),
   stimsSeen: () => Session.get('stimsSeen'),
-  tooFewStims: () => Session.get('stimsSeen'),
+  tooFewStims: () => Session.get('stimsSeen') < 30,
+  percentageOfStimsSeen: function() {
+    var percentageOfStimsSeen = parseFloat(Session.get('stimsSeen') / Session.get('stimCount') * 100).toFixed(0);
+    return percentageOfStimsSeen;
+  },
   itemMasteryRate: () => Session.get('itemMasteryRate'),
   itemMasteryTime: () => Session.get('itemMasteryTime'),
   displayItemsMasteredPerMinute: () => Session.get('displayItemMasteryRate'),
@@ -125,8 +118,13 @@ Template.studentReporting.helpers({
   selectedTdf: () => Session.get('selectedTdf'),
   lastTdf: async function() {
     const recentTdfs = await meteorCallAsync('getUserRecentTDFs', Meteor.userId());
+    if(recentTdfs.length === 0) {
+      return false;
+    }
     return recentTdfs[0];
   },
+  percentCorrect: () => Session.get('percentCorrect'),
+  difficulty: () => Session.get('displayDifficulty'),
   INVALID: INVALID,
 });
 
@@ -165,6 +163,7 @@ Template.studentReporting.rendered = async function() {
       const tdfToSelect = Session.get('instructorSelectedTdf');
       $('#tdf-select').val(tdfToSelect);
       setStudentPerformance(studentID, studentUsername, tdfToSelect);
+      
     });
   }
   updateDashboard(Session.get('currentTdfId'));
@@ -276,6 +275,7 @@ async function drawDashboard(studentId, selectedTdfId){
     let {totalStimCount, stimsIntroduced} = curStudentGraphData;
     const {allTimeNumCorrect, allTimeNumIncorrect, allTimePracticeDuration} = curStudentTotalData;
     totalAttempts = parseFloat(allTimeNumCorrect) + parseFloat(allTimeNumIncorrect);
+    percentCorrect = (parseFloat(allTimeNumCorrect) / totalAttempts) * 100;
     console.log('totalAttempts', totalAttempts);
     percentCorrect = (parseFloat(allTimeNumCorrect) / totalAttempts) * 100;
     totalPracticeDurationInMinutes = allTimePracticeDuration / 60000;
@@ -295,6 +295,14 @@ async function drawDashboard(studentId, selectedTdfId){
     Session.set('practiceDuration', totalPracticeDurationMinutesDisplay);
     Session.set('itemMasteryRate', itemMasteryRate.toFixed(2));
     Session.set('itemMasteryTime',estimatedTimeMastery.toFixed(0));
+    Session.set('percentCorrect',percentCorrect.toFixed(0));
+    if(displayDifficulty > 67){
+      Session.set('displayDifficulty',"Too Hard");
+    } else if(displayDifficulty < 33){
+      Session.set('displayDifficulty',"Too Easy");
+    } else {
+      Session.set('displayDifficulty',"Just Right");
+    }
     if(totalAttempts >= masteryDisplay){
       Session.set('displayItemMasteryRate',true);
     } else {
@@ -319,6 +327,11 @@ async function drawDashboard(studentId, selectedTdfId){
           let gaugeMeter = new progressGauge(dash,"donut",0,100,donutOptionsMasteredItems);
           dashCluster.push(gaugeMeter);
         }
+        if(dash.classList.contains('percentCorrect')){
+          console.log(dash);
+          let gaugeMeter = new progressGauge(dash,"donut",0,100,donutOptionsMasteredItems);
+          dashCluster.push(gaugeMeter);
+        }
         if(dash.classList.contains('learningSpeed')){
           console.log(dash);
           let gaugeMeter = new progressGauge(dash,"gauge",0,350,gaugeOptionsSpeedOfLearning);
@@ -334,8 +347,9 @@ async function drawDashboard(studentId, selectedTdfId){
       //Populate Dashboard values
       console.log('Testing dashCluster:',dashCluster);
       dashCluster[0].set(percentStimsSeen);
-      dashCluster[1].set(speedOfLearning);
-      dashCluster[2].set(displayDifficulty);
+      dashCluster[1].set(percentCorrect);
+      dashCluster[2].set(speedOfLearning);
+      dashCluster[3].set(displayDifficulty);
 
     } else {
       $('#dashboardGauges').hide();
@@ -344,8 +358,12 @@ async function drawDashboard(studentId, selectedTdfId){
   } else {
     Session.set('practiceDuration', 0);
     Session.set('curTotalAttempts', 0);
-    $('#dashboardGauges').hide();
-    $('#guagesUnavailableMsg').show();
+    Session.set('itemMasteryRate', 0);
+    Session.set('itemMasteryTime', 0);
+    Session.set('displayItemMasteryRate',false);
+    Session.set('displayEstimatedMasteryTime', false);
+    Session.set('stimCount',0);
+    Session.set('stimsSeen',0);
   }
 }
 function progressGauge(target, gaugeType, currentValue,maxValue,options = defaultGaugeOptions){

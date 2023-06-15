@@ -1,0 +1,58 @@
+version: '3.2'
+
+services:
+  mofacts:
+    image: jrustyhaner/mofacts-mini
+    volumes:
+      - type: bind
+        source: /mofactsAssets
+        target: /mofactsAssets
+        bind:
+          propagation: shared
+          create_host_path: true
+    build:
+      context: ../../
+      dockerfile: Dockerfile
+    ports:
+      - '80:3000'
+    depends_on:
+      - mongo
+      - syllables
+    environment:
+      ROOT_URL: ${APP_ROOT_URL:-http://localhost}
+      MONGO_URL: mongodb://mongo:27017/MoFACT
+      PORT: 3000
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+
+  mongo:
+    image: mongo:latest
+    command:
+      - --storageEngine=wiredTiger
+    volumes:
+      - data:/data/db
+
+  syllables:
+    image: jrustyhaner/mofacts-syllables
+    build:
+      context: ../../syllables_subsystem
+      dockerfile: Dockerfile
+    ports:
+      - '4567:4567'
+
+
+volumes:
+  data:
+
+

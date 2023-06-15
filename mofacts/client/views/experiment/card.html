@@ -21,6 +21,16 @@
             <div class="row text-center">
                 <h2>{{curTdfName}}</h2>
             </div>
+            <div class="row text-center row-cols-2 justify-content-center">
+                {{#if showPerformanceDetails}}
+                <div class="col mx-auto">
+                    <i class="fa fa-regular fa-clock" aria-hidden="true"></i>{{curStudentPerformance.totalTimeDisplay}} min
+                    <span style="font-size:large">|</span>
+                    <i class="fa fa-bar-chart" aria-hidden="true"></i>
+                    {{curStudentPerformance.percentCorrect}}
+                </div>
+                {{/if}}
+            </div>
             <div class="scrollHistoryContainer">
                 {{#if haveScrollList}}
                 {{#each scrollList}}

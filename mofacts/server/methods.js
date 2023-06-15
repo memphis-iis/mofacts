@@ -37,10 +37,17 @@ const fs = Npm.require('fs');
 const https = require('https')
 const { randomBytes } = require('crypto')
 let verbosityLevel = 0; //0 = only output serverConsole logs, 1 = only output function times, 2 = output serverConsole and function times
-const baseSyllableURL = 'http://localhost:4567/syllables/';
-
+const baseSyllableURL = Meteor.settings.syllableURL + "/syllables/" || 'http://localhost:4567/syllables/';
 if (process.env.METEOR_SETTINGS_WORKAROUND) {
-  Meteor.settings = JSON.parse(process.env.METEOR_SETTINGS_WORKAROUND);
+  //read settings path from environment variable, open file, parse contents, and set Meteor.settings
+  //check if the environment variable is a string or a file path
+  if(process.env.METEOR_SETTINGS_WORKAROUND.substring(0, 1) === '{') {
+    Meteor.settings = JSON.parse(process.env.METEOR_SETTINGS_WORKAROUND);
+  } else {
+    const settingsPath = process.env.METEOR_SETTINGS_WORKAROUND;
+    const settingsFile = fs.readFileSync(settingsPath);
+    Meteor.settings = JSON.parse(settingsFile);
+  }
 }
 if (Meteor.settings.public.testLogin) {
   process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = 0;
@@ -55,6 +62,8 @@ const maxEditDistance = Meteor.settings.SymSpell.maxEditDistance ? parseInt(Mete
 // How big the prefix used for indexing is. Larger values will be result in a faster search, but will use more memory. Default is 7.
 const prefixLength = Meteor.settings.SymSpell.prefixLength ? parseInt(Meteor.settings.SymSpell.prefixLength) : 7;
 const symSpell = new SymSpell(maxEditDistance, prefixLength);
+//append running directory to relative dictionary file locations of symSpell
+serverConsole('loading dictionaries from ' + Meteor.settings.frequencyDictionaryLocation);
 serverConsole(Meteor.settings.frequencyDictionaryLocation)
 symSpell.loadDictionary(Meteor.settings.frequencyDictionaryLocation, 0, 1);
 symSpell.loadBigramDictionary(Meteor.settings.bigramDictionaryLocation, 0, 2);

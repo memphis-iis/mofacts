@@ -1,0 +1,11 @@
+{
+  "name": "meteor-base-entrypoint-dependencies",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Dependencies used by entrypoint.sh",
+  "author": "Geoffrey Booth",
+  "license": "MIT",
+  "dependencies": {
+    "mongodb": "^4.3.1"
+  }
+}
