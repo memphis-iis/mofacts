@@ -1,6 +1,9 @@
 <template name="studentReporting">
   <div class="allContent">
     <div class="row">    
+      {{#if selectedTdf}}
+        <h5 class="text-center"> Your progress for <b>{{selectedTdf.lessonName}}</b></h5>
+      {{/if}}
       {{#if studentReportingTdfs}}
              <select id="tdf-select" class="width-80-percent">
              <option value="{{INVALID}}">Select a lesson</option>
@@ -12,7 +15,7 @@
       {{/if}}
       </div>
       <div class="row full-width">
-            {{#if lastTdf}}
+            {{#if studentReportingTdfs}}
               {{#if selectedTdf}}
                 {{#if tooFewStims}}
                 <div class="alert">
@@ -36,17 +39,61 @@
               <div class="alert-icon">
                 <i class="fa fa-info-circle" aria-hidden="true"></i>
               </div>
-                You have not started using the system.  Once you
-                have completed 30 questions on a lesson, we will
-                have a full report of your progress.
+              <h3>Welcome to MoFACTs</h3>
+                Once you have completed 30 questions on a lesson, return for a full report of your progress. Click the button below to get started.
               </div>
             {{/if}}
       </div> 
+      {{#if selectedTdf}}
+      {{#if tooFewStims}}
+      <div class="vh-30"></div>
+      {{else}}
+        <div class="row">
+          <div id="dashboardGauges">
+            <div class="row row-cols-lg-4 row-cols-xl-4 row-cols-2" style="padding-top:20px;">   
+              <div class="gauge col">
+                <div id="preview-textfield-custom" style="position:relative; top:65px;"><b>{{percentageOfStimsSeen}}%</b></div>  
+                <canvas class="dashCanvas masteredItems" width="100" height="100" id="canvas-unit-item-progress"></canvas>
+              </div>
+              <div class="col align-left" style="margin-top:50px;">
+                <span class="align-left">You have mastered {{percentageOfStimsSeen}} of the items in <b>{{selectedTdf.lessonName}}</b>. Well done!</span>
+              </div>
+              <div class="gauge col">
+                <div id="preview-textfield-custom" style="position:relative; top:65px;"><b>{{percentCorrect}}%</b></div>  
+                <canvas class="dashCanvas percentCorrect" width="100" height="100" id="canvas-unit-item-progress"></canvas>
+              </div>
+              <div class="col align-left" style="margin-top:30px;">
+                <span class="align-left">You answered correctly<b> {{percentCorrect}}%</b> of the time.</span>
+              </div>
+              <div class="gauge col gy-3">   
+                  <canvas class="dashCanvas learningSpeed" width="120" height="70" id="canvas-unit-percent-correct"></canvas>
+              </div>
+              <div class="col align-left gy-3">
+                <p>
+                {{#if displayItemsMasteredPerMinute}}
+                    You have mastered <b>{{itemMasteryRate}} items per minute</b>.
+                  {{/if}}
+                  {{#if displayEstimatedMasteryTime}}
+                    At this rate, you will master all items in <b>{{itemMasteryTime}} minutes</b>
+                  {{/if}}
+                  </p>
+              </div>
+              <div class="gauge col gy-2">
+                <canvas class="dashCanvas difficulty" width="120" height="70" id="canvas-ai-new-card-prediction"></canvas>
+                <div id="preview-textfield" style="display:none;">0%</div>  
+              </div>
+              <div class="col align-left gy-2">
+                <p>MoFacts has determined that the questions are <b>{{difficulty}}</b>.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      {{/if}}
+    {{/if}}
       {{#if noTime}}
-        <div class="vh-30"></div>
         <button id="go-to-lesson-select" class="btn btn-primary">Select a Lesson</button>
       {{else}}
-      <div class="vh-30"></div>
+      <div class="vh-5"></div>
       <button id="go-to-lesson-continue" class="btn  tdfButton" type="button" name="{{selectedTdf.name}}"
       data-tdfid="{{selectedTdf.tdfid}}"
       data-lessonname="{{selectedTdf.name}}"
@@ -62,53 +109,5 @@
       {{/if}}
       </button>
     {{/if}}
-      <div class="row">
-        <div id="dashboardGauges" hidden>
-          <div class="row" style="padding-top:20px;">   
-            <div class="gauge col-sm-6 col-xs-12">
-              <p>Mastered Items</p>   
-              <div id="preview-textfield-custom" style="top:80px; position: relative; font-size: small;"><b>{{stimsSeen}} of {{stimCount}}</b></div>  
-              <canvas class="dashCanvas masteredItems" width="100" height="100" id="canvas-unit-item-progress"></canvas>
-            </div>
-            <div class="gauge col-sm-6 col-xs-12">
-              <p>Speed of Learning</p>      
-                <div id="preview-textfield-custom" style="top:80px; position: relative;"></div>  
-                <div class="row" style="margin:auto; max-width:250px;">
-                  <div class="col-xs-6">
-                    <p>Low</p>
-                  </div>
-                  <div class="col-xs-6">
-                    <p>High</p>
-                  </div>
-                </div>
-                <canvas class="dashCanvas learningSpeed" width="150" height="100" id="canvas-unit-percent-correct"></canvas>
-                {{#if displayItemsMasteredPerMinute}}
-                  <p>Items mastered per minute for the last 30 practices: {{itemMasteryRate}}</p>
-                {{/if}}
-                {{#if displayEstimatedMasteryTime}}
-                  <p>Estimated time to master all items: {{itemMasteryTime}} minutes.</p>
-                {{/if}}
-            </div>
-          </div>
-          <div class="row text-center">
-            <div class="gauge col-sm-12 col-xs-12">
-              <p>Difficulty</p>    
-              <canvas class="dashCanvas difficulty" width="250" height="100" id="canvas-ai-new-card-prediction"></canvas>
-              <div id="preview-textfield" style="display:none;">0%</div>  
-              <div class="row" style="margin:auto; max-width:250px;">
-                <div class="col-xs-6">
-                  <p data-toggle="tooltip"  style="font-size: small;" title="MoFaCTs thinks its choices have been too hard for optimal learning and will be trying to make it easier than before, you might try studying the feedback more carefully.">Too Hard
-                  (Hover over this for more info)</p>
-                </div>
-                <div class="col-xs-6">
-                  <p data-toggle="tooltip"  style="font-size: small;" title="MoFaCTs thinks its choices have been too easy for optimal learning and will be trying to make it harder. Sit tight, and the system will introduce more items to pick up the pace.">Too Easy
-                  <br>
-                  (Hover over this for more info)</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
   </div>
 </template>

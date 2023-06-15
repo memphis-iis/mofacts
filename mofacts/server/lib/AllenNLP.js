@@ -245,7 +245,7 @@ function EntailmentRequest$reflection() {
   return (0, _Reflection.record_type)("AllenNLP.EntailmentRequest", [], EntailmentRequest, () => [["hypothesis", _Reflection.string_type], ["premise", _Reflection.string_type]]);
 }
 
-const endpoints = new Endpoints("https://allennlp.olney.ai/predict/semantic-role-labeling", "https://allennlp.olney.ai/predict/coreference-resolution", "https://allennlp.olney.ai/predict/dependency-parsing", "https://spacy.olney.ai/sents", "https://allennlp.olney.ai/predict/textual-entailment");
+const endpoints = new Endpoints("https://allennlp/predict/semantic-role-labeling", "https://allennlp/predict/coreference-resolution", "https://allennlp/predict/dependency-parsing", "https://spacy:8003/sents", "https://spacy:8003/predict/textual-entailment");
 exports.endpoints = endpoints;
 
 function GetCoreference(input$$1) {
