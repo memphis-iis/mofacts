@@ -1052,15 +1052,6 @@ function insertHiddenItem(userId, stimulusKC, tdfId) {
   }
   
 }
-
-async function getUserLastFeedbackTypeFromHistory(tdfID) {
-  const userHistory =  Histories.findOne({TDFId: tdfID, userId: Meteor.userId}, {sort: {time: -1}})?.feedbackType
-  let feedbackType = 'undefined';
-  if( userHistory && userHistory.feedbackType ) {
-    feedbackType = userHistory.feedbackType;
-  } 
-  return feedbackType;
-}
 async function insertHistory(historyRecord) {
   const tdfFileName = historyRecord['Condition_Typea'];
   const dynamicTagFields = await getListOfStimTags(tdfFileName);
@@ -2097,11 +2088,36 @@ const methods = {
     return clozes;
   },
 
-  getSimpleFeedbackForAnswer: function(userAnswer, correctAnswer) {
+  getSimpleFeedbackForAnswer: async function(userAnswer, correctAnswer) {
     // eslint-disable-next-line new-cap
-    const result = ElaboratedFeedback.GenerateFeedback(userAnswer, correctAnswer);
-    serverConsole('result: ' + JSON.stringify(result));
-    return result;
+    const mongoResult = await ElaboratedFeedbackCache.findOne({correctAnswer: correctAnswer});
+    serverConsole('mongoResult', mongoResult);
+    if(mongoResult && mongoResult.userAnswers && mongoResult.userAnswers[userAnswer])
+      return mongoResult.userAnswers[userAnswer];
+    else {
+      ElaboratedFeedback.GenerateFeedback(userAnswer, correctAnswer).then((result) => {
+        let userAnswers = {};
+        let id = '';
+        if(mongoResult){
+          id = mongoResult._id;
+          if(mongoResult.userAnswers)
+            userAnswers = mongoResult.userAnswers;
+        }
+        if (result.tag != 0) {
+          console.log('error with refutational feedback, feedback call: ' + result.name);
+          console.log(result);
+        } else if (result.tag == 0) {
+          console.log('refutationalFeedback,return:', result);
+          const refutationalFeedback = result.fields[0].Feedback || result.fields[0].feedback;
+          if (typeof(refutationalFeedback) != 'undefined' && refutationalFeedback != null) {
+            userAnswers[userAnswer] = refutationalFeedback;
+            ElaboratedFeedbackCache.upsert(id, {$set: {correctAnswer: correctAnswer, userAnswers: userAnswers}});
+            serverConsole('result1: ' + JSON.stringify(result), mongoResult);
+          }
+        }
+      });
+      return 'default feedback'
+    }
   },
 
   initializeTutorialDialogue: function(correctAnswer, userIncorrectAnswer, clozeItem) {
@@ -2627,7 +2643,7 @@ const asyncMethods = {
 
   insertHistory, getHistoryByTDFID, getUserRecentTDFs, clearCurUnitProgress, tdfUpdateConfirmed,
 
-  loadStimsAndTdfsFromPrivate, getListOfStimTags, getUserLastFeedbackTypeFromHistory,
+  loadStimsAndTdfsFromPrivate, getListOfStimTags,
 
   checkForUserException, 
   
