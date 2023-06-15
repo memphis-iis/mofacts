@@ -18,6 +18,7 @@ Sections = new Meteor.Collection('section');
 SectionUserMap = new Meteor.Collection('section_user_map');
 UserTimesLog = new Meteor.Collection('userTimesLog');
 UserMetrics = new Meteor.Collection('userMetrics');
+ElaboratedFeedbackCache = new Meteor.Collection('elaborated_feedback_cache');
 DynamicSettings = new Meteor.Collection('dynaminc_settings');
 ScheduledTurkMessages = new Mongo.Collection('scheduledTurkMessages');
 GoogleSpeechAPIKeys = new Mongo.Collection('googleSpeechAPIKeys');

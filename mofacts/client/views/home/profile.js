@@ -652,10 +652,10 @@ async function selectTdf(currentTdfId, lessonName, currentStimuliSetId, ignoreOu
     audioInputSensitivity = document.getElementById('audioInputSensitivity').value;
     audioPromptQuestionVolume = document.getElementById('audioPromptQuestionVolume').value;
     audioPromptFeedbackVolume = document.getElementById('audioPromptFeedbackVolume').value;
-    feedbackType = await meteorCallAsync('getUserLastFeedbackTypeFromHistory', currentTdfId);
+    feedbackType = GlobalExperimentStates.findOne({userId: Meteor.userId(), TDFId: currentTdfId})?.experimentState?.feedbackType || null;
     audioPromptFeedbackVoice = document.getElementById('audioPromptFeedbackVoice').value;
     if(feedbackType)
-      Session.set('feedbackTypeFromHistory', feedbackType.feedbacktype)
+      Session.set('feedbackTypeFromHistory', feedbackType)
     else
       Session.set('feedbackTypeFromHistory', null);
   }
@@ -670,7 +670,7 @@ async function selectTdf(currentTdfId, lessonName, currentStimuliSetId, ignoreOu
   Session.set('audioPromptFeedbackVolume', audioPromptFeedbackVolume);
   Session.set('audioPromptFeedbackVoiceView', audioPromptFeedbackVoice)
   if(feedbackType)
-    Session.set('feedbackTypeFromHistory', feedbackType.feedbacktype)
+    Session.set('feedbackTypeFromHistory', feedbackType)
   else
     Session.set('feedbackTypeFromHistory', null);
 

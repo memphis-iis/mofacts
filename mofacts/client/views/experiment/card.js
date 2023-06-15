@@ -490,7 +490,16 @@ Template.card.events({
     Session.set('displayFeedback', false);
     processUserTimesLog();  
   },
-  'click #confirmFeedbackSelectionFromIndex': function(){
+  'click #confirmFeedbackSelectionFromIndex': () => {
+    let selectedDialogueType = 'simple'
+    if(document.getElementById('dialogueSelectRefutational').checked)
+      selectedDialogueType = 'refutational';
+    else if(document.getElementById('dialogueSelectDialogue').checked)  
+      selectedDialogueType = 'dialogue';
+
+    Session.set('selectedDialogueType', selectedDialogueType);
+    Session.set('feedbackTypeFromHistory', selectedDialogueType);
+    updateExperimentState({feedbackType: selectedDialogueType}, 'profileDialogueToggles');
     Session.set('displayFeedback', false);
     Session.set('pausedLocks', Session.get('pausedLocks')-1);
     Session.set('resetFeedbackSettingsFromIndex', false);

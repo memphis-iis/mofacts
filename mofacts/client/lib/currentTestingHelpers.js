@@ -501,7 +501,7 @@ function getCurrentDeliveryParams() {
   if (!deliveryParams['feedbackType'].length ||
       deliveryParams['allowFeedbackTypeSelect']) {
     deliveryParams['feedbackType'] =
-        dialogueSelectState.get('selectedDialogueType');
+        Session.get('selectedDialogueType') || Session.get('feedbackTypeFromHistory');
   }
 
   return deliveryParams;
