@@ -610,6 +610,8 @@ async function selectTdf(currentTdfId, lessonName, currentStimuliSetId, ignoreOu
   // current TDF should be changed due to an experimental condition
   Session.set('currentRootTdfId', currentTdfId);
   Session.set('currentTdfId', currentTdfId);
+  let globalExperimentState = GlobalExperimentStates.findOne({userId: Meteor.userId(), TDFId: currentTdfId}) || {};
+  Session.set('globalExperimentState', globalExperimentState);
   const tdfResponse = Tdfs.findOne({_id: currentTdfId});
   const curTdfContent = tdfResponse.content;
   const curTdfTips = tdfResponse.content.tdfs.tutor.setspec.tips;

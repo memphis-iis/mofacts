@@ -134,48 +134,43 @@ function updateCurStudentPerformance(isCorrect, practiceTime, testType) {
 
 async function setStudentPerformance(studentID, studentUsername, tdfId) {
   console.log('setStudentPerformance:', studentID, studentUsername, tdfId);
-  let studentPerformanceData;
-  studentPerformanceData = await meteorCallAsync('getStudentPerformanceByIdAndTDFId', studentID, tdfId);
-  if (isEmpty(studentPerformanceData)) {
-    studentPerformanceData = {
-      numCorrect: 0,
-      numIncorrect: 0,
-      stimsSeen: 0,
-      lastSeen: 0,
-      totalStimCount: 0,
-      totalPracticeDuration: 0,
-      count: 0,
-    };
-  } else {
-    studentPerformanceData = {
-      numCorrect: parseInt(studentPerformanceData.numCorrect) || 0,
-      allTimeCorrect: parseInt(studentPerformanceData.allTimeCorrect) || 0,
-      allTimeIncorrect: parseInt(studentPerformanceData.allTimeIncorrect) || 0,
-      numIncorrect: parseInt(studentPerformanceData.numIncorrect) || 0,
-      lastSeen: parseInt(studentPerformanceData.lastSeen) || 0,
-      stimsSeen:  parseInt(studentPerformanceData.stimsSeen)  || 0,
-      totalStimCount: parseInt(studentPerformanceData.totalStimCount) || 0,
-      totalPracticeDuration: parseInt(studentPerformanceData.totalPracticeDuration) || 0,
-      allTimeTotalPracticeDuration: parseInt(studentPerformanceData.allTimeTotalPracticeDuration) || 0,
-      count: parseInt(studentPerformanceData.count) || 0,
-    };
-  }
-  const divisor = studentPerformanceData.numCorrect + studentPerformanceData.numIncorrect
-  const percentCorrect = (divisor > 0) ? ((studentPerformanceData.numCorrect / divisor)*100).toFixed(2) + '%' : 'N/A';
+  let componentState = ComponentStates.findOne({userId: studentID, TDFId: tdfId});
   const studentPerformance = {
-    'username': studentUsername,
-    'count': studentPerformanceData.count,
-    'percentCorrect': percentCorrect,
-    'numCorrect': studentPerformanceData.numCorrect,
-    'numIncorrect': studentPerformanceData.numIncorrect,
-    'stimsSeen': studentPerformanceData.stimsSeen,
-    'totalStimCount': studentPerformanceData.totalStimCount,
-    'totalTime': studentPerformanceData.totalPracticeDuration,
-    // convert from ms to min
-    'totalTimeDisplay': (studentPerformanceData.totalPracticeDuration / (60 * 1000)).toFixed(1),
+    username: studentUsername,
+    numCorrect: 0,
+    numIncorrect: 0,
+    stimsSeen: 0,
+    lastSeen: 0,
+    totalStimCount: 0,
+    totalTime: 0,
+    count: 0,
+    allTimeNumCorrect: 0,
+    allTimeNumIncorrect: 0,
+    allTimePracticeDuration: 0,
+    percentCorrect: 0,
+    totalTimeDisplay: 0,
   };
+  if (componentState){
+    const stimStates = componentState.stimStates;
+    for (const stimState of stimStates) {
+      studentPerformance.totalStimCount++;
+      studentPerformance.numCorrect += stimState.priorCorrect;
+      studentPerformance.numIncorrect += stimState.priorIncorrect;
+      studentPerformance.totalTime += stimState.totalPracticeDuration;
+      studentPerformance.allTimeNumCorrect += stimState.allTimeCorrect;
+      studentPerformance.allTimeNumIncorrect += stimState.allTimeIncorrect;
+      studentPerformance.allTimePracticeDuration += stimState.allTimeTotalPracticeDuration;
+      if (stimState.priorCorrect || stimState.priorIncorrect) {
+        studentPerformance.stimsIntroduced++;
+      }
+      studentPerformance.count += stimState.timesSeen;
+    }
+  }
+  const divisor = studentPerformance.numCorrect + studentPerformance.numIncorrect
+  studentPerformance.percentCorrect = (divisor > 0) ? ((studentPerformance.numCorrect / divisor)*100).toFixed(2) + '%' : 'N/A';;
+  studentPerformance.totalTimeDisplay = (studentPerformance.totalTime / (1000*60)).toFixed(1);
   Session.set('curStudentPerformance', studentPerformance);
-  console.log('setStudentPerformance,output:', studentPerformanceData, studentPerformance);
+  console.log('setStudentPerformance,output:', studentPerformance);
 }
 
 // Return the total number of stim clusters
