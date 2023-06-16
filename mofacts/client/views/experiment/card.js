@@ -384,7 +384,7 @@ async function initCard() {
       leavePage('/card');
     }
   };
-  const globalExperimentState = GlobalExperimentStates.findOne({TDFId: Session.get('currentTdfId')});
+  const globalExperimentState = Session.get('globalExperimentState')
   Session.set('currentExperimentState', globalExperimentState.experimentState)
   Session.set('experimentId', globalExperimentState._id);
   Session.set('scoringEnabled', undefined);
@@ -630,10 +630,10 @@ Template.card.helpers({
   },
 
   'displayAnswer': function() {
-    return Answers.getDisplayAnswerText(GlobalExperimentStates.findOne({TDFId: Session.get('currentTdfId')}).experimentState.currentAnswer);
+    return Answers.getDisplayAnswerText(Session.get('currentAnswer'));
   },
 
-  'rawAnswer': ()=> GlobalExperimentStates.findOne({TDFId: Session.get('currentTdfId')}).experimentState.currentAnswer,
+  'rawAnswer': ()=> Session.get('currentAnswer'),
 
   'currentProgress': () => Session.get('questionIndex'),
 
@@ -2745,16 +2745,15 @@ function stopRecording() {
 // END WEB AUDIO SECTION
 
 async function getExperimentState() {
-  let curExperimentState = GlobalExperimentStates.findOne({TDFId: Session.get('currentTdfId')}).experimentState;
-  const sessExpState = Session.get('currentExperimentState');
-  console.log('getExperimentState:', curExperimentState, sessExpState);
+  let curExperimentState = Session.get('globalExperimentState').experimentState;
+  console.log('getExperimentState:', curExperimentState);
   Meteor.call('updatePerformanceData', 'utlQuery', 'card.getExperimentState', Meteor.userId());
   Session.set('currentExperimentState', curExperimentState);
   return curExperimentState || {};
 }
 
 function updateExperimentState(newState, codeCallLocation, unitEngineOverride = {}) {
-  let globalExperimentState = GlobalExperimentStates.findOne({TDFId: Session.get('currentTdfId')});
+  let globalExperimentState = Session.get('globalExperimentState')
   let curExperimentState = Session.get('currentExperimentState');
   console.log('currentExperimentState:', curExperimentState);
   if (unitEngineOverride && Object.keys(unitEngineOverride).length > 0)
@@ -2764,19 +2763,17 @@ function updateExperimentState(newState, codeCallLocation, unitEngineOverride = 
   }
   if(!globalExperimentState){
     curExperimentState = Object.assign(JSON.parse(JSON.stringify(curExperimentState)), newState);
-    GlobalExperimentStates.insert({
-      userId: Meteor.userId(),
-      TDFId: curExperimentState.currentTdfId,
-      experimentState: curExperimentState
-    });
+    Meteor.call('createExperimentState', curExperimentState, curExperimentState.currentTdfId);
     console.log('updateExperimentState', codeCallLocation, '\nnew:', curExperimentState);
-    return Session.get('currentRootTdfId');
+    return curExperimentState.currentTdfId;
   }
   curExperimentState = Object.assign(JSON.parse(JSON.stringify(curExperimentState)), newState);
-  GlobalExperimentStates.update({_id: globalExperimentState._id}, {$set: {experimentState: curExperimentState}});
+  Meteor.call('updateExperimentState', curExperimentState, curExperimentState.currentTdfId);
+  globalExperimentState.experimentState = curExperimentState;
+  Session.set('globalExperimentState', globalExperimentState);
   console.log('updateExperimentState', codeCallLocation, '\nnew:', curExperimentState);
   Session.set('currentExperimentState', curExperimentState);
-  return Session.get('currentRootTdfId');
+  return curExperimentState.currentTdfId;
 }
 
 // Re-initialize our User Progress and Card Probabilities internal storage
@@ -3051,7 +3048,7 @@ async function processUserTimesLog() {
   Session.set('clozeQuestionParts', curExperimentState.clozeQuestionParts || undefined);
   Session.set('testType', curExperimentState.testType);
   Session.set('originalQuestion', curExperimentState.originalQuestion);
-
+  Session.set('currentAnswer', curExperimentState.currentAnswer);
   Session.set('subTdfIndex', curExperimentState.subTdfIndex);
   Session.set('alternateDisplayIndex', curExperimentState.alternateDisplayIndex);
 

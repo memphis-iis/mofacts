@@ -2055,6 +2055,21 @@ const methods = {
     }
   },
 
+  updateExperimentState: function(curExperimentState) {
+    serverConsole('updateExperimentState', curExperimentState, curExperimentState.currentTdfId);
+    GlobalExperimentStates.update({userId: Meteor.userId(), TDFId: curExperimentState.currentTdfId}, {$set: {experimentState: curExperimentState}});
+  },
+
+  createExperimentState: function(curExperimentState) {
+    serverConsole('createExperimentState', curExperimentState, curExperimentState.currentTdfId);
+    GlobalExperimentStates.insert({
+      userId: Meteor.userId(),
+      TDFId: curExperimentState.currentTdfId,
+      experimentState: curExperimentState
+    });
+  },
+
+
   getAltServerUrl: function() {
     return altServerUrl;
   },

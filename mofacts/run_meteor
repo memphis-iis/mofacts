@@ -1,27 +1,27 @@
 #!/bin/bash
 
-echo "Removing use of symlinks from shared folder"
-sudo umount .meteor/local -f
-rm .meteor/local -rf
-mkdir -p .meteor/local
+# echo "Removing use of symlinks from shared folder"
+# sudo umount .meteor/local -f
+# rm .meteor/local -rf
+# mkdir -p .meteor/local
 
-sudo umount packages -f
-rm packages -rf
-mkdir -p packages
+# sudo umount packages -f
+# rm packages -rf
+# mkdir -p packages
 
-mkdir -p "$HOME/.meteor/local"
-sudo mount --bind "$HOME/.meteor/local" .meteor/local
+# mkdir -p "$HOME/.meteor/local"
+# sudo mount --bind "$HOME/.meteor/local" .meteor/local
 
-mkdir -p "$HOME/.meteor/packages"
-sudo mount --bind "$HOME/.meteor/packages" packages
+# mkdir -p "$HOME/.meteor/packages"
+# sudo mount --bind "$HOME/.meteor/packages" packages
 
-sudo umount ../custom_packages/meteor-accounts-saml-iis-version-2-10-2020/.npm -f
-rm ../custom_packages/meteor-accounts-saml-iis-version-2-10-2020/.npm -rf
-mkdir "$HOME/.npm"
-mkdir ../custom_packages/meteor-accounts-saml-iis-version-2-10-2020/.npm
-sudo mount --bind "$HOME/.npm" ../custom_packages/meteor-accounts-saml-iis-version-2-10-2020/.npm
+# sudo umount ../custom_packages/meteor-accounts-saml-iis-version-2-10-2020/.npm -f
+# rm ../custom_packages/meteor-accounts-saml-iis-version-2-10-2020/.npm -rf
+# mkdir "$HOME/.npm"
+# mkdir ../custom_packages/meteor-accounts-saml-iis-version-2-10-2020/.npm
+# sudo mount --bind "$HOME/.npm" ../custom_packages/meteor-accounts-saml-iis-version-2-10-2020/.npm
 
-meteor npm install --no-bin-links
+# meteor npm install --no-bin-links
 
 export MONGO_URL=mongodb://localhost:27017/MoFaCT
 echo "MONGO_URL=$MONGO_URL"
