@@ -523,7 +523,6 @@ Router.route('/card', {
       Meteor.subscribe('assets', Session.get('currentTdfFile').ownerId, Session.get('currentStimuliSetId')),
       Meteor.subscribe('userComponentStates', Session.get('currentTdfId')),
       Meteor.subscribe('currentTdf', Session.get('currentTdfId')),
-      Meteor.subscribe('userExperimentState', Session.get('currentTdfId')),
     ]
   },
   action: function() {
@@ -541,6 +540,13 @@ Router.route('/card', {
 Session.set('instructionClientStart', 0);
 Router.route('/instructions', {
   name: 'client.instructions',
+  waitOn: function() {
+    return [ 
+      Meteor.subscribe('assets', Session.get('currentTdfFile').ownerId, Session.get('currentStimuliSetId')),
+      Meteor.subscribe('userComponentStates', Session.get('currentTdfId')),
+      Meteor.subscribe('currentTdf', Session.get('currentTdfId')),
+    ]
+  },
   action: function() {
     Session.set('instructionClientStart', Date.now());
     Session.set('curModule', 'instructions');

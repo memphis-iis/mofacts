@@ -238,7 +238,7 @@ function defaultUnitEngine(curExperimentData) {
       const newExperimentState = {};
       Session.set('alternateDisplayIndex', undefined);
       const cluster = stimClusters[cardIndex];
-      clientConsole('setUpCardQuestionAndAnswerGlobals', cardIndex, whichStim, probFunctionParameters,
+      clientConsole(1, 'setUpCardQuestionAndAnswerGlobals', cardIndex, whichStim, probFunctionParameters,
           cluster, cluster.stims[whichStim], whichHintLevel);
       const curStim = cluster.stims[whichStim];
       let currentDisplay = JSON.parse(JSON.stringify({
@@ -332,6 +332,8 @@ function defaultUnitEngine(curExperimentData) {
           clientConsole(2, 'HintLevel: setUpCardQuestionAndAnswerGlobals, Hints Disabled',whichHintLevel);
         }
       }
+      Session.set('currentAnswerSyllables', currentAnswerSyllables);
+      Session.set('currentAnswer', currentAnswer);
       Session.set('clozeQuestionParts', clozeQuestionParts);
       newExperimentState.currentAnswerSyllables = currentAnswerSyllables;
       newExperimentState.currentAnswer = currentAnswer;
