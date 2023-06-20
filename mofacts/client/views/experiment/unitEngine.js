@@ -671,7 +671,6 @@ function modelUnitEngine() {
         }
       }
     }
-    const stim = cards[clusterIndex].stims[stimIndex];
 
     return {clusterIndex, stimIndex, hintLevelIndex};
   }
