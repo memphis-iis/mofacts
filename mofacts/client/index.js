@@ -72,7 +72,7 @@ function loadClientSettings() {
 function clientConsole(...args) {
   let logVerbosityLevel = args.shift();
   if(verbosityLevel == 0) return;
-  if (logVerbosityLevel > verbosityLevel) return;
+  if (!Meteor.isDevelopment && logVerbosityLevel > verbosityLevel) return;
   const disp = [(new Date()).toString()];
   for (let i = 0; i < args.length; ++i) {
     disp.push(args[i]);
