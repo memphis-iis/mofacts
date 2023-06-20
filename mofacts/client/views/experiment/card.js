@@ -2100,7 +2100,9 @@ async function cardStart() {
     Session.set('buttonList', []);
 
     console.log('cards template rendered => Performing resume');
-    Session.get('currentExperimentState').showOverlearningText = false;
+    let curExperimentState = Session.get('currentExperimentState');
+    curExperimentState.showOverlearningText = false;
+    Session.set('currentExperimentState', curExperimentState);
 
     Session.set('inResume', false); // Turn this off to keep from re-resuming
     resumeFromComponentState();
@@ -2753,15 +2755,15 @@ async function getExperimentState() {
 }
 
 function updateExperimentState(newState, codeCallLocation, unitEngineOverride = {}) {
-  let globalExperimentState = Session.get('globalExperimentState')
-  let curExperimentState = Session.get('currentExperimentState');
+  let globalExperimentState = Session.get('globalExperimentState') || {};
+  let curExperimentState = Session.get('currentExperimentState') || {};
   console.log('currentExperimentState:', curExperimentState);
   if (unitEngineOverride && Object.keys(unitEngineOverride).length > 0)
     curExperimentState = unitEngineOverride;
-  if (!curExperimentState){
+  if (Object.keys(curExperimentState).length === 0){
     curExperimentState = globalExperimentState?.experimentState || {};
   }
-  if(!globalExperimentState){
+  if(Object.keys(globalExperimentState).length === 0){
     curExperimentState = Object.assign(JSON.parse(JSON.stringify(curExperimentState)), newState);
     Meteor.call('createExperimentState', curExperimentState, curExperimentState.currentTdfId);
     console.log('updateExperimentState', codeCallLocation, '\nnew:', curExperimentState);
