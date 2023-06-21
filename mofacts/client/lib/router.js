@@ -375,6 +375,12 @@ Router.route('/classEdit',{
   
     //Get teacher info
     const teacher = verifiedTeachers.find((x) => x.username === teacherSelected);
+    if(!teacher){
+      console.log('teacher not found');
+      alert('This account is not a teacher account. Please log in with a teacher account.');
+      router.go('/');
+      return;
+    }
     console.log('got teachers', teacher);
 
     Session.set('teachers', verifiedTeachers);    

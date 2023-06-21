@@ -1469,12 +1469,13 @@ async function showUserFeedback(isCorrect, feedbackMessage, afterAnswerFeedbackC
     $('#UserInteraction')
         .removeClass('alert-success alert-danger')
         .addClass('text-align alert')
-        .html("<div class=\"alert-icon\"><i class=\"fa fa-question-exclaimation\" aria-hidden=\"true\"></i></div>" + feedbackMessage)
+        .html(feedbackMessage)
         .attr("hidden",false)
         .show()
         if(!isCorrect){
+          $('#UserInteraction').addClass('alert-danger');
           $('#CountdownTimer')
-            .addClass('text-align')
+            .addClass('text-align, text-alert-danger')
             .attr("hidden",false)
             .show();
 
@@ -1504,6 +1505,8 @@ async function showUserFeedback(isCorrect, feedbackMessage, afterAnswerFeedbackC
             }
           }, 100);
           Session.set('CurIntervalId', CountdownTimerInterval);
+        } else {
+          $('#UserInteraction').addClass('alert-success');
         }
   }
 

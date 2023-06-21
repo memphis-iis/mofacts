@@ -18,19 +18,13 @@
     {{else}}
         {{#if displayReady}}
         <br>    
-            <div class="row text-center">
+            <div class="row text-center card-header">
                 <h2>{{curTdfName}}</h2>
+                <p class="text-center">
+                    {{curStudentPerformance.totalTimeDisplay}} min | {{curStudentPerformance.percentCorrect}} correct
+                </p>
             </div>
-            <div class="row text-center row-cols-2 justify-content-center">
-                {{#if showPerformanceDetails}}
-                <div class="col mx-auto">
-                    <i class="fa fa-regular fa-clock" aria-hidden="true"></i>{{curStudentPerformance.totalTimeDisplay}} min
-                    <span style="font-size:large">|</span>
-                    <i class="fa fa-bar-chart" aria-hidden="true"></i>
-                    {{curStudentPerformance.percentCorrect}}
-                </div>
-                {{/if}}
-            </div>
+            <div class="vh-10"></div>
             <div class="scrollHistoryContainer">
                 {{#if haveScrollList}}
                 {{#each scrollList}}
@@ -51,7 +45,7 @@
                     <div class="container" id="displayContainer">
                         <div class="row full-width">
                             {{#if anythingButAudioCard}}
-                                <div class="alert text-center">
+                                <div class="text-center">
                                     <p>
                                     {{#if ifClozeDisplayTextExists}}
                                         {{#if textOrClozeCard}}
@@ -88,9 +82,6 @@
                         <div class="container-fluid" id="displayContainer">
                             <div id="leftPanel" class="col-md-11">
                                 <div class="alert text-center" id="textQuestion">
-                                    <div class="alert-icon">
-                                        <i class="fa fa-question-exclaimation" aria-hidden="true"></i>
-                                    </div>
                                     {{{dialogueText}}}
                                 </div>
                             </div>
@@ -127,11 +118,18 @@
                     {{/if}}
                 {{/if}}
                 {{#if notButtonTrialOrInDialogueLoop}}
-   
-                        <div class="col-xs-12 col-sm-12 col-md-offset-1 col-md-10 col-lg-12">
+                        <div class="position-absolute top-100 start-50 translate-middle">
+                            {{#if showDialogueHints}}
+                                {{#if dialogueCacheHint}}
+                                    <div class="row">
+                                        <div class="col-lg-12 visible-text text-center">
+                                            <b>Hints:</b> {{dialogueCacheHint}}
+                                        </div>
+                                    </div>
+                                {{/if}}
+                            {{/if}}
                             {{> inputF}}
                         </div>
-
                 {{else}}
                     
                 <div class="row">
@@ -185,13 +183,9 @@
                 {{/if}}
             {{/if}}
 
-            <div class="userInteractionContainer">
+            <div id="userInteractionContainer">
                 <div class="row">
                     <div class="text-center" id="UserInteraction" hidden>
-                        <div class="alert-icon">
-                            <i class="fa fa-question-exclaimation" aria-hidden="true"></i>
-                        </div>
-                        
                     </div>
                 </div>
                 <div class="row">
@@ -208,27 +202,14 @@
             {{#if questionIsRemovable}}
                 <div class="removalContainer">
                     <div class="text-center">
-                        Is this answer incorrect or too confusing? Click
-                        <a href="#" id="removeQuestion">
-                            here
-                        </a> 
-                        to remove and report it.
-                        <div class="alert  {{fontSizeClass}} alert-success alert text-align" id="removalFeedback" hidden>
-                            Thanks, we'll remove this question from your stack.
-                        </div>
+                        <button href="#" id="removeQuestion" class="btn btn-secondary">
+                            Report Mistake
+                        </button> 
                     </div>
                 </div>
             {{/if}}
 
-            {{#if showDialogueHints}}
-                {{#if dialogueCacheHint}}
-                    <div class="row">
-                        <div class="col-lg-12 visible-text text-center">
-                            <b>Hints:</b> {{dialogueCacheHint}}
-                        </div>
-                    </div>
-                {{/if}}
-            {{/if}}
+
 
             {{#if isInRole 'teacher'}}
             <div class="row">

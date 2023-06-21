@@ -10,55 +10,69 @@
                 <div class="row text-center">
                     <h3>Verbosity Level</h3>
                 </div>
-                <div class="row row-col-6s card">
-                    <div class="col-6 text-right">
-                        <label class="form-check-label" for="verbosityRadio1">
-                            Server Logs Only
-                        </label>
+                <form>
+                    <div class="row row-cols-2">
+                        <div class="col text-end">
+                            <label class="form-check-label" for="verbosityRadio1">
+                                Server Logs Only
+                            </label>
+                        </div>
+                        <div class="col">
+                            <input  type="radio" name="flexRadioDefault" id="verbosityRadio0">
+                        </div>
+                        <div class="col text-end">
+                            <label class="form-check-label" for="verbosityRadio1">
+                                Function Times Only
+                            </label>
+                        </div>
+                        <div class="col">
+                            <input  type="radio" name="flexRadioDefault" id="verbosityRadio1">
+                        </div>
+                        <div class="col text-end">
+                            <label class="form-check-label" for="verbosityRadio2">
+                                Server Logs and Function Times
+                            </label>
+                        </div>
+                        <div class="col">
+                            <input  type="radio" name="flexRadioDefault" id="verbosityRadio2">
+                        </div>
                     </div>
-                    <div class="col-6">
-                        <input  type="radio" name="flexRadioDefault" id="verbosityRadio0">
-                    </div>
-                    <div class="col-6 text-right">
-                        <label class="form-check-label" for="verbosityRadio1">
-                            Function Times Only
-                        </label>
-                    </div>
-                    <div class="col-6">
-                        <input  type="radio" name="flexRadioDefault" id="verbosityRadio1">
-                    </div>
-                    <div class="col-6 text-right">
-                        <label class="form-check-label" for="verbosityRadio2">
-                            Server Logs and Function Times
-                        </label>
-                    </div>
-                    <div class="col-6">
-                        <input  type="radio" name="flexRadioDefault" id="verbosityRadio2">
-                    </div>
-                </div>
+                </form>
             </div>
         </div>
     {{/if}}
     <div class="container">
-    <h4>Change Clinet Logging Level</h4>
-        <div class="form-check">
-            <input class="form-check-input clientVerbosityRadio" type="radio" name="flexRadioDefault" id="clientVerbosityRadio0">
-            <label class="form-check-label" for="clientVerbosityRadio0">
-                No Logging (fastest)
-            </label>
+        <div class="row text-center">
+            <h3>Client Verboisty Level</h3>
         </div>
-        <div class="form-check">
-            <input class="form-check-input clientVerbosityRadio" type="radio" name="flexRadioDefault" id="clientVerbosityRadio1">
-            <label class="form-check-label" for="clientVerbosityRadio1">
-                Function Calls Only (slower)
-            </label>
-        </div>
-        <div class="form-check">
-            <input class="form-check-input clientVerbosityRadio" type="radio" name="flexRadioDefault" id="clientVerbosityRadio2">
-            <label class="form-check-label" for="clientVerbosityRadio2">
-                Full Logging (slowest)
-            </label>
-        </div>
+        <form>
+            <div class="row row-cols-2">
+                <div class="col text-end">
+                    <label class="form-check-label" for="clientVerbosityRadio0">
+                        No Logging (fastest)
+                    </label>
+                </div>
+                <div class="col">
+                    <input class="clientVerbosityRadio" type="radio" name="flexRadioDefault" id="clientVerbosityRadio0">
+                </div>
+                <div class="col text-end">
+                    <label class="form-check-label" for="clientVerbosityRadio1">
+                        Function Calls Only (slower)
+                    </label>
+                </div>
+                <div class="col">
+                    <input class="clientVerbosityRadio" type="radio" name="flexRadioDefault" id="clientVerbosityRadio1">
+                </div>
+                <div class="col text-end">
+                    <label class="form-check-label" for="clientVerbosityRadio2">
+                        Full Logging (slowest)
+                    </label>
+                </div>
+                <div class="col">
+                    <input class="clientVerbosityRadio" type="radio" name="flexRadioDefault" id="clientVerbosityRadio2">
+                </div>
+            </div>
+        </form>
     </div>
 
 </template>
