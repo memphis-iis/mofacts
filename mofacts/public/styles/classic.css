@@ -33,6 +33,13 @@ p{
     margin-left: auto;
     margin-right: auto;
 }
+.btn-secondary{
+    background-color: #d9d9d9 !important;
+    color: #000000;
+    /* center button */
+    margin-left: auto;
+    margin-right: auto;
+}
 .btn:hover, .btn-icon:hover{
     background-color: #00cc00;
     border-color: #7ed957;
@@ -68,10 +75,41 @@ p{
     background-color: #d9d9d9;
 }
 
+.text-alert-danger{
+    color: #ff0000;
+}
+
+.alert-success, .alert-danger{
+    /* fix to bottom of page */
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    /* slide in from bottom */
+    animation: slideInBottom 0.5s;
+    -webkit-animation: slideInBottom 0.5s;
+    /* slide out to bottom */
+    animation: slideOutBottom 0.5s;
+    -webkit-animation: slideOutBottom 0.5s;
+    background-color: white !important
+    /* make sure no border */
+    border: none !important;
+}
 thead{
     background-color: #7ed957;
 }
 
+.card-header{
+    background-color: #7ed957;
+    padding: 10px;
+}
+.card-header p{
+    color: #06723c;
+    font-family: 'Arimo';
+    font-size: 15px;
+    margin-top: -10px;
+    margin-bottom: -10px;
+
+}
 
 /* General Styles */
 h1{
@@ -270,6 +308,20 @@ select{
     font-size: 50px;
     /* circle */
     border-radius: 50%;
+}
+
+.alert-success{
+    background-color: #7ed957;
+    color: white;
+}
+
+.alert-danger b{
+    color: #db6464;
+    font-size: 20px;
+}
+.alert-success b{
+    color: #7ed957;
+    font-size: 20px;
 }
 
 .modal-body{

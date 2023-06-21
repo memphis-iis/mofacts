@@ -68,14 +68,8 @@ Template.userAdmin.events({
     const userId = _.trim(btnTarget.data('userid'));
     const roleAction = _.trim(btnTarget.data('roleaction'));
     const roleName = _.trim(btnTarget.data('rolename'));
-    console.log('Action requested:', roleAction, 'to', roleName, 'for', userId);
 
-    if (!userId || !roleAction || !roleName) {
-      console.log('Invalid parameters found!');
-      return;
-    }
 
-    $('#userAdminModal').modal('show');
 
     Meteor.call('userAdminRoleChange', userId, roleAction, roleName, function(error, result) {
       $('#userAdminModal').modal('hide');
@@ -84,7 +78,7 @@ Template.userAdmin.events({
       if (typeof error !== 'undefined') {
         disp = 'Failed to handle request. Error:' + error;
       } else {
-        disp = 'Server returned:' + JSON.stringify(result, null, 2);
+        disp = 'Action completed successfully';
       }
       console.log(disp);
       alert(disp);

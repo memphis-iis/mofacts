@@ -104,7 +104,7 @@
         </div> <!-- /turkLogAll -->
         {{/if}}
         <div class="row form-inline">
-            <div class="col-md-6" id="turk-assignment-details">
+            <div class="col-md-12" id="turk-assignment-details">
                 <div id="name">
                     <h3 class="text-center">View Turk Assignment Details</h3>
                         <input type="text" class="form-control" name="turk-assignid" id="turk-assignid" value="" placeholder="Mechanical Turk AssignmentID">
@@ -114,13 +114,14 @@
                 </div>
             </div>
 
-            <div class="col-md-6" id="turk-send-message">
+            <div class="col-md-12" id="turk-send-message">
                 <div id="name">
                     <h3 class="text-center">Send Turk Message</h3>
                     <div class="form-group">
                         <input type="text" class="form-control" name="turk-workerid" id="turk-workerid" value="" placeholder="Mechanical Turk WorkerID">
                     </div>
                     <textarea name="turk-msg" id="turk-msg" rows="12" placeholder="Message text goes here"></textarea>
+                    <br>
                     <button id="turk-send-msg" class="btn width-80-percent">Send</button>
                 </div>
             </div>
