@@ -80,6 +80,7 @@ p{
 }
 
 .alert-success, .alert-danger{
+    background-color: #F2F2F2 !important;
     /* fix to bottom of page */
     position: fixed;
     bottom: 0;
@@ -90,9 +91,10 @@ p{
     /* slide out to bottom */
     animation: slideOutBottom 0.5s;
     -webkit-animation: slideOutBottom 0.5s;
-    background-color: white !important
+    background-color: #F2F2F2 !important;
     /* make sure no border */
-    border: none !important;
+    border: none;
+
 }
 thead{
     background-color: #7ed957;
@@ -310,13 +312,9 @@ select{
     border-radius: 50%;
 }
 
-.alert-success{
-    background-color: #7ed957;
-    color: white;
-}
 
 .alert-danger b{
-    color: #db6464;
+    color: #ff0000;
     font-size: 20px;
 }
 .alert-success b{
@@ -350,10 +348,30 @@ select{
     .full-menu-content li{
         font-size: 12pt;
     }
+    .fixed-btm{
+        position: absolute;
+        bottom: 5vh;    
+        width:75vw;
+        max-width: 500px;
+    }
+
+    .input-box{
+        position: none;
+    }
+    .input-box input{
+        width: 50% !important;
+        margin: 0px;
+    }
 }
 
 /* Adaptive  Screens */
 @media screen and (max-width: 1024px) {
+    .fixed-btm{
+        position: absolute;
+        bottom: 5vh;    
+        width:90vw;
+        max-width: 500px;
+    }
     .modal-expanded{
         height: 80vh !important;
         top: 20% !important;
@@ -395,6 +413,16 @@ select{
     }
     .table-responsive table{
         min-width: 90vw;
+    }
+    .input-box{
+        position: absolute;
+        bottom: 20px;
+        left: 0px;
+        right: 0px;
+    }
+    .input-box input{
+        width: 100%;
+        margin: 0px;
     }
 }
 
@@ -490,4 +518,11 @@ select{
     margin-left: 5px;
     padding: 15px;
     font-size: 12pt;
+}
+
+#userInteractionContainer{
+    position: absolute;
+    bottom: 0px;
+    left: 0px;
+    right: 0px;
 }

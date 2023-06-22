@@ -133,6 +133,17 @@ sudo touch /etc/motd
 sudo apt-get install -y docker.io
 sudo apt-get install -y docker-compose
 
+#add vagrant user to docker group
+sudo usermod -aG docker vagrant
+
+#give vagrant user permission to run docker without sudo
+sudo chmod 666 /var/run/docker.sock
+
+#start docker on boot
+sudo systemctl enable docker
+
+
+
 
 
 # Spit out some messages for the user - to do this we'll need to create a message

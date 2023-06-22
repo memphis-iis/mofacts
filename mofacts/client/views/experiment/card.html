@@ -118,7 +118,7 @@
                     {{/if}}
                 {{/if}}
                 {{#if notButtonTrialOrInDialogueLoop}}
-                        <div class="position-absolute top-100 start-50 translate-middle">
+                        <div class="input-box" style="box-sizing: border-box;">
                             {{#if showDialogueHints}}
                                 {{#if dialogueCacheHint}}
                                     <div class="row">
@@ -183,9 +183,16 @@
                 {{/if}}
             {{/if}}
 
-            <div id="userInteractionContainer">
+            <div id="userInteractionContainer" class="position-fixed bottom-0">
                 <div class="row">
                     <div class="text-center" id="UserInteraction" hidden>
+                        <div class="row">
+                            <div class="vh-5"></div>
+                            <div class="progress">
+                                <div id="progressbar" class="progress-bar bg-danger" role="progressbar" aria-label="Basic example" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100" style="width:100%;"></div>
+                              </div>
+                            <div id="CountdownTimerText"></div>
+                        </div>
                     </div>
                 </div>
                 <div class="row">
@@ -193,13 +200,9 @@
                         {{> inputForceCorrect}}
                     </div>
                 </div>
-                <div class="row">
-                    <div class="progress">
-                        <div class="progress-bar" role="progressbar" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100"></div>
-                    </div>
-                </div>
             </div>
             {{#if questionIsRemovable}}
+            <div class="vh-10"></div>
                 <div class="removalContainer">
                     <div class="text-center">
                         <button href="#" id="removeQuestion" class="btn btn-secondary">
