@@ -76,7 +76,7 @@ Template.signUp.events({
           }
           await meteorCallAsync('setUserLoginData', `direct`, 'password');
           Meteor.logoutOtherClients();
-          Router.go('/profile');
+          Router.render('profile');
         }
       });
     });

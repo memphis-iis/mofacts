@@ -12,4 +12,4 @@ mkdir --parents $APP_BUNDLE_FOLDER
 
 cd $APP_SOURCE_FOLDER
 
-meteor build --directory $APP_BUNDLE_FOLDER --server-only --settings /mofactsAssets/settings.json
+TOOL_NODE_FLAGS=--max-old-space-size=4096 meteor build --directory $APP_BUNDLE_FOLDER --server-only --settings /mofactsAssets/settings.json
