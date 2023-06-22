@@ -362,6 +362,14 @@ select{
         width: 50% !important;
         margin: 0px;
     }
+    .alert-audio-100{
+        color: #06723e;
+        background-color: #7ed957;
+        padding: 20px;
+        margin-top: 20px;
+        margin-right: -4vw;
+        margin-left: -4vw;
+    }
 }
 
 /* Adaptive  Screens */
@@ -424,7 +432,28 @@ select{
         width: 100%;
         margin: 0px;
     }
+    .alert-audio-100{
+        color: #06723e;
+        background-color: #7ed957;
+        padding: 20px;
+        margin-top: 20px;
+        margin-right: -8vw;
+        margin-left: -8vw;
+    }
 }
+
+/* hack for bootstrap between 768px and 1024px */
+@media screen and (min-width: 768px) and (max-width: 1024px) {
+    .alert-audio-100{
+        color: #06723e;
+        background-color: #7ed957;
+        padding: 20px;
+        margin-top: 20px;
+        margin-right: -6vw;
+        margin-left: -6vw;
+    }
+}
+
 
 
 /*animation classes*/
@@ -526,3 +555,34 @@ select{
     left: 0px;
     right: 0px;
 }
+
+input[type="range"]::-webkit-slider-runnable-track {
+    background: #00cc00;
+    height: 0.5rem;
+  }
+  
+  /******** Firefox ********/
+  input[type="range"]::-moz-range-track {
+    background: #00cc00;
+    height: 0.5rem;
+  }
+
+
+
+ input[type="range"]::-moz-range-thumb {
+    border: none; /*Removes extra border that FF applies*/
+    appearance: none;
+    background-color: #000000;
+    height: 2rem;
+    width: 1rem;    
+    margin-top: -5px; /* Centers thumb on the track */
+}
+
+input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none; /* Override default look */
+    appearance: none;
+    margin-top: -5px; /* Centers thumb on the track */
+    background-color: #06723c;
+    height: 2rem;
+    width: 1rem;    
+ }
