@@ -439,7 +439,6 @@ async function processPackageUpload(fileObj, owner, zipLink){
     }
     serverConsole('unzippedFiles', unzippedFiles);
     const stimFileName = unzippedFiles.filter(f => f.type == 'stim')[0].name;
-    const stimSetId = await getStimuliSetIdByFilename(stimFileName);
     try {
       for(const stim of unzippedFiles.filter(f => f.type == 'stim')){
         results.push(await saveContentFile(stim.type, stim.name, stim.contents, owner, stim.path));
@@ -448,7 +447,15 @@ async function processPackageUpload(fileObj, owner, zipLink){
       serverConsole('processPackageUpload ERROR,', path, ',', e + ' on file: ' + filePath);
       throw new Meteor.Error('package upload failed at stim upload: ' + e + ' on file: ' + filePath)
     }
-
+    const stimSetId = await getStimuliSetIdByFilename(stimFileName);
+    try {
+      for(const media of unzippedFiles.filter(f => f.type == 'media')){
+        await saveMediaFile(media, owner, stimSetId);
+      }
+    } catch(e) {
+      serverConsole('processPackageUpload ERROR,', path, ',', e + ' on file: ' + filePath);
+      throw new Meteor.Error('package upload failed at media upload: ' + e + ' on file: ' + filePath)
+    }
     try {
       for(const tdf of unzippedFiles.filter(f => f.type == 'tdf')){
         const tdfResults = await saveContentFile(tdf.type, tdf.name, tdf.contents, owner, tdf.path);
@@ -458,14 +465,6 @@ async function processPackageUpload(fileObj, owner, zipLink){
     } catch(e) {
       serverConsole('processPackageUpload ERROR,', path, ',', e + ' on file: ' + filePath);
       throw new Meteor.Error('package upload failed at tdf upload: ' + e + ' on file: ' + filePath)
-    }
-    try {
-      for(const media of unzippedFiles.filter(f => f.type == 'media')){
-        await saveMediaFile(media, owner, stimSetId);
-      }
-    } catch(e) {
-      serverConsole('processPackageUpload ERROR,', path, ',', e + ' on file: ' + filePath);
-      throw new Meteor.Error('package upload failed at media upload: ' + e + ' on file: ' + filePath)
     }
     return {results, stimSetId};
   } catch(e) {
@@ -557,6 +556,18 @@ async function saveContentFile(type, filename, filecontents, owner, packagePath 
               newFormatttedTips.push(tip.replace(imageName, imageLink));
               serverConsole('imageLink', imageLink);
             }
+          }
+        }
+      }
+      for(const unit of json.tutor.unit){
+        if(unit.unitinstructions && unit.unitinstructions.includes('<img')){
+          serverConsole('unitinstructions contains image, finding now')
+          const imageName = unit.unitinstructions.split('<img')[1].split('src="')[1].split('"')[0];
+          const image = await DynamicAssets.collection.findOne({userId: ownerId, name: imageName});
+          if(image){
+            const imageLink = image.meta.link;
+            unit.unitinstructions = unit.unitinstructions.replace(imageName, imageLink);
+            serverConsole('imageLink', imageLink);
           }
         }
       }

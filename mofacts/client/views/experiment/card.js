@@ -2100,7 +2100,7 @@ async function cardStart() {
     Session.set('buttonList', []);
 
     console.log('cards template rendered => Performing resume');
-    let curExperimentState = Session.get('currentExperimentState');
+    let curExperimentState = Session.get('currentExperimentState') || {};
     curExperimentState.showOverlearningText = false;
     Session.set('currentExperimentState', curExperimentState);
 
