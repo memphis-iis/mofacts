@@ -148,6 +148,7 @@ Router.route('/experiment/:target?/:xcond?', {
       console.log('EXPERIMENT target:', target, 'xcond', xcond);
 
       Session.set('clusterMapping', '');
+      if(Meteor.userId()) Meteor.logout();
       this.render('signIn');
     }
   },
