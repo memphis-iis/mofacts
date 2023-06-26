@@ -2763,6 +2763,9 @@ function updateExperimentState(newState, codeCallLocation, unitEngineOverride = 
   if (Object.keys(curExperimentState).length === 0){
     curExperimentState = globalExperimentState?.experimentState || {};
   }
+  if (curExperimentState.currentTdfId === undefined || newState.currentTdfId === undefined) {
+    newState.currentTdfId = Session.get('currentRootTdfId')
+  }
   if(Object.keys(globalExperimentState).length === 0){
     curExperimentState = Object.assign(JSON.parse(JSON.stringify(curExperimentState)), newState);
     Meteor.call('createExperimentState', curExperimentState, curExperimentState.currentTdfId);
