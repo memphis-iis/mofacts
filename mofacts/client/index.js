@@ -113,15 +113,17 @@ function redoCardImage() {
 //change the theme of the page onlogin
 Accounts.onLogin(function() {
   //get theme from user profile
-  var theme = Meteor.user().profile.theme;
-  //if that field returns undefined, set it to /classic.css
-  if (!theme) {
-    theme = '/styles/classic.css';
+  if(Meteor.user()){
+    let theme = Meteor.user().profile.theme;
+    //if that field returns undefined, set it to /classic.css
+    if (!theme) {
+      theme = '/styles/classic.css';
+    }
+    //change #theme href to theme
+    $('#theme').attr('href', theme);
+    //set the theme select to the theme
+    $('#themeSelect').val(theme);
   }
-  //change #theme href to theme
-  $('#theme').attr('href', theme);
-  //set the theme select to the theme
-  $('#themeSelect').val(theme);
 });
 
 //change the theme of the page onlogin to /neo or /neo-dark depending on browser

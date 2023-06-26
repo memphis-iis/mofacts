@@ -1027,7 +1027,7 @@ async function getTdfNamesAssignedByInstructor(instructorID) {
 
 async function getExperimentState(userId, TDFId) { // by currentRootTDFId, not currentTdfId
   const experimentStateRet = GlobalExperimentStates.findOne({userId: userId, TDFId: TDFId});
-  const experimentState = experimentStateRet.experimentState;
+  const experimentState = experimentStateRet ? experimentStateRet.experimentState : {};
   return experimentState;
 }
 

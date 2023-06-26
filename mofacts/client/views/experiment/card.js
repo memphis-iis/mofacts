@@ -384,9 +384,6 @@ async function initCard() {
       leavePage('/card');
     }
   };
-  const globalExperimentState = Session.get('globalExperimentState')
-  Session.set('currentExperimentState', globalExperimentState.experimentState)
-  Session.set('experimentId', globalExperimentState._id);
   Session.set('scoringEnabled', undefined);
 
   if (!Session.get('stimDisplayTypeMap')) {
@@ -2747,7 +2744,7 @@ function stopRecording() {
 // END WEB AUDIO SECTION
 
 async function getExperimentState() {
-  let curExperimentState = Session.get('globalExperimentState').experimentState;
+  let curExperimentState = meteorCallAsync('getExperimentState', Meteor.userId(), Session.get('currentRootTdfId'));
   console.log('getExperimentState:', curExperimentState);
   Meteor.call('updatePerformanceData', 'utlQuery', 'card.getExperimentState', Meteor.userId());
   Session.set('currentExperimentState', curExperimentState);
@@ -2755,27 +2752,20 @@ async function getExperimentState() {
 }
 
 function updateExperimentState(newState, codeCallLocation, unitEngineOverride = {}) {
-  let globalExperimentState = Session.get('globalExperimentState') || {};
   let curExperimentState = Session.get('currentExperimentState') || {};
   console.log('currentExperimentState:', curExperimentState);
   if (unitEngineOverride && Object.keys(unitEngineOverride).length > 0)
     curExperimentState = unitEngineOverride;
-  if (Object.keys(curExperimentState).length === 0){
-    curExperimentState = globalExperimentState?.experimentState || {};
-  }
   if (curExperimentState.currentTdfId === undefined || newState.currentTdfId === undefined) {
     newState.currentTdfId = Session.get('currentRootTdfId')
   }
-  if(Object.keys(globalExperimentState).length === 0){
+  if(Object.keys(curExperimentState).length === 0){
     curExperimentState = Object.assign(JSON.parse(JSON.stringify(curExperimentState)), newState);
     Meteor.call('createExperimentState', curExperimentState, curExperimentState.currentTdfId);
-    console.log('updateExperimentState', codeCallLocation, '\nnew:', curExperimentState);
-    return curExperimentState.currentTdfId;
+  } else {
+    curExperimentState = Object.assign(JSON.parse(JSON.stringify(curExperimentState)), newState);
+    Meteor.call('updateExperimentState', curExperimentState, curExperimentState.currentTdfId);
   }
-  curExperimentState = Object.assign(JSON.parse(JSON.stringify(curExperimentState)), newState);
-  Meteor.call('updateExperimentState', curExperimentState, curExperimentState.currentTdfId);
-  globalExperimentState.experimentState = curExperimentState;
-  Session.set('globalExperimentState', globalExperimentState);
   console.log('updateExperimentState', codeCallLocation, '\nnew:', curExperimentState);
   Session.set('currentExperimentState', curExperimentState);
   return curExperimentState.currentTdfId;
