@@ -611,7 +611,7 @@ async function selectTdf(currentTdfId, lessonName, currentStimuliSetId, ignoreOu
   Session.set('currentRootTdfId', currentTdfId);
   Session.set('currentTdfId', currentTdfId);
   let globalExperimentState = GlobalExperimentStates.findOne({userId: Meteor.userId(), TDFId: currentTdfId}) || {};
-  Session.set('globalExperimentState', globalExperimentState);
+  globalExperimentState ? Session.set('currentExperimentState', globalExperimentState.experimentState) : Session.set('currentExperimentState', {});
   const tdfResponse = Tdfs.findOne({_id: currentTdfId});
   const curTdfContent = tdfResponse.content;
   const curTdfTips = tdfResponse.content.tdfs.tutor.setspec.tips;

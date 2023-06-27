@@ -54,10 +54,18 @@ Template.signIn.onRendered(async function() {
 
 Template.signIn.events({
   'click #signInButton': function(event) {
-    Meteor.logout();
     event.preventDefault();
     $('#signInButton').prop('disabled', true);
     userPasswordCheck();
+  },
+
+  'keypress #signInUsername': function(event) {
+    const key = event.keyCode || event.which;
+    if (key == 13) { //enter key
+      event.preventDefault();
+      $('#signInButton').prop('disabled', true);
+      userPasswordCheck();
+    }
   },
 
   'click #signUpButton': function(event) {
@@ -184,15 +192,6 @@ Template.signIn.events({
       Meteor.logoutOtherClients();
       Router.go('/profile');
     });
-  },
-
-  'keypress .accept-enter-key-testlogin': function(event) {
-    const key = event.keyCode || event.which;
-    if (key == 13) {
-      event.preventDefault();
-      $('#testSignInButton').prop('disabled', true);
-      testLogin();
-    }
   },
 
   'click #testSignInButton': function(event) {
