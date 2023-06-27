@@ -440,6 +440,16 @@ async function processPackageUpload(fileObj, owner, zipLink){
     serverConsole('unzippedFiles', unzippedFiles);
     const stimFileName = unzippedFiles.filter(f => f.type == 'stim')[0].name;
     try {
+      for(const tdf of unzippedFiles.filter(f => f.type == 'tdf')){
+        const tdfResults = await saveContentFile(tdf.type, tdf.name, tdf.contents, owner, tdf.path);
+        results.push(tdfResults);
+        serverConsole('tdfResults', tdfResults);
+      }
+    } catch(e) {
+      serverConsole('processPackageUpload ERROR,', path, ',', e + ' on file: ' + filePath);
+      throw new Meteor.Error('package upload failed at tdf upload: ' + e + ' on file: ' + filePath)
+    }
+    try {
       for(const stim of unzippedFiles.filter(f => f.type == 'stim')){
         results.push(await saveContentFile(stim.type, stim.name, stim.contents, owner, stim.path));
       }
@@ -455,16 +465,6 @@ async function processPackageUpload(fileObj, owner, zipLink){
     } catch(e) {
       serverConsole('processPackageUpload ERROR,', path, ',', e + ' on file: ' + filePath);
       throw new Meteor.Error('package upload failed at media upload: ' + e + ' on file: ' + filePath)
-    }
-    try {
-      for(const tdf of unzippedFiles.filter(f => f.type == 'tdf')){
-        const tdfResults = await saveContentFile(tdf.type, tdf.name, tdf.contents, owner, tdf.path);
-        results.push(tdfResults);
-        serverConsole('tdfResults', tdfResults);
-      }
-    } catch(e) {
-      serverConsole('processPackageUpload ERROR,', path, ',', e + ' on file: ' + filePath);
-      throw new Meteor.Error('package upload failed at tdf upload: ' + e + ' on file: ' + filePath)
     }
     return {results, stimSetId};
   } catch(e) {
@@ -1875,6 +1875,7 @@ async function upsertStimFile(stimulusFileName, stimJSON, ownerId, packagePath =
 async function upsertTDFFile(tdfFilename, tdfJSON, ownerId, packagePath = null) {
   serverConsole('upsertTDFFile', tdfFilename);
   serverConsole('tdfJSON', tdfJSON);
+  let ret = {reason: []};
   let stimulusFileName = tdfJSON.tdfs.tutor.setspec.stimulusfile;
   let Tdf = tdfJSON.tdfs;
   let lessonName = _.trim(Tdf.tutor.setspec.lessonname);
@@ -1882,6 +1883,8 @@ async function upsertTDFFile(tdfFilename, tdfJSON, ownerId, packagePath = null) 
   if (!stimuliSetId) {
     stimuliSetId = nextStimuliSetId;
     nextStimuliSetId += 1;
+  } else {
+    ret = {res: 'awaitClientTDF', reason: ['prevStimExists']}
   }
   if (lessonName.length < 1) {
     results.result = false;
@@ -1927,12 +1930,16 @@ async function upsertTDFFile(tdfFilename, tdfJSON, ownerId, packagePath = null) 
       stimuliSetId: stimuliSetId,
       content: tdfJSONtoUpsert
     }
+    if(ret.res != 'awaitClientTDF'){
+      ret.res = 'awaitClientTDF'
+    }
+    ret.TDF = updateObj
+    ret.reason.push('prevTDFExists')
     if(prev.content.tdfs.tutor.setspec.shuffleclusters != tdfJSON.tdfs.tutor.setspec.shuffleclusters){
       serverConsole('sufflecluster changed, alerting user');
-      return {res: 'awaitClientTDF', TDF: updateObj}
-    } else {
-      Tdfs.update({_id: prev._id},{$set:updateObj});
+      ret.reason.push('shuffleclusterMissmatch')
     }
+    return ret
   } else {
     formattedStims = [];
     serverConsole('inserting tdf', tdfFilename, formattedStims);
