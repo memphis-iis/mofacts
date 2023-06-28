@@ -14,6 +14,7 @@
           feedback.</label>
         <input class="form-check-input" type="checkbox" role="switch" id="audioPromptQuestionOn">
       </div>
+      <br>
       <div class="audioEnabledGroup" style="display: none;">
         <div class="row alert-audio-100">
           <div class="col-4">
@@ -38,13 +39,13 @@
         </div>
         
         {{#if showSpeechAPISetup}}
-          <div class="audioEnabledGroup" hidden>
+          <div class="audioEnabledGroup">
             {{#if speechAPIKeyIsSetup}}
               <p style="color:green">Speech api key is setup</p>
             {{else}}
-              <p style="color:red">Speech api key is not setup</p>
+              <p style="color:red">Speech api key is not setup: <a id='setupAPIKey'>Click here to enable.</a></p>
             {{/if}}
-            <a id='setupAPIKey'>Set up API Key</a>
+
           </div>
         {{/if}}
       </div>
@@ -122,26 +123,37 @@
     <div id="headphonesSuggestedDiv" hidden>
       <h6 color="green">Headphones are suggested with both speech input and output enabled.</h6>
     </div>
-    <div id='speechAPIModal' class="modal fade">
-      <div class="modal-dialog" role="document">
+
+    <div class="modal fade-in-up" id="speechAPIModal" tabindex="-1" aria-labelledby="audioModal" aria-hidden="true">
+      <div class="modal-dialog" id="audio-modal-dialog">
         <div class="modal-content">
           <div class="modal-header">
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-              <span aria-hidden="true">&times;</span>
-              <span class="sr-only">Close</span>
-            </button>
-            <h4 class="modal-title">Google Speech API Key Setup</h4>
+            <h3 class="modal-title">Speech API Key Setup</h3>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
-            <p>If you haven't already please enable the Google Speech API
-              and generate a Google Speech API key by following the instructions
-              <a href="https://support.google.com/cloud/answer/6158862?hl=en" target="_blank">here</a>.</p>
-            <label>Google Speech API Key:</label>
-            <input type="text" id='speechAPIKey'>
-          </div>
-          <div class="modal-footer">
-            <button id='speechAPISubmit' type="button" class="btn-primary flow">Save changes</button>
-            <button id='speechAPIDelete' type="button" class="btn-danger flow">Delete API Key</button>
+            <div class="modal-body">
+              <div class="container">
+                <div class="row">
+                  <div class="col-10 mx-auto text-center">
+                    <p>If you haven't already please enable the Google Speech API
+                      and generate a Google Speech API key by following the instructions
+                      <a href="https://support.google.com/cloud/answer/6158862?hl=en" target="_blank">here</a>.</p>
+                    <label>Google Speech API Key:</label>
+                    <input type="text" id='speechAPIKey'>
+                    <div class="vh-5"></div>
+                    <div class="row row-cols-2">
+                        <div class="col">
+                          <button id='speechAPISubmit' type="button" class="btn-fixed btn">Save changes</button>
+                        </div>
+                        <div class="col">
+                          <button id='speechAPIDelete' type="button" class="btn-fixed btn">Delete API Key</button>
+                        </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>

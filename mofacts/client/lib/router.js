@@ -123,6 +123,7 @@ Router.route('/experiment/:target?/:xcond?', {
     return Meteor.subscribe('tdfByExperimentTarget', this.params.target)
   },
   action: async function() {
+    Session.set('useEmbeddedAPIKeys', true);
     Session.set('curModule', 'experiment');
     // We set our session variable and also set a cookie (so that we still
     // know they're an experimental participant after browser refresh)
@@ -409,6 +410,8 @@ Router.route('/classEdit',{
 //Setup profile routes for direct teacher links
 Router.route('/classes/:_teacher', {
   action: async function(){
+    console.log('teacher route' + this.params._teacher);
+    Session.set('useEmbeddedAPIKeys', true);
     teacherSelected = this.params._teacher;
     let southwestOnly = false;
     let loginMode = Session.get('loginMode');
@@ -485,6 +488,8 @@ Router.route('/classes/:_teacher', {
 //Setup profile routes for direct class links
 Router.route('/classes/:_teacher/:_class', {
   action: async function(){
+    console.log('class route: ' + this.params._teacher + ' ' + this.params._class);
+    Session.set('useEmbeddedAPIKeys', true);
     teacherSelected = this.params._teacher;
     curClassID = this.params._class;
     let southwestOnly = false;

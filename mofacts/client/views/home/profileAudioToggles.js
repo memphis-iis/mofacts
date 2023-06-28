@@ -191,6 +191,8 @@ Template.profileAudioToggles.events({
   },
 
   'click #setupAPIKey': function(e) {
+    //hide the modal
+    $('speechAPIModal').modal('hide');
     e.preventDefault();
     $('#speechAPIModal').modal('show');// {backdrop: "static"}
     Meteor.call('getUserSpeechAPIKey', function(error, key) {
@@ -258,7 +260,12 @@ Template.profileAudioToggles.events({
 
 Template.profileAudioToggles.helpers({
   showSpeechAPISetup: function() {
-    return Session.get('showSpeechAPISetup');
+    //check if Session variable useEmbeddedAPIKey is set
+    if(Session.get('useEmbeddedAPIKeys')){
+      return false;
+    } else {
+      return Session.get('showSpeechAPISetup');
+    }
   },
 
   speechAPIKeyIsSetup: function() {

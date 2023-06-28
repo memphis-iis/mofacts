@@ -10,14 +10,6 @@ Template.signIn.onRendered(async function() {
     console.log('password signin, setting login mode');
     Session.set('loginMode', 'password');
     
-    //get institutions
-    const institutions = [
-      {name: 'None', route: ''},
-      {name: 'Soutwest', route: 'signInSouthwest'}
-    ]
-    Session.set('institutions', institutions);
-    console.log('institutions', institutions);
-
     let verifiedTeachers = await meteorCallAsync('getAllTeachers');
     console.log('verifiedTeachers', verifiedTeachers);
   
@@ -44,8 +36,10 @@ Template.signIn.onRendered(async function() {
     $('#initialInstructorSelection').prop('hidden', 'true');
     $('#classSelection').prop('hidden', 'false');
     $('.login').prop('hidden', 'true');
+    //start bootstrap modal
+    $('#classSelectModal').modal('show');
+    $('#classSelect').removeAttr('hidden');
   }
-
 });
 
 
@@ -63,7 +57,10 @@ Template.signIn.events({
     event.preventDefault();
     Router.go('/signup');
   },
-  
+  'click #classSelectButton': function(event) {
+    event.preventDefault();
+    $('#teacherSelect').removeAttr('hidden');
+  },
   'change #institutionSelect': function(event) {
     event.preventDefault();
     console.log('institution select');
@@ -77,14 +74,30 @@ Template.signIn.events({
   
   'change #teacherSelect': function(event) {
     event.preventDefault();
-    setTeacher(event.target.value);
+    //get the teacher's information fron allTeachers in format {_id:'{{this._id}}',username:'{{this.username}}
+    const teacher = Session.get('teachers').find(teacher => teacher._id === event.target.value);
+    setTeacher(teacher);
+    console.log('teacher select' + teacher);
+    //show class selection
+    $('#classSelect').removeAttr('hidden');
+    //hide teacher selection
+    $('#teacherSelect').prop('hidden', 'true');
   },
   'change #classSelect': function(event) {
     event.preventDefault();
     setClass(event.target.value);
+    //if the user is logged in, route to the profile page, otherwise, close the modal and show the login form
+    $('#classSelectModal').modal('hide');
+    if(Meteor.userId()){
+      Router.go('/profile');
+    }
   },
   'click #signInWithMicrosoftSSO': function(event) {
     event.preventDefault();
+    if(!Session.get('curClass')){
+      //If we are not in a class and we log in, we need to disable embedded API keys.
+      Session.set('useEmbeddedAPIKeys', false);
+    }
     console.log('microsoft sso');
     //we are using passport-microsoft, which is a wrapper for passport-azure-ad
     passport = require('passport');
@@ -173,6 +186,10 @@ Template.signIn.events({
     };
 
     Meteor.loginWithGoogle(options, async function(err) {
+      if(!Session.get('curClass')){
+        //If we are not in a class and we log in, we need to disable embedded API keys.
+        Session.set('useEmbeddedAPIKeys', false);
+      }
       if (err) {
         $('#signInButton').prop('disabled', false);
         // error handling
@@ -406,6 +423,10 @@ function userPasswordCheck() {
 
   // If we're here, we're NOT in experimental mode
   Meteor.loginWithPassword(newUsername, newPassword, async function(error) {
+    if(!Session.get('curClass')){
+      //If we are not in a class and we log in, we need to disable embedded API keys.
+      Session.set('useEmbeddedAPIKeys', false);
+    }
     if (typeof error !== 'undefined') {
       console.log('Login error: ' + error);
       $('#invalidLogin').show();
@@ -506,6 +527,8 @@ setClass = function(curClassID) {
   Session.set('curSectionId', curClass.sectionid)
   console.log("Class/Section Set", curClass, curClass.sectionid);
   $('.login').prop('hidden', '');
+  Session.set('useEmbeddedAPIKey', true);
+  
 };
 
 setTeacher = function(teacher) { // Shape: {_id:'{{this._id}}',username:'{{this.username}}'}
