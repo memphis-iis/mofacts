@@ -16,11 +16,15 @@
     "diff": "^5.0.0",
     "double-metaphone": "^2.0.0",
     "hark": "^1.2.3",
+    "http": "0.0.1-security",
     "isomorphic-fetch": "^3.0.0",
     "node-symspell": "^0.1.0",
+    "passport": "^0.6.0",
+    "passport-microsoft": "^1.0.0",
     "pg-promise": "^10.11.1",
     "transliteration": "^2.1.7",
-    "unzipper": "^0.10.11"
+    "unzipper": "^0.10.11",
+    "util": "^0.12.5"
   },
   "devDependencies": {
     "@types/jquery": "^3.5.13",

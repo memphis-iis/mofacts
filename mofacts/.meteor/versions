@@ -83,6 +83,8 @@ peerlibrary:blocking@0.5.2
 peerlibrary:xml2js@0.4.8_1
 percolate:synced-cron@1.3.2
 promise@0.11.2
+q42:accounts-microsoft@1.0.0
+q42:microsoft@0.1.0
 random@1.2.0
 rate-limit@1.0.9
 reactive-dict@1.3.0

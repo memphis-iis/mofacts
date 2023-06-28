@@ -83,44 +83,56 @@ Template.signIn.events({
     event.preventDefault();
     setClass(event.target.value);
   },
-  'click #signInWithSSOModalButton': function(event) {
+  'click #signInWithMicrosoftSSO': function(event) {
     event.preventDefault();
-    console.log('saml login');
-    const provider = event.target.getAttribute('data-provider');
-    console.log('provider: ' + JSON.stringify(provider));
-    Meteor.loginWithSaml({
-      provider,
-    }, function(data, data2) {
-      console.log('callback');
-      // handle errors and result
-      console.log('data: ' + JSON.stringify(data));
-      console.log('data2: ' + JSON.stringify(data2));
-      if (!!data && !!data.error) {
-        alert('Problem logging in: ' + data.error);
-      } else {
-        const curTeacher = Session.get('curTeacher');
-        const curClass = Session.get('curClass');
-        Meteor.call('addUserToTeachersClass', Meteor.userId(), curTeacher._id, curClass.sectionId, async function(err, result) {
+    console.log('microsoft sso');
+    //we are using passport-microsoft, which is a wrapper for passport-azure-ad
+    passport = require('passport');
+    passport.use(new OIDCStrategy({
+      identityMetadata: 'https://login.microsoftonline.com/common/v2.0/.well-known/openid-configuration',
+      clientID: "fe073cfe-ab3e-4589-b1f0-3bdc7094abeb",
+      responseType: 'id_token',
+      responseMode: 'form_post',
+      redirectUrl: 'http://localhost:3000/auth/microsoft/callback',
+      allowHttpForRedirectUrl: true,
+    }, function(iss, sub, profile, accessToken, refreshToken, done) {
+      //we recieve an id_token, which is a JWT, and we can use it to get the user's email address
+      const email = profile._json.email;
+      //check if the user exists
+      const user = Meteor.users.findOne({'emails.address': email});
+      if (user) {
+        //if the user exists, log them in
+        Accounts.loginWithPassword(email, 'microsoft', function(err) {
           if (err) {
-            console.log('error adding user to teacher class: ' + err);
+            console.log('error logging in with microsoft', err);
           }
-          console.log('addUserToTeachersClass result: ' + result);
-          let sectionName = "";
-          if(curClass.sectionName){
-            sectionName = "/" + curClass.sectionName;
+        }
+        );
+      } else {
+        //if the user does not exist, create them
+        Accounts.createUser({
+          email: email,
+          password: 'microsoft',
+          profile: {
+            loginMode: 'microsoft',
+          },
+        }, function(err) {
+          if (err) {
+            console.log('error creating microsoft user', err);
           }
-          const asignedTDFIds = await meteorCallAsync('getTdfsAssignedToStudent', Meteor.userId(), curClass.sectionId)
-          const entryPoint = `${curTeacher.username}/${curClass.courseName + sectionName}`
-          await meteorCallAsync('setUserLoginData', entryPoint, 'southwest', curTeacher, curClass, asignedTDFIds);
-          Meteor.call('logUserAgentAndLoginTime', Meteor.userId(), navigator.userAgent);
-          Meteor.call('updatePerformanceData', 'login', 'signinSouthwest.clickSamlLogin', Meteor.userId());
-          Meteor.logoutOtherClients();
-          Router.go('/profile');
+        });
+        //then log them in
+        Accounts.loginWithPassword(email, 'microsoft', function(err) {
+          if (err) {
+            console.log('error logging in with microsoft', err);
+          }
         });
       }
-    });
+    }
+    ));
+    //redirect to microsoft login
+    window.location.href = '/auth/microsoft';
   },
-
   'click #courseLink': function(event) {
     event.preventDefault();
     const sectionId = event.target.getAttribute('section-id');
