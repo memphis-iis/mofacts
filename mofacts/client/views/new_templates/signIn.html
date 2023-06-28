@@ -23,8 +23,12 @@
                         <input  type="text" id="signInUsername" value="" placeholder="Username"><br>
                         <input  type="password" id="password" value="" placeholder="Password"><br><br>
                         <span class="help-inline danger errcheck" id="invalidLogin" hidden >Username password pair not found!</span>
-                        <div class="vh-5"></div>
+                    
                     {{/if}}
+                    <a data-bs-toggle="modal" id="classSelectButton" data-bs-target="#classSelectModal">
+                        Teacher / Class Select
+                    </a>
+                    <div class="vh-5"></div>
                     {{#if showTestLogin}}
                     <br>
                         <a id="testSignInButton">Test Login (password not required)</a>
@@ -43,6 +47,9 @@
                 {{/unless}}
                 <button type="button" id="signInButtonOAuth" class="btn btn-fixed">Sign In with Google</button><br>
                 <button type="button" id="signInWithMicrosoftSSO" class="btn btn-fixed">Sign in with Microsoft SSO</button>
+                <br>
+                
+                  
             </div>
         </div>
         <!-- footer -->
@@ -53,29 +60,23 @@
             <div class="modal-dialog fade-in-up">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h3 class="modal-title">SSO Login</h3>
+                        <h3 class="modal-title">Class Selection</h3>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                       </div>
-                  <div class="modal-body login-form ">
+                  <div class="modal-body login-form text-center">
                     <p>
-                        Please enter your SSO URL and select your teacher and class.
+                        Select your teacher and class from the dropdowns below.
                     </p>
-                    <form class="spacer">
-                        <!-- SSO URL input -->
-                        <div class="row">
-                            <div class="col mx-auto">
-                                <input type="text" id="ssoUrl" value="" class="mx-auto" placeholder="https://sso.example.com"><br>
-                            </div>
-                        </div>
+                    <form class="spacer text-center">
                         <!-- hidden teacher select form -->
-                        <select id="teacherSelect" class="form-select" aria-label="Default select example" hidden>
+                        <select id="teacherSelect" style="width:80%;" aria-label="Default select example" hidden>
                             <option selected>Select your teacher</option>
-                            {{#each teacher}}
-                                <option value="{{this.id}}">{{this.username}}</option>
+                            {{#each teachers}}
+                                <option value="{{this._id}}">{{this.profile.name}}</option>
                             {{/each}}
                         </select>
                         <!-- hidden class select form -->
-                        <select id="classSelect" class="form-select" aria-label="Default select example" hidden>
+                        <select id="classSelect" style="width:80%;" aria-label="Default select example" hidden>
                             <option selected>Select your class</option>
                             {{#each curTeacherClasses}}
                               {{#if checkSectionExists this.sectionName}}
@@ -88,11 +89,8 @@
                     </form>
                         <div class="vh-5"></div>
                         <div class="row row-col-2 text-center">
-                            <div class="col">
-                                <button type="button" class="btn btn-fixed">Sign In</button>
-                            </div>
                             <div>
-                                <button type="button" class="btn btn-fixed" data-bs-dismiss="modal">Close</button>
+                                <button type="button" class="btn btn-fixed" data-bs-dismiss="modal">Select and Close</button>
                             </div>
                     </div>
                   </div>

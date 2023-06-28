@@ -2530,8 +2530,11 @@ async function processLINEAR16(data) {
       // is within the realm of reasonable responses before transcribing it
       answerGrammar = getAllCurrentStimAnswers(false);
     }
-
-    const tdfSpeechAPIKey = Session.get('currentTdfFile').tdfs.tutor.setspec.speechAPIKey;
+    if($Session.get('useEmbeddedAPIKeys')){
+      const tdfSpeechAPIKey = Session.get('currentTdfFile').tdfs.tutor.setspec.speechAPIKey;
+    } else {
+      const tdfSpeechAPIKey = '';
+    }
     // Make the actual call to the google speech api with the audio data for transcription
     if (tdfSpeechAPIKey && tdfSpeechAPIKey != '') {
       console.log('tdf key detected');
