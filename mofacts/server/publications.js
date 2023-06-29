@@ -9,7 +9,7 @@ Meteor.publish('assets', function(ownerId, stimSetId) {
 });
 
 Meteor.publish('ownedFiles', function() {
-    return [Tdfs.find({'ownerId': Meteor.userId()}), Stims.find({'owner': Meteor.userId()})]
+    return [Tdfs.find({'ownerId': Meteor.userId()}), Stims.find()]
 });
 
 Meteor.publish('accessableFiles', function() {

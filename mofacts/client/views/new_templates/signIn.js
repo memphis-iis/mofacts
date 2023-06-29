@@ -5,6 +5,7 @@ import {displayify} from '../../../common/globalHelpers';
 import {selectTdf} from '../home/profile'
 import {routeToSignin} from '../../lib/router';
 
+
 Template.signIn.onRendered(async function() {
   if (Session.get('loginMode') !== 'experiment') {
     console.log('password signin, setting login mode');
@@ -31,13 +32,12 @@ Template.signIn.onRendered(async function() {
   }
   Session.set('classesByInstructorId', classesByInstructorId);
   curTeacher = Session.get('curTeacher');
-  console.log("teacher:", curTeacher._id);
+  console.log("teacher:", curTeacher._id || 'none');
   if (curTeacher._id){
     $('#initialInstructorSelection').prop('hidden', 'true');
     $('#classSelection').prop('hidden', 'false');
     $('.login').prop('hidden', 'true');
     //start bootstrap modal
-    $('#classSelectModal').modal('show');
     $('#classSelect').removeAttr('hidden');
   }
 });
@@ -57,9 +57,13 @@ Template.signIn.events({
     event.preventDefault();
     Router.go('/signup');
   },
-  'click #classSelectButton': function(event) {
+  'change #classSelect': function(event) {
     event.preventDefault();
-    $('#teacherSelect').removeAttr('hidden');
+    console.log('class select');
+    //route to /classes/teacher._username/section._id
+    Router.go('/classes/' + Session.get('curTeacher').username + '/' + event.target.value);
+    //hide ClassSelectModal
+    $('#classSelectModal').modal('hide');
   },
   'change #institutionSelect': function(event) {
     event.preventDefault();
@@ -83,69 +87,49 @@ Template.signIn.events({
     //hide teacher selection
     $('#teacherSelect').prop('hidden', 'true');
   },
-  'change #classSelect': function(event) {
+
+  'click #cancelClassSelect': function(event) {
     event.preventDefault();
-    setClass(event.target.value);
-    //if the user is logged in, route to the profile page, otherwise, close the modal and show the login form
-    $('#classSelectModal').modal('hide');
-    if(Meteor.userId()){
-      Router.go('/profile');
-    }
+    //set curTeacher and curClass session variables to null
+    Session.set('curTeacher', null);
+    Session.set('curClass', null);
+    //set the useEmbeddedAPIKeys session variable to false
+    Session.set('useEmbeddedAPIKeys', false);
+  },
+  'click #classSelectButton': function(event) {
+    event.preventDefault();
+    //set the curClass and curTeacher session variables to null
+    Session.set('curTeacher', null);
+    Session.set('curClass', null);
+    //set the useEmbeddedAPIKeys session variable to false
+    Session.set('useEmbeddedAPIKeys', false);
   },
   'click #signInWithMicrosoftSSO': function(event) {
-    event.preventDefault();
-    if(!Session.get('curClass')){
-      //If we are not in a class and we log in, we need to disable embedded API keys.
-      Session.set('useEmbeddedAPIKeys', false);
-    }
-    console.log('microsoft sso');
-    //we are using passport-microsoft, which is a wrapper for passport-azure-ad
-    passport = require('passport');
-    passport.use(new OIDCStrategy({
-      identityMetadata: 'https://login.microsoftonline.com/common/v2.0/.well-known/openid-configuration',
-      clientID: "fe073cfe-ab3e-4589-b1f0-3bdc7094abeb",
-      responseType: 'id_token',
-      responseMode: 'form_post',
-      redirectUrl: 'http://localhost:3000/auth/microsoft/callback',
-      allowHttpForRedirectUrl: true,
-    }, function(iss, sub, profile, accessToken, refreshToken, done) {
-      //we recieve an id_token, which is a JWT, and we can use it to get the user's email address
-      const email = profile._json.email;
-      //check if the user exists
-      const user = Meteor.users.findOne({'emails.address': email});
-      if (user) {
-        //if the user exists, log them in
-        Accounts.loginWithPassword(email, 'microsoft', function(err) {
-          if (err) {
-            console.log('error logging in with microsoft', err);
-          }
+      //login with the Accounts service office365
+      event.preventDefault();
+      console.log('Microsoft Login Proceeding');
+      //set the login mode to microsoft
+      Session.set('loginMode', 'microsoft');
+      Meteor.loginWithOffice365({
+        loginStyle: 'popup',
+        requestOfflineToken: true,
+        requestPermissions: ['User.Read']
+      }, async function(err) {
+        //if we are not in a class and we log in, we need to disable embedded API keys.
+        if(!Session.get('curClass')){
+          Session.set('useEmbeddedAPIKeys', false);
         }
-        );
-      } else {
-        //if the user does not exist, create them
-        Accounts.createUser({
-          email: email,
-          password: 'microsoft',
-          profile: {
-            loginMode: 'microsoft',
-          },
-        }, function(err) {
-          if (err) {
-            console.log('error creating microsoft user', err);
-          }
-        });
-        //then log them in
-        Accounts.loginWithPassword(email, 'microsoft', function(err) {
-          if (err) {
-            console.log('error logging in with microsoft', err);
-          }
-        });
-      }
-    }
-    ));
-    //redirect to microsoft login
-    window.location.href = '/auth/microsoft';
-  },
+        if (err) {
+          // error handling
+          console.log('Could not log in with Microsoft', err);
+          $('#signInButton').prop('disabled', false);
+          return;
+        } else {
+          //redirect to profile edit page, since we don't have a profile yet
+          Router.go('/profile');
+        }
+      });
+    },
   'click #courseLink': function(event) {
     event.preventDefault();
     const sectionId = event.target.getAttribute('section-id');
@@ -154,7 +138,7 @@ Template.signIn.events({
     const allClasses = Session.get('curTeacherClasses');
     const curClass = allClasses.find((aClass) => aClass.sectionId.includes(sectionId));
     Session.set('curClass', curClass);
-    Session.set('curSectionId', sectionId)
+    Session.set('curSectionId', sectionId);
     $('.login').prop('hidden', '');
   },
 
@@ -518,32 +502,9 @@ function testLogin() {
   });
 }
 
-setClass = function(curClassID) {
-  console.log(curClassID);
-  $('#classSelection').prop('hidden', 'true');
-  const allClasses = Session.get('sectionsByInstructorId');
-  const curClass = allClasses.find((aClass) => aClass.sectionid == curClassID);
-  Session.set('curClass', curClass);
-  Session.set('curSectionId', curClass.sectionid)
-  console.log("Class/Section Set", curClass, curClass.sectionid);
-  $('.login').prop('hidden', '');
-  Session.set('useEmbeddedAPIKey', true);
-  
-};
+
 
 setTeacher = function(teacher) { // Shape: {_id:'{{this._id}}',username:'{{this.username}}'}
-  console.log(teacher);
-  Session.set('curTeacher', teacher);
-  $('#initialInstructorSelection').prop('hidden', 'true');
-  const curClasses = Session.get('classesByInstructorId')[teacher._id];
-  console.log('setTeacher', Session.get('classesByInstructorId'), teacher._id, teacher);
-
-  if (curClasses == undefined) {
-    $('#initialInstructorSelection').prop('hidden', '');
-    alert('Your instructor hasn\'t set up their classes yet.  Please contact them and check back in at a later time.');
-    Session.set('curTeacher', {});
-  } else {
-    Session.set('curTeacherClasses', curClasses);
-    $('#classSelection').prop('hidden', '');
-  }
+  //route to the teacher's login page
+  Router.go('/classes/' + teacher.username);
 };

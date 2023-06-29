@@ -17,10 +17,38 @@ Template.contentUpload.helpers({
   },
   assets: function() {
     const files = DynamicAssets.find().fetch();
-    files.forEach((file) => {
-      file.link = DynamicAssets.link(file)
-    });
-    return files;
+    sortedFiles = [];
+    //get all tdfs
+    allTDfs = Tdfs.find({ownerId: Meteor.userId()}).fetch();
+    console.log('allTdfs:', allTDfs);
+    //iterate through allTdfs and get all stimuli
+    tdfSummaries = [];
+    for (const tdf of allTDfs) {
+      thisTdf = {};
+      thisTdf.lessonName = tdf.content.tdfs.tutor.setspec.lessonname;
+      thisTdf.stimuliCount = tdf.stimuli.length;
+      thisTdf.accessors = tdf.accessors || [];
+      thisTdf.accessorsCount = thisTdf.accessors.length;
+      thisTdf.assets = [];
+      thisTdf._id = tdf._id;
+      //iterart through tdf.stimuli and get all stimuli
+      for (const stim of tdf.stimuli) {
+        thisAsset = {};
+        thisAsset.filename = stim.imageStimulus || stim.audioStimulus || stim.videoStimulus;
+        thisAsset.fileType = stim.imageStimulus ? 'image' : stim.audioStimulus ? 'audio' : stim.videoStimulus ? 'video' : 'unknown';
+        thisAsset.link = DynamicAssets.findOne({name: thisAsset.filename}).link();
+        //check if thisTdf.assets already contains a file with thisAsset.filename
+        //if not, add it to thisTdf.assets
+        if(!thisTdf.assets.some(function(asset){
+            return asset.filename === thisAsset.filename;
+        })){
+          thisTdf.assets.push(thisAsset);
+        }
+      }
+      tdfSummaries.push(thisTdf);
+    }
+  console.log('tdfSummaries:', tdfSummaries);
+  return tdfSummaries;
   },
 });
 
@@ -28,6 +56,12 @@ Template.contentUpload.onCreated(function() {
   this.currentUpload = new ReactiveVar(false);
   this.curFilesToUpload = new ReactiveVar([]);
 });
+
+Template.contentUpload.rendered = function() {
+  Meteor.subscribe('allUsers', function() {
+    Session.set('allUsers', Meteor.users.find({}, {fields: {username: 1}, sort: [['username', 'asc']]}).fetch());
+  });
+};
 
 
 // //////////////////////////////////////////////////////////////////////////
@@ -70,6 +104,18 @@ Template.contentUpload.events({
     Template.instance().curFilesToUpload.set(files);
     //clear file input
     $('#upload-file').val('');
+  },
+  'click #show_assets': function(event){
+    event.preventDefault();
+    //get data-file field
+    const tdfId = event.currentTarget.getAttribute('data-file');
+    console.log('tdfId:', tdfId);
+    //toggle the attribute hidden of assets-tdfid
+    if($('#assets-'+tdfId).attr('hidden')){
+      $('#assets-'+tdfId).removeAttr('hidden');
+    } else {
+      $('#assets-'+tdfId).attr('hidden', true);
+    }
   },
   'click #doUpload': async function(event) {
     //get files array from reactive var
@@ -129,7 +175,8 @@ Template.contentUpload.events({
     e.preventDefault();
     console.log('deleteAllAssetsPrompt clicked');
     $('#deleteAllAssetsPrompt').css('display', 'none');
-    $('#deleteAllAssetsConfirm').css('display', 'block');
+    $('#deleteAllAssetsConfirm').removeAttr('hidden');
+
   },
   'click #deleteAllAssetsConfirm': async function(e, template) {
     fileCount = await meteorCallAsync('deleteAllFiles');
@@ -147,7 +194,67 @@ Template.contentUpload.events({
     const popup = window.open();
     popup.document.write(img);                        
     popup.print();
-  }
+  },
+  'click #add-access-btn': function(event){
+    //call assignAccessors meteor method with args tdfId and [accessors] and [revokedAccessors]
+    const tdfId = event.currentTarget.getAttribute('value');
+    console.log('tdfId:', tdfId);
+    //get current accessors
+    const curAccessors = Tdfs.findOne({_id: tdfId}).accessors;
+    const accessors = ($('#add-access-'+tdfId).val()).split(',');  //iterate through accessors to get _id for each by email
+    var newAccessors = [];
+    for(let i=0; i<accessors.length; i++){
+      const accessor = Session.get('allUsers').filter(user => user.username == accessors[i]);
+      if(accessor.length > 0){
+        newAccessors.push({userId: accessor[0]._id, username: accessor[0].username});
+      } else {
+        console.log('accessor not found:', accessors[i]);
+        alert('User does not exist.' + accessors[i]);
+        return;
+      }
+    }
+    console.log('accessors:', newAccessors);
+    const revokedAccessors = [];
+    Meteor.call('assignAccessors', tdfId, newAccessors, revokedAccessors, function(error, result){
+      if(error){
+        console.log('error:', error);
+      } else {
+        console.log('result:', result);
+      }
+    });
+  },
+  'click #remove-access-btn': function(event){
+    //call assignAccessors meteor method with args tdfId and [accessors] and [revokedAccessors]
+    const tdfId = event.currentTarget.getAttribute('value');
+    console.log('tdfId:', tdfId, 'user:', event.currentTarget.getAttribute('data-user'));
+    //get current accessors
+    var curAccessors = Tdfs.findOne({_id: tdfId}).accessors;
+    //remove the accessor from the array
+    curAccessors = curAccessors.filter(accessor => accessor.userId != event.currentTarget.getAttribute('data-user'));
+    //get accessors to revoke
+    const revokedAccessorId = event.currentTarget.getAttribute('data-user');
+    //get the revoked accessors _id
+    const revokedAccessors = [revokedAccessorId];
+    Meteor.call('assignAccessors', tdfId, curAccessors, revokedAccessors, function(error, result){
+      if(error){
+        console.log('error:', error);
+      } else {
+        console.log('result:', result);
+      }
+    });
+  },
+  'click #transfer-btn': function(event){
+    const tdfId = event.currentTarget.getAttribute('value');
+    const newOwnerUsername = $('#transfer-' + tdfId).val();
+    const newOwner = Session.get('allUsers').filter(user => user.username == newOwnerUsername)[0];
+    Meteor.call('transferDataOwnership', tdfId, newOwner, function(error, result){
+      if(error){
+        console.log('error:', error);
+      } else {
+        console.log('result:', result);
+      }
+    });
+  },
 });
 
 
@@ -232,7 +339,7 @@ async function doFileUpload(fileArray) {
     $('#stimUploadLoadingSymbol').hide()
     
     if (errorStack.length == 0) {
-      alert(count.toString() + ' files saved successfully');
+      alert("Files saved successfully. It may take a few minutes for the changes to take effect.");
     } else {
       alert('There were ' + errorStack.length + ' errors uploading files: ' + errorStack.join('\n'));
     }

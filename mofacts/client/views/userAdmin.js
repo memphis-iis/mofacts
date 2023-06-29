@@ -19,23 +19,17 @@ Template.userAdmin.rendered = function() {
 
 Template.userAdmin.helpers({
   userRoleEditList: function() {
-    const userList = [];
     const allUsers = Session.get('allUsers') || [];
-    allUsers.forEach(function(user) {
-      const username = user.username.trim();
-
-      // Only show users for admin work if the username is an email addr
-      // (and yes, we're using a HUGE shortcut here - this check is only
-      // for admin convenience, not security)
-      if (username.indexOf(Session.get('filter')) > -1) {
-        userList.push({
-          '_id': user._id,
-          'username': username,
-          'admin': Roles.userIsInRole(user, ['admin']),
-          'teacher': Roles.userIsInRole(user, ['teacher']),
-        });
+    filter = Session.get('filter');
+    //filter out users that don't match the filter 
+    userList = allUsers.filter(function(user) {
+      if(user.username){
+        return user.username.indexOf(filter) !== -1;
+      } else {
+        return false;
       }
     });
+    console.log('userRoleEditList:' + JSON.stringify(userList));
     return userList;
   },
 });

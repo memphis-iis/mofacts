@@ -584,3 +584,24 @@ input[type="range"]::-webkit-slider-thumb {
     height: 2rem;
     width: 1rem;    
  }
+
+ #signInButtonOAuth{
+    /* use google's blue for outline with white background */
+    border: 1px solid #4285f4;
+    background-color: #ffffff !important;
+    color: #4285f4;
+ }
+
+ #signInWithMicrosoftSSO{
+    /* use microsoft black for outline with white background */
+    border: 1px solid #000000;
+    background-color: #ffffff !important;
+    color: #000000;
+ }
+
+ #classSelectButton{
+    /* use microsoft black for outline with white background */
+    border: 1px solid #000000;
+    background-color: #ffffff !important;
+    color: #000000;
+ }

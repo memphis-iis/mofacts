@@ -37,17 +37,10 @@ const fs = Npm.require('fs');
 const https = require('https')
 const { randomBytes } = require('crypto')
 let verbosityLevel = 0; //0 = only output serverConsole logs, 1 = only output function times, 2 = output serverConsole and function times
-const baseSyllableURL = Meteor.settings.syllableURL + "/syllables/" || 'http://localhost:4567/syllables/';
+const baseSyllableURL = 'http://localhost:4567/syllables/';
+
 if (process.env.METEOR_SETTINGS_WORKAROUND) {
-  //read settings path from environment variable, open file, parse contents, and set Meteor.settings
-  //check if the environment variable is a string or a file path
-  if(process.env.METEOR_SETTINGS_WORKAROUND.substring(0, 1) === '{') {
-    Meteor.settings = JSON.parse(process.env.METEOR_SETTINGS_WORKAROUND);
-  } else {
-    const settingsPath = process.env.METEOR_SETTINGS_WORKAROUND;
-    const settingsFile = fs.readFileSync(settingsPath);
-    Meteor.settings = JSON.parse(settingsFile);
-  }
+  Meteor.settings = JSON.parse(process.env.METEOR_SETTINGS_WORKAROUND);
 }
 if (Meteor.settings.public.testLogin) {
   process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = 0;
@@ -62,9 +55,7 @@ const maxEditDistance = Meteor.settings.SymSpell.maxEditDistance ? parseInt(Mete
 // How big the prefix used for indexing is. Larger values will be result in a faster search, but will use more memory. Default is 7.
 const prefixLength = Meteor.settings.SymSpell.prefixLength ? parseInt(Meteor.settings.SymSpell.prefixLength) : 7;
 const symSpell = new SymSpell(maxEditDistance, prefixLength);
-//append running directory to relative dictionary file locations of symSpell
-serverConsole('loading dictionaries from ' + Meteor.settings.frequencyDictionaryLocation);
-serverConsole(Meteor.settings.frequencyDictionaryLocation)
+//get the path to the dictionary in /public/dictionaries
 symSpell.loadDictionary(Meteor.settings.frequencyDictionaryLocation, 0, 1);
 symSpell.loadBigramDictionary(Meteor.settings.bigramDictionaryLocation, 0, 2);
 process.env.MAIL_URL = Meteor.settings.MAIL_URL;
@@ -2238,23 +2229,21 @@ const methods = {
     Meteor.users.update({'_id': {$in: revokedAccessors}}, {$pull: {'accessedTDFs': TDFId}}, {multi: true});
   },
 
-  transferDataOwnership: function(fileId, fileType, newOwnerId, oldOwnerId){
-    let query;
-    if(fileType == 'TDF'){
-      query = Roles.userIsInRole(oldOwnerId, 'admin') ? {_id: fileId} : {_id: fileId, ownerId: oldOwnerId};
-    } else { 
-      fileId = parseInt(fileId);
-      query = Roles.userIsInRole(oldOwnerId, 'admin') ? {stimuliSetId: fileId} : {stimuliSetId: fileId, owner: oldOwnerId};
-    }
-    if(oldOwnerId && newOwnerId){
-      serverConsole('transferring data ownership for', fileType, fileId, 'to', newOwnerId);
-      if(fileType == 'TDF')
-        Tdfs.update(query, {$set: {'ownerId': newOwnerId}})
-      else
-        Stims.update(query, {$set: {'owner': newOwnerId}})
+  transferDataOwnership: function(tdfId, newOwner){
+    //set the Tdf owner
+    serverConsole('transferDataOwnership',tdfId,newOwner);
+    tdf = Tdfs.findOne({_id: tdfId});
+    if(!tdf){
+      serverConsole('TDF not found');
+      return "TDF not found";
     } else {
-        serverConsole(`transferDataOwnership failed, ${fileType} or newOwner not found`);
+      serverConsole('TDF found', tdf._id, tdf.ownerId);
     }
+    tdf.ownerId = newOwner._id;
+    Tdfs.upsert({_id: tdfId}, tdf);
+    serverConsole(tdf);
+    serverConsole('transfer ' + tdfId + "to" + newOwner);
+    return "success";
   },
 
   resetPasswordWithSecret: function(email, secret, newPassword){
@@ -2356,6 +2345,24 @@ const methods = {
 
     // Remember we return a LIST of errors, so this is success
     return createdId;
+  },
+
+  populateSSOProfile: function(userId){
+    //check if the user has a service profile
+    const user = Meteor.users.findOne(userId);
+    if(user && user.services){
+      //if the user has a service profile, populate the user profile with the service profile
+      const service = Object.keys(user.services)[0];
+      const serviceProfile = user.services[service];
+      const profile = {
+        'firstName': serviceProfile.givenName,
+        'lastName': serviceProfile.surname,
+        'email': serviceProfile.mail,
+      };
+      Meteor.users.update(userId, {$set: {profile: profile, username: serviceProfile.mail}});
+      return "success: " + serviceProfile.mail;
+    }
+    return "failure";
   },
 
   //setUserTheme - sets the user's theme in profile
@@ -2890,6 +2897,16 @@ Meteor.startup(async function() {
     'secret': _.prop(google, 'secret'),
   });
   serverConsole('Rewrote Google service config');
+
+  //add microsoft service config
+  ServiceConfiguration.configurations.upsert({service: 'office365'}, {
+    $set: {
+      loginStyle: 'popup',
+      clientId: 'fe073cfe-ab3e-4589-b1f0-3bdc7094abeb', //Meteor.settings.office365.clientId,
+      secret: 'PtG8Q~zkuknxIKj9x2CUr~h5fLZdxBC3u9LMva.u',
+      tenent: 'common',
+    },
+  });
 
   // Figure out the "prime admin" (owner of repo TDF/stim files)
   // Note that we accept username or email and then find the ID

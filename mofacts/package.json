@@ -20,8 +20,8 @@
     "isomorphic-fetch": "^3.0.0",
     "node-symspell": "^0.1.0",
     "passport": "^0.6.0",
-    "passport-microsoft": "^1.0.0",
     "pg-promise": "^10.11.1",
+    "punycode": "^2.3.0",
     "transliteration": "^2.1.7",
     "unzipper": "^0.10.11",
     "util": "^0.12.5"
