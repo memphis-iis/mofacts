@@ -1772,6 +1772,7 @@ function modelUnitEngine() {
       const maxSecs = session.displaymaxseconds || 0;
       const maxTrials = parseInt(session.maxTrials || 0);
       const numTrialsSoFar = cardProbabilities.numQuestionsAnsweredCurrentSession || 0;
+      const practicetimer = Session.get('currentDeliveryParams').practicetimer;
 
       if (maxTrials > 0 && numTrialsSoFar >= maxTrials) {
         Meteor.call('resetCurSessionTrialsCount', Meteor.userId(), Session.get('currentTdfId'))
@@ -1796,7 +1797,13 @@ function modelUnitEngine() {
         return false;
       }
 
-      const unitElapsedTime = (Date.now() - unitStartTimestamp) / 1000.0;
+      let unitElapsedTime = 0;
+      if(practicetimer === 'clock-based'){
+        unitElapsedTime = Session.get('curStudentPerformance').totalTime / 1000.0;
+      }
+      else {
+        unitElapsedTime = (Date.now() - unitStartTimestamp) / 1000.0;
+      }
       clientConsole(2, 'Model practice check', unitElapsedTime, '>', practiceSeconds);
       return (unitElapsedTime > practiceSeconds);
     },
