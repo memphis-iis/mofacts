@@ -2217,7 +2217,9 @@ const methods = {
 
   getAssignableTDFSForUser: function(userId){
     serverConsole('getAssignableTDFSForUser', userId);
-    const assignableTDFs = Tdfs.find({$or: [{ownerId: userId}, {accessors: {$elemMatch: {userId: userId}}}]}).fetch();
+    // get tdfs where ownerId is userId or .accessors array contains property with userId
+    const assignableTDFs = Tdfs.find({$or: [{ownerId: userId}, {'accessors.userId': userId}]}).fetch();
+    serverConsole('assignableTDFs', assignableTDFs);
     return assignableTDFs;
   },
 
