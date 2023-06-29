@@ -67,6 +67,7 @@ Template.FileManagement.events({
       }
       else{
         console.log(res)
+        alert('Ownership Transferred Successfully');
         Session.set('transferOwnershipFileId', undefined);
         Session.set('transferOwnershipFileType', undefined);
       }

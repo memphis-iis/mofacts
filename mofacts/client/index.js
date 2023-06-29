@@ -17,6 +17,8 @@ if (location.protocol !== 'https:' && forceSSL) {
   location.href = location.href.replace(/^http:/, 'https:');
 }
 
+
+
 async function checkUserSession(){
   const currentSessionId = Meteor.default_connection._lastSessionId;
   const lastSessionId = Meteor.user().profile.lastSessionId;
@@ -112,16 +114,16 @@ function redoCardImage() {
 }
 //change the theme of the page onlogin
 Accounts.onLogin(function() {
-  //get theme from user profile
-  var theme = Meteor.user().profile.theme;
-  //if that field returns undefined, set it to /classic.css
-  if (!theme) {
-    theme = '/styles/classic.css';
+  //check if the user has a profile with an email, first name, and last name
+  if (Meteor.userId() && !Meteor.user().profile.username) {
+    Meteor.call('populateSSOProfile', Meteor.userId(), function(error, result) {
+      if (error) {
+        console.log(error);
+      } else {
+        console.log(result);
+      }
+    });
   }
-  //change #theme href to theme
-  $('#theme').attr('href', theme);
-  //set the theme select to the theme
-  $('#themeSelect').val(theme);
 });
 
 //change the theme of the page onlogin to /neo or /neo-dark depending on browser
@@ -138,6 +140,7 @@ Accounts.onLogout(function() {
 });
 
 Meteor.startup(function() {
+
   Session.set('debugging', true);
   sessionCleanUp();
 
@@ -340,7 +343,7 @@ Template.registerHelper('modalTemplate', function() {
   return modalTemplate.template;
 });
 Template.registerHelper('isLoggedIn', function() {
-  return haveMeteorUser();
+  return Meteor.userId() !== null;
 });
 Template.registerHelper('showPerformanceDetails', function() {
   return ((Session.get('curModule') == 'card' || Session.get('curModule') !== 'instructions') && Session.get('scoringEnabled') && Session.get('unitType') != 'schedule');

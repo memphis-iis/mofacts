@@ -25,9 +25,6 @@
                         <span class="help-inline danger errcheck" id="invalidLogin" hidden >Username password pair not found!</span>
                     
                     {{/if}}
-                    <a data-bs-toggle="modal" id="classSelectButton" data-bs-target="#classSelectModal">
-                        Teacher / Class Select
-                    </a>
                     <div class="vh-5"></div>
                     {{#if showTestLogin}}
                     <br>
@@ -41,12 +38,20 @@
         <!-- login with sso and google -->
         <div class="row text-center large-spacer login-sso-options">
             <div class="col-lg-4 offset-lg-4 col-md-6 col-md-offset-4 col-sm-8 col-sm-offset-2 col-xs-12 large-spacer">
-                <button type="button" id="signInButton" class="btn btn-fixed">Sign In</button><br>
+                <button type="button" id="signInButton" class="btn btn-fixed">Log In</button><br>
                 {{#unless isExperiment}}
                     <button type="button" id="signUpButton" class="btn btn-fixed">Sign Up</button><br>
                 {{/unless}}
-                <button type="button" id="signInButtonOAuth" class="btn btn-fixed">Sign In with Google</button><br>
-                <button type="button" id="signInWithMicrosoftSSO" class="btn btn-fixed">Sign in with Microsoft SSO</button>
+                <button data-bs-toggle="modal" class="btn btn-fixed btn-secondary" id="classSelectButton" data-bs-target="#classSelectModal">
+                    Teacher / Class Select
+                </button>
+                <button type="button" id="signInButtonOAuth" class="btn btn-fixed">
+                    <img width="20px" style="margin-bottom:3px; margin-right:5px" alt="Google sign-in" src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Google_%22G%22_Logo.svg/512px-Google_%22G%22_Logo.svg.png" />
+                    Sign in with Google
+                </button><br>
+                <button type="button" id="signInWithMicrosoftSSO" class="btn btn-fixed">
+                    <img width="20px" style="margin-bottom:3px; margin-right:5px" alt="Google sign-in" src="https://upload.wikimedia.org/wikipedia/commons/4/44/Microsoft_logo.svg" />
+                    Sign in with Microsoft</button>
                 <br>
                 
                   
@@ -69,7 +74,7 @@
                     </p>
                     <form class="spacer text-center">
                         <!-- hidden teacher select form -->
-                        <select id="teacherSelect" style="width:80%;" aria-label="Default select example" hidden>
+                        <select id="teacherSelect" style="width:80%;" aria-label="Default select example">
                             <option selected>Select your teacher</option>
                             {{#each teachers}}
                                 <option value="{{this._id}}">{{this.profile.name}}</option>
@@ -90,7 +95,7 @@
                         <div class="vh-5"></div>
                         <div class="row row-col-2 text-center">
                             <div>
-                                <button type="button" class="btn btn-fixed" data-bs-dismiss="modal">Select and Close</button>
+                                <button type="button" class="btn btn-fixed" id="cancelClassSelect" data-bs-dismiss="modal">Cancel</button>
                             </div>
                     </div>
                   </div>

@@ -16,43 +16,70 @@
                 <table class="table table-striped">
                     <thead>
                         <tr>
-                            <th class="col-2">Type</th>
-                            <th class="col-6">Name</th>
-                            <th class="col-2">Download</th>
-                            <th class="col-2">Delete</th>
+                            <th class="col-6">Summary</th>
+                            <th class="col-6">Action</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {{#each TdfFiles}}
-                            <tr>
-                                <td>tdf</td>
-                                <td>{{content.fileName}}</td>
-                                <td><button id="tdf-download-btn" value="{{_id}}" class="btn-icon"><span class="fa fa-download" aria-hidden="true"></span></button></td>
-                                <td><button id="tdf-delete-btn" value="{{_id}}" data-filename="{{fileName}}" class="btn-icon"><span class="fa fa-minus" aria-hidden="true"></span></button></td>
-                            </tr>
-                        {{/each}}
-                        {{#each StimFiles}}
-                            <tr>
-                                <td>stim</td>
-                                <td>{{this.fileName}}</td>
-                                <td><button id="stim-download-btn" value="{{stimuliSetId}}" class="btn-icon"><span class="fa fa-download" aria-hidden="true"></span></button></td>
-                                <td><button id="stim-delete-btn" value="{{stimuliSetId}}" data-filename="{{fileName}}" class="btn-icon"><span class="fa fa-minus" aria-hidden="true"></span></button></td>
-                            </tr>
-                        {{/each}}
                         {{#each assets}}
                             <tr>
                                 <td>
-                                    {{ext}}
+                                    <table>
+                                        <tr>
+                                            <td>
+                                                <b>{{lessonName}}</b>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                Stimuli Count: {{stimuliCount}}
+                                            </td>
+                                        </tr>
+                                        {{#if accessors}}
+                                        <tr>
+                                            <td>  
+                                                Teachers (excluding owner) ({{accessorsCount}}):
+                                                <ul>
+                                                {{#each accessors}}
+                                                    <li>
+                                                    {{this.username}}
+                                                    <!-- button to revoke access -->
+                                                    <button id="remove-access-btn" value="{{../_id}}" data-user="{{this.userId}}" class="btn-icon"><span class="fa fa-minus" aria-hidden="true"></span></button>
+                                                    </li>
+                                                {{/each}}
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                        {{/if}}
+                                        <tr>
+                                            <td>
+                                                <a id="show_assets" data-file="{{this._id}}">Assets (click to toggle)</a>
+                                                <p hidden id="assets-{{this._id}}">
+                                                {{#each this.assets}}
+                                                    <a href="{{this.link}}">{{this.filename}}</a>
+                                                {{/each}}
+                                                </p>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </td>
+                                <td><button id="tdf-download-btn" value="{{_id}}" class="btn-icon"><span class="fa fa-download" aria-hidden="true"></span></button>
+                                    <button id="tdf-delete-btn" value="{{_id}}" data-filename="{{fileName}}" class="btn-icon"><span class="fa fa-minus" aria-hidden="true"></span></button>
+                                </td>
+                            </tr>
+                            <tr>
+
+                                <td>
+                                    Transfer Ownership (not recoverable)
+                                    <input type="text" id="transfer-{{_id}}" placeholder="Enter new owner's email">
+                                    <button id="transfer-btn" value="{{_id}}" class="btn-icon"><span class="fa fa-exchange" aria-hidden="true"></span></button>
                                 </td>
                                 <td>
-                                    {{name}}
+                                    Add Access
+                                    <input type="text" id="add-access-{{_id}}" data-id="{{_id}}" placeholder="Enter new user's email">
+                                    <button id="add-access-btn" value="{{_id}}" class="btn-icon"><span class="fa fa-plus" aria-hidden="true"></span></button>
                                 </td>
-                                <td>
-                                    <a href="{{link}}" download="{{name}}" target="_parent">
-                                        <button id="assetDownloadButton" value="{{_id}}" class="btn-icon"><span class="fa fa-download" aria-hidden="true"></span></button>
-                                    </a>
-                                </td>
-                                <td><button id="assetDeleteButton" value="{{_id}}" data-id="{{_id}}" class="btn-icon"><span class="fa fa-minus" aria-hidden="true"></span></button></td>
+
                             </tr>
                         {{/each}}
                     </tbody>
@@ -93,10 +120,9 @@
         {{#if isInRole 'admin'}}
         <h3 class="text-center">Admin Functions</h3>
             <p>
-                This will delete all files. It will remove image and media assets, but will not remove lessons (TDFs) or stimuli from the database.
+                This will delete all files, remove all lessons, and remove all stimuli. <b>This is not recoverable.</b>
             </p>
-            <button class="btn width-80-percent" id="deleteAllAssetsPrompt">Delete All Uploaded Files. </button>
-                <button class="btn width-80-percent" style="display: none;" id="deleteAllAssetsConfirm" hidden>Are you sure? This is NOT recoverable.</button>
+            <button class="btn width-80-percent" id="deleteAllAssetsConfirm">Delete All Uploaded Files </button>
         {{/if}}
     </div>
 </template>

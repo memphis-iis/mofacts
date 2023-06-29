@@ -53,6 +53,8 @@ iron:router@1.1.2
 iron:url@1.1.0
 jquery@1.11.11
 launch-screen@1.2.0
+lindoelio:accounts-office365@0.1.1
+lindoelio:office365-oauth@0.2.0
 livedata@1.0.18
 localstorage@1.2.0
 logging@1.1.20

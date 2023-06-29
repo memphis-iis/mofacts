@@ -168,6 +168,7 @@ const restrictedRoutes = [
   'turkWorkflow',
   'dataDownload',
   'userProfileEdit',
+  'profileEdit',
   'userAdmin',
   'contentGeneration',
   'tdfAssignmentEdit',
@@ -431,7 +432,6 @@ Router.route('/classes/:_teacher', {
     //Get teacher info
     const teacher = verifiedTeachers.find((x) => x.username === teacherSelected);
     console.log('got teachers', teacher);
-
     Session.set('teachers', verifiedTeachers);    
     
     console.log('teacher', teacher);
