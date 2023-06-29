@@ -12,6 +12,9 @@
             <div class="row full-width">
                 <div class="header-box">
                     Recent Lessons
+                    {{#if class}}
+                    : {{class.courseName}}
+                    {{/if}}
                 </div> 
             </div>
             <div class="row  gy-5">
@@ -41,8 +44,14 @@
             <div class="header-box">
                 {{#if searching}}
                     Search Results
+                    {{#if class}}
+                    : {{class.courseName}}
+                    {{/if}}
                 {{else}}
                     Available Lessons
+                    {{#if class}}
+                    : {{class.courseName}}
+                    {{/if}}
                 {{/if}}
             </div> 
         </div> 

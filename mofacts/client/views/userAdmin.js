@@ -13,7 +13,7 @@ Template.userAdmin.rendered = function() {
   });
 
   Meteor.subscribe('allUsers', function() {
-    Session.set('allUsers', Meteor.users.find({}, {fields: {username: 1}, sort: [['username', 'asc']]}).fetch());
+    Session.set('allUsers', Meteor.users.find({}, {fields: {username: 1, roles:1}, sort: [['username', 'asc']]}).fetch());
   });
 };
 
@@ -27,6 +27,19 @@ Template.userAdmin.helpers({
         return user.username.indexOf(filter) !== -1;
       } else {
         return false;
+      }
+    });
+    //iterate through the list. if roles contains teacher, set .teacher to true. if roles contains admin, set .admin to true
+    userList.forEach(function(user) {
+      user.teacher = false;
+      user.admin = false;
+      if(user.roles){
+        if(user.roles.indexOf('teacher') !== -1){
+          user.teacher = true;
+        }
+        if(user.roles.indexOf('admin') !== -1){
+          user.admin = true;
+        }
       }
     });
     console.log('userRoleEditList:' + JSON.stringify(userList));

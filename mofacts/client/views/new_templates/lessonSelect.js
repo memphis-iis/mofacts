@@ -72,7 +72,7 @@ Template.lessonSelect.helpers({
     },
   
     class: function(){
-      thisClass = Meteor.user().profile.class;
+      thisClass = Session.get('curClass');
       console.log('class: ', thisClass);
       if(thisClass.courseName){
         return thisClass;
@@ -148,6 +148,22 @@ Template.lessonSelect.helpers({
     const courseId = Meteor.user().profile.curClass ? Meteor.user().profile.curClass.courseId : null;
     const courseTdfs = Assignments.find({courseId: courseId}).fetch()
     console.log('courseTdfs', courseTdfs, courseId);
+
+    //if curclass is set, then get the tdfs for that class
+    if (Session.get('curClass').sectionId) {
+      const teacherId = Session.get('curClass').teacherUserId;
+      const teacherTdfs = await meteorCallAsync('getAllCourseAssignmentsForInstructor', teacherId);
+      console.log('teacherTdfs', teacherTdfs);
+      //get allTdfs._id that match each teacherTdfs.tdfId
+      const classTdfs = allTdfs.filter((tdf) => {
+        return teacherTdfs.some((teacherTdf) => {
+          return teacherTdf.tdfId == tdf._id;
+        });
+      });
+      console.log('classTdfs', classTdfs);
+      allTdfs = classTdfs;
+    }
+
   
     // Check all the valid TDF's
     for (const tdf of allTdfs) {
