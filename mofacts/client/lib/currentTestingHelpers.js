@@ -392,12 +392,17 @@ function getCurrentDeliveryParams() {
     'useSpellingCorrection': false,
     'editDistance': 1,
     'optimalThreshold': false,
-    'resetStudentPerformance': false
+    'resetStudentPerformance': false,
+    'practicetimer': "clock-based"
   };
 
   // We've defined defaults - also define translatations for values
   function xlateBool(v) {
     return v ? _.trim(v).toLowerCase() === 'true' : false;
+  }
+
+  function xlateString(v) {
+    return v ? _.trim(v).toLowerCase() : '';
   }
 
   function randListItem(list) {
@@ -435,7 +440,8 @@ function getCurrentDeliveryParams() {
     'useSpellingCorrection': xlateBool,
     'editDistance': _.intval,
     'optimalThreshold': _.intval,
-    'resetStudentPerformance': xlateBool
+    'resetStudentPerformance': xlateBool,
+    'practicetimer': xlateString
   };
 
   let modified = false;
