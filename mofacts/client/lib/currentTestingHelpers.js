@@ -393,7 +393,7 @@ function getCurrentDeliveryParams() {
     'editDistance': 1,
     'optimalThreshold': false,
     'resetStudentPerformance': false,
-    'practicetimer': "clock-based"
+    'practicetimer': "query-based"
   };
 
   // We've defined defaults - also define translatations for values
