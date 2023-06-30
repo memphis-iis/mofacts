@@ -614,13 +614,11 @@ async function selectTdf(currentTdfId, lessonName, currentStimuliSetId, ignoreOu
   globalExperimentState ? Session.set('currentExperimentState', globalExperimentState.experimentState) : Session.set('currentExperimentState', {});
   const tdfResponse = Tdfs.findOne({_id: currentTdfId});
   const curTdfContent = tdfResponse.content;
-  const curTdfTips = tdfResponse.content.tdfs.tutor.setspec.tips;
   Session.set('currentTdfFile', curTdfContent);
   Session.set('currentTdfName', curTdfContent.fileName);
   Session.set('currentStimuliSetId', currentStimuliSetId);
   Session.set('ignoreOutOfGrammarResponses', ignoreOutOfGrammarResponses);
   Session.set('speechOutOfGrammarFeedback', speechOutOfGrammarFeedback);
-  Session.set('curTdfTips', curTdfTips)
 
   // Record state to restore when we return to this page
   let audioPromptMode;

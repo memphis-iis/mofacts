@@ -3,7 +3,7 @@ import {haveMeteorUser} from '../../lib/currentTestingHelpers';
 import {updateExperimentState, initCard} from './card';
 import {routeToSignin} from '../../lib/router';
 
-export {instructContinue, unitHasLockout};
+export {instructContinue, unitHasLockout, checkForFileImage};
 // //////////////////////////////////////////////////////////////////////////
 // Instruction timer and leaving this page - we don't want to leave a
 // timer running!
@@ -85,6 +85,19 @@ function currLockOutMinutes() {
     logLockout(lockoutminutes);
     return lockoutminutes;
   }
+}
+
+function checkForFileImage(string) {
+  let div = document.createElement('div');
+  div.innerHTML = string;
+  let images = div.getElementsByTagName('img')
+  for(let image of images){
+    let imgSrc = image ? image.getAttribute("src") : "";
+    image = DynamicAssets.findOne({name: imgSrc});
+    if(image)
+    string = string.replace(imgSrc, image.link())
+  }
+  return string
 }
 
 function unitHasLockout() {
@@ -344,11 +357,11 @@ Template.instructions.helpers({
   },
 
   instructionText: function() {
-    return Session.get('currentTdfUnit').unitinstructions;
+    return checkForFileImage(Session.get('currentTdfUnit').unitinstructions);
   },
 
   instructionQuestion: function(){
-    return Session.get('currentTdfUnit').unitinstructionsquestion;
+    return checkForFileImage(Session.get('currentTdfUnit').unitinstructionsquestion);
   },
 
   islockout: function() {

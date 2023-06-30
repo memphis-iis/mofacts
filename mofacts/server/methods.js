@@ -544,36 +544,6 @@ async function saveContentFile(type, filename, filecontents, owner, packagePath 
       const jsonContents = typeof filecontents == 'string' ? JSON.parse(filecontents) : filecontents;
       const json = {tutor: jsonContents.tutor};
       const lessonName = _.trim(jsonContents.tutor.setspec.lessonname);
-      const tips = jsonContents.tutor.setspec.tips;
-      let newFormatttedTips = [];
-      if(tips){
-        for(const tip of tips){
-          if(tip.split('<img').length > 1){
-            const imageName = tip.split('<img')[1].split('src="')[1].split('"')[0];
-            const image = await DynamicAssets.collection.findOne({userId: ownerId, name: imageName});
-            if(image){
-              const imageLink = image.meta.link;
-              newFormatttedTips.push(tip.replace(imageName, imageLink));
-              serverConsole('imageLink', imageLink);
-            }
-          }
-        }
-      }
-      for(const unit of json.tutor.unit){
-        if(unit.unitinstructions && unit.unitinstructions.includes('<img')){
-          serverConsole('unitinstructions contains image, finding now')
-          const imageName = unit.unitinstructions.split('<img')[1].split('src="')[1].split('"')[0];
-          const image = await DynamicAssets.collection.findOne({userId: ownerId, name: imageName});
-          if(image){
-            const imageLink = image.meta.link;
-            unit.unitinstructions = unit.unitinstructions.replace(imageName, imageLink);
-            serverConsole('imageLink', imageLink);
-          }
-        }
-      }
-      if(newFormatttedTips.length > 0){
-        json.tutor.setspec.tips = newFormatttedTips;
-      }
       if (lessonName.length < 1) {
         results.result = false;
         results.errmsg = 'TDF has no lessonname - it cannot be valid';
