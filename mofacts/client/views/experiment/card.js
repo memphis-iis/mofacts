@@ -18,7 +18,7 @@ import {createScheduleUnit, createModelUnit, createEmptyUnit} from './unitEngine
 import {Answers} from './answerAssess';
 import {sessionCleanUp} from '../../lib/sessionUtils';
 import {checkUserSession} from '../../index'
-import {instructContinue, unitHasLockout} from './instructions';
+import {instructContinue, unitHasLockout, checkForFileImage} from './instructions';
 
 export {
   speakMessageIfAudioPromptFeedbackEnabled,
@@ -376,6 +376,13 @@ function leavePage(dest) {
 Template.card.rendered = initCard;
 
 async function initCard() {
+  const tdfResponse = Session.get('currentTdfFile');
+  const curTdfTips = tdfResponse.content.tdfs.tutor.setspec.tips;
+  const formattedTips = []
+  for(const tip of curTdfTips){
+    formattedTips.push(checkForFileImage(tip))
+  }
+  Session.set('curTdfTips', formattedTips)
   await checkUserSession();
   console.log('RENDERED----------------------------------------------');
   // Catch page navigation events (like pressing back button) so we can call our cleanup method
@@ -384,9 +391,6 @@ async function initCard() {
       leavePage('/card');
     }
   };
-  const globalExperimentState = GlobalExperimentStates.findOne({TDFId: Session.get('currentTdfId')});
-  Session.set('currentExperimentState', globalExperimentState.experimentState)
-  Session.set('experimentId', globalExperimentState._id);
   Session.set('scoringEnabled', undefined);
 
   if (!Session.get('stimDisplayTypeMap')) {
@@ -639,10 +643,10 @@ Template.card.helpers({
   },
 
   'displayAnswer': function() {
-    return Answers.getDisplayAnswerText(GlobalExperimentStates.findOne({TDFId: Session.get('currentTdfId')}).experimentState.currentAnswer);
+    return Answers.getDisplayAnswerText(Session.get('currentAnswer'));
   },
 
-  'rawAnswer': ()=> GlobalExperimentStates.findOne({TDFId: Session.get('currentTdfId')}).experimentState.currentAnswer,
+  'rawAnswer': ()=> Session.get('currentAnswer'),
 
   'currentProgress': () => Session.get('questionIndex'),
 
@@ -2109,7 +2113,9 @@ async function cardStart() {
     Session.set('buttonList', []);
 
     console.log('cards template rendered => Performing resume');
-    Session.get('currentExperimentState').showOverlearningText = false;
+    let curExperimentState = Session.get('currentExperimentState') || {};
+    curExperimentState.showOverlearningText = false;
+    Session.set('currentExperimentState', curExperimentState);
 
     Session.set('inResume', false); // Turn this off to keep from re-resuming
     resumeFromComponentState();
@@ -2754,38 +2760,31 @@ function stopRecording() {
 // END WEB AUDIO SECTION
 
 async function getExperimentState() {
-  let curExperimentState = GlobalExperimentStates.findOne({TDFId: Session.get('currentTdfId')}).experimentState;
-  const sessExpState = Session.get('currentExperimentState');
-  console.log('getExperimentState:', curExperimentState, sessExpState);
+  let curExperimentState = meteorCallAsync('getExperimentState', Meteor.userId(), Session.get('currentRootTdfId'));
+  console.log('getExperimentState:', curExperimentState);
   Meteor.call('updatePerformanceData', 'utlQuery', 'card.getExperimentState', Meteor.userId());
   Session.set('currentExperimentState', curExperimentState);
   return curExperimentState || {};
 }
 
 function updateExperimentState(newState, codeCallLocation, unitEngineOverride = {}) {
-  let globalExperimentState = GlobalExperimentStates.findOne({TDFId: Session.get('currentTdfId')});
-  let curExperimentState = Session.get('currentExperimentState');
+  let curExperimentState = Session.get('currentExperimentState') || {};
   console.log('currentExperimentState:', curExperimentState);
   if (unitEngineOverride && Object.keys(unitEngineOverride).length > 0)
     curExperimentState = unitEngineOverride;
-  if (!curExperimentState){
-    curExperimentState = globalExperimentState?.experimentState || {};
+  if (curExperimentState.currentTdfId === undefined || newState.currentTdfId === undefined) {
+    newState.currentTdfId = Session.get('currentRootTdfId')
   }
-  if(!globalExperimentState){
+  if(Object.keys(curExperimentState).length === 0){
     curExperimentState = Object.assign(JSON.parse(JSON.stringify(curExperimentState)), newState);
-    GlobalExperimentStates.insert({
-      userId: Meteor.userId(),
-      TDFId: curExperimentState.currentTdfId,
-      experimentState: curExperimentState
-    });
-    console.log('updateExperimentState', codeCallLocation, '\nnew:', curExperimentState);
-    return Session.get('currentRootTdfId');
+    Meteor.call('createExperimentState', curExperimentState, curExperimentState.currentTdfId);
+  } else {
+    curExperimentState = Object.assign(JSON.parse(JSON.stringify(curExperimentState)), newState);
+    Meteor.call('updateExperimentState', curExperimentState, curExperimentState.currentTdfId);
   }
-  curExperimentState = Object.assign(JSON.parse(JSON.stringify(curExperimentState)), newState);
-  GlobalExperimentStates.update({_id: globalExperimentState._id}, {$set: {experimentState: curExperimentState}});
   console.log('updateExperimentState', codeCallLocation, '\nnew:', curExperimentState);
   Session.set('currentExperimentState', curExperimentState);
-  return Session.get('currentRootTdfId');
+  return curExperimentState.currentTdfId;
 }
 
 // Re-initialize our User Progress and Card Probabilities internal storage
@@ -3060,7 +3059,7 @@ async function processUserTimesLog() {
   Session.set('clozeQuestionParts', curExperimentState.clozeQuestionParts || undefined);
   Session.set('testType', curExperimentState.testType);
   Session.set('originalQuestion', curExperimentState.originalQuestion);
-
+  Session.set('currentAnswer', curExperimentState.currentAnswer);
   Session.set('subTdfIndex', curExperimentState.subTdfIndex);
   Session.set('alternateDisplayIndex', curExperimentState.alternateDisplayIndex);
 

@@ -238,7 +238,7 @@ function defaultUnitEngine(curExperimentData) {
       const newExperimentState = {};
       Session.set('alternateDisplayIndex', undefined);
       const cluster = stimClusters[cardIndex];
-      clientConsole('setUpCardQuestionAndAnswerGlobals', cardIndex, whichStim, probFunctionParameters,
+      clientConsole(1, 'setUpCardQuestionAndAnswerGlobals', cardIndex, whichStim, probFunctionParameters,
           cluster, cluster.stims[whichStim], whichHintLevel);
       const curStim = cluster.stims[whichStim];
       let currentDisplay = JSON.parse(JSON.stringify({
@@ -332,6 +332,8 @@ function defaultUnitEngine(curExperimentData) {
           clientConsole(2, 'HintLevel: setUpCardQuestionAndAnswerGlobals, Hints Disabled',whichHintLevel);
         }
       }
+      Session.set('currentAnswerSyllables', currentAnswerSyllables);
+      Session.set('currentAnswer', currentAnswer);
       Session.set('clozeQuestionParts', clozeQuestionParts);
       newExperimentState.currentAnswerSyllables = currentAnswerSyllables;
       newExperimentState.currentAnswer = currentAnswer;
@@ -669,7 +671,6 @@ function modelUnitEngine() {
         }
       }
     }
-    const stim = cards[clusterIndex].stims[stimIndex];
 
     return {clusterIndex, stimIndex, hintLevelIndex};
   }
@@ -1771,6 +1772,7 @@ function modelUnitEngine() {
       const maxSecs = session.displaymaxseconds || 0;
       const maxTrials = parseInt(session.maxTrials || 0);
       const numTrialsSoFar = cardProbabilities.numQuestionsAnsweredCurrentSession || 0;
+      const practicetimer = Session.get('currentDeliveryParams').practicetimer;
 
       if (maxTrials > 0 && numTrialsSoFar >= maxTrials) {
         Meteor.call('resetCurSessionTrialsCount', Meteor.userId(), Session.get('currentTdfId'))
@@ -1795,7 +1797,13 @@ function modelUnitEngine() {
         return false;
       }
 
-      const unitElapsedTime = (Date.now() - unitStartTimestamp) / 1000.0;
+      let unitElapsedTime = 0;
+      if(practicetimer === 'clock-based'){
+        unitElapsedTime = Session.get('curStudentPerformance').totalTime / 1000.0;
+      }
+      else {
+        unitElapsedTime = (Date.now() - unitStartTimestamp) / 1000.0;
+      }
       clientConsole(2, 'Model practice check', unitElapsedTime, '>', practiceSeconds);
       return (unitElapsedTime > practiceSeconds);
     },
