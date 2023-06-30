@@ -5,7 +5,7 @@ Meteor.publish('files.assets.all', function () {
 });
 
 Meteor.publish('assets', function(ownerId, stimSetId) {
-    return DynamicAssets.collection.find({userId: ownerId, "meta.stimuliSetId": stimSetId});
+    return DynamicAssets.collection.find({userId: ownerId});
 });
 
 Meteor.publish('ownedFiles', function() {

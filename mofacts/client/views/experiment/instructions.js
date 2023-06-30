@@ -344,7 +344,22 @@ Template.instructions.helpers({
   },
 
   instructionText: function() {
-    return Session.get('currentTdfUnit').unitinstructions;
+    text = Session.get('currentTdfUnit').unitinstructions;
+    //this is in HTML. Iterate through all src tags and if they do not begin with http, lookup the dynamic asset
+    //and replace the src with the dynamic asset
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(text, 'text/html');
+    const srcs = doc.getElementsByTagName('img');
+    for (let i = 0; i < srcs.length; i++) {
+      const src = srcs[i].getAttribute('src');
+      if (src && src.indexOf('http') !== 0) {
+        const asset = DynamicAssets.findOne({name: src}).link();
+        if (asset) {
+          srcs[i].setAttribute('src', asset);
+        }
+      }
+    }
+    return doc.body.innerHTML;
   },
 
   instructionQuestion: function(){
