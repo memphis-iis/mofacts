@@ -148,6 +148,7 @@ Router.route('/experiment/:target?/:xcond?', {
       console.log('EXPERIMENT target:', target, 'xcond', xcond);
 
       Session.set('clusterMapping', '');
+      if(Meteor.userId()) Meteor.logout();
       this.render('signIn');
     }
   },
@@ -291,15 +292,17 @@ Router.route('/adminControls', {
 Router.route('/profile', {
   name: 'client.profile',
   waitOn: function() {
-    let assignedTdfs = Meteor.user()?.profile?.assignedTdfs;
+    let assignedTdfs = Meteor.user()?.profile?.assignedTdfs || 'undefined';
     let curCourseId = Meteor.user()?.profile?.curClass?.courseId || 'undefined'
     let allSubscriptions = [
       Meteor.subscribe('allUserExperimentState', assignedTdfs)];
-    if (curCourseId != undefined)
+    if (curCourseId == 'undefined' || curCourseId == undefined)
+      console.log('no assignments found')
+    else
       allSubscriptions.push(Meteor.subscribe('Assignments', curCourseId));
     if (Roles.userIsInRole(Meteor.user(), ['admin']))
       allSubscriptions.push(Meteor.subscribe('allUsers'));
-    if (assignedTdfs === undefined || assignedTdfs === 'all')
+    if (assignedTdfs === 'undefined' || assignedTdfs === 'all' || assignedTdfs.length == 0)
       allSubscriptions.push(Meteor.subscribe('allTdfs'));
     else 
       allSubscriptions.push(Meteor.subscribe('currentTdf', assignedTdfs));
@@ -523,7 +526,6 @@ Router.route('/card', {
       Meteor.subscribe('assets', Session.get('currentTdfFile').ownerId, Session.get('currentStimuliSetId')),
       Meteor.subscribe('userComponentStates', Session.get('currentTdfId')),
       Meteor.subscribe('currentTdf', Session.get('currentTdfId')),
-      Meteor.subscribe('userExperimentState', Session.get('currentTdfId')),
     ]
   },
   action: function() {
@@ -541,6 +543,13 @@ Router.route('/card', {
 Session.set('instructionClientStart', 0);
 Router.route('/instructions', {
   name: 'client.instructions',
+  waitOn: function() {
+    return [ 
+      Meteor.subscribe('assets', Session.get('currentTdfFile').ownerId, Session.get('currentStimuliSetId')),
+      Meteor.subscribe('userComponentStates', Session.get('currentTdfId')),
+      Meteor.subscribe('currentTdf', Session.get('currentTdfId')),
+    ]
+  },
   action: function() {
     Session.set('instructionClientStart', Date.now());
     Session.set('curModule', 'instructions');

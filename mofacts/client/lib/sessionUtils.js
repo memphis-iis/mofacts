@@ -46,6 +46,7 @@ import {curExperimentState} from "../views/experiment/card.js";
 function sessionCleanUp() {
   console.log('session cleanup!!!');
 
+  Session.get('currentAnswer', undefined);
   Session.set('alternateDisplayIndex', undefined);
   Session.set('showDialogueText', false);
   Session.set('audioEnabled', undefined);

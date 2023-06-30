@@ -49,6 +49,7 @@ if (Meteor.settings.public.testLogin) {
 
 let highestStimuliSetId;
 let nextStimuliSetId;
+let nextEventId = 1;
 
 // How large the distance between two words can be to be considered a match. Larger values result in a slower search. Defualt is 2.
 const maxEditDistance = Meteor.settings.SymSpell.maxEditDistance ? parseInt(Meteor.settings.SymSpell.maxEditDistance) : 2;
@@ -374,8 +375,8 @@ async function clearCurUnitProgress(userId, TDFId) {
       unit.responseStates[responseState].totalPracticeDuration = 0;
       unit.responseStates[responseState].timesSeen = 0;
     }
+    ComponentStates.update({_id: unit._id}, unit);
   }
-  ComponentStates.update({_id: unit._id}, unit);
 }
 
 async function getMaxResponseKC(){
@@ -438,16 +439,6 @@ async function processPackageUpload(fileObj, owner, zipLink){
     }
     serverConsole('unzippedFiles', unzippedFiles);
     const stimFileName = unzippedFiles.filter(f => f.type == 'stim')[0].name;
-    const stimSetId = await getStimuliSetIdByFilename(stimFileName);
-    try {
-      for(const stim of unzippedFiles.filter(f => f.type == 'stim')){
-        results.push(await saveContentFile(stim.type, stim.name, stim.contents, owner, stim.path));
-      }
-    } catch(e) {
-      serverConsole('processPackageUpload ERROR,', path, ',', e + ' on file: ' + filePath);
-      throw new Meteor.Error('package upload failed at stim upload: ' + e + ' on file: ' + filePath)
-    }
-
     try {
       for(const tdf of unzippedFiles.filter(f => f.type == 'tdf')){
         const tdfResults = await saveContentFile(tdf.type, tdf.name, tdf.contents, owner, tdf.path);
@@ -458,6 +449,15 @@ async function processPackageUpload(fileObj, owner, zipLink){
       serverConsole('processPackageUpload ERROR,', path, ',', e + ' on file: ' + filePath);
       throw new Meteor.Error('package upload failed at tdf upload: ' + e + ' on file: ' + filePath)
     }
+    try {
+      for(const stim of unzippedFiles.filter(f => f.type == 'stim')){
+        results.push(await saveContentFile(stim.type, stim.name, stim.contents, owner, stim.path));
+      }
+    } catch(e) {
+      serverConsole('processPackageUpload ERROR,', path, ',', e + ' on file: ' + filePath);
+      throw new Meteor.Error('package upload failed at stim upload: ' + e + ' on file: ' + filePath)
+    }
+    const stimSetId = await getStimuliSetIdByFilename(stimFileName);
     try {
       for(const media of unzippedFiles.filter(f => f.type == 'media')){
         await saveMediaFile(media, owner, stimSetId);
@@ -544,24 +544,6 @@ async function saveContentFile(type, filename, filecontents, owner, packagePath 
       const jsonContents = typeof filecontents == 'string' ? JSON.parse(filecontents) : filecontents;
       const json = {tutor: jsonContents.tutor};
       const lessonName = _.trim(jsonContents.tutor.setspec.lessonname);
-      const tips = jsonContents.tutor.setspec.tips;
-      let newFormatttedTips = [];
-      if(tips){
-        for(const tip of tips){
-          if(tip.split('<img').length > 1){
-            const imageName = tip.split('<img')[1].split('src="')[1].split('"')[0];
-            const image = await DynamicAssets.collection.findOne({userId: ownerId, name: imageName});
-            if(image){
-              const imageLink = image.meta.link;
-              newFormatttedTips.push(tip.replace(imageName, imageLink));
-              serverConsole('imageLink', imageLink);
-            }
-          }
-        }
-      }
-      if(newFormatttedTips.length > 0){
-        json.tutor.setspec.tips = newFormatttedTips;
-      }
       if (lessonName.length < 1) {
         results.result = false;
         results.errmsg = 'TDF has no lessonname - it cannot be valid';
@@ -1015,7 +997,7 @@ async function getTdfNamesAssignedByInstructor(instructorID) {
 
 async function getExperimentState(userId, TDFId) { // by currentRootTDFId, not currentTdfId
   const experimentStateRet = GlobalExperimentStates.findOne({userId: userId, TDFId: TDFId});
-  const experimentState = experimentStateRet.experimentState;
+  const experimentState = experimentStateRet ? experimentStateRet.experimentState : {};
   return experimentState;
 }
 
@@ -1055,8 +1037,8 @@ function insertHiddenItem(userId, stimulusKC, tdfId) {
 async function insertHistory(historyRecord) {
   const tdfFileName = historyRecord['Condition_Typea'];
   const dynamicTagFields = await getListOfStimTags(tdfFileName);
-  const eventId = Histories.findOne({}, {limit: 1, sort: {eventId: -1}})?.eventId + 1 || 1;
-  historyRecord.eventId = eventId
+  historyRecord.eventId = nextEventId;
+  nextEventId += 1;
   historyRecord.dynamicTagFields = dynamicTagFields || [];
   historyRecord.recordedServerTime = (new Date()).getTime();
   serverConsole('insertHistory', historyRecord);
@@ -1378,61 +1360,39 @@ async function getStimSetFromLearningSessionByClusterList(stimuliSetId, clusterL
 
 async function getStudentPerformanceByIdAndTDFId(userId, TDFId, stimIds=null) {
   serverConsole('getStudentPerformanceByIdAndTDFId', userId, TDFId, stimIds);
-  const innerQuery = {
-    userId: userId,
-    TDFId: TDFId,
-    componentType: 'stimulus',
-  };
 
-  if (stimIds) {
-    innerQuery.KCId = {$in: stimIds};
+  const componentState = await ComponentStates.findOne({userId: userId, TDFId: TDFId});
+  if (!componentState) return null;
+  
+  const studentPerformance = {
+    totalStimCount: 0,
+    numCorrect: 0,
+    numIncorrect: 0,
+    totalPracticeDuration: 0,
+    allTimeNumCorrect: 0,
+    allTimeNumIncorrect: 0,
+    allTimePracticeDuration: 0,
+    stimsIntroduced: 0,
+    count: 0,
   }
-
-  const query = [{
-    $match: innerQuery,
-  },
-  {
-    $addFields: {
-      introduced: {
-        $cond: {
-          if: {$or: ['$priorCorrect', '$priorIncorrect']},
-          then: 1,
-          else: 0,
-        },
-      },
-      totalStimCount: 1,
-    },
-  },
-  {
-    $group: {
-      _id: null,
-      totalStimCount: {$sum: '$totalStimCount'},
-      numCorrect: {$sum: '$priorCorrect'},
-      numIncorrect: {$sum:  '$priorIncorrect'},
-      totalPracticeDuration: {$sum: '$totalPracticeDuration'},
-      allTimeNumCorrect: {$sum: '$allTimeCorrect'},
-      allTimeNumIncorrect: {$sum: '$allTimeIncorrect'},
-      allTimePracticeDuration: {$sum: '$allTimeTotalPracticeDuration'},
-      stimsIntroduced: {$sum: '$introduced'},
-      count: {$sum: '$timesSeen'},
-    },
-  },
-  {
-    $addFields: {
-      count: {$sum: ['$priorCorrect', '$priorIncorrect', '$count']}
-    },
-  },
-  {
-    $project: {
-      _id: 0,
-    },
-  }];
-
-  const studentPerformance = await ComponentStates.rawCollection().aggregate(query).toArray();
-  if (!studentPerformance[0]) return null;
+  const stimStates = componentState.stimStates;
+  for (const stimState of stimStates) {
+    if (stimIds && !stimIds.includes(stimState.KCId)) continue;
+    studentPerformance.totalStimCount++;
+    studentPerformance.numCorrect += stimState.priorCorrect;
+    studentPerformance.numIncorrect += stimState.priorIncorrect;
+    studentPerformance.totalPracticeDuration += stimState.totalPracticeDuration;
+    studentPerformance.allTimeNumCorrect += stimState.allTimeCorrect;
+    studentPerformance.allTimeNumIncorrect += stimState.allTimeIncorrect;
+    studentPerformance.allTimePracticeDuration += stimState.allTimeTotalPracticeDuration;
+    if (stimState.priorCorrect || stimState.priorIncorrect) {
+      studentPerformance.stimsIntroduced++;
+    }
+    studentPerformance.count += stimState.timesSeen;
+  }
   // serverConsole('query', query);
   // serverConsole('studentPerformance', studentPerformance[0]);
-  return studentPerformance[0];
+  return studentPerformance;
 }
 
 async function getStudentPerformanceByIdAndTDFIdFromHistory(userId, TDFId, returnRows=null) {
@@ -1876,6 +1836,7 @@ async function upsertStimFile(stimulusFileName, stimJSON, ownerId, packagePath =
 async function upsertTDFFile(tdfFilename, tdfJSON, ownerId, packagePath = null) {
   serverConsole('upsertTDFFile', tdfFilename);
   serverConsole('tdfJSON', tdfJSON);
+  let ret = {reason: []};
   let stimulusFileName = tdfJSON.tdfs.tutor.setspec.stimulusfile;
   let Tdf = tdfJSON.tdfs;
   let lessonName = _.trim(Tdf.tutor.setspec.lessonname);
@@ -1883,6 +1844,8 @@ async function upsertTDFFile(tdfFilename, tdfJSON, ownerId, packagePath = null) 
   if (!stimuliSetId) {
     stimuliSetId = nextStimuliSetId;
     nextStimuliSetId += 1;
+  } else {
+    ret = {res: 'awaitClientTDF', reason: ['prevStimExists']}
   }
   if (lessonName.length < 1) {
     results.result = false;
@@ -1928,12 +1891,16 @@ async function upsertTDFFile(tdfFilename, tdfJSON, ownerId, packagePath = null) 
       stimuliSetId: stimuliSetId,
       content: tdfJSONtoUpsert
     }
+    if(ret.res != 'awaitClientTDF'){
+      ret.res = 'awaitClientTDF'
+    }
+    ret.TDF = updateObj
+    ret.reason.push('prevTDFExists')
     if(prev.content.tdfs.tutor.setspec.shuffleclusters != tdfJSON.tdfs.tutor.setspec.shuffleclusters){
       serverConsole('sufflecluster changed, alerting user');
-      return {res: 'awaitClientTDF', TDF: updateObj}
-    } else {
-      Tdfs.update({_id: prev._id},{$set:updateObj});
+      ret.reason.push('shuffleclusterMissmatch')
     }
+    return ret
   } else {
     formattedStims = [];
     serverConsole('inserting tdf', tdfFilename, formattedStims);
@@ -2066,6 +2033,21 @@ const methods = {
       });
     }
   },
+
+  updateExperimentState: function(curExperimentState) {
+    serverConsole('updateExperimentState', curExperimentState, curExperimentState.currentTdfId);
+    GlobalExperimentStates.update({userId: Meteor.userId(), TDFId: curExperimentState.currentTdfId}, {$set: {experimentState: curExperimentState}});
+  },
+
+  createExperimentState: function(curExperimentState) {
+    serverConsole('createExperimentState', curExperimentState, curExperimentState.currentTdfId);
+    GlobalExperimentStates.insert({
+      userId: Meteor.userId(),
+      TDFId: curExperimentState.currentTdfId,
+      experimentState: curExperimentState
+    });
+  },
+
 
   getAltServerUrl: function() {
     return altServerUrl;
@@ -2865,6 +2847,7 @@ Meteor.methods(functionTimerWrapper(methods, asyncMethods));
 Meteor.startup(async function() {
   //await combineStimAndTdfFiles();
   highestStimuliSetId = Tdfs.findOne({}, {sort: {stimuliSetId: -1}, limit: 1 });
+  nextEventId = Histories.findOne({}, {limit: 1, sort: {eventId: -1}})?.eventId + 1 || 1;
   nextStimuliSetId = highestStimuliSetId && highestStimuliSetId.stimuliSetId ? parseInt(highestStimuliSetId.stimuliSetId) + 1 : 1;
   DynamicSettings.upsert({key: 'clientVerbosityLevel'}, {$set: {value: 1}});
 

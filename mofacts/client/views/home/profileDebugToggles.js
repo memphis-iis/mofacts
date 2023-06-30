@@ -1,6 +1,7 @@
 Template.profileDebugToggles.rendered = function() {
     debugParms = Session.get('debugParms');
-    $('#debugProbParmsDisplay').prop('checked', debugParms.probParmsDisplay);
+    if(debugParms)
+        $('#debugProbParmsDisplay').prop('checked', debugParms.probParmsDisplay);
 }
 Template.profileDebugToggles.helpers({
     debugParms: () => {

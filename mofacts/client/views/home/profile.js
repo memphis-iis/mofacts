@@ -610,15 +610,15 @@ async function selectTdf(currentTdfId, lessonName, currentStimuliSetId, ignoreOu
   // current TDF should be changed due to an experimental condition
   Session.set('currentRootTdfId', currentTdfId);
   Session.set('currentTdfId', currentTdfId);
+  let globalExperimentState = GlobalExperimentStates.findOne({userId: Meteor.userId(), TDFId: currentTdfId}) || {};
+  globalExperimentState ? Session.set('currentExperimentState', globalExperimentState.experimentState) : Session.set('currentExperimentState', {});
   const tdfResponse = Tdfs.findOne({_id: currentTdfId});
   const curTdfContent = tdfResponse.content;
-  const curTdfTips = tdfResponse.content.tdfs.tutor.setspec.tips;
   Session.set('currentTdfFile', curTdfContent);
   Session.set('currentTdfName', curTdfContent.fileName);
   Session.set('currentStimuliSetId', currentStimuliSetId);
   Session.set('ignoreOutOfGrammarResponses', ignoreOutOfGrammarResponses);
   Session.set('speechOutOfGrammarFeedback', speechOutOfGrammarFeedback);
-  Session.set('curTdfTips', curTdfTips)
 
   // Record state to restore when we return to this page
   let audioPromptMode;
