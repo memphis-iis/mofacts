@@ -18,7 +18,7 @@ import {createScheduleUnit, createModelUnit, createEmptyUnit} from './unitEngine
 import {Answers} from './answerAssess';
 import {sessionCleanUp} from '../../lib/sessionUtils';
 import {checkUserSession} from '../../index'
-import {instructContinue, unitHasLockout} from './instructions';
+import {instructContinue, unitHasLockout, checkForFileImage} from './instructions';
 
 export {
   speakMessageIfAudioPromptFeedbackEnabled,
@@ -376,6 +376,13 @@ function leavePage(dest) {
 Template.card.rendered = initCard;
 
 async function initCard() {
+  const tdfResponse = Session.get('currentTdfFile');
+  const curTdfTips = tdfResponse.content.tdfs.tutor.setspec.tips;
+  const formattedTips = []
+  for(const tip of curTdfTips){
+    formattedTips.push(checkForFileImage(tip))
+  }
+  Session.set('curTdfTips', formattedTips)
   await checkUserSession();
   console.log('RENDERED----------------------------------------------');
   // Catch page navigation events (like pressing back button) so we can call our cleanup method
