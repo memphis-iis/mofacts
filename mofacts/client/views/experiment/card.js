@@ -908,6 +908,7 @@ function preloadAudioFiles() {
   for (const src of allSrcs) {
     let source = src;
     if(!src.includes('http')){
+      console.log('trying to get audio file', src);
       try {
         source = DynamicAssets.findOne({name: src}).link();
       }
