@@ -377,10 +377,12 @@ Template.card.rendered = initCard;
 
 async function initCard() {
   const tdfResponse = Session.get('currentTdfFile');
-  const curTdfTips = tdfResponse.content.tdfs.tutor.setspec.tips;
+  const curTdfTips = tdfResponse.tdfs.tutor.setspec.tips || [];
   const formattedTips = []
-  for(const tip of curTdfTips){
-    formattedTips.push(checkForFileImage(tip))
+  if(curTdfTips){
+    for(const tip of curTdfTips){
+      formattedTips.push(checkForFileImage(tip))
+    }
   }
   Session.set('curTdfTips', formattedTips)
   await checkUserSession();
