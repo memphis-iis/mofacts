@@ -2,7 +2,7 @@
     <div class="container">
         <!-- page header -->
         <div class="row text-center">
-            <div class="col-lg-4 offset-lg-4 col-md-6 col-md-offset-4 col-sm-8 col-sm-offset-2 col-xs-12">
+            <div class="col-12 mx-auto">
                 <div class="vh-10"></div>
                 <h1 align-bottom>MoFaCTS</h1>
                 <span id="serverErrors"></span>
@@ -11,7 +11,7 @@
         </div>
         <!-- centered login form -->
         <div class="row text-center login-form spacer">
-            <div class="col-lg-4 offset-lg-4 col-md-6 col-md-offset-4 col-sm-8 col-sm-offset-2 col-xs-12">
+            <div class="col-12 mx-auto">
                 <form>
                     {{#if isExperiment}}
                         <input  type="text" id="signInUsername" value="" placeholder="Amazon Turk ID"><br>
@@ -37,7 +37,7 @@
         {{#unless isExperiment}}
         <!-- login with sso and google -->
         <div class="row text-center large-spacer login-sso-options">
-            <div class="col-lg-4 offset-lg-4 col-md-6 col-md-offset-4 col-sm-8 col-sm-offset-2 col-xs-12 large-spacer">
+            <div class="col-12 mx-auto">
                 <button type="button" id="signInButton" class="btn btn-fixed">Log In</button><br>
                 {{#unless isExperiment}}
                     <button type="button" id="signUpButton" class="btn btn-fixed">Sign Up</button><br>
@@ -45,6 +45,7 @@
                 <button data-bs-toggle="modal" class="btn btn-fixed btn-secondary" id="classSelectButton" data-bs-target="#classSelectModal">
                     Teacher / Class Select
                 </button>
+                <br>
                 <button type="button" id="signInButtonOAuth" class="btn btn-fixed">
                     <img width="20px" style="margin-bottom:3px; margin-right:5px" alt="Google sign-in" src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Google_%22G%22_Logo.svg/512px-Google_%22G%22_Logo.svg.png" />
                     Sign in with Google
