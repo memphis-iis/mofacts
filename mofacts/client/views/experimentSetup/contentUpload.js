@@ -372,8 +372,12 @@ async function doFileUpload(fileArray) {
 async function doPackageUpload(file, template){
   const existingFile = await DynamicAssets.findOne({ name: file.name, userId: Meteor.userId() });
   if (existingFile) {
-    console.log(`File ${file.name} already exists, overwritting.`)
-    existingFile.remove();
+    if(confirm(`Uploading this file will overwrite existing data. Continue?`)){
+      console.log(`File ${file.name} already exists, overwritting.`)
+      existingFile.remove();
+    } else {
+      return;
+    }
   }
   const upload = DynamicAssets.insert({
     file: file,
@@ -397,8 +401,15 @@ async function doPackageUpload(file, template){
           } 
           for(res of result.results){
             if (res.data && res.data.res == 'awaitClientTDF') {
+              let reason = []
+              if(res.data.reason.includes('prevTDFExists'))
+                reason.push(`Previous ${res.data.TDF.content.fileName} already exists, continuing the upload will overwrite the old file. Continue?`)
+              if(res.data.reason.includes(`prevStimExists`))
+                reason.push(`Previous ${res.data.TDF.content.tdfs.tutor.setspec.stimulusfile} already exists, continuing the upload will overwrite the old file. Continue?`)
+              if(res.data.reason.includes('shuffleclusterMissmatch'))
+                reason.push(`The uploaded package contains a TDF file that could break the experiment. Do you want to continue?\nFile Name: ${res.data.TDF.content.fileName}`)
               console.log('Client TDF could break experiment, asking for confirmation');
-              if(confirm(`The uploaded package contains a TDF file that could break the experiment. Do you want to continue?\nFile Name: ${res.data.TDF.content.fileName}`)){
+              if(confirm(reason.join('\n'))){
                 Meteor.call('tdfUpdateConfirmed', res.data.TDF, function(err,res){
                   if(err){
                     alert(err);

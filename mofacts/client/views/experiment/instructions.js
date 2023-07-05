@@ -1,9 +1,9 @@
 import {secsIntervalString} from '../../../common/globalHelpers';
 import {haveMeteorUser} from '../../lib/currentTestingHelpers';
-import {updateExperimentState} from './card';
+import {updateExperimentState, initCard} from './card';
 import {routeToSignin} from '../../lib/router';
 
-export {instructContinue};
+export {instructContinue, unitHasLockout, checkForFileImage};
 // //////////////////////////////////////////////////////////////////////////
 // Instruction timer and leaving this page - we don't want to leave a
 // timer running!
@@ -39,7 +39,12 @@ function leavePage(dest) {
   if (typeof dest === 'function') {
     dest();
   } else {
-    Router.go(dest);
+    if(dest == '/card' && document.location.pathname == '/card'){
+      // we are already on the card page, so we need to force a reload
+      initCard();
+    } else {
+      Router.go(dest);
+    }
   }
 }
 
@@ -78,6 +83,37 @@ function currLockOutMinutes() {
       Meteor.call('setLockoutTimeStamp', new Date().getTime(), lockoutminutes, Session.get('currentUnitNumber'), Session.get('currentTdfId'));
     }
     logLockout(lockoutminutes);
+    return lockoutminutes;
+  }
+}
+
+function checkForFileImage(string) {
+  let div = document.createElement('div');
+  div.innerHTML = string;
+  let images = div.getElementsByTagName('img')
+  for(let image of images){
+    let imgSrc = image ? image.getAttribute("src") : "";
+    image = DynamicAssets.findOne({name: imgSrc});
+    if(image)
+    string = string.replace(imgSrc, image.link())
+  }
+  return string
+}
+
+function unitHasLockout() {
+  if(Meteor.user() && Meteor.user().profile.lockouts && Meteor.user().profile.lockouts[Session.get('currentTdfId')] &&
+  Meteor.user().profile.lockouts[Session.get('currentTdfId')].currentLockoutUnit == Session.get('currentUnitNumber')){
+    const userLockout = Meteor.user().profile.lockouts[Session.get('currentTdfId')];
+    const lockoutTimeStamp = userLockout.lockoutTimeStamp;
+    const lockoutMinutes = userLockout.lockoutMinutes;
+    const lockoutTime = lockoutTimeStamp + lockoutMinutes*60*1000;
+    const currTime = new Date().getTime();
+    if(currTime < lockoutTime){
+      const newLockoutMinutes = Math.ceil((lockoutTime - currTime)/(60*1000));
+      return newLockoutMinutes;
+    }
+  } else {
+    const lockoutminutes = parseInt(Session.get('currentDeliveryParams').lockoutminutes || 0);
     return lockoutminutes;
   }
 }
@@ -267,6 +303,7 @@ function instructContinue() {
     curUnit.unitinstructions.trim() : '';
   if (feedbackText.length < 1) feedbackText = curUnit.picture ? curUnit.picture.trim() : '';
 
+
   // Record the fact that we just showed instruction. Also - we use a call
   // back to redirect to the card display screen to make sure that everything
   // has been properly logged on the server. We do all this in an async
@@ -320,11 +357,11 @@ Template.instructions.helpers({
   },
 
   instructionText: function() {
-    return Session.get('currentTdfUnit').unitinstructions;
+    return checkForFileImage(Session.get('currentTdfUnit').unitinstructions);
   },
 
   instructionQuestion: function(){
-    return Session.get('currentTdfUnit').unitinstructionsquestion;
+    return checkForFileImage(Session.get('currentTdfUnit').unitinstructionsquestion);
   },
 
   islockout: function() {
