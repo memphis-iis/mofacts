@@ -30,6 +30,12 @@
                                                 <b>{{lessonName}}</b>
                                             </td>
                                         </tr>
+                                        {{#if error}}
+                                        <tr>
+                                            <b>ERROR:</b>
+                                            <p>{{{error}}}</p>
+                                        </tr>
+                                        {{/if}}
                                         <tr>
                                             <td>
                                                 Stimuli Count: {{stimuliCount}}

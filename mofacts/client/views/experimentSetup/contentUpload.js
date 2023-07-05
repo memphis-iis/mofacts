@@ -31,12 +31,19 @@ Template.contentUpload.helpers({
       thisTdf.accessorsCount = thisTdf.accessors.length;
       thisTdf.assets = [];
       thisTdf._id = tdf._id;
+      thisTdf.error = false;
       //iterart through tdf.stimuli and get all stimuli
       for (const stim of tdf.stimuli) {
         thisAsset = {};
         thisAsset.filename = stim.imageStimulus || stim.audioStimulus || stim.videoStimulus;
         thisAsset.fileType = stim.imageStimulus ? 'image' : stim.audioStimulus ? 'audio' : stim.videoStimulus ? 'video' : 'unknown';
-        thisAsset.link = DynamicAssets.findOne({name: thisAsset.filename}).link();
+        fileObj = DynamicAssets.findOne({name: thisAsset.filename});
+        //if fileObj exists, get the file link
+        if (fileObj) {
+          thisAsset.link = fileObj.meta.link || fileObj.link();
+        } else {
+          thisTdf.error == false ? thisTdf.error = "File not found: " + thisAsset.filename + "<br>" : thisTdf.error += ", " + thisAsset.filename + "<br>";
+        }
         //check if thisTdf.assets already contains a file with thisAsset.filename
         //if not, add it to thisTdf.assets
         if(!thisTdf.assets.some(function(asset){
