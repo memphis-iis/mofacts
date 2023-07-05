@@ -1,3 +1,4 @@
+import { all } from 'bluebird';
 import {meteorCallAsync} from '../..';
 import { ReactiveVar } from 'meteor/reactive-var';
 export {doFileUpload};
@@ -31,25 +32,30 @@ Template.contentUpload.helpers({
       thisTdf.accessorsCount = thisTdf.accessors.length;
       thisTdf.assets = [];
       thisTdf._id = tdf._id;
-      thisTdf.error = false;
+      thisTdf.errors = [];
       //iterart through tdf.stimuli and get all stimuli
       for (const stim of tdf.stimuli) {
         thisAsset = {};
         thisAsset.filename = stim.imageStimulus || stim.audioStimulus || stim.videoStimulus;
-        thisAsset.fileType = stim.imageStimulus ? 'image' : stim.audioStimulus ? 'audio' : stim.videoStimulus ? 'video' : 'unknown';
-        fileObj = DynamicAssets.findOne({name: thisAsset.filename});
+        thisAsset.fileType = stim.imageStimulus ? 'image' : stim.audioStimulus ? 'audio' : stim.videoStimulus ? 'video' : "unknown"
+        thisAsset.filename ? fileObj = DynamicAssets.findOne({name: thisAsset.filename}) : fileObj = false;
         //if fileObj exists, get the file link
-        if (fileObj) {
+        if (thisAsset.filename && fileObj) {
           thisAsset.link = fileObj.meta.link || fileObj.link();
         } else {
-          thisTdf.error == false ? thisTdf.error = "File not found: " + thisAsset.filename + "<br>" : thisTdf.error += ", " + thisAsset.filename + "<br>";
+          if(typeof thisAsset.filename !== 'undefined'){
+            thisTdf.errors.push(thisAsset.filename + ' not found. This will cause errors in the lesson.<br>');
+          }
         }
         //check if thisTdf.assets already contains a file with thisAsset.filename
         //if not, add it to thisTdf.assets
         if(!thisTdf.assets.some(function(asset){
             return asset.filename === thisAsset.filename;
         })){
-          thisTdf.assets.push(thisAsset);
+          //check that thisAsset.filename is not false
+          if (thisAsset.filename){
+            thisTdf.assets.push(thisAsset);
+          }
         }
       }
       tdfSummaries.push(thisTdf);
@@ -186,14 +192,15 @@ Template.contentUpload.events({
 
   },
   'click #deleteAllAssetsConfirm': async function(e, template) {
-    fileCount = await meteorCallAsync('deleteAllFiles');
-    if(fileCount == 0){
-      alert(`All files deleted.`);
-    } else {
-      alert("Error: Files not deleted.");
-    }
-    $('#deleteAllAssetsPrompt').css('display', 'block');
-    $('#deleteAllAssetsConfirm').css('display', 'none');
+    Meteor.call('deleteAllFiles',
+      function(error, result) {
+        if (error) {
+          console.log('error:', error);
+        } else {
+          console.log('result: deleted ', results, ' files');
+        }
+      }
+    );
   },
   'click .imageLink'(e) {
     const url = $(e.currentTarget).data('link');
@@ -318,7 +325,7 @@ async function doFileUpload(fileArray) {
         console.log('Upload attempted for', name);
 
         try {
-          const result = await meteorCallAsync('saveContentFile', fileType, name, fileData);
+          const result = await meteorCallAsync('saveContentFile', fileType, name, fileData, Meteor.userId());
           if (!result.result) {
             if(result.data && result.data.res == 'awaitClientTDF'){
               console.log('Client TDF could break experiment, asking for confirmation');

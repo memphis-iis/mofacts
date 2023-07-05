@@ -61,7 +61,7 @@
                                 </div> 
                                 <div class="marginLeftAndRight h2" id="imageDisplay">
                                     {{#if imageCard}}
-                                        <img id="cardQuestionImg" src="{{curImgSrc}}" style="max-width: 100%; width: auto; height: max-content;"> 
+                                        <img id="cardQuestionImg" src="{{curImgSrc}}" class="img-responsive"> 
                                     {{/if}}
                                 </div>
                                 {{#if videoCard}}
@@ -72,7 +72,12 @@
                                 {{/if}}
                             {{/if}}
                             {{#if audioCard}}
-                                <img src="images/speaker.png" class="h2 sound-img">
+                                
+                                <!-- fa speaker icon with class img-responsive-->
+                                <div class="text-center">
+                                    <span class="fa fa-volume-up fa-5x" id="audioIcon"></span>
+                                </div>
+                                <div class="vh-5"></div>
                             {{/if}}
                         </div>
                     </div>
@@ -143,7 +148,7 @@
                         <div id="multipleChoiceContainer">
                             <!-- will contain multiple choice buttons which are dynamically added. -->
                             {{#if buttonTrial}}
-                            <div id="multipleChoiceTable" class="row gy-3 row-cols-xs-1 row-cols-sm-2 row-cols-2 text-center">
+                            <div id="multipleChoiceTable" class="row gy-3 row-cols-xs-1 row-cols-sm-1 row-cols-md-2 row-cols-lg-4 text-center">
                                 {{#if imageResponse}}
                                     {{#each buttonListImageRows}}
                                     <div class="col mx-auto">
@@ -168,7 +173,7 @@
                                         <br>
                                         {{/if}}
                                     
-                                        <button verbalChoice='{{verbalChoice}}' type='button' name='{{buttonName}}' class='btnPaddedAndMinWidth btn btn-block multipleChoiceButton btn-responsive'>
+                                        <button verbalChoice='{{verbalChoice}}' type='button' name='{{buttonName}}' class='multipleChoiceButton btn btn-primary'>
                                         {{buttonValue}}
                                         </button>
                                     
