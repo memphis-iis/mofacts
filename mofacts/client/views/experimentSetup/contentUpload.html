@@ -16,8 +16,8 @@
                 <table class="table table-striped">
                     <thead>
                         <tr>
-                            <th class="col-6">Summary</th>
-                            <th class="col-6">Action</th>
+                            <th class="col-8">Summary</th>
+                            <th class="col-4">Action</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -30,10 +30,13 @@
                                                 <b>{{lessonName}}</b>
                                             </td>
                                         </tr>
-                                        {{#if error}}
+                                        {{#if errors}}
                                         <tr>
                                             <b>ERROR:</b>
-                                            <p>{{{error}}}</p>
+                                            <br>
+                                            {{#each errors}}
+                                                {{{this}}}
+                                            {{/each}}
                                         </tr>
                                         {{/if}}
                                         <tr>

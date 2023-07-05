@@ -2496,6 +2496,20 @@ const methods = {
       Histories.remove({TDFId: tdfId});
       GlobalExperimentStates.remove({TDFId: tdfId});
       Tdfs.remove({_id: tdfId});
+      //iterate through TDF.stimuli
+      for (const stim of TDF.stimuli) {
+        asset = stim.imageStimulus || stim.audioStimulus || stim.videoStimulus || false;
+        if (asset) {
+          //remove asset
+          DynamicAssets.remove({"name": asset}, function(err, result){
+            if(err){
+              serverConsole(err);
+            } else {
+              serverConsole("Asset removed: ", asset);
+            }
+          });
+        }
+      }
     } else {
       result = 'No matching tdf file found';
       return result;
@@ -2827,9 +2841,16 @@ const asyncMethods = {
 
   deleteAllFiles: async function(){
     serverConsole('delete all uploaded files');
-    DynamicAssets.remove({});
-    filesLength = DynamicAssets.find().fetch().length;
-    return filesLength;
+    filesRemoved = 0;
+    const files = DynamicAssets.find({}).fetch();
+    serverConsole("files to remove: " + files.length);
+    for(let file of files){
+      serverConsole('removing file ' + file._id);
+      DynamicAssets.remove({_id: file._id});
+      filesRemoved++;
+    }
+    serverConsole('removed ' + filesRemoved + ' files');
+    return filesRemoved;
   },
   deleteStimFile: async function(stimSetId) {
     stimSetId = parseInt(stimSetId);

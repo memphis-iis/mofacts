@@ -1527,6 +1527,8 @@ async function showUserFeedback(isCorrect, feedbackMessage, afterAnswerFeedbackC
           }, 100);
           Session.set('CurIntervalId', CountdownTimerInterval);
         } else {
+          //hide progressbar
+          $('#progressbar').hide();
           $('#UserInteraction').addClass('alert-success');
         }
   }
@@ -2804,8 +2806,7 @@ function updateExperimentState(newState, codeCallLocation, unitEngineOverride = 
     Meteor.call('updateExperimentState', curExperimentState, curExperimentState.currentTdfId);
   }
   console.log('updateExperimentState', codeCallLocation, '\nnew:', curExperimentState);
-  Session.set('currentExperimentState', curExperimentState);
-  return curExperimentState.currentTdfId;
+  return Session.get('currentRootTdfId');
 }
 
 // Re-initialize our User Progress and Card Probabilities internal storage
