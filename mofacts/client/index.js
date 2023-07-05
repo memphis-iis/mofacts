@@ -74,7 +74,7 @@ function loadClientSettings() {
 function clientConsole(...args) {
   let logVerbosityLevel = args.shift();
   if(verbosityLevel == 0) return;
-  if (logVerbosityLevel > verbosityLevel) return;
+  if (!Meteor.isDevelopment && logVerbosityLevel > verbosityLevel) return;
   const disp = [(new Date()).toString()];
   for (let i = 0; i < args.length; ++i) {
     disp.push(args[i]);
@@ -362,7 +362,7 @@ Template.registerHelper('showFeedbackResetButton', function() {
   return Session.get('curModule') == 'card' && Session.get('currentTdfFile').tdfs.tutor.unit[Session.get('currentUnitNumber')].deliveryparams.allowFeedbackTypeSelect
 });
 Template.registerHelper('isInTrial', function() {
-  return Session.get('curModule') == 'card'
+  return Session.get('curModule') == 'card' || Session.get('curModule') == 'instructions';
 });
 Template.registerHelper('isInSession', function() {
   return (Session.get('curModule') == 'profile');

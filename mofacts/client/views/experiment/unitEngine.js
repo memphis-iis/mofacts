@@ -238,7 +238,7 @@ function defaultUnitEngine(curExperimentData) {
       const newExperimentState = {};
       Session.set('alternateDisplayIndex', undefined);
       const cluster = stimClusters[cardIndex];
-      clientConsole('setUpCardQuestionAndAnswerGlobals', cardIndex, whichStim, probFunctionParameters,
+      clientConsole(1, 'setUpCardQuestionAndAnswerGlobals', cardIndex, whichStim, probFunctionParameters,
           cluster, cluster.stims[whichStim], whichHintLevel);
       const curStim = cluster.stims[whichStim];
       let currentDisplay = JSON.parse(JSON.stringify({
@@ -307,7 +307,7 @@ function defaultUnitEngine(curExperimentData) {
         curStim.answerSyllables = currentAnswerSyllables;
         curStim.hintLevel = 0;
         //check for tdf hints enabled
-        const currentTdfFile = Tdfs.findOne();
+        const currentTdfFile = Tdfs.findOne({_id: Session.get('currentTdfId')});
         tdfHintsEnabled = currentTdfFile.content.tdfs.tutor.setspec.hintsEnabled == "true";
         //check for stim hints enabled
         stimHintsEnabled = currentDisplay.hintsEnabled;
@@ -332,6 +332,8 @@ function defaultUnitEngine(curExperimentData) {
           clientConsole(2, 'HintLevel: setUpCardQuestionAndAnswerGlobals, Hints Disabled',whichHintLevel);
         }
       }
+      Session.set('currentAnswerSyllables', currentAnswerSyllables);
+      Session.set('currentAnswer', currentAnswer);
       Session.set('clozeQuestionParts', clozeQuestionParts);
       newExperimentState.currentAnswerSyllables = currentAnswerSyllables;
       newExperimentState.currentAnswer = currentAnswer;
@@ -401,8 +403,6 @@ function modelUnitEngine() {
   // creation, so if they leave in the middle of practice and come back to
   // the unit we'll start all over.
   const unitStartTimestamp = Date.now();
-
-  const responseIDMap = {};
 
   function getStimParameterArray(clusterIndex, whichStim) {
     return getStimCluster(clusterIndex).stims[whichStim].params.split(',').map((x) => _.floatval(x));
@@ -671,7 +671,6 @@ function modelUnitEngine() {
         }
       }
     }
-    const stim = cards[clusterIndex].stims[stimIndex];
 
     return {clusterIndex, stimIndex, hintLevelIndex};
   }
@@ -1216,13 +1215,43 @@ function modelUnitEngine() {
         responseText: Object.entries(cardProbabilities.responses).find(r => r[1] == response)[0], // not actually in db, need to lookup/assign kcid when loading
         instructionQuestionResult: null,
       };
-      response._id = responseIDMap[responseKCMap[responseState.responseText]];
-      if (ComponentStates.update({_id: card._id}, {$set: cardState}) == 0)
-        ComponentStates.insert(cardState);
-      if (ComponentStates.update({_id: stim._id}, {$set: stimState}) == 0)
-        ComponentStates.insert(stimState);
-      if (ComponentStates.update({_id: response._id}, {$set: responseState}) == 0)
-        ComponentStates.insert(responseState); 
+      const componentStates = ComponentStates.findOne({userId, TDFId});
+      if(componentStates){
+        let cardIndex = componentStates.cardStates.findIndex(function(item){
+          return item.KCId === card.clusterKC
+        });
+        let stimIndex = componentStates.stimStates.findIndex(function(item){
+          return item.KCId === stim.stimulusKC
+        });
+        let responseIndex = componentStates.responseStates.findIndex(function(item){
+          return item.responseText === responseState.responseText
+        });
+        if (cardIndex == -1)
+          componentStates.cardStates.push(cardState);
+        else
+          componentStates.cardStates[cardIndex] = cardState;
+        if (stimIndex == -1)
+          componentStates.stimStates.push(stimState);
+        else
+          componentStates.stimStates[stimIndex] = stimState;
+        if (responseIndex == -1)
+          componentStates.responseStates.push(responseState);
+        else
+          componentStates.responseStates[responseIndex] = responseState;
+        ComponentStates.update(componentStates._id, {$set: {
+          cardStates: componentStates.cardStates, 
+          stimStates: componentStates.stimStates, 
+          responseStates: componentStates.responseStates
+        }});
+      } else {
+        ComponentStates.insert({
+          userId: userId,
+          TDFId: TDFId,
+          cardStates: [cardState],
+          stimStates: [stimState],
+          responseStates: [responseState]
+        });
+      }
     },
 
     saveComponentStatesSync: function() {
@@ -1288,7 +1317,6 @@ function modelUnitEngine() {
       }
 
       for (const [responseText, response] of Object.entries(cardProbabilities.responses)) {
-        const _id = responseIDMap[response.KCId];
         const responseState = {
           userId,
           TDFId,
@@ -1411,9 +1439,6 @@ function modelUnitEngine() {
                 card.stims.filter((x) => x.stimulusKC != stimulusKC).reduce((acc, stim) => acc +
                     stim.totalPracticeDuration, 0), 0);
           }
-        }
-        for (const response of responses){
-          responseIDMap[response.KCId] = response._id;
         }
         clientConsole(2, 'loadComponentStates2', cards, stims, probsMap, componentStates,
             clusterStimKCs, stimProbabilityEstimates);
@@ -1747,6 +1772,7 @@ function modelUnitEngine() {
       const maxSecs = session.displaymaxseconds || 0;
       const maxTrials = parseInt(session.maxTrials || 0);
       const numTrialsSoFar = cardProbabilities.numQuestionsAnsweredCurrentSession || 0;
+      const practicetimer = Session.get('currentDeliveryParams').practicetimer;
 
       if (maxTrials > 0 && numTrialsSoFar >= maxTrials) {
         Meteor.call('resetCurSessionTrialsCount', Meteor.userId(), Session.get('currentTdfId'))
@@ -1771,7 +1797,13 @@ function modelUnitEngine() {
         return false;
       }
 
-      const unitElapsedTime = (Date.now() - unitStartTimestamp) / 1000.0;
+      let unitElapsedTime = 0;
+      if(practicetimer === 'clock-based'){
+        unitElapsedTime = Session.get('curStudentPerformance').totalTime / 1000.0;
+      }
+      else {
+        unitElapsedTime = (Date.now() - unitStartTimestamp) / 1000.0;
+      }
       clientConsole(2, 'Model practice check', unitElapsedTime, '>', practiceSeconds);
       return (unitElapsedTime > practiceSeconds);
     },

@@ -53,7 +53,17 @@ Template.signIn.events({
     userPasswordCheck();
   },
 
+  'keypress #signInUsername': function(event) {
+    const key = event.keyCode || event.which;
+    if (key == 13) { //enter key
+      event.preventDefault();
+      $('#signInButton').prop('disabled', true);
+      userPasswordCheck();
+    }
+  },
+
   'click #signUpButton': function(event) {
+    Meteor.logout();
     event.preventDefault();
     Router.go('/signup');
   },
@@ -153,12 +163,14 @@ Template.signIn.events({
   'keypress .accept-enter-key': function(event) {
     const key = event.keyCode || event.which;
     if (key == 13) {
+      Meteor.logout();
       event.preventDefault();
       $('#signInButton').prop('disabled', true);
       userPasswordCheck();
     }
   },
   'click #signInButtonOAuth': function(event) {
+    Meteor.logout();
     $('#signInButton').prop('disabled', true);
     event.preventDefault();
     console.log('Google Login Proceeding');
@@ -193,15 +205,6 @@ Template.signIn.events({
       Meteor.logoutOtherClients();
       Router.go('/profile');
     });
-  },
-
-  'keypress .accept-enter-key-testlogin': function(event) {
-    const key = event.keyCode || event.which;
-    if (key == 13) {
-      event.preventDefault();
-      $('#testSignInButton').prop('disabled', true);
-      testLogin();
-    }
   },
 
   'click #testSignInButton': function(event) {
