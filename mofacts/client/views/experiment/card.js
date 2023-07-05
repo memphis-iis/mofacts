@@ -645,6 +645,12 @@ Template.card.helpers({
 
   'displayReady': () => Session.get('displayReady'),
 
+  'readyPromptString': () => Session.get('currentDeliveryParams').readyPromptString,
+
+  'displayReadyPromptString': function() {
+    return !Session.get('displayReady') && Session.get('currentDeliveryParams').readyPromptString
+  },
+
   'isDevelopment': () => Meteor.isDevelopment,
 
   'displayReadyConverter': function(displayReady) {
@@ -2218,10 +2224,17 @@ function startQuestionTimeout() {
   console.log(currentDisplayEngine);
   console.log('-------------------------');
 
-  const beginQuestionAndInitiateUserInputBound = beginQuestionAndInitiateUserInput.bind(null, delayMs, deliveryParams);
-  const pipeline = checkAndDisplayTwoPartQuestion.bind(null,
-      deliveryParams, currentDisplayEngine, Session.get('currentExperimentState').clozeQuestionParts, beginQuestionAndInitiateUserInputBound);
-  checkAndDisplayPrestimulus(deliveryParams, pipeline);
+  let readyPromptTimeout = 0;
+  if(Session.get('currentDeliveryParams').readyPromptStringDisplayTime && Session.get('currentDeliveryParams').readyPromptStringDisplayTime > 0){
+    readyPromptTimeout = Session.get('currentDeliveryParams').readyPromptStringDisplayTime
+  }
+  trialStartTimestamp = Date.now();
+  Meteor.setTimeout(() => {
+    const beginQuestionAndInitiateUserInputBound = beginQuestionAndInitiateUserInput.bind(null, delayMs, deliveryParams);
+    const pipeline = checkAndDisplayTwoPartQuestion.bind(null,
+        deliveryParams, currentDisplayEngine, Session.get('currentExperimentState').clozeQuestionParts, beginQuestionAndInitiateUserInputBound);
+    checkAndDisplayPrestimulus(deliveryParams, pipeline);
+  }, readyPromptTimeout)
 }
 
 function checkAndDisplayPrestimulus(deliveryParams, nextStageCb) {
@@ -2281,7 +2294,6 @@ function checkAndDisplayTwoPartQuestion(deliveryParams, currentDisplayEngine, cl
 function beginQuestionAndInitiateUserInput(delayMs, deliveryParams) {
   console.log('beginQuestionAndInitiateUserInput');
   firstKeypressTimestamp = 0;
-  trialStartTimestamp = Date.now();
   console.log(trialStartTimestamp)
   const currentDisplay = Session.get('currentDisplay');
 
