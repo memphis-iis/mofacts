@@ -393,7 +393,9 @@ function getCurrentDeliveryParams() {
     'editDistance': 1,
     'optimalThreshold': false,
     'resetStudentPerformance': false,
-    'practicetimer': "query-based"
+    'practicetimer': "query-based",
+    'readyPromptString': '',
+    'readyPromptStringDisplayTime': 0
   };
 
   // We've defined defaults - also define translatations for values
@@ -441,7 +443,9 @@ function getCurrentDeliveryParams() {
     'editDistance': _.intval,
     'optimalThreshold': _.intval,
     'resetStudentPerformance': xlateBool,
-    'practicetimer': xlateString
+    'practicetimer': xlateString,
+    'readyPromptString': xlateString,
+    'readyPromptStringDisplayTime': _.intVal
   };
 
   let modified = false;
