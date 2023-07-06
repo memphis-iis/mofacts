@@ -295,7 +295,7 @@ async function getTdfByFileName(filename) {
 async function getTdfByExperimentTarget(experimentTarget) {
   try {
     serverConsole('getTdfByExperimentTarget:'+experimentTarget);
-    tdf = Tdfs.findOne({"content.tdfs.tutor.setspec.experimentTarget": experimentTarget});
+    tdf = Tdfs.findOne({"content.tdfs.tutor.setspec.experimentTarget": {$regex: experimentTarget, $options: 'i'}});
     return tdf;
   } catch (e) {
     serverConsole('getTdfByExperimentTarget ERROR,', experimentTarget, ',', e);
