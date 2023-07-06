@@ -1,27 +1,34 @@
 <template name="profileDialogueToggles">
-  <div class="padLeftAndRight row toggleSwitchContainer">
-    <p  style="text-align: left;font-size: larger;">Feedback Settings</p>
+  <div class="row full-width">
+    <div class="header-box">
+        <h3 class="text-center">Feedback Settings</h3>
+    </div>
+  </div>
+  <div class="row">
     <div class="dialogue-select-containers">
-      <div id="switch-input" class="switch-3 switch-candy">
-        <input class="dialogueSelectRadio" id="dialogueSelectSimple" name="dialogueSelectRadios" data-dialogue-type="simple" type="radio" checked="{{isChecked 'simple'}}"/>
-        <label for="dialogueSelectSimple" onclick="" >Simple Feedback</label>
+            <div class="form-check form-switch">
+              <label for="dialogueSelectSimple" onclick="" >Simple Feedback</label>
+        <input class="form-check-input" type="checkbox" role="switch" id="dialogueSelectSimple" name="dialogueSelectRadios" checked="{{isChecked 'simple'}}"/>
+
       </div>
       <p>When an answer is incorrect, the system gives the correct answer.</p>
     </div>
     <div class="dialogue-select-containers">
       <div class="flow">
-        <div id="switch-input" class="switch-3 switch-candy">
-          <input class="dialogueSelectRadio" id="dialogueSelectRefutational" name="dialogueSelectRadios" data-dialogue-type="refutational" type="radio" checked="{{isChecked 'refutational'}}"  />
-          <label for="dialogueSelectRefutational" onclick="">Refutational Feedback *</label>
+              <div class="form-check form-switch">
+                <label for="dialogueSelectRefutational" onclick="">Refutational Feedback *</label>
+                <input class="form-check-input" type="checkbox" role="switch" id="dialogueSelectRefutational" name="dialogueSelectRadios" data-dialogue-type="refutational"  checked="{{isChecked 'refutational'}}"  />
+          
         </div>
         <p>When an answer is incorrect, the system provides additional explanation about why that answer is wrong.</p>
       </div>
     </div>
     <div class="dialogue-select-containers">
       <div class="flow">
-        <div id="switch-input" class="switch-3 switch-candy">
-          <input class="dialogueSelectRadio" id="dialogueSelectDialogue" name="dialogueSelectRadios" data-dialogue-type="dialogue" type="radio" checked="{{isChecked 'dialogue'}}"  />
-          <label for="dialogueSelectDialogue" onclick="">Dialogue Feedback *</label>
+              <div class="form-check form-switch">
+                <label for="dialogueSelectDialogue" onclick="">Dialogue Feedback *</label>
+                <input class="form-check-input" type="checkbox" role="switch" id="dialogueSelectDialogue" name="dialogueSelectRadios" data-dialogue-type="dialogue" checked="{{isChecked 'dialogue'}}"  />
+        
         </div>
         <p>When an answer is incorrect, the system asks you follow up questions to help you remember the differences between your answer and the correct answer.</p>
       </div>

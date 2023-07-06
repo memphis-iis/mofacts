@@ -10,20 +10,21 @@
         <div>
             <br />
             {{#if resetFeedbackSettingsFromIndex}}
-                <button id='confirmFeedbackSelectionFromIndex' class='btn'>Confirm feedback settings</button>
+                <button id='confirmFeedbackSelectionFromIndex' class='btn width-100-percent'>Confirm feedback settings</button>
             {{else}}
-                <button id='confirmFeedbackSelection' class='btn'>Confirm feedback settings</button>
+                <button id='confirmFeedbackSelection' class='btn width-100-percent'>Confirm feedback settings</button>
             {{/if}}
         </div>
     {{else}}
-        {{#if isDevelopment}}
-            <button id='skipUnit' class='btn'>Skip Unit</button>
-            <br><br>
-            <button id='giveAnser' class='btn'>Answer Correctly</button>
-            <br><br>
-            <button id='giveWrongAnser' class='btn'>Answer Incorrectly</button>
-        {{/if}}
         {{#if displayReady}}
+        <br>    
+            <div class="row text-center card-header">
+                <h2>{{curTdfName}}</h2>
+                <p class="text-center">
+                    {{curStudentPerformance.totalTimeDisplay}} min | {{curStudentPerformance.percentCorrect}} correct
+                </p>
+            </div>
+            <div class="vh-10"></div>
             <div class="scrollHistoryContainer">
                 {{#if haveScrollList}}
                 {{#each scrollList}}
@@ -41,39 +42,42 @@
 
             {{#if trial}}
                 <div class="row">
-                    <div class="container-fluid" id="displayContainer">
-                        <div id="leftPanel" class="col-md-12">
+                    <div class="container" id="displayContainer">
+                        <div class="row full-width">
                             {{#if anythingButAudioCard}}
-                                {{#if ifClozeDisplayTextExists}}
-                                <div class="marginLeftAndRight alert alert-info {{fontSizeClass}}" id="textQuestion">
-                                    {{#if textOrClozeCard}}
-                                        {{#if subWordClozeCurrentQuestionExists}}
-                                            {{{subWordParts}}}
-                                        {{else}}
-                                            {{{clozeText}}}
-                                            {{{text}}}
+                                <div class="text-center">
+                                    <p>
+                                    {{#if ifClozeDisplayTextExists}}
+                                        {{#if textOrClozeCard}}
+                                            {{#if subWordClozeCurrentQuestionExists}}
+                                                {{{subWordParts}}}
+                                            {{else}}
+                                                {{{clozeText}}}
+                                                {{{text}}}
+                                            {{/if}}
                                         {{/if}}
                                     {{/if}}
-                                </div>
-                                {{/if}}
+                                    </p>
+                                </div> 
                                 <div class="marginLeftAndRight h2" id="imageDisplay">
                                     {{#if imageCard}}
-                                        <img id="cardQuestionImg" src="{{curImgSrc}}" style="max-width: 100%; width: auto; height: max-content;"> 
+                                        <img id="cardQuestionImg" src="{{curImgSrc}}" class="img-responsive"> 
                                     {{/if}}
                                 </div>
-                                <div class="marginLeftAndRight h2" id="videoDisplay">
-                                    {{#if videoCard}}
-                                        <video autoplay="" style="display: block; margin-left: auto; margin-right: auto; width: 50%;">
-                                            <source src="{{curVideoSrc}}">
-                                            Your browser does not support the video tag.
-                                        </video>
-                                    {{/if}}
-                                </div>
+                                {{#if videoCard}}
+                                    <video autoplay="" style="display: block; margin-left: auto; margin-right: auto; width: 50%;">
+                                        <source src="{{curVideoSrc}}">
+                                        Your browser does not support the video tag.
+                                    </video>
+                                {{/if}}
                             {{/if}}
-                        </div>
-                        <div id="rightmostPanel" class="{{speakerCardPosition}}">
                             {{#if audioCard}}
-                                <img src="images/speaker.png" class="h2 sound-img">
+                                
+                                <!-- fa speaker icon with class img-responsive-->
+                                <div class="text-center">
+                                    <span class="fa fa-volume-up fa-5x" id="audioIcon"></span>
+                                </div>
+                                <div class="vh-5"></div>
                             {{/if}}
                         </div>
                     </div>
@@ -82,7 +86,7 @@
                     <div class="row">
                         <div class="container-fluid" id="displayContainer">
                             <div id="leftPanel" class="col-md-11">
-                                <div class="marginLeftAndRight alert alert-info {{fontSizeClass}}" id="textQuestion">
+                                <div class="alert text-center" id="textQuestion">
                                     {{{dialogueText}}}
                                 </div>
                             </div>
@@ -119,11 +123,18 @@
                     {{/if}}
                 {{/if}}
                 {{#if notButtonTrialOrInDialogueLoop}}
-                    <div class="row" id="textEntryRow">
-                        <div class="col-xs-12 col-sm-12 col-md-offset-1 col-md-10 col-lg-12">
+                        <div class="input-box" style="box-sizing: border-box;">
+                            {{#if showDialogueHints}}
+                                {{#if dialogueCacheHint}}
+                                    <div class="row">
+                                        <div class="col-lg-12 visible-text text-center">
+                                            <b>Hints:</b> {{dialogueCacheHint}}
+                                        </div>
+                                    </div>
+                                {{/if}}
+                            {{/if}}
                             {{> inputF}}
                         </div>
-                    </div>  <!-- close row -->
                 {{else}}
                     
                 <div class="row">
@@ -137,38 +148,39 @@
                         <div id="multipleChoiceContainer">
                             <!-- will contain multiple choice buttons which are dynamically added. -->
                             {{#if buttonTrial}}
-                            <table id="multipleChoiceTable">
+                            <div id="multipleChoiceTable" class="row gy-3 row-cols-xs-1 row-cols-sm-1 row-cols-md-2 row-cols-lg-4 text-center">
                                 {{#if imageResponse}}
                                     {{#each buttonListImageRows}}
-                                    <tr>
+                                    <div class="col mx-auto">
                                         {{#each this}}
                                         {{#if audioEnabled}}
-                                            <td><label style="margin-bottom:0px">{{verbalChoice}}.</label></td>
-                                            <td>&nbsp;</td>
+                                            <label style="margin-bottom:0px">{{verbalChoice}}.</label>
+                                            <br>
+                             
                                         {{/if}}
-                                        <td class="td-img">
+                                
                                             <button style="background: url({{buttonValue}});background-size: 300px 150px;;background-repeat: no-repeat;" verbalChoice='{{verbalChoice}}' type='button' name='{{buttonName}}' class='btnPaddedAndMinWidth btn-alt btn-block multipleChoiceButton btn-image btn-responsive'>
                                             </button>
-                                        </td>
+                                     
                                         {{/each}}
-                                    </tr>
+                                    </div>
                                     {{/each}}
                                 {{else}}
                                     {{#each buttonList}}
-                                    <tr display={{displayReadyConverter (displayReady) }}>
+                                    <div display={{displayReadyConverter (displayReady) }} class="col mx-auto">
                                         {{#if audioEnabled}}
-                                        <td><label style="margin-bottom:0px">{{verbalChoice}}.</label></td>
-                                        <td>&nbsp;</td>
+                                        <label style="margin-bottom:0px">{{verbalChoice}}.</label>
+                                        <br>
                                         {{/if}}
-                                        <td>
-                                            <button verbalChoice='{{verbalChoice}}' type='button' name='{{buttonName}}' class='btnPaddedAndMinWidth btn btn-block multipleChoiceButton btn-responsive'>
-                                            {{buttonValue}}
-                                            </button>
-                                        </td>
-                                    </tr>
+                                    
+                                        <button verbalChoice='{{verbalChoice}}' type='button' name='{{buttonName}}' class='multipleChoiceButton btn btn-primary'>
+                                        {{buttonValue}}
+                                        </button>
+                                    
+                                    </div>
                                     {{/each}}
                                 {{/if}}
-                            </table>
+                            </div>
                             {{/if}}
                         </div>
                     </div>
@@ -176,43 +188,36 @@
                 {{/if}}
             {{/if}}
 
-            <div class="userInteractionContainer">
+            <div id="userInteractionContainer" class="position-fixed bottom-0">
                 <div class="row">
-                    <div class="marginLeftAndRight {{fontSizeClass}}" id="UserInteraction" hidden>
+                    <div class="text-center" id="UserInteraction" hidden>
+                        <div class="row">
+                            <div class="vh-5"></div>
+                            <div class="progress">
+                                <div id="progressbar" class="progress-bar bg-danger" role="progressbar" aria-label="Basic example" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100" style="width:100%;"></div>
+                              </div>
+                            <div id="CountdownTimerText"></div>
+                        </div>
                     </div>
                 </div>
                 <div class="row">
-                    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 {{fontSizeClass}}" id="forceCorrectionEntry" hidden>
+                    <div class="" id="forceCorrectionEntry" hidden>
                         {{> inputForceCorrect}}
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="marginLeftAndRight {{fontSizeClass}}" id="CountdownTimer" style="text-align: right;" hidden>
                     </div>
                 </div>
             </div>
             {{#if questionIsRemovable}}
+            <div class="vh-10"></div>
                 <div class="removalContainer">
                     <div class="text-center">
-                        Is this answer incorrect or too confusing? Click
-                        <a href="#" id="removeQuestion">
-                            here
-                        </a> 
-                        to remove and report it.
-                        <div class="alert  {{fontSizeClass}} alert-success alert text-align" id="removalFeedback" hidden>
-                            Thanks, we'll remove this question from your stack.
-                        </div>
+                        <button href="#" id="removeQuestion" class="btn btn-secondary">
+                            Report Mistake
+                        </button> 
                     </div>
                 </div>
             {{/if}}
 
-            {{#if showDialogueHints}}
-            <div class="row">
-                <div class="col-lg-12 visible-text text-center">
-                    <h5>Testing Aid (Dialogue Cache Matching Answer): {{dialogueCacheHint}}</h5>
-                </div>
-            </div>
-            {{/if}}
+
 
             {{#if isInRole 'teacher'}}
             <div class="row">
@@ -281,8 +286,15 @@
     <!-- Use a fixed footer if we have something to show -->
     {{#if haveDispTimeout}}
     <div id="continueBar" >
-        <span id="displayTimeoutMsg"></span>
-        <button type="button" id="continueButton" class="marginLeftAndRight button btn btn-primary text-center" style="text-align:center; white-space: nowrap;">
+        <span id="displayTimeoutMsg">
+            <!-- timer bar -->
+            <div class="progress">
+                <div id="timerBar" class="progress-bar progress-bar-success progress-bar-striped active" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="{{displayTimeout}}" style="width: 0%">
+                    <span class="sr-only">0% Complete</span>
+                </div>
+            </div>
+        </span>
+        <button type="button" id="continueButton" class="btn text-center">
             Continue
         </button>
     </div> 

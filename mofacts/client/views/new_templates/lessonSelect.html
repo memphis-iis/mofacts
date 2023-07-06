@@ -1,0 +1,97 @@
+<template name="lessonSelect">
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-md-12">
+        <div class="row" style="margin: 10px;">
+            <input id="practiceTDFSearch" type="text" placeholder="Select a lesson" alt="tdf search box">
+        </div>
+        <!-- search by tag form -->
+        {{#if searching}}
+        {{else}}
+            {{#if recentTdfs}}
+            <div class="row full-width">
+                <div class="header-box">
+                    Recent Lessons
+                    {{#if class}}
+                    : {{class.courseName}}
+                    {{/if}}
+                </div> 
+            </div>
+            <div class="row  gy-5">
+                {{#each recentTdfs}}    
+                <div class=" col-lg-3 col-md-3  col-xs-12">
+                        <button id="{{this.tdfid}}" class="btn  width-100-percent tdfButton" type="button" name="{{this.name}}"
+                        data-tdfid="{{this.tdfid}}"
+                        data-lessonname="{{this.name}}"
+                        data-currentStimuliSetId="{{this.currentStimuliSetId}}"
+                        data-ignoreOutOfGrammarResponses="{{this.ignoreOutOfGrammarResponses}}"
+                        data-speechOutOfGrammarFeedback="{{this.speechOutOfGrammarFeedback}}"
+                        data-isMultiTdf="{{this.isMultiTdf}}">{{this.name}}
+                        {{#if this.enableAudioPromptAndFeedback}}
+                            <span class="fa fa-headphones"></span>
+                        {{/if}}
+                        {{#if this.audioInputEnabled}}
+                            <span class="fa fa-microphone"></span>
+                        {{/if}}
+                        </button>
+                    </div>  
+                {{/each}}
+            </div>
+            <br>
+        {{/if}}
+    {{/if}}
+        <div class="row full-width">
+            <div class="header-box">
+                {{#if searching}}
+                    Search Results
+                    {{#if class}}
+                    : {{class.courseName}}
+                    {{/if}}
+                {{else}}
+                    Available Lessons
+                    {{#if class}}
+                    : {{class.courseName}}
+                    {{/if}}
+                {{/if}}
+            </div> 
+        </div> 
+        {{#if enabledTdfs}}
+        <div class="row  gy-5">
+                {{#each enabledTdfs}}    
+                <div class=" col-lg-3 col-md-3  col-xs-12">
+                        <button id="{{this.tdfid}}" class="btn  width-100-percent tdfButton" type="button" name="{{this.name}}"
+                        data-tdfid="{{this.tdfid}}"
+                        data-lessonname="{{this.name}}"
+                        data-currentStimuliSetId="{{this.currentStimuliSetId}}"
+                        data-ignoreOutOfGrammarResponses="{{this.ignoreOutOfGrammarResponses}}"
+                        data-speechOutOfGrammarFeedback="{{this.speechOutOfGrammarFeedback}}"
+                        data-isMultiTdf="{{this.isMultiTdf}}">{{this.name}}
+                        {{#if this.enableAudioPromptAndFeedback}}
+                            <span class="fa fa-headphones"></span>
+                        {{/if}}
+                        {{#if this.audioInputEnabled}}
+                            <span class="fa fa-microphone"></span>
+                        {{/if}}
+                        </button>
+                    </div>  
+                {{/each}}
+            </div>
+        {{else}}
+            {{#if searching}}
+                <p class="full-width text-center">
+                    No results found.
+                </p>
+            {{else}}
+            <p class="full-width text-center">
+                There are no lessons loaded. Please contact your administrator
+            </p>
+            <div class="vh-5"></div>
+                <div class="mx-auto text-center">
+                    <button id="reportError" data-bs-toggle="modal" data-bs-target="#errorReportingModal" class="btn">Report an Error</button>
+                </div>
+            {{/if}}
+        {{/if}}
+      </div>
+    </div>
+  </div>
+</template>

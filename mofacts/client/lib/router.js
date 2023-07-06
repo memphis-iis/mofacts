@@ -123,6 +123,7 @@ Router.route('/experiment/:target?/:xcond?', {
     return Meteor.subscribe('tdfByExperimentTarget', this.params.target)
   },
   action: async function() {
+    Session.set('useEmbeddedAPIKeys', true);
     Session.set('curModule', 'experiment');
     // We set our session variable and also set a cookie (so that we still
     // know they're an experimental participant after browser refresh)
@@ -168,6 +169,7 @@ const restrictedRoutes = [
   'turkWorkflow',
   'dataDownload',
   'userProfileEdit',
+  'profileEdit',
   'userAdmin',
   'contentGeneration',
   'tdfAssignmentEdit',
@@ -175,7 +177,7 @@ const restrictedRoutes = [
   'feedback',
   'experimentSettings',
   'classControlPanel',
-  'contentControlPanel'
+  'contentControlPanel',
 ];
 
 const getDefaultRouteAction = function(routeName) {
@@ -220,6 +222,7 @@ Router.route('/studentReporting', {
     return [Meteor.subscribe('allTdfs', 'all')];
   },
   action: function() {
+    routeName = 'studentReporting';
     Session.set('curModule', routeName.toLowerCase());
     console.log(routeName + ' ROUTE');
     this.render(routeName);
@@ -335,6 +338,33 @@ Router.route('/profile', {
   },
 });
 
+Router.route('/lessonSelect', {
+  name: 'client.lessonSelect',
+  waitOn: function() {
+    let assignedTdfs = Meteor.user()?.profile?.assignedTdfs;
+    let curCourseId = Meteor.user()?.profile?.curClass?.courseId || 'undefined'
+    let allSubscriptions = [
+      Meteor.subscribe('allUserExperimentState', assignedTdfs)
+    ];
+    if (curCourseId != undefined)
+      allSubscriptions.push(Meteor.subscribe('Assignments', curCourseId));
+    if (Roles.userIsInRole(Meteor.user(), ['admin']))
+      allSubscriptions.push(Meteor.subscribe('allUsers'));
+    if (assignedTdfs === undefined || assignedTdfs === 'all')
+      allSubscriptions.push(Meteor.subscribe('allTdfs'));
+    else 
+      allSubscriptions.push(Meteor.subscribe('currentTdf', assignedTdfs));
+    return allSubscriptions;
+  },
+  action: function() {
+    if (Meteor.user()) {
+      this.render('lessonSelect');
+    } else {
+      this.redirect('/');
+    }
+  },
+});
+
 Router.route('/classEdit',{
   action: async function(){
   if(Meteor.user()){
@@ -349,6 +379,12 @@ Router.route('/classEdit',{
   
     //Get teacher info
     const teacher = verifiedTeachers.find((x) => x.username === teacherSelected);
+    if(!teacher){
+      console.log('teacher not found');
+      alert('This account is not a teacher account. Please log in with a teacher account.');
+      router.go('/');
+      return;
+    }
     console.log('got teachers', teacher);
 
     Session.set('teachers', verifiedTeachers);    
@@ -377,6 +413,8 @@ Router.route('/classEdit',{
 //Setup profile routes for direct teacher links
 Router.route('/classes/:_teacher', {
   action: async function(){
+    console.log('teacher route' + this.params._teacher);
+    Session.set('useEmbeddedAPIKeys', true);
     teacherSelected = this.params._teacher;
     let southwestOnly = false;
     let loginMode = Session.get('loginMode');
@@ -396,7 +434,6 @@ Router.route('/classes/:_teacher', {
     //Get teacher info
     const teacher = verifiedTeachers.find((x) => x.username === teacherSelected);
     console.log('got teachers', teacher);
-
     Session.set('teachers', verifiedTeachers);    
     
     console.log('teacher', teacher);
@@ -453,6 +490,8 @@ Router.route('/classes/:_teacher', {
 //Setup profile routes for direct class links
 Router.route('/classes/:_teacher/:_class', {
   action: async function(){
+    console.log('class route: ' + this.params._teacher + ' ' + this.params._class);
+    Session.set('useEmbeddedAPIKeys', true);
     teacherSelected = this.params._teacher;
     curClassID = this.params._class;
     let southwestOnly = false;

@@ -5,19 +5,12 @@ import {displayify} from '../../../common/globalHelpers';
 import {selectTdf} from '../home/profile'
 import {routeToSignin} from '../../lib/router';
 
+
 Template.signIn.onRendered(async function() {
   if (Session.get('loginMode') !== 'experiment') {
     console.log('password signin, setting login mode');
     Session.set('loginMode', 'password');
     
-    //get institutions
-    const institutions = [
-      {name: 'None', route: ''},
-      {name: 'Soutwest', route: 'signInSouthwest'}
-    ]
-    Session.set('institutions', institutions);
-    console.log('institutions', institutions);
-
     let verifiedTeachers = await meteorCallAsync('getAllTeachers');
     console.log('verifiedTeachers', verifiedTeachers);
   
@@ -39,13 +32,14 @@ Template.signIn.onRendered(async function() {
   }
   Session.set('classesByInstructorId', classesByInstructorId);
   curTeacher = Session.get('curTeacher');
-  console.log("teacher:", curTeacher._id);
+  console.log("teacher:", curTeacher._id || 'none');
   if (curTeacher._id){
     $('#initialInstructorSelection').prop('hidden', 'true');
     $('#classSelection').prop('hidden', 'false');
     $('.login').prop('hidden', 'true');
+    //start bootstrap modal
+    $('#classSelect').removeAttr('hidden');
   }
-
 });
 
 
@@ -73,7 +67,14 @@ Template.signIn.events({
     event.preventDefault();
     Router.go('/signup');
   },
-  
+  'change #classSelect': function(event) {
+    event.preventDefault();
+    console.log('class select');
+    //route to /classes/teacher._username/section._id
+    Router.go('/classes/' + Session.get('curTeacher').username + '/' + event.target.value);
+    //hide ClassSelectModal
+    $('#classSelectModal').modal('hide');
+  },
   'change #institutionSelect': function(event) {
     event.preventDefault();
     console.log('institution select');
@@ -87,50 +88,58 @@ Template.signIn.events({
   
   'change #teacherSelect': function(event) {
     event.preventDefault();
-    setTeacher(event.target.value);
-  },
-  'change #classSelect': function(event) {
-    event.preventDefault();
-    setClass(event.target.value);
-  },
-  'click #signInWithSSOModalButton': function(event) {
-    event.preventDefault();
-    console.log('saml login');
-    const provider = event.target.getAttribute('data-provider');
-    console.log('provider: ' + JSON.stringify(provider));
-    Meteor.loginWithSaml({
-      provider,
-    }, function(data, data2) {
-      console.log('callback');
-      // handle errors and result
-      console.log('data: ' + JSON.stringify(data));
-      console.log('data2: ' + JSON.stringify(data2));
-      if (!!data && !!data.error) {
-        alert('Problem logging in: ' + data.error);
-      } else {
-        const curTeacher = Session.get('curTeacher');
-        const curClass = Session.get('curClass');
-        Meteor.call('addUserToTeachersClass', Meteor.userId(), curTeacher._id, curClass.sectionId, async function(err, result) {
-          if (err) {
-            console.log('error adding user to teacher class: ' + err);
-          }
-          console.log('addUserToTeachersClass result: ' + result);
-          let sectionName = "";
-          if(curClass.sectionName){
-            sectionName = "/" + curClass.sectionName;
-          }
-          const asignedTDFIds = await meteorCallAsync('getTdfsAssignedToStudent', Meteor.userId(), curClass.sectionId)
-          const entryPoint = `${curTeacher.username}/${curClass.courseName + sectionName}`
-          await meteorCallAsync('setUserLoginData', entryPoint, 'southwest', curTeacher, curClass, asignedTDFIds);
-          Meteor.call('logUserAgentAndLoginTime', Meteor.userId(), navigator.userAgent);
-          Meteor.call('updatePerformanceData', 'login', 'signinSouthwest.clickSamlLogin', Meteor.userId());
-          Meteor.logoutOtherClients();
-          Router.go('/profile');
-        });
-      }
-    });
+    //get the teacher's information fron allTeachers in format {_id:'{{this._id}}',username:'{{this.username}}
+    const teacher = Session.get('teachers').find(teacher => teacher._id === event.target.value);
+    setTeacher(teacher);
+    console.log('teacher select' + teacher);
+    //show class selection
+    $('#classSelect').removeAttr('hidden');
+    //hide teacher selection
+    $('#teacherSelect').prop('hidden', 'true');
   },
 
+  'click #cancelClassSelect': function(event) {
+    event.preventDefault();
+    //set curTeacher and curClass session variables to null
+    Session.set('curTeacher', null);
+    Session.set('curClass', null);
+    //set the useEmbeddedAPIKeys session variable to false
+    Session.set('useEmbeddedAPIKeys', false);
+  },
+  'click #classSelectButton': function(event) {
+    event.preventDefault();
+    //set the curClass and curTeacher session variables to null
+    Session.set('curTeacher', null);
+    Session.set('curClass', null);
+    //set the useEmbeddedAPIKeys session variable to false
+    Session.set('useEmbeddedAPIKeys', false);
+  },
+  'click #signInWithMicrosoftSSO': function(event) {
+      //login with the Accounts service office365
+      event.preventDefault();
+      console.log('Microsoft Login Proceeding');
+      //set the login mode to microsoft
+      Session.set('loginMode', 'microsoft');
+      Meteor.loginWithOffice365({
+        loginStyle: 'popup',
+        requestOfflineToken: true,
+        requestPermissions: ['User.Read']
+      }, async function(err) {
+        //if we are not in a class and we log in, we need to disable embedded API keys.
+        if(!Session.get('curClass')){
+          Session.set('useEmbeddedAPIKeys', false);
+        }
+        if (err) {
+          // error handling
+          console.log('Could not log in with Microsoft', err);
+          $('#signInButton').prop('disabled', false);
+          return;
+        } else {
+          //redirect to profile edit page, since we don't have a profile yet
+          Router.go('/profile');
+        }
+      });
+    },
   'click #courseLink': function(event) {
     event.preventDefault();
     const sectionId = event.target.getAttribute('section-id');
@@ -139,7 +148,7 @@ Template.signIn.events({
     const allClasses = Session.get('curTeacherClasses');
     const curClass = allClasses.find((aClass) => aClass.sectionId.includes(sectionId));
     Session.set('curClass', curClass);
-    Session.set('curSectionId', sectionId)
+    Session.set('curSectionId', sectionId);
     $('.login').prop('hidden', '');
   },
 
@@ -173,6 +182,10 @@ Template.signIn.events({
     };
 
     Meteor.loginWithGoogle(options, async function(err) {
+      if(!Session.get('curClass')){
+        //If we are not in a class and we log in, we need to disable embedded API keys.
+        Session.set('useEmbeddedAPIKeys', false);
+      }
       if (err) {
         $('#signInButton').prop('disabled', false);
         // error handling
@@ -397,6 +410,10 @@ function userPasswordCheck() {
 
   // If we're here, we're NOT in experimental mode
   Meteor.loginWithPassword(newUsername, newPassword, async function(error) {
+    if(!Session.get('curClass')){
+      //If we are not in a class and we log in, we need to disable embedded API keys.
+      Session.set('useEmbeddedAPIKeys', false);
+    }
     if (typeof error !== 'undefined') {
       console.log('Login error: ' + error);
       $('#invalidLogin').show();
@@ -488,30 +505,9 @@ function testLogin() {
   });
 }
 
-setClass = function(curClassID) {
-  console.log(curClassID);
-  $('#classSelection').prop('hidden', 'true');
-  const allClasses = Session.get('sectionsByInstructorId');
-  const curClass = allClasses.find((aClass) => aClass.sectionid == curClassID);
-  Session.set('curClass', curClass);
-  Session.set('curSectionId', curClass.sectionid)
-  console.log("Class/Section Set", curClass, curClass.sectionid);
-  $('.login').prop('hidden', '');
-};
+
 
 setTeacher = function(teacher) { // Shape: {_id:'{{this._id}}',username:'{{this.username}}'}
-  console.log(teacher);
-  Session.set('curTeacher', teacher);
-  $('#initialInstructorSelection').prop('hidden', 'true');
-  const curClasses = Session.get('classesByInstructorId')[teacher._id];
-  console.log('setTeacher', Session.get('classesByInstructorId'), teacher._id, teacher);
-
-  if (curClasses == undefined) {
-    $('#initialInstructorSelection').prop('hidden', '');
-    alert('Your instructor hasn\'t set up their classes yet.  Please contact them and check back in at a later time.');
-    Session.set('curTeacher', {});
-  } else {
-    Session.set('curTeacherClasses', curClasses);
-    $('#classSelection').prop('hidden', '');
-  }
+  //route to the teacher's login page
+  Router.go('/classes/' + teacher.username);
 };

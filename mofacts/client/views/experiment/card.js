@@ -395,7 +395,7 @@ async function initCard() {
   };
   Session.set('scoringEnabled', undefined);
 
-  if (!Session.get('stimDisplayTypeMap')) {
+  if (!Session.get('stimDisplayTypeMap') || !Session.get('stimDisplayTypeMap').length > 0) {
     const stimDisplayTypeMap = await meteorCallAsync('getStimDisplayTypeMap');
     Session.set('stimDisplayTypeMap', stimDisplayTypeMap);
   }
@@ -813,7 +813,14 @@ Template.card.helpers({
     }
     console.log("probability parms input",probParms);
     return probParms;
-  }
+    
+  },
+  'curTdfName': function(){
+    lessonname = Session.get('currentTdfFile').tdfs.tutor.setspec.lessonname;
+    console.log("lessonname",lessonname);
+    return lessonname;
+  },
+  
 });
 
 function getResponseType() {
@@ -1466,53 +1473,63 @@ async function showUserFeedback(isCorrect, feedbackMessage, afterAnswerFeedbackC
   const isButtonTrial = getButtonTrial();
   // For button trials with images where they get the answer wrong, assume incorrect feedback is an image path
   if (!isCorrect && isButtonTrial && getResponseType() == 'image') {
-    $('#UserInteraction').removeClass('text-align alert alert-success alert-danger').html('');
     const buttonImageFeedback = 'Incorrect.  The correct response is displayed below.';
     const correctImageSrc = Session.get('currentExperimentState').originalAnswer;
-    $('#UserInteraction').html('<p class="text-align alert alert-danger">' + buttonImageFeedback +
+    $('#UserInteraction').html('<p class="text-align alert">' + buttonImageFeedback +
       '</p><img style="background: url(' + correctImageSrc +
       '); background-size:100%; background-repeat: no-repeat;" disabled="" \
       class="btn-alt btn-block btn-image btn-responsive">').show().attr("hidden",false);
   } else {
+    //check if the feedback has the word "incorrect" or "correct" in it, if so, encase it in a bold tag and a new line before it and after it
+    if (feedbackMessage.includes("Incorrect") || feedbackMessage.includes("Correct")) {
+      feedbackMessage = feedbackMessage.replace("Incorrect", "<br><b>Incorrect</b><br>");
+      feedbackMessage = feedbackMessage.replace("Correct", "<br><b>Correct</b><br>");
+    }
     $('#UserInteraction')
         .removeClass('alert-success alert-danger')
         .addClass('text-align alert')
-        .addClass(isCorrect ? 'alert-success' : 'alert-danger')
-        .text(feedbackMessage)
+        .html(feedbackMessage + $('#UserInteraction').html())
         .attr("hidden",false)
         .show()
         if(!isCorrect){
-          $('#CountdownTimer')
-            .addClass('text-align')
-            .attr("hidden",false)
-            .show();
-
+          $('#UserInteraction').addClass('alert-danger');
           var countDownStart = new Date().getTime();
           let dialogueHistory;
           if (Session.get('dialogueHistory')) {
             dialogueHistory = JSON.parse(JSON.stringify(Session.get('dialogueHistory')));
           }
           countDownStart += getReviewTimeout(getTestType(), Session.get('currentDeliveryParams'), isCorrect, dialogueHistory, isTimeout);
+          var originalnow = new Date().getTime();
+          var originalDist = countDownStart - originalnow;
+          var originalSecs = Math.ceil((originalDist % (1000 * 60)) / 1000);
 
           var CountdownTimerInterval = Meteor.setInterval(function() {
             var now = new Date().getTime()
             var distance = countDownStart - now;
             var seconds = Math.ceil((distance % (1000 * 60)) / 1000);
 
-            $('#CountdownTimer').text('Continuing in: ' + seconds + "s");
-    
+            document.getElementById("CountdownTimerText").innerHTML = 'Continuing in: ' + seconds + "s";
+            //set the bootstrap progress bar to the percentage of time left using the style attribute
+            var percent = (seconds / originalSecs) * 100;
+            document.getElementById("progressbar").style.width = percent + "%";
+
+
             // If the count down is finished, end interval and clear CountdownTimer
             if (distance < 0) {
               Meteor.clearInterval(CountdownTimerInterval);
               if(window.currentAudioObj) {
-                $('#CountdownTimer').text('Continuing after feedback...');
+                $('#CountdownTimerText').text('Continuing after feedback...');
               } else {
-                $('#CountdownTimer').text('');
+                $('#CountdownTimerText').text('');
               }
               Session.set('CurIntervalId', undefined);
             }
           }, 100);
           Session.set('CurIntervalId', CountdownTimerInterval);
+        } else {
+          //hide progressbar
+          $('#progressbar').hide();
+          $('#UserInteraction').addClass('alert-success');
         }
   }
 
@@ -2380,6 +2397,7 @@ function scrollElementIntoView(selector, scrollType) {
 // loads before it and stopUserInput is erroneously executed afterwards due to timing issues
 let inputDisabled = undefined;
 function stopUserInput() {
+  $('#userAnswer').hide();
   console.log('stop user input');
   inputDisabled = true;
   stopRecording();
@@ -2515,8 +2533,11 @@ async function processLINEAR16(data) {
       // is within the realm of reasonable responses before transcribing it
       answerGrammar = getAllCurrentStimAnswers(false);
     }
-
-    const tdfSpeechAPIKey = Session.get('currentTdfFile').tdfs.tutor.setspec.speechAPIKey;
+    if($Session.get('useEmbeddedAPIKeys')){
+      const tdfSpeechAPIKey = Session.get('currentTdfFile').tdfs.tutor.setspec.speechAPIKey;
+    } else {
+      const tdfSpeechAPIKey = '';
+    }
     // Make the actual call to the google speech api with the audio data for transcription
     if (tdfSpeechAPIKey && tdfSpeechAPIKey != '') {
       console.log('tdf key detected');
@@ -2785,8 +2806,7 @@ function updateExperimentState(newState, codeCallLocation, unitEngineOverride = 
     Meteor.call('updateExperimentState', curExperimentState, curExperimentState.currentTdfId);
   }
   console.log('updateExperimentState', codeCallLocation, '\nnew:', curExperimentState);
-  Session.set('currentExperimentState', curExperimentState);
-  return curExperimentState.currentTdfId;
+  return Session.get('currentRootTdfId');
 }
 
 // Re-initialize our User Progress and Card Probabilities internal storage

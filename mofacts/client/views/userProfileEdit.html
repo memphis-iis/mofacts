@@ -1,25 +1,21 @@
 <!-- User Profile (AWS) editing template -->
 
 <template name="userProfileEdit">
-    <div>
-        <div class="col-md-offset-3 col-md-6 form-horizontal" id="profileContainer">
-            <legend class="text-center">Profile Data</legend>
+    <div class="container">
+        <div class="header-box">
+            AWS User Data
+        </div> 
+        <div class="row" id="profileContainer">
 
             <div class="form-group">
-                <label class="col-md-4 control-label" for="profileAWSID">AWS ID</label>
-                <div class="col-md-8">
+
+                <div class="col-12">
                     <input type="text"
                         id="profileAWSID" name="profileAWSID"
                         class="form-control clearOnSave"
                         maxlength="40"
                         placeholder="{{#if have_aws_id}}Overwrite{{else}}Enter{{/if}} your AWS ID"
                     >
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label class="col-md-4 control-label" for="profileAWSSecret">AWS Secret Key</label>
-                <div class="col-md-8">
                     <input type="password"
                         id="profileAWSSecret" name="profileAWSSecret"
                         class="form-control clearOnSave"
@@ -28,17 +24,17 @@
                     >
                 </div>
             </div>
-
-            <div class="form-group">
-                <label class="col-md-4 control-label" for="profileUseSandbox">Use Sandbox</label>
-                <div class="col-md-8">
+            <div class="row text-center">
+                <div class="col-12">
                     <input type="checkbox" id="profileUseSandbox" name="profileUseSandbox" checked={{use_sandbox}}>
-                    <button type='button' id='saveProfile' class='btn btn-fix'>
-                        Save Profile Data
-                    </button>
-                    <br>
-                    <small>(Your AWS credentials are never shown)</small>
+                    <label class="control-label" for="profileUseSandbox">Use Sandbox (Your AWS credentials are never shown)</label>
                 </div>
+            </div>
+            <div class="vh-5"></div>
+            <div class="row text-center">
+                <button type='button' id='saveProfile' class='btn btn-fix'>
+                    Save Profile Data
+                </button>
             </div>
         </div>
     </div>

@@ -17,6 +17,8 @@ if (location.protocol !== 'https:' && forceSSL) {
   location.href = location.href.replace(/^http:/, 'https:');
 }
 
+
+
 async function checkUserSession(){
   const currentSessionId = Meteor.default_connection._lastSessionId;
   const lastSessionId = Meteor.user().profile.lastSessionId;
@@ -112,17 +114,15 @@ function redoCardImage() {
 }
 //change the theme of the page onlogin
 Accounts.onLogin(function() {
-  //get theme from user profile
-  if(Meteor.user()){
-    let theme = Meteor.user().profile.theme;
-    //if that field returns undefined, set it to /classic.css
-    if (!theme) {
-      theme = '/styles/classic.css';
-    }
-    //change #theme href to theme
-    $('#theme').attr('href', theme);
-    //set the theme select to the theme
-    $('#themeSelect').val(theme);
+  //check if the user has a profile with an email, first name, and last name
+  if (Meteor.userId() && !Meteor.user().profile.username) {
+    Meteor.call('populateSSOProfile', Meteor.userId(), function(error, result) {
+      if (error) {
+        console.log(error);
+      } else {
+        console.log(result);
+      }
+    });
   }
 });
 
@@ -140,25 +140,7 @@ Accounts.onLogout(function() {
 });
 
 Meteor.startup(function() {
-  console.logs = [];
-  console.defaultLog = console.log.bind(console);
-  console.log = function(...args) {
-    const convertedArgs = [];
-    for (const index in args) {
-      if (typeof(args[index]) != 'object') {
-        convertedArgs.push(args[index]);
-      } else {
-        try {
-          convertedArgs.push(JSON.stringify(args[index]));
-        } catch (e) {
-          convertedArgs.push(e);
-        }
-      }
-    }
-    console.logs = console.logs.concat(convertedArgs);
-    console.logs = console.logs.slice(0, 100000);
-    console.defaultLog.apply(null, args);
-  };
+
   Session.set('debugging', true);
   sessionCleanUp();
 
@@ -176,25 +158,6 @@ Template.DefaultLayout.onRendered(function() {
   });
   //load css into head based on user's preferences
   const user = Meteor.user();
-  if (user && user.profile && user.profile.css) {
-    css = user.profile.theme;
-    //if that field returns undefined, set it to /neo.css
-    if (!css) {
-      css = '/styles/neo.css';
-    }
-    //link that css file url to the head
-    $('head').append('<link id="theme" rel="stylesheet" href="' + css + '" type="text/css" />');
-    console.log('css loaded, ', css);
-  } else {
-    //use neo css if light theme is set or if no theme is set as a browser preference
-    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
-      console.log('light theme');
-      $('head').append('<link id="theme" rel="stylesheet" href="/styles/neo.css" type="text/css" />');
-    } else {
-      console.log('dark theme');
-      $('head').append('<link id="theme" rel="stylesheet" href="/styles/neo-dark.css" type="text/css" />');
-    }
-  }
 
   $('#helpModal').on('hidden.bs.modal', function() {
     if (window.currentAudioObj) {
@@ -239,21 +202,7 @@ Template.DefaultLayout.events({
     Router.go('/profile');
   },
 
-  'click #progressButton': function(event) {
-    event.preventDefault();
-    if (window.currentAudioObj) {
-      window.currentAudioObj.pause();
-    }
-    // Clear out studentUsername in case we are a teacher/admin who previously
-    // navigated to this page for a particular student and want to see our own progress
-    Session.set('studentUsername', null);
-    Session.set('curStudentID', undefined);
-    Session.set('curStudentPerformance', undefined);
-    Session.set('curClass', undefined);
-    Session.set('instructorSelectedTdf', undefined);
-    Session.set('curClassPerformance', undefined);
-    Router.go('/studentReporting');
-  },
+
   'click #helpButton': function(event) {
     event.preventDefault();
     Session.set('pausedLocks', Session.get('pausedLocks')+1);
@@ -394,7 +343,7 @@ Template.registerHelper('modalTemplate', function() {
   return modalTemplate.template;
 });
 Template.registerHelper('isLoggedIn', function() {
-  return haveMeteorUser();
+  return Meteor.userId() !== null;
 });
 Template.registerHelper('showPerformanceDetails', function() {
   return ((Session.get('curModule') == 'card' || Session.get('curModule') !== 'instructions') && Session.get('scoringEnabled') && Session.get('unitType') != 'schedule');

@@ -49,12 +49,35 @@ sudo cp "$CFGBASE.new" $CFGSRC
 sudo systemctl restart mongod
 ###############################################################################
 
-# Install and configure postgres
-dos2unix /vagrant/db/initDb.sh
-bash /vagrant/db/initDb.sh
-
 # Install Java 8
 sudo apt-get install -y openjdk-8-jre
+sudo apt install openjdk-8-jdk-headless -y
+
+# Install android tools 
+mkdir ~/android
+cd ~/android
+wget https://dl.google.com/android/repository/commandlinetools-linux-7583922_latest.zip
+unzip commandlinetools-linux-7583922_latest.zip
+rm commandlinetools-linux-7583922_latest.zip
+mv ~/cmdline-tools/* ~/android/cmdline-tools/tools/
+rm -rf ~/cmdline-tools
+
+#write bashrc
+echo 'export ANDROID_HOME=$HOME/android' >> ~/.bashrc
+echo 'export ANDROID_SDK_ROOT=$HOME/android' >> ~/.bashrc
+echo 'export PATH=$ANDROID_HOME/cmdline-tools/tools/bin/:$PATH' >> ~/.bashrc
+echo 'export PATH=$ANDROID_HOME/emulator/:$PATH'  >> ~/.bashrc
+echo 'export PATH=$ANDROID_HOME/platform-tools/:$PATH' >> ~/.bashrc
+echo 'export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64' >> ~/.bashrc
+
+#export bash vars
+export ANDROID_HOME=$HOME/android
+export ANDROID_SDK_ROOT=$HOME/android
+export PATH=$ANDROID_HOME/cmdline-tools/tools/bin/:$PATH
+export PATH=$ANDROID_HOME/emulator/:$PATH
+export PATH=$ANDROID_HOME/platform-tools/:$PATH
+export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
+
 
 # Set up syllable systemd service
 sudo cp /vagrant/syllables_subsystem/syllable.service /etc/systemd/system/
@@ -92,6 +115,9 @@ sudo mount --bind "$HOME/.meteor/packages" packages
 #meteor update
 meteor npm install --save babel-runtime --no-bin-links
 
+#Install gradle
+sudo apt-get install -y gradle
+
 # Set up dynamic config
 bash /vagrant/scripts/server/setDynamicConfig.sh
 
@@ -104,6 +130,17 @@ sudo touch /etc/motd
 #install docker and docker-compose
 sudo apt-get install -y docker.io
 sudo apt-get install -y docker-compose
+
+#add vagrant user to docker group
+sudo usermod -aG docker vagrant
+
+#give vagrant user permission to run docker without sudo
+sudo chmod 666 /var/run/docker.sock
+
+#start docker on boot
+sudo systemctl enable docker
+
+
 
 
 

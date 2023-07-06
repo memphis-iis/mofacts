@@ -13,29 +13,36 @@ Template.userAdmin.rendered = function() {
   });
 
   Meteor.subscribe('allUsers', function() {
-    Session.set('allUsers', Meteor.users.find({}, {fields: {username: 1}, sort: [['username', 'asc']]}).fetch());
+    Session.set('allUsers', Meteor.users.find({}, {fields: {username: 1, roles:1}, sort: [['username', 'asc']]}).fetch());
   });
 };
 
 Template.userAdmin.helpers({
   userRoleEditList: function() {
-    const userList = [];
     const allUsers = Session.get('allUsers') || [];
-    allUsers.forEach(function(user) {
-      const username = user.username.trim();
-
-      // Only show users for admin work if the username is an email addr
-      // (and yes, we're using a HUGE shortcut here - this check is only
-      // for admin convenience, not security)
-      if (username.indexOf(Session.get('filter')) > -1) {
-        userList.push({
-          '_id': user._id,
-          'username': username,
-          'admin': Roles.userIsInRole(user, ['admin']),
-          'teacher': Roles.userIsInRole(user, ['teacher']),
-        });
+    filter = Session.get('filter');
+    //filter out users that don't match the filter 
+    userList = allUsers.filter(function(user) {
+      if(user.username){
+        return user.username.indexOf(filter) !== -1;
+      } else {
+        return false;
       }
     });
+    //iterate through the list. if roles contains teacher, set .teacher to true. if roles contains admin, set .admin to true
+    userList.forEach(function(user) {
+      user.teacher = false;
+      user.admin = false;
+      if(user.roles){
+        if(user.roles.indexOf('teacher') !== -1){
+          user.teacher = true;
+        }
+        if(user.roles.indexOf('admin') !== -1){
+          user.admin = true;
+        }
+      }
+    });
+    console.log('userRoleEditList:' + JSON.stringify(userList));
     return userList;
   },
 });
@@ -68,14 +75,8 @@ Template.userAdmin.events({
     const userId = _.trim(btnTarget.data('userid'));
     const roleAction = _.trim(btnTarget.data('roleaction'));
     const roleName = _.trim(btnTarget.data('rolename'));
-    console.log('Action requested:', roleAction, 'to', roleName, 'for', userId);
 
-    if (!userId || !roleAction || !roleName) {
-      console.log('Invalid parameters found!');
-      return;
-    }
 
-    $('#userAdminModal').modal('show');
 
     Meteor.call('userAdminRoleChange', userId, roleAction, roleName, function(error, result) {
       $('#userAdminModal').modal('hide');
@@ -84,7 +85,7 @@ Template.userAdmin.events({
       if (typeof error !== 'undefined') {
         disp = 'Failed to handle request. Error:' + error;
       } else {
-        disp = 'Server returned:' + JSON.stringify(result, null, 2);
+        disp = 'Action completed successfully';
       }
       console.log(disp);
       alert(disp);

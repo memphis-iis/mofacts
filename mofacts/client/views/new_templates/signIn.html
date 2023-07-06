@@ -2,44 +2,60 @@
     <div class="container">
         <!-- page header -->
         <div class="row text-center">
-            <div class="col-lg-4 offset-lg-4 col-md-6 col-md-offset-4 col-sm-8 col-sm-offset-2 col-xs-12 spacer">
-                <h1>MoFaCTS</h1>
+            <div class="col-12 mx-auto">
+                <div class="vh-10"></div>
+                <h1 align-bottom>MoFaCTS</h1>
                 <span id="serverErrors"></span>
+                <div class="vh-5"></div>
             </div>
         </div>
         <!-- centered login form -->
         <div class="row text-center login-form spacer">
-            <div class="col-lg-4 offset-lg-4 col-md-6 col-md-offset-4 col-sm-8 col-sm-offset-2 col-xs-12">
+            <div class="col-12 mx-auto">
                 <form>
                     {{#if isExperiment}}
                         <input  type="text" id="signInUsername" value="" placeholder="Amazon Turk ID"><br>
                         {{#if experimentPasswordRequired}}
                             <input  type="password" id="password" value="" placeholder="Password"><br><br>
                         {{/if}}
+                        <div class="vh-5"></div>
                     {{else}}
                         <input  type="text" id="signInUsername" value="" placeholder="Username"><br>
                         <input  type="password" id="password" value="" placeholder="Password"><br><br>
                         <span class="help-inline danger errcheck" id="invalidLogin" hidden >Username password pair not found!</span>
+                    
                     {{/if}}
+                    <div class="vh-5"></div>
                     {{#if showTestLogin}}
                     <br>
                         <a id="testSignInButton">Test Login (password not required)</a>
                         <br>
                     {{/if}}
-                    <button type="button" id="signInButton" class="btn">Sign In</button>
-                    {{#unless isExperiment}}
-                        <button type="button" id="signUpButton" class="btn">Sign Up</button>
-                    {{/unless}}
-
                 </form>
             </div>
         </div>
         {{#unless isExperiment}}
         <!-- login with sso and google -->
         <div class="row text-center large-spacer login-sso-options">
-            <div class="col-lg-4 offset-lg-4 col-md-6 col-md-offset-4 col-sm-8 col-sm-offset-2 col-xs-12 large-spacer">
-                <button type="button" id="signInButtonOAuth" class="btn">Sign In with Google</button><br><br>
-                <button type="button" id="signInWithSSOButton" class="btn" data-bs-toggle="modal" data-bs-target="#classSelectModal">Class Select / SSO</button>
+            <div class="col-12 mx-auto">
+                <button type="button" id="signInButton" class="btn btn-fixed">Log In</button><br>
+                {{#unless isExperiment}}
+                    <button type="button" id="signUpButton" class="btn btn-fixed">Sign Up</button><br>
+                {{/unless}}
+                <button data-bs-toggle="modal" class="btn btn-fixed btn-secondary" id="classSelectButton" data-bs-target="#classSelectModal">
+                    Teacher / Class Select
+                </button>
+                <br>
+                <button type="button" id="signInButtonOAuth" class="btn btn-fixed">
+                    <img width="20px" style="margin-bottom:3px; margin-right:5px" alt="Google sign-in" src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Google_%22G%22_Logo.svg/512px-Google_%22G%22_Logo.svg.png" />
+                    Sign in with Google
+                </button><br>
+                <button type="button" id="signInWithMicrosoftSSO" class="btn btn-fixed">
+                    <img width="20px" style="margin-bottom:3px; margin-right:5px" alt="Google sign-in" src="https://upload.wikimedia.org/wikipedia/commons/4/44/Microsoft_logo.svg" />
+                    Sign in with Microsoft</button>
+                <br>
+                
+                  
             </div>
         </div>
         <!-- footer -->
@@ -47,29 +63,26 @@
         {{/unless}}
         <!-- modal for sso login, hidden by default -->
         <div class="modal" id="classSelectModal" tabindex="-1">
-            <div class="modal-dialog">
+            <div class="modal-dialog fade-in-up">
                 <div class="modal-content">
-                  <div class="modal-header">
-                    <h5 class="modal-title">Class Select</h5>
-                  </div>
-                  <div class="modal-body login-form ">
-                    <form class="spacer">
-                        <!-- institution select form -->
-                        <select id="institutionSelect" class="form-select" aria-label="Default select example">
-                            <option selected>Select your institution</option>
-                            {{#each institutions}}
-                                <option value="{{this.route}}">{{this.name}}</option>
-                            {{/each}}
-                        </select>
+                    <div class="modal-header">
+                        <h3 class="modal-title">Class Selection</h3>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                      </div>
+                  <div class="modal-body login-form text-center">
+                    <p>
+                        Select your teacher and class from the dropdowns below.
+                    </p>
+                    <form class="spacer text-center">
                         <!-- hidden teacher select form -->
-                        <select id="teacherSelect" class="form-select" aria-label="Default select example" hidden>
+                        <select id="teacherSelect" style="width:80%;" aria-label="Default select example">
                             <option selected>Select your teacher</option>
-                            {{#each teacher}}
-                                <option value="{{this.id}}">{{this.username}}</option>
+                            {{#each teachers}}
+                                <option value="{{this._id}}">{{this.profile.name}}</option>
                             {{/each}}
                         </select>
                         <!-- hidden class select form -->
-                        <select id="classSelect" class="form-select" aria-label="Default select example" hidden>
+                        <select id="classSelect" style="width:80%;" aria-label="Default select example" hidden>
                             <option selected>Select your class</option>
                             {{#each curTeacherClasses}}
                               {{#if checkSectionExists this.sectionName}}
@@ -80,9 +93,11 @@
                           {{/each}}
                         </select>
                     </form>
-                    <div class="row text-center">
-                        <button type="button" class="btn">Sign In</button>
-                        <button type="button" class="btn" data-bs-dismiss="modal">Close</button>
+                        <div class="vh-5"></div>
+                        <div class="row row-col-2 text-center">
+                            <div>
+                                <button type="button" class="btn btn-fixed" id="cancelClassSelect" data-bs-dismiss="modal">Cancel</button>
+                            </div>
                     </div>
                   </div>
                 </div>

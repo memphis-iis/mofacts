@@ -3,20 +3,20 @@ export {getAudioPromptModeFromPage, getAudioInputFromPage};
 
 const showHideAudioEnabledGroup = function(show) {
   if (show) {
-    $('.audioEnabledGroup').removeClass('invisible');
+    $('.audioEnabledGroup').show();
     $('.audioEnabledGroup').addClass('flow');
   } else {
-    $('.audioEnabledGroup').addClass('invisible');
+    $('.audioEnabledGroup').hide();
     $('.audioEnabledGroup').removeClass('flow');
   }
 };
 
 function getAudioPromptModeFromPage() {
-  if ($('#audioPromptFeedbackOn')[0].checked && $('#audioPromptQuestionOn')[0].checked) {
+  if ($('#audioPromptFeedbackOn').checked && $('#audioPromptQuestionOn').checked) {
     return 'all';
-  } else if ($('#audioPromptFeedbackOn')[0].checked){
+  } else if ($('#audioPromptFeedbackOn').checked){
     return 'feedback';
-  } else if ($('#audioPromptQuestionOn')[0].checked) {
+  } else if ($('#audioPromptQuestionOn').checked) {
     return 'question';
   } else {
     return 'silent';
@@ -36,7 +36,6 @@ function setAudioPromptFeedbackVolumeOnPage(audioVolume) {
 function disableUnsupportedFeatures(isSafari){
   if(isSafari){
     $('#audioInputOn').prop( "disabled", true );
-    $('#audioInputOff').prop( "disabled", true );
     $('#audioInputTitle').text($('#audioInputTitle').text() + "(Not available for safari)");
   }
 }
@@ -49,36 +48,39 @@ function setAudioPromptModeOnPage(audioPromptMode) {
       break;
     case 'feedback':
       $('#audioPromptFeedbackOn')[0].checked = true;
-      $('#audioPromptQuestionOff')[0].checked = true;
+      $('#audioPromptQuestionOn')[0].checked = false;
       break;
     case 'question':
-      $('#audioPromptFeedbackOff')[0].checked = true;
+      $('#audioPromptFeedbackOn')[0].checked = false;
       $('#audioPromptQuestionOn')[0].checked = true;
       break;
     default:
-      $('#audioPromptFeedbackOff')[0].checked = true;
-      $('#audioPromptQuestionOff')[0].checked = true;
+      $('#audioPromptFeedbackOn')[0].checked = false;
+      $('#audioPromptQuestionOn')[0].checked = false;
       break;
   }
 }
 
 function getAudioInputFromPage() {
-  return !$('#audioInputOff')[0].checked;
+  return $('#audioInputOn').checked;
 }
 
 function setAudioInputOnPage(audioInputEnabled) {
   if (audioInputEnabled) {
-    $('#audioInputOn')[0].checked = true;
+    $('#audioInputOn').checked = true;
   } else {
-    $('#audioInputOff')[0].checked = true;
+    $('#audioInputOn').checked = false;
   }
 }
 
 function showHideheadphonesSuggestedDiv(show) {
   if (show) {
-    $('#headphonesSuggestedDiv').removeClass('invisible');
+    $('#headphonesSuggestedDiv').show();
+    //change the modal height to accomodate the new content
+    $('.modal-dialog').addClass('modal-expanded');
   } else {
-    $('#headphonesSuggestedDiv').addClass('invisible');
+    $('#headphonesSuggestedDiv').hide();
+    $('.modal-dialog').removeClass('modal-expanded');
   }
 }
 
@@ -86,27 +88,27 @@ function showHideAudioPromptGroupDependingOnAudioPromptMode(audioPromptMode) {
   switch (audioPromptMode) {
     case 'feedback':
       $('.audioPromptFeedbackGroup').addClass('flow');
-      $('.audioPromptFeedbackGroup').removeClass('invisible');
-      $('.audioPromptQuestionGroup').addClass('invisible');
+      $('.audioPromptFeedbackGroup').show();
+      $('.audioPromptQuestionGroup').hide();
       $('.audioPromptQuestionGroup').removeClass('flow');
       break;
     case 'question':
       $('.audioPromptQuestionGroup').addClass('flow');
-      $('.audioPromptQuestionGroup').removeClass('invisible');
-      $('.audioPromptFeedbackGroup').addClass('invisible');
+      $('.audioPromptQuestionGroup').show();
+      $('.audioPromptFeedbackGroup').hide();
       $('.audioPromptFeedbackGroup').removeClass('flow');
       break;
     case 'all':
       $('.audioPromptFeedbackGroup').addClass('flow');
-      $('.audioPromptFeedbackGroup').removeClass('invisible');
+      $('.audioPromptFeedbackGroup').show();
       $('.audioPromptQuestionGroup').addClass('flow');
-      $('.audioPromptQuestionGroup').removeClass('invisible');
+      $('.audioPromptQuestionGroup').show();
       break;
     case 'silent':
     default:
-      $('.audioPromptFeedbackGroup').addClass('invisible');
+      $('.audioPromptFeedbackGroup').hide();
       $('.audioPromptFeedbackGroup').removeClass('flow');
-      $('.audioPromptQuestionGroup').addClass('invisible');
+      $('.audioPromptQuestionGroup').hide();
       $('.audioPromptQuestionGroup').removeClass('flow');
       break;
   }
@@ -161,17 +163,20 @@ Template.profileAudioToggles.rendered = function() {
 };
 
 Template.profileAudioToggles.events({
-  'click .audioPromptRadio': function(event) {
+  'click #audioPromptQuestionOn': function(event) {
     console.log('audio prompt mode: ' + event.currentTarget.id);
     const audioPromptMode = getAudioPromptModeFromPage();
-
-    const showHeadphonesSuggestedDiv = (audioPromptMode != 'silent') && getAudioInputFromPage();
-
-    showHideheadphonesSuggestedDiv(showHeadphonesSuggestedDiv);
-
     Session.set('audioPromptFeedbackView', audioPromptMode);
-
-    showHideAudioPromptGroupDependingOnAudioPromptMode(audioPromptMode);
+    //if toggle is on, show the warning, else hide it
+    if(event.currentTarget.checked){
+      $('.audioEnabledGroup').show();
+      $('#audio-modal-dialog').addClass('modal-expanded');
+      console.log('showing audio enabled group');
+    }else{
+      $('.audioEnabledGroup').hide();
+      $('#audio-modal-dialog').removeClass('modal-expanded');
+      console.log('hiding audio enabled group');
+    }
   },
 
   'click .audioInputRadio': function(event) {
@@ -186,6 +191,8 @@ Template.profileAudioToggles.events({
   },
 
   'click #setupAPIKey': function(e) {
+    //hide the modal
+    $('speechAPIModal').modal('hide');
     e.preventDefault();
     $('#speechAPIModal').modal('show');// {backdrop: "static"}
     Meteor.call('getUserSpeechAPIKey', function(error, key) {
@@ -253,7 +260,12 @@ Template.profileAudioToggles.events({
 
 Template.profileAudioToggles.helpers({
   showSpeechAPISetup: function() {
-    return Session.get('showSpeechAPISetup');
+    //check if Session variable useEmbeddedAPIKey is set
+    if(Session.get('useEmbeddedAPIKeys')){
+      return false;
+    } else {
+      return Session.get('showSpeechAPISetup');
+    }
   },
 
   speechAPIKeyIsSetup: function() {

@@ -56,7 +56,7 @@ const maxEditDistance = Meteor.settings.SymSpell.maxEditDistance ? parseInt(Mete
 // How big the prefix used for indexing is. Larger values will be result in a faster search, but will use more memory. Default is 7.
 const prefixLength = Meteor.settings.SymSpell.prefixLength ? parseInt(Meteor.settings.SymSpell.prefixLength) : 7;
 const symSpell = new SymSpell(maxEditDistance, prefixLength);
-serverConsole(Meteor.settings.frequencyDictionaryLocation)
+//get the path to the dictionary in /public/dictionaries
 symSpell.loadDictionary(Meteor.settings.frequencyDictionaryLocation, 0, 1);
 symSpell.loadBigramDictionary(Meteor.settings.bigramDictionaryLocation, 0, 2);
 process.env.MAIL_URL = Meteor.settings.MAIL_URL;
@@ -174,12 +174,8 @@ Meteor.publish(null, function() {
 
 Meteor.publish('allUsers', function() {
   const opts = {
-    fields: {username: 1},
+    fields: {username: 1, roles: 1},
   };
-  // eslint-disable-next-line no-invalid-this
-  if (Roles.userIsInRole(this.userId, ['admin'])) {
-    opts.fields.roles = 1;
-  }
   return Meteor.users.find({}, opts);
 });
 
@@ -733,6 +729,7 @@ async function getAllCourseAssignmentsForInstructor(instructorId) {
     {
       $project:{ //SELECT t.content -> \'fileName\' AS filename, c.courseName, c.courseId
         _id: 0,
+        tdfId: "$TDF._id",
         fileName: "$TDF.content.fileName",
         courseName: "$course.courseName",
         courseId: "$course._id"
@@ -2185,7 +2182,9 @@ const methods = {
 
   getAssignableTDFSForUser: function(userId){
     serverConsole('getAssignableTDFSForUser', userId);
-    const assignableTDFs = Tdfs.find({$or: [{ownerId: userId}, {accessors: {$elemMatch: {userId: userId}}}]}).fetch();
+    // get tdfs where ownerId is userId or .accessors array contains property with userId
+    const assignableTDFs = Tdfs.find({$or: [{ownerId: userId}, {'accessors.userId': userId}]}).fetch();
+    serverConsole('assignableTDFs', assignableTDFs);
     return assignableTDFs;
   },
 
@@ -2197,23 +2196,21 @@ const methods = {
     Meteor.users.update({'_id': {$in: revokedAccessors}}, {$pull: {'accessedTDFs': TDFId}}, {multi: true});
   },
 
-  transferDataOwnership: function(fileId, fileType, newOwnerId, oldOwnerId){
-    let query;
-    if(fileType == 'TDF'){
-      query = Roles.userIsInRole(oldOwnerId, 'admin') ? {_id: fileId} : {_id: fileId, ownerId: oldOwnerId};
-    } else { 
-      fileId = parseInt(fileId);
-      query = Roles.userIsInRole(oldOwnerId, 'admin') ? {stimuliSetId: fileId} : {stimuliSetId: fileId, owner: oldOwnerId};
-    }
-    if(oldOwnerId && newOwnerId){
-      serverConsole('transferring data ownership for', fileType, fileId, 'to', newOwnerId);
-      if(fileType == 'TDF')
-        Tdfs.update(query, {$set: {'ownerId': newOwnerId}})
-      else
-        Stims.update(query, {$set: {'owner': newOwnerId}})
+  transferDataOwnership: function(tdfId, newOwner){
+    //set the Tdf owner
+    serverConsole('transferDataOwnership',tdfId,newOwner);
+    tdf = Tdfs.findOne({_id: tdfId});
+    if(!tdf){
+      serverConsole('TDF not found');
+      return "TDF not found";
     } else {
-        serverConsole(`transferDataOwnership failed, ${fileType} or newOwner not found`);
+      serverConsole('TDF found', tdf._id, tdf.ownerId);
     }
+    tdf.ownerId = newOwner._id;
+    Tdfs.upsert({_id: tdfId}, tdf);
+    serverConsole(tdf);
+    serverConsole('transfer ' + tdfId + "to" + newOwner);
+    return "success";
   },
 
   resetPasswordWithSecret: function(email, secret, newPassword){
@@ -2315,6 +2312,24 @@ const methods = {
 
     // Remember we return a LIST of errors, so this is success
     return createdId;
+  },
+
+  populateSSOProfile: function(userId){
+    //check if the user has a service profile
+    const user = Meteor.users.findOne(userId);
+    if(user && user.services){
+      //if the user has a service profile, populate the user profile with the service profile
+      const service = Object.keys(user.services)[0];
+      const serviceProfile = user.services[service];
+      const profile = {
+        'firstName': serviceProfile.givenName,
+        'lastName': serviceProfile.surname,
+        'email': serviceProfile.mail,
+      };
+      Meteor.users.update(userId, {$set: {profile: profile, username: serviceProfile.mail}});
+      return "success: " + serviceProfile.mail;
+    }
+    return "failure";
   },
 
   //setUserTheme - sets the user's theme in profile
@@ -2481,6 +2496,20 @@ const methods = {
       Histories.remove({TDFId: tdfId});
       GlobalExperimentStates.remove({TDFId: tdfId});
       Tdfs.remove({_id: tdfId});
+      //iterate through TDF.stimuli
+      for (const stim of TDF.stimuli) {
+        asset = stim.imageStimulus || stim.audioStimulus || stim.videoStimulus || false;
+        if (asset) {
+          //remove asset
+          DynamicAssets.remove({"name": asset}, function(err, result){
+            if(err){
+              serverConsole(err);
+            } else {
+              serverConsole("Asset removed: ", asset);
+            }
+          });
+        }
+      }
     } else {
       result = 'No matching tdf file found';
       return result;
@@ -2812,9 +2841,16 @@ const asyncMethods = {
 
   deleteAllFiles: async function(){
     serverConsole('delete all uploaded files');
-    DynamicAssets.remove({});
-    filesLength = DynamicAssets.find().fetch().length;
-    return filesLength;
+    filesRemoved = 0;
+    const files = DynamicAssets.find({}).fetch();
+    serverConsole("files to remove: " + files.length);
+    for(let file of files){
+      serverConsole('removing file ' + file._id);
+      DynamicAssets.remove({_id: file._id});
+      filesRemoved++;
+    }
+    serverConsole('removed ' + filesRemoved + ' files');
+    return filesRemoved;
   },
   deleteStimFile: async function(stimSetId) {
     stimSetId = parseInt(stimSetId);
@@ -2865,6 +2901,16 @@ Meteor.startup(async function() {
     'secret': _.prop(google, 'secret'),
   });
   serverConsole('Rewrote Google service config');
+
+  //add microsoft service config
+  ServiceConfiguration.configurations.upsert({service: 'office365'}, {
+    $set: {
+      loginStyle: 'popup',
+      clientId: 'fe073cfe-ab3e-4589-b1f0-3bdc7094abeb', //Meteor.settings.office365.clientId,
+      secret: 'PtG8Q~zkuknxIKj9x2CUr~h5fLZdxBC3u9LMva.u',
+      tenent: 'common',
+    },
+  });
 
   // Figure out the "prime admin" (owner of repo TDF/stim files)
   // Note that we accept username or email and then find the ID

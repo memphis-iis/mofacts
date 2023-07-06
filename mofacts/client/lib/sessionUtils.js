@@ -132,5 +132,14 @@ function sessionCleanUp() {
     window.audioContext.close();
     window.audioContext = null;
   }
+  if(curExperimentState){
+    let globalExperimentState = GlobalExperimentStates.findOne({TDFId: Session.get('currentRootTdfId')})
+    if(globalExperimentState){
+      curExperimentState = Object.assign(globalExperimentState.experimentState, curExperimentState)
+      GlobalExperimentStates.update({_id: globalExperimentState._id}, {$set: {experimentState: curExperimentState}});
+    }
+  }
+  Session.set('currentRootTdfId', undefined);
+  curExperimentState = null;
 }
 

@@ -78,7 +78,7 @@ Template.signUp.events({
           }
           await meteorCallAsync('setUserLoginData', `direct`, 'password');
           Meteor.logoutOtherClients();
-          Router.go('/profile');
+          Router.render('profile');
         }
       });
     });
@@ -108,4 +108,11 @@ Template.signUp.events({
       $('#passwordMustMatch').hide();
     }
   },
+});
+
+Template.signUp.onRendered(function() {
+  //check if the user is already logged in
+  if (Meteor.userId()) {
+    Router.go('/profile');
+  }
 });

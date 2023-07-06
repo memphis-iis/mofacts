@@ -5,13 +5,13 @@
                 Press to continue when ready
             </button>
         {{else}}
-            <div class="{{fontSizeClass}}">
-                <input id="dialogueUserAnswer" class="alert alert-warning" style="display:table-cell;width:100%;">
+            <div class="text-center w-80">
+                <input id="dialogueUserAnswer" style="display:table-cell;width:100%;" placeholder="type response here...">
             </div>
         {{/if}}
     {{else}}
-        <div class="{{fontSizeClass}}">
-            <input id="userAnswer" class="alert alert-warning" style="display:table-cell;width:100%;" autocomplete="off">
+        <div class="text-center w-80">
+            <input type="text" id="userAnswer" style="display:table-cell;width:100%;" autocomplete="off" placeholder="type response here...">
         </div>
     {{/if}}
 

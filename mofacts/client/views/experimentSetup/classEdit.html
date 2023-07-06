@@ -1,8 +1,13 @@
 <template name="classEdit">
 {{#if isInRole 'admin, teacher'}}
     <br /><br />
-    <div class="col-md-3">
-        <legend class="text-center">Add/Edit Classes</legend>
+    <div class="container">
+      <div class="header-box">
+          <h4>Class Management</h4>
+      </div>
+      <div class="row text-center">
+        <h4>Add or Edit a Class</h4>
+      </div>
         <div>
           <select id="class-select">
               <option selected="selected" value="">Add a class</option>
@@ -20,21 +25,26 @@
           <textarea class="form-control" rows=15 cols=20 id="sectionNames" placeholder="Enter section names here"></textarea>
         </div>
         <div>
-                 
-          <button type='button' id='saveClass' class='btn btn-fix'>
+        <div class="vh-5"></div>
+          <button type='button' id='saveClass' class='btn w-100'>
               Save Class
           </button>
         </div>
+        <div class="vh-5"></div>
         <div class="row">
-          <div class="col-md-12">
-          <label>Section Links</label>
-          {{#each sections}}
-            <ul>
-            
-                <li><a href="{{baseLink}}classes/{{curTeacher}}/{{this.sectionId}}">{{this.courseName}} - {{this.sectionName}}</a></li>
+          <div class="col-md-12 text-center">
+          <h4>Section Links</h4>
+          {{#if sections}}
+            {{#each sections}}
+              <ul>
+              
+                  <li><a href="{{baseLink}}classes/{{curTeacher}}/{{this.sectionId}}">{{this.courseName}} - {{this.sectionName}}</a></li>
 
-            </ul>
-          {{/each}}
+              </ul>
+            {{/each}}
+          {{else}}
+            <p>No sections created.</p>
+          {{/if}}
         </div>
         </div>
     </div>
