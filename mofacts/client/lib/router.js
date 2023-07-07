@@ -292,7 +292,14 @@ Router.route('/adminControls', {
 Router.route('/profile', {
   name: 'client.profile',
   waitOn: function() {
-    let assignedTdfs = Meteor.user()?.profile?.assignedTdfs || 'undefined';
+    let assignedTdfs =  'undefined';
+    if(Meteor.user() && Meteor.user().profile && Meteor.user().profile.assignedTdfs){
+      assignedTdfs = Meteor.user()?.profile?.assignedTdfs
+    }
+    let experimentTarget = 'undefined'
+    if (Session.get('experimentTarget')) {
+      assignedTdfs = 'undefined'
+    }
     let curCourseId = Meteor.user()?.profile?.curClass?.courseId || 'undefined'
     let allSubscriptions = [
       Meteor.subscribe('allUserExperimentState', assignedTdfs)];
@@ -300,10 +307,14 @@ Router.route('/profile', {
       console.log('no assignments found')
     else
       allSubscriptions.push(Meteor.subscribe('Assignments', curCourseId));
+    
     if (Roles.userIsInRole(Meteor.user(), ['admin']))
       allSubscriptions.push(Meteor.subscribe('allUsers'));
+    
     if (assignedTdfs === 'undefined' || assignedTdfs === 'all' || assignedTdfs.length == 0)
       allSubscriptions.push(Meteor.subscribe('allTdfs'));
+    else if(experimentTarget != 'undefined')
+      allSubscriptions.push(Meteor.subscribe('tdfByExperimentTarget', experimentTarget));
     else 
       allSubscriptions.push(Meteor.subscribe('currentTdf', assignedTdfs));
     return allSubscriptions;
