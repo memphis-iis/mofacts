@@ -341,15 +341,17 @@ async function getProbabilityEstimatesByKCId(relevantKCIds) { // {clusterIndex:[
 async function getResponseKCMap() {
   serverConsole('getResponseKCMap');
 
-  let responseKCStuff = Tdfs.find().fetch();
+  let responseKCStuff = await Tdfs.find().fetch();
   responseKCStuff = responseKCStuff.map(r => r.stimuli).flat();
   const responseKCMap = {};
   for (const row of responseKCStuff) {
-    const correctresponse = row.correctResponse;
-    const responsekc = row.responseKC;
-
-    const answerText = getDisplayAnswerText(correctresponse);
-    responseKCMap[answerText] = responsekc;
+    if(row) {
+      const correctresponse = row.correctResponse;
+      const responsekc = row.responseKC;
+  
+      const answerText = getDisplayAnswerText(correctresponse);
+      responseKCMap[answerText] = responsekc;
+    }
   }
   return responseKCMap;
 }
@@ -1922,8 +1924,7 @@ async function upsertTDFFile(tdfFilename, tdfJSON, ownerId, packagePath = null) 
       tdfJSONtoUpsert = tdfJSON;
     }
   }
-  Tdfs.upsert({stimuliSetId: stimuliSetId}, {$set: {
-    tdfFileName: tdfFilename,
+  Tdfs.upsert({tdfFileName: tdfFilename}, {$set: {
     path: packagePath,
     content: tdfJSONtoUpsert,
     ownerId: ownerId,

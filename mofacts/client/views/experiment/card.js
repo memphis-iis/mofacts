@@ -2765,7 +2765,7 @@ function stopRecording() {
 // END WEB AUDIO SECTION
 
 async function getExperimentState() {
-  let curExperimentState = meteorCallAsync('getExperimentState', Meteor.userId(), Session.get('currentRootTdfId'));
+  let curExperimentState = await meteorCallAsync('getExperimentState', Meteor.userId(), Session.get('currentRootTdfId'));
   console.log('getExperimentState:', curExperimentState);
   Meteor.call('updatePerformanceData', 'utlQuery', 'card.getExperimentState', Meteor.userId());
   Session.set('currentExperimentState', curExperimentState);
@@ -2853,8 +2853,8 @@ async function resumeFromComponentState() {
     } else {
       // Select condition and save it
       console.log('No previous experimental condition: Selecting from ' + setspec.condition.length);
-      const shortFileName =  _.sample(setspec.condition).replace('.json', '').replace('.xml', '')
-      conditionTdfId = Tdfs.findOne({"content.fileName": shortFileName, stimuliSetId: stimuliSetId})._id;
+      const randomConditionFileName =  _.sample(setspec.condition)
+      conditionTdfId = Tdfs.findOne({"content.fileName": randomConditionFileName})._id;
       newExperimentState.conditionTdfId = conditionTdfId;
       newExperimentState.conditionNote = 'Selected from ' + _.display(setspec.condition.length) + ' conditions';
       console.log('Exp Condition', conditionTdfId, newExperimentState.conditionNote);
@@ -2888,8 +2888,7 @@ async function resumeFromComponentState() {
     console.log('No Experimental condition is required: continuing', rootTDFBoxed);
   }
 
-  const stimuliSetId = Session.get('currentStimuliSetId');
-  const stimuliSet = Tdfs.findOne({ stimuliSetId: stimuliSetId }).stimuli
+  const stimuliSet = Tdfs.findOne({_id: Session.get('currentRootTdfId')}).stimuli
 
   Session.set('currentStimuliSet', stimuliSet);
   Session.set('feedbackUnset', Session.get('fromInstructions') || Session.get('feedbackUnset'));
@@ -2903,7 +2902,7 @@ async function resumeFromComponentState() {
   // is to be system assigned (as opposed to URL-specified)
   if (setspec.randomizedDelivery && setspec.randomizedDelivery.length) {
     console.log('xcond for delivery params is sys assigned: searching');
-    const prevExperimentXCond = experimentState.experimentXCond;
+    const prevExperimentXCond = curExperimentState.experimentXCond;
 
     let experimentXCond;
 
