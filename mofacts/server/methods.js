@@ -1840,7 +1840,7 @@ async function upsertStimFile(stimulusFileName, stimJSON, ownerId, packagePath =
     stimuliSetId: stimuliSetId, 
     rawStimuliFile: stimJSON, //raw stimuli
     stimuli: formattedStims, //formatted stimuli for use in the app
-  }});
+  }}, {multi: true});
   Meteor.call('updateStimSyllables', stimuliSetId, formattedStims)
 }
 
