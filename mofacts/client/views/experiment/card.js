@@ -904,45 +904,6 @@ function initializeAudio() {
   }
 }
 
-function preloadAudioFiles() {
-  const allSrcs = getCurrentStimDisplaySources('audioStimulus');
-  console.log('allSrcs,audio', allSrcs);
-  soundsDict = {};
-  for (const src of allSrcs) {
-    let source = src;
-    if(!src.includes('http')){
-      try {
-        source = DynamicAssets.findOne({name: src}).link();
-      }
-      catch (e) {
-        console.error('Error getting audio file: ' + e);
-        alert('Could not load audio file: ' + src + '. ')
-        Router.go('/profile')
-      }
-    }
-    let sound = new Audio(source);
-    sound.onplay = function (source) {
-      let src = source.target.fileName
-      if (soundsDict[src]) {
-        soundsDict[src].isCurrentlyPlaying = true;
-      }
-      console.log('Sound played');
-    }
-    sound.onended = function (source) {
-      let src = source.target.fileName
-      if (soundsDict[src]) {
-        soundsDict[src].isCurrentlyPlaying = false;
-      }
-      if (onEndCallbackDict[src]) {
-        onEndCallbackDict[src]();
-      }
-      console.log('Sound completed');
-    }
-    sound.fileName = src;
-    soundsDict[src] = sound;
-  }
-}
-
 function preloadImages() {
   const curStimImgSrcs = getCurrentStimDisplaySources('imageStimulus');
   console.log('curStimImgSrcs: ', curStimImgSrcs);
@@ -980,7 +941,6 @@ function preloadStimuliFiles() {
   // Pre-load sounds to be played into soundsDict to avoid audio lag issues
   if (curStimHasSoundDisplayType()) {
     console.log('Sound type questions detected, pre-loading sounds');
-    preloadAudioFiles();
   } else {
     console.log('Non sound type detected');
   }
@@ -1139,27 +1099,38 @@ function getCurrentClusterAndStimIndices() {
 
 // Stop previous sound
 function clearPlayingSound() {
-  if (currentSound) {
-    try {
-      currentSound.stop();
-    } catch (e) {
-      // Do nothing
-    }
-    currentSound = null;
+  try {
+    currentSound.stop();
+  } catch (e) {
+    // Do nothing
   }
+  currentSound = null;
 }
 
 // Play a sound matching the current question
 function playCurrentSound(onEndCallback) {
   // We currently only play one sound at a time
-  clearPlayingSound();
-  const currentAudioSrc = Session.get('currentDisplay').audioSrc;
+  let currentAudioSrc = Session.get('currentDisplay').audioSrc;
   console.log('currentAudioSrc: ' + currentAudioSrc);
+  if(!currentAudioSrc.includes('http')){
+    try {
+      currentAudioSrc = DynamicAssets.findOne({name: currentAudioSrc}).link();
+    }
+    catch (e) {
+      console.error('Error getting audio file: ' + e);
+      alert('Could not load audio file: ' + currentAudioSrc + '. ')
+      Router.go('/profile')
+    }
+  }
+  let currentSound = new Audio(currentAudioSrc);
   // Reset sound and play it
-  currentSound = soundsDict[currentAudioSrc];
-  onEndCallbackDict[currentAudioSrc] = onEndCallback;
-  currentSound.isCurrentlyPlaying = true;
   currentSound.play();
+  currentSound.addEventListener('ended', function() {
+    if (onEndCallback) {
+      onEndCallback();
+    }
+    console.log('Sound completed');
+  })
 }
 
 function handleUserForceCorrectInput(e, source) {
@@ -2208,14 +2179,6 @@ function startQuestionTimeout() {
 
   // We do this little shuffle of session variables so the display will update all at the same time
   const currentDisplayEngine = Session.get('currentExperimentState').currentDisplayEngine;
-
-  // make sure we get the right audio source
-  if(currentDisplayEngine) {
-    if(currentDisplayEngine.audioSrc && !soundsDict[currentDisplayEngine.audioSrc]) {
-      let source = DynamicAssets.findOne({name: currentDisplayEngine.audioSrc}).link()
-      currentDisplayEngine.audioSrc = source;
-    }
-  }
 
   console.log('startQuestionTimeout, closeQuestionParts', Session.get('currentExperimentState').clozeQuestionParts);
 
