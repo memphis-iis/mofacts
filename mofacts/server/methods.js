@@ -37,10 +37,17 @@ const fs = Npm.require('fs');
 const https = require('https')
 const { randomBytes } = require('crypto')
 let verbosityLevel = 0; //0 = only output serverConsole logs, 1 = only output function times, 2 = output serverConsole and function times
-const baseSyllableURL = 'http://localhost:4567/syllables/';
+const baseSyllableURL = Meteor.settings.syllableURL ||'http://syllables:4567/syllables/' ;
 
 if (process.env.METEOR_SETTINGS_WORKAROUND) {
-  Meteor.settings = JSON.parse(process.env.METEOR_SETTINGS_WORKAROUND);
+  //check if process.env.METEOR_SETTINGS_WORKAROUND is a path
+  if (fs.existsSync(process.env.METEOR_SETTINGS_WORKAROUND)) {
+    serverConsole('loading settings from ' + process.env.METEOR_SETTINGS_WORKAROUND);
+    Meteor.settings = JSON.parse(fs.readFileSync(process.env.METEOR_SETTINGS_WORKAROUND, 'utf8'));
+  } else {
+    serverConsole('METEOR_SETTINGS_WORKAROUND is not a path');
+    Meteor.settings = JSON.parse(process.env.METEOR_SETTINGS_WORKAROUND);
+  }
 }
 if (Meteor.settings.public.testLogin) {
   process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = 0;
@@ -2906,8 +2913,8 @@ Meteor.startup(async function() {
   ServiceConfiguration.configurations.upsert({service: 'office365'}, {
     $set: {
       loginStyle: 'popup',
-      clientId: 'fe073cfe-ab3e-4589-b1f0-3bdc7094abeb', //Meteor.settings.office365.clientId,
-      secret: 'PtG8Q~zkuknxIKj9x2CUr~h5fLZdxBC3u9LMva.u',
+      clientId: Meteor.settings.microsoft.clientId,
+      secret: Meteor.settings.microsoft.secret,
       tenent: 'common',
     },
   });

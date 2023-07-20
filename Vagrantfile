@@ -13,11 +13,10 @@ Vagrant.configure(2) do |config|
   config.vm.network "forwarded_port", guest: 27017, host: 30017, host_ip: "127.0.0.1"
   config.vm.network "forwarded_port", guest: 5432, host: 65432
   config.vm.network "forwarded_port", guest: 3000, host: 3000, host_ip: "0.0.0.0"
-  config.vm.network "forwarded_port", guest: 80, host: 8080
   config.vm.synced_folder "db/", "/vagrant/db", owner: "vagrant", group: mofacts_gid, mount_options: ["dmode=775,fmode=775"]
   config.vm.provider "virtualbox" do |vb|
     vb.gui = false
     vb.memory = "6144"
   end
-  config.vm.provision "shell", privileged: true, path: ".provisioning_script.sh"
+  config.vm.provision "shell", privileged: false, path: ".provisioning_script.sh"
 end
