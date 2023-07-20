@@ -2725,7 +2725,7 @@ const asyncMethods = {
           stimuli[i].syllables = syllableArray;
         }
       }
-      Tdfs.update({'stimuliSetId': stimuliSetId}, {$set: {'stimuli': stimuli}});
+      Tdfs.update({'stimuliSetId': stimuliSetId}, {$set: {'stimuli': stimuli}}, {multi: true});
       serverConsole('after updateStimSyllables');
       serverConsole(stimuliSetId);
     }
