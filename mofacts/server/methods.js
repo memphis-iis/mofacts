@@ -1723,6 +1723,36 @@ function sendErrorReportSummaries() {
   }
 }
 
+//function to check drive space and send email if it is low
+function checkDriveSpace() {
+  serverConsole('checkDriveSpace');
+  fs = Npm.require('fs');
+  const driveSpace = fs.statSync('/').size;
+  //get total drive space
+  const driveSpaceTotal = fs.statSync('/').blksize * fs.statSync('/').blocks;
+  //get drive space used
+  const driveSpaceUsed = driveSpaceTotal - driveSpace;
+  //get drive space used as a percentage
+  const driveSpaceUsedPercent = (driveSpaceUsed / driveSpaceTotal) * 100;
+  //if drive space used is greater than 90%, send email
+  if (driveSpaceUsedPercent > 90) {
+    const from = ownerEmail;
+    const subject = 'Drive Space Warning - ' + thisServerUrl;
+    const text = 'Drive space is ' + driveSpaceUsedPercent + '% full. ' +
+                  'Please check the server and delete any unnecessary files. ';
+    // send email to admins
+    for (const index in adminUsers) {
+      const admin = adminUsers[index];
+      try {
+        sendEmail(admin, from, subject, text);
+      } catch (err) {
+        serverConsole(err);
+      }
+    }
+  }
+}
+
+
 // Save the given user profile via "upsert" logic
 function userProfileSave(id, profile) {
   try {
@@ -3061,6 +3091,16 @@ Meteor.startup(async function() {
         return sendErrorReportSummaries();
       },
     });
+
+    //add sync cron job to send email to admin if the server is running low on physical memory
+    SyncedCron.add({
+      name: 'Check Drive Space Remaining',
+      schedule: function(parser) {
+        return parser.text('at 3:00 pm');
+      },
+      job: function() {
+        return checkDriveSpace();
+      }
   }
   
   //email admin that the server has restarted
