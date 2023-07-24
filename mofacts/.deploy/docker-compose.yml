@@ -14,7 +14,7 @@ services:
       context: ../../
       dockerfile: Dockerfile
     ports:
-      - '80:3000'
+      - '3000:3000'
     depends_on:
       - mongo
       - syllables
@@ -22,6 +22,7 @@ services:
       ROOT_URL: ${APP_ROOT_URL:-http://localhost}
       MONGO_URL: mongodb://mongo:27017/MoFACT
       PORT: 3000
+      METEOR_SETTINGS_WORKAROUND: '/mofactsAssets/settings.json'
     deploy:
       restart_policy:
         condition: on-failure

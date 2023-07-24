@@ -37,9 +37,10 @@ const fs = Npm.require('fs');
 const https = require('https')
 const { randomBytes } = require('crypto')
 let verbosityLevel = 0; //0 = only output serverConsole logs, 1 = only output function times, 2 = output serverConsole and function times
-const baseSyllableURL = Meteor.settings.syllableURL ||'http://syllables:4567/syllables/' ;
 
+console.log('Starting server');
 if (process.env.METEOR_SETTINGS_WORKAROUND) {
+  console.log('METEOR_SETTINGS_WORKAROUND is set to ' + process.env.METEOR_SETTINGS_WORKAROUND);
   //check if process.env.METEOR_SETTINGS_WORKAROUND is a path
   if (fs.existsSync(process.env.METEOR_SETTINGS_WORKAROUND)) {
     serverConsole('loading settings from ' + process.env.METEOR_SETTINGS_WORKAROUND);
@@ -53,6 +54,8 @@ if (Meteor.settings.public.testLogin) {
   process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = 0;
   serverConsole('dev environment, allow insecure tls');
 }
+
+const baseSyllableURL = Meteor.settings.syllableURL ||'http://syllables:4567/syllables/' ;
 
 let highestStimuliSetId;
 let nextStimuliSetId;
