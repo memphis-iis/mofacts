@@ -1224,7 +1224,9 @@ function handleUserInput(e, source, simAnswerCorrect) {
   clearCardTimeout();
 
   let userAnswer;
-  if (isTimeout) {
+  if(testType === 's'){
+    userAnswer = '' //no response for study trial
+  } else if (isTimeout) {
     userAnswer = '[timeout]';
   } else if (source === 'keypress') {
     userAnswer = _.trim($('#userAnswer').val()).toLowerCase();
@@ -1860,10 +1862,12 @@ function gatherAnswerLogRecord(trialEndTimeStamp, trialStartTimeStamp, source, u
   // hack
   const sessionID = (new Date(trialStartTimeStamp)).toUTCString().substr(0, 16) + ' ' + Session.get('currentTdfName');
   let outcome = '';
-  if (!isStudy)
-    outcome = 'incorrect';
-  if (isCorrect) 
+  if (isStudy)
+    outcome = 'study';
+  else if (isCorrect) 
     outcome = 'correct';
+  else
+    outcome = 'incorrect';
   const answerLogRecord = {
     'itemId': _id,
     'KCId': stimulusKC,

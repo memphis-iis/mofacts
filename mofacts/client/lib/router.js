@@ -137,12 +137,15 @@ Router.route('/experiment/:target?/:xcond?', {
     Cookie.set('experimentTarget', target, 21);
     Cookie.set('experimentXCond', xcond, 21);
 
-    const tdf = Tdfs.findOne();
+    let tdf = Tdfs.findOne();
 
-    if (tdf.content.tdfs.tutor.setspec.condition){
-      Session.set('experimentConditions', tdf.content.tdfs.tutor.setspec.condition)
-    }
+    if(!tdf) tdf = await meteorCallAsync('getTdfByExperimentTarget', target);
+
     if (tdf) {
+
+      if (tdf.content.tdfs.tutor.setspec.condition){
+        Session.set('experimentConditions', tdf.content.tdfs.tutor.setspec.condition)
+      }
       console.log('tdf found');
       const experimentPasswordRequired = tdf.content.tdfs.tutor.setspec.experimentPasswordRequired ?
           eval(tdf.content.tdfs.tutor.setspec.experimentPasswordRequired) : false;
