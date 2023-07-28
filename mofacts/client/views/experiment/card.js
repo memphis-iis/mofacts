@@ -443,7 +443,12 @@ Template.card.events({
   },
 
   'keypress #userAnswer': function(e) {
-    handleUserInput(e, 'keypress');
+    const key = e.keyCode || e.which;
+    if (key == ENTER_KEY) {
+      Session.set('submmissionLock', true);
+    } else if (!Session.get('submmissionLock')) {
+      handleUserInput(e, 'keypress');
+    }
   },
 
   'click #removeQuestion': function(e) {
@@ -508,7 +513,10 @@ Template.card.events({
 
   'click .multipleChoiceButton': function(event) {
     event.preventDefault();
-    handleUserInput(event, 'buttonClick');
+    if(!Session.get('submmissionLock')){
+      Session.set('submmissionLock', true);
+      handleUserInput(event, 'buttonClick');
+    }
   },
 
   'click #continueStudy': function(event) {
@@ -1604,6 +1612,7 @@ async function afterFeedbackCallback(trialEndTimeStamp, trialStartTimeStamp, isT
   //if dialogueStart is set that means the user went through interactive dialogue
   Session.set('dialogueTotalTime', undefined);
   Session.set('dialogueHistory', undefined);
+  Session.set('submmissionLock', false);
   const newExperimentState = {
     lastAction: answerLogAction,
     lastActionTimeStamp: Date.now(),
