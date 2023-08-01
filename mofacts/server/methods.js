@@ -3216,7 +3216,16 @@ Router.route('data-by-file', {
       'File-Name': fileName
     });
 
-    response.write(await createExperimentExport(exp, userId));
+    const tdf = Tdfs.findOne({"content.fileName": exp});
+
+    if (tdf && tdf.content.tdfs.tutor.setspec.condition) {
+      const experiments = tdf.content.tdfs.tutor.setspec.condition;
+      experiments.unshift(exp);
+      response.write(await createExperimentExport(experiments, userId));
+    } else {
+      response.write(await createExperimentExport(exp, userId));
+    }
+
     response.end('');
 
     serverConsole('Sent all  data for', exp, 'as file', fileName);
