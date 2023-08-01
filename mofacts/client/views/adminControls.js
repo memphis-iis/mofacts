@@ -1,3 +1,5 @@
+import { meteorCallAsync } from "../index";
+
 Template.adminControls.created = function() {
     Meteor.call('getVerbosity', function(err, verbosity) {
         if (err) {
@@ -10,7 +12,12 @@ Template.adminControls.created = function() {
 };
 
 Template.adminControls.helpers({
-    
+    'serverStatus': function() {
+        Meteor.call('getServerStatus', function(err, res) {
+            Session.set('serverStatus', res);
+        });
+        return Session.get('serverStatus');
+    }
 });
 
 Template.adminControls.events({
