@@ -8,6 +8,28 @@
             </div> 
             <div class="container">
                 <div class="row text-center">
+                    <h3>Server Status</h3>
+                </div>
+                <div class="row row-cols-2">
+                    <div class="col text-end">
+                        Server Storage Space 
+                    </div>
+                    <div class="col">
+                        <!-- boostrap progress bar-->
+                        <div class="progress">
+                            <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow={{serverStatus.diskSpacePercent}} aria-valuemin="0" aria-valuemax="100" style="width: {{serverStatus.diskSpacePercent}}%"></div>
+                        </div>  
+                    </div>
+                </div>
+                <div class="row row-cols-2">
+                    <div class="col text-end">
+                        Server Storage Space (Text)
+                    </div>
+                    <div class="col">
+                        Used {{serverStatus.diskSpacePercent}}%, Remaining ({{serverStatus.remainingSpace}}/{{serverStatus.diskSpace}})
+                    </div>
+                </div>
+                <div class="row text-center">
                     <h3>Verbosity Level</h3>
                 </div>
                 <form>
@@ -40,26 +62,7 @@
                 </form>
             </div>
         </div>
-        <br><br>
-        <h4>Change Clinet Logging Level</h4>
-        <div class="form-check">
-            <input class="form-check-input clientVerbosityRadio" type="radio" name="flexRadioDefault" id="clientVerbosityRadio0">
-            <label class="form-check-label" for="clientVerbosityRadio0">
-                No Logging (fastest)
-            </label>
-        </div>
-        <div class="form-check">
-            <input class="form-check-input clientVerbosityRadio" type="radio" name="flexRadioDefault" id="clientVerbosityRadio1">
-            <label class="form-check-label" for="clientVerbosityRadio1">
-                Function Calls Only (slower)
-            </label>
-        </div>
-        <div class="form-check">
-            <input class="form-check-input clientVerbosityRadio" type="radio" name="flexRadioDefault" id="clientVerbosityRadio2">
-            <label class="form-check-label" for="clientVerbosityRadio2">
-                Full Logging (slowest)
-            </label>
-        </div>
+       
     {{/if}}
     <div class="container">
         <div class="row text-center">

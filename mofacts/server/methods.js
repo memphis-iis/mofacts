@@ -2090,6 +2090,19 @@ const methods = {
     return altServerUrl;
   },
 
+  getServerStatus: function() {
+    const driveSpace = fs.statSync('/').size;
+    //get total drive space
+    const driveSpaceTotal = fs.statSync('/').blksize * fs.statSync('/').blocks;
+    //get drive space used
+    const driveSpaceUsed = driveSpaceTotal - driveSpace;
+    //get drive space remaining
+    const remainingSpace = driveSpaceTotal - driveSpaceUsed;
+    //get drive space used as a percentage
+    const driveSpaceUsedPercent = (driveSpaceUsed / driveSpaceTotal) * 100;
+    return {diskSpacePercent: driveSpaceUsedPercent, remainingSpace: remainingSpace, diskSpace: driveSpaceTotal, diskSpaceUsed: driveSpaceUsed};
+  },
+
   resetAllSecretKeys: function() {
     if(Meteor.userId() && Roles.userIsInRole(Meteor.userId(), ['admin'])){
       serverConsole('resetting user secrets');
@@ -3101,6 +3114,7 @@ Meteor.startup(async function() {
       job: function() {
         return checkDriveSpace();
       }
+    });
   }
   
   //email admin that the server has restarted
