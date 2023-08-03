@@ -444,9 +444,8 @@ Template.card.events({
 
   'keypress #userAnswer': function(e) {
     const key = e.keyCode || e.which;
-    if (key == ENTER_KEY) {
+    if (key == ENTER_KEY && !Session.get('submmissionLock')) {
       Session.set('submmissionLock', true);
-    } else if (!Session.get('submmissionLock')) {
       handleUserInput(e, 'keypress');
     }
   },
@@ -1612,7 +1611,6 @@ async function afterFeedbackCallback(trialEndTimeStamp, trialStartTimeStamp, isT
   //if dialogueStart is set that means the user went through interactive dialogue
   Session.set('dialogueTotalTime', undefined);
   Session.set('dialogueHistory', undefined);
-  Session.set('submmissionLock', false);
   const newExperimentState = {
     lastAction: answerLogAction,
     lastActionTimeStamp: Date.now(),
@@ -2109,6 +2107,7 @@ async function prepareCard() {
   Meteor.logoutOtherClients();
   Session.set('wasReportedForRemoval', false);
   Session.set('displayReady', false);
+  Session.set('submmissionLock', false);
   Session.set('currentDisplay', {});
   console.log('displayReadyFalse, prepareCard');
   $('#helpButton').prop("disabled",false);
