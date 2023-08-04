@@ -138,8 +138,15 @@ Router.route('/experiment/:target?/:xcond?', {
     Cookie.set('experimentTarget', target, 21);
     Cookie.set('experimentXCond', xcond, 21);
 
-    const tdf = await meteorCallAsync('getTdfByExperimentTarget', target);
+    let tdf = Tdfs.findOne();
+
+    if(!tdf) tdf = await meteorCallAsync('getTdfByExperimentTarget', target);
+
     if (tdf) {
+
+      if (tdf.content.tdfs.tutor.setspec.condition){
+        Session.set('experimentConditions', tdf.content.tdfs.tutor.setspec.condition)
+      }
       console.log('tdf found');
       const experimentPasswordRequired = tdf.content.tdfs.tutor.setspec.experimentPasswordRequired ?
           eval(tdf.content.tdfs.tutor.setspec.experimentPasswordRequired) : false;
@@ -149,7 +156,6 @@ Router.route('/experiment/:target?/:xcond?', {
       console.log('EXPERIMENT target:', target, 'xcond', xcond);
 
       Session.set('clusterMapping', '');
-      if(Meteor.userId()) Meteor.logout();
       this.render('signIn');
     }
   },
@@ -295,7 +301,14 @@ Router.route('/adminControls', {
 Router.route('/profile', {
   name: 'client.profile',
   waitOn: function() {
-    let assignedTdfs = Meteor.user()?.profile?.assignedTdfs || 'undefined';
+    let assignedTdfs =  'undefined';
+    if(Meteor.user() && Meteor.user().profile && Meteor.user().profile.assignedTdfs){
+      assignedTdfs = Meteor.user()?.profile?.assignedTdfs
+    }
+    let experimentTarget = 'undefined'
+    if (Session.get('experimentTarget')) {
+      assignedTdfs = 'undefined'
+    }
     let curCourseId = Meteor.user()?.profile?.curClass?.courseId || 'undefined'
     let allSubscriptions = [
       Meteor.subscribe('allUserExperimentState', assignedTdfs)];
@@ -303,11 +316,15 @@ Router.route('/profile', {
       console.log('no assignments found')
     else
       allSubscriptions.push(Meteor.subscribe('Assignments', curCourseId));
+    
     if (Roles.userIsInRole(Meteor.user(), ['admin']))
       allSubscriptions.push(Meteor.subscribe('allUsers'));
+    
     if (assignedTdfs === 'undefined' || assignedTdfs === 'all' || assignedTdfs.length == 0)
       allSubscriptions.push(Meteor.subscribe('allTdfs'));
-    else 
+    else if(experimentTarget != 'undefined') {
+      allSubscriptions.push(Meteor.subscribe('tdfByExperimentTarget', experimentTarget, Session.get('experimentConditions')));
+    } else 
       allSubscriptions.push(Meteor.subscribe('currentTdf', assignedTdfs));
     return allSubscriptions;
   },
@@ -321,7 +338,6 @@ Router.route('/profile', {
         Session.set('curModule', 'profileSouthwest');
         this.render('/profile');
       } else if (loginMode === 'experiment') {
-        Meteor.logout();
         Cookie.set('isExperiment', '0', 1); // 1 day
         Cookie.set('experimentTarget', '', 1);
         Cookie.set('experimentXCond', '', 1);
@@ -565,6 +581,7 @@ Router.route('/card', {
       Meteor.subscribe('assets', Session.get('currentTdfFile').ownerId, Session.get('currentStimuliSetId')),
       Meteor.subscribe('userComponentStates', Session.get('currentTdfId')),
       Meteor.subscribe('currentTdf', Session.get('currentTdfId')),
+      Meteor.subscribe('tdfByExperimentTarget', Session.get('experimentTarget'), Session.get('experimentConditions'))
     ]
   },
   action: function() {

@@ -98,10 +98,8 @@
             {{#if study}}
             <div class="row">
                 <div class="col-xs-offset-2 col-xs-8 col-sm-offset-4 col-sm-4 col-md-offset-4 col-md-4 col-lg-offset-4 col-lg-4 {{fontSizeClass}}">
-                    {{#if clozeCard}}
-                        {{#if hideResponse}}
-                            <p id="answerLabel" class="alert alert-info">{{displayAnswer}}</p>
-                        {{/if}}
+                    {{#if hideResponse}}
+                        <p id="answerLabel" class="alert alert-info">{{displayAnswer}}</p>
                     {{/if}}
                     <div>
                         {{#if skipstudy}}
@@ -258,6 +256,11 @@
                 </div>
             </div>
         {{/if}}
+    {{/if}}
+    {{#if displayReadyPromptString}}
+        <div class="marginLeftAndRight alert alert-info {{fontSizeClass}} text-center" id="textQuestion">
+            {{readyPromptString}}
+        </div>
     {{/if}}
 
         <!-- Modal -->
