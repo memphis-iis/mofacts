@@ -38,141 +38,148 @@
                 {{/each}}
                 {{/if}}
             </div>
-
-            {{#if trial}}
-                <div class="row">
-                    <div class="container-fluid" id="displayContainer">
-                        <div id="leftPanel" class="col-md-12">
-                            {{#if anythingButAudioCard}}
-                                {{#if ifClozeDisplayTextExists}}
-                                <div class="marginLeftAndRight alert alert-info {{fontSizeClass}}" id="textQuestion">
-                                    {{#if textOrClozeCard}}
-                                        {{#if subWordClozeCurrentQuestionExists}}
-                                            {{{subWordParts}}}
-                                        {{else}}
-                                            {{{clozeText}}}
-                                            {{{text}}}
+            <div class="row">
+                <div class="col-md-6 col-sm-12 col-xs-12">
+                    {{#if trial}}
+                        <div class="row">
+                            <div class="container-fluid" id="displayContainer">
+                                
+                                <div id="leftPanel" class="col">
+                                    {{#if anythingButAudioCard}}
+                                        {{#if ifClozeDisplayTextExists}}
+                                        <div class="marginLeftAndRight alert alert-info {{fontSizeClass}}" id="textQuestion">
+                                            {{#if textOrClozeCard}}
+                                                {{#if subWordClozeCurrentQuestionExists}}
+                                                    {{{subWordParts}}}
+                                                {{else}}
+                                                    {{{clozeText}}}
+                                                    {{{text}}}
+                                                {{/if}}
+                                            {{/if}}
+                                        </div>
                                         {{/if}}
+                                        <div class="marginLeftAndRight h2" id="imageDisplay">
+                                            {{#if imageCard}}
+                                                <img id="cardQuestionImg" src="{{curImgSrc}}" style="max-width: 100%; width: auto; height: max-content;"> 
+                                            {{/if}}
+                                        </div>
+                                        <div class="marginLeftAndRight h2" id="videoDisplay">
+                                            {{#if videoCard}}
+                                                <video autoplay="" style="display: block; margin-left: auto; margin-right: auto; width: 50%;">
+                                                    <source src="{{curVideoSrc}}">
+                                                    Your browser does not support the video tag.
+                                                </video>
+                                            {{/if}}
+                                        </div>
                                     {{/if}}
                                 </div>
-                                {{/if}}
-                                <div class="marginLeftAndRight h2" id="imageDisplay">
-                                    {{#if imageCard}}
-                                        <img id="cardQuestionImg" src="{{curImgSrc}}" style="max-width: 100%; width: auto; height: max-content;"> 
+                                <div id="rightmostPanel" class="{{speakerCardPosition}}">
+                                    {{#if audioCard}}
+                                        <img src="images/speaker.png" class="h2 sound-img">
                                     {{/if}}
-                                </div>
-                                <div class="marginLeftAndRight h2" id="videoDisplay">
-                                    {{#if videoCard}}
-                                        <video autoplay="" style="display: block; margin-left: auto; margin-right: auto; width: 50%;">
-                                            <source src="{{curVideoSrc}}">
-                                            Your browser does not support the video tag.
-                                        </video>
-                                    {{/if}}
-                                </div>
-                            {{/if}}
-                        </div>
-                        <div id="rightmostPanel" class="{{speakerCardPosition}}">
-                            {{#if audioCard}}
-                                <img src="images/speaker.png" class="h2 sound-img">
-                            {{/if}}
-                        </div>
-                    </div>
-                </div>
-                {{#if userInDiaglogue}}   
-                    <div class="row">
-                        <div class="container-fluid" id="displayContainer">
-                            <div id="leftPanel" class="col-md-11">
-                                <div class="marginLeftAndRight alert alert-info {{fontSizeClass}}" id="textQuestion">
-                                    {{{dialogueText}}}
                                 </div>
                             </div>
                         </div>
-                    </div>
-                {{/if}}
-            {{/if}}
-
-            {{#if study}}
-            <div class="row">
-                <div class="col-xs-offset-2 col-xs-8 col-sm-offset-4 col-sm-4 col-md-offset-4 col-md-4 col-lg-offset-4 col-lg-4 {{fontSizeClass}}">
-                    {{#if hideResponse}}
-                        <p id="answerLabel" class="alert alert-info">{{displayAnswer}}</p>
-                    {{/if}}
-                    <div>
-                        {{#if skipstudy}}
-                        <button type='button' id='continueStudy' name='continueStudy' class='btn btn-block btn-responsive' disabled>
-                            Continue
-                        </button>
+                        {{#if userInDiaglogue}}   
+                            <div class="row">
+                                <div class="container-fluid" id="displayContainer">
+                                    <div id="leftPanel" class="col">
+                                        <div class="marginLeftAndRight alert alert-info {{fontSizeClass}}" id="textQuestion">
+                                            {{{dialogueText}}}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         {{/if}}
-                    </div>
-                </div>  <!-- close column -->
-            </div>  <!-- close row -->
-            {{/if}}
-
-            {{#if testordrill}}
-                {{#if audioEnabled}}
-                    {{#if isNotInDialogueLoopStageIntroOrExit}}
-                        <p class="marginLeftAndRight text-center">{{voiceTranscriptionPromptMsg}}</p>
-                        <img class="center-block" style="height:50px; width:auto; " src="{{voiceTranscriptionImgSrc}}">
-                        <br>
                     {{/if}}
-                {{/if}}
-                {{#if notButtonTrialOrInDialogueLoop}}
-                    <div class="row" id="textEntryRow">
-                        <div class="col-xs-12 col-sm-12 col-md-offset-1 col-md-10 col-lg-12">
-                            {{> inputF}}
-                        </div>
-                    </div>  <!-- close row -->
-                {{else}}
+
+                    {{#if study}}
+                        <div class="row">
+                            <div class="col-xs-offset-2 col-xs-8 col-sm-offset-4 col-sm-4 col-md-offset-4 col-md-4 col-lg-offset-4 col-lg-4 {{fontSizeClass}}">
+                                {{#if hideResponse}}
+                                    <p id="answerLabel" class="alert alert-info">{{displayAnswer}}</p>
+                                {{/if}}
+                                <div>
+                                    {{#if skipstudy}}
+                                    <button type='button' id='continueStudy' name='continueStudy' class='btn btn-block btn-responsive' disabled>
+                                        Continue
+                                    </button>
+                                    {{/if}}
+                                </div>
+                            </div>  <!-- close column -->
+                        </div>  <!-- close row -->
+                    {{/if}}
+                </div>
+
+                <div class="col">
+                {{#if testordrill}}
+                    {{#if audioEnabled}}
+                        {{#if isNotInDialogueLoopStageIntroOrExit}}
+                            <p class="marginLeftAndRight text-center">{{voiceTranscriptionPromptMsg}}</p>
+                            <img class="center-block" style="height:50px; width:auto; " src="{{voiceTranscriptionImgSrc}}">
+                            <br>
+                        {{/if}}
+                    {{/if}}
+                    {{#if notButtonTrialOrInDialogueLoop}}
+                        <div class="row" id="textEntryRow">
+                            <div class="col-xs-12 col-sm-12 col-md-offset-1 col-md-10 col-lg-12">
+                                {{> inputF}}
+                            </div>
+                        </div>  <!-- close row -->
+                    {{else}}
+                        
+                    <div class="row">
                     
-                <div class="row">
-                
-                    {{#if buttonTrial}}
-                        {{#if audioEnabled}}
-                            <p class="marginLeftAndRight text-center">Please speak the letter next to the correct option for audio input</p>
+                        {{#if buttonTrial}}
+                            {{#if audioEnabled}}
+                                <p class="marginLeftAndRight text-center">Please speak the letter next to the correct option for audio input</p>
+                            {{/if}}
                         {{/if}}
-                    {{/if}}
-                    <div class="col-md-12">
-                        <div id="multipleChoiceContainer">
-                            <!-- will contain multiple choice buttons which are dynamically added. -->
-                            {{#if buttonTrial}}
-                            <table id="multipleChoiceTable">
-                                {{#if imageResponse}}
-                                    {{#each buttonListImageRows}}
-                                    <tr>
-                                        {{#each this}}
-                                        {{#if audioEnabled}}
+                        <div class="col">
+                            <div id="multipleChoiceContainer">
+                                <!-- will contain multiple choice buttons which are dynamically added. -->
+                                {{#if buttonTrial}}
+                                <table id="multipleChoiceTable">
+                                    {{#if imageResponse}}
+                                        {{#each buttonListImageRows}}
+                                        <tr>
+                                            {{#each this}}
+                                            {{#if audioEnabled}}
+                                                <td><label style="margin-bottom:0px">{{verbalChoice}}.</label></td>
+                                                <td>&nbsp;</td>
+                                            {{/if}}
+                                            <td class="td-img">
+                                                <button style="background: url({{buttonValue}});background-size: 300px 150px;;background-repeat: no-repeat;" verbalChoice='{{verbalChoice}}' type='button' name='{{buttonName}}' class='btnPaddedAndMinWidth btn-alt btn-block multipleChoiceButton btn-image btn-responsive'>
+                                                </button>
+                                            </td>
+                                            {{/each}}
+                                        </tr>
+                                        {{/each}}
+                                    {{else}}
+                                        {{#each buttonList}}
+                                        <tr display={{displayReadyConverter (displayReady) }}>
+                                            {{#if audioEnabled}}
                                             <td><label style="margin-bottom:0px">{{verbalChoice}}.</label></td>
                                             <td>&nbsp;</td>
-                                        {{/if}}
-                                        <td class="td-img">
-                                            <button style="background: url({{buttonValue}});background-size: 300px 150px;;background-repeat: no-repeat;" verbalChoice='{{verbalChoice}}' type='button' name='{{buttonName}}' class='btnPaddedAndMinWidth btn-alt btn-block multipleChoiceButton btn-image btn-responsive'>
-                                            </button>
-                                        </td>
+                                            {{/if}}
+                                            <td>
+                                                <button verbalChoice='{{verbalChoice}}' type='button' name='{{buttonName}}' class='btnPaddedAndMinWidth btn btn-block multipleChoiceButton btn-responsive'>
+                                                {{buttonValue}}
+                                                </button>
+                                            </td>
+                                        </tr>
                                         {{/each}}
-                                    </tr>
-                                    {{/each}}
-                                {{else}}
-                                    {{#each buttonList}}
-                                    <tr display={{displayReadyConverter (displayReady) }}>
-                                        {{#if audioEnabled}}
-                                        <td><label style="margin-bottom:0px">{{verbalChoice}}.</label></td>
-                                        <td>&nbsp;</td>
-                                        {{/if}}
-                                        <td>
-                                            <button verbalChoice='{{verbalChoice}}' type='button' name='{{buttonName}}' class='btnPaddedAndMinWidth btn btn-block multipleChoiceButton btn-responsive'>
-                                            {{buttonValue}}
-                                            </button>
-                                        </td>
-                                    </tr>
-                                    {{/each}}
+                                    {{/if}}
+                                </table>
                                 {{/if}}
-                            </table>
-                            {{/if}}
+                            </div>
                         </div>
-                    </div>
-                </div> <!-- close row -->
+                    </div> <!-- close row -->
+                    {{/if}}
                 {{/if}}
-            {{/if}}
+                </div>
+            </div>
+            
 
             <div class="userInteractionContainer">
                 <div class="row">
