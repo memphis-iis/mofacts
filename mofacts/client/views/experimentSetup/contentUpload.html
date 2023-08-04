@@ -5,7 +5,7 @@
         {{#if isInRole 'admin,teacher'}}
             <div class="row">
                 <h1 class="text-center">Asset Uploader</h1>
-                <p>This uploads your assets for use in experiments. It can also upload packaged zip files with TDF/stim/asset combinations. You may use video, audio, or image files as well. A link will be generated and available after upload. Note, it may take some time to complete large packages. Please wait until a prompt is given to navigate to a new page.</p>   
+                <p>This uploads your assets for use in experiments. It will upload packaged zip files with TDF/stim/asset combinations. Your package can also include image, video, and sound files. A link will be generated and available after upload. Note, it may take some time to complete large packages. Please wait until a prompt is given to navigate to a new page.</p>   
             </div>
         {{else}}
         <h2>You do not have access to this function.</h2>
@@ -13,48 +13,16 @@
         <br>
         <div class="row"> 
             <div class="col-md-4">
-                <legend class="text-center">Upload Stimulus File(s)</legend>
+                <legend class="text-center">Upload ZIP Package</legend>
                 <div class="form-group">
                     <span class="btn btn-default btn-file">
-                        Browse
-                        <input type="file" class="form-control" name="upload-stim" id="upload-stim" value="" placeholder="Stimulus File" multiple>
-                        <span class='label label-info file-info' id="stim-file-info"></span>
-                    </span>
-                </div>
-                <div class="stim-upload-button-container">
-                    <button type='button' id='doUploadStim' class='btn btn-fix' style="margin-right: 2%;">
-                        Upload Stimulus File(s)
-                    </button>
-                    <div class="loader" id='stimUploadLoadingSymbol' style="margin-top: 1%" hidden></div>
-                </div>
-            </div>
-
-            <div class="col-md-4">
-                <legend class="text-center">Upload TDF File(s)</legend>
-                <div class="form-group">
-                    <span class="btn btn-default btn-file">
-                        Browse
-                        <input type="file" class="form-control" name="upload-tdf" id="upload-tdf" value="" placeholder="TDF File" multiple>
-                        <span class='label label-info file-info' id="tdf-file-info"></span>
-                    </span>
-                </div>
-                <button type='button' id='doUploadTDF' class='btn btn-fix'>
-                    Upload TDF File(s)
-                </button>
-            </div>
-
-
-            <div class="col-md-4">
-                <legend class="text-center">Upload Package</legend>
-                <div class="form-group">
-                    <span class="btn btn-default btn-file">
-                        Browse
+                        Browse ZIP Package
                         <input id="upload-package" style="margin: auto; display:block;" type="file" multiple />
                         <span class='label label-info file-info' id="package-file-info"></span>
                     </span>
                 </div>
                 <button type='button' id='doUploadPackage' class='btn btn-fix'>
-                    Upload Package
+                    Upload ZIP Package
                 </button>
             </div>
             </div>
