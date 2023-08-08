@@ -2072,6 +2072,12 @@ const methods = {
     }
   },
 
+  removeTurkById: function(turkId, experimentId){
+    serverConsole('removeTurkById', turkId, experimentId)
+    ScheduledTurkMessages.remove({workerUserId: turkId, experiment: experimentId});
+    Meteor.users.update({_id: turkId}, {$set: {[`profile.lockouts.${experimentId}.lockoutMinutes`]: Number.MAX_SAFE_INTEGER}})
+  },
+
   updateExperimentState: function(curExperimentState) {
     serverConsole('updateExperimentState', curExperimentState, curExperimentState.currentTdfId);
     GlobalExperimentStates.update({userId: Meteor.userId(), TDFId: curExperimentState.currentTdfId}, {$set: {experimentState: curExperimentState}});
@@ -2690,7 +2696,7 @@ const methods = {
 const asyncMethods = {
   getAllTdfs, getTdfByFileName, getTdfByExperimentTarget, getTdfIDsAndDisplaysAttemptedByUserId,
 
-  getStimDisplayTypeMap, getStimuliSetById, getSourceSentences, 
+  getStimDisplayTypeMap, getStimuliSetById, getSourceSentences,
 
   getAllCourses, getAllCourseSections, getAllCoursesForInstructor, getAllCourseAssignmentsForInstructor,
 
@@ -2711,6 +2717,16 @@ const asyncMethods = {
   loadStimsAndTdfsFromPrivate, getListOfStimTags,
 
   checkForUserException, 
+
+  getUsersByExperimentId: async function(experimentId){
+    const messages = ScheduledTurkMessages.find({experiment: experimentId}).fetch();
+    const userIds = messages.map(x => x.workerUserId);
+    let users = []
+    for (const u of userIds){
+      users.push({userId: u, userName: Meteor.users.findOne({_id: u}).username})
+    }
+    return users;
+  },
   
   makeGoogleTTSApiCall: async function(TDFId, message, audioPromptSpeakingRate, audioVolume, selectedVoice) {
     const ttsAPIKey = await getTdfTTSAPIKey(TDFId);
@@ -2956,15 +2972,17 @@ Meteor.startup(async function() {
   });
   serverConsole('Rewrote Google service config');
 
-  //add microsoft service config
-  ServiceConfiguration.configurations.upsert({service: 'office365'}, {
-    $set: {
-      loginStyle: 'popup',
-      clientId: Meteor.settings.microsoft.clientId,
-      secret: Meteor.settings.microsoft.secret,
-      tenent: 'common',
-    },
-  });
+  if(Meteor.settings.microsoft) {
+    //add microsoft service config
+    ServiceConfiguration.configurations.upsert({service: 'office365'}, {
+      $set: {
+        loginStyle: 'popup',
+        clientId: Meteor.settings.microsoft.clientId,
+        secret: Meteor.settings.microsoft.secret,
+        tenent: 'common',
+      },
+    });
+  }
 
   // Figure out the "prime admin" (owner of repo TDF/stim files)
   // Note that we accept username or email and then find the ID

@@ -172,7 +172,6 @@ const defaultBehaviorRoutes = [
 
 const restrictedRoutes = [
   'multiTdfSelect',
-  'turkWorkflow',
   'dataDownload',
   'userProfileEdit',
   'profileEdit',
@@ -221,6 +220,14 @@ for (const route of defaultBehaviorRoutes) {
     action: getDefaultRouteAction(route),
   });
 }
+
+Router.route('/turkWorkflow', {
+  name: 'client.turkWorkflow',
+  waitOn: function() {
+    return Meteor.subscribe('ownedTdfs', Meteor.userId())
+  },
+  action: getRestrictedRouteAction('turkWorkflow'),
+})
 
 Router.route('/studentReporting', {
   name: 'client.studentReporting',

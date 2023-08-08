@@ -74,6 +74,12 @@ Template.turkWorkflow.helpers({
         {sort: [['maxTimestamp', 'desc'], ['idx', 'asc']]},
     );
   },
+  experiments: function() {
+    const experiments = Tdfs.find({"ownerId": Meteor.userId(), "content.tdfs.tutor.setspec.experimentTarget": {$ne: null}}).fetch()
+    return experiments
+  },
+
+  turkIds: () => Session.get('turkIds')
 });
 
 
@@ -112,7 +118,7 @@ Template.turkWorkflow.rendered = async function() {
       return;
     }
 
-    const expTarget = setspec.experimentTarget.trim();
+    const expTarget = setspec.experimentTarget ? setspec.experimentTarget.trim() : '';
 
     if (expTarget.length > 0 && (isAdmin || Meteor.userId() === tdfObject.owner)) {
       $('#turkLogSelectContainer').append(
@@ -149,6 +155,21 @@ Template.turkWorkflow.events({
       }
       $('#turk-assign-results').text(disp);
     });
+  },
+
+  'change #experiment-select': async function(event) {
+    event.preventDefault()
+    const TDFId = $("#experiment-select").val()
+    const users = await meteorCallAsync('getUsersByExperimentId', TDFId)
+    $('#user-select').prop('disabled', false);
+    Session.set('turkIds', users)
+  },
+
+  'click #turk-assignment-removal': function(event) {
+    event.preventDefault();
+    const turkId = $("#user-select").val();
+    const TDFId = $("#experiment-select").val()
+    Meteor.call('removeTurkById', turkId, TDFId)
   },
 
   // Admin/Teachers - send Turk message
