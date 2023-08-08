@@ -443,7 +443,11 @@ Template.card.events({
   },
 
   'keypress #userAnswer': function(e) {
-    handleUserInput(e, 'keypress');
+    const key = e.keyCode || e.which;
+    if (key == ENTER_KEY && !Session.get('submmissionLock')) {
+      Session.set('submmissionLock', true);
+      handleUserInput(e, 'keypress');
+    }
   },
 
   'click #removeQuestion': function(e) {
@@ -517,7 +521,10 @@ Template.card.events({
 
   'click .multipleChoiceButton': function(event) {
     event.preventDefault();
-    handleUserInput(event, 'buttonClick');
+    if(!Session.get('submmissionLock')){
+      Session.set('submmissionLock', true);
+      handleUserInput(event, 'buttonClick');
+    }
   },
 
   'click #continueStudy': function(event) {
@@ -653,6 +660,12 @@ Template.card.helpers({
   'currentProgress': () => Session.get('questionIndex'),
 
   'displayReady': () => Session.get('displayReady'),
+
+  'readyPromptString': () => Session.get('currentDeliveryParams').readyPromptString,
+
+  'displayReadyPromptString': function() {
+    return !Session.get('displayReady') && Session.get('currentDeliveryParams').readyPromptString
+  },
 
   'isDevelopment': () => Meteor.isDevelopment,
 
@@ -914,45 +927,6 @@ function initializeAudio() {
   }
 }
 
-function preloadAudioFiles() {
-  const allSrcs = getCurrentStimDisplaySources('audioStimulus');
-  console.log('allSrcs,audio', allSrcs);
-  soundsDict = {};
-  for (const src of allSrcs) {
-    let source = src;
-    if(!src.includes('http')){
-      try {
-        source = DynamicAssets.findOne({name: src}).link();
-      }
-      catch (e) {
-        console.error('Error getting audio file: ' + e);
-        alert('Could not load audio file: ' + src + '. ')
-        Router.go('/profile')
-      }
-    }
-    let sound = new Audio(source);
-    sound.onplay = function (source) {
-      let src = source.target.fileName
-      if (soundsDict[src]) {
-        soundsDict[src].isCurrentlyPlaying = true;
-      }
-      console.log('Sound played');
-    }
-    sound.onended = function (source) {
-      let src = source.target.fileName
-      if (soundsDict[src]) {
-        soundsDict[src].isCurrentlyPlaying = false;
-      }
-      if (onEndCallbackDict[src]) {
-        onEndCallbackDict[src]();
-      }
-      console.log('Sound completed');
-    }
-    sound.fileName = src;
-    soundsDict[src] = sound;
-  }
-}
-
 function preloadImages() {
   const curStimImgSrcs = getCurrentStimDisplaySources('imageStimulus');
   console.log('curStimImgSrcs: ', curStimImgSrcs);
@@ -990,7 +964,6 @@ function preloadStimuliFiles() {
   // Pre-load sounds to be played into soundsDict to avoid audio lag issues
   if (curStimHasSoundDisplayType()) {
     console.log('Sound type questions detected, pre-loading sounds');
-    preloadAudioFiles();
   } else {
     console.log('Non sound type detected');
   }
@@ -1149,27 +1122,38 @@ function getCurrentClusterAndStimIndices() {
 
 // Stop previous sound
 function clearPlayingSound() {
-  if (currentSound) {
-    try {
-      currentSound.stop();
-    } catch (e) {
-      // Do nothing
-    }
-    currentSound = null;
+  try {
+    currentSound.stop();
+  } catch (e) {
+    // Do nothing
   }
+  currentSound = null;
 }
 
 // Play a sound matching the current question
 function playCurrentSound(onEndCallback) {
   // We currently only play one sound at a time
-  clearPlayingSound();
-  const currentAudioSrc = Session.get('currentDisplay').audioSrc;
+  let currentAudioSrc = Session.get('currentDisplay').audioSrc;
   console.log('currentAudioSrc: ' + currentAudioSrc);
+  if(!currentAudioSrc.includes('http')){
+    try {
+      currentAudioSrc = DynamicAssets.findOne({name: currentAudioSrc}).link();
+    }
+    catch (e) {
+      console.error('Error getting audio file: ' + e);
+      alert('Could not load audio file: ' + currentAudioSrc + '. ')
+      Router.go('/profile')
+    }
+  }
+  let currentSound = new Audio(currentAudioSrc);
   // Reset sound and play it
-  currentSound = soundsDict[currentAudioSrc];
-  onEndCallbackDict[currentAudioSrc] = onEndCallback;
-  currentSound.isCurrentlyPlaying = true;
   currentSound.play();
+  currentSound.addEventListener('ended', function() {
+    if (onEndCallback) {
+      onEndCallback();
+    }
+    console.log('Sound completed');
+  })
 }
 
 function handleUserForceCorrectInput(e, source) {
@@ -1263,7 +1247,9 @@ function handleUserInput(e, source, simAnswerCorrect) {
   clearCardTimeout();
 
   let userAnswer;
-  if (isTimeout) {
+  if(testType === 's'){
+    userAnswer = '' //no response for study trial
+  } else if (isTimeout) {
     userAnswer = '[timeout]';
   } else if (source === 'keypress') {
     userAnswer = _.trim($('#userAnswer').val()).toLowerCase();
@@ -1909,10 +1895,12 @@ function gatherAnswerLogRecord(trialEndTimeStamp, trialStartTimeStamp, source, u
   // hack
   const sessionID = (new Date(trialStartTimeStamp)).toUTCString().substr(0, 16) + ' ' + Session.get('currentTdfName');
   let outcome = '';
-  if (!isStudy)
-    outcome = 'incorrect';
-  if (isCorrect) 
+  if (isStudy)
+    outcome = 'study';
+  else if (isCorrect) 
     outcome = 'correct';
+  else
+    outcome = 'incorrect';
   const answerLogRecord = {
     'itemId': _id,
     'KCId': stimulusKC,
@@ -2145,6 +2133,7 @@ async function prepareCard() {
   Meteor.logoutOtherClients();
   Session.set('wasReportedForRemoval', false);
   Session.set('displayReady', false);
+  Session.set('submmissionLock', false);
   Session.set('currentDisplay', {});
   console.log('displayReadyFalse, prepareCard');
   $('#helpButton').prop("disabled",false);
@@ -2229,14 +2218,6 @@ function startQuestionTimeout() {
   // We do this little shuffle of session variables so the display will update all at the same time
   const currentDisplayEngine = Session.get('currentExperimentState').currentDisplayEngine;
 
-  // make sure we get the right audio source
-  if(currentDisplayEngine) {
-    if(currentDisplayEngine.audioSrc && !soundsDict[currentDisplayEngine.audioSrc]) {
-      let source = DynamicAssets.findOne({name: currentDisplayEngine.audioSrc}).link()
-      currentDisplayEngine.audioSrc = source;
-    }
-  }
-
   console.log('startQuestionTimeout, closeQuestionParts', Session.get('currentExperimentState').clozeQuestionParts);
 
   Session.set('displayReady', false);
@@ -2244,10 +2225,17 @@ function startQuestionTimeout() {
   console.log(currentDisplayEngine);
   console.log('-------------------------');
 
-  const beginQuestionAndInitiateUserInputBound = beginQuestionAndInitiateUserInput.bind(null, delayMs, deliveryParams);
-  const pipeline = checkAndDisplayTwoPartQuestion.bind(null,
-      deliveryParams, currentDisplayEngine, Session.get('currentExperimentState').clozeQuestionParts, beginQuestionAndInitiateUserInputBound);
-  checkAndDisplayPrestimulus(deliveryParams, pipeline);
+  let readyPromptTimeout = 0;
+  if(Session.get('currentDeliveryParams').readyPromptStringDisplayTime && Session.get('currentDeliveryParams').readyPromptStringDisplayTime > 0){
+    readyPromptTimeout = Session.get('currentDeliveryParams').readyPromptStringDisplayTime
+  }
+  trialStartTimestamp = Date.now();
+  Meteor.setTimeout(() => {
+    const beginQuestionAndInitiateUserInputBound = beginQuestionAndInitiateUserInput.bind(null, delayMs, deliveryParams);
+    const pipeline = checkAndDisplayTwoPartQuestion.bind(null,
+        deliveryParams, currentDisplayEngine, Session.get('currentExperimentState').clozeQuestionParts, beginQuestionAndInitiateUserInputBound);
+    checkAndDisplayPrestimulus(deliveryParams, pipeline);
+  }, readyPromptTimeout)
 }
 
 function checkAndDisplayPrestimulus(deliveryParams, nextStageCb) {
@@ -2307,7 +2295,6 @@ function checkAndDisplayTwoPartQuestion(deliveryParams, currentDisplayEngine, cl
 function beginQuestionAndInitiateUserInput(delayMs, deliveryParams) {
   console.log('beginQuestionAndInitiateUserInput');
   firstKeypressTimestamp = 0;
-  trialStartTimestamp = Date.now();
   console.log(trialStartTimestamp)
   const currentDisplay = Session.get('currentDisplay');
 
@@ -2783,7 +2770,7 @@ function stopRecording() {
 // END WEB AUDIO SECTION
 
 async function getExperimentState() {
-  let curExperimentState = meteorCallAsync('getExperimentState', Meteor.userId(), Session.get('currentRootTdfId'));
+  let curExperimentState = await meteorCallAsync('getExperimentState', Meteor.userId(), Session.get('currentRootTdfId'));
   console.log('getExperimentState:', curExperimentState);
   Meteor.call('updatePerformanceData', 'utlQuery', 'card.getExperimentState', Meteor.userId());
   Session.set('currentExperimentState', curExperimentState);
@@ -2870,8 +2857,8 @@ async function resumeFromComponentState() {
     } else {
       // Select condition and save it
       console.log('No previous experimental condition: Selecting from ' + setspec.condition.length);
-      const shortFileName =  _.sample(setspec.condition).replace('.json', '').replace('.xml', '')
-      conditionTdfId = Tdfs.findOne({"content.fileName": shortFileName, stimuliSetId: stimuliSetId})._id;
+      const randomConditionFileName =  _.sample(setspec.condition)
+      conditionTdfId = Tdfs.findOne({"content.fileName": randomConditionFileName})._id;
       newExperimentState.conditionTdfId = conditionTdfId;
       newExperimentState.conditionNote = 'Selected from ' + _.display(setspec.condition.length) + ' conditions';
       console.log('Exp Condition', conditionTdfId, newExperimentState.conditionNote);
@@ -2905,8 +2892,7 @@ async function resumeFromComponentState() {
     console.log('No Experimental condition is required: continuing', rootTDFBoxed);
   }
 
-  const stimuliSetId = Session.get('currentStimuliSetId');
-  const stimuliSet = Tdfs.findOne({ stimuliSetId: stimuliSetId }).stimuli
+  const stimuliSet = Tdfs.findOne({_id: Session.get('currentRootTdfId')}).stimuli
 
   Session.set('currentStimuliSet', stimuliSet);
   Session.set('feedbackUnset', Session.get('fromInstructions') || Session.get('feedbackUnset'));
@@ -2920,7 +2906,7 @@ async function resumeFromComponentState() {
   // is to be system assigned (as opposed to URL-specified)
   if (setspec.randomizedDelivery && setspec.randomizedDelivery.length) {
     console.log('xcond for delivery params is sys assigned: searching');
-    const prevExperimentXCond = experimentState.experimentXCond;
+    const prevExperimentXCond = curExperimentState.experimentXCond;
 
     let experimentXCond;
 

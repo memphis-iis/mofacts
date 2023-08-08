@@ -47,8 +47,13 @@ Meteor.publish('allTdfs', function() {
     return Tdfs.find();
 });
 
-Meteor.publish('tdfByExperimentTarget', function(experimentTarget) {
-    return Tdfs.find({"content.tdfs.tutor.setspec.experimentTarget": experimentTarget});
+Meteor.publish('tdfByExperimentTarget', function(experimentTarget, experimentConditions=undefined) {
+    let query = {"content.tdfs.tutor.setspec.experimentTarget": {$regex: experimentTarget, $options: '-i'}}
+    if(experimentConditions && Array.isArray(experimentConditions)){
+        query = {$or: [{"content.fileName": {$in: experimentConditions}}, {"content.tdfs.tutor.setspec.experimentTarget": {$regex: experimentTarget, $options: '-i'}}]}
+        console.log(query)
+    }
+    return Tdfs.find(query);
 });
 
 Meteor.publish('Assignments', function(courseId) {

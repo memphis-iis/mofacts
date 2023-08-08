@@ -301,7 +301,7 @@ async function getTdfByFileName(filename) {
 async function getTdfByExperimentTarget(experimentTarget) {
   try {
     serverConsole('getTdfByExperimentTarget:'+experimentTarget);
-    tdf = Tdfs.findOne({"content.tdfs.tutor.setspec.experimentTarget": experimentTarget});
+    tdf = Tdfs.findOne({"content.tdfs.tutor.setspec.experimentTarget": {$regex: experimentTarget, $options: 'i'}});
     return tdf;
   } catch (e) {
     serverConsole('getTdfByExperimentTarget ERROR,', experimentTarget, ',', e);
@@ -347,15 +347,17 @@ async function getProbabilityEstimatesByKCId(relevantKCIds) { // {clusterIndex:[
 async function getResponseKCMap() {
   serverConsole('getResponseKCMap');
 
-  let responseKCStuff = Tdfs.find().fetch();
+  let responseKCStuff = await Tdfs.find().fetch();
   responseKCStuff = responseKCStuff.map(r => r.stimuli).flat();
   const responseKCMap = {};
   for (const row of responseKCStuff) {
-    const correctresponse = row.correctResponse;
-    const responsekc = row.responseKC;
-
-    const answerText = getDisplayAnswerText(correctresponse);
-    responseKCMap[answerText] = responsekc;
+    if(row) {
+      const correctresponse = row.correctResponse;
+      const responsekc = row.responseKC;
+  
+      const answerText = getDisplayAnswerText(correctresponse);
+      responseKCMap[answerText] = responsekc;
+    }
   }
   return responseKCMap;
 }
@@ -1866,7 +1868,7 @@ async function upsertStimFile(stimulusFileName, stimJSON, ownerId, packagePath =
     stimuliSetId: stimuliSetId, 
     rawStimuliFile: stimJSON, //raw stimuli
     stimuli: formattedStims, //formatted stimuli for use in the app
-  }});
+  }}, {multi: true});
   Meteor.call('updateStimSyllables', stimuliSetId, formattedStims)
 }
 
@@ -1950,8 +1952,7 @@ async function upsertTDFFile(tdfFilename, tdfJSON, ownerId, packagePath = null) 
       tdfJSONtoUpsert = tdfJSON;
     }
   }
-  Tdfs.upsert({stimuliSetId: stimuliSetId}, {$set: {
-    tdfFileName: tdfFilename,
+  Tdfs.upsert({tdfFileName: tdfFilename}, {$set: {
     path: packagePath,
     content: tdfJSONtoUpsert,
     ownerId: ownerId,
@@ -2822,7 +2823,7 @@ const asyncMethods = {
           stimuli[i].syllables = syllableArray;
         }
       }
-      Tdfs.update({'stimuliSetId': stimuliSetId}, {$set: {'stimuli': stimuli}});
+      Tdfs.update({'stimuliSetId': stimuliSetId}, {$set: {'stimuli': stimuli}}, {multi: true});
       serverConsole('after updateStimSyllables');
       serverConsole(stimuliSetId);
     }
@@ -3341,7 +3342,16 @@ Router.route('data-by-file', {
       'File-Name': fileName
     });
 
-    response.write(await createExperimentExport(exp, userId));
+    const tdf = Tdfs.findOne({"content.fileName": exp});
+
+    if (tdf && tdf.content.tdfs.tutor.setspec.condition) {
+      const experiments = tdf.content.tdfs.tutor.setspec.condition;
+      experiments.unshift(exp);
+      response.write(await createExperimentExport(experiments, userId));
+    } else {
+      response.write(await createExperimentExport(exp, userId));
+    }
+
     response.end('');
 
     serverConsole('Sent all  data for', exp, 'as file', fileName);
