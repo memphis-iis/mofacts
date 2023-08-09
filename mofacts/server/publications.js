@@ -47,6 +47,10 @@ Meteor.publish('allTdfs', function() {
     return Tdfs.find();
 });
 
+Meteor.publish('ownedTdfs', function(ownerId) {
+    return Tdfs.find({'ownerId': ownerId});
+});
+
 Meteor.publish('tdfByExperimentTarget', function(experimentTarget, experimentConditions=undefined) {
     let query = {"content.tdfs.tutor.setspec.experimentTarget": {$regex: experimentTarget, $options: '-i'}}
     if(experimentConditions && Array.isArray(experimentConditions)){

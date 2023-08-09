@@ -126,6 +126,27 @@
                 </div>
             </div>
         </div>
+    
+        <div id="mainContent">
+            <h2>Remove Turk User</h2>
+            <h3 class="text-center">Experiment Selection</h3>
+            <select id="experiment-select" class="width-80-percent">
+              <option selected="selected" value="{{INVALID}}" disabled="true">Select an Experiment</option>
+              {{#each experiments}}
+                <option value="{{this._id}}">{{this.content.tdfs.tutor.setspec.lessonname}}</option>
+              {{/each}}
+            </select>
+            <div>
+              <h3 class="text-center">Select User</h3>
+              <select id="user-select" disabled="true" class="width-80-percent">
+                  <option selected="selected" value="{{INVALID}}" disabled="true">Select a User</option>
+                  {{#each turkIds}}
+                    <option value="{{this.userId}}">{{this.userName}}</option>
+                  {{/each}}
+              </select>
+            </div>
+            <button id="turk-assignment-removal" class="btn width-80-percent">Remove Turk</button>
+        </div>
     </div> <!-- /turkLogEntireWorkflow -->
 
 
