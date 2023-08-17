@@ -184,8 +184,12 @@ Meteor.publish(null, function() {
 
 Meteor.publish('allUsers', function() {
   const opts = {
-    fields: {username: 1, roles: 1},
+    fields: {username: 1},
   };
+  // eslint-disable-next-line no-invalid-this
+  if (Roles.userIsInRole(this.userId, ['admin'])) {
+    opts.fields.roles = 1;
+  }  
   return Meteor.users.find({}, opts);
 });
 
@@ -741,7 +745,6 @@ async function getAllCourseAssignmentsForInstructor(instructorId) {
     {
       $project:{ //SELECT t.content -> \'fileName\' AS filename, c.courseName, c.courseId
         _id: 0,
-        tdfId: "$TDF._id",
         fileName: "$TDF.content.fileName",
         courseName: "$course.courseName",
         courseId: "$course._id"
@@ -1042,6 +1045,15 @@ function insertHiddenItem(userId, stimulusKC, tdfId) {
     }
   }
   
+}
+
+async function getUserLastFeedbackTypeFromHistory(tdfID) {
+  const userHistory =  Histories.findOne({TDFId: tdfID, userId: Meteor.userId}, {sort: {time: -1}})?.feedbackType
+  let feedbackType = 'undefined';
+  if( userHistory && userHistory.feedbackType ) {
+    feedbackType = userHistory.feedbackType;
+  } 
+  return feedbackType;
 }
 async function insertHistory(historyRecord) {
   const tdfFileName = historyRecord['Condition_Typea'];
@@ -2714,7 +2726,7 @@ const asyncMethods = {
 
   insertHistory, getHistoryByTDFID, getUserRecentTDFs, clearCurUnitProgress, tdfUpdateConfirmed,
 
-  loadStimsAndTdfsFromPrivate, getListOfStimTags,
+  loadStimsAndTdfsFromPrivate, getListOfStimTags, getUserLastFeedbackTypeFromHistory,
 
   checkForUserException, 
 

@@ -167,6 +167,7 @@ Template.lessonSelect.helpers({
   
     // Check all the valid TDF's
     for (const tdf of allTdfs) {
+      console.log('tdf', tdf.content.tdfs.tutor.setspec.lessonname, tdf);
       const TDFId = tdf._id;
       const tdfObject = tdf.content;
       const isMultiTdf = tdfObject.isMultiTdf;
@@ -180,7 +181,7 @@ Template.lessonSelect.helpers({
         continue;
       }
   
-      const name = setspec.lessonname;
+      const name = setspec.lessonname || "No lesson name";
       const ignoreOutOfGrammarResponses = setspec.speechIgnoreOutOfGrammarResponses ?
           setspec.speechIgnoreOutOfGrammarResponses.toLowerCase() == 'true' : false;
       const speechOutOfGrammarFeedback = setspec.speechOutOfGrammarFeedback ?
@@ -220,7 +221,7 @@ Template.lessonSelect.helpers({
   
       // Note that we defer checking for userselect in case something above
       // (e.g. experimentTarget) auto-selects the TDF
-      if (setspec.userselect) {
+      if (setspec.userselect && !isAdmin) {
         if (setspec.userselect == 'false') continue;
       }
   
@@ -292,7 +293,7 @@ Template.lessonSelect.helpers({
       this.tdfTags.set(tdfTags);
   
   
-      if ((tdf.visibility == 'profileOnly' || tdf.visibility == 'enabled' || typeof tdf.visibility === "undefined")) {
+      if (tdf.visibility == 'profileOnly' || tdf.visibility == 'enabled' || typeof tdf.visibility === "undefined") {
         enabledTdfs.push(tdfObject);
       } else {
         disabledTdfs.push(tdfObject);
