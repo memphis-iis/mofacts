@@ -395,7 +395,7 @@ async function initCard() {
   };
   Session.set('scoringEnabled', undefined);
 
-  if (!Session.get('stimDisplayTypeMap') || !Session.get('stimDisplayTypeMap').length > 0) {
+  if (!Session.get('stimDisplayTypeMap')) {
     const stimDisplayTypeMap = await meteorCallAsync('getStimDisplayTypeMap');
     Session.set('stimDisplayTypeMap', stimDisplayTypeMap);
   }
@@ -500,16 +500,7 @@ Template.card.events({
     Session.set('displayFeedback', false);
     processUserTimesLog();  
   },
-  'click #confirmFeedbackSelectionFromIndex': () => {
-    let selectedDialogueType = 'simple'
-    if(document.getElementById('dialogueSelectRefutational').checked)
-      selectedDialogueType = 'refutational';
-    else if(document.getElementById('dialogueSelectDialogue').checked)  
-      selectedDialogueType = 'dialogue';
-
-    Session.set('selectedDialogueType', selectedDialogueType);
-    Session.set('feedbackTypeFromHistory', selectedDialogueType);
-    updateExperimentState({feedbackType: selectedDialogueType}, 'profileDialogueToggles');
+  'click #confirmFeedbackSelectionFromIndex': function(){
     Session.set('displayFeedback', false);
     Session.set('pausedLocks', Session.get('pausedLocks')-1);
     Session.set('resetFeedbackSettingsFromIndex', false);
@@ -826,14 +817,7 @@ Template.card.helpers({
     }
     console.log("probability parms input",probParms);
     return probParms;
-    
-  },
-  'curTdfName': function(){
-    lessonname = Session.get('currentTdfFile').tdfs.tutor.setspec.lessonname;
-    console.log("lessonname",lessonname);
-    return lessonname;
-  },
-  
+  }
 });
 
 function getResponseType() {
@@ -2793,7 +2777,8 @@ function updateExperimentState(newState, codeCallLocation, unitEngineOverride = 
     Meteor.call('updateExperimentState', curExperimentState, curExperimentState.currentTdfId);
   }
   console.log('updateExperimentState', codeCallLocation, '\nnew:', curExperimentState);
-  return Session.get('currentRootTdfId');
+  Session.set('currentExperimentState', curExperimentState);
+  return curExperimentState.currentTdfId;
 }
 
 // Re-initialize our User Progress and Card Probabilities internal storage

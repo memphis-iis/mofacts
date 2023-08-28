@@ -54,8 +54,10 @@ if (Meteor.settings.public.testLogin) {
   process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = 0;
   serverConsole('dev environment, allow insecure tls');
 }
+// if Meteor settings specifies a syllableURL, use it. Otherwise check if Meteor.isProduction and use the appropriate URL, otherwise use the dev URL
+const syllableURL = Meteor.settings.syllableURL ? Meteor.settings.syllableURL : Meteor.isProduction ? 'http://syllables:4567/syllables/' : 'http://localhost:4567/syllables/';
 
-const baseSyllableURL = Meteor.settings.syllableURL ||'http://syllables:4567/syllables/' ;
+
 
 let highestStimuliSetId;
 let nextStimuliSetId;
