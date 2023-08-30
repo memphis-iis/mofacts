@@ -181,7 +181,7 @@ Template.lessonSelect.helpers({
         continue;
       }
   
-      const name = setspec.lessonname || "No lesson name";
+      const name = setspec.lessonname;
       const ignoreOutOfGrammarResponses = setspec.speechIgnoreOutOfGrammarResponses ?
           setspec.speechIgnoreOutOfGrammarResponses.toLowerCase() == 'true' : false;
       const speechOutOfGrammarFeedback = setspec.speechOutOfGrammarFeedback ?
@@ -293,7 +293,7 @@ Template.lessonSelect.helpers({
       this.tdfTags.set(tdfTags);
   
   
-      if (tdf.visibility == 'profileOnly' || tdf.visibility == 'enabled' || typeof tdf.visibility === "undefined") {
+      if ((tdf.visibility == 'profileOnly' || tdf.visibility == 'enabled') & typeof name != "undefined" & name != "") {
         enabledTdfs.push(tdfObject);
       } else {
         disabledTdfs.push(tdfObject);
