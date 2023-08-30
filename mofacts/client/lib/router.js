@@ -161,7 +161,7 @@ Router.route('/experiment/:target?/:xcond?', {
   },
 });
 
-const defaultBehaviorRoutes = [
+defaultBehaviorRoutes = [
   'signIn',
   'signInSouthwest',
   'signUp',
@@ -169,6 +169,10 @@ const defaultBehaviorRoutes = [
   'resetPassword',
   'setTheme',
 ];
+
+if(Meteor.settings.public.testLogin){
+  defaultBehaviorRoutes.push('testLogin');
+}
 
 const restrictedRoutes = [
   'multiTdfSelect',
