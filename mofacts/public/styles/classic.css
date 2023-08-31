@@ -378,6 +378,14 @@ select{
         width:90vw;
         max-width: 500px;
     }
+
+    #userInteractionContainer{
+        position: absolute;
+        bottom: 0px;
+        left: 0px;
+        right: 0px;
+    }
+
     .modal-expanded{
         height: 80vh !important;
         top: 20% !important;
