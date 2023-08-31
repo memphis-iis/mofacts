@@ -170,10 +170,6 @@ defaultBehaviorRoutes = [
   'setTheme',
 ];
 
-if(Meteor.settings.public.testLogin){
-  defaultBehaviorRoutes.push('testLogin');
-}
-
 const restrictedRoutes = [
   'multiTdfSelect',
   'dataDownload',
@@ -224,6 +220,26 @@ for (const route of defaultBehaviorRoutes) {
     action: getDefaultRouteAction(route),
   });
 }
+
+
+
+
+
+//special routes
+Router.route('/testLogin', {
+  name: 'client.testLogin',
+  action: async function() {
+    testLoginsEnabled = await meteorCallAsync('getTestLogin');
+    console.log('testLoginsEnabled', testLoginsEnabled);
+    if(testLoginsEnabled){
+      this.render('testLogin');
+    } else {
+      alert('Test logins are not enabled.  Please contact your instructor.');
+      this.redirect('/');
+    }
+  }
+});
+
 
 Router.route('/turkWorkflow', {
   name: 'client.turkWorkflow',

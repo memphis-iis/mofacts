@@ -2053,7 +2053,13 @@ function getSyllablesForWord(word) {
 const methods = {
   getMatchingDialogueCacheWordsForAnswer, getAllTeachers, getUserIdforUsername, getClassPerformanceByTDF, 
 
-  removeUserDueDateException, insertHiddenItem, setUserLoginData, addUserDueDateException,
+  removeUserDueDateException, insertHiddenItem, setUserLoginData, addUserDueDateException, 
+  
+  getMeteorSettingsPublic: function(settings) {
+    //passes back current public settings
+    serverConsole('updateClientMeteorSettings', settings);
+    return Meteor.settings.public;
+  },
 
   generateContent: function( percentage, stringArrayJsonOption, inputText ) {
     if(Meteor.user() && Meteor.user().emails[0] || Meteor.isDevelopment){
@@ -2691,6 +2697,10 @@ const methods = {
     return verbosityLevel
   },
 
+  getTestLogin: function() {
+    return DynamicSettings.findOne({key: 'testLoginsEnabled'}).value;
+  },
+
   getTdfsByOwnerId: (ownerId) => {
     const tdfs = Tdfs.find({'ownerId': ownerId}).fetch();
     return tdfs || [];
@@ -2970,6 +2980,8 @@ Meteor.startup(async function() {
   nextEventId = Histories.findOne({}, {limit: 1, sort: {eventId: -1}})?.eventId + 1 || 1;
   nextStimuliSetId = highestStimuliSetId && highestStimuliSetId.stimuliSetId ? parseInt(highestStimuliSetId.stimuliSetId) + 1 : 1;
   DynamicSettings.upsert({key: 'clientVerbosityLevel'}, {$set: {value: 1}});
+  DynamicSettings.upsert({key: 'testLoginsEnabled'}, {$set: {value: false}});
+
 
   // Let anyone looking know what config is in effect
   serverConsole('Log Notice (from siteConfig):', getConfigProperty('logNotice'));
