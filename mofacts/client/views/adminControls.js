@@ -9,6 +9,14 @@ Template.adminControls.created = function() {
             $(`#verbosityRadio${verbosity}`).prop('checked', true);
         }
     });
+    Meteor.call('getTestLogin', function(err, testLoginsEnabled) {
+        if (err) {
+            console.log("Error getting testLoginsEnabled: " + err);
+        } else {
+            console.log("Got testLoginsEnabled: " + testLoginsEnabled);
+            $(`#testLoginsCheckbox`).prop('checked', testLoginsEnabled);
+        }
+    });
 };
 
 Template.adminControls.helpers({
@@ -17,6 +25,9 @@ Template.adminControls.helpers({
             Session.set('serverStatus', res);
         });
         return Session.get('serverStatus');
+    },
+    'testLoginsEnabled': function() {
+        return DynamicSettings.findOne({key: 'testLoginsEnabled'}).value;
     }
 });
 
@@ -35,6 +46,12 @@ Template.adminControls.events({
         const start = name.length - 1;
         const verbosity = _.intval(name.slice(start, name.length))
         DynamicSettings.update({_id: _id}, {$set: {value: verbosity}});
-    }
+    },
+    'click #testLoginsCheckbox': function(event) {
+        console.log("testLoginsCheckbox clicked");
+        let _id = DynamicSettings.findOne({key: 'testLoginsEnabled'})._id;
+        const testLoginsEnabled = $('#testLoginsCheckbox').prop('checked');
+        DynamicSettings.update({_id: _id}, {$set: {value: testLoginsEnabled}});  
+    },
 });
   

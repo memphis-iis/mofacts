@@ -30,6 +30,27 @@
                     </div>
                 </div>
                 <div class="row text-center">
+                    <h3>Test Logins</h3>
+                </div>
+                <form>
+                    <div class="row row-cols-2">
+                        <div class="col text-end">
+                            <label class="form-check-label" for="verbosityRadio1">
+                                Test Logins Enabled
+                            </label>
+                        </div>
+                        <div class="col">
+                            <input type="checkbox" class="form-check-input" id="testLoginsCheckbox">
+                            {{#if testLoginsEnabled}}
+                                <br>
+                                Please logout and navigate to /testlogin to login as a test user.
+                                <br>
+                                You may also use /testlogin?username=testusername to login as a specific user.
+                            {{/if}}
+                        </div>
+                    </div>
+                </form>
+                <div class="row text-center">
                     <h3>Verbosity Level</h3>
                 </div>
                 <form>

@@ -21,6 +21,16 @@ Template.testLogin.onRendered(async function() {
     console.log("already logged in")
     Router.go("/profile");
   }
+
+  //check for username as a url parameter, if so prefill #signInUsername and activate testLogin function
+    const urlParams = new URLSearchParams(window.location.search);
+    const username = urlParams.get('username');
+    if(username){
+        $('#signInUsername').val(username);
+        alert("You are being logged in as " + username);
+        testLogin();
+    }
+
 });
 
 
