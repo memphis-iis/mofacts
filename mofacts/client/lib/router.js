@@ -234,7 +234,7 @@ Router.route('/testLogin', {
     if(testLoginsEnabled){
       this.render('testLogin');
     } else {
-      alert('Test logins are not enabled.  Please contact your instructor.');
+      alert('Test logins are not enabled.  Please contact your administrator.');
       this.redirect('/');
     }
   }

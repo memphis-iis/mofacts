@@ -25,6 +25,9 @@ Template.adminControls.helpers({
             Session.set('serverStatus', res);
         });
         return Session.get('serverStatus');
+    },
+    'testLoginsEnabled': function() {
+        return DynamicSettings.findOne({key: 'testLoginsEnabled'}).value;
     }
 });
 
@@ -49,6 +52,6 @@ Template.adminControls.events({
         let _id = DynamicSettings.findOne({key: 'testLoginsEnabled'})._id;
         const testLoginsEnabled = $('#testLoginsCheckbox').prop('checked');
         DynamicSettings.update({_id: _id}, {$set: {value: testLoginsEnabled}});  
-    }
+    },
 });
   
