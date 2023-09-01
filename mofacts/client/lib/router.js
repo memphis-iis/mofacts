@@ -164,7 +164,6 @@ Router.route('/experiment/:target?/:xcond?', {
 defaultBehaviorRoutes = [
   'signIn',
   'signInSouthwest',
-  'signUp',
   'tabwarning',
   'resetPassword',
   'setTheme',
@@ -240,6 +239,17 @@ Router.route('/testLogin', {
   }
 });
 
+Router.route('/signup', {
+  name: 'client.signUp',
+  action: function() {
+    //if the user is logged in, redirect to profile, otherwise render signup
+    if(Meteor.userId()){
+      Router.go('/profile');
+    } else {
+      this.render('signUp');
+    }
+  }
+});
 
 Router.route('/turkWorkflow', {
   name: 'client.turkWorkflow',

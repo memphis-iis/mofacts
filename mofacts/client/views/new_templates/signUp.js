@@ -2,7 +2,7 @@ import {sessionCleanUp} from '../../lib/sessionUtils';
 import {routeToSignin} from '../../lib/router';
 
 Template.signUp.events({
-  'click #signInButton': function(event) {
+  'click #backkTosignInButton': function(event) {
     Meteor.logout();
     event.preventDefault();
     routeToSignin();
@@ -63,6 +63,8 @@ Template.signUp.events({
 
       sessionCleanUp();
 
+      alert('Your account has been created! You will now be logged in.')
+
       Meteor.loginWithPassword(formUsername, formPassword1, async function(error) {
         if (typeof error !== 'undefined') {
           // This means that we have an issue of some kind - but there's
@@ -78,7 +80,6 @@ Template.signUp.events({
           }
           await meteorCallAsync('setUserLoginData', `direct`, 'password');
           Meteor.logoutOtherClients();
-          Router.render('profile');
         }
       });
     });
