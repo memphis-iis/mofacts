@@ -2,7 +2,7 @@ import {sessionCleanUp} from '../../lib/sessionUtils';
 import {routeToSignin} from '../../lib/router';
 
 Template.signUp.events({
-  'click #signInButton': function(event) {
+  'click #backkTosignInButton': function(event) {
     Meteor.logout();
     event.preventDefault();
     routeToSignin();
