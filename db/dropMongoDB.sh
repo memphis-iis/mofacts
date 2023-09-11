@@ -1,3 +1,3 @@
 #! /bin/sh
 mongo MoFaCT --eval "db.dropDatabase()"
-mongorestore mongodump/
+mongorestore ./home/rusty/mongodump-2023-09-11

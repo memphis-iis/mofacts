@@ -29,6 +29,9 @@
 <template name="DefaultLayout">
   {{#if isLoggedIn}}
     {{> nav}}
+    {{#if showPerformanceDetails}}
+      {{> curStudentPerformance}}
+    {{/if}}
   {{/if}}
   <!-- main page content -->
   {{> yield}}
