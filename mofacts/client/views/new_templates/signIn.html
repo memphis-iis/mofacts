@@ -33,6 +33,9 @@
         <!-- login with sso and google -->
         <div class="row text-center large-spacer login-sso-options">
             <div class="col-12 mx-auto">
+                {{#if showTestLogin}}
+                    <button type="button" id="testSignInButton" class="btn btn-fixed">Test Log In</button><br>
+                {{/if}}
                 <button type="button" id="signInButton" class="btn btn-fixed">Log In</button><br>
                 {{#unless isExperiment}}
                     <button type="button" id="signUpButton" class="btn btn-fixed">Sign Up</button><br>

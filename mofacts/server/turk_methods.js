@@ -597,26 +597,34 @@ Meteor.methods({
     serverConsole('turkUserLogStatus', experiment);
 
     const expKey = ('' + experiment).replace(/\./g, '_');
+    const expTDF = await getTdfByFileName(experiment);
+    const expTDFId = expTDF._id;
+    console.log('expTDFId', expTDFId)
     const records = [];
     let tdf = null;
 
-    UserTimesLog.find({}).forEach(async function(entry) {
-      if (!(expKey in entry)) {
-        return;
-      }
+    const experimentUsers = await Meteor.users.find({"profile.loginMode": 'experiment'}).fetch();
+    const experimentUserIds = experimentUsers.map(function(user) { return user._id; });
+    const experimentUserComponentStates = await ComponentStates.find({userId: {$in: experimentUserIds}, TDFId: expTDFId}).fetch();
+    const experimentUserExperimentStates = await GlobalExperimentStates.find({userId: {$in: experimentUserIds}, TDFId: expTDFId}).fetch();
+    const userTimesLog = await UserTimesLog.find({}).fetch();
 
-      const recs = entry[expKey];
-      if (!recs || !recs.length) {
-        return;
-      }
-
-      const userRec = Meteor.users.findOne({_id: entry._id});
+    for(const entry of experimentUserComponentStates) {
+      const userRec = experimentUsers.find(function(user) {
+        return user._id === entry.userId;
+      });
+      const userExperimentState = experimentUserExperimentStates.find(function(experimentUserExperimentState) {
+        return experimentUserExperimentState.userId === entry.userId;
+      });
+      const curUserTimesLog = userTimesLog.find(function(userTimeLog) {
+        return userTimeLog.userId === entry.userId && userTimeLog[expTDFId];
+      });
       if (!userRec || !userRec.username) {
         return;
       }
 
       const data = {
-        userId: entry._id,
+        userId: userRec._id,
         username: userRec.username,
         turkpay: '?',
         turkpayDetails: 'No Details Found',
@@ -629,70 +637,59 @@ Meteor.methods({
         questionsSeen: 0,
         answersSeen: 0,
         answersCorrect: 0,
-        lastUnitSeen: -1,
+        lastUnitSeen: userExperimentState.experimentState ? userExperimentState.experimentState.currentUnitNumber : -1,
         maxTimestamp: 0,
       };
-
-      for (let i = 0; i < recs.length; ++i) {
-        const rec = recs[i];
-        if (!rec || !rec.action) {
-          continue;
-        }
-
-        const lastTs = _.intval(rec.clientSideTimeStamp);
-        if (!!lastTs && lastTs > data.maxTimestamp) {
-          data.maxTimestamp = lastTs;
-        }
-
-        const act = _.trim(rec.action).toLowerCase();
-        if (act === 'turk-approval') {
-          data.turkpay = rec.success ? 'Complete' : 'FAIL';
-          data.turkpayDetails = rec;
-        } else if (act === 'turk-bonus') {
-          data.turkbonus = rec.success ? 'Complete' : 'FAIL';
-          data.turkbonusDetails = rec;
-        } else if (act === 'turk-email-schedule') {
-          data.turkEmailSchedule = rec.success ? 'Complete': 'FAIL';
-          data.turkEmailScheduleDetails = rec;
-        } else if (act === 'turk-email-send') {
-          data.turkEmailSend = rec.success ? 'Complete': 'FAIL';
-          data.turkEmailSendDetails = rec;
-        } else if (tdf !== null && (act === 'expcondition' || act === 'condition-notify')) {
-          // Two things to keep in mind here - this is a one time check,
-          // and we'll immediately fail if there is a problem
-          const mytdf = await getTdfByFileName(rec.currentTdfName);
-          tdf = mytdf.content;
-          let ownerOK = false;
-          if (!!tdf && typeof tdf.owner !== 'undefined') {
-            // They must be the owner of the TDF
-            ownerOK = (Meteor.user()._id === tdf.owner);
+      console.log('curUserTimesLog', curUserTimesLog)
+      if(curUserTimesLog){
+        console.log('curUserTimesLog', curUserTimesLog)
+        for(const log of curUserTimesLog[expTDFId]){
+          if(!log){
+            return;
           }
-
-          if (!ownerOK) {
-            serverConsole('Could not verify owner for', experiment);
-            return [];
-          }
-        } else if (act === 'question') {
-          if (rec.selType) {
-            data.questionsSeen += 1;
-            data.lastUnitSeen = Math.max(data.lastUnitSeen, _.intval(rec.currentUnit));
-          }
-        } else if (act === 'answer' || act === '[timeout]') {
-          data.answersSeen += 1;
-
-          let wasCorrect = false;
-          if (act === 'answer') {
-            wasCorrect = typeof rec.isCorrect !== 'undefined' ? rec.isCorrect : false;
-          }
-          if (wasCorrect) {
-            data.answersCorrect += 1;
+          if (log.action === 'turk-approval') {
+            data.turkpay = log.success ? 'Complete' : 'FAIL';
+            data.turkpayDetails = log;
+          } else if (log.action === 'turk-bonus') {
+            data.turkbonus = log.success ? 'Complete' : 'FAIL';
+            data.turkbonusDetails = log;
+          } else if (log.action === 'turk-email-schedule') {
+            data.turkEmailSchedule = log.success ? 'Complete': 'FAIL';
+            data.turkEmailScheduleDetails = log;
+          } else if (log.action === 'turk-email-send') {
+            data.turkEmailSend = log.success ? 'Complete': 'FAIL';
+            data.turkEmailSendDetails = log;
+          } else if (tdf !== null && (log.action === 'expcondition' || log.action === 'condition-notify')) {
+            // Two things to keep in mind here - this is a one time check,
+            // and we'll immediately fail if there is a problem
+            tdf = expTDF.content;
+            let ownerOK = false;
+            if (!!tdf && typeof tdf.owner !== 'undefined') {
+              // They must be the owner of the TDF
+              ownerOK = (Meteor.user()._id === tdf.owner);
+            }
+    
+            if (!ownerOK) {
+              serverConsole('Could not verify owner for', experiment);
+              return [];
+            }
           }
         }
       }
 
-      records.push(data);
-    });
 
+      for (const stim of entry.stimStates) {
+        data.answersCorrect += _.intval(stim.allTimeCorrect);
+        data.questionsSeen += (stim.allTimeCorrect + stim.allTimeIncorrect);
+        data.answersSeen += (stim.allTimeCorrect + stim.allTimeIncorrect);
+        const lastTs = _.intval(stim.firstSeen);
+        if (!!lastTs && lastTs > data.maxTimestamp) {
+          data.maxTimestamp = lastTs;
+        }
+      }
+
+      records.push(data);
+    }
     return records;
   },
   // DEBUG
