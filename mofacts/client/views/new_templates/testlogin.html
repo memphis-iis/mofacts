@@ -1,0 +1,29 @@
+<template name="testLogin">
+    <div class="container">
+        <!-- page header -->
+        <div class="row text-center">
+            <div class="col-12 mx-auto">
+                <div class="vh-10"></div>
+                <h1 align-bottom>MoFaCTS</h1>
+                <span id="serverErrors"></span>
+                <div class="vh-5"></div>
+            </div>
+        </div>
+        <!-- centered login form -->
+        <div class="row text-center login-form spacer">
+            <div class="col-12 mx-auto">
+                <form>
+                        <input  type="text" id="signInUsername" value="" placeholder="Username"><br>
+                </form>
+            </div>
+        </div>
+        <div class="row text-center large-spacer login-sso-options">
+            <div class="col-12 mx-auto">
+                <button type="button" id="testSignInButton" class="btn btn-fixed">Test Log In</button><br>
+     
+            </div>
+        </div>
+        <!-- footer -->
+        {{> footer}}
+    </div>
+</template>

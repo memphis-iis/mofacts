@@ -1,6 +1,5 @@
 <template name="signUp">
     <div class="container">
-        <div class="vh-5"></div>
         <div class="row text-center">
             <div class="col-lg-4 offset-lg-4 col-md-6 col-md-offset-4 col-sm-8 col-sm-offset-2 col-xs-12">
                 <div class="vh-10"></div>
@@ -11,7 +10,7 @@
         </div>
         <div class="row text-center">
             <div class="col-lg-4 offset-lg-4 col-md-6 col-md-offset-4 col-sm-8 col-sm-offset-2 col-xs-12">
-                <p align-bottom>Welcome. Let's get started.</p>
+                <p align-bottom>Welcome. Let's sign up for MoFaCTs.</p>
                 <span id="serverErrors"></span>
             </div>
         </div>
@@ -34,12 +33,13 @@
                 </div>
                 <div class="vh-5"></div>
                 <div class="form-group">
-                    <button type="button" id="signUpButton" class="btn btn-fixed">Sign Up</button>
-                    <button type="button" id="signInButton" class="btn btn-fixed">Sign In</button>
+                    <button type="button" id="signUpButton" class="btn btn-fixed">Create Account</button><br>
+                    <a id="backkTosignInButton" class="btn btn-fixed">Back to Sign In</a>
                     <span id="serverErrors" hidden ></span>
                 </div>
                 <br>
             </div>
         </div>
+        {{> footer}}
     </div>
 </template>

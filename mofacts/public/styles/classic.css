@@ -10,6 +10,9 @@ h3{
     padding: 10px;
 }
 
+a{
+    color: #00cc00
+}
 h5{
     /* League Spartan */
     font-family: 'League Spartan';
@@ -378,6 +381,14 @@ select{
         width:90vw;
         max-width: 500px;
     }
+
+    #userInteractionContainer{
+        position: absolute;
+        bottom: 0px;
+        left: 0px;
+        right: 0px;
+    }
+
     .modal-expanded{
         height: 80vh !important;
         top: 20% !important;
@@ -585,13 +596,19 @@ input[type="range"]::-webkit-slider-thumb {
     width: 1rem;    
  }
 
- #signInButtonOAuth{
+ #signInButtonOAuth {
     /* use google's blue for outline with white background */
     border: 1px solid #4285f4;
     background-color: #ffffff !important;
     color: #4285f4;
  }
 
+ #backkTosignInButton{
+    /* use google's blue for outline with white background */
+    border: 1px solid #4285f4;
+    background-color: #ffffff !important;
+ }
+ 
  #signInWithMicrosoftSSO{
     /* use microsoft black for outline with white background */
     border: 1px solid #000000;

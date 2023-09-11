@@ -276,7 +276,7 @@ function defaultUnitEngine(curExperimentData) {
 
       const correctAnswer = Answers.getDisplayAnswerText(currentStimAnswer);
       const cacheWords = await meteorCallAsync('getMatchingDialogueCacheWordsForAnswer', correctAnswer);
-      Session.set('dialogueCacheHint', cacheWords.join(', '));
+      Session.set('dialogueCacheHint', cacheWords.join(','));
       newExperimentState.originalAnswer = currentStimAnswer;
       currentStimAnswer = currentStimAnswer.toLowerCase();
 

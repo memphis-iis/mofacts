@@ -161,10 +161,9 @@ Router.route('/experiment/:target?/:xcond?', {
   },
 });
 
-const defaultBehaviorRoutes = [
+defaultBehaviorRoutes = [
   'signIn',
   'signInSouthwest',
-  'signUp',
   'tabwarning',
   'resetPassword',
   'setTheme',
@@ -220,6 +219,37 @@ for (const route of defaultBehaviorRoutes) {
     action: getDefaultRouteAction(route),
   });
 }
+
+
+
+
+
+//special routes
+Router.route('/testLogin', {
+  name: 'client.testLogin',
+  action: async function() {
+    testLoginsEnabled = await meteorCallAsync('getTestLogin');
+    console.log('testLoginsEnabled', testLoginsEnabled);
+    if(testLoginsEnabled){
+      this.render('testLogin');
+    } else {
+      alert('Test logins are not enabled.  Please contact your administrator.');
+      this.redirect('/');
+    }
+  }
+});
+
+Router.route('/signup', {
+  name: 'client.signUp',
+  action: function() {
+    //if the user is logged in, redirect to profile, otherwise render signup
+    if(Meteor.userId()){
+      Router.go('/profile');
+    } else {
+      this.render('signUp');
+    }
+  }
+});
 
 Router.route('/turkWorkflow', {
   name: 'client.turkWorkflow',

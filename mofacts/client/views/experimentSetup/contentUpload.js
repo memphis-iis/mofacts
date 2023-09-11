@@ -89,24 +89,9 @@ Template.contentUpload.events({
     for (const file of Array.from($('#upload-file').prop('files'))) {
       //if the file has extension .json, read and parse it, if it is a TDF file it will have "tutor" field, if it is a stimuli file it will have "setspec" field
       if (file.name.endsWith('.json')) {
-        console.log('JSON file:', file);
-        const reader = new FileReader();
-        reader.onload = function(e) {
-          const fileContent = JSON.parse(e.target.result);
-          //print file contents to console
-          console.log('fileContent:', fileContent);
-          if (fileContent.tutor) {
-            file.fileType = 'tdf';
-            file.fileDescrip = 'TDF'
-          } else if (fileContent.setspec) {
-            file.fileType = 'stim';
-            file.fileDescrip = 'Stimuli'
-          } else {
-            file.fileType = 'unknown';
-            file.fileDescrip = 'Unknown'      
-          }
-        };
-        reader.readAsText(file);
+        //send an alert that json files are not supported
+        alert('JSON files are not supported. Please upload a ZIP file.');
+
       } else {
         file.fileType = 'package';
       }
@@ -134,9 +119,12 @@ Template.contentUpload.events({
     //get files array from reactive var
     const files = Template.instance().curFilesToUpload.get();
     $('#stimUploadLoadingSymbol').show()
-    doFileUpload(files);
+    //call doFileUpload function for each file
+    for (const file of files) {
+      await doPackageUpload(file, Template.instance());
+    }
     //reset reactive var
-    Template.instance().curFilesToUpload.set([]);
+    Template.instance().curFilesToUpload.set(false);
   },
     'click #tdf-download-btn': function(event){
       event.preventDefault();
@@ -296,22 +284,22 @@ async function doFileUpload(fileArray) {
   const errorStack = [];
 
   for (const file of files) {
-    //check if file type is package
-    if (file.fileType == 'package') {
-      //check if package exists in dynamicAssets
-      const existingFile = DynamicAssets.findOne({fileName: file.name});
-      if (existingFile) {
-        //atempts to delete existing file
-        try {
-          existingFile.remove();
-        } catch (e) {
-          console.log('error deleting existing file', e);
-          alert('Error deleting existing file. Please try again. If this error persists, please file a bug report.');
-        }
-      } else {
-        doPackageUpload(file, Template.instance());
+  //check if file type is package
+  if (file.fileType == 'package') {
+    //check if package exists in dynamicAssets
+    const existingFile = DynamicAssets.findOne({fileName: file.name});
+    if (existingFile) {
+      //atempts to delete existing file
+      try {
+        existingFile.remove();
+      } catch (e) {
+        console.log('error deleting existing file', e);
+        alert('Error deleting existing file. Please try again. If this error persists, please file a bug report.');
       }
     } else {
+      doPackageUpload(file, Template.instance());
+    }
+  } else {
       count += 1;
       const name = file.name;
       const fileType = file.fileType;
@@ -368,7 +356,7 @@ async function doFileUpload(fileArray) {
      // Now we can clear the selected file
     $('#upload-file').val('');
     $('#upload-file').parent().find('.file-info').html('');
-
+    
     console.log(fileType, ':', fileDescrip, 'at ele', fileElementSelector, 'scheduled', count, 'uploads');
     //alert('Upload complete');
     }

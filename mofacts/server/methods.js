@@ -54,8 +54,10 @@ if (Meteor.settings.public.testLogin) {
   process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = 0;
   serverConsole('dev environment, allow insecure tls');
 }
+// if Meteor settings specifies a syllableURL, use it. Otherwise check if Meteor.isProduction and use the appropriate URL, otherwise use the dev URL
+const syllableURL = Meteor.settings.syllableURL ? Meteor.settings.syllableURL : Meteor.isProduction ? 'http://syllables:4567/syllables/' : 'http://localhost:4567/syllables/';
 
-const baseSyllableURL = Meteor.settings.syllableURL ||'http://syllables:4567/syllables/' ;
+
 
 let highestStimuliSetId;
 let nextStimuliSetId;
@@ -184,8 +186,12 @@ Meteor.publish(null, function() {
 
 Meteor.publish('allUsers', function() {
   const opts = {
-    fields: {username: 1, roles: 1},
+    fields: {username: 1},
   };
+  // eslint-disable-next-line no-invalid-this
+  if (Roles.userIsInRole(this.userId, ['admin'])) {
+    opts.fields.roles = 1;
+  }  
   return Meteor.users.find({}, opts);
 });
 
@@ -741,7 +747,6 @@ async function getAllCourseAssignmentsForInstructor(instructorId) {
     {
       $project:{ //SELECT t.content -> \'fileName\' AS filename, c.courseName, c.courseId
         _id: 0,
-        tdfId: "$TDF._id",
         fileName: "$TDF.content.fileName",
         courseName: "$course.courseName",
         courseId: "$course._id"
@@ -1042,6 +1047,15 @@ function insertHiddenItem(userId, stimulusKC, tdfId) {
     }
   }
   
+}
+
+async function getUserLastFeedbackTypeFromHistory(tdfID) {
+  const userHistory =  Histories.findOne({TDFId: tdfID, userId: Meteor.userId}, {sort: {time: -1}})?.feedbackType
+  let feedbackType = 'undefined';
+  if( userHistory && userHistory.feedbackType ) {
+    feedbackType = userHistory.feedbackType;
+  } 
+  return feedbackType;
 }
 async function insertHistory(historyRecord) {
   const tdfFileName = historyRecord['Condition_Typea'];
@@ -2039,7 +2053,13 @@ function getSyllablesForWord(word) {
 const methods = {
   getMatchingDialogueCacheWordsForAnswer, getAllTeachers, getUserIdforUsername, getClassPerformanceByTDF, 
 
-  removeUserDueDateException, insertHiddenItem, setUserLoginData, addUserDueDateException,
+  removeUserDueDateException, insertHiddenItem, setUserLoginData, addUserDueDateException, 
+  
+  getMeteorSettingsPublic: function(settings) {
+    //passes back current public settings
+    serverConsole('updateClientMeteorSettings', settings);
+    return Meteor.settings.public;
+  },
 
   generateContent: function( percentage, stringArrayJsonOption, inputText ) {
     if(Meteor.user() && Meteor.user().emails[0] || Meteor.isDevelopment){
@@ -2677,6 +2697,10 @@ const methods = {
     return verbosityLevel
   },
 
+  getTestLogin: function() {
+    return DynamicSettings.findOne({key: 'testLoginsEnabled'}).value;
+  },
+
   getTdfsByOwnerId: (ownerId) => {
     const tdfs = Tdfs.find({'ownerId': ownerId}).fetch();
     return tdfs || [];
@@ -2714,7 +2738,7 @@ const asyncMethods = {
 
   insertHistory, getHistoryByTDFID, getUserRecentTDFs, clearCurUnitProgress, tdfUpdateConfirmed,
 
-  loadStimsAndTdfsFromPrivate, getListOfStimTags,
+  loadStimsAndTdfsFromPrivate, getListOfStimTags, getUserLastFeedbackTypeFromHistory,
 
   checkForUserException, 
 
@@ -2956,6 +2980,8 @@ Meteor.startup(async function() {
   nextEventId = Histories.findOne({}, {limit: 1, sort: {eventId: -1}})?.eventId + 1 || 1;
   nextStimuliSetId = highestStimuliSetId && highestStimuliSetId.stimuliSetId ? parseInt(highestStimuliSetId.stimuliSetId) + 1 : 1;
   DynamicSettings.upsert({key: 'clientVerbosityLevel'}, {$set: {value: 1}});
+  DynamicSettings.upsert({key: 'testLoginsEnabled'}, {$set: {value: false}});
+
 
   // Let anyone looking know what config is in effect
   serverConsole('Log Notice (from siteConfig):', getConfigProperty('logNotice'));

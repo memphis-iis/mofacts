@@ -395,7 +395,7 @@ async function initCard() {
   };
   Session.set('scoringEnabled', undefined);
 
-  if (!Session.get('stimDisplayTypeMap') || !Session.get('stimDisplayTypeMap').length > 0) {
+  if (!Session.get('stimDisplayTypeMap')) {
     const stimDisplayTypeMap = await meteorCallAsync('getStimDisplayTypeMap');
     Session.set('stimDisplayTypeMap', stimDisplayTypeMap);
   }
@@ -500,16 +500,7 @@ Template.card.events({
     Session.set('displayFeedback', false);
     processUserTimesLog();  
   },
-  'click #confirmFeedbackSelectionFromIndex': () => {
-    let selectedDialogueType = 'simple'
-    if(document.getElementById('dialogueSelectRefutational').checked)
-      selectedDialogueType = 'refutational';
-    else if(document.getElementById('dialogueSelectDialogue').checked)  
-      selectedDialogueType = 'dialogue';
-
-    Session.set('selectedDialogueType', selectedDialogueType);
-    Session.set('feedbackTypeFromHistory', selectedDialogueType);
-    updateExperimentState({feedbackType: selectedDialogueType}, 'profileDialogueToggles');
+  'click #confirmFeedbackSelectionFromIndex': function(){
     Session.set('displayFeedback', false);
     Session.set('pausedLocks', Session.get('pausedLocks')-1);
     Session.set('resetFeedbackSettingsFromIndex', false);
@@ -826,14 +817,7 @@ Template.card.helpers({
     }
     console.log("probability parms input",probParms);
     return probParms;
-    
-  },
-  'curTdfName': function(){
-    lessonname = Session.get('currentTdfFile').tdfs.tutor.setspec.lessonname;
-    console.log("lessonname",lessonname);
-    return lessonname;
-  },
-  
+  }
 });
 
 function getResponseType() {
@@ -1471,14 +1455,14 @@ async function showUserFeedback(isCorrect, feedbackMessage, afterAnswerFeedbackC
       feedbackMessage = feedbackMessage.replace("Incorrect", "<br><b>Incorrect</b><br>");
       feedbackMessage = feedbackMessage.replace("Correct", "<br><b>Correct</b><br>");
     }
+    $('.hints').hide();
+    const hSize = Session.get('currentDeliveryParams') ? Session.get('currentDeliveryParams').fontsize.toString() : 2;
     $('#UserInteraction')
-        .removeClass('alert-success alert-danger')
-        .addClass('text-align alert')
+        .addClass('h' + hSize)
         .html(feedbackMessage + $('#UserInteraction').html())
         .attr("hidden",false)
         .show()
         if(!isCorrect){
-          $('#UserInteraction').addClass('alert-danger');
           var countDownStart = new Date().getTime();
           let dialogueHistory;
           if (Session.get('dialogueHistory')) {
@@ -1495,6 +1479,8 @@ async function showUserFeedback(isCorrect, feedbackMessage, afterAnswerFeedbackC
             var seconds = Math.ceil((distance % (1000 * 60)) / 1000);
 
             document.getElementById("CountdownTimerText").innerHTML = 'Continuing in: ' + seconds + "s";
+         
+            $('#CountdownTimerText').addClass('h' + hSize);
             //set the bootstrap progress bar to the percentage of time left using the style attribute
             var percent = (seconds / originalSecs) * 100;
             document.getElementById("progressbar").style.width = percent + "%";
@@ -1515,7 +1501,6 @@ async function showUserFeedback(isCorrect, feedbackMessage, afterAnswerFeedbackC
         } else {
           //hide progressbar
           $('#progressbar').hide();
-          $('#UserInteraction').addClass('alert-success');
         }
   }
 
@@ -2793,7 +2778,8 @@ function updateExperimentState(newState, codeCallLocation, unitEngineOverride = 
     Meteor.call('updateExperimentState', curExperimentState, curExperimentState.currentTdfId);
   }
   console.log('updateExperimentState', codeCallLocation, '\nnew:', curExperimentState);
-  return Session.get('currentRootTdfId');
+  Session.set('currentExperimentState', curExperimentState);
+  return curExperimentState.currentTdfId;
 }
 
 // Re-initialize our User Progress and Card Probabilities internal storage
