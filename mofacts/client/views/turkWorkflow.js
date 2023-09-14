@@ -15,7 +15,7 @@ function turkLogInsert(newRec) {
   newRec.turk_username = newRec.username;
 
   if (newRec.maxTimestamp) {
-    newRec.lastAction = new Date(newRec.maxTimestamp);
+    newRec.lastAction = new Date(newRec.maxTimestamp).toLocaleString();
   }
   turkExperimentLog.insert(newRec);
 }
@@ -72,7 +72,7 @@ Template.turkWorkflow.helpers({
     return turkExperimentLog.find(
         {'questionsSeen': {'$gte': _.intval(minTrials)}},
         {sort: [['maxTimestamp', 'desc'], ['idx', 'asc']]},
-    );
+    ).fetch();
   },
   experiments: function() {
     const experiments = Tdfs.find({"ownerId": Meteor.userId(), "content.tdfs.tutor.setspec.experimentTarget": {$ne: null}}).fetch()
@@ -120,11 +120,10 @@ Template.turkWorkflow.rendered = async function() {
 
     const expTarget = setspec.experimentTarget ? setspec.experimentTarget.trim() : '';
 
-    if (expTarget.length > 0 && (isAdmin || Meteor.userId() === tdfObject.owner)) {
-      $('#turkLogSelectContainer').append(
-          $('<button type=\'button\' id=\'turk_'+tdfObject._id+'\' name=turk_\''+name+'\'></button>')
-              .addClass('btn btn-fix btn-sm btn-success btn-log-select')
-              .css('margin', '3px')
+    if (expTarget.length > 0 && (isAdmin || Meteor.userId() === tdfObject.ownerId)){
+      $('#tdf-select').append(
+          $(`<option id=turk_${tdfObject._id} name=turk_${name} value=${tdfObject.fileName}></option>`)
+              .addClass('btn btn-fix btn-primary btn-xs btn-sched-detail btn-log-select')
               .data('tdffilename', tdfObject.fileName)
               .html(name),
       );
@@ -193,11 +192,11 @@ Template.turkWorkflow.events({
   },
 
   // Admin/Teachers - show user log for a particular experiment
-  'click .btn-log-select': function(event) {
+  'change #tdf-select': function(event) {
     event.preventDefault();
 
-    const target = $(event.currentTarget);
-    const exp = target.data('tdffilename');
+    const target = $("#tdf-select");
+    const exp = target.val();
 
     turkLogRefresh(exp);
   },

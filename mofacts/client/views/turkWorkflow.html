@@ -5,6 +5,15 @@
         Mechanical Turk Workflow
        </div> 
     <div id="turkLogEntireWorkflow">
+        <div class="row">
+            <div class="col-md-12" id="turkLogSelectContainer">
+                <h3 class="text-center">Select a TDF to see the Turk Log</h3>
+                
+                <select id="tdf-select" class="width-80-percent">
+                    <option value="{{INVALID}}">Select a lesson</option>
+                </select>
+            </div>
+        </div>
         {{#if turkExperimentLogToShow}}
         <div id="turkLogAll">
             <div class="row">
@@ -28,71 +37,70 @@
                                 <th>Approval</th>
                                 <th>Email Sent</th>
                                 <th>Last Unit</th>
+                                <th>Last Action</th>
                                 <th>Q Seen</th>
                                 <th>A Given</th>
                                 <th>Bonus</th>
                             </tr></thead>
 
-                            <tbody>
-                            {{#each turkExperimentLog}}
-                                <tr>
-                                    <td>{{userid}}</td>
-                                    <td>{{turk_username}}</td>
-                                    <td>
-                                        {{#if haveEmailSched}}
+                        <tbody>
+                        {{#each turkExperimentLog}}
+                            <tr>
+                                <td>{{userId}}</td>
+                                <td>{{turk_username}}</td>
+                                <td>
+                                    {{#if haveEmailSched}}
+                                    <button type="button"
+                                        class="btn btn-fix btn-primary btn-xs btn-sched-detail"
+                                        data-idx="{{idx}}"
+                                    ><i class="fa fa-search-plus"></i>&nbsp;{{turkEmailSchedule}}
+                                    </button>
+                                    {{else}}
+                                    Email not scheduled
+                                    {{/if}}
+                                </td>
+                                <td>{{answersCorrect}}</td>
+                                <td>
+                                    {{#if needPay}}
                                         <button type="button"
-                                            class="btn-icon btn-sched-detail"
+                                            class="btn btn-fix btn-primary btn-xs btn-pay-action"
                                             data-idx="{{idx}}"
-                                        ><i class="fa fa-magnifying-glass-plus"></i>
+                                        ><span class="fa fa-usd" aria-hidden="true"></span>&nbsp;Approve/Pay
                                         </button>
-                                        {{/if}}
-                                        {{turkEmailSchedule}}
-                                    </td>
-                                    <td>{{answersCorrect}}</td>
-                                    <td>
-                                        {{#if needPay}}
-                                            <button type="button"
-                                                class="btn-icon btn-pay-action"
-                                                data-idx="{{idx}}"
-                                            ><i class="fa fa-dollar-sign"></i>Approve/Pay
-                                            </button>
-                                        {{else}}
-                                            <button type="button"
-                                                class="btn-icon btn-pay-detail"
-                                                data-idx="{{idx}}"
-                                            ><i class="fa fa-magnifying-glass-plus"></i>
-                                            </button>
-                                            {{turkpay}}
-                                        {{/if}}
-                                    </td>
-                                    <td>
-                                        {{#if haveEmailSend}}
+                                    {{else}}
                                         <button type="button"
-                                            class="btn-icon btn-send-detail"
+                                            class="btn btn-fix btn-primary btn-xs btn-pay-detail"
                                             data-idx="{{idx}}"
-                                        ><i class="fa fa-magnifying-glass-plus"></i>
+                                        ><span class="fa fa-search-plus" aria-hidden="true"></span>&nbsp;
+                                        {{turkpay}}
                                         </button>
-                                        {{/if}}
-                                        {{turkEmailSend}}
-                                    </td>
-                                    <td>{{lastUnitSeen}}</td>
-                                    <td>{{questionsSeen}}</td>
-                                    <td>{{answersSeen}}</td>
-                                    <td>
-                                        {{#if needBonus}}
-                                            <button type="button"
-                                                class="btn-icon btn-bonus-action"
-                                                data-idx="{{idx}}"
-                                            ><i class="fa fa-dollar-sign"></i>Send Bonus
-                                            </button>
-                                        {{else}}
-                                            <button type="button"
-                                                class="btn-icon btn-bonus-detail"
-                                                data-idx="{{idx}}"
-                                            ><i class="fa fa-magnifying-glass-plus"></i>
-                                            </button>
-                                            {{turkbonus}}
-                                        {{/if}}
+                                    {{/if}}
+                                </td>
+                                <td>
+                                    {{#if haveEmailSend}}
+                                    <button type="button"
+                                        class="btn btn-fix btn-primary btn-xs btn-send-detail"
+                                        data-idx="{{idx}}"
+                                    ><span class="fa fa-search-plus" aria-hidden="true"></span>&nbsp;{{turkEmailSend}}
+                                    </button>
+                                    {{else}}
+                                    Email not sent
+                                    {{/if}}
+                                </td>
+                                <td>{{lastUnitSeen}}</td>
+                                <td>{{lastAction}}</td>
+                                <td>{{questionsSeen}}</td>
+                                <td>{{answersSeen}}</td>
+                                <td>
+                                    {{#if needBonus}}
+                                        <button type="button" class="btn btn-fix btn-primary btn-xs btn-bonus-action" data-idx="{{idx}}">
+                                            <span class="fa fa-usd" aria-hidden="true"></span>&nbsp;Send Bonus
+                                        </button>
+                                    {{else}}
+                                        <button type="button" class="btn btn-fix btn-primary btn-xs btn-bonus-action" data-idx="{{idx}}">
+                                            <span class="fa fa-search-plus" aria-hidden="true"></span>&nbsp;{{turkEmailSend}}
+                                        </button>
+                                    {{/if}}
                                     </td>
                                 </tr>
                             {{/each}}
@@ -150,7 +158,7 @@
     </div> <!-- /turkLogEntireWorkflow -->
 
 
-    <div class="modal fade" id="turkModal" tabindex="-1" role="dialog" aria-labelledby="turkModalLabel">
+    <div class="modal" id="turkModal" tabindex="-1" role="dialog" aria-labelledby="turkModalLabel">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -166,14 +174,14 @@
         </div>
     </div>
 
-    <div class="modal fade" id="detailsModal" tabindex="-1" role="dialog" aria-labelledby="detailsModalLabel">
-        <div class="modal-dialog" role="document" style="width:98%;">
+    <div class="modal" id="detailsModal" tabindex="-1" role="dialog" aria-labelledby="detailsModalLabel">
+        <div class="modal-dialog" >
             <div class="modal-content">
                 <div class="modal-header">
                     <h4 class="modal-title" id="detailsModalLabel">Turk Experiment Log Details</h4>
                 </div>
                 <div class="modal-body">
-                    <div id="detailsModalListing" style="white-space:pre;"></div>
+                    <div id="detailsModalListing" style="white-space: pre-wrap;"></div>
                 </div>
             </div>
         </div>
