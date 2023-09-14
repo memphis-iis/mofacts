@@ -2054,7 +2054,7 @@ const methods = {
   getMatchingDialogueCacheWordsForAnswer, getAllTeachers, getUserIdforUsername, getClassPerformanceByTDF, 
 
   removeUserDueDateException, insertHiddenItem, setUserLoginData, addUserDueDateException, 
-  
+    
   getMeteorSettingsPublic: function(settings) {
     //passes back current public settings
     serverConsole('updateClientMeteorSettings', settings);
@@ -3041,6 +3041,10 @@ Meteor.startup(async function() {
         return;
       }
       Roles.addUsersToRoles(user._id, roleName);
+      //if the role name is admin or teacher, create a secret key for the user
+      if(roleName == 'admin' || roleName == 'teacher'){
+        createUserSecretKey(user._id);
+      }
       serverConsole('Added user', username, 'to role', roleName);
     });
   };
