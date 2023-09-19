@@ -208,7 +208,7 @@ Template.turkWorkflow.events({
   },
 
   // Admin/Teachers - approve/pay a user in the Turk log view
-  'click .btn-pay-action': function(event) {
+  'click .btn-pay-action': async function(event) {
     event.preventDefault();
 
     const rec = turkLogButtonToRec(event.currentTarget);
@@ -216,8 +216,8 @@ Template.turkWorkflow.events({
       alert('Cannot find record for that table entry?!');
       return;
     }
-
-    const exp = _.trim(rec.experiment).replace(/\./g, '_');
+    const exp = await meteorCallAsync('getTdfByFileName', rec.experiment)
+    const expId = exp._id
     if (!exp) {
       alert('Could not determine the experiment name for this entry?!');
       return;
@@ -226,8 +226,7 @@ Template.turkWorkflow.events({
     const msg = 'Thank you for participating';
 
     $('#turkModal').modal('show');
-
-    Meteor.call('turkPay', rec.userid, exp, msg, function(error, result) {
+    Meteor.call('turkPay', rec.userId, expId, msg, function(error, result) {
       $('#turkModal').modal('hide');
 
       rec.turkpayDetails = {
@@ -257,7 +256,7 @@ Template.turkWorkflow.events({
   },
 
   // Admin/Teachers - pay bonus to a user in the Turk log view
-  'click .btn-bonus-action': function(event) {
+  'click .btn-bonus-action': async function(event) {
     event.preventDefault();
 
     const rec = turkLogButtonToRec(event.currentTarget);
@@ -266,7 +265,9 @@ Template.turkWorkflow.events({
       return;
     }
 
-    const exp = _.trim(rec.experiment).replace(/\./g, '_');
+    const exp = await meteorCallAsync('getTdfByFileName', rec.experiment)
+    const expId = exp._id
+    const expFile =  _.trim(rec.experiment).replace(/\./g, '_');
     if (!exp) {
       alert('Could not determine the experiment name for this entry?!');
       return;
@@ -274,7 +275,7 @@ Template.turkWorkflow.events({
 
     $('#turkModal').modal('show');
 
-    Meteor.call('turkBonus', rec.userid, exp, function(error, result) {
+    Meteor.call('turkBonus', rec.userId, expFile, expId, function(error, result) {
       $('#turkModal').modal('hide');
 
       rec.turkbonusDetails = {
