@@ -340,16 +340,6 @@ Meteor.methods({
     return resultMsg;
   },
 
-  turkTest: async function(ownerId) {
-    serverConsole('turkTest');
-    const ownerProfile = UserProfileData.findOne({_id: ownerId});
-    serverConsole('ownerProfile', ownerProfile);
-    let hitlist = await turk.getAvailableHITs(ownerProfile, {});
-    serverConsole('hitlist', hitlist);
-    return hitlist
-  },
-    
-
   // Assuming the current user is an admin or teacher, and given a user ID, an
   // experiment, and a msg - we attempt to pay the user for the current MTurk
   // HIT/assignment.
@@ -701,10 +691,10 @@ Meteor.methods({
     return records;
   },
   // DEBUG
-  // turkTest: async function(ownerProfile, hit) {
-  //   serverConsole('Method hit');
-  //   const assignList = await turk.getAssignmentsForHIT(ownerProfile, hit);
-  //   serverConsole('Got there??');
-  //   serverConsole(assignList);
-  // },
+  turkTest: async function(ownerProfile, hit) {
+    serverConsole('Method hit');
+    const assignList = await turk.getAssignmentsForHIT(ownerProfile, hit);
+    serverConsole('Got there??');
+    serverConsole(assignList);
+  },
 });
