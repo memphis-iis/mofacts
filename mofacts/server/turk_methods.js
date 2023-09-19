@@ -438,11 +438,10 @@ Meteor.methods({
         throw new Error('Can not continue - no assignment');
       }
 
-      const approveResponse = ""
-            // await turk.approveAssignment(ownerProfile, {
-            //     'AssignmentId': assignment.AssignmentId,
-            //     'RequesterFeedback': msg || "Thanks for your participation"
-            // });
+      const approveResponse = await turk.approveAssignment(ownerProfile, {
+                'AssignmentId': assignment.AssignmentId,
+                'RequesterFeedback': msg || "Thanks for your participation"
+            });
       workPerformed.approveAssignment = 'Assignment was approved!';
       workPerformed.approvalDetails = approveResponse;
     } catch (e) {
@@ -606,7 +605,6 @@ Meteor.methods({
   turkUserLogStatus: async function(experiment) {
     serverConsole('turkUserLogStatus', experiment);
 
-    const expKey = ('' + experiment).replace(/\./g, '_');
     const expTDF = await getTdfByFileName(experiment);
     const expTDFId = expTDF._id;
     console.log('expTDFId', expTDFId)
