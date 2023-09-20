@@ -373,7 +373,6 @@ Meteor.methods({
       if (!ownerProfile.have_aws_id || !ownerProfile.have_aws_secret) {
         throw new Error('You are not set up for AWS/MTurk');
       }
-
       turkid = _.chain(Meteor.users.findOne({'_id': workerUserId}))
           .prop('username').trim()
           .value().toUpperCase();
@@ -430,9 +429,9 @@ Meteor.methods({
       }
 
       const approveResponse = await turk.approveAssignment(ownerProfile, {
-        'AssignmentId': assignment.AssignmentId,
-        'RequesterFeedback': msg || 'Thanks for your participation',
-      });
+                'AssignmentId': assignment.AssignmentId,
+                'RequesterFeedback': msg || "Thanks for your participation"
+            });
       workPerformed.approveAssignment = 'Assignment was approved!';
       workPerformed.approvalDetails = approveResponse;
     } catch (e) {
@@ -596,7 +595,6 @@ Meteor.methods({
   turkUserLogStatus: async function(experiment) {
     serverConsole('turkUserLogStatus', experiment);
 
-    const expKey = ('' + experiment).replace(/\./g, '_');
     const expTDF = await getTdfByFileName(experiment);
     const expTDFId = expTDF._id;
     console.log('expTDFId', expTDFId)
