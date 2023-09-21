@@ -3052,15 +3052,12 @@ async function resumeFromComponentState() {
   //but the unit and individual question can override these settings
   const curTdfUISettings = rootTDFBoxed.content.tdfs.tutor.setspec.uiSettings ? rootTDFBoxed.content.tdfs.tutor.setspec.uiSettings : false;
   const curUnitUISettions = curTdfUnit.uiSettings ? curTdfUnit.uiSettings : false;
-  const curCardUISettings = curQuestion.uiSettings ? curQuestion.uiSettings : false;
   
   //show which settings are being used
   if(curTdfUISettings){
     console.log('using tdf ui settings')
   } else if(curUnitUISettions){
     console.log('using unit ui settings')
-  } else if(curCardUISettings){
-    console.log('using card ui settings')
   } else {
     console.log('using default ui settings')
   }
