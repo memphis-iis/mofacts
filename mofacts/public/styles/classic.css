@@ -382,13 +382,6 @@ select{
         max-width: 500px;
     }
 
-    #userInteractionContainer{
-        position: absolute;
-        bottom: 0px;
-        left: 0px;
-        right: 0px;
-    }
-
     .modal-expanded{
         height: 80vh !important;
         top: 20% !important;
@@ -558,12 +551,6 @@ select{
     font-size: 12pt;
 }
 
-#userInteractionContainer{
-    position: absolute;
-    bottom: 0px;
-    left: 0px;
-    right: 0px;
-}
 
 input[type="range"]::-webkit-slider-runnable-track {
     background: #00cc00;
@@ -577,6 +564,12 @@ input[type="range"]::-webkit-slider-runnable-track {
   }
 
 
+  #userLowerInteractionContainer{
+    position: absolute;
+    bottom: 0px;
+    left: 0px;
+    right: 0px;
+}
 
  input[type="range"]::-moz-range-thumb {
     border: none; /*Removes extra border that FF applies*/

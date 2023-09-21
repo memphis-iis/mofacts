@@ -1,4 +1,4 @@
-import Promise from 'bluebird';
+import Promise, { is } from 'bluebird';
 import {dialogueContinue} from './views/experiment/dialogueUtils.js';
 import {haveMeteorUser} from './lib/currentTestingHelpers';
 import {ENTER_KEY} from '../common/Definitions.js';
@@ -7,6 +7,9 @@ import {restartMainCardTimeoutIfNecessary} from './views/experiment/card.js';
 import {instructContinue} from './views/experiment/instructions.js';
 import {routeToSignin} from './lib/router.js';
 import { init } from "meteor/simonsimcity:client-session-timeout";
+import {
+  getTestType,
+} from './lib/currentTestingHelpers';
 
 export {checkUserSession, clientConsole}
 
@@ -346,6 +349,11 @@ Template.registerHelper('isLoggedIn', function() {
   return Meteor.userId() !== null;
 });
 Template.registerHelper('showPerformanceDetails', function() {
+  const type = getTestType();
+  console.log('showPerformanceDetails type: ' + type);
+  const uiSettings = Session.get('curTdfUISettings');
+  if(type == "s" && uiSettings.displayPerformanceDuringStudy) return true;
+  if(type == "s" && !uiSettings.displayPerformanceDuringStudy) return false;
   return ((Session.get('curModule') == 'card' || Session.get('curModule') !== 'instructions') && Session.get('scoringEnabled') && Session.get('unitType') != 'schedule');
 });
 Template.registerHelper('currentScore', function() {
@@ -377,4 +385,5 @@ Template.registerHelper('and',(a,b)=>{
 Template.registerHelper('or',(a,b)=>{
   return a || b;
 });
+
 

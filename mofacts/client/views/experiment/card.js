@@ -200,6 +200,27 @@ function beginMainCardTimeout(delay, func) {
   Session.set('mainCardTimeoutStart', mainCardTimeoutStart);
   console.log('mainCardTimeoutStart', mainCardTimeoutStart);
   timeoutName = Meteor.setTimeout(timeoutFunc, timeoutDelay);
+  cardStartTime = Date.now();
+  var countdownInterval = Meteor.setInterval(function() {
+    if(Session.get('curTdfUISettings').displayCardTimeoutAsBarOrText == "bar" || Session.get('curTdfUISettings').displayCardTimeoutAsBarOrText == "both"){
+       $("#progressBarContainer").attr('hidden', false);
+    } else {
+       $("#progressBarContainer").attr('hidden', true);
+    }
+    if(Session.get('curTdfUISettings').displayCardTimeoutAsBarOrText == "text" || Session.get('curTdfUISettings').displayCardTimeoutAsBarOrText == "both"){
+     $('#CountdownTimerText').attr("hidden",false);
+    } else {
+      $('#CountdownTimerText').attr("hidden",true);
+    }
+    const remaining = Math.round((timeoutDelay - (Date.now() - cardStartTime)) / 1000);
+    if (remaining <= 0) {
+      Meteor.clearInterval(countdownInterval);
+    } else {
+      $('#CountdownTimerText').text("Continuing in: " + secsIntervalString(remaining));
+      percent = 100 - (remaining * 1000 / timeoutDelay * 100);
+      document.getElementById("progressbar").style.width = percent + "%";
+    }
+  }, 1000);
   Session.set('varLenTimeoutName', Meteor.setInterval(varLenDisplayTimeout, 400));
 }
 
@@ -817,7 +838,8 @@ Template.card.helpers({
     }
     console.log("probability parms input",probParms);
     return probParms;
-  }
+  },
+  'UIsettings': () => Session.get('curTdfUISettings')
 });
 
 function getResponseType() {
@@ -1452,16 +1474,39 @@ async function showUserFeedback(isCorrect, feedbackMessage, afterAnswerFeedbackC
   } else {
     //check if the feedback has the word "incorrect" or "correct" in it, if so, encase it in a bold tag and a new line before it and after it
     if (feedbackMessage.includes("Incorrect") || feedbackMessage.includes("Correct")) {
-      feedbackMessage = feedbackMessage.replace("Incorrect", "<br><b>Incorrect</b><br>");
-      feedbackMessage = feedbackMessage.replace("Correct", "<br><b>Correct</b><br>");
+      uiCorrectColor = Session.get('curTdfUISettings').correctColor;
+      uiIncorrectColor = Session.get('curTdfUISettings').incorrectColor;
+      feedbackMessage = feedbackMessage.replace("Incorrect.", "<br><b style='color" + uiIncorrectColor + "darkorange'>Incorrect</b><br>");
+      feedbackMessage = feedbackMessage.replace("Correct.", "<br><b style='color" + uiCorrectColor + "darkgreen'>Correct</b><br>");
+      //if the ui setting onlyShowSimpleFeedback is set to true, then we will only show the word "incorrect" or "correct" in the feedback
+      if (Session.get('curTdfUISettings').onlyShowSimpleFeedback) {
+        feedbackMessage = feedbackMessage.split("<br>")[1];
+      }
     }
     $('.hints').hide();
     const hSize = Session.get('currentDeliveryParams') ? Session.get('currentDeliveryParams').fontsize.toString() : 2;
+    if(Session.get('curTdfUISettings').displayUserAnswerAtTop){
+      //prepend the user answer to the feedback message
+      userAnswer = $('#userAnswer').val();
+      if(userAnswer){
+        feedbackMessage = "Your Answer: " + userAnswer + '<br>' + feedbackMessage;
+      }
+    }
     $('#UserInteraction')
-        .addClass('h' + hSize)
         .html(feedbackMessage + $('#UserInteraction').html())
         .attr("hidden",false)
         .show()
+        if(Session.get('curTdfUISettings').displayReviewTimeoutAsBarOrText == "bar" || Session.get('curTdfUISettings').displayReviewTimeoutAsBarOrText == "both"){
+           $("#progressBarContainer").attr('hidden', true);
+        } else {
+           $("#progressBarContainer").attr('hidden', false);
+        }
+        //if the displayOnlyCorrectAnswerAsFeedbackOverride is set to true, then we will display the correct answer in feedbackOverride div
+        if (Session.get('curTdfUISettings').displayCorrectAnswerInCenter) {
+          const correctAnswer = Answers.getDisplayAnswerText(Session.get('currentExperimentState').currentAnswer);
+          $('#feedbackOverride').html(correctAnswer);
+        }
+        
         if(!isCorrect){
           var countDownStart = new Date().getTime();
           let dialogueHistory;
@@ -1477,13 +1522,16 @@ async function showUserFeedback(isCorrect, feedbackMessage, afterAnswerFeedbackC
             var now = new Date().getTime()
             var distance = countDownStart - now;
             var seconds = Math.ceil((distance % (1000 * 60)) / 1000);
-
-            document.getElementById("CountdownTimerText").innerHTML = 'Continuing in: ' + seconds + "s";
-         
-            $('#CountdownTimerText').addClass('h' + hSize);
-            //set the bootstrap progress bar to the percentage of time left using the style attribute
-            var percent = (seconds / originalSecs) * 100;
+            if(Session.get('curTdfUISettings').displayReviewTimeoutAsBarOrText == "text" || Session.get('curTdfUISettings').displayReviewTimeoutAsBarOrText == "both"){
+              //set the bootstrap progress bar to the percentage of time left using the style attribute
+            var percent = 100 - ((seconds / originalSecs) * 100);
             document.getElementById("progressbar").style.width = percent + "%";
+              document.getElementById("CountdownTimerText").innerHTML = 'Continuing in: ' + seconds + "s";
+            } else {
+              $('#CountdownTimerText').attr("hidden",true);
+              document.getElementById("progressbar").style.width = "0%";
+            }
+            
 
 
             // If the count down is finished, end interval and clear CountdownTimer
@@ -1500,7 +1548,7 @@ async function showUserFeedback(isCorrect, feedbackMessage, afterAnswerFeedbackC
           Session.set('CurIntervalId', CountdownTimerInterval);
         } else {
           //hide progressbar
-          $('#progressbar').hide();
+           $("#progressBarContainer").attr('hidden', false);
         }
   }
 
@@ -2199,7 +2247,7 @@ function startQuestionTimeout() {
   if (delayMs < 1) {
     throw new Error('Could not find appropriate question timeout');
   }
-
+  
   // We do this little shuffle of session variables so the display will update all at the same time
   const currentDisplayEngine = Session.get('currentExperimentState').currentDisplayEngine;
 
@@ -2221,8 +2269,27 @@ function startQuestionTimeout() {
         deliveryParams, currentDisplayEngine, Session.get('currentExperimentState').clozeQuestionParts, beginQuestionAndInitiateUserInputBound);
     checkAndDisplayPrestimulus(deliveryParams, pipeline);
   }, readyPromptTimeout)
-}
+  countdownInterval = setInterval(() => {
+    const timeLeft = Math.max(0, readyPromptTimeout - (Date.now() - trialStartTimestamp));
+    const timeLeftSecs = Math.ceil(timeLeft / 1000);
+    if(timeLeft <= 0){
+      clearInterval(countdownInterval);
+    } else {
+      if(Session.get('curTdfUISettings').displayReadyPromptTimeoutAsBarOrText == "bar" || Session.get('curTdfUISettings').displayReadyPromptTimeoutAsBarOrText == "both"){
+        document.getElementById("progressbar").style.width =  "0%";
+     } else {
+        percent = 100 - (timeLeftSecs / readyPromptTimeout / 10);
+     }
+     if(Session.get('curTdfUISettings').displayReadyPromptTimeoutAsBarOrText == "text" || Session.get('curTdfUISettings').displayReadyPromptTimeoutAsBarOrText == "both"){
+       $('#CountdownTimerText').attr("hidden",false);
+     } else {
+       $('#CountdownTimerText').attr("hidden",true);
+     }
+      $('#CountdownTimerText').text("Continuing in: " + timeLeftSecs + "s.");
 
+    }
+  }, 1000);
+}
 function checkAndDisplayPrestimulus(deliveryParams, nextStageCb) {
   console.log('checking for prestimulus display');
   // we'll [0], if it exists
@@ -2974,6 +3041,70 @@ async function resumeFromComponentState() {
   }
 
   updateExperimentState(newExperimentState, 'card.resumeFromComponentState');
+
+  const componentStates = ComponentStates.find().fetch();
+  const curUnitNum = Session.get('currentUnitNumber');
+  const curQuestionIndex = curExperimentState.questionIndex
+  const curQuestion = curTdfUnit.question ? curTdfUnit.question[curQuestionIndex] : false;
+
+  //custom settings for user interface
+  //we get the current settings from the tdf file's setspec
+  //but the unit and individual question can override these settings
+  const curTdfUISettings = rootTDFBoxed.content.tdfs.tutor.setspec.uiSettings ? rootTDFBoxed.content.tdfs.tutor.setspec.uiSettings : false;
+  const curUnitUISettions = curTdfUnit.uiSettings ? curTdfUnit.uiSettings : false;
+  const curCardUISettings = curQuestion.uiSettings ? curQuestion.uiSettings : false;
+  
+  //show which settings are being used
+  if(curTdfUISettings){
+    console.log('using tdf ui settings')
+  } else if(curUnitUISettions){
+    console.log('using unit ui settings')
+  } else if(curCardUISettings){
+    console.log('using card ui settings')
+  } else {
+    console.log('using default ui settings')
+  }
+  // priority is card, then unit, then tdf. 
+  const UIsettings = curCardUISettings || curUnitUISettions || curTdfUISettings || false;
+
+  const displayPresets = {
+    default:{
+      "displayReviewTimeoutAsBarOrText": "both",
+      "displayReadyPromptTimeoutAsBarOrText": "both",
+      "displayCardTimeoutAsBarOrText": "both",
+      "displayTimeOutDuringStudy": true,
+      "displayUserAnswerAtTop": true,
+      "displayPerformanceDuringStudy": false,
+      "displayCorrectAnswerInCenter": true,
+      "onlyShowSimpleFeedback": true,
+      "incorrectColor": "darkorange",
+      "correctColor": "green",
+    },
+  }
+
+  //if curTdfUISettings is set, then we need to check if it is a string or an object.
+  //if it is a string, then we need to check if it is a preset. Otherwise, we set it to default
+  //and modify the keys that are set in the object.
+  if(UIsettings){
+    if(typeof UIsettings === 'string'){
+      if(displayPresets[UIsettings]){
+        Session.set('curTdfUISettings', displayPresets[UIsettings])
+      } else {
+        Session.set('curTdfUISettings', displayPresets['default'])
+      }
+    } else {
+      Session.set('curTdfUISettings', UIsettings)
+      //fill in the missing keys with the default values
+      for(const key in displayPresets['default']){
+        if(!UIsettings.hasOwnProperty(key)){
+          UIsettings[key] = displayPresets['default'][key]
+        }
+      }
+    }
+  } else {
+    Session.set('curTdfUISettings', displayPresets['default'])
+  }
+  console.log('curTdfUISettings', Session.get('curTdfUISettings'))
 
   if (Session.get('feedbackUnset')){
     getFeedbackParameters();

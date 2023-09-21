@@ -41,7 +41,17 @@
                                         {{/if}}
                                         <tr>
                                             <td>
-                                                Stimuli Count: {{stimuliCount}}
+                                                Stimuli Count: {{stimuliCount}} <a id="show_stimuli" data-file="{{this._id}}">(click to toggle view of {{stimFilesCount}})</a>
+                                                <p hidden id="stimuli-{{this._id}}">
+                                                {{#each stimFileInfo}}
+                                                    <a id="#stim-download-btn" value="{{this.stimuliSetId}}">{{this.fileName}}</a>
+                                                {{/each}}
+                                                </p>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+
                                             </td>
                                         </tr>
                                         {{#if accessors}}
@@ -93,11 +103,42 @@
                         {{/each}}
                     </tbody>
                 </table>
+                
             </div>
         </div>
+        {{#if packagesUploaded}}
+        <div class="row">
+            <div class="col text-center">
+                <h3 class="text-center">Packages Uploaded</h3>
+                <div class="table-responsive card">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th class="col-8">Summary</th>
+                                <th class="col-4">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {{#each packagesUploaded}}
+                                <tr>
+                                    <td>
+                                        FileName: {{name}}<br>
+                                        Size: {{size}}<br>
+                                    </td>
+                                    <td>
+                                        <a href="{{link}}">Download</a>
+                                    </td>
+                                </tr>
+                            {{/each}}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        {{/if}}
         <div class="row"> 
             <div class="col text-center ">
-                <h3 class="text-center">Upload Asset</h3>
+                <h3 class="text-center">Upload Package</h3>
                 <div class="row text-center">
                     <div class="vh-5"></div>
                     <div class="row">
