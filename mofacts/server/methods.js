@@ -309,34 +309,47 @@ async function getAllTdfs() {
   return tdfs;
 }
 
-async function getProbabilityEstimatesByKCId(relevantKCIds) { // {clusterIndex:[stimKCId,stimKCId],...}
-  //theres gotta be a more efficient way to do this
-  let allKCIDs = []
-  for(let kcidIndex in relevantKCIds){
-    for(let kcid of relevantKCIds[kcidIndex]){
-      allKCIDs.push(kcid);
-    }
-  }
-  const histories = Histories.find({KCId: { $in: allKCIDs }}, {sort: { time: 1 }}).fetch();
-  const clusterProbs = {};
-  const individualStimProbs = {};
-  // eslint-disable-next-line guard-for-in
-  for (const clusterIndex in relevantKCIds) {
-    clusterProbs[clusterIndex] = [];
-    const clusterKCs = relevantKCIds[clusterIndex];
-    const ret = histories.filter(h => clusterKCs.includes(h.KCId));
-    if(ret){
-      for(const pair of ret){
-        if(pair.probabilityEstimate){
-          clusterProbs[clusterIndex].push(pair.probabilityEstimate);
-          if(individualStimProbs[pair.KCId]) individualStimProbs[pair.KCId].push(pair.probabilityEstimate);
-          else individualStimProbs[pair.KCId] = [pair.probabilityEstimate];
-        }
+async function getProbabilityEstimatesByKCId(relevantKCIds) {
+  const allKCIDs = [].concat(...Object.values(relevantKCIds));
+
+  const pipeline = [
+    {
+      $match: { KCId: { $in: allKCIDs } }
+    },
+    {
+      $sort: { time: 1 }
+    },
+    {
+      $group: {
+        _id: "$KCId",
+        clusterProbs: { $push: "$probabilityEstimate" }
       }
     }
+  ];
+
+  const result = await Histories.rawCollection().aggregate(pipeline).toArray();
+
+  const clusterProbs = {};
+  const individualStimProbs = {};
+
+  for (const entry of result) {
+    const KCId = entry._id;
+    const probabilities = entry.clusterProbs;
+
+    if (probabilities && probabilities.length > 0) {
+      clusterProbs[KCId] = probabilities;
+
+      if (!individualStimProbs[KCId]) {
+        individualStimProbs[KCId] = [];
+      }
+
+      individualStimProbs[KCId].push(...probabilities);
+    }
   }
-  return {clusterProbs, individualStimProbs};
+
+  return { clusterProbs, individualStimProbs };
 }
+
 
 async function getResponseKCMap() {
   serverConsole('getResponseKCMap');
