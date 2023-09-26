@@ -1370,7 +1370,7 @@ function modelUnitEngine() {
         clusterStimKCs[i] = stimKCs;
       }
 
-      const probabilityEstimates = await meteorCallAsync('getProbabilityEstimatesByKCId', clusterStimKCs);
+      const probabilityEstimates = await meteorCallAsync('getProbabilityEstimatesByKCId', Session.get('currentTdfId'), clusterStimKCs);
       const stimProbabilityEstimates = probabilityEstimates.individualStimProbs;
       const clusterProbabilityEstimates = probabilityEstimates.clusterProbs;
 
