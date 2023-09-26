@@ -321,23 +321,77 @@ async function getAllTdfs() {
   return tdfs;
 }
 
-async function getProbabilityEstimatesByKCId(relevantKCIds) {
-  const allKCIDs = [].concat(...Object.values(relevantKCIds));
+async function updateProbabilityEstimates(TDFId, clusterProbs, individualStimProbs, relevantKCIds) {
+  serverConsole('updateProbabilityEstimates', TDFId);
+  const probEstimates = ProbabilityEstimates.findOne({TDFId: TDFId})
+  if(probEstimates){
+    ProbabilityEstimates.update({_id: probEstimates._id}, {$set: {clusterProbs: clusterProbs, individualStimProbs: individualStimProbs, relevantKCIds: relevantKCIds}});
+  } else {
+    ProbabilityEstimates.insert({TDFId: TDFId, clusterProbs: clusterProbs, individualStimProbs: individualStimProbs, relevantKCIds: relevantKCIds});
+  }
+}
 
-  const pipeline = [
-    {
-      $match: { KCId: { $in: allKCIDs } }
-    },
-    {
-      $sort: { time: 1 }
-    },
-    {
-      $group: {
-        _id: "$KCId",
-        clusterProbs: { $push: "$probabilityEstimate" }
+async function updateSingleProbabilityEstimate(TDFId, KCId, probabilityEstimate) {
+  serverConsole('updateSingleProbabilityEstimate', TDFId, KCId, probabilityEstimate);
+  const probEstimates = ProbabilityEstimates.findOne({TDFId: TDFId})
+  if(probEstimates){
+    const clusterProbs = probEstimates.clusterProbs;
+    const individualStimProbs = probEstimates.individualStimProbs;
+    const relevantKCIds = probEstimates.relevantKCIds;
+    for(const cluster in relevantKCIds){
+      if(relevantKCIds[cluster].includes(KCId)){
+        if(!clusterProbs[cluster]) clusterProbs[cluster] = [];
+        clusterProbs[cluster].push(probabilityEstimate);
       }
     }
-  ];
+    if(individualStimProbs[KCId]){
+      individualStimProbs[KCId].push(probabilityEstimate);
+    } else {
+      individualStimProbs[KCId] = [probabilityEstimate];
+    }
+    updateProbabilityEstimates(TDFId, clusterProbs, individualStimProbs, relevantKCIds);
+  }
+}
+
+async function getProbabilityEstimatesByKCId(TDFId, relevantKCIds) {
+  serverConsole('getProbabilityEstimatesByKCId', TDFId);
+  const probEstimates = await ProbabilityEstimates.findOne({TDFId: TDFId})
+
+  if(!probEstimates){
+    //generate probability estimates then store them for future use
+    const allKCIDs = [].concat(...Object.values(relevantKCIds));
+    const pipeline = [
+      {
+        $match: { KCId: { $in: allKCIDs }, probabilityEstimate: { $ne: null } }
+      },
+      {
+        $sort: { time: 1 }
+      },
+    ];
+
+    const histories = await Histories.rawCollection().aggregate(pipeline).toArray();
+    const clusterProbs = {};
+    const individualStimProbs = {};
+    // eslint-disable-next-line guard-for-in
+    for (const clusterIndex in relevantKCIds) {
+      clusterProbs[clusterIndex] = [];
+      const clusterKCs = relevantKCIds[clusterIndex];
+      const ret = histories.filter(h => clusterKCs.includes(h.KCId));
+      if(ret){
+        for(const pair of ret){
+          if(pair.probabilityEstimate){
+            clusterProbs[clusterIndex].push(pair.probabilityEstimate);
+            if(individualStimProbs[pair.KCId]) individualStimProbs[pair.KCId].push(pair.probabilityEstimate);
+            else individualStimProbs[pair.KCId] = [pair.probabilityEstimate];
+          }
+        }
+      }
+    }
+    updateProbabilityEstimates(TDFId, clusterProbs, individualStimProbs, relevantKCIds);
+    return { clusterProbs, individualStimProbs };
+  }
+  return probEstimates;
+}
 
   const result = await Histories.rawCollection().aggregate(pipeline).toArray();
 
