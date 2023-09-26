@@ -393,29 +393,6 @@ async function getProbabilityEstimatesByKCId(TDFId, relevantKCIds) {
   return probEstimates;
 }
 
-  const result = await Histories.rawCollection().aggregate(pipeline).toArray();
-
-  const clusterProbs = {};
-  const individualStimProbs = {};
-
-  for (const entry of result) {
-    const KCId = entry._id;
-    const probabilities = entry.clusterProbs;
-
-    if (probabilities && probabilities.length > 0) {
-      clusterProbs[KCId] = probabilities;
-
-      if (!individualStimProbs[KCId]) {
-        individualStimProbs[KCId] = [];
-      }
-
-      individualStimProbs[KCId].push(...probabilities);
-    }
-  }
-
-  return { clusterProbs, individualStimProbs };
-}
-
 async function getResponseKCMap() {
   serverConsole('getResponseKCMap');
 
@@ -531,7 +508,9 @@ async function processPackageUpload(fileObj, owner, zipLink){
     }
     try {
       for(const stim of unzippedFiles.filter(f => f.type == 'stim')){
-        results.push(await saveContentFile(stim.type, stim.name, stim.contents, owner, stim.path));
+        const stimResults = await saveContentFile(stim.type, stim.name, stim.contents, owner, stim.path)
+        results.push(stimResults);
+        serverConsole('stimResults', stimResults);
       }
     } catch(e) {
       serverConsole('processPackageUpload ERROR,', path, ',', e + ' on file: ' + filePath);
@@ -546,24 +525,11 @@ async function processPackageUpload(fileObj, owner, zipLink){
       serverConsole('processPackageUpload ERROR,', path, ',', e + ' on file: ' + filePath);
       throw new Meteor.Error('package upload failed at media upload: ' + e + ' on file: ' + filePath)
     }
+    serverConsole('results', results);
     return {results, stimSetId};
   } catch(e) {
     serverConsole('processPackageUpload ERROR,', path, ',', e + ' on file: ' + filePath);
     throw new Meteor.Error('package upload failed at initialization: ' + e + ' on file: ' + filePath)
-  }
-}
-
-async function combineStimAndTdfFiles(){
-  const TDFS = await Tdfs.find({}).fetch();
-  for(const tdf of TDFS){
-    const stimulusFileName = await Items.findOne({stimuliSetId: tdf.stimuliSetId})?.stimulusFileName;
-    const stimuli = await Items.find({stimuliSetId: tdf.stimuliSetId}).fetch();
-    console.log(stimuli)
-    if(stimuli){
-      tdf.stimuli = stimuli;
-      tdf.stimulusFileName = stimulusFileName;
-      await Tdfs.update({_id: tdf._id}, tdf);
-    }
   }
 }
 
@@ -634,7 +600,7 @@ async function saveContentFile(type, filename, filecontents, owner, packagePath 
       if (stimFileName == 'INVALID') {
         // Note this means root tdfs will have NULL stimulisetid
         results.result = false;
-        results.errmsg = 'Please upload stimulus file before uploading a TDF';
+        results.errmsg = 'Please upload stimulus file before uploading a TDF: ' + stimFileName;
 
         return results;
       } else {
@@ -642,7 +608,7 @@ async function saveContentFile(type, filename, filecontents, owner, packagePath 
         const stimuliSetId = tdf ? tdf.stimuliSetId : null;
         if (isEmpty(stimuliSetId)) {
           results.result = false;
-          results.errmsg = 'Please upload stimulus file before uploading a TDF';
+          results.errmsg = 'Please upload stimulus file before uploading a TDF: ' + stimFileName;
         } else {
           try {
             const rec = {'fileName': filename, 'tdfs': json, 'ownerId': ownerId, 'source': 'upload'};
@@ -3041,7 +3007,6 @@ const asyncMethods = {
 Meteor.methods(functionTimerWrapper(methods, asyncMethods));
 
 Meteor.startup(async function() {
-  //await combineStimAndTdfFiles();
   highestStimuliSetId = Tdfs.findOne({}, {sort: {stimuliSetId: -1}, limit: 1 });
   nextEventId = Histories.findOne({}, {limit: 1, sort: {eventId: -1}})?.eventId + 1 || 1;
   nextStimuliSetId = highestStimuliSetId && highestStimuliSetId.stimuliSetId ? parseInt(highestStimuliSetId.stimuliSetId) + 1 : 1;

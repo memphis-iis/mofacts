@@ -412,6 +412,10 @@ async function doPackageUpload(file, template){
                 });
               }
             }
+            else if(!res.result) {
+              alert("Package upload faild: " + res.errmsg);
+              return
+            }
           }
           alert("Package upload succeded.");
           if(res.stimSetId)
