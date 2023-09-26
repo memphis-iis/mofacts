@@ -1889,7 +1889,7 @@ async function upsertStimFile(stimulusFileName, stimJSON, ownerId, packagePath =
     stimuliSetId = nextStimuliSetId;
     nextStimuliSetId += 1;
   }
-  //serverConsole('getAssociatedStimSetIdForStimFile', stimulusFileName, stimuliSetId);
+  serverConsole('getAssociatedStimSetIdForStimFile', stimulusFileName, stimuliSetId);
   
   const oldStimFormat = {
     'fileName': stimulusFileName,
@@ -1900,7 +1900,7 @@ async function upsertStimFile(stimulusFileName, stimJSON, ownerId, packagePath =
   await Items.remove({stimuliSetId: stimuliSetId})
   const newStims = getNewItemFormat(oldStimFormat, stimulusFileName, stimuliSetId, responseKCMap);
   let maxStimulusKC = 0;
-  // serverConsole('!!!newStims:', newStims);
+  serverConsole('!!!newStims:', newStims);
   for (const stim of newStims) {
     if(stim.stimulusKC > maxStimulusKC){
       maxStimulusKC = stim.stimulusKC;
@@ -1915,7 +1915,7 @@ async function upsertStimFile(stimulusFileName, stimJSON, ownerId, packagePath =
     rawStimuliFile: stimJSON, //raw stimuli
     stimuli: formattedStims, //formatted stimuli for use in the app
   }}, {multi: true});
-  //Meteor.call('updateStimSyllables', stimuliSetId, formattedStims)
+  Meteor.call('updateStimSyllables', stimuliSetId, formattedStims)
 }
 
 async function upsertTDFFile(tdfFilename, tdfJSON, ownerId, packagePath = null) {
