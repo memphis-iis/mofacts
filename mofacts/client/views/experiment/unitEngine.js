@@ -512,7 +512,7 @@ function modelUnitEngine() {
     probFunction = defaultProbFunction;
   }
 
-  function findMinProbCardAndHintLevel(cards, hiddenItems) {
+  function findMinProbCardAndHintLevel(cards, hiddenItems, forceSpacing) {
     clientConsole(1, 'findMinProbCard');
     let currentMin = 1.00001;
     let clusterIndex=-1;
@@ -521,7 +521,7 @@ function modelUnitEngine() {
 
     for (let i=0; i<cards.length; i++) {
       const card = cards[i];
-      if (!card.canUse || !(card.trialsSinceLastSeen > 1)) {
+      if (forceSpacing && (!card.canUse || !(card.trialsSinceLastSeen > 1))) {
         continue;
       } else {
         const stimCluster = stimClusters[i];
@@ -584,7 +584,7 @@ function modelUnitEngine() {
     return {clusterIndex, stimIndex, hintLevelIndex};
   }
 
-  function findMaxProbCardAndHintLevel(cards, ceiling, hiddenItems, currentDeliveryParams) {
+  function findMaxProbCardAndHintLevel(cards, ceiling, hiddenItems, currentDeliveryParams, forceSpacing) {
     clientConsole(1, 'findMaxProbCardAndHintLevel');
     let currentMax = 0;
     let clusterIndex=-1;
@@ -596,7 +596,7 @@ function modelUnitEngine() {
 
     for (let i=0; i<cards.length; i++) {
       const card = cards[i];
-      if (!card.canUse || !(card.trialsSinceLastSeen > 1)) {
+      if (forceSpacing && (!card.canUse || !(card.trialsSinceLastSeen > 1))) {
         continue;
       } else {
         const stimCluster = stimClusters[i];
@@ -627,7 +627,7 @@ function modelUnitEngine() {
     return {clusterIndex, stimIndex, hintLevelIndex};
   }
 
-  function findMinProbDistCard(cards, hiddenItems, currentDeliveryParams) {
+  function findMinProbDistCard(cards, hiddenItems, currentDeliveryParams, forceSpacing) {
     clientConsole(1, 'findMinProbDistCard');
     let currentMin = 50.0;
     let clusterIndex=-1;
@@ -637,7 +637,7 @@ function modelUnitEngine() {
 
     for (let i=0; i<cards.length; i++) {
       const card = cards[i];
-      if (!card.canUse || !(card.trialsSinceLastSeen > 1)) {
+      if (forceSpacing && (!card.canUse || !(card.trialsSinceLastSeen > 1))) {
         continue;
       } else {
         const stimCluster = stimClusters[i];
@@ -675,7 +675,7 @@ function modelUnitEngine() {
     return {clusterIndex, stimIndex, hintLevelIndex};
   }
 
-  function findMaxProbCardThresholdCeilingPerCard(cards, hiddenItems, currentDeliveryParams) {
+  function findMaxProbCardThresholdCeilingPerCard(cards, hiddenItems, currentDeliveryParams, forceSpacing) {
     clientConsole(1, 'findMaxProbCardThresholdCeilingPerCard');
     let currentMax = 0;
     let clusterIndex=-1;
@@ -684,7 +684,7 @@ function modelUnitEngine() {
 
     for (let i=0; i<cards.length; i++) {
       const card = cards[i];
-      if (!card.canUse || !(card.trialsSinceLastSeen > 1)) {
+      if (forceSpacing && (!card.canUse || !(card.trialsSinceLastSeen > 1))) {
         continue;
       } else {
         const stimCluster = stimClusters[i];
@@ -1512,29 +1512,30 @@ function modelUnitEngine() {
       const hiddenItems = Session.get('hiddenItems');
       const cards = cardProbabilities.cards;
       const currentDeliveryParams = Session.get('currentDeliveryParams');
+      const forceSpacing = true;
       switch (this.unitMode) {
         case 'thresholdCeiling':
-          indices = findMaxProbCardThresholdCeilingPerCard(cards, hiddenItems, currentDeliveryParams);
+          indices = findMaxProbCardThresholdCeilingPerCard(cards, hiddenItems, currentDeliveryParams, forceSpacing);
           clientConsole(2, 'thresholdCeiling, indicies:', JSON.parse(JSON.stringify(indices)));
           if (indices.clusterIndex === -1) {
             clientConsole(2, 'thresholdCeiling failed, reverting to min prob');
-            indices = findMinProbCardAndHintLevel(cards, hiddenItems);
+            indices = findMinProbCardAndHintLevel(cards, hiddenItems, forceSpacing);
           }
           break;
         case 'distance':
-          indices = findMinProbDistCard(cards, hiddenItems, currentDeliveryParams);
+          indices = findMinProbDistCard(cards, hiddenItems, currentDeliveryParams, forceSpacing);
           break;
         case 'highest':
           // Magic number to indicate there is no real ceiling (probs should max out at 1.0)
-          indices = findMaxProbCardAndHintLevel(cards, 1.00001, hiddenItems, currentDeliveryParams);
+          indices = findMaxProbCardAndHintLevel(cards, 1.00001, hiddenItems, currentDeliveryParams, forceSpacing);
           if (indices.clusterIndex === -1) {
-            indices = findMinProbCardAndHintLevel(cards, hiddenItems);
+            indices = findMinProbCardAndHintLevel(cards, hiddenItems, forceSpacing);
           }
           break;
         default:
-          indices = findMaxProbCardAndHintLevel(cards, 0.90, hiddenItems, currentDeliveryParams);
+          indices = findMaxProbCardAndHintLevel(cards, 0.90, hiddenItems, currentDeliveryParams, forceSpacing);
           if (indices.clusterIndex === -1) {
-            indices = findMinProbCardAndHintLevel(cards, hiddenItems);
+            indices = findMinProbCardAndHintLevel(cards, hiddenItems, forceSpacing);
           }
           break;
       }
@@ -1560,6 +1561,11 @@ function modelUnitEngine() {
       newClusterIndex = indices.clusterIndex;
       newStimIndex = indices.stimIndex;
       newHintLevel = indices.hintLevelIndex;
+
+      if(newClusterIndex === -1 || newStimIndex === -1 || newHintLevel === -1){
+        unitIsFinished('No more cards to show');
+        return;
+      }
 
       clientConsole(2, 'selectNextCard indices:', newClusterIndex, newStimIndex, newHintLevel, indices);
       // Found! Update everything and grab a reference to the card and stim

@@ -28,7 +28,8 @@ export {
   updateExperimentState,
   restartMainCardTimeoutIfNecessary,
   getCurrentClusterAndStimIndices,
-  initCard
+  initCard,
+  unitIsFinished
 };
 
 /*
