@@ -395,7 +395,8 @@ function getCurrentDeliveryParams() {
     'resetStudentPerformance': false,
     'practicetimer': "query-based",
     'readyPromptString': '',
-    'readyPromptStringDisplayTime': 0
+    'readyPromptStringDisplayTime': 0,
+    'forceSpacing': false,
   };
 
   // We've defined defaults - also define translatations for values
@@ -445,7 +446,8 @@ function getCurrentDeliveryParams() {
     'resetStudentPerformance': xlateBool,
     'practicetimer': xlateString,
     'readyPromptString': xlateString,
-    'readyPromptStringDisplayTime': _.intVal
+    'readyPromptStringDisplayTime': _.intVal,
+    'forceSpacing': xlateBool,
   };
 
   let modified = false;

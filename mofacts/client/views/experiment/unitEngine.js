@@ -11,7 +11,7 @@ import {
   updateCurStudentPerformance,
   getAllCurrentStimAnswers
 } from '../../lib/currentTestingHelpers';
-import {updateExperimentState} from './card';
+import {updateExperimentState, unitIsFinished} from './card';
 import {MODEL_UNIT, SCHEDULE_UNIT} from '../../../common/Definitions';
 import {meteorCallAsync, clientConsole} from '../../index';
 import {displayify} from '../../../common/globalHelpers';
@@ -1512,7 +1512,7 @@ function modelUnitEngine() {
       const hiddenItems = Session.get('hiddenItems');
       const cards = cardProbabilities.cards;
       const currentDeliveryParams = Session.get('currentDeliveryParams');
-      const forceSpacing = true;
+      const forceSpacing = currentDeliveryParams.forceSpacing;
       switch (this.unitMode) {
         case 'thresholdCeiling':
           indices = findMaxProbCardThresholdCeilingPerCard(cards, hiddenItems, currentDeliveryParams, forceSpacing);
