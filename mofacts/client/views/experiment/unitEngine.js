@@ -512,12 +512,13 @@ function modelUnitEngine() {
     probFunction = defaultProbFunction;
   }
 
-  function findMinProbCardAndHintLevel(cards, hiddenItems, forceSpacing) {
+  function findMinProbCardAndHintLevel(cards, hiddenItems, currentDeliveryParams) {
     clientConsole(1, 'findMinProbCard');
     let currentMin = 1.00001;
     let clusterIndex=-1;
     let stimIndex=-1;
     let hintLevelIndex=-1;
+    let forceSpacing = currentDeliveryParams.forceSpacing;
 
     for (let i=0; i<cards.length; i++) {
       const card = cards[i];
@@ -584,12 +585,14 @@ function modelUnitEngine() {
     return {clusterIndex, stimIndex, hintLevelIndex};
   }
 
-  function findMaxProbCardAndHintLevel(cards, ceiling, hiddenItems, currentDeliveryParams, forceSpacing) {
+  function findMaxProbCardAndHintLevel(cards, ceiling, hiddenItems, currentDeliveryParams) {
     clientConsole(1, 'findMaxProbCardAndHintLevel');
     let currentMax = 0;
     let clusterIndex=-1;
     let stimIndex=-1;
     let hintLevelIndex=-1;
+    let forceSpacing = currentDeliveryParams.forceSpacing;
+
     if(currentDeliveryParams && currentDeliveryParams.optimalThreshold) {
       ceiling = currentDeliveryParams.optimalThreshold;
     }
@@ -627,13 +630,14 @@ function modelUnitEngine() {
     return {clusterIndex, stimIndex, hintLevelIndex};
   }
 
-  function findMinProbDistCard(cards, hiddenItems, currentDeliveryParams, forceSpacing) {
+  function findMinProbDistCard(cards, hiddenItems, currentDeliveryParams) {
     clientConsole(1, 'findMinProbDistCard');
     let currentMin = 50.0;
     let clusterIndex=-1;
     let stimIndex=-1;
     let hintLevelIndex=-1;
     let optimalProb;
+    let forceSpacing = currentDeliveryParams.forceSpacing;
 
     for (let i=0; i<cards.length; i++) {
       const card = cards[i];
@@ -675,12 +679,13 @@ function modelUnitEngine() {
     return {clusterIndex, stimIndex, hintLevelIndex};
   }
 
-  function findMaxProbCardThresholdCeilingPerCard(cards, hiddenItems, currentDeliveryParams, forceSpacing) {
+  function findMaxProbCardThresholdCeilingPerCard(cards, hiddenItems, currentDeliveryParams) {
     clientConsole(1, 'findMaxProbCardThresholdCeilingPerCard');
     let currentMax = 0;
     let clusterIndex=-1;
     let stimIndex=-1;
     let hintLevelIndex=-1;
+    let forceSpacing = currentDeliveryParams.forceSpacing;
 
     for (let i=0; i<cards.length; i++) {
       const card = cards[i];
@@ -1512,30 +1517,29 @@ function modelUnitEngine() {
       const hiddenItems = Session.get('hiddenItems');
       const cards = cardProbabilities.cards;
       const currentDeliveryParams = Session.get('currentDeliveryParams');
-      const forceSpacing = currentDeliveryParams.forceSpacing;
       switch (this.unitMode) {
         case 'thresholdCeiling':
-          indices = findMaxProbCardThresholdCeilingPerCard(cards, hiddenItems, currentDeliveryParams, forceSpacing);
+          indices = findMaxProbCardThresholdCeilingPerCard(cards, hiddenItems, currentDeliveryParams);
           clientConsole(2, 'thresholdCeiling, indicies:', JSON.parse(JSON.stringify(indices)));
           if (indices.clusterIndex === -1) {
             clientConsole(2, 'thresholdCeiling failed, reverting to min prob');
-            indices = findMinProbCardAndHintLevel(cards, hiddenItems, forceSpacing);
+            indices = findMinProbCardAndHintLevel(cards, hiddenItems, currentDeliveryParams);
           }
           break;
         case 'distance':
-          indices = findMinProbDistCard(cards, hiddenItems, currentDeliveryParams, forceSpacing);
+          indices = findMinProbDistCard(cards, hiddenItems, currentDeliveryParams);
           break;
         case 'highest':
           // Magic number to indicate there is no real ceiling (probs should max out at 1.0)
-          indices = findMaxProbCardAndHintLevel(cards, 1.00001, hiddenItems, currentDeliveryParams, forceSpacing);
+          indices = findMaxProbCardAndHintLevel(cards, 1.00001, hiddenItems, currentDeliveryParams);
           if (indices.clusterIndex === -1) {
-            indices = findMinProbCardAndHintLevel(cards, hiddenItems, forceSpacing);
+            indices = findMinProbCardAndHintLevel(cards, hiddenItems, currentDeliveryParams);
           }
           break;
         default:
-          indices = findMaxProbCardAndHintLevel(cards, 0.90, hiddenItems, currentDeliveryParams, forceSpacing);
+          indices = findMaxProbCardAndHintLevel(cards, 0.90, hiddenItems, currentDeliveryParams);
           if (indices.clusterIndex === -1) {
-            indices = findMinProbCardAndHintLevel(cards, hiddenItems, forceSpacing);
+            indices = findMinProbCardAndHintLevel(cards, hiddenItems, currentDeliveryParams);
           }
           break;
       }
