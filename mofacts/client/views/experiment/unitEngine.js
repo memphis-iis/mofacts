@@ -11,7 +11,7 @@ import {
   updateCurStudentPerformance,
   getAllCurrentStimAnswers
 } from '../../lib/currentTestingHelpers';
-import {updateExperimentState} from './card';
+import {updateExperimentState, unitIsFinished} from './card';
 import {MODEL_UNIT, SCHEDULE_UNIT} from '../../../common/Definitions';
 import {meteorCallAsync, clientConsole} from '../../index';
 import {displayify} from '../../../common/globalHelpers';
@@ -512,16 +512,17 @@ function modelUnitEngine() {
     probFunction = defaultProbFunction;
   }
 
-  function findMinProbCardAndHintLevel(cards, hiddenItems) {
+  function findMinProbCardAndHintLevel(cards, hiddenItems, currentDeliveryParams) {
     clientConsole(1, 'findMinProbCard');
     let currentMin = 1.00001;
     let clusterIndex=-1;
     let stimIndex=-1;
     let hintLevelIndex=-1;
+    let forceSpacing = currentDeliveryParams.forceSpacing;
 
     for (let i=0; i<cards.length; i++) {
       const card = cards[i];
-      if (!card.canUse || !(card.trialsSinceLastSeen > 1)) {
+      if (forceSpacing && (!card.canUse || !(card.trialsSinceLastSeen > 1))) {
         continue;
       } else {
         const stimCluster = stimClusters[i];
@@ -590,13 +591,15 @@ function modelUnitEngine() {
     let clusterIndex=-1;
     let stimIndex=-1;
     let hintLevelIndex=-1;
+    let forceSpacing = currentDeliveryParams.forceSpacing;
+
     if(currentDeliveryParams && currentDeliveryParams.optimalThreshold) {
       ceiling = currentDeliveryParams.optimalThreshold;
     }
 
     for (let i=0; i<cards.length; i++) {
       const card = cards[i];
-      if (!card.canUse || !(card.trialsSinceLastSeen > 1)) {
+      if (forceSpacing && (!card.canUse || !(card.trialsSinceLastSeen > 1))) {
         continue;
       } else {
         const stimCluster = stimClusters[i];
@@ -634,10 +637,11 @@ function modelUnitEngine() {
     let stimIndex=-1;
     let hintLevelIndex=-1;
     let optimalProb;
+    let forceSpacing = currentDeliveryParams.forceSpacing;
 
     for (let i=0; i<cards.length; i++) {
       const card = cards[i];
-      if (!card.canUse || !(card.trialsSinceLastSeen > 1)) {
+      if (forceSpacing && (!card.canUse || !(card.trialsSinceLastSeen > 1))) {
         continue;
       } else {
         const stimCluster = stimClusters[i];
@@ -681,10 +685,11 @@ function modelUnitEngine() {
     let clusterIndex=-1;
     let stimIndex=-1;
     let hintLevelIndex=-1;
+    let forceSpacing = currentDeliveryParams.forceSpacing;
 
     for (let i=0; i<cards.length; i++) {
       const card = cards[i];
-      if (!card.canUse || !(card.trialsSinceLastSeen > 1)) {
+      if (forceSpacing && (!card.canUse || !(card.trialsSinceLastSeen > 1))) {
         continue;
       } else {
         const stimCluster = stimClusters[i];
@@ -1518,7 +1523,7 @@ function modelUnitEngine() {
           clientConsole(2, 'thresholdCeiling, indicies:', JSON.parse(JSON.stringify(indices)));
           if (indices.clusterIndex === -1) {
             clientConsole(2, 'thresholdCeiling failed, reverting to min prob');
-            indices = findMinProbCardAndHintLevel(cards, hiddenItems);
+            indices = findMinProbCardAndHintLevel(cards, hiddenItems, currentDeliveryParams);
           }
           break;
         case 'distance':
@@ -1528,13 +1533,13 @@ function modelUnitEngine() {
           // Magic number to indicate there is no real ceiling (probs should max out at 1.0)
           indices = findMaxProbCardAndHintLevel(cards, 1.00001, hiddenItems, currentDeliveryParams);
           if (indices.clusterIndex === -1) {
-            indices = findMinProbCardAndHintLevel(cards, hiddenItems);
+            indices = findMinProbCardAndHintLevel(cards, hiddenItems, currentDeliveryParams);
           }
           break;
         default:
           indices = findMaxProbCardAndHintLevel(cards, 0.90, hiddenItems, currentDeliveryParams);
           if (indices.clusterIndex === -1) {
-            indices = findMinProbCardAndHintLevel(cards, hiddenItems);
+            indices = findMinProbCardAndHintLevel(cards, hiddenItems, currentDeliveryParams);
           }
           break;
       }
@@ -1560,6 +1565,11 @@ function modelUnitEngine() {
       newClusterIndex = indices.clusterIndex;
       newStimIndex = indices.stimIndex;
       newHintLevel = indices.hintLevelIndex;
+
+      if(newClusterIndex === -1 || newStimIndex === -1 || newHintLevel === -1){
+        unitIsFinished('No more cards to show');
+        return;
+      }
 
       clientConsole(2, 'selectNextCard indices:', newClusterIndex, newStimIndex, newHintLevel, indices);
       // Found! Update everything and grab a reference to the card and stim
