@@ -457,7 +457,7 @@ async function getMaxResponseKC(){
 }
 
 // Package Uploader
-async function processPackageUpload(fileObj, owner, zipLink){
+async function processPackageUpload(fileObj, owner, zipLink, emailToggle){
   DynamicAssets.collection.update({_id: fileObj._id}, {$set: {'meta.link': zipLink}});
   let path = fileObj.path;
   let results = [];
@@ -503,6 +503,14 @@ async function processPackageUpload(fileObj, owner, zipLink){
         serverConsole('tdfResults', tdfResults);
       }
     } catch(e) {
+      if(emailToggle){
+        sendEmail(
+          Meteor.user().emails[0].address,
+          Meteor.settings.owner,
+          "Package Upload Failed",
+          "Package upload failed at tdf upload: " + e + " on file: " + filePath
+        )
+      }
       serverConsole('processPackageUpload ERROR,', path, ',', e + ' on file: ' + filePath);
       throw new Meteor.Error('package upload failed at tdf upload: ' + e + ' on file: ' + filePath)
     }
@@ -513,8 +521,16 @@ async function processPackageUpload(fileObj, owner, zipLink){
         serverConsole('stimResults', stimResults);
       }
     } catch(e) {
+      if(emailToggle){
+        sendEmail(
+          Meteor.user().emails[0].address,
+          Meteor.settings.owner,
+          "Package Upload Failed",
+          "Package upload failed at stim upload: " + e + " on file: " + filePath
+        )
+      }
       serverConsole('processPackageUpload ERROR,', path, ',', e + ' on file: ' + filePath);
-      throw new Meteor.Error('package upload failed at stim upload: ' + e + ' on file: ' + filePath)
+      throw new Meteor.Error('package upload failed at stim upload: ' + e + ' on file: ' + filePath);
     }
     const stimSetId = await getStimuliSetIdByFilename(stimFileName);
     try {
@@ -522,12 +538,38 @@ async function processPackageUpload(fileObj, owner, zipLink){
         await saveMediaFile(media, owner, stimSetId);
       }
     } catch(e) {
+      if(emailToggle){
+        sendEmail(
+          Meteor.user().emails[0].address,
+          Meteor.settings.owner,
+          "Package Upload Failed",
+          "Package upload failed at media upload: " + e + " on file: " + filePath
+        )
+      }
       serverConsole('processPackageUpload ERROR,', path, ',', e + ' on file: ' + filePath);
       throw new Meteor.Error('package upload failed at media upload: ' + e + ' on file: ' + filePath)
     }
     serverConsole('results', results);
+    if(emailToggle){
+      sendEmail(
+        Meteor.user().emails[0].address,
+        Meteor.settings.owner,
+        "Package Upload Successful",
+        "Package upload successful: " + fileName
+      )
+    }
+    //update stim syllables
+    Meteor.call('updateStimSyllables', stimSetId);
     return {results, stimSetId};
   } catch(e) {
+      if(emailToggle){
+        sendEmail(
+          Meteor.user().emails[0].address,
+          Meteor.settings.owner,
+          "Package Upload Failed",
+          "Package upload failed at initialization: " + e + " on file: " + filePath
+        )
+      }
     serverConsole('processPackageUpload ERROR,', path, ',', e + ' on file: ' + filePath);
     throw new Meteor.Error('package upload failed at initialization: ' + e + ' on file: ' + filePath)
   }
@@ -1867,6 +1909,7 @@ function findUserByName(username) {
 }
 
 function sendEmail(to, from, subject, text) {
+  serverConsole('sendEmail', to, from, subject, text);
   check([to, from, subject, text], [String]);
   Email.send({to, from, subject, text});
 }

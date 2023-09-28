@@ -112,6 +112,16 @@
                             {{/each}}
                     </div>
                     {{/if}}
+                    <div class="row row-cols-2">
+                        <div class="col text-end">
+                            <label class="form-check-label" for="emailInsteadOfAlert">
+                                Email a summary of the upload instead of an alert in the browser.
+                            </label>
+                        </div>
+                        <div class="col text-start">
+                            <input type="checkbox" class="form-check-input" id="emailInsteadOfAlert">
+                        </div>
+                    </div>
                     <div class="vh-5"></div>
                     <div class="row">
                         <button type='button' id='doUpload' class='btn'>
