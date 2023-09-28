@@ -17,6 +17,12 @@
         </div>
     {{else}}
         {{#if displayReady}}
+        <div id="userInteractionContainer">
+                <div class="text-center" id="UserInteraction" hidden></div>
+                <div class="" id="forceCorrectionEntry" hidden>
+                    {{> inputForceCorrect}}
+                </div>
+        </div>
         <br>    
             <div class="vh-10"></div>
             <div class="scrollHistoryContainer">
@@ -73,6 +79,9 @@
                                 </div>
                                 <div class="vh-5"></div>
                             {{/if}}
+                            <div class="vh-5"></div>
+                            <div id="feedbackOverride" class="{{fontSizeClass}} text-center">
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -130,7 +139,7 @@
                 {{else}}
                     
                 <div class="row">
-                
+                    
                     {{#if buttonTrial}}
                         {{#if audioEnabled}}
                             <p class="marginLeftAndRight text-center">Please speak the letter next to the correct option for audio input</p>
@@ -140,10 +149,10 @@
                         <div id="multipleChoiceContainer">
                             <!-- will contain multiple choice buttons which are dynamically added. -->
                             {{#if buttonTrial}}
-                            <div id="multipleChoiceTable" class="row gy-3 row-cols-xs-1 row-cols-sm-1 row-cols-md-2 row-cols-lg-4 text-center">
+                            <div id="multipleChoiceTable" class="row gy-3 row-cols-1 row-cols-md-2 text-center align-items-start">
                                 {{#if imageResponse}}
                                     {{#each buttonListImageRows}}
-                                    <div class="col mx-auto">
+                                    <div class="col ml-auto">
                                         {{#each this}}
                                         {{#if audioEnabled}}
                                             <label style="margin-bottom:0px">{{verbalChoice}}.</label>
@@ -159,7 +168,7 @@
                                     {{/each}}
                                 {{else}}
                                     {{#each buttonList}}
-                                    <div display={{displayReadyConverter (displayReady) }} class="col mx-auto">
+                                    <div display={{displayReadyConverter (displayReady) }} class="col ml-auto">
                                         {{#if audioEnabled}}
                                         <label style="margin-bottom:0px">{{verbalChoice}}.</label>
                                         <br>
@@ -178,29 +187,10 @@
                     </div>
                 </div> <!-- close row -->
                 {{/if}}
+
             {{/if}}
 
-            <div id="userInteractionContainer">
-                <div class="row">
-                    <div class="text-center" id="UserInteraction" hidden>
-                        <div class="row text-center">
-                            <div class="col-sm-12 col-xs-12 col-md-6 col-lg-6 mx-auto">
-                                <div class="vh-5"></div>
-                                <div class="progress">
-                                    <div id="progressbar" class="progress-bar bg-warning  progress-bar-striped" role="progressbar" aria-label="Basic example" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100" style="width:100%;"></div>
-                                </div>
-                                <div id="CountdownTimerText"></div>
-                                <div class="vh-5"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="" id="forceCorrectionEntry" hidden>
-                        {{> inputForceCorrect}}
-                    </div>
-                </div>
-            </div>
+
             {{#if questionIsRemovable}}
             <div class="vh-10"></div>
                 <div class="removalContainer">
@@ -213,6 +203,21 @@
             {{/if}}
 
 
+            <div id="userLowerInteractionContainer">
+                <div class="row">
+                    <div class="row text-center">
+                        <div class="col-sm-12 col-xs-12 col-md-6 col-lg-6 mx-auto">
+                            <div class="vh-15"></div>
+                            <br>
+                            <div id="progressBarContainer" class="progress" hidden>
+                                <div id="progressbar" class="progress-bar bg-warning  progress-bar-striped" role="progressbar" aria-label="Basic example" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100" style="width:100%;"></div>
+                            </div>
+                            <div id="CountdownTimerText"></div>
+                            <div class="vh-10"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
             {{#if isInRole 'teacher'}}
             <div class="row">

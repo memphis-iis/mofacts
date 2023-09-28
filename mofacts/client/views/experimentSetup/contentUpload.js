@@ -33,8 +33,18 @@ Template.contentUpload.helpers({
       thisTdf.assets = [];
       thisTdf._id = tdf._id;
       thisTdf.errors = [];
+      thisTdf.stimFileInfo = [];
+      thisTdf.stimFilesCount = 0;
       //iterart through tdf.stimuli and get all stimuli
       for (const stim of tdf.stimuli) {
+        //check if thisTdf.stimFileInfo already contains a file with this stim.stimuliSetId
+        //if not, add it to thisTdf.stimFileInfo
+        if(!thisTdf.stimFileInfo.some(function(stimFileInfo){
+            return stimFileInfo.stimuliSetId === stim.stimuliSetId;
+        })){
+          thisTdf.stimFilesCount++;
+          thisTdf.stimFileInfo.push( {stimuliSetId: stim.stimuliSetId, fileName: stim.stimulusFileName} );
+        }
         thisAsset = {};
         thisAsset.filename = stim.imageStimulus || stim.audioStimulus || stim.videoStimulus;
         thisAsset.fileType = stim.imageStimulus ? 'image' : stim.audioStimulus ? 'audio' : stim.videoStimulus ? 'video' : "unknown"
@@ -63,6 +73,15 @@ Template.contentUpload.helpers({
   console.log('tdfSummaries:', tdfSummaries);
   return tdfSummaries;
   },
+  'packagesUploaded': function() {
+    packages = DynamicAssets.find({userId: Meteor.userId()}).fetch();
+    //get a link for each package
+    packages.forEach(function(thispackage){
+      thispackage.link = DynamicAssets.link(thispackage);
+    });
+    console.log('packages:', packages);
+    return packages;
+  }
 });
 
 Template.contentUpload.onCreated(function() {
@@ -113,6 +132,18 @@ Template.contentUpload.events({
       $('#assets-'+tdfId).removeAttr('hidden');
     } else {
       $('#assets-'+tdfId).attr('hidden', true);
+    }
+  },
+  'click #show_stimuli': function(event){
+    event.preventDefault();
+    //get data-file field
+    const tdf = event.currentTarget.getAttribute('data-file');
+    console.log('tdf:', tdf);
+    //toggle the attribute hidden of assets-tdfid
+    if($('#stimuli-'+tdf).attr('hidden')){
+      $('#stimuli-'+tdf).removeAttr('hidden');
+    } else {
+      $('#stimuli-'+tdf).attr('hidden', true);
     }
   },
   'click #doUpload': async function(event) {
