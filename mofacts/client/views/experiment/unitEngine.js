@@ -800,6 +800,7 @@ function modelUnitEngine() {
           parms = this.calculateSingleProb(i, j, 0, count, stimCluster);
           tdfDebugLog.push(parms.debugLog);
           
+          stim.available = parms.available;
           if(parms.available === undefined || parms.available){
             stim.canUse = true;
             if(stimCluster.stims[j].textStimulus || stimCluster.stims[j].clozeStimulus){
@@ -1613,6 +1614,14 @@ function modelUnitEngine() {
       if (Session.get('currentDeliveryParams').studyFirst && card.priorStudy == 0) {
         clientConsole(2, 'STUDY FOR FIRST TRIAL !!!');
         testType = 's';
+      } else if (stim.available) {
+        clientConsole(2, "Trial type set by probability function to: ", stim.available)
+        if(stim.available == "drill")
+          testType = 'd';
+        else if(stim.available == "study")
+          testType = 's';
+        else if(stim.available == "test")
+          testType = 't';
       }
       Session.set('testType', testType);
       newExperimentState.testType = testType;
