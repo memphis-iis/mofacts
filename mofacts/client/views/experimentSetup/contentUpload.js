@@ -421,8 +421,10 @@ async function doPackageUpload(file, template){
       const link = DynamicAssets.link(fileObj);
       if(fileObj.ext == "zip"){
         console.log('package detected')
-        Meteor.call('processPackageUpload', fileObj, Meteor.userId(), link, function(err,result){
-          if(err){
+        // check if emailInsteadOfAlert is checked
+        const emailToggle = $('#emailInsteadOfAlert').is(':checked') ? true : false;
+        Meteor.call('processPackageUpload', fileObj, Meteor.userId(), link, emailToggle, function(err,result){
+            if(err){
             alert(err);
           } 
           for(res of result.results){
@@ -444,14 +446,16 @@ async function doPackageUpload(file, template){
               }
             }
             else if(!res.result) {
-              alert("Package upload faild: " + res.errmsg);
+              alert("Package upload failed: " + res.errmsg);
               return
             }
           }
+        //if email toggle, then we don't wait for the server to process the package
+        if(!emailToggle){
           alert("Package upload succeded.");
-          if(res.stimSetId)
-            Meteor.call('updateStimSyllables', res.stimSetId);
-        });
+        } else {
+          alert("Package is being processed. You will be notified when it is complete or if there are any errors.");}
+        });  
       }
     }
   });
