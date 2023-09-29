@@ -84,6 +84,9 @@ Template.dataDownload.helpers({
           return false; // If a class is selected, reject any TDF data that does not belong to the selected class
         }
       }
+      if (!tdf.content.tdfs.tutor.unit || _.isEmpty(tdf.content.tdfs.tutor.unit)) {
+        return false; // Reject any TDF data that does not have a unit
+      }
 
       if (isAdmin()) {
         if (_.isEmpty(Template.instance().selectedTeacherId.get())) {
