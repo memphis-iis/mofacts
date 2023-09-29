@@ -3063,7 +3063,7 @@ async function resumeFromComponentState() {
     console.log('using default ui settings')
   }
   // priority is card, then unit, then tdf. 
-  const UIsettings = curCardUISettings || curUnitUISettions || curTdfUISettings || false;
+  const UIsettings = curUnitUISettions || curTdfUISettings || false;
 
   const displayPresets = {
     default:{
