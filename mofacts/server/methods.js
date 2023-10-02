@@ -1696,6 +1696,7 @@ async function getTdfIDsAndDisplaysAttemptedByUserId(userId, onlyWithLearningSes
     const tdfObject = tdf.content;
     if (!tdfObject.tdfs.tutor.unit) continue;// TODO: fix root/condition tdfs
     if (!tdfObject.tdfs.tutor.setspec.progressReporterParams) continue; // Don't display tdfs without progressReporterParams
+    if (tdfObject.tdfs.tutor.setspec.disableProgressReport) continue; // Don't display tdfs with disableProgressReport
     if (onlyWithLearningSessions) {
       for (const unit of tdfObject.tdfs.tutor.unit) {
         if (unit.learningsession) {
