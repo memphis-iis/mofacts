@@ -7,9 +7,6 @@ COPY ./mofacts/package*.json $APP_SOURCE_FOLDER/
 # Copy settings.json into container
 COPY ./assets/ /mofactsAssets/
 
-#copy custom packages from ../custom-packages into the meteor packages folder
-COPY ./custom_packages/meteor-accounts-saml-iis-version-2-10-2020/ $APP_SOURCE_FOLDER/packages/meteor-accounts-saml-iis-version-2-10-2020/
-
 #verify the presence of the settings.json file in the assets folder
 RUN test -f /mofactsAssets/settings.json && echo "settings.json file found" || echo "settings.json file not found"
 

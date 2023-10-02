@@ -5,7 +5,6 @@
 
 standard-app-packages@1.0.9
 accounts-password@1.6.3
-peerlibrary:xml2js
 underscore@1.0.10
 bojicas:howler2
 
@@ -30,7 +29,6 @@ random@1.2.0
 harrison:papa-parse
 ecmascript@0.14.4
 email@2.0.0
-steffo:meteor-accounts-saml-iis-version-2-10-2020
 standard-minifier-js@2.6.0
 natestrauser:select2
 fourseven:scss@4.12.0
