@@ -1,7 +1,0 @@
-{
-  "packages": {
-    "accounts-saml": {
-    	"path":"../"
-    }
-  }
-}
