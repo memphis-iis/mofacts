@@ -497,24 +497,6 @@ async function processPackageUpload(fileObj, owner, zipLink, emailToggle){
     serverConsole('unzippedFiles', unzippedFiles);
     const stimFileName = unzippedFiles.filter(f => f.type == 'stim')[0].name;
     try {
-      for(const tdf of unzippedFiles.filter(f => f.type == 'tdf')){
-        const tdfResults = await saveContentFile(tdf.type, tdf.name, tdf.contents, owner, tdf.path);
-        results.push(tdfResults);
-        serverConsole('tdfResults', tdfResults);
-      }
-    } catch(e) {
-      if(emailToggle){
-        sendEmail(
-          Meteor.user().emails[0].address,
-          Meteor.settings.owner,
-          "Package Upload Failed",
-          "Package upload failed at tdf upload: " + e + " on file: " + filePath
-        )
-      }
-      serverConsole('processPackageUpload ERROR,', path, ',', e + ' on file: ' + filePath);
-      throw new Meteor.Error('package upload failed at tdf upload: ' + e + ' on file: ' + filePath)
-    }
-    try {
       for(const stim of unzippedFiles.filter(f => f.type == 'stim')){
         const stimResults = await saveContentFile(stim.type, stim.name, stim.contents, owner, stim.path)
         results.push(stimResults);
@@ -531,6 +513,24 @@ async function processPackageUpload(fileObj, owner, zipLink, emailToggle){
       }
       serverConsole('processPackageUpload ERROR,', path, ',', e + ' on file: ' + filePath);
       throw new Meteor.Error('package upload failed at stim upload: ' + e + ' on file: ' + filePath);
+    }
+    try {
+      for(const tdf of unzippedFiles.filter(f => f.type == 'tdf')){
+        const tdfResults = await saveContentFile(tdf.type, tdf.name, tdf.contents, owner, tdf.path);
+        results.push(tdfResults);
+        serverConsole('tdfResults', tdfResults);
+      }
+    } catch(e) {
+      if(emailToggle){
+        sendEmail(
+          Meteor.user().emails[0].address,
+          Meteor.settings.owner,
+          "Package Upload Failed",
+          "Package upload failed at tdf upload: " + e + " on file: " + filePath
+        )
+      }
+      serverConsole('processPackageUpload ERROR,', path, ',', e + ' on file: ' + filePath);
+      throw new Meteor.Error('package upload failed at tdf upload: ' + e + ' on file: ' + filePath)
     }
     const stimSetId = await getStimuliSetIdByFilename(stimFileName);
     try {
@@ -647,7 +647,7 @@ async function saveContentFile(type, filename, filecontents, owner, packagePath 
         return results;
       } else {
         const tdf = Tdfs.findOne({stimulusFileName: stimFileName});
-        const stimuliSetId = tdf ? tdf.stimuliSetId : null;
+        const stimuliSetId = getStimuliSetIdByFilename(stimFileName);
         if (isEmpty(stimuliSetId)) {
           results.result = false;
           results.errmsg = 'Please upload stimulus file before uploading a TDF: ' + stimFileName;
@@ -1959,6 +1959,7 @@ async function upsertStimFile(stimulusFileName, stimJSON, ownerId, packagePath =
     stimuli: formattedStims, //formatted stimuli for use in the app
   }}, {multi: true});
   Meteor.call('updateStimSyllables', stimuliSetId, formattedStims)
+  return stimuliSetId
 }
 
 async function upsertTDFFile(tdfFilename, tdfJSON, ownerId, packagePath = null) {
