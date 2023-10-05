@@ -513,7 +513,7 @@ async function processPackageUpload(fileObj, owner, zipLink, emailToggle){
           Meteor.user().emails[0].address,
           Meteor.settings.owner,
           "Package Upload Failed",
-          "Package upload failed at tdf upload: " + e + " on file: " + filePath
+          "Package upload failed at stim upload: " + e + " on file: " + filePath
         )
       }
       serverConsole('1 processPackageUpload ERROR,', path, ',', e + ' on file: ' + filePath);
@@ -631,19 +631,26 @@ async function saveContentFile(type, filename, filecontents, owner, packagePath 
 
         return results;
       } else {
-        try {
-          const rec = {'fileName': filename, 'tdfs': json, 'ownerId': ownerId, 'source': 'upload'};
-          const ret = await upsertTDFFile(filename, rec, ownerId);
-          if(ret && ret.res == 'awaitClientTDF'){
-            serverConsole('awaitClientTDF', ret)
-            results.result = false;
-            results.data = ret;
-          } else {
-            results.result = true;
+        const tdf = Tdfs.findOne({stimulusFileName: stimFileName});
+        const stimuliSetId = tdf ? tdf.stimuliSetId : null;
+        if (isEmpty(stimuliSetId)) {
+          results.result = false;
+          results.errmsg = 'Please upload stimulus file before uploading a TDF: ' + stimFileName;
+        } else {
+          try {
+            const rec = {'fileName': filename, 'tdfs': json, 'ownerId': ownerId, 'source': 'upload'};
+            const ret = await upsertTDFFile(filename, rec, ownerId);
+            if(ret && ret.res == 'awaitClientTDF'){
+              serverConsole('awaitClientTDF', ret)
+              results.result = false;
+              results.data = ret;
+            } else {
+              results.result = true;
+            }
+          } catch (err) {
+            results.result=false;
+            results.errmsg=err.toString();
           }
-        } catch (err) {
-          results.result=false;
-          results.errmsg=err.toString();
         }
         return results;
       }
@@ -2001,6 +2008,7 @@ async function upsertStimFile(stimulusFileName, stimJSON, ownerId, packagePath =
     stimuli: formattedStims, //formatted stimuli for use in the app
   }}, {multi: true});
   Meteor.call('updateStimSyllables', stimuliSetId, formattedStims)
+  return stimuliSetId
 }
 
 async function upsertTDFFile(tdfFilename, tdfJSON, ownerId, packagePath = null) {
