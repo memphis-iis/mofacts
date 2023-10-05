@@ -244,12 +244,13 @@
             </div>
             {{/if}}
         {{/if}}
-        <div class="row">
-            <div hidden  class="col-lg-offset-2 col-lg-5" style="text-align: center;" id="overlearningRow">
-                <h4 style=" color: #585858;">You are currently overlearning!  Please consider taking a break and coming back later.</h4>
-                <button id="overlearningButton" type="button" class="btn btn-responsive" style="width: auto;">Practice</button>
+            <div class="row">
+                <div hidden  class="col-lg-offset-2 col-lg-5" style="text-align: center;" id="overlearningRow">
+                    <h4 style=" color: #585858;">You are currently overlearning!  Please consider taking a break and coming back later.</h4>
+                    <button id="overlearningButton" type="button" class="btn btn-responsive" style="width: auto;">Practice</button>
+                </div>
             </div>
-        </div>
+        {{/if}}
     {{/if}}
     {{#if displayReadyPromptString}}
         <div class="marginLeftAndRight alert alert-info {{fontSizeClass}} text-center" id="textQuestion">
