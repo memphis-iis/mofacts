@@ -387,7 +387,6 @@ function getCurrentDeliveryParams() {
     'allowFeedbackTypeSelect': false,
     'falseAnswerLimit': undefined,
     'allowstimulusdropping': false,
-    'intertrialmessage': "",
     'allowPhoneticMatching': false,
     'useSpellingCorrection': false,
     'editDistance': 1,
