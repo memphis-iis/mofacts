@@ -496,11 +496,16 @@ async function processPackageUpload(fileObj, owner, zipLink, emailToggle){
     }
     serverConsole('unzippedFiles', unzippedFiles);
     const stimFileName = unzippedFiles.filter(f => f.type == 'stim')[0].name;
+    let stimSetId;
     try {
       for(const tdf of unzippedFiles.filter(f => f.type == 'tdf')){
-        const tdfResults = await saveContentFile(tdf.type, tdf.name, tdf.contents, owner, tdf.path);
-        results.push(tdfResults);
-        serverConsole('tdfResults', tdfResults);
+        const stim = unzippedFiles.find(f => f.name == tdf.contents.tutor.setspec.stimulusfile);
+        serverConsole('stim', stim, 'stimFileName', stimFileName, tdf.contents.tutor.setspec.stimulusfile);
+        const packageResult = await combineAndSaveContentFile(tdf, stim, owner);
+        results.push(packageResult);
+        serverConsole('packageResult', packageResult);
+        if(packageResult.data && packageResult.data.TDF && packageResult.data.TDF.stimuliSetId)
+          stimSetId = packageResult.data.TDF.stimuliSetId;
       }
     } catch(e) {
       if(emailToggle){
@@ -511,28 +516,10 @@ async function processPackageUpload(fileObj, owner, zipLink, emailToggle){
           "Package upload failed at tdf upload: " + e + " on file: " + filePath
         )
       }
-      serverConsole('processPackageUpload ERROR,', path, ',', e + ' on file: ' + filePath);
+      serverConsole('1 processPackageUpload ERROR,', path, ',', e + ' on file: ' + filePath);
       throw new Meteor.Error('package upload failed at tdf upload: ' + e + ' on file: ' + filePath)
     }
-    try {
-      for(const stim of unzippedFiles.filter(f => f.type == 'stim')){
-        const stimResults = await saveContentFile(stim.type, stim.name, stim.contents, owner, stim.path)
-        results.push(stimResults);
-        serverConsole('stimResults', stimResults);
-      }
-    } catch(e) {
-      if(emailToggle){
-        sendEmail(
-          Meteor.user().emails[0].address,
-          Meteor.settings.owner,
-          "Package Upload Failed",
-          "Package upload failed at stim upload: " + e + " on file: " + filePath
-        )
-      }
-      serverConsole('processPackageUpload ERROR,', path, ',', e + ' on file: ' + filePath);
-      throw new Meteor.Error('package upload failed at stim upload: ' + e + ' on file: ' + filePath);
-    }
-    const stimSetId = await getStimuliSetIdByFilename(stimFileName);
+    if (!stimSetId) stimSetId = await getStimuliSetIdByFilename(stimFileName);
     try {
       for(const media of unzippedFiles.filter(f => f.type == 'media')){
         await saveMediaFile(media, owner, stimSetId);
@@ -546,7 +533,7 @@ async function processPackageUpload(fileObj, owner, zipLink, emailToggle){
           "Package upload failed at media upload: " + e + " on file: " + filePath
         )
       }
-      serverConsole('processPackageUpload ERROR,', path, ',', e + ' on file: ' + filePath);
+      serverConsole('2 processPackageUpload ERROR,', path, ',', e + ' on file: ' + filePath);
       throw new Meteor.Error('package upload failed at media upload: ' + e + ' on file: ' + filePath)
     }
     serverConsole('results', results);
@@ -558,8 +545,6 @@ async function processPackageUpload(fileObj, owner, zipLink, emailToggle){
         "Package upload successful: " + fileName
       )
     }
-    //update stim syllables
-    Meteor.call('updateStimSyllables', stimSetId);
     return {results, stimSetId};
   } catch(e) {
       if(emailToggle){
@@ -570,8 +555,8 @@ async function processPackageUpload(fileObj, owner, zipLink, emailToggle){
           "Package upload failed at initialization: " + e + " on file: " + filePath
         )
       }
-    serverConsole('processPackageUpload ERROR,', path, ',', e + ' on file: ' + filePath);
-    throw new Meteor.Error('package upload failed at initialization: ' + e + ' on file: ' + filePath)
+    serverConsole('3 processPackageUpload ERROR,', path, ',', e + ' on file: ' + filePath);
+    console.error(e);
   }
 }
 
@@ -646,26 +631,19 @@ async function saveContentFile(type, filename, filecontents, owner, packagePath 
 
         return results;
       } else {
-        const tdf = Tdfs.findOne({stimulusFileName: stimFileName});
-        const stimuliSetId = tdf ? tdf.stimuliSetId : null;
-        if (isEmpty(stimuliSetId)) {
-          results.result = false;
-          results.errmsg = 'Please upload stimulus file before uploading a TDF: ' + stimFileName;
-        } else {
-          try {
-            const rec = {'fileName': filename, 'tdfs': json, 'ownerId': ownerId, 'source': 'upload'};
-            const ret = await upsertTDFFile(filename, rec, ownerId);
-            if(ret && ret.res == 'awaitClientTDF'){
-              serverConsole('awaitClientTDF', ret)
-              results.result = false;
-              results.data = ret;
-            } else {
-              results.result = true;
-            }
-          } catch (err) {
-            results.result=false;
-            results.errmsg=err.toString();
+        try {
+          const rec = {'fileName': filename, 'tdfs': json, 'ownerId': ownerId, 'source': 'upload'};
+          const ret = await upsertTDFFile(filename, rec, ownerId);
+          if(ret && ret.res == 'awaitClientTDF'){
+            serverConsole('awaitClientTDF', ret)
+            results.result = false;
+            results.data = ret;
+          } else {
+            results.result = true;
           }
+        } catch (err) {
+          results.result=false;
+          results.errmsg=err.toString();
         }
         return results;
       }
@@ -685,6 +663,69 @@ async function saveContentFile(type, filename, filecontents, owner, packagePath 
   results.errmsg = '';
 
   return results;
+}
+
+async function combineAndSaveContentFile(tdf, stim, owner) {
+  serverConsole('saveContentFile', tdf, stim, owner);
+  const results = {
+    'result': null,
+    'errmsg': 'No action taken?',
+    'action': 'None',
+  };
+  // if (!type) throw new Error('Type required for File Save'); const stimFileName = json.tutor.setspec.stimulusfile ? json.tutor.setspec.stimulusfile : 'INVALID';
+  // if (!filename) throw new Error('Filename required for File Save');
+  // if (!filecontents) throw new Error('File Contents required for File Save');
+  // if (type != 'tdf' && type != 'stim') {
+  //   throw new Error('Unknown file type not allowed: ' + type);
+  // }
+  let ownerId = "";
+  // We need a valid use that is either admin or teacher
+  if(owner){
+    ownerId = owner;
+  } else {
+    ownerId = Meteor.user()._id;
+  }
+  if (!ownerId) {
+    throw new Error('No user logged in - no file upload allowed');
+  }
+  if (!Roles.userIsInRole(ownerId, ['admin', 'teacher'])) {
+    throw new Error('You are not authorized to upload files');
+  }
+
+  try {
+    const jsonContents = typeof tdf.contents == 'string' ? JSON.parse(tdf.contents) : tdf.contents;
+    const json = {tutor: jsonContents.tutor};
+    const lessonName = _.trim(jsonContents.tutor.setspec.lessonname);
+    if (lessonName.length < 1) {
+      results.result = false;
+      results.errmsg = 'TDF has no lessonname - it cannot be valid';
+
+      return results;
+    }
+    const stimContents = typeof stim.contents == 'string' ? JSON.parse(stim.contents) : stim.contents;
+    try {
+      const rec = {'fileName': tdf.name, 'tdfs': json, 'ownerId': ownerId, 'source': 'upload', 'stimuli': stimContents, 'stimFileName': stim.name};
+      const ret = await upsertPackage(rec, ownerId);
+      if(ret && ret.res == 'awaitClientTDF'){
+        serverConsole('awaitClientTDF', ret)
+        results.result = false;
+        results.data = ret;
+      } else {
+        results.result = true;
+      }
+    } catch (err) {
+      results.result=false;
+      results.errmsg=err.toString();
+      console.error(err);
+    }
+    return results;
+  } catch (e) {
+    serverConsole('ERROR saving content file:', e, e.stack);
+    results.result = false;
+    results.errmsg = JSON.stringify(e);
+    console.error(e);
+    return results;
+  }
 }
 
 function stripSpacesAndLowerCase(input) {
@@ -1921,7 +1962,7 @@ function hasGeneratedTdfs(TDFjson) {
 
 // TODO rework for input in a new format as well as the current assumption of the old format
 async function upsertStimFile(stimulusFileName, stimJSON, ownerId, packagePath = null) {
-
+  
   let formattedStims = [];
 
   if(packagePath){
@@ -1966,10 +2007,10 @@ async function upsertTDFFile(tdfFilename, tdfJSON, ownerId, packagePath = null) 
   serverConsole('upsertTDFFile', tdfFilename);
   serverConsole('tdfJSON', tdfJSON);
   let ret = {reason: []};
-  let stimulusFileName = tdfJSON.tdfs.tutor.setspec.stimulusfile;
   let Tdf = tdfJSON.tdfs;
   let lessonName = _.trim(Tdf.tutor.setspec.lessonname);
-  let stimuliSetId = Tdfs.findOne({stimulusFileName: stimulusFileName})?.stimuliSetId
+  const prev = await getTdfByFileName(tdfFilename);
+  let stimuliSetId = prev.stimuliSetId
   if (!stimuliSetId) {
     stimuliSetId = nextStimuliSetId;
     nextStimuliSetId += 1;
@@ -2001,7 +2042,6 @@ async function upsertTDFFile(tdfFilename, tdfJSON, ownerId, packagePath = null) 
     Tdf.tutor.setspec.tips = newFormatttedTips;
   }
   tdfJSON = {'fileName': tdfFilename, 'tdfs': Tdf, 'ownerId': ownerId, 'source': 'upload'};
-  const prev = await getTdfByFileName(tdfFilename);
   let tdfJSONtoUpsert;
   if (prev && prev._id) {
     formattedStims = prev.formattedStims;
@@ -2042,12 +2082,133 @@ async function upsertTDFFile(tdfFilename, tdfJSON, ownerId, packagePath = null) 
       tdfJSONtoUpsert = tdfJSON;
     }
   }
-  Tdfs.upsert({tdfFileName: tdfFilename}, {$set: {
+  Tdfs.upsert({_id: prev._id}, {$set: {
     path: packagePath,
     content: tdfJSONtoUpsert,
     ownerId: ownerId,
     visibility: 'profileOnly'
   }});
+}
+
+async function upsertPackage(packageJSON, ownerId) {
+  //serverConsole('tdfJSON', packageJSON);
+  const responseKCMap = await getResponseKCMap();
+  const stimulusFileName = packageJSON.stimFileName
+  const stimJSON = packageJSON.stimuli
+  let ret = {reason: []};
+  let Tdf = packageJSON.tdfs;
+  let lessonName = _.trim(Tdf.tutor.setspec.lessonname);
+  const prev = await getTdfByFileName(packageJSON.fileName);
+  let stimuliSetId = prev ? prev.stimuliSetId : null;
+  if (!stimuliSetId) {
+    stimuliSetId = nextStimuliSetId;
+    nextStimuliSetId += 1;
+  } else {
+    ret = {res: 'awaitClientTDF', reason: ['prevStimExists']}
+  }
+  if (lessonName.length < 1) {
+    results.result = false;
+    results.errmsg = 'TDF has no lessonname - it cannot be valid';
+
+    return results;
+  }
+  const tips = Tdf.tutor.setspec.tips;
+  let newFormatttedTips = [];
+  if(tips){
+    for(const tip of tips){
+      if(tip.split('<img').length > 1){
+        const imageName = tip.split('<img')[1].split('src="')[1].split('"')[0];
+        const image = await DynamicAssets.findOne({userId: ownerId, name: imageName});
+        if(image){
+          const imageLink = image.link();
+          newFormatttedTips.push(tip.replace(imageName, imageLink));
+          serverConsole('imageLink', imageLink);
+        }
+      }
+    }
+  }
+  if(newFormatttedTips.length > 0){
+    Tdf.tutor.setspec.tips = newFormatttedTips;
+  }
+  tdfJSON = {'fileName': packageJSON.fileName, 'tdfs': Tdf, 'ownerId': ownerId, 'source': 'upload'};
+  let formattedStims = [];
+  serverConsole('getAssociatedStimSetIdForStimFile', stimulusFileName, stimuliSetId);
+  const oldStimFormat = {
+    'fileName': stimulusFileName,
+    'stimuli': stimJSON,
+    'owner': ownerId,
+    'source': 'repo',
+  };
+  const newStims = getNewItemFormat(oldStimFormat, stimulusFileName, stimuliSetId, responseKCMap);
+  let maxStimulusKC = 0;
+  //serverConsole('!!!newStims:', newStims);
+
+  for (const stim of newStims) {
+    if(stim.stimulusKC > maxStimulusKC){
+      maxStimulusKC = stim.stimulusKC;
+    }
+    let curAnswerSylls
+    stim.syllables = curAnswerSylls;
+    formattedStims.push(stim);
+  }
+  
+  let tdfJSONtoUpsert;
+  if (prev && prev._id) {
+    //serverConsole('updating tdf', tdfFilename, formattedStims);
+    if (hasGeneratedTdfs(tdfJSON)) {
+      const tdfGenerator = new DynamicTdfGenerator(tdfJSON.tdfs, tdfFilename, ownerId, 'repo', formattedStims);
+      const generatedTdf = tdfGenerator.getGeneratedTdf();
+      delete generatedTdf.createdAt;
+      tdfJSONtoUpsert = generatedTdf;
+    } else {
+      tdfJSONtoUpsert = tdfJSON;
+    }
+    let updateObj = {
+      _id: prev._id,
+      tdfFileName: packageJSON.fileName,
+      content: tdfJSONtoUpsert,
+      ownerId: ownerId,
+      rawStimuliFile: stimJSON, //raw stimuli
+      stimuli: formattedStims, //formatted stimuli for use in the app
+      stimuliSetId: stimuliSetId,
+      visibility: 'profileOnly'
+    }
+    if(ret.res != 'awaitClientTDF'){
+      ret.res = 'awaitClientTDF'
+    }
+    ret.TDF = updateObj
+    ret.reason.push('prevTDFExists')
+    if(prev.content.tdfs.tutor.setspec.shuffleclusters != tdfJSON.tdfs.tutor.setspec.shuffleclusters){
+      serverConsole('sufflecluster changed, alerting user');
+      ret.reason.push('shuffleclusterMissmatch')
+    }
+    return ret
+  } else {
+    //serverConsole('inserting tdf', tdfFilename, formattedStims);
+    if (hasGeneratedTdfs(tdfJSON)) {
+      const tdfGenerator = new DynamicTdfGenerator(tdfJSON.tdfs, tdfFilename, ownerId, 'repo', formattedStims);
+      const generatedTdf = tdfGenerator.getGeneratedTdf();
+      tdfJSONtoUpsert = generatedTdf;
+    } else {
+      tdfJSON.createdAt = new Date();
+      tdfJSONtoUpsert = tdfJSON;
+    }
+  }
+
+  Tdfs.upsert({"content.fileName": packageJSON.fileName}, {$set: {
+    tdfFileName: packageJSON.fileName,
+    content: tdfJSONtoUpsert,
+    ownerId: ownerId,
+    rawStimuliFile: stimJSON, //raw stimuli
+    stimuli: formattedStims, //formatted stimuli for use in the app
+    stimuliSetId: stimuliSetId,
+    visibility: 'profileOnly'
+  }});
+  
+  //update stim syllables
+  Meteor.call('updateStimSyllables', stimuliSetId);
+
+  return {stimuliSetId: stimuliSetId}
 }
 
 function tdfUpdateConfirmed(updateObj){
@@ -2910,7 +3071,7 @@ const asyncMethods = {
 
 
   updateStimSyllables: async function(stimuliSetId, stimuli = undefined) {
-    serverConsole('updateStimSyllables');
+    serverConsole('updateStimSyllables', stimuliSetId);
     if(!stimuli){
       const tdf = await Tdfs.findOne({ stimuliSetId: stimuliSetId });
       stimuli = tdf.stimuli
