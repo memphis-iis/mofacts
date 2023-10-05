@@ -513,11 +513,11 @@ async function processPackageUpload(fileObj, owner, zipLink, emailToggle){
           Meteor.user().emails[0].address,
           Meteor.settings.owner,
           "Package Upload Failed",
-          "Package upload failed at stim upload: " + e + " on file: " + filePath
+          "Package upload failed: " + e + " on file: " + filePath
         )
       }
       serverConsole('1 processPackageUpload ERROR,', path, ',', e + ' on file: ' + filePath);
-      throw new Meteor.Error('package upload failed at tdf upload: ' + e + ' on file: ' + filePath)
+      throw new Meteor.Error("Package upload failed: " + e + " on file: " + filePath)
     }
     if (!stimSetId) stimSetId = await getStimuliSetIdByFilename(stimFileName);
     try {
