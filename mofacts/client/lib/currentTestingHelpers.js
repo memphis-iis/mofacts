@@ -396,7 +396,7 @@ function getCurrentDeliveryParams() {
     'practicetimer': "query-based",
     'readyPromptString': '',
     'readyPromptStringDisplayTime': 0,
-    'forceSpacing': false,
+    'forceSpacing': true,
   };
 
   // We've defined defaults - also define translatations for values

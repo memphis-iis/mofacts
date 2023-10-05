@@ -520,10 +520,11 @@ function modelUnitEngine() {
     let hintLevelIndex=-1;
     let optimalProb;
     let forceSpacing = currentDeliveryParams.forceSpacing;
+    let minTrialDistance = forceSpacing ? 1 : -1;
 
     for (let i=0; i<cards.length; i++) {
       const card = cards[i];
-      if (forceSpacing && (!card.canUse || !(card.trialsSinceLastSeen > 1))) {
+      if (!card.canUse || !(card.trialsSinceLastSeen > minTrialDistance)) {
         continue;
       } else {
         const stimCluster = stimClusters[i];
@@ -568,10 +569,11 @@ function modelUnitEngine() {
     let stimIndex=-1;
     let hintLevelIndex=-1;
     let forceSpacing = currentDeliveryParams.forceSpacing;
+    let minTrialDistance = forceSpacing ? 1 : -1;
 
     for (let i=0; i<cards.length; i++) {
       const card = cards[i];
-      if (forceSpacing && (!card.canUse || !(card.trialsSinceLastSeen > 1))) {
+      if (!card.canUse || !(card.trialsSinceLastSeen > minTrialDistance)) {
         continue;
       } else {
         const stimCluster = stimClusters[i];
@@ -603,8 +605,6 @@ function modelUnitEngine() {
         }
       }
     }
-    const stim = cards[clusterIndex].stims[stimIndex];
-
     return {clusterIndex, stimIndex, hintLevelIndex};
   }
 
