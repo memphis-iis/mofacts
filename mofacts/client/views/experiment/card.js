@@ -599,8 +599,6 @@ Template.card.helpers({
     }
   },
 
-  'interTrialMessage': () => Session.get('currentDeliveryParams').intertrialmessage,
-
   'displayFeedback': () => Session.get('displayFeedback') && Session.get('currentDeliveryParams').allowFeedbackTypeSelect,
 
   'resetFeedbackSettingsFromIndex': () => Session.get('resetFeedbackSettingsFromIndex'),
