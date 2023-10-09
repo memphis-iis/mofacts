@@ -150,7 +150,7 @@ Template.lessonSelect.helpers({
     console.log('courseTdfs', courseTdfs, courseId);
 
     //if curclass is set, then get the tdfs for that class
-    if (Session.get('curClass').sectionId) {
+    if (Session.get('curClass') && Session.get('curClass').sectionId) {
       const teacherId = Session.get('curClass').teacherUserId;
       const teacherTdfs = await meteorCallAsync('getAllCourseAssignmentsForInstructor', teacherId);
       console.log('teacherTdfs', teacherTdfs);
