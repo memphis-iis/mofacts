@@ -1978,9 +1978,16 @@ async function upsertTDFFile(tdfFilename, tdfJSON, ownerId, packagePath = null) 
   }});
 }
 
-function tdfUpdateConfirmed(updateObj){
+function tdfUpdateConfirmed(updateObj, resetShuffleClusters = false){
   serverConsole('tdfUpdateConfirmed', updateObj);
   Tdfs.update({_id: updateObj._id},{$set:updateObj});
+  if(resetShuffleClusters){
+    const expStatses = GlobalExperimentStates.find({TDFId: updateObj._id}).fetch();
+    for(let expState of expStatses){
+      expState.experimentState.clusterMapping = [];
+      GlobalExperimentStates.update({_id: expStats._id}, {$set: {experimentState: expState}});
+    }
+  }
 }
 
 function setUserLoginData(entryPoint, loginMode, curTeacher = undefined, curClass = undefined, assignedTdfs = undefined){
