@@ -1632,6 +1632,12 @@ async function afterAnswerFeedbackCallback(trialEndTimeStamp, trialStartTimeStam
   const testType = getTestType();
   const deliveryParams = Session.get('currentDeliveryParams')
 
+  if (testType !== 'i' && testType !== 's') {
+    const overallOutcomeHistory = Session.get('overallOutcomeHistory') || [];
+    overallOutcomeHistory.push(isCorrect ? 1 : 0);
+    Session.set('overallOutcomeHistory', overallOutcomeHistory);
+  }
+
   let dialogueHistory;
   if (Session.get('dialogueHistory')) {
     dialogueHistory = JSON.parse(JSON.stringify(Session.get('dialogueHistory')));
@@ -1673,13 +1679,8 @@ async function afterFeedbackCallback(trialEndTimeStamp, trialStartTimeStamp, isT
     lastAction: answerLogAction,
     lastActionTimeStamp: Date.now(),
   };
-  
-  if (testType !== 'i') {
-    const overallOutcomeHistory = Session.get('overallOutcomeHistory');
-    overallOutcomeHistory.push(isCorrect ? 1 : 0);
-    newExperimentState.overallOutcomeHistory = overallOutcomeHistory;
-    Session.set('overallOutcomeHistory', overallOutcomeHistory);
-  }
+
+  newExperimentState.overallOutcomeHistory = Session.get('overallOutcomeHistory');
 
   // Give unit engine a chance to update any necessary stats
   const practiceTime = endLatency + feedbackLatency;
