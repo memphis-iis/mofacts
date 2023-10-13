@@ -798,7 +798,7 @@ function modelUnitEngine() {
           if(parms.available === undefined || parms.available){
             stim.canUse = true;
             if(stimCluster.stims[j].textStimulus || stimCluster.stims[j].clozeStimulus){
-              for(let k=0; k<Math.min(hintLevelIndex, 3); k++){
+              for(let k=1; k<Math.min(hintLevelIndex, 3); k++){
                 let hintLevelParms = this.calculateSingleProb(i, j, k, count, stimCluster);
                 hintLevelProbabilities.push(hintLevelParms.probability);
                 clientConsole(2, 'cluster: ' + i + ', card: ' + j + ', input hintlevel: ' + k + ', output hintLevel: ' + hintLevelParms.hintLevel + ', output probability: ' + hintLevelParms.probability) + ', debug message:' + hintLevelParms.debugLog;
