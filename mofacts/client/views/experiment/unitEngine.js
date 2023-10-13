@@ -545,7 +545,7 @@ function modelUnitEngine() {
             hintLevelIndex = 0;
           }
           if(stimCluster.stims[j].textStimulus || stimCluster.stims[j].clozeStimulus){
-            for(let k=0; k<Math.min(stim.hintLevelProbabilites.length, 3); k++){
+            for(let k=1; k<Math.min(stim.hintLevelProbabilites.length, 3); k++){
               let hintDist = Math.abs(Math.log(stim.hintLevelProbabilites[k]/(1-stim.hintLevelProbabilites[k])) - optimalProb);
               if(hintDist < currentMin){
                 currentMin = hintDist;
