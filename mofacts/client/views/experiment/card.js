@@ -1502,7 +1502,7 @@ async function showUserFeedback(isCorrect, feedbackMessage, afterAnswerFeedbackC
         }
         //if the displayOnlyCorrectAnswerAsFeedbackOverride is set to true, then we will display the correct answer in feedbackOverride div
         if (Session.get('curTdfUISettings').displayCorrectAnswerInCenter) {
-          const correctAnswer = Session.get('currentExperimentState').originalAnswer;
+          const correctAnswer = Answers.getDisplayAnswerText(Session.get('currentExperimentState').currentAnswer);
           $('#feedbackOverride').html(correctAnswer).attr("hidden",false).show();
         }
         
