@@ -3079,6 +3079,7 @@ async function resumeFromComponentState() {
       "displayUserAnswerAtTop": true,
       "displayPerformanceDuringStudy": false,
       "displayCorrectAnswerInCenter": true,
+      "stackChoiceButtons": false,
       "onlyShowSimpleFeedback": true,
       "incorrectColor": "darkorange",
       "correctColor": "green",
