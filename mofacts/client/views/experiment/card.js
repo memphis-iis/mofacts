@@ -202,20 +202,23 @@ function beginMainCardTimeout(delay, func) {
   console.log('mainCardTimeoutStart', mainCardTimeoutStart);
   timeoutName = Meteor.setTimeout(timeoutFunc, timeoutDelay);
   cardStartTime = Date.now();
+  if(Session.get('curTdfUISettings').displayCardTimeoutAsBarOrText == "bar" || Session.get('curTdfUISettings').displayCardTimeoutAsBarOrText == "both"){
+    $("#progressBarContainer").attr('hidden', false);
+ } else {
+    $("#progressBarContainer").attr('hidden', true);
+ }
+ if(Session.get('curTdfUISettings').displayCardTimeoutAsBarOrText == "text" || Session.get('curTdfUISettings').displayCardTimeoutAsBarOrText == "both"){
+  //set the countdown timer text
+  $('#CountdownTimerText').attr("hidden",false);
+ } else {
+   $('#CountdownTimerText').attr("hidden",true);
+ }
   var countdownInterval = Meteor.setInterval(function() {
-    if(Session.get('curTdfUISettings').displayCardTimeoutAsBarOrText == "bar" || Session.get('curTdfUISettings').displayCardTimeoutAsBarOrText == "both"){
-       $("#progressBarContainer").attr('hidden', false);
-    } else {
-       $("#progressBarContainer").attr('hidden', true);
-    }
-    if(Session.get('curTdfUISettings').displayCardTimeoutAsBarOrText == "text" || Session.get('curTdfUISettings').displayCardTimeoutAsBarOrText == "both"){
-     $('#CountdownTimerText').attr("hidden",false);
-    } else {
-      $('#CountdownTimerText').attr("hidden",true);
-    }
     const remaining = Math.round((timeoutDelay - (Date.now() - cardStartTime)) / 1000);
     if (remaining <= 0) {
       Meteor.clearInterval(countdownInterval);
+      //reset the progress bar
+      document.getElementById("progressbar").style.width = 0 + "%";
     } else {
       $('#CountdownTimerText').text("Continuing in: " + secsIntervalString(remaining));
       percent = 100 - (remaining * 1000 / timeoutDelay * 100);
@@ -1255,7 +1258,7 @@ function handleUserInput(e, source, simAnswerCorrect) {
   if(testType === 's'){
     userAnswer = '' //no response for study trial
   } else if (isTimeout) {
-    userAnswer = '[timeout]';
+    userAnswer =  _.trim($('#userAnswer').val()).toLowerCase() + ' [timeout]';
   } else if (source === 'keypress') {
     userAnswer = _.trim($('#userAnswer').val()).toLowerCase();
   } else if (source === 'buttonClick') {
@@ -1420,7 +1423,7 @@ function afterAnswerAssessmentCb(userAnswer, isCorrect, feedbackForAnswer, after
   Session.set('isRefutation', undefined);
   if (isCorrect == null && correctAndText != null) {
     isCorrect = correctAndText.isCorrect;
-    if (userAnswer != '[timeout]' && userAnswer != '' && !isCorrect && correctAndText.matchText.split(' ')[0] != 'Incorrect.'){
+    if (userAnswer.includes('[timeout]') != '' && !isCorrect && correctAndText.matchText.split(' ')[0] != 'Incorrect.'){
       Session.set('isRefutation', true);
     }
   }
@@ -1444,7 +1447,7 @@ function afterAnswerAssessmentCb(userAnswer, isCorrect, feedbackForAnswer, after
       if (feedbackForAnswer == null && correctAndText != null) {
         feedbackForAnswer = correctAndText.matchText;
       }
-      showUserFeedback(isCorrect, feedbackForAnswer, afterAnswerFeedbackCbBound, userAnswer == '[timeout]');
+      showUserFeedback(isCorrect, feedbackForAnswer, afterAnswerFeedbackCbBound, userAnswer.includes('[timeout]'));
     };
     if (currentDeliveryParams.feedbackType == 'dialogue' && !isCorrect) {
       speechTranscriptionTimeoutsSeen = 0;
@@ -1536,6 +1539,8 @@ async function showUserFeedback(isCorrect, feedbackMessage, afterAnswerFeedbackC
             // If the count down is finished, end interval and clear CountdownTimer
             if (distance < 0) {
               Meteor.clearInterval(CountdownTimerInterval);
+              //reset the progress bar
+              document.getElementById("progressbar").style.width = 0 + "%";
               if(window.currentAudioObj) {
                 $('#CountdownTimerText').text('Continuing after feedback...');
               } else {
@@ -1548,6 +1553,8 @@ async function showUserFeedback(isCorrect, feedbackMessage, afterAnswerFeedbackC
         } else {
           //hide progressbar
            $("#progressBarContainer").attr('hidden', false);
+           //reset the progress bar
+           document.getElementById("progressbar").style.width = 0 + "%";
         }
   }
 
@@ -2319,7 +2326,6 @@ function checkAndDisplayTwoPartQuestion(deliveryParams, currentDisplayEngine, cl
   Session.set('currentDisplay', currentDisplayEngine);
   Session.get('currentExperimentState').clozeQuestionParts = closeQuestionParts;
   Session.set('displayReady', true);
-
   console.log('checking for two part questions');
   // Handle two part questions
   const currentQuestionPart2 = Session.get('currentExperimentState').currentQuestionPart2;
