@@ -702,7 +702,7 @@ function modelUnitEngine() {
           if(!typeof stim.probabilityEstimate == "number"){
             throw 'Error: Probability Estimate is undefined or NaN.';
           }
-          ptemp[count]=Math.round(100*parms.probability)/100;
+          ptemp[count]=Math.round(10000*parms.probability)/10000;
           count++;           
         }
       }
