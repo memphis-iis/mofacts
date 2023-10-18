@@ -80,7 +80,7 @@
                                 <div class="vh-5"></div>
                             {{/if}}
                             <div class="vh-5"></div>
-                            <div id="feedbackOverride" class="{{fontSizeClass}} text-center">
+                            <div id="feedbackOverride" class="alert {{fontSizeClass}} text-center" hidden>
                             </div>
                         </div>
                     </div>
@@ -149,7 +149,13 @@
                         <div id="multipleChoiceContainer">
                             <!-- will contain multiple choice buttons which are dynamically added. -->
                             {{#if buttonTrial}}
-                            <div id="multipleChoiceTable" class="row gy-3 row-cols-1 row-cols-md-2 text-center align-items-start">
+                            <div id="multipleChoiceTable" class="row gy-3 
+                                {{#if UIsettings.stackChoiceButtons}}
+                                row-cols-1 row-cols-md-2 
+                                {{else}}
+                                row-cols-1
+                                {{/if}}
+                                text-center align-items-start">
                                 {{#if imageResponse}}
                                     {{#each buttonListImageRows}}
                                     <div class="col ml-auto">
@@ -212,7 +218,9 @@
                             <div id="progressBarContainer" class="progress" hidden>
                                 <div id="progressbar" class="progress-bar bg-warning  progress-bar-striped" role="progressbar" aria-label="Basic example" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100" style="width:100%;"></div>
                             </div>
-                            <div id="CountdownTimerText"></div>
+                            <div id="CountdownTimerText">
+                                Continuing in: 
+                            </div>
                             <div class="vh-10"></div>
                         </div>
                     </div>
