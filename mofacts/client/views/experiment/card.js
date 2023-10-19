@@ -20,6 +20,8 @@ import {sessionCleanUp} from '../../lib/sessionUtils';
 import {checkUserSession} from '../../index'
 import {instructContinue, unitHasLockout, checkForFileImage} from './instructions';
 
+import Plyr from 'plyr';
+
 export {
   speakMessageIfAudioPromptFeedbackEnabled,
   startRecording,
@@ -412,6 +414,7 @@ async function initCard() {
   Session.set('curTdfTips', formattedTips)
   await checkUserSession();
   console.log('RENDERED----------------------------------------------');
+  const player = new Plyr('#player');
   // Catch page navigation events (like pressing back button) so we can call our cleanup method
   window.onpopstate = function() {
     if (document.location.pathname == '/card') {
