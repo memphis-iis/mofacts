@@ -202,11 +202,6 @@ function beginMainCardTimeout(delay, func) {
   console.log('mainCardTimeoutStart', mainCardTimeoutStart);
   timeoutName = Meteor.setTimeout(timeoutFunc, timeoutDelay);
   cardStartTime = Date.now();
-  if(Session.get('curTdfUISettings').displayCardTimeoutAsBarOrText == "bar" || Session.get('curTdfUISettings').displayCardTimeoutAsBarOrText == "both"){
-    $("#progressBarContainer").attr('hidden', false);
- } else {
-    $("#progressBarContainer").attr('hidden', true);
- }
  if(Session.get('curTdfUISettings').displayCardTimeoutAsBarOrText == "text" || Session.get('curTdfUISettings').displayCardTimeoutAsBarOrText == "both"){
   //set the countdown timer text
   $('#CountdownTimerText').attr("hidden",false);
@@ -218,11 +213,22 @@ function beginMainCardTimeout(delay, func) {
     if (remaining <= 0) {
       Meteor.clearInterval(countdownInterval);
       //reset the progress bar
+      $('#progressbar').removeClass('progress-bar');
       document.getElementById("progressbar").style.width = 0 + "%";
+      $('#CountdownTimerText').text("Continuing...");
     } else {
       $('#CountdownTimerText').text("Continuing in: " + secsIntervalString(remaining));
       percent = 100 - (remaining * 1000 / timeoutDelay * 100);
-      document.getElementById("progressbar").style.width = percent + "%";
+      if(Session.get('curTdfUISettings').displayCardTimeoutAsBarOrText == "bar" || Session.get('curTdfUISettings').displayCardTimeoutAsBarOrText == "both"){
+        //add the progress bar class
+        $('#progressbar').addClass('progress-bar');
+        document.getElementById("progressbar").style.width = percent + "%";
+      } else {
+        //set width to 0% 
+        document.getElementById("progressbar").style.width = 0 + "%";
+        //remove progress bar class
+        $('#progressbar').removeClass('progress-bar');
+      }
     }
   }, 1000);
   Session.set('varLenTimeoutName', Meteor.setInterval(varLenDisplayTimeout, 400));
@@ -1489,24 +1495,21 @@ async function showUserFeedback(isCorrect, feedbackMessage, afterAnswerFeedbackC
     const hSize = Session.get('currentDeliveryParams') ? Session.get('currentDeliveryParams').fontsize.toString() : 2;
     if(Session.get('curTdfUISettings').displayUserAnswerAtTop){
       //prepend the user answer to the feedback message
-      userAnswer = $('#userAnswer').val();
-      if(userAnswer){
+      userAnswer = $('#userAnswer').val()
+      if(isTimeout)
+        feedbackMessage = "Your Answer: [timeout]" + userAnswer + '<br>' + feedbackMessage;
+      else
         feedbackMessage = "Your Answer: " + userAnswer + '<br>' + feedbackMessage;
-      }
     }
     $('#UserInteraction')
         .html(feedbackMessage + $('#UserInteraction').html())
         .attr("hidden",false)
         .show()
-        if(Session.get('curTdfUISettings').displayReviewTimeoutAsBarOrText == "bar" || Session.get('curTdfUISettings').displayReviewTimeoutAsBarOrText == "both"){
-           $("#progressBarContainer").attr('hidden', true);
-        } else {
-           $("#progressBarContainer").attr('hidden', false);
-        }
         //if the displayOnlyCorrectAnswerAsFeedbackOverride is set to true, then we will display the correct answer in feedbackOverride div
         if (Session.get('curTdfUISettings').displayCorrectAnswerInCenter) {
           const correctAnswer = Answers.getDisplayAnswerText(Session.get('currentExperimentState').currentAnswer);
-          $('#feedbackOverride').html(correctAnswer).attr("hidden",false).show();
+          $('#feedbackOverride').html(correctAnswer);
+          $('#feedbackOverrideContainer').attr("hidden",false).show();
         }
         
         if(!isCorrect){
@@ -1524,14 +1527,22 @@ async function showUserFeedback(isCorrect, feedbackMessage, afterAnswerFeedbackC
             var now = new Date().getTime()
             var distance = countDownStart - now;
             var seconds = Math.ceil((distance % (1000 * 60)) / 1000);
-            if(Session.get('curTdfUISettings').displayReviewTimeoutAsBarOrText == "text" || Session.get('curTdfUISettings').displayReviewTimeoutAsBarOrText == "both"){
-              //set the bootstrap progress bar to the percentage of time left using the style attribute
             var percent = 100 - ((seconds / originalSecs) * 100);
-            document.getElementById("progressbar").style.width = percent + "%";
+            if(Session.get('curTdfUISettings').displayReviewTimeoutAsBarOrText == "text" || Session.get('curTdfUISettings').displayReviewTimeoutAsBarOrText == "both"){
+                        
               document.getElementById("CountdownTimerText").innerHTML = 'Continuing in: ' + seconds + "s";
             } else {
-              $('#CountdownTimerText').attr("hidden",true);
-              document.getElementById("progressbar").style.width = "0%";
+              document.getElementById("CountdownTimerText").innerHTML = '';
+            }
+            if(Session.get('curTdfUISettings').displayReviewTimeoutAsBarOrText == "bar" || Session.get('curTdfUISettings').displayCardTimeoutAsBarOrText == "both"){
+              //add the progress bar class
+              $('#progressbar').addClass('progress-bar');
+              document.getElementById("progressbar").style.width = percent + "%";
+            } else {
+              //set width to 0% 
+              document.getElementById("progressbar").style.width = 0 + "%";
+              //remove progress bar class
+              $('#progressbar').removeClass('progress-bar');
             }
             
 
@@ -1544,17 +1555,17 @@ async function showUserFeedback(isCorrect, feedbackMessage, afterAnswerFeedbackC
               if(window.currentAudioObj) {
                 $('#CountdownTimerText').text('Continuing after feedback...');
               } else {
-                $('#CountdownTimerText').text('');
+                $('#CountdownTimerText').text("Continuing...");
               }
               Session.set('CurIntervalId', undefined);
             }
           }, 100);
           Session.set('CurIntervalId', CountdownTimerInterval);
         } else {
-          //hide progressbar
-           $("#progressBarContainer").attr('hidden', false);
-           //reset the progress bar
-           document.getElementById("progressbar").style.width = 0 + "%";
+          //remove progress bar class
+          $('#progressbar').removeClass('progress-bar');
+          //set width to 0%
+          document.getElementById("progressbar").style.width = 0 + "%";
         }
   }
 
@@ -2281,18 +2292,24 @@ function startQuestionTimeout() {
     const timeLeftSecs = Math.ceil(timeLeft / 1000);
     if(timeLeft <= 0){
       clearInterval(countdownInterval);
+      $('#CountdownTimerText').text("Continuing...");
     } else {
-      if(Session.get('curTdfUISettings').displayReadyPromptTimeoutAsBarOrText == "bar" || Session.get('curTdfUISettings').displayReadyPromptTimeoutAsBarOrText == "both"){
-        document.getElementById("progressbar").style.width =  "0%";
-     } else {
-        percent = 100 - (timeLeftSecs / readyPromptTimeout / 10);
-     }
+      if(Session.get('curTdfUISettings').displayReadyPromptTimeoutAsBarOrText == "bar" || Session.get('curTdfUISettings').displayCardTimeoutAsBarOrText == "both"){
+        //add the progress bar class
+        $('#progressbar').addClass('progress-bar');
+        document.getElementById("progressbar").style.width = percent + "%";
+      } else {
+        //set width to 0% 
+        document.getElementById("progressbar").style.width = 0 + "%";
+        //remove progress bar class
+        $('#progressbar').removeClass('progress-bar');
+      }
      if(Session.get('curTdfUISettings').displayReadyPromptTimeoutAsBarOrText == "text" || Session.get('curTdfUISettings').displayReadyPromptTimeoutAsBarOrText == "both"){
-       $('#CountdownTimerText').attr("hidden",false);
-     } else {
-       $('#CountdownTimerText').attr("hidden",true);
-     }
       $('#CountdownTimerText').text("Continuing in: " + timeLeftSecs + "s.");
+     } else {
+      $('#CountdownTimerText').text("");
+     }
+      
 
     }
   }, 1000);
@@ -3077,7 +3094,7 @@ async function resumeFromComponentState() {
       "displayCardTimeoutAsBarOrText": "both",
       "displayTimeOutDuringStudy": true,
       "displayUserAnswerAtTop": true,
-      "displayPerformanceDuringStudy": false,
+      "displayPerformanceDuringStudy": true,
       "displayCorrectAnswerInCenter": true,
       "stackChoiceButtons": false,
       "onlyShowSimpleFeedback": true,

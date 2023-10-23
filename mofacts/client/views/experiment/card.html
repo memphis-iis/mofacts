@@ -17,14 +17,14 @@
         </div>
     {{else}}
         {{#if displayReady}}
-        <div id="userInteractionContainer">
+        <div id="userInteractionContainer" class="vh-5">
                 <div class="text-center" id="UserInteraction" hidden></div>
                 <div class="" id="forceCorrectionEntry" hidden>
                     {{> inputForceCorrect}}
                 </div>
         </div>
         <br>    
-            <div class="vh-10"></div>
+            <div class="vh-5"></div>
             <div class="scrollHistoryContainer">
                 {{#if haveScrollList}}
                 {{#each scrollList}}
@@ -79,8 +79,10 @@
                                 </div>
                                 <div class="vh-5"></div>
                             {{/if}}
-                            <div class="vh-5"></div>
-                            <div id="feedbackOverride" class="alert {{fontSizeClass}} text-center" hidden>
+                            <div id="feedbackOverrideContainer" class="alert {{fontSizeClass}} text-center vh-5" hidden>
+                                <div id="feedbackOverride">
+                                    
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -124,7 +126,7 @@
                     {{/if}}
                 {{/if}}
                 {{#if notButtonTrialOrInDialogueLoop}}
-                        <div class="input-box" style="box-sizing: border-box;">
+                        <div class="input-box vh-5" style="box-sizing: border-box;">
                             {{#if showDialogueHints}}
                                 {{#if dialogueCacheHint}}
                                     <div class="row hints">
@@ -195,8 +197,6 @@
                 {{/if}}
 
             {{/if}}
-
-
             {{#if questionIsRemovable}}
             <div class="vh-10"></div>
                 <div class="removalContainer">
@@ -208,24 +208,6 @@
                 </div>
             {{/if}}
 
-
-            <div id="userLowerInteractionContainer">
-                <div class="row">
-                    <div class="row text-center">
-                        <div class="col-sm-12 col-xs-12 col-md-6 col-lg-6 mx-auto">
-                            <div class="vh-15"></div>
-                            <br>
-                            <div id="progressBarContainer" class="progress" hidden>
-                                <div id="progressbar" class="progress-bar bg-warning  progress-bar-striped" role="progressbar" aria-label="Basic example" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100" style="width:100%;"></div>
-                            </div>
-                            <div id="CountdownTimerText">
-                                Continuing in: 
-                            </div>
-                            <div class="vh-10"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
 
             {{#if isInRole 'teacher'}}
             <div class="row">
