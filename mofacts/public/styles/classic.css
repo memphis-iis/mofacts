@@ -568,14 +568,6 @@ input[type="range"]::-webkit-slider-runnable-track {
     height: 0.5rem;
   }
 
-
-  #userLowerInteractionContainer{
-    position: absolute;
-    bottom: 0px;
-    left: 0px;
-    right: 0px;
-}
-
  input[type="range"]::-moz-range-thumb {
     border: none; /*Removes extra border that FF applies*/
     appearance: none;
