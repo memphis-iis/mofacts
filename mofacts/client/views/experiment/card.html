@@ -1,12 +1,13 @@
 <template name="card">
     <div class="container" id="cardContainer">
+        {{#if isVideoSession}}
         <video id="player" playsinline controls data-poster="/path/to/poster.jpg">
-            <source src="/path/to/video.mp4" type="video/mp4" />
-            <source src="/path/to/video.webm" type="video/webm" />
+            <source src="{{videoSource}}" type="video/mp4" />
           
             <!-- Captions are optional -->
             <track kind="captions" label="English captions" src="/path/to/captions.vtt" srclang="en" default />
         </video>
+        {{/if}}
         {{#if isImpersonating}}
         <div class='text-center alert alert-warning'>
                 Impersonation Mode. Nothing will be logged. Log out to reset.

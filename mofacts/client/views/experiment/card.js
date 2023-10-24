@@ -739,6 +739,13 @@ Template.card.helpers({
     return rt === 'image';
   },
 
+  'isVideoSession': () => Session.get('isVideoSession'),
+
+  'videoSource': function() {
+    if(Session.get('isVideoSession') && Session.get('videoSource'))
+      return Session.get('videoSource')
+  },
+
   'test': function() {
     return getTestType() === 't';
   },
@@ -936,6 +943,10 @@ function initializeAudio() {
   } catch (e) {
     console.log('Error initializing Web Audio browser');
   }
+}
+
+function preloadVideos() {
+  Session.set('videoSource', DynamicAssets.findOne({name: Session.get('currentTdfUnit').videosession.videosource}).link());
 }
 
 function preloadImages() {
@@ -2182,6 +2193,9 @@ async function prepareCard() {
   $('#helpButton').prop("disabled",false);
   if (engine.unitFinished()) {
     unitIsFinished('Unit Engine');
+  } else if (Session.get('isVideoSession')) {
+    await newQuestionHandler();
+    Session.set('engineIndices', undefined);
   } else {
     await engine.selectNextCard(Session.get('engineIndices'), Session.get('currentExperimentState'));
     await newQuestionHandler();
@@ -3039,6 +3053,10 @@ async function resumeFromComponentState() {
   }
 
   const curTdfUnit = Session.get('currentTdfFile').tdfs.tutor.unit[Session.get('currentUnitNumber')];
+  if (curTdfUnit.videosession) 
+    Session.set('isVideoSession', true)
+  else
+    Session.set('isVideoSession', false)
   Session.set('currentTdfUnit', curTdfUnit);
   console.log('resume, currentTdfUnit:', curTdfUnit);
 
@@ -3047,6 +3065,13 @@ async function resumeFromComponentState() {
   } else {
     Session.set('questionIndex', 0);
     newExperimentState.questionIndex = 0;
+  }
+  
+  if(curTdfUnit.videosession){
+    console.log('video type questions detected, pre-loading video');
+    preloadVideos();
+  } else {
+    console.log('Non video type detected');
   }
 
   updateExperimentState(newExperimentState, 'card.resumeFromComponentState');
@@ -3216,7 +3241,7 @@ async function processUserTimesLog() {
 
     if (tdfFile.tdfs.tutor.unit[curUnitNum].assessmentsession) {
       engine = await createScheduleUnit(curExperimentData);
-    } else if (tdfFile.tdfs.tutor.unit[curUnitNum].learningsession) {
+    } else if (tdfFile.tdfs.tutor.unit[curUnitNum].learningsession || tdfFile.tdfs.tutor.unit[curUnitNum].videosession) {
       engine = await createModelUnit(curExperimentData);
     } else {
       engine = await createEmptyUnit(curExperimentData); // used for instructional units

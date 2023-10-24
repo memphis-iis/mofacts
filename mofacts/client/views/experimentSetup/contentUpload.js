@@ -11,7 +11,7 @@ Template.contentUpload.helpers({
     return Stims.find();
   },
   curFilesToUpload() {
-    return Template.instance().curFilesToUpload.get();
+    return Session.get('curFilesToUpload');
   },
   currentUpload() {
     return Template.instance().currentUpload.get();
@@ -103,7 +103,7 @@ Template.contentUpload.events({
   // Admin/Teachers - upload a TDF file
   'change #upload-file': function(event) {
     //get files array from reactive var
-    const files = Template.instance().curFilesToUpload.get();
+    const files = Session.get('curFilesToUpload');
     //add new files to array, appending the current file type from the dropdown
     for (const file of Array.from($('#upload-file').prop('files'))) {
       //if the file has extension .json, read and parse it, if it is a TDF file it will have "tutor" field, if it is a stimuli file it will have "setspec" field
@@ -118,7 +118,7 @@ Template.contentUpload.events({
     }
     //update reactive var with new array
     console.log('files:', files);
-    Template.instance().curFilesToUpload.set(files);
+    Session.set('curFilesToUpload', files);
     //clear file input
     $('#upload-file').val('');
   },
@@ -148,14 +148,14 @@ Template.contentUpload.events({
   },
   'click #doUpload': async function(event) {
     //get files array from reactive var
-    const files = Template.instance().curFilesToUpload.get();
+    const files = Session.get('curFilesToUpload');
     $('#stimUploadLoadingSymbol').show()
     //call doFileUpload function for each file
     for (const file of files) {
       await doPackageUpload(file, Template.instance());
     }
     //reset reactive var
-    Template.instance().curFilesToUpload.set(false);
+    Session.set('curFilesToUpload', false);
   },
     'click #tdf-download-btn': function(event){
       event.preventDefault();

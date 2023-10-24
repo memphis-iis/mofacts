@@ -8,6 +8,7 @@ export const DISABLED = 'disabled';
 export const ENABLED = 'enabled';
 export const MODEL_UNIT = 'model';
 export const SCHEDULE_UNIT = 'schedule';
+export const VIDEO_UNIT = 'video';
 // Define an ordering for the fields and the column name we'll put in the
 // output file. Note that these names must match the fields used in populate
 // record.

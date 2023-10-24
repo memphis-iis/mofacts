@@ -504,6 +504,8 @@ function modelUnitEngine() {
   let probFunction = undefined;
   if (unit.learningsession) 
     probFunction = unit.learningsession.calculateProbability ? unit.learningsession.calculateProbability.trim() : undefined;
+  else if (unit.videosession) 
+    probFunction = unit.videosession.calculateProbability ? unit.videosession.calculateProbability.trim() : undefined;
   const probFunctionHasHintSylls = typeof(probFunction) == 'undefined' ? false : probFunction.indexOf('hintsylls') > -1;
   clientConsole(2, 'probFunctionHasHintSylls: ' + probFunctionHasHintSylls, typeof(probFunction));
   if (probFunction) {
@@ -868,6 +870,7 @@ function modelUnitEngine() {
     setUpClusterList: function setUpClusterList(cards) {
       const currentTdfFile = Session.get('currentTdfFile');
       const isMultiTdf = currentTdfFile.isMultiTdf;
+      const isVideoSession = Session.get('isVideoSession')
       const clusterList = [];
 
       if (isMultiTdf) {
@@ -893,12 +896,14 @@ function modelUnitEngine() {
           clientConsole(1, 'setupclusterlist:', this.curUnit, sessCurUnit);
           let unitClusterList = "";
           // TODO: shouldn't need both
-          if(this.curUnit && this.curUnit.learningsession && this.curUnit.learningsession.clusterlist){
-            unitClusterList = this.curUnit.learningsession.clusterlist.trim()
+          if(isVideoSession) {
+            if (this.curUnit && this.curUnit.videosession && this.curUnit.videosession.questions)
+              unitClusterList = this.curUnit.videosession.questions.trim()
           }
-          else if (sessCurUnit && sessCurUnit.learningsession && sessCurUnit.learningsession.clusterlist){
-            unitClusterList = sessCurUnit.learningsession.clusterlist.trim();
-        }
+          else {
+            if(this.curUnit && this.curUnit.learningsession && this.curUnit.learningsession.clusterlist)
+              unitClusterList = this.curUnit.learningsession.clusterlist.trim()
+          }
         extractDelimFields(unitClusterList, clusterList);
       }
       clientConsole(2, 'clusterList', clusterList);
@@ -1383,9 +1388,10 @@ function modelUnitEngine() {
     unitMode: (function() {
       const unit = Session.get('currentTdfUnit');
       let unitMode = 'default';
-      if(unit.learningsession && unit.learningsession.unitMode){
+      if(unit.learningsession && unit.learningsession.unitMode)
         unitMode = unit.learningsession.unitMode.trim();
-      }
+      else if (unit.videosession && unit.videosession.unitMode)
+        unitMode = unit.videosession.unitMode.trim();
       clientConsole(1, 'UNIT MODE: ' + unitMode);
       return unitMode;
     })(),
@@ -1658,7 +1664,7 @@ function modelUnitEngine() {
     },
 
     unitFinished: function() {
-      const session = this.curUnit.learningsession;
+      const session = this.curUnit.learningsession || this.curUnit.videosession;
       const minSecs = session.displayminseconds || 0;
       const maxSecs = session.displaymaxseconds || 0;
       const maxTrials = parseInt(session.maxTrials || 0);
