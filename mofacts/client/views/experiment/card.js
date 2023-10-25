@@ -1485,10 +1485,8 @@ async function showUserFeedback(isCorrect, feedbackMessage, afterAnswerFeedbackC
   } else {
     //check if the feedback has the word "incorrect" or "correct" in it, if so, encase it in a bold tag and a new line before it and after it
       singleLineFeedback = Session.get('curTdfUISettings').singleLineFeedback;
-    if (feedbackMessage.includes("Incorrect") || feedbackMessage.includes("Correct")) {
       uiCorrectColor = Session.get('curTdfUISettings').correctColor;
       uiIncorrectColor = Session.get('curTdfUISettings').incorrectColor;
-    }
       if(singleLineFeedback){
         feedbackMessage = feedbackMessage.replace("Incorrect.", "<b style='color:" + uiIncorrectColor + ";'>Incorrect.</b>");
         feedbackMessage = feedbackMessage.replace("Correct.", "<b style='color:" + uiCorrectColor + ";'>Correct.</b>");
@@ -1541,7 +1539,13 @@ async function showUserFeedback(isCorrect, feedbackMessage, afterAnswerFeedbackC
             $('#feedbackOverride').html(correctAnswer);
             $('#feedbackOverrideContainer').attr("hidden",false).show();
           }
-
+          if(isCorrect){
+            uiCorrectColor = Session.get('curTdfUISettings').correctColor;
+            $(target)
+            .html("<b style='color:" + uiCorrectColor + ";'>Correct.</b>")
+            .attr("hidden",false)
+            .show()
+          }
           if(!isCorrect){
             $(target)
           .html(feedbackMessage)

@@ -1,5 +1,6 @@
 <template name="card">
     <div class="container" id="cardContainer">
+        <br>
         {{#if isImpersonating}}
         <div class='text-center alert alert-warning'>
                 Impersonation Mode. Nothing will be logged. Log out to reset.
@@ -18,7 +19,7 @@
     {{else}}
         {{#if displayReady}}
         <div id="userInteractionContainer" class="vh-5">
-                <div class="text-center" id="UserInteraction" hidden></div>
+                <div class="text-center {{fontSizeClass}}" id="UserInteraction" hidden></div>
                 <div class="" id="forceCorrectionEntry" hidden>
                     {{> inputForceCorrect}}
                 </div>
@@ -59,7 +60,10 @@
                         </div> 
                         <div class="h2" id="imageDisplay">
                             {{#if imageCard}}
-                                <img id="cardQuestionImg" src="{{curImgSrc}}" class="img-fluid w-100"> 
+                                <div class="w-100 text-center">
+                                      <img id="cardQuestionImg" src="{{curImgSrc}}" class="img-fluid mx-auto"> 
+                                </div>
+                                <br>
                             {{/if}}
                         </div>
                         {{#if videoCard}}
