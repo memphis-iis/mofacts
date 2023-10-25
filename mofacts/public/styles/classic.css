@@ -109,11 +109,11 @@ thead{
 }
 
 .card-header{
-    background-color: #7ed957;
+    background-color: #d9d9d9;
     padding: 10px;
 }
 .card-header p{
-    color: #06723c;
+    color: #000000;
     font-family: 'Arimo';
     font-size: 15px;
     margin-top: -10px;
@@ -566,6 +566,20 @@ input[type="range"]::-webkit-slider-runnable-track {
   input[type="range"]::-moz-range-track {
     background: #00cc00;
     height: 0.5rem;
+  }
+
+
+  #userLowerInteractionContainer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color:#F2F2F2; /* Set the background color as needed */
+    z-index: 999; /* Set a high z-index to ensure it's on top of other content */
+  }
+
+  #progressBarContainer{
+    background-color: rgba(0,0,0,0.0);
   }
 
  input[type="range"]::-moz-range-thumb {

@@ -461,6 +461,9 @@ async function initCard() {
   // If user has enabled audio input initialize web audio (this takes a bit)
   // (this will eventually call cardStart after we redirect through the voice
   // interstitial and get back here again)
+
+  $('#userLowerInteraction').html('');
+
   if (audioInputEnabled) {
     initializeAudio();
   } else {
@@ -1481,11 +1484,18 @@ async function showUserFeedback(isCorrect, feedbackMessage, afterAnswerFeedbackC
       class="btn-alt btn-block btn-image btn-responsive">').show().attr("hidden",false);
   } else {
     //check if the feedback has the word "incorrect" or "correct" in it, if so, encase it in a bold tag and a new line before it and after it
+      singleLineFeedback = Session.get('curTdfUISettings').singleLineFeedback;
     if (feedbackMessage.includes("Incorrect") || feedbackMessage.includes("Correct")) {
       uiCorrectColor = Session.get('curTdfUISettings').correctColor;
       uiIncorrectColor = Session.get('curTdfUISettings').incorrectColor;
-      feedbackMessage = feedbackMessage.replace("Incorrect.", "<br><b style='color" + uiIncorrectColor + "darkorange'>Incorrect</b><br>");
-      feedbackMessage = feedbackMessage.replace("Correct.", "<br><b style='color" + uiCorrectColor + "darkgreen'>Correct</b><br>");
+    }
+      if(singleLineFeedback){
+        feedbackMessage = feedbackMessage.replace("Incorrect.", "<b style='color:" + uiIncorrectColor + ";'>Incorrect</b>");
+        feedbackMessage = feedbackMessage.replace("Correct.", "<b style='color:" + uiCorrectColor + ";'>Correct</b>");
+      } else {
+        feedbackMessage = feedbackMessage.replace("Incorrect.", "<br><b style='color:" + uiIncorrectColor + ";'>Incorrect</b><br>");
+        feedbackMessage = feedbackMessage.replace("Correct.", "<br><b style='color:" + uiCorrectColor + ";'>Correct</b><br>");
+      }
       //if the ui setting onlyShowSimpleFeedback is set to true, then we will only show the word "incorrect" or "correct" in the feedback
       if (Session.get('curTdfUISettings').onlyShowSimpleFeedback) {
         feedbackMessage = feedbackMessage.split("<br>")[1];
@@ -1493,26 +1503,48 @@ async function showUserFeedback(isCorrect, feedbackMessage, afterAnswerFeedbackC
     }
     $('.hints').hide();
     const hSize = Session.get('currentDeliveryParams') ? Session.get('currentDeliveryParams').fontsize.toString() : 2;
-    if(Session.get('curTdfUISettings').displayUserAnswerAtTop){
+    if(Session.get('curTdfUISettings').displayUserAnswerInFeedback){
       //prepend the user answer to the feedback message
       userAnswer = $('#userAnswer').val()
-      if(isTimeout)
-        feedbackMessage = "Your Answer: [timeout]" + userAnswer + '<br>' + feedbackMessage;
-      else
-        feedbackMessage = "Your Answer: " + userAnswer + '<br>' + feedbackMessage;
-    }
-    $('#UserInteraction')
-        .html(feedbackMessage + $('#UserInteraction').html())
-        .attr("hidden",false)
-        .show()
-        //if the displayOnlyCorrectAnswerAsFeedbackOverride is set to true, then we will display the correct answer in feedbackOverride div
-        if (Session.get('curTdfUISettings').displayCorrectAnswerInCenter) {
-          const correctAnswer = Answers.getDisplayAnswerText(Session.get('currentExperimentState').currentAnswer);
-          $('#feedbackOverride').html(correctAnswer);
-          $('#feedbackOverrideContainer').attr("hidden",false).show();
+      if(isTimeout){
+        if(singleLineFeedback){
+          feedbackMessage = "Your Answer: [timeout]" + userAnswer + ' ' + feedbackMessage;
+        } else {
+          feedbackMessage = "Your Answer: [timeout]" + userAnswer + '<br>' + feedbackMessage;
         }
-        
-        if(!isCorrect){
+      } else {
+        if(singleLineFeedback){
+          feedbackMessage = "Your Answer: " + userAnswer + ' ' + feedbackMessage;
+        } else {  
+          feedbackMessage = "Your Answer: " + userAnswer + '<br>' + feedbackMessage;
+        }
+      }
+    feedbackDisplayPosition = Session.get('curTdfUISettings').feedbackDisplayPosition;
+    //we have several options for displaying the feedback, we can display it in the top (#userInteraction), bottom (#userLowerInteraction). We write a case for this
+    switch(feedbackDisplayPosition){
+      case "top":
+        target = "#UserInteraction";
+        break;
+      case "bottom":
+        target = "#userLowerInteraction";
+        break;
+    }
+    //hide the buttons
+    $('#multipleChoiceContainer').hide();
+    $('#displayContainer').removeClass('col-md-6').addClass('mx-auto');
+    //use jquery to select the target and display the feedback message
+        $(target)
+          .html(feedbackMessage)
+          .attr("hidden",false)
+          .show()
+          //if the displayOnlyCorrectAnswerAsFeedbackOverride is set to true, then we will display the correct answer in feedbackOverride div
+          if (Session.get('curTdfUISettings').displayCorrectAnswerInCenter) {
+            const correctAnswer = Answers.getDisplayAnswerText(Session.get('currentExperimentState').currentAnswer);
+            $('#feedbackOverride').html(correctAnswer);
+            $('#feedbackOverrideContainer').attr("hidden",false).show();
+          }
+
+          if(!isCorrect){
           var countDownStart = new Date().getTime();
           let dialogueHistory;
           if (Session.get('dialogueHistory')) {
@@ -1549,6 +1581,7 @@ async function showUserFeedback(isCorrect, feedbackMessage, afterAnswerFeedbackC
 
             // If the count down is finished, end interval and clear CountdownTimer
             if (distance < 0) {
+              $('#userLowerInteraction').html('');
               Meteor.clearInterval(CountdownTimerInterval);
               //reset the progress bar
               document.getElementById("progressbar").style.width = 0 + "%";
@@ -2162,6 +2195,7 @@ async function cardStart() {
   $('#cardQuestionImg').load(function(evt) {
     redoCardImage();
   });
+  $('#userLowerInteraction').html('');
 
   // Always hide the final instructions box
   $('#finalInstructionsDlg').modal('hide');
@@ -3085,7 +3119,7 @@ async function resumeFromComponentState() {
     console.log('using default ui settings')
   }
   // priority is card, then unit, then tdf. 
-  const UIsettings = curUnitUISettions || curTdfUISettings || false;
+  var UIsettings = curUnitUISettions || curTdfUISettings || false;
 
   const displayPresets = {
     default:{
@@ -3093,15 +3127,22 @@ async function resumeFromComponentState() {
       "displayReadyPromptTimeoutAsBarOrText": "both",
       "displayCardTimeoutAsBarOrText": "both",
       "displayTimeOutDuringStudy": true,
-      "displayUserAnswerAtTop": true,
+      "displayUserAnswerInFeedback": true,
       "displayPerformanceDuringStudy": true,
       "displayCorrectAnswerInCenter": true,
+      "singleLineFeedback" : false,
+      "feedbackDisplayPosition" : "top",
+      "stimuliPosition" : "top",
       "stackChoiceButtons": false,
-      "onlyShowSimpleFeedback": true,
+      "onlyShowSimpleFeedback": false,
       "incorrectColor": "darkorange",
-      "correctColor": "green",
+      "correctColor": "green"
     },
   }
+  //here we interprit the stimulus and input position settings to set the colum widths. There are 4 possible combinations.
+  // 1. stimuliPosition = top, userInputPosition = bottom. We set both to col-12
+  // 2. stimuliPosition = left, userInputPosition = right. We set stimuli to col-6 and input to col-6
+  
 
   //if curTdfUISettings is set, then we need to check if it is a string or an object.
   //if it is a string, then we need to check if it is a preset. Otherwise, we set it to default
@@ -3109,12 +3150,11 @@ async function resumeFromComponentState() {
   if(UIsettings){
     if(typeof UIsettings === 'string'){
       if(displayPresets[UIsettings]){
-        Session.set('curTdfUISettings', displayPresets[UIsettings])
+       UIsettings = displayPresets[UIsettings]
       } else {
-        Session.set('curTdfUISettings', displayPresets['default'])
+        UIsettings = displayPresets['default']
       }
     } else {
-      Session.set('curTdfUISettings', UIsettings)
       //fill in the missing keys with the default values
       for(const key in displayPresets['default']){
         if(!UIsettings.hasOwnProperty(key)){
@@ -3123,8 +3163,22 @@ async function resumeFromComponentState() {
       }
     }
   } else {
-    Session.set('curTdfUISettings', displayPresets['default'])
+    UIsettings = displayPresets['default']
   }
+  //get if the current card is a button trial
+  switch(UIsettings.stimuliPosition){
+    case 'top':
+      UIsettings.choiceColWidth = 'col-12';
+      UIsettings.displayColWidth = 'col-12';
+      break;
+    case 'left':
+      UIsettings.choiceColWidth = 'col-6';
+      UIsettings.displayColWidth = 'col-6';
+  }
+
+  Session.set('curTdfUISettings', UIsettings);
+
+  
   console.log('curTdfUISettings', Session.get('curTdfUISettings'))
 
   if (Session.get('feedbackUnset')){
@@ -3342,5 +3396,5 @@ async function processUserTimesLog() {
         Session.set('engineIndices', undefined);
       await prepareCard();
     }
+    }
   }
-}

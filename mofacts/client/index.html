@@ -31,6 +31,7 @@
     {{> nav}}
     {{#if showPerformanceDetails}}
       {{> curStudentPerformance}}
+      <br>
     {{/if}}
   {{/if}}
   <!-- main page content -->
@@ -41,10 +42,12 @@
     <div class="row text-center">
         <div class="col-sm-12 col-xs-12 col-md-6 col-lg-6 mx-auto" style="margin-bottom: 15px;">
             <br>
+            <div id="userLowerInteraction">
+            </div>
             <div id="CountdownTimerText">
             </div>
             <div id="progressBarContainer" class="progress">
-                <div id="progressbar" class="bg-warning  progress-bar-striped" role="progressbar" aria-label="Basic example" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100" style="width:0%;"></div>
+                <div id="progressbar" class="bg-warning progress-bar-striped" role="progressbar" aria-label="Basic example" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100" style="width:0%;"></div>
             </div>
         </div>
     </div>
