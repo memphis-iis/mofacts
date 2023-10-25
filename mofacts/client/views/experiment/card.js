@@ -140,6 +140,7 @@ let timeoutName = null;
 let timeoutFunc = null;
 let timeoutDelay = null;
 let simTimeoutName = null;
+let userAnswer = null;
 
 // Helper - return elapsed seconds since unit started. Note that this is
 // technically seconds since unit RESUME began (when we set currentUnitStartTime)
@@ -1263,7 +1264,6 @@ function handleUserInput(e, source, simAnswerCorrect) {
   }
   clearCardTimeout();
 
-  let userAnswer;
   if(testType === 's'){
     userAnswer = '' //no response for study trial
   } else if (isTimeout) {
@@ -1281,7 +1281,7 @@ function handleUserInput(e, source, simAnswerCorrect) {
     } else {
       userAnswer = _.trim($('#userAnswer').val()).toLowerCase();
     }
-  }
+  } 
 
   const trialEndTimeStamp = Date.now();
   const afterAnswerFeedbackCallbackWithEndTime = afterAnswerFeedbackCallback.bind(null,
@@ -1490,33 +1490,32 @@ async function showUserFeedback(isCorrect, feedbackMessage, afterAnswerFeedbackC
       uiIncorrectColor = Session.get('curTdfUISettings').incorrectColor;
     }
       if(singleLineFeedback){
-        feedbackMessage = feedbackMessage.replace("Incorrect.", "<b style='color:" + uiIncorrectColor + ";'>Incorrect</b>");
-        feedbackMessage = feedbackMessage.replace("Correct.", "<b style='color:" + uiCorrectColor + ";'>Correct</b>");
+        feedbackMessage = feedbackMessage.replace("Incorrect.", "<b style='color:" + uiIncorrectColor + ";'>Incorrect.</b>");
+        feedbackMessage = feedbackMessage.replace("Correct.", "<b style='color:" + uiCorrectColor + ";'>Correct.</b>");
       } else {
-        feedbackMessage = feedbackMessage.replace("Incorrect.", "<br><b style='color:" + uiIncorrectColor + ";'>Incorrect</b><br>");
-        feedbackMessage = feedbackMessage.replace("Correct.", "<br><b style='color:" + uiCorrectColor + ";'>Correct</b><br>");
+        feedbackMessage = feedbackMessage.replace("Incorrect.", "<br><b style='color:" + uiIncorrectColor + ";'>Incorrect.</b><br>");
+        feedbackMessage = feedbackMessage.replace("Correct.", "<br><b style='color:" + uiCorrectColor + ";'>Correct.</b><br>");
       }
       //if the ui setting onlyShowSimpleFeedback is set to true, then we will only show the word "incorrect" or "correct" in the feedback
       if (Session.get('curTdfUISettings').onlyShowSimpleFeedback) {
-        feedbackMessage = feedbackMessage.split("<br>")[1];
+        feedbackMessage = feedbackMessage.split("<br>")[1].toLowerCase();
       }
     }
     $('.hints').hide();
     const hSize = Session.get('currentDeliveryParams') ? Session.get('currentDeliveryParams').fontsize.toString() : 2;
     if(Session.get('curTdfUISettings').displayUserAnswerInFeedback){
       //prepend the user answer to the feedback message
-      userAnswer = $('#userAnswer').val()
       if(isTimeout){
         if(singleLineFeedback){
-          feedbackMessage = "Your Answer: [timeout]" + userAnswer + ' ' + feedbackMessage;
+          feedbackMessage = "Your Answer:" + userAnswer + '[timeout]. ' + feedbackMessage;
         } else {
-          feedbackMessage = "Your Answer: [timeout]" + userAnswer + '<br>' + feedbackMessage;
+          feedbackMessage = "Your Answer:" + userAnswer + '[timeout]. <br>' + feedbackMessage;
         }
       } else {
         if(singleLineFeedback){
-          feedbackMessage = "Your Answer: " + userAnswer + ' ' + feedbackMessage;
+          feedbackMessage = "Your Answer: " + userAnswer + '. ' + feedbackMessage;
         } else {  
-          feedbackMessage = "Your Answer: " + userAnswer + '<br>' + feedbackMessage;
+          feedbackMessage = "Your Answer: " + userAnswer + '.<br>' + feedbackMessage;
         }
       }
     feedbackDisplayPosition = Session.get('curTdfUISettings').feedbackDisplayPosition;
@@ -1527,16 +1526,15 @@ async function showUserFeedback(isCorrect, feedbackMessage, afterAnswerFeedbackC
         break;
       case "bottom":
         target = "#userLowerInteraction";
+        //add the fontSize class to the target
+        const hSize = Session.get('currentDeliveryParams') ? Session.get('currentDeliveryParams').fontsize.toString() : 2;
+        $(target).addClass('h' + hSize);
         break;
     }
     //hide the buttons
     $('#multipleChoiceContainer').hide();
     $('#displayContainer').removeClass('col-md-6').addClass('mx-auto');
     //use jquery to select the target and display the feedback message
-        $(target)
-          .html(feedbackMessage)
-          .attr("hidden",false)
-          .show()
           //if the displayOnlyCorrectAnswerAsFeedbackOverride is set to true, then we will display the correct answer in feedbackOverride div
           if (Session.get('curTdfUISettings').displayCorrectAnswerInCenter) {
             const correctAnswer = Answers.getDisplayAnswerText(Session.get('currentExperimentState').currentAnswer);
@@ -1545,6 +1543,10 @@ async function showUserFeedback(isCorrect, feedbackMessage, afterAnswerFeedbackC
           }
 
           if(!isCorrect){
+            $(target)
+          .html(feedbackMessage)
+          .attr("hidden",false)
+          .show()
           var countDownStart = new Date().getTime();
           let dialogueHistory;
           if (Session.get('dialogueHistory')) {
@@ -2683,7 +2685,6 @@ function speechAPICallback(err, data){
   }
 
   const inUserForceCorrect = $('#forceCorrectionEntry').is(':visible');
-  let userAnswer;
   if (getButtonTrial()) {
     console.log('button trial, setting user answer to verbalChoice');
     userAnswer = $('[verbalChoice=\'' + transcript + '\']')[0];
@@ -3107,7 +3108,7 @@ async function resumeFromComponentState() {
   //custom settings for user interface
   //we get the current settings from the tdf file's setspec
   //but the unit and individual question can override these settings
-  const curTdfUISettings = rootTDFBoxed.content.tdfs.tutor.setspec.uiSettings ? rootTDFBoxed.content.tdfs.tutor.setspec.uiSettings : false;
+  const curTdfUISettings = rootTDF.tdfs.tutor.setspec.uiSettings ? rootTDF.tdfs.tutor.setspec.uiSettings : false;
   const curUnitUISettions = curTdfUnit.uiSettings ? curTdfUnit.uiSettings : false;
   
   //show which settings are being used
@@ -3129,7 +3130,7 @@ async function resumeFromComponentState() {
       "displayTimeOutDuringStudy": true,
       "displayUserAnswerInFeedback": true,
       "displayPerformanceDuringStudy": true,
-      "displayCorrectAnswerInCenter": true,
+      "displayCorrectAnswerInCenter": false,
       "singleLineFeedback" : false,
       "feedbackDisplayPosition" : "top",
       "stimuliPosition" : "top",

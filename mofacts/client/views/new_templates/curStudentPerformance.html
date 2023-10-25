@@ -1,10 +1,13 @@
 <template name="curStudentPerformance">
     <br>
     <div class="row text-center">
-        <div class="col-sm-12 col-xs-12 col-md-6 col-lg-6 mx-auto card-header">
-            <p class="text-center">
-                {{curStudentPerformance.totalTimeDisplay}} min | {{curStudentPerformance.percentCorrect}} correct
-            </p>
+        <div class="col-sm-12 col-xs-12 col-md-6 col-lg-6 mx-auto card-header ">
+            <div class="row">
+                <div class="col-9 text-left "></div>
+                <div class="text-right col-3  displaystats">
+                    {{curStudentPerformance.totalTimeDisplay}} min | {{curStudentPerformance.percentCorrect}} correct
+                </div>
+            </div>
         </div>
     </div>
 </template>

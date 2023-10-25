@@ -109,15 +109,20 @@ thead{
 }
 
 .card-header{
-    background-color: #d9d9d9;
+
     padding: 10px;
 }
-.card-header p{
+.card-header .displaystats{
+    background-color: #d9d9d9;
     color: #000000;
     font-family: 'Arimo';
     font-size: 15px;
     margin-top: -10px;
     margin-bottom: -10px;
+    /*justify all text right*/
+    text-align: center;
+    /*justify all bootstrap columns right*/
+    justify-content: right;
 
 }
 
