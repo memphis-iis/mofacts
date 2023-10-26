@@ -216,7 +216,7 @@ function beginMainCardTimeout(delay, func) {
       //reset the progress bar
       $('#progressbar').removeClass('progress-bar');
       document.getElementById("progressbar").style.width = 0 + "%";
-      $('#CountdownTimerText').text("Continuing...");
+      $('#lowerInteraction').html('');
     } else {
       $('#CountdownTimerText').text("Continuing in: " + secsIntervalString(remaining));
       percent = 100 - (remaining * 1000 / timeoutDelay * 100);
@@ -1495,27 +1495,20 @@ async function showUserFeedback(isCorrect, feedbackMessage, afterAnswerFeedbackC
         feedbackMessage = feedbackMessage.replace("Correct.", "<br><b style='color:" + uiCorrectColor + ";'>Correct.</b><br>");
       }
       //if the ui setting onlyShowSimpleFeedback is set to true, then we will only show the word "incorrect" or "correct" in the feedback
-      if (Session.get('curTdfUISettings').onlyShowSimpleFeedback) {
-        feedbackMessage = feedbackMessage.split("<br>")[1].toLowerCase();
+      if (Session.get('curTdfUISettings').onlyShowSimpleFeedback && singleLineFeedback) {
+        feedbackMessage.split("<br>")[1].toLowerCase() ? feedbackMessage = feedbackMessage.split("<br>")[1].toLowerCase() : feedbackMessage = feedbackMessage.split("</b>")[1].toLowerCase();
       }
     }
     $('.hints').hide();
     const hSize = Session.get('currentDeliveryParams') ? Session.get('currentDeliveryParams').fontsize.toString() : 2;
     if(Session.get('curTdfUISettings').displayUserAnswerInFeedback){
       //prepend the user answer to the feedback message
-      if(isTimeout){
-        if(singleLineFeedback){
-          feedbackMessage = "Your Answer:" + userAnswer + '[timeout]. ' + feedbackMessage;
-        } else {
-          feedbackMessage = "Your Answer:" + userAnswer + '[timeout]. <br>' + feedbackMessage;
-        }
-      } else {
-        if(singleLineFeedback){
-          feedbackMessage = "Your Answer: " + userAnswer + '. ' + feedbackMessage;
-        } else {  
-          feedbackMessage = "Your Answer: " + userAnswer + '.<br>' + feedbackMessage;
-        }
-      }
+
+    if(singleLineFeedback){
+      feedbackMessage = "Your Answer: " + userAnswer + '. ' + feedbackMessage;
+    } else {  
+      feedbackMessage = "Your Answer: " + userAnswer + '.<br>' + feedbackMessage;
+    }
     feedbackDisplayPosition = Session.get('curTdfUISettings').feedbackDisplayPosition;
     //we have several options for displaying the feedback, we can display it in the top (#userInteraction), bottom (#userLowerInteraction). We write a case for this
     switch(feedbackDisplayPosition){
@@ -1538,13 +1531,6 @@ async function showUserFeedback(isCorrect, feedbackMessage, afterAnswerFeedbackC
             const correctAnswer = Answers.getDisplayAnswerText(Session.get('currentExperimentState').currentAnswer);
             $('#feedbackOverride').html(correctAnswer);
             $('#feedbackOverrideContainer').attr("hidden",false).show();
-          }
-          if(isCorrect){
-            uiCorrectColor = Session.get('curTdfUISettings').correctColor;
-            $(target)
-            .html("<b style='color:" + uiCorrectColor + ";'>Correct.</b>")
-            .attr("hidden",false)
-            .show()
           }
           if(!isCorrect){
             $(target)
@@ -1605,6 +1591,11 @@ async function showUserFeedback(isCorrect, feedbackMessage, afterAnswerFeedbackC
           $('#progressbar').removeClass('progress-bar');
           //set width to 0%
           document.getElementById("progressbar").style.width = 0 + "%";
+          uiCorrectColor = Session.get('curTdfUISettings').correctColor;
+          $(target)
+          .html("<b style='color:" + uiCorrectColor + ";'>Correct.</b>")
+          .attr("hidden",false)
+          .show()
         }
   }
 
@@ -1795,6 +1786,8 @@ async function afterFeedbackCallback(trialEndTimeStamp, trialStartTimeStamp, isT
 
 async function cardEnd() {
   hideUserFeedback();
+  $('#CountdownTimerText').text("Continuing...");
+  $('#userLowerInteraction').html('');
   $('#userAnswer').val('');
   Session.set('feedbackTimeoutEnds', Date.now())
   prepareCard();
@@ -2332,7 +2325,6 @@ function startQuestionTimeout() {
     const timeLeftSecs = Math.ceil(timeLeft / 1000);
     if(timeLeft <= 0){
       clearInterval(countdownInterval);
-      $('#CountdownTimerText').text("Continuing...");
     } else {
       if(Session.get('curTdfUISettings').displayReadyPromptTimeoutAsBarOrText == "bar" || Session.get('curTdfUISettings').displayCardTimeoutAsBarOrText == "both"){
         //add the progress bar class
