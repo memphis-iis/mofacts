@@ -1474,6 +1474,7 @@ async function showUserFeedback(isCorrect, feedbackMessage, afterAnswerFeedbackC
   console.log('showUserFeedback');
   userFeedbackStart = Date.now();
   const isButtonTrial = getButtonTrial();
+  feedbackDisplayPosition = Session.get('curTdfUISettings').feedbackDisplayPosition;
   // For button trials with images where they get the answer wrong, assume incorrect feedback is an image path
   if (!isCorrect && isButtonTrial && getResponseType() == 'image') {
     const buttonImageFeedback = 'Incorrect.  The correct response is displayed below.';
@@ -1487,7 +1488,7 @@ async function showUserFeedback(isCorrect, feedbackMessage, afterAnswerFeedbackC
       singleLineFeedback = Session.get('curTdfUISettings').singleLineFeedback;
       uiCorrectColor = Session.get('curTdfUISettings').correctColor;
       uiIncorrectColor = Session.get('curTdfUISettings').incorrectColor;
-      if(singleLineFeedback){
+      if(singleLineFeedback || feedbackDisplayPosition == "middle"){
         feedbackMessage = feedbackMessage.replace("Incorrect.", "<b style='color:" + uiIncorrectColor + ";'>Incorrect.</b>");
         feedbackMessage = feedbackMessage.replace("Correct.", "<b style='color:" + uiCorrectColor + ";'>Correct.</b>");
       } else {
@@ -1503,17 +1504,20 @@ async function showUserFeedback(isCorrect, feedbackMessage, afterAnswerFeedbackC
     const hSize = Session.get('currentDeliveryParams') ? Session.get('currentDeliveryParams').fontsize.toString() : 2;
     if(Session.get('curTdfUISettings').displayUserAnswerInFeedback){
       //prepend the user answer to the feedback message
-
     if(singleLineFeedback){
       feedbackMessage = "Your Answer: " + userAnswer + '. ' + feedbackMessage;
     } else {  
       feedbackMessage = "Your Answer: " + userAnswer + '.<br>' + feedbackMessage;
     }
-    feedbackDisplayPosition = Session.get('curTdfUISettings').feedbackDisplayPosition;
     //we have several options for displaying the feedback, we can display it in the top (#userInteraction), bottom (#userLowerInteraction). We write a case for this
     switch(feedbackDisplayPosition){
       case "top":
         target = "#UserInteraction";
+        $('#userInteractionContainer').attr("hidden",false).show();
+        break;
+      case "middle":
+        target = "#feedbackOverride";
+        $('#feedbackOverrideContainer').attr("hidden",false).show();
         break;
       case "bottom":
         target = "#userLowerInteraction";
@@ -3128,7 +3132,7 @@ async function resumeFromComponentState() {
       "displayPerformanceDuringStudy": true,
       "displayCorrectAnswerInCenter": false,
       "singleLineFeedback" : false,
-      "feedbackDisplayPosition" : "top",
+      "feedbackDisplayPosition" : "middle",
       "stimuliPosition" : "top",
       "stackChoiceButtons": false,
       "onlyShowSimpleFeedback": false,

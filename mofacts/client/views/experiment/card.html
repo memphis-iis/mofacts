@@ -18,14 +18,13 @@
         </div>
     {{else}}
         {{#if displayReady}}
-        <div id="userInteractionContainer" class="vh-5">
+        <div id="userInteractionContainer" class="vh-5" hidden>
                 <div class="text-center {{fontSizeClass}}" id="UserInteraction" hidden></div>
                 <div class="" id="forceCorrectionEntry" hidden>
                     {{> inputForceCorrect}}
                 </div>
         </div>
         <br>    
-            <div class="vh-10"></div>
             <div class="scrollHistoryContainer">
                 {{#if haveScrollList}}
                 {{#each scrollList}}
