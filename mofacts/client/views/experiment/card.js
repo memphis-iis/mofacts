@@ -414,7 +414,6 @@ async function initCard() {
   Session.set('curTdfTips', formattedTips)
   await checkUserSession();
   console.log('RENDERED----------------------------------------------');
-  const player = new Plyr('#player');
   // Catch page navigation events (like pressing back button) so we can call our cleanup method
   window.onpopstate = function() {
     if (document.location.pathname == '/card') {
@@ -905,6 +904,13 @@ function reinitializeMediaDueToDeviceChange() {
   initializeAudio();
 }
 
+function startVideo() {
+  const player = new Plyr('#videoUnitPlayer');
+  if(player){
+    player.play();
+  }
+}
+
 function initializeAudio() {
   try {
     // Older browsers might not implement mediaDevices at all, so we set an empty object first
@@ -946,7 +952,15 @@ function initializeAudio() {
 }
 
 function preloadVideos() {
-  Session.set('videoSource', DynamicAssets.findOne({name: Session.get('currentTdfUnit').videosession.videosource}).link());
+  if (Session.get('currentTdfUnit') && 
+  Session.get('currentTdfUnit').videosession &&
+  Session.get('currentTdfUnit').videosession.videosource) {
+    if(Session.get('currentTdfUnit').videosession.videosource.includes('http')){
+      Session.set('videoSource', Session.get('currentTdfUnit').videosession.videosource);
+    } else {
+      Session.set('videoSource', DynamicAssets.findOne({name: Session.get('currentTdfUnit').videosession.videosource}).link());
+    }
+  }
 }
 
 function preloadImages() {
@@ -2194,8 +2208,8 @@ async function prepareCard() {
   if (engine.unitFinished()) {
     unitIsFinished('Unit Engine');
   } else if (Session.get('isVideoSession')) {
-    await newQuestionHandler();
     Session.set('engineIndices', undefined);
+    startVideo();
   } else {
     await engine.selectNextCard(Session.get('engineIndices'), Session.get('currentExperimentState'));
     await newQuestionHandler();
@@ -3157,23 +3171,6 @@ async function getFeedbackParameters(){
     Session.set('displayFeedback',true);
   } 
 }
-
-// cached syllables depreciated by mongo migration
-// async function checkSyllableCacheForCurrentStimFile(cb) {
-//   const currentStimuliSetId = Session.get('currentStimuliSetId');
-//   cachedSyllables = StimSyllables.findOne({filename: currentStimuliSetId});
-//   console.log('cachedSyllables start: ', cachedSyllables);
-//   if (!cachedSyllables) {
-//     console.log('no cached syllables for this stim, calling server method to create them');
-//     Meteor.call('updateStimSyllables', currentStimuliSetId, function() {
-//       // cachedSyllables = StimSyllables.findOne({filename: currentStimuliSetId});
-//       // console.log('new cachedSyllables: ', cachedSyllables);
-//       cb();
-//     });
-//   } else {
-//     cb();
-//   }
-// }
 
 async function removeCardByUser() {
   Meteor.clearTimeout(Session.get('CurTimeoutId'));

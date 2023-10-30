@@ -1,7 +1,7 @@
 <template name="card">
     <div class="container" id="cardContainer">
         {{#if isVideoSession}}
-        <video id="player" playsinline controls data-poster="/path/to/poster.jpg">
+        <video id="videoUnitPlayer" playsinline controls data-poster="/path/to/poster.jpg">
             <source src="{{videoSource}}" type="video/mp4" />
           
             <!-- Captions are optional -->

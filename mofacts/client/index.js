@@ -354,6 +354,7 @@ Template.registerHelper('showPerformanceDetails', function() {
   const uiSettings = Session.get('curTdfUISettings');
   if(type == "s" && uiSettings.displayPerformanceDuringStudy) return true;
   if(type == "s" && !uiSettings.displayPerformanceDuringStudy) return false;
+  if(Session.get('isVideoSession')) return false;
   return ((Session.get('curModule') == 'card' || Session.get('curModule') !== 'instructions') && Session.get('scoringEnabled') && Session.get('unitType') != 'schedule');
 });
 Template.registerHelper('currentScore', function() {
