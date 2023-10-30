@@ -133,7 +133,7 @@ async function createExperimentExport(expName, requestingUserId) {
         const itemId = history.itemId;
         const teacherUserName = history.conditionTypeE?.split('/')[0];
         history = getHistory(history);
-        if(userIsAdmin ||  teacherUserName == requestingUserName || teacherUserName == 'undefined'){
+        if(userIsAdmin ||  teacherUserName == requestingUserName || teacherUserName == undefined){
           const dynamicStimTagValues = await getValuesOfStimTagList(stims, itemId, listOfDynamicStimTags);
           for (const tag of Object.keys(dynamicStimTagValues)) {
             history["CF (" + tag + ")"] = dynamicStimTagValues[tag];
