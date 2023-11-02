@@ -136,6 +136,7 @@ let trialStartTimestamp = 0;
 let firstKeypressTimestamp = 0;
 let currentSound = null; // See later in this file for sound functions
 let userFeedbackStart = null;
+let player = null;
 // We need to track the name/ID for clear and reset. We need the function and
 // delay used for reset
 let timeoutName = null;
@@ -904,11 +905,19 @@ function reinitializeMediaDueToDeviceChange() {
   initializeAudio();
 }
 
-function startVideo() {
-  const player = new Plyr('#videoUnitPlayer');
-  if(player){
-    player.play();
-  }
+async function initializePlyr() {
+  player = new Plyr('#videoUnitPlayer');
+  initVideoCards(player)
+  playVideo();
+}
+
+async function playVideo() {
+  $('#videoUnitPlayer').show();
+  player.play();
+  let indices = Session.get('engineIndices');
+  await engine.selectNextCard(indices, Session.get('currentExperimentState'));
+  Session.set('engineIndices', indices);
+  newQuestionHandler();
 }
 
 function initializeAudio() {
@@ -949,6 +958,53 @@ function initializeAudio() {
   } catch (e) {
     console.log('Error initializing Web Audio browser');
   }
+}
+
+function initVideoCards(player) {
+  const times = Session.get('currentTdfUnit')?.videosession?.questiontimes;
+  if(!times){
+    return
+  }
+  let timesCopy = times.slice(); 
+  timesCopy.sort((a, b) => a - b);
+  let nextTime = timesCopy.shift();
+  //add event listeners to pause video playback
+  player.on('timeupdate', async function(){
+    console.log('timeupdate', player.currentTime, nextTime);
+    if(player.currentTime >= nextTime && player.currentTime < nextTime+2){ //add 2 second buffer
+      player.pause();
+      $('#videoUnitPlayer').hide();
+      nextTime = timesCopy.shift();
+      nextQuestion = times.indexOf(nextTime);
+      Session.set('engineIndices', {stimIndex: 0, clusterIndex: nextQuestion});
+      Session.set('displayReady', true);
+    }
+  });
+
+  player.on('pause', async function(){
+    console.log('playback paused at ', player.currentTime);
+  });
+
+  player.on('play', async function(){
+    console.log('playback resumed at ', player.currentTime);
+  });
+
+  player.on('volumechange', async function(){
+    console.log('volume changed to ', player.volume);
+  });
+
+  player.on('seeking', async function(){
+    console.log('seeking started at ', player.currentTime);
+  });
+
+  player.on('seeked', async function(){
+    console.log('seeking started too ', player.currentTime);
+  });
+
+  player.on('ratechange', async function(){
+    console.log('playback speed changed to ', player.speed);
+  });
+
 }
 
 function preloadVideos() {
@@ -1691,12 +1747,14 @@ async function afterAnswerFeedbackCallback(trialEndTimeStamp, trialStartTimeStam
   }, reviewTimeout)
   Session.set('CurTimeoutId', timeout)
 
-  if(Session.get('unitType') == "model")
+  if(!Session.get('isVideoSession')){
+    if(Session.get('unitType') == "model")
     engine.calculateIndices().then(function(res, err) {
       Session.set('engineIndices', res );
     })
-  else
-    Session.set('engineIndices', undefined);
+    else
+      Session.set('engineIndices', undefined);
+  }
 }
 
 async function afterFeedbackCallback(trialEndTimeStamp, trialStartTimeStamp, isTimeout, isCorrect, testType, deliveryParams, answerLogRecord, callLocation) {
@@ -2208,8 +2266,17 @@ async function prepareCard() {
   if (engine.unitFinished()) {
     unitIsFinished('Unit Engine');
   } else if (Session.get('isVideoSession')) {
-    Session.set('engineIndices', undefined);
-    startVideo();
+    let indices = Session.get('engineIndices');
+    if(!indices){
+      indices = {
+        'clusterIndex': 0,
+        'stimIndex': 0
+      }
+      Session.set('engineIndices', indices);
+      initializePlyr();
+    } else {
+      playVideo();
+    }
   } else {
     await engine.selectNextCard(Session.get('engineIndices'), Session.get('currentExperimentState'));
     await newQuestionHandler();
@@ -2338,7 +2405,8 @@ function checkAndDisplayPrestimulus(deliveryParams, nextStageCb) {
     const prestimulusDisplayWrapper = {'text': prestimulusDisplay};
     console.log('prestimulusDisplay detected, displaying', prestimulusDisplayWrapper);
     Session.set('currentDisplay', prestimulusDisplayWrapper);
-    Session.set('displayReady', true);
+    const isVideoSession = Session.get('isVideoSession')
+    Session.set('displayReady', isVideoSession ? false : true); //displayReady handled by video session if video unit
     const prestimulusdisplaytime = deliveryParams.prestimulusdisplaytime;
     console.log('delaying for ' + prestimulusdisplaytime + ' ms then starting question', new Date());
     setTimeout(function() {
@@ -2353,10 +2421,11 @@ function checkAndDisplayPrestimulus(deliveryParams, nextStageCb) {
 
 function checkAndDisplayTwoPartQuestion(deliveryParams, currentDisplayEngine, closeQuestionParts, nextStageCb) {
   // In either case we want to set up the current display now
+  const isVideoSession = Session.get('isVideoSession')
   Session.set('displayReady', false);
   Session.set('currentDisplay', currentDisplayEngine);
   Session.get('currentExperimentState').clozeQuestionParts = closeQuestionParts;
-  Session.set('displayReady', true);
+  Session.set('displayReady', isVideoSession ? false : true);
   console.log('checking for two part questions');
   // Handle two part questions
   const currentQuestionPart2 = Session.get('currentExperimentState').currentQuestionPart2;
@@ -2369,7 +2438,7 @@ function checkAndDisplayTwoPartQuestion(deliveryParams, currentDisplayEngine, cl
       console.log('after timeout, displaying question part two', new Date());
       Session.set('displayReady', false);
       Session.set('currentDisplay', twoPartQuestionWrapper);
-      Session.set('displayReady', true);
+      Session.set('displayReady', isVideoSession ? false : true);
       console.log('displayReadyTrue, checkAndDisplayTwoPartQuestion');
       Session.get('currentExperimentState').currentQuestionPart2 = undefined;
       redoCardImage();
@@ -2415,12 +2484,14 @@ function beginQuestionAndInitiateUserInput(delayMs, deliveryParams) {
       }
       speakMessageIfAudioPromptFeedbackEnabled(questionToSpeak + buttonsToSpeak, 'question');
     }
-    allowUserInput();
-    beginMainCardTimeout(delayMs, function() {
-      console.log('stopping input after ' + delayMs + ' ms');
-      stopUserInput();
-      handleUserInput({}, 'timeout');
-    });
+    if(!Session.get('isVideoSession')) {
+      allowUserInput();
+      beginMainCardTimeout(delayMs, function() {
+        console.log('stopping input after ' + delayMs + ' ms');
+        stopUserInput();
+        handleUserInput({}, 'timeout');
+      });
+    }
   }
 }
 
@@ -3067,9 +3138,9 @@ async function resumeFromComponentState() {
   }
 
   const curTdfUnit = Session.get('currentTdfFile').tdfs.tutor.unit[Session.get('currentUnitNumber')];
-  if (curTdfUnit.videosession) 
+  if (curTdfUnit.videosession) { 
     Session.set('isVideoSession', true)
-  else
+  } else
     Session.set('isVideoSession', false)
   Session.set('currentTdfUnit', curTdfUnit);
   console.log('resume, currentTdfUnit:', curTdfUnit);
@@ -3313,7 +3384,17 @@ async function processUserTimesLog() {
     const curTdfUnit = curTdf.tdfs.tutor.unit[Session.get('currentUnitNumber')];
     await setStudentPerformance(curUser._id, curUser.username, currentTdfId);
 
-    if (resumeToQuestion) {
+    if(Session.get('isVideoSession')){
+      let indices = Session.get('engineIndices');
+      if(!indices){
+        indices = {
+          'clusterIndex': 0,
+          'stimIndex': 0
+        }
+      }
+      Session.set('engineIndices', indices);
+      initializePlyr();
+    } else if (resumeToQuestion) {
       // Question outstanding: force question display and let them give an answer
       console.log('RESUME FINISHED: displaying current question');
       await newQuestionHandler();
