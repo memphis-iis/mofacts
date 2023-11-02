@@ -19,6 +19,22 @@ Template.adminControls.created = function() {
     });
 };
 
+Template.adminControls.rendered = function() {
+        //get client verbosity level
+        clientVerbosityLevel = DynamicSettings.findOne({key: 'clientVerbosityLevel'}).value.toString();
+        //if client verbosity level is not set, set it to 0
+        if (clientVerbosityLevel === undefined) {
+            clientVerbosityLevel = "0"
+            console.log("clientVerbosityLevel not set, setting to 0");
+            DynamicSettings.insert({key: 'clientVerbosityLevel', value: clientVerbosityLevel});
+        }
+        //set the name of the radio button to be checked
+        const name = `clientVerbosityRadio${clientVerbosityLevel}`;
+        console.log("clientVerbosityLevel: " + name);
+        //check the radio button
+        document.getElementById(name).checked = true;
+    };
+
 Template.adminControls.helpers({
     'serverStatus': function() {
         Meteor.call('getServerStatus', function(err, res) {

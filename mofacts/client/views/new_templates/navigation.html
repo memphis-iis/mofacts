@@ -5,11 +5,14 @@
   <div class="container-fluid">
     <a class="navbar-brand" href="/">MoFaCTs</a>
     <div class="d-flex toggle-buttons" role="menu">
+      {{#if isInTrial}}
+      {{else}}
       <button class="dropdown-item" id="errorReportButton" data-bs-toggle="modal" data-bs-target="#audioModal"><i class="fa fa-volume-up" aria-hidden="true"></i>
       </button>
       <button type="button" aria-label="Toggle navigation" onclick="$('#full-menu').toggle();">
         <span class="navbar-toggler-icon"></span>
       </button>  
+      {{/if}}
     </div>
   </div>
 </nav>

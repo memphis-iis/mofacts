@@ -438,7 +438,7 @@ async function doPackageUpload(file, template){
                 reason.push(`The uploaded package contains a TDF file that could break the experiment. Do you want to continue?\nFile Name: ${res.data.TDF.content.fileName}`)
               console.log('Client TDF could break experiment, asking for confirmation');
               if(confirm(reason.join('\n'))){
-                Meteor.call('tdfUpdateConfirmed', res.data.TDF, function(err,res){
+                Meteor.call('tdfUpdateConfirmed', res.data.TDF, res.data.reason.includes('shuffleclusterMissmatch'), function(err,res){
                   if(err){
                     alert(err);
                   }

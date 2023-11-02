@@ -520,10 +520,11 @@ function modelUnitEngine() {
     let hintLevelIndex=-1;
     let optimalProb;
     let forceSpacing = currentDeliveryParams.forceSpacing;
+    let minTrialDistance = forceSpacing ? 1 : -1;
 
     for (let i=0; i<cards.length; i++) {
       const card = cards[i];
-      if (forceSpacing && (!card.canUse || !(card.trialsSinceLastSeen > 1))) {
+      if (!card.canUse || !(card.trialsSinceLastSeen > minTrialDistance)) {
         continue;
       } else {
         const stimCluster = stimClusters[i];
@@ -544,7 +545,7 @@ function modelUnitEngine() {
             hintLevelIndex = 0;
           }
           if(stimCluster.stims[j].textStimulus || stimCluster.stims[j].clozeStimulus){
-            for(let k=0; k<Math.min(stim.hintLevelProbabilites.length, 3); k++){
+            for(let k=1; k<Math.min(stim.hintLevelProbabilites.length, 3); k++){
               let hintDist = Math.abs(Math.log(stim.hintLevelProbabilites[k]/(1-stim.hintLevelProbabilites[k])) - optimalProb);
               if(hintDist < currentMin){
                 currentMin = hintDist;
@@ -568,10 +569,11 @@ function modelUnitEngine() {
     let stimIndex=-1;
     let hintLevelIndex=-1;
     let forceSpacing = currentDeliveryParams.forceSpacing;
+    let minTrialDistance = forceSpacing ? 1 : -1;
 
     for (let i=0; i<cards.length; i++) {
       const card = cards[i];
-      if (forceSpacing && (!card.canUse || !(card.trialsSinceLastSeen > 1))) {
+      if (!card.canUse || !(card.trialsSinceLastSeen > minTrialDistance)) {
         continue;
       } else {
         const stimCluster = stimClusters[i];
@@ -603,8 +605,6 @@ function modelUnitEngine() {
         }
       }
     }
-    const stim = cards[clusterIndex].stims[stimIndex];
-
     return {clusterIndex, stimIndex, hintLevelIndex};
   }
 
@@ -702,7 +702,7 @@ function modelUnitEngine() {
           if(!typeof stim.probabilityEstimate == "number"){
             throw 'Error: Probability Estimate is undefined or NaN.';
           }
-          ptemp[count]=Math.round(100*parms.probability)/100;
+          ptemp[count]=Math.round(10000*parms.probability)/10000;
           count++;           
         }
       }
