@@ -637,3 +637,12 @@ input[type="range"]::-webkit-slider-thumb {
     max-width: 50vw;
     height: auto;
  }
+
+ .imgDisplay-container{
+    /*this is a backround image that needs to be top-center and not repeat, and contained within the div*/
+    background-position: top center;    
+    background-repeat: no-repeat;
+    background-size: contain;
+    min-height:50vw;
+    width: 100%;
+}

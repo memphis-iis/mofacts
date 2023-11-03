@@ -23,8 +23,10 @@
                 <div class="" id="forceCorrectionEntry" hidden>
                     {{> inputForceCorrect}}
                 </div>
+                <div class="vh-10"></div>
         </div>
         <br>    
+
             <div class="scrollHistoryContainer">
                 {{#if haveScrollList}}
                 {{#each scrollList}}
@@ -57,14 +59,14 @@
                             {{/if}}
                             </p>
                         </div> 
-                        <div class="h2" id="imageDisplay">
-                            {{#if imageCard}}
-                                <div class="w-100 text-center">
-                                      <img id="cardQuestionImg" src="{{curImgSrc}}" class="img-fluid mx-auto"> 
+                        {{#if imageCard}}
+                        <div class="h2 vh-50" id="imageDisplay">
+            
+                                <div class="w-100  imgDisplay-container text-center" style="background-image: url({{curImgSrc}}) ;">
                                 </div>
                                 <br>
-                            {{/if}}
                         </div>
+                        {{/if}}
                         {{#if videoCard}}
                             <video autoplay="">
                                 <source src="{{curVideoSrc}}">
@@ -148,13 +150,7 @@
                 <div id="multipleChoiceContainer" class="{{UIsettings.choiceColWidth}}">
                     <!-- will contain multiple choice buttons which are dynamically added. -->
                     {{#if buttonTrial}}
-                    <div id="multipleChoiceTable" class="row gy-3 
-                        {{#if UIsettings.stackChoiceButtons}}
-                        row-cols-1 row-cols-md-2 
-                        {{else}}
-                        row-cols-1
-                        {{/if}}
-                        text-center align-items-start">
+                    <div id="multipleChoiceTable" class="row gy-3 choice text-center row-cols-{{UIsettings.choiceButtonCols}} align-items-start">
                         {{#if imageResponse}}
                             {{#each buttonListImageRows}}
                             <div class="col ml-auto">

@@ -1488,6 +1488,7 @@ async function showUserFeedback(isCorrect, feedbackMessage, afterAnswerFeedbackC
       singleLineFeedback = Session.get('curTdfUISettings').singleLineFeedback;
       uiCorrectColor = Session.get('curTdfUISettings').correctColor;
       uiIncorrectColor = Session.get('curTdfUISettings').incorrectColor;
+      displayCorrectAnswerInCenter = Session.get('curTdfUISettings').displayCorrectAnswerInCenter;
       if(singleLineFeedback || feedbackDisplayPosition == "middle"){
         feedbackMessage = feedbackMessage.replace("Incorrect.", "<b style='color:" + uiIncorrectColor + ";'>Incorrect.</b>");
         feedbackMessage = feedbackMessage.replace("Correct.", "<b style='color:" + uiCorrectColor + ";'>Correct.</b>");
@@ -1495,19 +1496,18 @@ async function showUserFeedback(isCorrect, feedbackMessage, afterAnswerFeedbackC
         feedbackMessage = feedbackMessage.replace("Incorrect.", "<br><b style='color:" + uiIncorrectColor + ";'>Incorrect.</b><br>");
         feedbackMessage = feedbackMessage.replace("Correct.", "<br><b style='color:" + uiCorrectColor + ";'>Correct.</b><br>");
       }
-      //if the ui setting onlyShowSimpleFeedback is set to true, then we will only show the word "incorrect" or "correct" in the feedback
-      if (Session.get('curTdfUISettings').onlyShowSimpleFeedback && singleLineFeedback) {
-        feedbackMessage.split("<br>")[1].toLowerCase() ? feedbackMessage = feedbackMessage.split("<br>")[1].toLowerCase() : feedbackMessage = feedbackMessage.split("</b>")[1].toLowerCase();
+      if (Session.get('curTdfUISettings').onlyShowSimpleFeedback) {
+        feedbackMessage.split("<br>")[1] ? feedbackMessage = feedbackMessage.split("<br>")[0] : feedbackMessage = feedbackMessage.split("</b>")[0]
       }
-    }
     $('.hints').hide();
     const hSize = Session.get('currentDeliveryParams') ? Session.get('currentDeliveryParams').fontsize.toString() : 2;
-    if(Session.get('curTdfUISettings').displayUserAnswerInFeedback){
-      //prepend the user answer to the feedback message
-    if(singleLineFeedback){
-      feedbackMessage = "Your Answer: " + userAnswer + '. ' + feedbackMessage;
-    } else {  
-      feedbackMessage = "Your Answer: " + userAnswer + '.<br>' + feedbackMessage;
+      if(Session.get('curTdfUISettings').displayUserAnswerInFeedback){
+        //prepend the user answer to the feedback message
+      if(singleLineFeedback){
+        feedbackMessage =  "<b style='color:" + uiIncorrectColor + ";'>Incorrect.</b> Your Answer: " + userAnswer + '. ' + feedbackMessage;
+      } else {  
+        feedbackMessage = "<br><b style='color:" + uiIncorrectColor + ";'>Incorrect.</b><br> Your Answer: " + userAnswer + '.<br>' + feedbackMessage;
+      }
     }
     //we have several options for displaying the feedback, we can display it in the top (#userInteraction), bottom (#userLowerInteraction). We write a case for this
     switch(feedbackDisplayPosition){
@@ -1531,14 +1531,17 @@ async function showUserFeedback(isCorrect, feedbackMessage, afterAnswerFeedbackC
     $('#displayContainer').removeClass('col-md-6').addClass('mx-auto');
     //use jquery to select the target and display the feedback message
           //if the displayOnlyCorrectAnswerAsFeedbackOverride is set to true, then we will display the correct answer in feedbackOverride div
-          if (Session.get('curTdfUISettings').displayCorrectAnswerInCenter) {
+          if (displayCorrectAnswerInCenter) {
             const correctAnswer = Answers.getDisplayAnswerText(Session.get('currentExperimentState').currentAnswer);
             $('#feedbackOverride').html(correctAnswer);
             $('#feedbackOverrideContainer').attr("hidden",false).show();
           }
+          if(isTimeout && !Session.get('curTdfUISettings').displayUserAnswerInFeedback){
+            feedbackMessage = "[timeout]" + " <b style='color:" + uiIncorrectColor + ";'>Incorrect.</b> " + feedbackMessage;
+          }
           if(!isCorrect){
             $(target)
-          .html(feedbackMessage)
+          .html($(target).html() + feedbackMessage)
           .attr("hidden",false)
           .show()
           var countDownStart = new Date().getTime();
@@ -2463,7 +2466,6 @@ function allowUserInput() {
       $('#continueStudy, #userAnswer, #multipleChoiceContainer button').prop('disabled', false);
     }
     // Force scrolling to bottom of screen for the input
-    scrollElementIntoView(null, false);
 
     const textFocus = !getButtonTrial();
     if (textFocus) {
@@ -2476,18 +2478,6 @@ function allowUserInput() {
   }, 200);
 }
 
-function scrollElementIntoView(selector, scrollType) {
-  Meteor.setTimeout(function() {
-    Tracker.afterFlush(function() {
-      if (selector === null) {
-        window.scrollTo(0, scrollType ? 0 : document.body.scrollHeight);
-      } else {
-        $(selector).get(0).scrollIntoView(scrollType ? true : false);
-      }
-      console.log('Scrolled for', selector, scrollType);
-    });
-  }, 1);
-}
 
 // This records the synchronous state of whether input should be enabled or disabled
 // without this we get into the situation where either stopUserInput fails because
@@ -3129,12 +3119,13 @@ async function resumeFromComponentState() {
       "displayCardTimeoutAsBarOrText": "both",
       "displayTimeOutDuringStudy": true,
       "displayUserAnswerInFeedback": true,
-      "displayPerformanceDuringStudy": true,
+      "displayPerformanceDuringStudy": false,
+      "displayPerformanceDuringTrial": true,
       "displayCorrectAnswerInCenter": false,
       "singleLineFeedback" : false,
       "feedbackDisplayPosition" : "middle",
       "stimuliPosition" : "top",
-      "stackChoiceButtons": false,
+      "choiceButtonCols": 1,
       "onlyShowSimpleFeedback": false,
       "incorrectColor": "darkorange",
       "correctColor": "green"
@@ -3179,7 +3170,7 @@ async function resumeFromComponentState() {
 
   Session.set('curTdfUISettings', UIsettings);
 
-  
+
   console.log('curTdfUISettings', Session.get('curTdfUISettings'))
 
   if (Session.get('feedbackUnset')){
