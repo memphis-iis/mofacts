@@ -1475,7 +1475,6 @@ async function showUserFeedback(isCorrect, feedbackMessage, afterAnswerFeedbackC
   userFeedbackStart = Date.now();
   const isButtonTrial = getButtonTrial();
   feedbackDisplayPosition = Session.get('curTdfUISettings').feedbackDisplayPosition;
-  feedbackDisplayPosition = "middle";
   // For button trials with images where they get the answer wrong, assume incorrect feedback is an image path
   if (!isCorrect && isButtonTrial && getResponseType() == 'image') {
     const buttonImageFeedback = 'Incorrect.  The correct response is displayed below.';
