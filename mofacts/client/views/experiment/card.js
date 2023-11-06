@@ -1475,6 +1475,7 @@ async function showUserFeedback(isCorrect, feedbackMessage, afterAnswerFeedbackC
   userFeedbackStart = Date.now();
   const isButtonTrial = getButtonTrial();
   feedbackDisplayPosition = Session.get('curTdfUISettings').feedbackDisplayPosition;
+  feedbackDisplayPosition = "middle";
   // For button trials with images where they get the answer wrong, assume incorrect feedback is an image path
   if (!isCorrect && isButtonTrial && getResponseType() == 'image') {
     const buttonImageFeedback = 'Incorrect.  The correct response is displayed below.';
@@ -1501,12 +1502,22 @@ async function showUserFeedback(isCorrect, feedbackMessage, afterAnswerFeedbackC
       }
     $('.hints').hide();
     const hSize = Session.get('currentDeliveryParams') ? Session.get('currentDeliveryParams').fontsize.toString() : 2;
-      if(Session.get('curTdfUISettings').displayUserAnswerInFeedback){
+    //if userAnswer is [timeout], feedbackMessage should be "<b style='color:" + uiIncorrectColor + ";'>Incorrect.</b> " + feedbackMessage
+    if(isTimeout){
+      //if displayCorrectAnswerInCenter is true, then we will only display simple feedback
+      if(displayCorrectAnswerInCenter){
+        feedbackMessage = "<b style='color:" + uiIncorrectColor + ";'>Incorrect.</b> ";
+      } else {
+        feedbackMessage = "<b style='color:" + uiIncorrectColor + ";'>Incorrect.</b><br>" + feedbackMessage;
+      }
+    }
+    if(Session.get('curTdfUISettings').displayUserAnswerInFeedback){
         //prepend the user answer to the feedback message
-      if(singleLineFeedback){
-        feedbackMessage =  "<b style='color:" + uiIncorrectColor + ";'>Incorrect.</b> Your Answer: " + userAnswer + '. ' + feedbackMessage;
+      
+        if(singleLineFeedback){
+        feedbackMessage =  ". Your answer: " + userAnswer + '. ' + feedbackMessage;
       } else {  
-        feedbackMessage = "<br><b style='color:" + uiIncorrectColor + ";'>Incorrect.</b><br> Your Answer: " + userAnswer + '.<br>' + feedbackMessage;
+        feedbackMessage = "<br>Your answer: " + userAnswer + '. ' + feedbackMessage;
       }
     }
     //we have several options for displaying the feedback, we can display it in the top (#userInteraction), bottom (#userLowerInteraction). We write a case for this
@@ -1526,6 +1537,10 @@ async function showUserFeedback(isCorrect, feedbackMessage, afterAnswerFeedbackC
         $(target).addClass('h' + hSize);
         break;
     }
+    //remove the first <br> tag from feedback message if it exists
+    if(feedbackMessage.startsWith("<br>")){
+      feedbackMessage = feedbackMessage.substring(4);
+    }
     //hide the buttons
     $('#multipleChoiceContainer').hide();
     $('#displayContainer').removeClass('col-md-6').addClass('mx-auto');
@@ -1535,6 +1550,9 @@ async function showUserFeedback(isCorrect, feedbackMessage, afterAnswerFeedbackC
             const correctAnswer = Answers.getDisplayAnswerText(Session.get('currentExperimentState').currentAnswer);
             $('#feedbackOverride').html(correctAnswer);
             $('#feedbackOverrideContainer').attr("hidden",false).show();
+            if(feedbackDisplayPosition == "middle"){
+              feedbackMessage = ". " + feedbackMessage;
+            }
           }
           if(isTimeout && !Session.get('curTdfUISettings').displayUserAnswerInFeedback){
             feedbackMessage = "[timeout]" + " <b style='color:" + uiIncorrectColor + ";'>Incorrect.</b> " + feedbackMessage;
