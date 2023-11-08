@@ -9,6 +9,10 @@ import {
   getAllCurrentStimAnswers,
   getTestType,
 } from '../../lib/currentTestingHelpers';
+import { 
+  initializePlyr,
+  playVideo,
+} from '../../lib/plyrHelper.js'
 import {meteorCallAsync, redoCardImage} from '../../index';
 import {DialogueUtils, dialogueContinue, dialogueLoop, initiateDialogue} from './dialogueUtils';
 import {SCHEDULE_UNIT, ENTER_KEY} from '../../../common/Definitions';
@@ -20,7 +24,6 @@ import {sessionCleanUp} from '../../lib/sessionUtils';
 import {checkUserSession} from '../../index'
 import {instructContinue, unitHasLockout, checkForFileImage} from './instructions';
 
-import Plyr from 'plyr';
 
 export {
   speakMessageIfAudioPromptFeedbackEnabled,
@@ -31,7 +34,9 @@ export {
   restartMainCardTimeoutIfNecessary,
   getCurrentClusterAndStimIndices,
   initCard,
-  unitIsFinished
+  unitIsFinished,
+  gatherAnswerLogRecord,
+  newQuestionHandler
 };
 
 /*
@@ -133,6 +138,7 @@ let cachedSyllables = null;
 let speechTranscriptionTimeoutsSeen = 0;
 let timeoutsSeen = 0; // Reset to zero on resume or non-timeout
 let trialStartTimestamp = 0;
+Session.set('trialStartTimestamp', trialStartTimestamp);
 let firstKeypressTimestamp = 0;
 let currentSound = null; // See later in this file for sound functions
 let userFeedbackStart = null;
@@ -905,21 +911,6 @@ function reinitializeMediaDueToDeviceChange() {
   initializeAudio();
 }
 
-async function initializePlyr() {
-  player = new Plyr('#videoUnitPlayer');
-  initVideoCards(player)
-  playVideo();
-}
-
-async function playVideo() {
-  $('#videoUnitPlayer').show();
-  player.play();
-  let indices = Session.get('engineIndices');
-  await engine.selectNextCard(indices, Session.get('currentExperimentState'));
-  Session.set('engineIndices', indices);
-  newQuestionHandler();
-}
-
 function initializeAudio() {
   try {
     // Older browsers might not implement mediaDevices at all, so we set an empty object first
@@ -958,53 +949,6 @@ function initializeAudio() {
   } catch (e) {
     console.log('Error initializing Web Audio browser');
   }
-}
-
-function initVideoCards(player) {
-  const times = Session.get('currentTdfUnit')?.videosession?.questiontimes;
-  if(!times){
-    return
-  }
-  let timesCopy = times.slice(); 
-  timesCopy.sort((a, b) => a - b);
-  let nextTime = timesCopy.shift();
-  //add event listeners to pause video playback
-  player.on('timeupdate', async function(){
-    console.log('timeupdate', player.currentTime, nextTime);
-    if(player.currentTime >= nextTime && player.currentTime < nextTime+2){ //add 2 second buffer
-      player.pause();
-      $('#videoUnitPlayer').hide();
-      nextTime = timesCopy.shift();
-      nextQuestion = times.indexOf(nextTime);
-      Session.set('engineIndices', {stimIndex: 0, clusterIndex: nextQuestion});
-      Session.set('displayReady', true);
-    }
-  });
-
-  player.on('pause', async function(){
-    console.log('playback paused at ', player.currentTime);
-  });
-
-  player.on('play', async function(){
-    console.log('playback resumed at ', player.currentTime);
-  });
-
-  player.on('volumechange', async function(){
-    console.log('volume changed to ', player.volume);
-  });
-
-  player.on('seeking', async function(){
-    console.log('seeking started at ', player.currentTime);
-  });
-
-  player.on('seeked', async function(){
-    console.log('seeking started too ', player.currentTime);
-  });
-
-  player.on('ratechange', async function(){
-    console.log('playback speed changed to ', player.speed);
-  });
-
 }
 
 function preloadVideos() {
@@ -2368,6 +2312,7 @@ function startQuestionTimeout() {
     readyPromptTimeout = Session.get('currentDeliveryParams').readyPromptStringDisplayTime
   }
   trialStartTimestamp = Date.now();
+  Session.set('trialStartTimestamp', trialStartTimestamp);
   Meteor.setTimeout(() => {
     const beginQuestionAndInitiateUserInputBound = beginQuestionAndInitiateUserInput.bind(null, delayMs, deliveryParams);
     const pipeline = checkAndDisplayTwoPartQuestion.bind(null,
@@ -2977,6 +2922,7 @@ async function resumeFromComponentState() {
   timeoutsSeen = 0;
   firstKeypressTimestamp = 0;
   trialStartTimestamp = 0;
+  Session.set('trialStartTimestamp', trialStartTimestamp);
   clearScrollList();
   clearCardTimeout();
 
