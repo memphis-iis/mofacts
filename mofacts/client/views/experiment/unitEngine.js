@@ -544,15 +544,14 @@ function modelUnitEngine() {
             stimIndex=j;
             hintLevelIndex = 0;
           }
-          if(stimCluster.stims[j].textStimulus || stimCluster.stims[j].clozeStimulus){
-            for(let k=1; k<Math.min(stim.hintLevelProbabilites.length, 3); k++){
-              let hintDist = Math.abs(Math.log(stim.hintLevelProbabilites[k]/(1-stim.hintLevelProbabilites[k])) - optimalProb);
-              if(hintDist < currentMin){
-                currentMin = hintDist;
-                clusterIndex=i;
-                stimIndex=j;
-                hintLevelIndex = k;
-              }
+          if(stimCluster.stims[j].syllables.length < 3 || !(stimCluster.stims[j].textStimulus || stimCluster.stims[j].clozeStimulus)) continue;
+          for(let k=1; k<Math.min(stim.hintLevelProbabilites.length, 3); k++){
+            let hintDist = Math.abs(Math.log(stim.hintLevelProbabilites[k]/(1-stim.hintLevelProbabilites[k])) - optimalProb);
+            if(hintDist < currentMin){
+              currentMin = hintDist;
+              clusterIndex=i;
+              stimIndex=j;
+              hintLevelIndex = k;
             }
           }
         }
@@ -592,14 +591,13 @@ function modelUnitEngine() {
             stimIndex=j;
             hintLevelIndex=0;
           }
-          if(stimCluster.stims[j].textStimulus || stimCluster.stims[j].clozeStimulus){
-            for(let k=0; k<stim.hintLevelProbabilites.length; k++){
-              if(stim.hintLevelProbabilites[k] > currentMax && stim.hintLevelProbabilites[k] < thresholdCeiling ){
-                currentMax = stim.hintLevelProbabilites[k];
-                clusterIndex=i;
-                stimIndex=j;
-                hintLevelIndex = k;
-              }
+          if(stimCluster.stims[j].syllables.length < 3 || !(stimCluster.stims[j].textStimulus || stimCluster.stims[j].clozeStimulus)) continue;
+          for(let k=0; k<stim.hintLevelProbabilites.length; k++){
+            if(stim.hintLevelProbabilites[k] > currentMax && stim.hintLevelProbabilites[k] < thresholdCeiling ){
+              currentMax = stim.hintLevelProbabilites[k];
+              clusterIndex=i;
+              stimIndex=j;
+              hintLevelIndex = k;
             }
           }
         }
@@ -660,36 +658,36 @@ function modelUnitEngine() {
       let parms;
       const ptemp=[];
       const tdfDebugLog=[];
-      for (let i=0; i<cardProbabilities.cards.length; i++) {
-        const card = cardProbabilities.cards[i];
+      for (let clusterIndex = 0; clusterIndex < cardProbabilities.cards.length; clusterIndex++) {
+        const card = cardProbabilities.cards[clusterIndex];
         const pParams=[];
-        const stimCluster = stimClusters[i];
-        for (let j=0; j<card.stims.length; j++) {
-          const stim = card.stims[j];
+        const stimCluster = stimClusters[clusterIndex];
+        for (let stimIndex = 0; stimIndex < card.stims.length; stimIndex++) {
+          const stim = card.stims[stimIndex];
           const hintLevelProbabilities = [];
           const currentStimuliSetId = Session.get('currentStimuliSetId');
-          const stimAnswer = stimCluster.stims[j].correctResponse
+          const stimAnswer = stimCluster.stims[stimIndex].correctResponse
           let answerText = Answers.getDisplayAnswerText(stimAnswer).toLowerCase();
           //Detect Hint Levels
-          if (!stimCluster.stims[j].syllables) {
+          if (!stimCluster.stims[stimIndex].syllables) {
             hintLevelIndex = 1;
             clientConsole(2, 'no cached syllables for: ' + currentStimuliSetId + ' | ' + answerText + '. hintlevel index is 1.');
           } else {
-            const stimSyllableData = stimCluster.stims[j].syllables;
+            const stimSyllableData = stimCluster.stims[stimIndex].syllables;
             hintLevelIndex = stimSyllableData.length;
             clientConsole(2, 'syllables detected for: ' + currentStimuliSetId + ' | ' + answerText + '. hintlevel index is ' + hintLevelIndex);
           }
-          parms = this.calculateSingleProb(i, j, 0, count, stimCluster);
+          parms = this.calculateSingleProb(clusterIndex, stimIndex, 0, count, stimCluster);
           tdfDebugLog.push(parms.debugLog);
           
           stim.available = parms.available;
           if(parms.available === undefined || parms.available){
             stim.canUse = true;
-            if(stimCluster.stims[j].textStimulus || stimCluster.stims[j].clozeStimulus){
-              for(let k=0; k<Math.min(hintLevelIndex, 3); k++){
-                let hintLevelParms = this.calculateSingleProb(i, j, k, count, stimCluster);
+            if((stimCluster.stims[stimIndex].textStimulus || stimCluster.stims[stimIndex].clozeStimulus) && hintLevelIndex > 2){ //hints can't be used if there are fewer than 3 syllables
+              for(let hintLevel = 0; hintLevel < 3; hintLevel++){
+                let hintLevelParms = this.calculateSingleProb(clusterIndex, stimIndex, hintLevel, count, stimCluster);
                 hintLevelProbabilities.push(hintLevelParms.probability);
-                clientConsole(2, 'cluster: ' + i + ', card: ' + j + ', input hintlevel: ' + k + ', output hintLevel: ' + hintLevelParms.hintLevel + ', output probability: ' + hintLevelParms.probability) + ', debug message:' + hintLevelParms.debugLog;
+                clientConsole(2, 'cluster: ' + clusterIndex + ', card: ' + stimIndex + ', input hintlevel: ' + hintLevel + ', output hintLevel: ' + hintLevelParms.hintLevel + ', output probability: ' + hintLevelParms.probability) + ', debug message:' + hintLevelParms.debugLog;
               }
               stim.hintLevelProbabilites = hintLevelProbabilities;
               clientConsole(2, 'hintLevel probabilities', hintLevelProbabilities);
