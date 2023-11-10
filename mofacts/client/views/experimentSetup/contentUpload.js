@@ -17,7 +17,8 @@ Template.contentUpload.helpers({
     return Template.instance().currentUpload.get();
   },
   assets: function() {
-    const files = DynamicAssets.find().fetch();
+    userId = Meteor.userId();
+    const files = DynamicAssets.find({userId: userId}).fetch();
     sortedFiles = [];
     //get all tdfs
     allTDfs = Tdfs.find({ownerId: Meteor.userId()}).fetch();

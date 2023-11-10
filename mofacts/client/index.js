@@ -375,6 +375,9 @@ Template.registerHelper('showFeedbackResetButton', function() {
 Template.registerHelper('isInTrial', function() {
   return Session.get('curModule') == 'card' || Session.get('curModule') == 'instructions';
 });
+Template.registerHelper('isInInstructions', function() {
+  return Session.get('curModule') == 'instructions';
+});
 Template.registerHelper('isInSession', function() {
   return (Session.get('curModule') == 'profile');
 });
