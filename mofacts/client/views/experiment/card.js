@@ -1497,7 +1497,7 @@ async function showUserFeedback(isCorrect, feedbackMessage, afterAnswerFeedbackC
         feedbackMessage = feedbackMessage.replace("Correct.", "<br><b style='color:" + uiCorrectColor + ";'>Correct.</b><br>");
       }
       if (Session.get('curTdfUISettings').onlyShowSimpleFeedback) {
-        feedbackMessage.split("<br>")[1] ? feedbackMessage = feedbackMessage.split("<br>")[0] : feedbackMessage = feedbackMessage.split("</b>")[0]
+        isCorrect ? feedbackMessage = "<b style='color:" + uiCorrectColor + ";'>Correct.</b>" : feedbackMessage = "<b style='color:" + uiIncorrectColor + ";'>Incorrect.</b>";
       }
     $('.hints').hide();
     const hSize = Session.get('currentDeliveryParams') ? Session.get('currentDeliveryParams').fontsize.toString() : 2;
@@ -1513,10 +1513,14 @@ async function showUserFeedback(isCorrect, feedbackMessage, afterAnswerFeedbackC
     if(Session.get('curTdfUISettings').displayUserAnswerInFeedback){
         //prepend the user answer to the feedback message
       
-        if(singleLineFeedback){
-        feedbackMessage =  ". Your answer: " + userAnswer + '. ' + feedbackMessage;
+      if(singleLineFeedback){
+        feedbackMessage =  "Your answer: " + userAnswer + '. ' + feedbackMessage;
       } else {  
         feedbackMessage = "<br>Your answer: " + userAnswer + '. ' + feedbackMessage;
+      }
+      if(displayCorrectAnswerInCenter && feedbackDisplayPosition == "middle"){
+        //prepend a period to the feedback message
+        feedbackMessage = ". " + feedbackMessage;
       }
     }
     //we have several options for displaying the feedback, we can display it in the top (#userInteraction), bottom (#userLowerInteraction). We write a case for this
@@ -1547,14 +1551,11 @@ async function showUserFeedback(isCorrect, feedbackMessage, afterAnswerFeedbackC
           //if the displayOnlyCorrectAnswerAsFeedbackOverride is set to true, then we will display the correct answer in feedbackOverride div
           if (displayCorrectAnswerInCenter) {
             const correctAnswer = Answers.getDisplayAnswerText(Session.get('currentExperimentState').currentAnswer);
-            $('#feedbackOverride').html(correctAnswer);
-            $('#feedbackOverrideContainer').attr("hidden",false).show();
-            if(feedbackDisplayPosition == "middle"){
-              feedbackMessage = ". " + feedbackMessage;
-            }
+            $('#correctAnswerDisplayContainer').html(correctAnswer);
+            $('#correctAnswerDisplayContainer').attr("hidden",false).show();
           }
           if(isTimeout && !Session.get('curTdfUISettings').displayUserAnswerInFeedback){
-            feedbackMessage = "[timeout]" + " <b style='color:" + uiIncorrectColor + ";'>Incorrect.</b> " + feedbackMessage;
+            feedbackMessage =  ". " + feedbackMessage;
           }
           if(!isCorrect){
             $(target)
