@@ -182,7 +182,7 @@ function defaultUnitEngine(curExperimentData) {
       let currentStimAnswerWordCount = currentStimAnswer.split(' ').length;
 
       // For now this distinguishes model engine from schedule engine, which doesn't do syllable replacement
-      if (probFunctionParameters) {
+      if (probFunctionParameters && probFunctionParameters.hintLevel > 0) {
         clientConsole(1, 'getSubClozeAnswerSyllables, displaySyllableIndices/hintsylls: ', probFunctionParameters.hintsylls,
             ', this.cachedSyllables: ', this.cachedSyllables);
         const answer = currentStimAnswer.replace(/\./g, '_');
@@ -544,16 +544,33 @@ function modelUnitEngine() {
             stimIndex=j;
             hintLevelIndex = 0;
           }
-          if(stimCluster.stims[j].syllables.length < 3 || !(stimCluster.stims[j].textStimulus || stimCluster.stims[j].clozeStimulus)) continue;
-          for(let k=1; k<Math.min(stim.hintLevelProbabilites.length, 3); k++){
-            let hintDist = Math.abs(Math.log(stim.hintLevelProbabilites[k]/(1-stim.hintLevelProbabilites[k])) - optimalProb);
-            if(hintDist < currentMin){
+          if (
+            !stimCluster.stims[j] ||
+            !stimCluster.stims[j].syllables ||
+            stimCluster.stims[j].syllables.length < 3 ||
+            !(stimCluster.stims[j].textStimulus || stimCluster.stims[j].clozeStimulus)
+          ) {
+            continue;
+          }
+          
+          for (let k = 1; k < Math.min(stim.hintLevelProbabilites.length, 3); k++) {
+            // Check if hintLevelProbabilites array exists
+            if (!stim.hintLevelProbabilites) {
+              continue;
+            }
+          
+            let hintDist = Math.abs(
+              Math.log(stim.hintLevelProbabilites[k] / (1 - stim.hintLevelProbabilites[k])) - optimalProb
+            );
+          
+            if (hintDist < currentMin) {
               currentMin = hintDist;
-              clusterIndex=i;
-              stimIndex=j;
+              clusterIndex = i;
+              stimIndex = j;
               hintLevelIndex = k;
             }
           }
+          
         }
       }
     }

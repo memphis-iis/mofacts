@@ -615,7 +615,7 @@ Router.route('/card', {
   name: 'client.card',
   waitOn: function() {
     return [ 
-      Meteor.subscribe('assets', Session.get('currentTdfFile').ownerId, Session.get('currentStimuliSetId')),
+      Meteor.subscribe('files.assets.all'),
       Meteor.subscribe('userComponentStates', Session.get('currentTdfId')),
       Meteor.subscribe('currentTdf', Session.get('currentTdfId')),
       Meteor.subscribe('tdfByExperimentTarget', Session.get('experimentTarget'), Session.get('experimentConditions'))
@@ -638,7 +638,7 @@ Router.route('/instructions', {
   name: 'client.instructions',
   waitOn: function() {
     return [ 
-      Meteor.subscribe('assets', Session.get('currentTdfFile').ownerId, Session.get('currentStimuliSetId')),
+      Meteor.subscribe('files.assets.all'),
       Meteor.subscribe('userComponentStates', Session.get('currentTdfId')),
       Meteor.subscribe('currentTdf', Session.get('currentTdfId')),
     ]
