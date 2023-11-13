@@ -1949,15 +1949,7 @@ function scheduleUnitEngine() {
       const shuffles = settings.finalPermute.split(' ');
       const swaps = settings.finalSwap.split(' ');
       let mapping = _.range(finalQuests.length);
-
-      while (shuffles.length > 0 || swaps.length > 0) {
-        mapping = createStimClusterMapping(
-            finalQuests.length,
-            shuffles.shift() || '',
-            swaps.shift() || '',
-            mapping,
-        );
-      }
+      mapping = createStimClusterMapping(finalQuests.length, shuffles || [], swaps || [], mapping)
 
       clientConsole(2, 'Question swap/shuffle mapping:', displayify(
           _.map(mapping, function(val, idx) {

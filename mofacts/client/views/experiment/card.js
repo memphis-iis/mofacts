@@ -2917,15 +2917,7 @@ async function resumeFromComponentState() {
     console.log('shuffles.length', shuffles.length);
     console.log('swaps.length', swaps.length);
 
-    while (shuffles.length > 0 || swaps.length > 0) {
-      clusterMapping = createStimClusterMapping(
-          stimCount,
-          shuffles.shift() || '',
-          swaps.shift() || '',
-          clusterMapping,
-      );
-      console.log('while', clusterMapping);
-    }
+    clusterMapping = createStimClusterMapping(stimCount, shuffles || [], swaps || [], clusterMapping)
     newExperimentState.clusterMapping = clusterMapping;
     console.log('Cluster mapping created', clusterMapping);
   } else {
