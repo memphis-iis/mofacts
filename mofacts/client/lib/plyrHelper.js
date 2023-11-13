@@ -2,57 +2,107 @@ import Plyr from 'plyr';
 import { newQuestionHandler } from '../views/experiment/card.js'
 
 let lastTimestamp = 0;
+let lastVolume = 0;
+let lastSpeed = 0;
+let loggingSeek = false;
+let seekStart = 0;
+let player;
 
 function initVideoCards(player) {
-    const times = Session.get('currentTdfUnit')?.videosession?.questiontimes;
-    lastTimestamp = 0;
-    if(!times){
-      return
-    }
-    let timesCopy = times.slice(); 
-    timesCopy.sort((a, b) => a - b);
-    let nextTime = timesCopy.shift();
-    //add event listeners to pause video playback
-    player.on('timeupdate', async function(){
-      if(lastTimestamp > player.currentTime || player.currentTime - lastTimestamp > 2){
-        //if the user seeks backwards or forwards more than 2 seconds, log a seek event
-        logPlyrAction('seek', player);
-      }
-      console.log('timeupdate', player.currentTime, lastTimestamp, nextTime);
-      lastTimestamp = player.currentTime;
-      if(player.currentTime >= nextTime && player.currentTime < nextTime+2){ //add 2 second buffer
-        player.pause();
-        $('#videoUnitPlayer').hide();
-        nextTime = timesCopy.shift();
-        nextQuestion = times.indexOf(nextTime);
+  const times = Session.get('currentTdfUnit')?.videosession?.questiontimes;
+  lastTimestamp = 0;
+  loggingSeek = false;
+  if(!times){
+    return
+  }
+  let timesCopy = times.slice(); 
+  timesCopy.sort((a, b) => a - b);
+  let nextTimeIndex = 0;
+  let nextTime = timesCopy[nextTimeIndex];
+  lastVolume = player.volume;
+  lastSpeed = player.speed;
+
+  //add event listeners to pause video playback
+  player.on('timeupdate', async function(event){
+    const instance = event.detail.plyr;
+    // if(instance.currentTime - lastTimestamp > 2){
+    //   //if the user seeks backwards or forwards more than 2 seconds, log a seek event
+    //   logPlyrAction('seek', instance);
+    // } else if (lastTimestamp > instance.currentTime){
+    //   logPlyrAction('seek', instance);
+    //   nextTimeIndex = getIndex(timesCopy, instance.currentTime); //allow user to see old questions
+    //   nextTime = timesCopy[nextTimeIndex];
+    //   let nextQuestion = times.indexOf(nextTime);
+    //   Session.set('engineIndices', {stimIndex: 0, clusterIndex: nextQuestion});
+    //   await engine.selectNextCard(Session.get('engineIndices'), Session.get('currentExperimentState'));
+    //   newQuestionHandler();
+    // }
+    console.log('timeupdate', instance.currentTime, lastTimestamp, instance.currentTime - lastTimestamp, nextTime);
+    lastTimestamp = instance.currentTime;
+
+    if(instance.currentTime >= nextTime){
+      instance.pause();
+      $('#videoUnitPlayer').hide();
+      if(nextTimeIndex < timesCopy.length){
+        nextTime = timesCopy[nextTimeIndex];
+        let nextQuestion = times.indexOf(nextTime);
         Session.set('engineIndices', {stimIndex: 0, clusterIndex: nextQuestion});
         Session.set('displayReady', true);
+        nextTimeIndex++;
       }
-    });
+    }
+  });
+
+  player.on('pause', async function(event){
+    const instance = event.detail.plyr;
+    console.log('playback paused at ', instance.currentTime);
+    logPlyrAction('pause', instance);
+  });
+
+  player.on('play', async function(event){
+    const instance = event.detail.plyr;
+    console.log('playback resumed at ', instance.currentTime);
+    logPlyrAction('resume', instance);
+  });
+
+  player.on('volumechange', async function(event){
+    const instance = event.detail.plyr;
+    console.log('volume changed to ', instance.volume, ' from ', lastVolume);
+    logPlyrAction('volumeChange', instance);
+  });
+
+  player.on('seeking', async function(event){
+    if(loggingSeek) return;
+    loggingSeek = true;
+    const instance = event.detail.plyr;
+    seekStart = instance.currentTime;
+    console.log('seeking from ', instance.currentTime);
+  });
+
+  player.on("mouseup", async function(){
+    if(loggingSeek) {
+      console.log('seeked to ', player.currentTime, ' from ', seekStart);
+      logPlyrAction('seek', player);
+      loggingSeek = false;
+    }
+  });
+
+  player.on('ratechange', async function(event){
+    const instance = event.detail.plyr;
+    console.log('playback speed changed to ', instance.speed, "from ", lastSpeed);
+    logPlyrAction('playbackSpeedChange', instance);
+  });
   
-    player.on('pause', async function(){
-      console.log('playback paused at ', player.currentTime);
-      logPlyrAction('pause', player);
-    });
-  
-    player.on('play', async function(){
-      console.log('playback resumed at ', player.currentTime);
-      logPlyrAction('resume', player);
-    });
-  
-    player.on('volumechange', async function(){
-      console.log('volume changed to ', player.volume);
-      logPlyrAction('volumeChange', player);
-    });
-  
-    player.on('ratechange', async function(){
-      console.log('playback speed changed to ', player.speed);
-      logPlyrAction('playbackSpeedChange', player);
-    });
-  
+}
+
+function getIndex(arr, num) {
+  return arr.concat(num).sort(function(a, b) {
+    return a - b;
+  }).indexOf(num);
 }
   
 function logPlyrAction(action, player){
+  console.log('logging plyr action', action, player.currentTime, player.volume, player.speed, player.playing)
   const trialStartTimestamp = Session.get('trialStartTimestamp');
   const sessionID = (new Date(trialStartTimestamp)).toUTCString().substr(0, 16) + ' ' + Session.get('currentTdfName');
 
@@ -115,6 +165,8 @@ function logPlyrAction(action, player){
     'CFVideoTimeStamp': player.currentTime,
     'CFVideoCurrentSpeed': player.speed,
     'CFVideoCurrentVolume': player.volume,
+    'CFVideoPreviousSpeed': lastSpeed,
+    'CFVideoPreviousVolume': lastVolume,
     'CFVideoIsPlaying': player.playing,
     'feedbackText': $('#UserInteraction').text() || '',
     'feedbackType': 'N/A',
