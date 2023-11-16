@@ -66,7 +66,6 @@ function initVideoCards(player) {
       logPlyrAction('seek', player);
       loggingSeek = false; 
       if (seekStart > player.currentTime){
-        logPlyrAction('seek', player);
         nextTimeIndex = getIndex(timesCopy, player.currentTime); //allow user to see old questions
         nextTime = timesCopy[nextTimeIndex];
         let nextQuestion = times.indexOf(nextTime);
@@ -183,7 +182,7 @@ function logPlyrAction(action, player){
     'hintLevel': 0,
     'entryPoint': Meteor.user().profile.entryPoint
   };
-  //Meteor.call('insertHistory', answerLogRecord);
+  Meteor.call('insertHistory', answerLogRecord);
 }
 
 export async function initializePlyr() {
