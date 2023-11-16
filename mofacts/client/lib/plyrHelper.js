@@ -188,7 +188,16 @@ function logPlyrAction(action, player){
 
 export async function initializePlyr() {
   Session.set('trialStartTimestamp', Date.now());
-  player = new Plyr('#videoUnitPlayer');
+  const points = [];
+  const times = Session.get('currentTdfUnit')?.videosession?.questiontimes;
+  if(times){
+    times.forEach(time => {
+      points.push({time: time, label: 'Question'});
+    });
+  }
+  player = new Plyr('#videoUnitPlayer', {
+    markers: { enabled: true, points: points }
+  });
   initVideoCards(player)
   playVideo();
 }
