@@ -5,6 +5,6 @@ Session.set("versionInfo",
 "buildTimestamp":"Fri Aug 13 10:07:19 CDT 2021",
 "buildersUsername":"Andrew Tackett",
 "branch":"postgresMigration",
-"repoURL":"git@github.com:memphis-iis/mofacts-ies.git"
+"repoURL":"git@github.com:memphis-iis/mofacts.git"
 }
 );

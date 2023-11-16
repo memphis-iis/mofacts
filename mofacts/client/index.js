@@ -281,7 +281,7 @@ Template.DefaultLayout.events({
       window.currentAudioObj.pause();
     }
     //open the wiki in a new tab
-    window.open('https://github.com/memphis-iis/mofacts-ies/wiki', '_blank');
+    window.open('https://github.com/memphis-iis/mofacts/wiki', '_blank');
   },
   'click #mechTurkButton': function(event) {
     event.preventDefault();

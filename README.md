@@ -6,6 +6,10 @@
 
 MoFaCTS is a Meteor.js driven, responsive implementation of the FaCT System
 designed for use by mobile participants.
+- [Documentation Wiki](https://github.com/memphis-iis/mofacts/wiki)
+- [Prerequisites](#prerequisites)
+- [Qucik Start](#quickstart)
+- [License](#license)
 
 Please see the docs subdirectory for a complete description of deployment and
 production setup.
