@@ -1138,6 +1138,34 @@ async function getTdfNamesAssignedByInstructor(instructorID) {
   }
 }
 
+async function getTdfNamesByOwnerId(ownerId) {
+  serverConsole('getTdfNamesByOwnerId', ownerId);
+  try {
+    tdfs = Tdfs.find({ownerId: ownerId}).fetch();
+    const ownedTdfFileNames = tdfs.map(tdf => tdf.content.fileName);
+    serverConsole('ownedTdfFileNames', ownedTdfFileNames);
+    return ownedTdfFileNames;
+  } catch (e) {
+    serverConsole('getTdfNamesByOwnerId ERROR,', e);
+    return null;
+  }
+}
+
+async function getTdfNamesByAccessorId(accessorId) {
+  serverConsole('getTdfNamesByAccessorId', accessorId);
+  try {
+    //find tdfs where accessors array contains accessorId
+    tdfs = Tdfs.find({accessors: accessorId}).fetch();
+    const accessibleTdfFileNames = tdfs.map(tdf => tdf.content.fileName);
+    serverConsole('accessibleTdfFileNames', accessibleTdfFileNames);
+    return accessibleTdfFileNames;
+  } catch (e) {
+    serverConsole('getTdfNamesByAccessorId ERROR,', e);
+    return null;
+  }
+}
+
+
 async function getExperimentState(userId, TDFId) { // by currentRootTDFId, not currentTdfId
   const experimentStateRet = GlobalExperimentStates.findOne({userId: userId, TDFId: TDFId});
   const experimentState = experimentStateRet ? experimentStateRet.experimentState : {};
@@ -2985,7 +3013,7 @@ const asyncMethods = {
 
   addCourse, editCourse, editCourseAssignments, addUserToTeachersClass, saveContentFile,
 
-  getTdfNamesAssignedByInstructor, getTdfsAssignedToStudent, getTdfAssignmentsByCourseIdMap,
+  getTdfNamesAssignedByInstructor, getTdfNamesByOwnerId, getTdfsAssignedToStudent, getTdfAssignmentsByCourseIdMap,
 
   getStudentPerformanceByIdAndTDFId, getStudentPerformanceByIdAndTDFIdFromHistory, getNumDroppedItemsByUserIDAndTDFId,
   
@@ -3513,7 +3541,19 @@ Router.route('data-by-teacher', {
       return;
     }
 
-    const tdfNames = await getTdfNamesAssignedByInstructor(uid);
+    //get all tdfs assigned to the user
+    const assignedTdfs = await getTdfNamesAssignedByInstructor(uid);
+
+    //append tdfs that are owned by the user
+    const ownedTdfs = await getTdfNamesByOwnerId(uid);
+
+    //append all tdfs that the user is an accessor for
+    const accessorTdfs = await getTdfNamesByAccessorId(uid);
+
+    //combine the two arrays
+    const tdfNames = assignedTdfs.concat(ownedTdfs).concat(accessorTdfs);
+
+    console.log(userId, uid, tdfNames)
 
     if (!tdfNames.length > 0) {
       response.writeHead(404);

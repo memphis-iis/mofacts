@@ -5,7 +5,6 @@ import {
     setStudentPerformance,
     getStimCount,
     getStimCluster,
-    createStimClusterMapping,
     getAllCurrentStimAnswers,
     getTestType,
   } from '../../lib/currentTestingHelpers';

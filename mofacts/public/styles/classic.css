@@ -76,6 +76,11 @@ p{
 }
 .alert, .header-box{
     background-color: #d9d9d9;
+    /*vertical center text*/
+    display: flex;
+    align-items: center;
+    /*horizontal center text*/
+    justify-content: center;
 }
 
 .text-alert-danger{
@@ -104,15 +109,18 @@ thead{
 }
 
 .card-header{
-    background-color: #7ed957;
+
     padding: 10px;
 }
-.card-header p{
-    color: #06723c;
+.card-header .displaystats{
+    background-color: #d9d9d9;
+    color: #000000;
     font-family: 'Arimo';
     font-size: 15px;
     margin-top: -10px;
     margin-bottom: -10px;
+    /*justify all text right*/
+    text-align: center;
 
 }
 
@@ -564,12 +572,18 @@ input[type="range"]::-webkit-slider-runnable-track {
   }
 
 
-  #userLowerInteractionContainer{
-    position: absolute;
-    bottom: 0px;
-    left: 0px;
-    right: 0px;
-}
+  #userLowerInteractionContainer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color:#F2F2F2; /* Set the background color as needed */
+    z-index: 999; /* Set a high z-index to ensure it's on top of other content */
+  }
+
+  #progressBarContainer{
+    background-color: rgba(0,0,0,0.0);
+  }
 
  input[type="range"]::-moz-range-thumb {
     border: none; /*Removes extra border that FF applies*/
@@ -623,3 +637,12 @@ input[type="range"]::-webkit-slider-thumb {
     max-width: 50vw;
     height: auto;
  }
+
+ .imgDisplay-container{
+    /*this is a backround image that needs to be top-center and not repeat, and contained within the div*/
+    background-position: top center;    
+    background-repeat: no-repeat;
+    height:50vh;
+    width: 100%;
+    background-size: contain;
+}

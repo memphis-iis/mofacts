@@ -223,12 +223,6 @@ function getStimKCBaseForCurrentStimuliSet() {
 // is the fact that additional elements will be added if
 // mapping.length < stimCount
 function createStimClusterMapping(stimCount, shuffleclusters, swapclusters, startMapping) {
-  if (stimCount < 1) {
-    return [];
-  }
-
-  let i;
-
   // Default mapping is identity - mapping[x] == x
   // We also need to make sure we have stimCount elements
   let mapping = (startMapping || []).slice(); // they get a copy back
@@ -236,75 +230,84 @@ function createStimClusterMapping(stimCount, shuffleclusters, swapclusters, star
     mapping.push(mapping.length);
   }
 
-  // Shufle the given ranges of cards (like permutefinalresult)
-  if (shuffleclusters) {
-    const shuffleRanges = [];
-    extractDelimFields(shuffleclusters, shuffleRanges);
-
-    const shuffled = mapping.slice(); // work on a copy
-
-    _.each(shuffleRanges, function(rng) {
-      const targetIndexes = rangeVal(rng);
-      const randPerm = targetIndexes.slice(); // clone
-      shuffle(randPerm);
-
-      for (let j = 0; j < targetIndexes.length; ++j) {
-        shuffled[targetIndexes[j]] = mapping[randPerm[j]];
-      }
-    });
-
-    mapping = shuffled.slice();
+  for(const shuffle of shuffleclusters) {
+    mapping = performClusterShuffle(stimCount, shuffle, mapping)
   }
-
-  // Swap out sections of clusters (one step up from our shuffle above)
-  if (swapclusters) {
-    // Get the chunks that we'll be swapping. Each chunk is in the format
-    // of an array of integral indexes (after the map). We actually get
-    // TWO lists of chunks - one in order and one that is the actual swap
-    const ranges = [];
-    extractDelimFields(swapclusters, ranges);
-    const swapChunks = _.map(ranges, rangeVal);
-    const sortChunks = _.map(ranges, rangeVal);
-
-    // Now insure our sorted chunks are actually in order - we sort
-    // numerically by the first index
-    sortChunks.sort(function(lhs, rhs) {
-      const lv = lhs[0]; const rv = rhs[0];
-      if (lv < rv) return -1;
-      else if (lv > rv) return 1;
-      else return 0;
-    });
-
-    // Now get a permuted copy of our chunks
-    shuffle(swapChunks);
-
-    const swapped = [];
-    i = 0;
-    while (i < mapping.length) {
-      if (sortChunks.length > 0 && i == sortChunks[0][0]) {
-        // Swap chunk - grab the permuted chunk and add the mapped numbers
-        const chunk = swapChunks.shift();
-        for (let chunkIdx = 0; chunkIdx < chunk.length; ++chunkIdx) {
-          swapped.push(mapping[chunk[chunkIdx]]);
-        }
-
-        // advance to the next chunk
-        i += sortChunks.shift().length;
-      } else {
-        // Not part of a swapped chunk - keep this number and just move
-        // to the next number
-        swapped.push(mapping[i]);
-        i++;
-      }
-    }
-
-    // All done
-    mapping = swapped.slice();
-  }
+  mapping = performClusterSwap(swapclusters, mapping)
 
   return mapping;
 }
 
+function performClusterShuffle(stimCount, shuffleclusters, mapping){
+  if (stimCount < 1) {
+    return [];
+  }
+
+  // Shufle the given ranges of cards (like permutefinalresult)
+  if (!shuffleclusters) return mapping;
+
+  const shuffleRanges = [];
+  extractDelimFields(shuffleclusters, shuffleRanges);
+
+  const shuffled = mapping.slice(); // work on a copy
+
+  _.each(shuffleRanges, function(rng) {
+    const targetIndexes = rangeVal(rng);
+    const randPerm = targetIndexes.slice(); // clone
+    shuffle(randPerm);
+
+    for (let j = 0; j < targetIndexes.length; ++j) {
+      shuffled[targetIndexes[j]] = mapping[randPerm[j]];
+    }
+  });
+
+  return shuffled.slice();
+}
+
+function performClusterSwap(swapclusters, mapping){
+  // Swap out sections of clusters (one step up from our shuffle above)
+  if (!swapclusters) return mapping;
+  // Get the chunks that we'll be swapping. Each chunk is in the format
+  // of an array of integral indexes (after the map). We actually get
+  // TWO lists of chunks - one in order and one that is the actual swap
+  const swapChunks = _.map(swapclusters, rangeVal);
+  const sortChunks = _.map(swapclusters, rangeVal);
+
+  // Now insure our sorted chunks are actually in order - we sort
+  // numerically by the first index
+  sortChunks.sort(function(lhs, rhs) {
+    const lv = lhs[0]; const rv = rhs[0];
+    if (lv < rv) return -1;
+    else if (lv > rv) return 1;
+    else return 0;
+  });
+
+  // Now get a permuted copy of our chunks
+  shuffle(swapChunks);
+
+  const swapped = [];
+  i = 0;
+  while (i < mapping.length) {
+    if (sortChunks.length > 0 && i == sortChunks[0][0]) {
+      // Swap chunk - grab the permuted chunk and add the mapped numbers
+      const chunk = swapChunks.shift();
+      for (let chunkIdx = 0; chunkIdx < chunk.length; ++chunkIdx) {
+        swapped.push(mapping[chunk[chunkIdx]]);
+      }
+
+      // advance to the next chunk
+      i += sortChunks.shift().length;
+    } else {
+      // Not part of a swapped chunk - keep this number and just move
+      // to the next number
+      swapped.push(mapping[i]);
+      i++;
+    }
+  }
+
+  // All done
+  return swapped.slice();
+}
 function getAllCurrentStimAnswers(removeExcludedPhraseHints) {
   const {curClusterIndex, curStimIndex} = getCurrentClusterAndStimIndices();
   const stims = Session.get('currentStimuliSet');

@@ -352,9 +352,12 @@ Template.registerHelper('showPerformanceDetails', function() {
   const type = getTestType();
   console.log('showPerformanceDetails type: ' + type);
   const uiSettings = Session.get('curTdfUISettings');
+  if(Session.get('curModule') == 'instructions') return false;
   if(type == "s" && uiSettings.displayPerformanceDuringStudy) return true;
   if(type == "s" && !uiSettings.displayPerformanceDuringStudy) return false;
   if(Session.get('isVideoSession')) return false;
+  if(type == "t" && uiSettings.displayPerformanceDuringTrial) return true;
+  if(type == "t" && !uiSettings.displayPerformanceDuringTrial) return false;
   return ((Session.get('curModule') == 'card' || Session.get('curModule') !== 'instructions') && Session.get('scoringEnabled') && Session.get('unitType') != 'schedule');
 });
 Template.registerHelper('currentScore', function() {
@@ -372,6 +375,9 @@ Template.registerHelper('showFeedbackResetButton', function() {
 });
 Template.registerHelper('isInTrial', function() {
   return Session.get('curModule') == 'card' || Session.get('curModule') == 'instructions';
+});
+Template.registerHelper('isInInstructions', function() {
+  return Session.get('curModule') == 'instructions';
 });
 Template.registerHelper('isInSession', function() {
   return (Session.get('curModule') == 'profile');

@@ -23,7 +23,7 @@ the above, setting up and running the application is as simple as opening a
 terminal and running:
 
 ````
-$ git clone https://github.com/memphis-iis/mofacts-ies.git
+$ git clone https://github.com/memphis-iis/mofacts.git
 $ cd mofacts/mofacts
 $ ./run_meteor
 ````
@@ -84,7 +84,7 @@ repository. From your command prompt, clone the repository and then enter the
 new directory:
 
 ````
-$ git clone https://github.com/memphis-iis/mofacts-ies.git
+$ git clone https://github.com/memphis-iis/mofacts.git
 $ cd mofacts
 ````
 
