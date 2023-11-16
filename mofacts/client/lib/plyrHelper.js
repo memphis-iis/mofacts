@@ -1,7 +1,6 @@
 import Plyr from 'plyr';
 import { newQuestionHandler } from '../views/experiment/card.js'
 
-let lastTimestamp = 0;
 let lastVolume = 0;
 let lastSpeed = 0;
 let loggingSeek = false;
@@ -10,7 +9,6 @@ let player;
 
 function initVideoCards(player) {
   const times = Session.get('currentTdfUnit')?.videosession?.questiontimes;
-  lastTimestamp = 0;
   loggingSeek = false;
   if(!times){
     return
@@ -25,24 +23,21 @@ function initVideoCards(player) {
   //add event listeners to pause video playback
   player.on('timeupdate', async function(event){
     const instance = event.detail.plyr;
-    // if(instance.currentTime - lastTimestamp > 2){
-    //   //if the user seeks backwards or forwards more than 2 seconds, log a seek event
-    //   logPlyrAction('seek', instance);
-    // } else if (lastTimestamp > instance.currentTime){
-    //   logPlyrAction('seek', instance);
-    //   nextTimeIndex = getIndex(timesCopy, instance.currentTime); //allow user to see old questions
-    //   nextTime = timesCopy[nextTimeIndex];
-    //   let nextQuestion = times.indexOf(nextTime);
-    //   Session.set('engineIndices', {stimIndex: 0, clusterIndex: nextQuestion});
-    //   await engine.selectNextCard(Session.get('engineIndices'), Session.get('currentExperimentState'));
-    //   newQuestionHandler();
-    // }
-    console.log('timeupdate', instance.currentTime, lastTimestamp, instance.currentTime - lastTimestamp, nextTime);
-    lastTimestamp = instance.currentTime;
 
     if(instance.currentTime >= nextTime){
       instance.pause();
+    }
+  });
+
+  player.on('pause', async function(event){
+    const instance = event.detail.plyr;
+    console.log('playback paused at ', instance.currentTime);
+    logPlyrAction('pause', instance);
+
+    //running here ensures that player pauses before being hidden
+    if(instance.currentTime >= nextTime){
       $('#videoUnitPlayer').hide();
+      nextTimeIndex++;
       if(nextTimeIndex < timesCopy.length){
         nextTime = timesCopy[nextTimeIndex];
         let nextQuestion = times.indexOf(nextTime);
@@ -51,12 +46,6 @@ function initVideoCards(player) {
         nextTimeIndex++;
       }
     }
-  });
-
-  player.on('pause', async function(event){
-    const instance = event.detail.plyr;
-    console.log('playback paused at ', instance.currentTime);
-    logPlyrAction('pause', instance);
   });
 
   player.on('play', async function(event){
@@ -71,20 +60,39 @@ function initVideoCards(player) {
     logPlyrAction('volumeChange', instance);
   });
 
-  player.on('seeking', async function(event){
-    if(loggingSeek) return;
-    loggingSeek = true;
-    const instance = event.detail.plyr;
-    seekStart = instance.currentTime;
-    console.log('seeking from ', instance.currentTime);
-  });
-
-  player.on("mouseup", async function(){
+  $("[id*='plyr-seek']")[0].addEventListener("mouseup", async function(){
     if(loggingSeek) {
       console.log('seeked to ', player.currentTime, ' from ', seekStart);
       logPlyrAction('seek', player);
-      loggingSeek = false;
+      loggingSeek = false; 
+      if (seekStart > player.currentTime){
+        logPlyrAction('seek', player);
+        nextTimeIndex = getIndex(timesCopy, player.currentTime); //allow user to see old questions
+        nextTime = timesCopy[nextTimeIndex];
+        let nextQuestion = times.indexOf(nextTime);
+        Session.set('engineIndices', {stimIndex: 0, clusterIndex: nextQuestion});
+        await engine.selectNextCard(Session.get('engineIndices'), Session.get('currentExperimentState'));
+        newQuestionHandler();
+      } else if(player.currentTime >= nextTime) {
+        player.pause();
+        $('#videoUnitPlayer').hide();
+        if(nextTimeIndex < timesCopy.length){
+          nextTime = timesCopy[nextTimeIndex];
+          let nextQuestion = times.indexOf(nextTime);
+          Session.set('engineIndices', {stimIndex: 0, clusterIndex: nextQuestion});
+          Session.set('displayReady', true);
+          nextTimeIndex++;
+        }
+      }
     }
+  });
+
+  $("[id*='plyr-seek']")[0].addEventListener("mousedown", async function(){ 
+    if(loggingSeek) return;
+    loggingSeek = true;
+    const instance = player
+    seekStart = instance.currentTime;
+    console.log('seeking from ', instance.currentTime);
   });
 
   player.on('ratechange', async function(event){
