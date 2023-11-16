@@ -63,7 +63,7 @@ function initVideoCards(player) {
   $("[id*='plyr-seek']")[0].addEventListener("mouseup", async function(){
     if(loggingSeek) {
       console.log('seeked to ', player.currentTime, ' from ', seekStart);
-      logPlyrAction('seek', player);
+      logPlyrAction('seek', player, player.currentTime, seekStart);
       loggingSeek = false; 
       if (seekStart > player.currentTime){
         nextTimeIndex = getIndex(timesCopy, player.currentTime); //allow user to see old questions
@@ -108,7 +108,7 @@ function getIndex(arr, num) {
   }).indexOf(num);
 }
   
-function logPlyrAction(action, player){
+function logPlyrAction(action, player, currentTime = null, seekStart = null){
   console.log('logging plyr action', action, player.currentTime, player.volume, player.speed, player.playing)
   const trialStartTimestamp = Session.get('trialStartTimestamp');
   const sessionID = (new Date(trialStartTimestamp)).toUTCString().substr(0, 16) + ' ' + Session.get('currentTdfName');
@@ -118,6 +118,9 @@ function logPlyrAction(action, player){
 
   const problemName = Session.get('currentExperimentState').originalDisplay;
   const stepName = problemName;
+
+  currentTime = currentTime || player.currentTime;
+  const seekEnd = seekStart ? currentTime : null;
     
   const answerLogRecord = {
     'itemId': "N/A",
@@ -169,7 +172,9 @@ function logPlyrAction(action, player){
     'CFStartLatency': null,
     'CFEndLatency': null,
     'CFFeedbackLatency': null,
-    'CFVideoTimeStamp': player.currentTime,
+    'CFVideoTimeStamp': currentTime,
+    'CFVideoSeekStart': seekStart,
+    'CFVideoSeekEnd': seekEnd,
     'CFVideoCurrentSpeed': player.speed,
     'CFVideoCurrentVolume': player.volume,
     'CFVideoPreviousSpeed': lastSpeed,

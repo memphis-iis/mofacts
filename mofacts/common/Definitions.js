@@ -67,5 +67,13 @@ export const outputFields = [
   'CF (Button Order)', // CF buttonOrder
   'CF (Item Removed)', // item was reported by the user as wrong
   'CF (Note)', // CF note
-  'CF (Entry Point)'
+  'CF (Entry Point)',
+  'CF (Video TimeStamp)',
+  'CF (Video Seek Start)',
+  'CF (Video Seek End)',
+  'CF (Video Current Speed)',
+  'CF (Video Current Volume)',
+  'CF (Video Previous Speed)',
+  'CF (Video Previous Volume)',
+  'CF (Video Is Playing)',
 ];
