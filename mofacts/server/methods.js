@@ -2240,7 +2240,7 @@ async function upsertPackage(packageJSON, ownerId) {
     stimuliSetId: stimuliSetId,
     visibility: 'profileOnly'
   }});
-  
+
   //update stim syllables
   Meteor.call('updateStimSyllables', stimuliSetId);
 
@@ -3112,7 +3112,23 @@ const asyncMethods = {
     ComponentStates.update({_id: unit._id}, unit);
   },
 
+  updateTdfConditionCounts: async function(TDFId, conditionCounts) {
+    serverConsole('updateTdfConditionCounts', TDFId, conditionCounts);
+    Tdfs.update({_id: TDFId}, {$set: {conditionCounts: conditionCounts}});
+  },
 
+  resetTdfConditionCounts: async function(TDFId) {
+    serverConsole('resetTdfConditionCounts', TDFId);
+    setspec = Tdfs.findOne({_id: TDFId}).content.tdfs.tutor.setspec;
+    serverConsole("setspec:", setspec)
+    conditions = setspec.condition;
+    conditionCounts = {};
+    for(let condition in conditions){
+      conditionCounts[condition] = 0;
+    }
+    Tdfs.update({_id: TDFId}, {$set: {conditionCounts: conditionCounts}});
+  },
+  
   updateStimSyllables: async function(stimuliSetId, stimuli = undefined) {
     serverConsole('updateStimSyllables', stimuliSetId);
     if(!stimuli){
