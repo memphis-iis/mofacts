@@ -465,6 +465,8 @@ async function processPackageUpload(fileObj, owner, zipLink, emailToggle){
   let filePath
   let fileName
   let extension
+  //convert the path to a filename
+  let packageFile = path.split('/').pop();
   try{
     const unzipper = Npm.require('unzipper');
     const zip = await unzipper.Open.file(path);
@@ -490,6 +492,7 @@ async function processPackageUpload(fileObj, owner, zipLink, emailToggle){
         path: filePath,
         extension: extension,
         contents: fileContents,
+        packageFile: packageFile,
         type: type
       };
       unzippedFiles.push(fileMeta);
@@ -701,6 +704,7 @@ async function combineAndSaveContentFile(tdf, stim, owner) {
 
   try {
     const jsonContents = typeof tdf.contents == 'string' ? JSON.parse(tdf.contents) : tdf.contents;
+    const jsonPackageFile = tdf.packageFile;
     const json = {tutor: jsonContents.tutor};
     const lessonName = _.trim(jsonContents.tutor.setspec.lessonname);
     if (lessonName.length < 1) {
@@ -711,7 +715,7 @@ async function combineAndSaveContentFile(tdf, stim, owner) {
     }
     const stimContents = typeof stim.contents == 'string' ? JSON.parse(stim.contents) : stim.contents;
     try {
-      const rec = {'fileName': tdf.name, 'tdfs': json, 'ownerId': ownerId, 'source': 'upload', 'stimuli': stimContents, 'stimFileName': stim.name};
+      const rec = {'fileName': tdf.name, 'tdfs': json, 'ownerId': ownerId, 'source': 'upload', 'stimuli': stimContents, 'stimFileName': stim.name, 'packageFile': jsonPackageFile};
       const ret = await upsertPackage(rec, ownerId);
       if(ret && ret.res == 'awaitClientTDF'){
         serverConsole('awaitClientTDF', ret)
@@ -2131,6 +2135,7 @@ async function upsertPackage(packageJSON, ownerId) {
   const responseKCMap = await getResponseKCMap();
   const stimulusFileName = packageJSON.stimFileName
   const stimJSON = packageJSON.stimuli
+  const packageFile = packageJSON.packageFile
   let ret = {reason: []};
   let Tdf = packageJSON.tdfs;
   let lessonName = _.trim(Tdf.tutor.setspec.lessonname);
@@ -2204,6 +2209,7 @@ async function upsertPackage(packageJSON, ownerId) {
       tdfFileName: packageJSON.fileName,
       content: tdfJSONtoUpsert,
       ownerId: ownerId,
+      packageFileName: packageFile || "No Package File",
       rawStimuliFile: stimJSON, //raw stimuli
       stimuli: formattedStims, //formatted stimuli for use in the app
       stimuliSetId: stimuliSetId,
@@ -2235,6 +2241,7 @@ async function upsertPackage(packageJSON, ownerId) {
     tdfFileName: packageJSON.fileName,
     content: tdfJSONtoUpsert,
     ownerId: ownerId,
+    packageFileName: packageFile || "No Package File",
     rawStimuliFile: stimJSON, //raw stimuli
     stimuli: formattedStims, //formatted stimuli for use in the app
     stimuliSetId: stimuliSetId,
