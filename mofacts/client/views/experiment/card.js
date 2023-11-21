@@ -2156,6 +2156,18 @@ async function unitIsFinished(reason) {
   if (newUnitNum < curTdf.tdfs.tutor.unit.length) {
     // Just hit a new unit - we need to restart with instructions
     console.log('UNIT FINISHED: show instructions for next unit', newUnitNum);
+    const rootTDFBoxed = Tdfs.findOne({_id: Session.get('currentRootTdfId')});
+    const rootTDF = rootTDFBoxed.content;
+    const setspec = rootTDF.tdfs.tutor.setspec;
+    if(setspec.loadbalancing && setspec.countcompletion == newUnitNum){
+      const curConditionFileName = Session.get('currentTdfFile');
+      //get the condition number from the rootTDF
+      const curConditionNumber = setspec.condition.indexOf(curConditionFileName);
+      //increment the completion count for the current condition
+      rootTDF.loadbalancing.completionCount[curConditionNumber] = rootTDF.loadbalancing.completionCount[curConditionNumber] + 1;
+      //update the rootTDF
+      Meteor.call('updateTdfConditionCounts', Session.get('currentRootTdfId'), conditionCounts);
+    }
     leaveTarget = '/instructions';
   } else {
     // We have run out of units - return home for now
@@ -2164,12 +2176,12 @@ async function unitIsFinished(reason) {
     const rootTDFBoxed = Tdfs.findOne({_id: Session.get('currentRootTdfId')});
     const rootTDF = rootTDFBoxed.content;
     const setspec = rootTDF.tdfs.tutor.setspec;
-    if(setspec.loadBalancing && setspec.countcompletion == "end"){
+    if(setspec.loadbalancing && setspec.countcompletion == "end"){
       const curConditionFileName = Session.get('currentTdfFile');
       //get the condition number from the rootTDF
       const curConditionNumber = setspec.condition.indexOf(curConditionFileName);
       //increment the completion count for the current condition
-      rootTDF.loadBalancing.completionCount[curConditionNumber] = rootTDF.loadBalancing.completionCount[curConditionNumber] + 1;
+      rootTDF.loadbalancing.completionCount[curConditionNumber] = rootTDF.loadbalancing.completionCount[curConditionNumber] + 1;
       //update the rootTDF
       Meteor.call('updateTdfConditionCounts', Session.get('currentRootTdfId'), conditionCounts);
     }
