@@ -53,6 +53,10 @@ Template.contentUpload.helpers({
       if(checkIfConditional){
         continue;
       }
+      //get the original package filename by looking up the assetId in the tdf
+      thisTdf.packageAssetId = tdf.packageFileName.split('.')[0];
+      thisTdf.packageFileLink = DynamicAssets.findOne({_id: thisTdf.packageAssetId}).link();
+      //iterate through tdf.stimuli and get all stimuli
       for (const stim of tdf.stimuli) {
         //check if thisTdf.stimFileInfo already contains a file with this stim.stimuliSetId
         //if not, add it to thisTdf.stimFileInfo
@@ -176,19 +180,7 @@ Template.contentUpload.events({
   },
     'click #tdf-download-btn': function(event){
       event.preventDefault();
-      const TDFId = event.currentTarget.getAttribute('value')
-      let selectedTdf = Tdfs.findOne({_id: TDFId});
-      console.log('downloading tdf id', TDFId);
-      let blob = new Blob([JSON.stringify(selectedTdf.content.tdfs,null,2)], { type: 'application/json' });
-      let url = window.URL.createObjectURL(blob);
-      let downloadFileName = selectedTdf.content.fileName.trim();
-      var a = document.createElement("a");
-      document.body.appendChild(a);
-      a.style = "display: none";
-      a.href = url;
-      a.download = downloadFileName;
-      a.click();
-      window.URL.revokeObjectURL(url);
+      window.open(event.currentTarget.getAttribute('value'));
     },
   'click #tdf-delete-btn': function(event){
     const tdfId = event.currentTarget.getAttribute('value')

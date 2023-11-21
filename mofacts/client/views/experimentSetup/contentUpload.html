@@ -41,6 +41,11 @@
                                             </td>
                                         </tr>
                                         {{/if}}
+                                        <tr>
+                                            <td>
+                                                <b>Package Asset Id:</b> {{packageAssetId}}
+                                            </td>
+                                        </tr>
                                         {{#if errors}}
                                         <tr>
                                             <b>ERROR:</b>
@@ -93,7 +98,7 @@
                                         </tr>
                                     </table>
                                 </td>
-                                <td><button id="tdf-download-btn" value="{{_id}}" class="btn-icon"><span class="fa fa-download" aria-hidden="true"></span></button>
+                                <td><button id="tdf-download-btn" value="{{packageFileLink}}" class="btn-icon"><span class="fa fa-download" aria-hidden="true"></span></button>
                                     <button id="tdf-delete-btn" value="{{_id}}" data-filename="{{fileName}}" class="btn-icon"><span class="fa fa-minus" aria-hidden="true"></span></button>
                                     {{#if conditions}}
                                         <button id="reset-conditions-btn" value="{{_id}}" class="btn-icon"><span class="fa fa-refresh" aria-hidden="true"></span></button>
@@ -121,36 +126,6 @@
                 
             </div>
         </div>
-        {{#if packagesUploaded}}
-        <div class="row">
-            <div class="col text-center">
-                <h3 class="text-center">Packages Uploaded</h3>
-                <div class="table-responsive card">
-                    <table class="table table-striped">
-                        <thead>
-                            <tr>
-                                <th class="col-8">Summary</th>
-                                <th class="col-4">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {{#each packagesUploaded}}
-                                <tr>
-                                    <td>
-                                        FileName: {{name}}<br>
-                                        Size: {{size}}<br>
-                                    </td>
-                                    <td>
-                                        <a href="{{link}}">Download</a>
-                                    </td>
-                                </tr>
-                            {{/each}}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-        {{/if}}
         <div class="row"> 
             <div class="col text-center ">
                 <h3 class="text-center">Upload Package</h3>
