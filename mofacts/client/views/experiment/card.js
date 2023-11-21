@@ -2140,6 +2140,7 @@ async function unitIsFinished(reason) {
   const curUnitNum = Session.get('currentUnitNumber');
   const newUnitNum = curUnitNum + 1;
   const curTdfUnit = curTdf.tdfs.tutor.unit[newUnitNum];
+  const countCompletion = curTdf.tdfs.tutor.unit[newUnitNum].countcompletion;
 
   Session.set('questionIndex', 0);
   Session.set('clusterIndex', undefined);
@@ -2159,7 +2160,7 @@ async function unitIsFinished(reason) {
     const rootTDFBoxed = Tdfs.findOne({_id: Session.get('currentRootTdfId')});
     const rootTDF = rootTDFBoxed.content;
     const setspec = rootTDF.tdfs.tutor.setspec;
-    if(setspec.loadbalancing && setspec.countcompletion == newUnitNum){
+    if((setspec.loadbalancing && setspec.countcompletion == newUnitNum) || (setspec.loadbalancing && countCompletion && !setspec.countcompletion)){
       const curConditionFileName = Session.get('currentTdfFile');
       //get the condition number from the rootTDF
       const curConditionNumber = setspec.condition.indexOf(curConditionFileName);
