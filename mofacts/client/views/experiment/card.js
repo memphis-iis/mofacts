@@ -2547,8 +2547,8 @@ function stopUserInput() {
 
 // Audio prompt/feedback
 function speakMessageIfAudioPromptFeedbackEnabled(msg, audioPromptSource) {
-  const enableAudioPromptAndFeedback = Session.get('enableAudioPromptAndFeedback');
-  const audioPromptMode = Session.get('audioPromptMode');
+  const audioPromptMode = Meteor.user().audioPromptMode;
+  const enableAudioPromptAndFeedback = audioPromptMode && audioPromptMode != 'silent';
   let synthesis = window.speechSynthesis;
   if (enableAudioPromptAndFeedback) {
     if (audioPromptSource === audioPromptMode || audioPromptMode === 'all') {

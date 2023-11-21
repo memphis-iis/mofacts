@@ -2267,17 +2267,14 @@ function tdfUpdateConfirmed(updateObj, resetShuffleClusters = false){
 }
 
 function setUserLoginData(entryPoint, loginMode, curTeacher = undefined, curClass = undefined, assignedTdfs = undefined){
-  serverConsole(Meteor.userId());
-  let query = { 
-    'profile.entryPoint': entryPoint,
-    'profile.curTeacher': curTeacher,
-    'profile.curClass': curClass,
-    'profile.loginMode': loginMode,
-    'profile.assignedTdfs': assignedTdfs
-  };
-  if(Meteor.userId()){
-    Meteor.users.update(Meteor.userId(), { $set: query })
-  }
+  serverConsole('setUserLoginData', entryPoint, loginMode, curTeacher, curClass, assignedTdfs);
+  let profile = Meteor.user().profile;
+  profile.entryPoint = entryPoint;
+  profile.curTeacher = curTeacher;
+  profile.curClass = curClass;
+  profile.loginMode = loginMode;
+  profile.assignedTdfs = assignedTdfs;
+  Meteor.users.update({_id: Meteor.userId()}, {$set: {profile: profile}});
 }
 
 async function loadStimsAndTdfsFromPrivate(adminUserId) {
@@ -2382,7 +2379,19 @@ const methods = {
   removeTurkById: function(turkId, experimentId){
     serverConsole('removeTurkById', turkId, experimentId)
     ScheduledTurkMessages.remove({workerUserId: turkId, experiment: experimentId});
-    Meteor.users.update({_id: turkId}, {$set: {[`profile.lockouts.${experimentId}.lockoutMinutes`]: Number.MAX_SAFE_INTEGER}})
+    let profile = Meteor.user().profile;
+    profile.lockoiuts[experimentId].lockoutMinutes = Number.MAX_SAFE_INTEGER;
+    Meteor.users.update({_id: Meteor.userId()}, {$set: {profile: profile}});
+  },
+
+  saveAudioPromptMode: function(audioPromptMode){
+    serverConsole('saveAudioPromptMode', audioPromptMode);
+    Meteor.users.update({_id: Meteor.userId()}, {$set: {audioPromptMode: audioPromptMode}});
+  },
+
+  saveAudioInputMode: function(audioInputMode){
+    serverConsole('saveAudioInputMode', audioInputMode);
+    Meteor.users.update({_id: Meteor.userId()}, {$set: {audioInputMode: audioInputMode}});
   },
 
   updateExperimentState: function(curExperimentState) {
@@ -2702,7 +2711,9 @@ const methods = {
   //setUserTheme - sets the user's theme in profile
   setUserTheme: function(theme) {
     console.log('setUserTheme', theme);
-    Meteor.users.update(Meteor.userId(), { $set: { 'profile.theme': theme }});
+    let profile = Meteor.user().profile;
+    profile.theme = theme;
+    Meteor.users.update({_id: Meteor.userId()}, {$set: {profile: profile}});
     //verify that the theme was set
   },
 
@@ -2712,22 +2723,25 @@ const methods = {
     if (!Meteor.users.findOne(userId)) {
       throw new Meteor.Error(404, 'User not found');
     }
-    Meteor.users.update(this.userId, { $set: { 'profile.impersonating': userId }});
+    let profile = Meteor.user().profile;
+    profile.impersonating = userId;
+    Meteor.users.update({_id: Meteor.userId()}, {$set: {profile: profile}});
     this.setUserId(userId);
   },
 
   clearLoginData: function(){
-    let query = { 
-      'profile.entryPoint': null, 
-      'profile.curTeacher': null, 
-      'profile.curClass': null,
-      'profile.loginMode': null
-    };
-    Meteor.users.update(Meteor.userId(), { $set: query })
+    let profile = Meteor.user().profile;
+    profile.entryPoint = null;
+    profile.curTeacher = null;
+    profile.curClass = null;
+    profile.loginMode = null;
+    Meteor.users.update({_id: Meteor.userId()}, {$set: {profile: profile}});
   },
 
   clearImpersonation: function(){
-    Meteor.users.update(this.userId, { $set: { 'profile.impersonating': false }});
+    let profile = Meteor.user().profile;
+    profile.impersonating = false;
+    Meteor.users.update({_id: Meteor.userId()}, {$set: {profile: profile}});
     return;
   },
 
@@ -2774,8 +2788,13 @@ const methods = {
   },
 
   setUserSessionId: function(sessionId, sessionIdTimestamp) {
-    const userID = Meteor.userId();
-    Meteor.users.update(userID, {$set: {'profile.lastSessionId': sessionId, 'profile.lastSessionIdTimestamp': sessionIdTimestamp}});
+    let profile = Meteor.users.findOne({_id: Meteor.userId()}).profile;
+    serverConsole('setUserSessionId', sessionId, sessionIdTimestamp)
+    serverConsole('profile', profile)
+    profile.lastSessionId = sessionId;
+    profile.lastSessionIdTimestamp = sessionIdTimestamp;
+    serverConsole('profile2', profile)
+    Meteor.users.update({_id: Meteor.userId()}, {$set: {profile: profile}});
   },
 
   deleteUserSpeechAPIKey: function() {
@@ -3064,14 +3083,14 @@ const asyncMethods = {
   
   setLockoutTimeStamp: async function(lockoutTimeStamp, lockoutMinutes, currentUnitNumber, TDFId) {
     serverConsole('setLockoutTimeStamp', lockoutTimeStamp, lockoutMinutes, currentUnitNumber, TDFId);
-    const lockout = {
-      [`profile.lockouts.${TDFId}.lockoutTimeStamp`]: lockoutTimeStamp,
-      [`profile.lockouts.${TDFId}.lockoutMinutes`]: lockoutMinutes,
-      [`profile.lockouts.${TDFId}.currentLockoutUnit`]: currentUnitNumber
-    }
-    Meteor.users.update(Meteor.userId(), { 
-      $set: lockout
-    });
+    let profile = Meteor.user().profile;
+    if(!profile.lockouts) profile.lockouts = {};
+    if(!profile.lockouts[TDFId]) profile.lockouts[TDFId] = {};
+
+    profile.lockouts[TDFId].lockoutTimeStamp = lockoutTimeStamp;
+    profile.lockouts[TDFId].lockoutMinutes = lockoutMinutes;
+    profile.lockouts[TDFId].currentLockoutUnit = currentUnitNumber;
+    Meteor.users.update({_id: Meteor.userId()}, {$set: {profile: profile}});
   },
 
   makeGoogleSpeechAPICall: async function(TDFId, speechAPIKey = '', request, answerGrammar){

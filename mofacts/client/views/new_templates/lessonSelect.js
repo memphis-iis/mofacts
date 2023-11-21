@@ -559,16 +559,16 @@ Template.lessonSelect.helpers({
     }
   }
 
-  function getAudioInputFromPage() {
-    return $('#audioInputOn').checked;
-  }
-  
-  function getAudioPromptModeFromPage() {
-  if ($('#audioPromptFeedbackOn').checked && $('#audioPromptQuestionOn').checked) {
+function getAudioInputFromPage() {
+  return $('#audioInputOn').checked;
+}
+
+function getAudioPromptModeFromPage() {
+  if ($('#audioPromptFeedbackOn')[0].checked && $('#audioPromptQuestionOn')[0].checked) {
     return 'all';
-  } else if ($('#audioPromptFeedbackOn').checked){
+  } else if ($('#audioPromptFeedbackOn')[0].checked){
     return 'feedback';
-  } else if ($('#audioPromptQuestionOn').checked) {
+  } else if ($('#audioPromptQuestionOn')[0].checked) {
     return 'question';
   } else {
     return 'silent';

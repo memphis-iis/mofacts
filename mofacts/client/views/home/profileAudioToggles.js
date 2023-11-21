@@ -11,12 +11,22 @@ const showHideAudioEnabledGroup = function(show) {
   }
 };
 
+const showHideAudioInputGroup = function(show) {
+  if (show) {
+    $('.audioInputGroup').show();
+    $('.audioInputGroup').addClass('flow');
+  } else {
+    $('.audioInputGroup').hide();
+    $('.audioInputGroup').removeClass('flow');
+  }
+};
+
 function getAudioPromptModeFromPage() {
-  if ($('#audioPromptFeedbackOn').checked && $('#audioPromptQuestionOn').checked) {
+  if ($('#audioPromptFeedbackOn')[0].checked && $('#audioPromptQuestionOn')[0].checked) {
     return 'all';
-  } else if ($('#audioPromptFeedbackOn').checked){
+  } else if ($('#audioPromptFeedbackOn')[0].checked){
     return 'feedback';
-  } else if ($('#audioPromptQuestionOn').checked) {
+  } else if ($('#audioPromptQuestionOn')[0].checked) {
     return 'question';
   } else {
     return 'silent';
@@ -62,14 +72,14 @@ function setAudioPromptModeOnPage(audioPromptMode) {
 }
 
 function getAudioInputFromPage() {
-  return $('#audioInputOn').checked;
+  return $('#audioInputOn')[0].checked;
 }
 
 function setAudioInputOnPage(audioInputEnabled) {
   if (audioInputEnabled) {
-    $('#audioInputOn').checked = true;
+    $('#audioInputOn')[0].checked = true;
   } else {
-    $('#audioInputOn').checked = false;
+    $('#audioInputOn')[0].checked = false;
   }
 }
 
@@ -85,31 +95,33 @@ function showHideheadphonesSuggestedDiv(show) {
 }
 
 function showHideAudioPromptGroupDependingOnAudioPromptMode(audioPromptMode) {
+  const audioPromptFeedbackGroup = $('.audioPromptFeedbackGroup');
+  const audioPromptQuestionGroup = $('.audioPromptQuestionGroup');
   switch (audioPromptMode) {
     case 'feedback':
-      $('.audioPromptFeedbackGroup').addClass('flow');
-      $('.audioPromptFeedbackGroup').show();
-      $('.audioPromptQuestionGroup').hide();
-      $('.audioPromptQuestionGroup').removeClass('flow');
+      audioPromptFeedbackGroup.show();
+      audioPromptFeedbackGroup.addClass('flow');
+      audioPromptQuestionGroup.removeClass('flow');
+      audioPromptQuestionGroup.hide();
       break;
     case 'question':
-      $('.audioPromptQuestionGroup').addClass('flow');
-      $('.audioPromptQuestionGroup').show();
-      $('.audioPromptFeedbackGroup').hide();
-      $('.audioPromptFeedbackGroup').removeClass('flow');
+      audioPromptQuestionGroup.show();
+      audioPromptQuestionGroup.addClass('flow');
+      audioPromptFeedbackGroup.removeClass('flow');
+      audioPromptFeedbackGroup.hide();
       break;
     case 'all':
-      $('.audioPromptFeedbackGroup').addClass('flow');
-      $('.audioPromptFeedbackGroup').show();
-      $('.audioPromptQuestionGroup').addClass('flow');
-      $('.audioPromptQuestionGroup').show();
+      audioPromptFeedbackGroup.show();
+      audioPromptFeedbackGroup.addClass('flow');
+      audioPromptQuestionGroup.show();
+      audioPromptQuestionGroup.addClass('flow');
       break;
     case 'silent':
     default:
-      $('.audioPromptFeedbackGroup').hide();
-      $('.audioPromptFeedbackGroup').removeClass('flow');
-      $('.audioPromptQuestionGroup').hide();
-      $('.audioPromptQuestionGroup').removeClass('flow');
+      audioPromptFeedbackGroup.removeClass('flow');
+      audioPromptFeedbackGroup.hide();
+      audioPromptQuestionGroup.removeClass('flow');
+      audioPromptQuestionGroup.hide();
       break;
   }
 }
@@ -119,6 +131,20 @@ Template.profileAudioToggles.rendered = function() {
     $('#speechAPIKey').focus();
   });
 
+  $('#audioModal').on('shown.bs.modal', function() {
+    const audioInputEnabled = Meteor.user().audioInputMode
+    const audioPromptMode = Meteor.user().audioPromptMode || 'silent';
+    setAudioInputOnPage(audioInputEnabled || Session.get('audioEnabledView'));
+    setAudioPromptModeOnPage(audioPromptMode);
+    showHideAudioPromptGroupDependingOnAudioPromptMode(audioPromptMode);
+    setAudioPromptQuestionVolumeOnPage(Session.get('audioPromptQuestionVolume'));
+    setAudioPromptFeedbackVolumeOnPage(Session.get('audioPromptFeedbackVolume'));
+    showHideAudioInputGroup(audioInputEnabled);
+    showHideAudioEnabledGroup(audioPromptMode != 'silent' || audioInputEnabled);    
+    const showHeadphonesSuggestedDiv = audioPromptMode != 'silent' && audioInputEnabled;
+    showHideheadphonesSuggestedDiv(showHeadphonesSuggestedDiv);
+  });
+
   checkAndSetSpeechAPIKeyIsSetup();
 
   $('#audioInputSensitivity').change(function() {
@@ -126,14 +152,6 @@ Template.profileAudioToggles.rendered = function() {
   });
 
   disableUnsupportedFeatures(Session.get('isSafari'));
-  // Restore toggle values from prior page loads
-  setAudioInputOnPage(Session.get('audioEnabledView'));
-  const audioPromptMode = Session.get('audioPromptFeedbackView');
-  setAudioPromptModeOnPage(audioPromptMode);
-  showHideAudioPromptGroupDependingOnAudioPromptMode(audioPromptMode);
-  setAudioPromptQuestionVolumeOnPage(Session.get('audioPromptQuestionVolume'));
-  setAudioPromptFeedbackVolumeOnPage(Session.get('audioPromptFeedbackVolume'));
-  showHideAudioEnabledGroup();
 
   // Restore range/label values from prior page loads
   const audioInputSensitivityView = Session.get('audioInputSensitivityView');
@@ -164,30 +182,28 @@ Template.profileAudioToggles.rendered = function() {
 
 Template.profileAudioToggles.events({
   'click #audioPromptQuestionOn': function(event) {
-    console.log('audio prompt mode: ' + event.currentTarget.id);
-    const audioPromptMode = getAudioPromptModeFromPage();
-    Session.set('audioPromptFeedbackView', audioPromptMode);
-    //if toggle is on, show the warning, else hide it
-    if(event.currentTarget.checked){
-      $('.audioEnabledGroup').show();
-      $('#audio-modal-dialog').addClass('modal-expanded');
-      console.log('showing audio enabled group');
-    }else{
-      $('.audioEnabledGroup').hide();
-      $('#audio-modal-dialog').removeClass('modal-expanded');
-      console.log('hiding audio enabled group');
-    }
+    updateAudioPromptMode(event);
   },
 
-  'click .audioInputRadio': function(event) {
+  'click #audioPromptFeedbackOn': function(event) {
+    updateAudioPromptMode(event);
+  },
+
+  'click #audioInputOn': function(event) {
     console.log('audio input mode: ' + event.currentTarget.id);
     const audioInputEnabled = getAudioInputFromPage();
 
     const showHeadphonesSuggestedDiv = (getAudioPromptModeFromPage() != 'silent') && audioInputEnabled;
 
     showHideheadphonesSuggestedDiv(showHeadphonesSuggestedDiv);
-
-    showHideAudioEnabledGroup(audioInputEnabled);
+    showHideAudioInputGroup(audioInputEnabled)
+    showHideAudioEnabledGroup(audioInputEnabled || (getAudioPromptModeFromPage() != 'silent'));
+    //save the audio input mode to the user profile in mongodb
+    Meteor.call('saveAudioInputMode', audioInputEnabled, function(error) {
+      if (error) {
+        console.log('Error saving audio input mode', error);
+      }
+    });
   },
 
   'click #setupAPIKey': function(e) {
@@ -279,6 +295,29 @@ function checkAndSetSpeechAPIKeyIsSetup() {
       console.log('Error getting whether speech api key is setup');
     } else {
       Session.set('speechAPIKeyIsSetup', data);
+    }
+  });
+}
+
+function updateAudioPromptMode(e){
+  console.log('audio prompt mode: ' + e.currentTarget.id);
+  const audioPromptMode = getAudioPromptModeFromPage();
+  Session.set('audioPromptFeedbackView', audioPromptMode);
+  //if toggle is on, show the warning, else hide it
+  if (e.currentTarget.checked){
+    $('.audioEnabledGroup').show();
+    $('#audio-modal-dialog').addClass('modal-expanded');
+    console.log('showing audio enabled group');
+  } else if(audioPromptMode == 'silent' && !getAudioInputFromPage()){
+    $('.audioEnabledGroup').hide();
+    $('#audio-modal-dialog').removeClass('modal-expanded');
+    console.log('hiding audio enabled group');
+  }
+  showHideAudioPromptGroupDependingOnAudioPromptMode(audioPromptMode);
+  //save the audio prompt mode to the user profile in mongodb
+  Meteor.call('saveAudioPromptMode', audioPromptMode, function(error) {
+    if (error) {
+      console.log('Error saving audio prompt mode', error);
     }
   });
 }

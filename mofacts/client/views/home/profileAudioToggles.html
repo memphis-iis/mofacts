@@ -6,48 +6,50 @@
         <input class="form-check-input" type="checkbox" role="switch" id="audioPromptQuestionOn">
       </div>
       <div class="form-check form-switch">
-        <label class="form-check-label" for="audioPromptFeedbackOn">MoFaCTs listens to my answers.</label>
-        <input class="form-check-input" type="checkbox" role="switch" id="audioPromptQuestionOn">
+        <label class="form-check-label" for="audioInputOn">MoFaCTs listens to my answers.</label>
+        <input class="form-check-input" type="checkbox" role="switch" id="audioInputOn">
       </div>
       <div class="form-check form-switch">
-        <label class="form-check-label" for="audioInputOn">MoFACTs reads me
+        <label class="form-check-label" for="audioPromptFeedbackOn">MoFACTs reads me
           feedback.</label>
-        <input class="form-check-input" type="checkbox" role="switch" id="audioPromptQuestionOn">
+        <input class="form-check-input" type="checkbox" role="switch" id="audioPromptFeedbackOn">
       </div>
       <br>
       <div class="audioEnabledGroup" style="display: none;">
-        <div class="row alert-audio-100">
-          <div class="col-4">
-            <i class="fa fa-microphone" style="font-size: 100px;"></i>
+        <div class="audioInputGroup" style="display: none;">
+          <div class="row alert-audio-100">
+            <div class="col-4">
+              <i class="fa fa-microphone" style="font-size: 100px;"></i>
+            </div>
+            <div class="col-8">
+              Only available for lessons with this icon. Headphones and a quiet room are recommended.</div>
+            </div>
+            <div class="text-center">
+              <br>
+              <h5>Microphone Sensitivity</h5>
+            </div>
+          <input type="range" style="width:100%" id="audioInputSensitivity" value="20" step="1" min="0" max="60">
+          <br>
+          <div class="row">
+            <div class="col-6 text-start">
+              <span style="font-weight: bold;">Quiet Room</span>
+            </div>
+            <div class="col-6 text-end">
+              <span style="font-weight: bold;">Noisy Room</span>
+            </div>
           </div>
-          <div class="col-8">
-            Only available for lessons with this icon. Headphones and a quiet room are recommended.</div>
-          </div>
-          <div class="text-center">
-            <br>
-            <h5>Microphone Sensitivity</h5>
-          </div>
-        <input type="range" style="width:100%" id="audioInputSensitivity" value="20" step="1" min="0" max="60">
-        <br>
-        <div class="row">
-          <div class="col-6 text-start">
-            <span style="font-weight: bold;">Quiet Room</span>
-          </div>
-          <div class="col-6 text-end">
-            <span style="font-weight: bold;">Noisy Room</span>
-          </div>
-        </div>
-        
-        {{#if showSpeechAPISetup}}
-          <div class="audioEnabledGroup">
-            {{#if speechAPIKeyIsSetup}}
-              <p style="color:green">Speech api key is setup</p>
-            {{else}}
-              <p style="color:red">Speech api key is not setup: <a id='setupAPIKey'>Click here to enable.</a></p>
-            {{/if}}
+          
+          {{#if showSpeechAPISetup}}
+            <div class="audioEnabledGroup">
+              {{#if speechAPIKeyIsSetup}}
+                <p style="color:green">Speech api key is setup</p>
+              {{else}}
+                <p style="color:red">Speech api key is not setup: <a id='setupAPIKey'>Click here to enable.</a></p>
+              {{/if}}
 
-          </div>
-        {{/if}}
+            </div>
+          {{/if}}
+        </div>
       </div>
       <div class="audioPromptQuestionGroup" style="display: none;">
         <h5 style="color:green; padding-left:8%">Requires <span class="fa fa-headphones"></span> icon. Headphones recommended.</h5>
@@ -84,7 +86,7 @@
           <a href="#" id="audioPromptVoiceTest"><span class="fa fa-volumne-high"></span></a>
         </div>
       </div>
-      <div class="audioPromptFeedbackGroup" style="padding-left:2%;" hidden>
+      <div class="audioPromptFeedbackGroup" style="display: none;">
         <h5 style="color:green; padding-left:8%">Requires <span class="fa fa-headphones"></span> icon. Headphones recommended.</h5>
         <div style="display: inline-block; padding-left:8%">
           <label for="audioPromptFeedbackVolume" class="audioPromptFeedbackVolume">Volume: </label>
@@ -120,7 +122,7 @@
         </div>
       </div>
     </div>
-    <div id="headphonesSuggestedDiv" hidden>
+    <div id="headphonesSuggestedDiv" style="display: none;">
       <h6 color="green">Headphones are suggested with both speech input and output enabled.</h6>
     </div>
 
