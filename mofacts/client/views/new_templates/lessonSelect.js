@@ -218,13 +218,6 @@ Template.lessonSelect.helpers({
             ),
         );
       }
-  
-      // Note that we defer checking for userselect in case something above
-      // (e.g. experimentTarget) auto-selects the TDF
-      if (setspec.userselect && !isAdmin) {
-        if (setspec.userselect == 'false') continue;
-      }
-  
       const audioInputEnabled = setspec.audioInputEnabled ? setspec.audioInputEnabled == 'true' : false;
       const enableAudioPromptAndFeedback = setspec.enableAudioPromptAndFeedback ?
           setspec.enableAudioPromptAndFeedback == 'true' : false;

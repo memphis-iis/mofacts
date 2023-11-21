@@ -24,8 +24,7 @@ Template.contentUpload.helpers({
     allTDfs = Tdfs.find({ownerId: Meteor.userId()}).fetch();
     console.log('allTdfs:', allTDfs);
     //iterate through allTdfs and get all stimuli
-    tdfSummaries = [];
-    for (const tdf of allTDfs) {
+    tdfSummaries = [];    for (const tdf of allTDfs) {
       thisTdf = {};
       thisTdf.lessonName = tdf.content.tdfs.tutor.setspec.lessonname;
       thisTdf.stimuliCount = tdf.stimuli.length;
@@ -36,10 +35,28 @@ Template.contentUpload.helpers({
       thisTdf.errors = [];
       thisTdf.stimFileInfo = [];
       thisTdf.stimFilesCount = 0;
+      thisTdf.fileName = tdf.content.fileName;
+      checkIfConditional = allTDfs.some(function(tdf){
+        conditions = tdf.content.tdfs.tutor.setspec.condition;
+        //check if condition contains the TDF filename
+        if(conditions && conditions.includes(thisTdf.fileName)){
+          return true;
+        }
+      });
+      if(tdf.content.tdfs.tutor.setspec.condition){
+        thisTdf.conditions = [];
+        for(let i=0; i<tdf.content.tdfs.tutor.setspec.condition.length; i++){
+          thisTdf.conditions.push({condition: tdf.content.tdfs.tutor.setspec.condition[i], count: tdf.conditionCounts[i]});
+        }
+      }
+      //if thisTdf is conditional, skip it
+      if(checkIfConditional){
+        continue;
+      }
       //get the original package filename by looking up the assetId in the tdf
       thisTdf.packageAssetId = tdf.packageFileName.split('.')[0];
       thisTdf.packageFileLink = DynamicAssets.findOne({_id: thisTdf.packageAssetId}).link();
-      //iterart through tdf.stimuli and get all stimuli
+      //iterate through tdf.stimuli and get all stimuli
       for (const stim of tdf.stimuli) {
         //check if thisTdf.stimFileInfo already contains a file with this stim.stimuliSetId
         //if not, add it to thisTdf.stimFileInfo
@@ -168,6 +185,10 @@ Template.contentUpload.events({
   'click #tdf-delete-btn': function(event){
     const tdfId = event.currentTarget.getAttribute('value')
     Meteor.call('deleteTDFFile',tdfId);
+  },
+  'click #reset-conditions-btn': function(event){
+    const tdfId = event.currentTarget.getAttribute('value')
+    Meteor.call('resetTdfConditionCounts',tdfId);
   },
 
   'click #assetDeleteButton': function(event){

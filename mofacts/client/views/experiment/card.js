@@ -2140,6 +2140,7 @@ async function unitIsFinished(reason) {
   const curUnitNum = Session.get('currentUnitNumber');
   const newUnitNum = curUnitNum + 1;
   const curTdfUnit = curTdf.tdfs.tutor.unit[newUnitNum];
+  const countCompletion = curTdf.tdfs.tutor.unit[newUnitNum].countcompletion;
 
   Session.set('questionIndex', 0);
   Session.set('clusterIndex', undefined);
@@ -2156,11 +2157,38 @@ async function unitIsFinished(reason) {
   if (newUnitNum < curTdf.tdfs.tutor.unit.length) {
     // Just hit a new unit - we need to restart with instructions
     console.log('UNIT FINISHED: show instructions for next unit', newUnitNum);
+    const rootTDFBoxed = Tdfs.findOne({_id: Session.get('currentRootTdfId')});
+    const rootTDF = rootTDFBoxed.content;
+    const setspec = rootTDF.tdfs.tutor.setspec;
+    if((setspec.loadbalancing && setspec.countcompletion == newUnitNum) || (setspec.loadbalancing && countCompletion && !setspec.countcompletion)){
+      const curConditionFileName = Session.get('currentTdfFile');
+      //get the condition number from the rootTDF
+      const curConditionNumber = setspec.condition.indexOf(curConditionFileName);
+      //increment the completion count for the current condition
+      rootTDF.loadbalancing.completionCount[curConditionNumber] = rootTDF.loadbalancing.completionCount[curConditionNumber] + 1;
+      //update the rootTDF
+      Meteor.call('updateTdfConditionCounts', Session.get('currentRootTdfId'), conditionCounts);
+    }
     leaveTarget = '/instructions';
   } else {
     // We have run out of units - return home for now
     console.log('UNIT FINISHED: No More Units');
+    //if loadbalancing is enabled and countcompletion is "end" then we need to increment the completion count of the current condition in the root tdf
+    const rootTDFBoxed = Tdfs.findOne({_id: Session.get('currentRootTdfId')});
+    const rootTDF = rootTDFBoxed.content;
+    const setspec = rootTDF.tdfs.tutor.setspec;
+    if(setspec.loadbalancing && setspec.countcompletion == "end"){
+      const curConditionFileName = Session.get('currentTdfFile');
+      //get the condition number from the rootTDF
+      const curConditionNumber = setspec.condition.indexOf(curConditionFileName);
+      //increment the completion count for the current condition
+      rootTDF.loadbalancing.completionCount[curConditionNumber] = rootTDF.loadbalancing.completionCount[curConditionNumber] + 1;
+      //update the rootTDF
+      Meteor.call('updateTdfConditionCounts', Session.get('currentRootTdfId'), conditionCounts);
+    }
+
     leaveTarget = '/profile';
+    
   }
 
   const newExperimentState = {
@@ -2947,8 +2975,8 @@ async function resumeFromComponentState() {
   // condition selection. It will be our responsibility to update
   // currentTdfId and currentStimuliSetId based on experimental conditions
   // (if necessary)
-  const rootTDFBoxed = Tdfs.findOne({_id: Session.get('currentRootTdfId')});
-  const rootTDF = rootTDFBoxed.content;
+  let rootTDFBoxed = Tdfs.findOne({_id: Session.get('currentRootTdfId')});
+  let rootTDF = rootTDFBoxed.content;
   if (!rootTDF) {
     console.log('PANIC: Unable to load the root TDF for learning', Session.get('currentRootTdfId'));
     alert('Unfortunately, something is broken and this lesson cannot continue');
@@ -2974,21 +3002,90 @@ async function resumeFromComponentState() {
       console.log('Found previous experimental condition: using that');
       conditionTdfId = prevCondition;
     } else {
-      // Select condition and save it
-      console.log('No previous experimental condition: Selecting from ' + setspec.condition.length);
-      const randomConditionFileName =  _.sample(setspec.condition)
-      conditionTdfId = Tdfs.findOne({"content.fileName": randomConditionFileName})._id;
-      newExperimentState.conditionTdfId = conditionTdfId;
-      newExperimentState.conditionNote = 'Selected from ' + _.display(setspec.condition.length) + ' conditions';
-      console.log('Exp Condition', conditionTdfId, newExperimentState.conditionNote);
+      if(!setspec.loadbalancing){
+        // Select condition and save it
+        console.log('No previous experimental condition: Selecting from ' + setspec.condition.length);
+        const randomConditionFileName =  _.sample(setspec.condition)
+        conditionTdfId = Tdfs.findOne({"content.fileName": randomConditionFileName})._id;
+        newExperimentState.conditionTdfId = conditionTdfId;
+        newExperimentState.conditionNote = 'Selected from ' + _.display(setspec.condition.length) + ' conditions';
+        console.log('Exp Condition', conditionTdfId, newExperimentState.conditionNote);
+      } else {
+        conditionCounts = rootTDFBoxed.conditionCounts;
+        if(setspec.loadbalancing == "max"){
+          //we check the conditionCounts and select randomly from the conditions with a count less than the max
+          let max = 0;
+          let maxConditions = [];
+          for(condition in setspec.condition){
+            if(conditionCounts[condition] > max){
+              max = conditionCounts[condition];
+            }
+          }
+          for(condition in setspec.condition){
+            if(conditionCounts[condition] < max){
+              maxConditions.push(setspec.condition[condition]);
+            }
+          }
+          //if the maxConditions array is empty, we select randomly from all conditions
+          if(maxConditions.length == 0){
+            maxConditions = setspec.condition;
+          }
+          const randomConditionFileName =  _.sample(maxConditions)
+          conditionTdfId = Tdfs.findOne({"content.fileName": randomConditionFileName})._id;
+        } else if(setspec.loadbalancing == "min"){
+          //we check the conditionCounts and select randomly from the conditions with a count equal to the min
+          let min = 1000000000;
+          let minConditions = [];
+          for(condition in setspec.condition){
+            if(conditionCounts[condition] < min){
+              min = conditionCounts[condition];
+            }
+          }
+          for(condition in setspec.condition){
+            if(conditionCounts[condition] == min){
+              minConditions.push(setpec.condition[condition]);
+            }
+          }
+          //if the minConditions array is empty, we select randomly from all conditions
+          if(minConditions.length == 0){
+            minConditions = setspec.condition;
+          }
+          const randomConditionFileName =  _.sample(minConditions)
+          conditionTdfId = Tdfs.findOne({"content.fileName": randomConditionFileName})._id;
+      } else {
+        console.log('Invalid loadbalancing parameter');
+        alert('Unfortunately, something is broken and this lesson cannot continue');
+        leavePage('/profile');
+        return;
+      }
     }
+    if (setspec.countcompletion == "beginning") {
+      //reload the conditionCounts from the rootTDF
+      rootTDFBoxed = Tdfs.findOne({_id: Session.get('currentRootTdfId')});
+      conditionCounts = rootTDFBoxed.conditionCounts;
+      conditions = rootTDF.tdfs.tutor.setspec.condition;
+      //iterate the conditionCounts for the condition we selected
+      conditionFileName = Tdfs.findOne({_id: conditionTdfId}).content.fileName;
+      for(condition in conditions){
+        if(conditions[condition] == conditionFileName){
+          conditionCounts[condition] = conditionCounts[condition] + 1;
+          break;
+        }
+      }
+
+      Meteor.call('updateTdfConditionCounts', Session.get('currentRootTdfId'), conditionCounts);
+    }
+
+    newExperimentState.conditionTdfId = conditionTdfId;
+    updateExperimentState(newExperimentState, 'setExpCondition');
+  }
 
     if (!conditionTdfId) {
       console.log('No experimental condition could be selected!');
       alert('Unfortunately, something is broken and this lesson cannot continue');
       leavePage('/profile');
       return;
-    }
+    } 
 
     // Now we have a different current TDF (but root stays the same)
     Session.set('currentTdfId', conditionTdfId);
