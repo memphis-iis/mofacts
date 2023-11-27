@@ -534,7 +534,7 @@ function modelUnitEngine() {
         for (let j=0; j<card.stims.length; j++) {
           const stim = card.stims[j];
           if (hiddenItems.includes(stim.stimulusKC) || !stim.canUse) continue;
-          optimalProb = currentDeliveryParams.optimalThreshold;
+          optimalProb = Math.log(currentDeliveryParams.optimalThreshold/(1-currentDeliveryParams.optimalThreshold));
           const parameters = stim.parameter;
           if(!optimalProb && parameters[1]) optimalProb = Math.log(parameters[1]/(1-parameters[1]));
           if(!optimalProb) {
