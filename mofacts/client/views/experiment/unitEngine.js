@@ -16,6 +16,8 @@ import {MODEL_UNIT, SCHEDULE_UNIT} from '../../../common/Definitions';
 import {meteorCallAsync, clientConsole} from '../../index';
 import {displayify} from '../../../common/globalHelpers';
 import {Answers} from './answerAssess';
+import { serverConsole } from '../../../server/methods';
+import { ifError } from 'assert';
 
 export {createScheduleUnit, createModelUnit, createEmptyUnit};
 
@@ -521,6 +523,7 @@ function modelUnitEngine() {
     let optimalProb;
     let forceSpacing = currentDeliveryParams.forceSpacing;
     let minTrialDistance = forceSpacing ? 1 : -1;
+    const currentDeliveryParams = Session.get('currentDeliveryParams');
 
     for (let i=0; i<cards.length; i++) {
       const card = cards[i];
@@ -531,11 +534,11 @@ function modelUnitEngine() {
         for (let j=0; j<card.stims.length; j++) {
           const stim = card.stims[j];
           if (hiddenItems.includes(stim.stimulusKC) || !stim.canUse) continue;
+          optimalProb = currentDeliveryParams.optimalThreshold;
           const parameters = stim.parameter;
-          optimalProb = Math.log(parameters[1]/(1-parameters[1]));
-          if (!optimalProb) {
-            // clientConsole(2, "NO OPTIMAL PROB SPECIFIED IN STIM, DEFAULTING TO 0.90");
-            optimalProb = currentDeliveryParams.optimalThreshold || 0.90;
+          if(!optimalProb && parameters[1]) optimalProb = Math.log(parameters[1]/(1-parameters[1]));
+          if(!optimalProb) {
+            throw 'Error: Optimal Probability is undefined or NaN.';
           }
           const dist = Math.abs(Math.log(stim.probabilityEstimate/(1-stim.probabilityEstimate)) - optimalProb);
           if (dist < currentMin) {
@@ -730,6 +733,7 @@ function modelUnitEngine() {
     calculateSingleProb: function calculateSingleProb(cardIndex, stimIndex, hintLevel, i, stimCluster) {
       const card = cardProbabilities.cards[cardIndex];
       const stim = card.stims[stimIndex];
+      const currentDeliveryParams = Session.get('currentDeliveryParams');
       
       // Store parameters in an object for easy logging/debugging
       const p = {};
@@ -860,6 +864,7 @@ function modelUnitEngine() {
       p.responseStudyTrialCount = p.resp.priorStudy;
 
       p.stimParameters = stimCluster.stims[stimIndex].params.split(',').map((x) => _.floatval(x));
+      if(currentDeliveryParams.optimalThreshold) p.stimParameters[1] = currentDeliveryParams.optimalThreshold;
 
       p.clusterPreviousCalculatedProbabilities = JSON.parse(JSON.stringify(card.previousCalculatedProbabilities));
       p.clusterOutcomeHistory = JSON.parse(JSON.stringify(card.outcomeStack));
