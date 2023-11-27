@@ -16,8 +16,6 @@ import {MODEL_UNIT, SCHEDULE_UNIT} from '../../../common/Definitions';
 import {meteorCallAsync, clientConsole} from '../../index';
 import {displayify} from '../../../common/globalHelpers';
 import {Answers} from './answerAssess';
-import { serverConsole } from '../../../server/methods';
-import { ifError } from 'assert';
 
 export {createScheduleUnit, createModelUnit, createEmptyUnit};
 
@@ -523,7 +521,6 @@ function modelUnitEngine() {
     let optimalProb;
     let forceSpacing = currentDeliveryParams.forceSpacing;
     let minTrialDistance = forceSpacing ? 1 : -1;
-    const currentDeliveryParams = Session.get('currentDeliveryParams');
 
     for (let i=0; i<cards.length; i++) {
       const card = cards[i];
@@ -736,7 +733,6 @@ function modelUnitEngine() {
     calculateSingleProb: function calculateSingleProb(cardIndex, stimIndex, hintLevel, i, stimCluster) {
       const card = cardProbabilities.cards[cardIndex];
       const stim = card.stims[stimIndex];
-      const currentDeliveryParams = Session.get('currentDeliveryParams');
       
       // Store parameters in an object for easy logging/debugging
       const p = {};
@@ -867,7 +863,6 @@ function modelUnitEngine() {
       p.responseStudyTrialCount = p.resp.priorStudy;
 
       p.stimParameters = stimCluster.stims[stimIndex].params.split(',').map((x) => _.floatval(x));
-      if(currentDeliveryParams.optimalThreshold) p.stimParameters[1] = currentDeliveryParams.optimalThreshold;
 
       p.clusterPreviousCalculatedProbabilities = JSON.parse(JSON.stringify(card.previousCalculatedProbabilities));
       p.clusterOutcomeHistory = JSON.parse(JSON.stringify(card.outcomeStack));
