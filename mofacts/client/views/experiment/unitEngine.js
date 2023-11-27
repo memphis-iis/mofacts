@@ -16,8 +16,6 @@ import {MODEL_UNIT, SCHEDULE_UNIT} from '../../../common/Definitions';
 import {meteorCallAsync, clientConsole} from '../../index';
 import {displayify} from '../../../common/globalHelpers';
 import {Answers} from './answerAssess';
-import { serverConsole } from '../../../server/methods';
-import { ifError } from 'assert';
 
 export {createScheduleUnit, createModelUnit, createEmptyUnit};
 
@@ -534,7 +532,7 @@ function modelUnitEngine() {
         for (let j=0; j<card.stims.length; j++) {
           const stim = card.stims[j];
           if (hiddenItems.includes(stim.stimulusKC) || !stim.canUse) continue;
-          optimalProb = Math.log(currentDeliveryParams.optimalThreshold/(1-currentDeliveryParams.optimalThreshold));
+          optimalProb = Math.log(currentDeliveryParams.optimalThreshold/(1-currentDeliveryParams.optimalThreshold)) || false;
           const parameters = stim.parameter;
           if(!optimalProb && parameters[1]) optimalProb = Math.log(parameters[1]/(1-parameters[1]));
           if(!optimalProb) {
