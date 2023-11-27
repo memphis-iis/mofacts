@@ -531,11 +531,11 @@ function modelUnitEngine() {
         for (let j=0; j<card.stims.length; j++) {
           const stim = card.stims[j];
           if (hiddenItems.includes(stim.stimulusKC) || !stim.canUse) continue;
-          optimalProb = currentDeliveryParams.optimalThreshold;
           const parameters = stim.parameter;
-          if(!optimalProb && parameters[1]) optimalProb = Math.log(parameters[1]/(1-parameters[1]));
-          if(!optimalProb) {
-            throw 'Error: Optimal Probability is undefined or NaN.';
+          optimalProb = Math.log(parameters[1]/(1-parameters[1]));
+          if (!optimalProb) {
+            // clientConsole(2, "NO OPTIMAL PROB SPECIFIED IN STIM, DEFAULTING TO 0.90");
+            optimalProb = currentDeliveryParams.optimalThreshold || 0.90;
           }
           const dist = Math.abs(Math.log(stim.probabilityEstimate/(1-stim.probabilityEstimate)) - optimalProb);
           if (dist < currentMin) {
