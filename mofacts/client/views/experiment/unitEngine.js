@@ -678,9 +678,12 @@ function modelUnitEngine() {
       let parms;
       const ptemp=[];
       const tdfDebugLog=[];
-      for (let clusterIndex = 0; clusterIndex < cardProbabilities.cards.length; clusterIndex++) {
+      const unitNumber = Session.get('currentUnitNumber');
+      const curTdf = Session.get('currentTdf');
+      const clusterList = curTdf.content.tdfs.tutor.unit[unitNumber].clusterlist;
+      const unitClusterList = clusterList.split(' ').map((x) => x.split('-').map((y) => parseInt(y)));
+      for (clusterIndex of unitClusterList) {
         const card = cardProbabilities.cards[clusterIndex];
-        const pParams=[];
         const stimCluster = stimClusters[clusterIndex];
         for (let stimIndex = 0; stimIndex < card.stims.length; stimIndex++) {
           const stim = card.stims[stimIndex];
