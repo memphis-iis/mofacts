@@ -530,16 +530,14 @@ function modelUnitEngine() {
         const stimCluster = stimClusters[i];
         for (let j=0; j<card.stims.length; j++) {
           const stim = card.stims[j];
-          if (hiddenItems.includes(stim.stimulusKC) || !stim.canUse) continue
+          if (hiddenItems.includes(stim.stimulusKC) || !stim.canUse) continue;
           const parameters = stim.parameter;
           const currentDeliveryParams = Session.get('currentDeliveryParams');
-          optimalProb = Math.log(currentDeliveryParams.optimalThreshold/(1-currentDeliveryParams.optimalThreshold) || false          if (!optimalProb) optimalProb = Math.log(parameters[1]/(1-parameters[1]) || false;
-          if (!optimalProb) optimalProb = Math.log(parameters[1]/(1-parameters[1]) || false;
+          optimalProb = Math.log(currentDeliveryParams.optimalThreshold/(1-currentDeliveryParams.optimalThreshold)) || false;
+          if (!optimalProb) optimalProb = Math.log(parameters[1]/(1-parameters[1])) || false;
           if (!optimalProb) {
             clientConsole(2, "NO OPTIMAL PROBABILITY SPECIFIED IN STIM, THROWING ERROR");
             throw new Error("NO OPTIMAL PROBABILITY SPECIFIED IN STIM, THROWING ERROR");
-            alert("There is an error with this lesson. Please contact the administrator.")
-            break;
           }
           const dist = Math.abs(Math.log(stim.probabilityEstimate/(1-stim.probabilityEstimate)) - optimalProb);
           if (dist < currentMin) {
