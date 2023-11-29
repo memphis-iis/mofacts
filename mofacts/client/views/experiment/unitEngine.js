@@ -521,7 +521,6 @@ function modelUnitEngine() {
     let optimalProb;
     let forceSpacing = currentDeliveryParams.forceSpacing;
     let minTrialDistance = forceSpacing ? 1 : -1;
-    const currentDeliveryParams = Session.get('currentDeliveryParams');
 
     for (let i=0; i<cards.length; i++) {
       const card = cards[i];
@@ -531,12 +530,12 @@ function modelUnitEngine() {
         const stimCluster = stimClusters[i];
         for (let j=0; j<card.stims.length; j++) {
           const stim = card.stims[j];
-          if (hiddenItems.includes(stim.stimulusKC) || !stim.canUse) continue;
-          optimalProb = Math.log(currentDeliveryParams.optimalThreshold/(1-currentDeliveryParams.optimalThreshold)) || false;
+          if (hiddenItems.includes(stim.stimulusKC) || !stim.canUse) continue
           const parameters = stim.parameter;
-          if(!optimalProb && parameters[1]) optimalProb = Math.log(parameters[1]/(1-parameters[1]));
-          if(!optimalProb) {
-            throw 'Error: Optimal Probability is undefined or NaN.';
+          optimalProb = Math.log(parameters[1]/(1-parameters[1]));
+          if (!optimalProb) {
+            // clientConsole(2, "NO OPTIMAL PROB SPECIFIED IN STIM, DEFAULTING TO 0.90");
+            optimalProb = currentDeliveryParams.optimalThreshold || 0.90;
           }
           const dist = Math.abs(Math.log(stim.probabilityEstimate/(1-stim.probabilityEstimate)) - optimalProb);
           if (dist < currentMin) {
@@ -676,9 +675,12 @@ function modelUnitEngine() {
       let parms;
       const ptemp=[];
       const tdfDebugLog=[];
-      for (let clusterIndex = 0; clusterIndex < cardProbabilities.cards.length; clusterIndex++) {
+      const unitNumber = Session.get('currentUnitNumber');
+      const curTdf = Session.get('currentTdf');
+      const clusterList = curTdf.content.tdfs.tutor.unit[unitNumber].clusterlist;
+      const unitClusterList = clusterList.split(' ').map((x) => x.split('-').map((y) => parseInt(y)));
+      for (clusterIndex of unitClusterList) {
         const card = cardProbabilities.cards[clusterIndex];
-        const pParams=[];
         const stimCluster = stimClusters[clusterIndex];
         for (let stimIndex = 0; stimIndex < card.stims.length; stimIndex++) {
           const stim = card.stims[stimIndex];
@@ -731,7 +733,6 @@ function modelUnitEngine() {
     calculateSingleProb: function calculateSingleProb(cardIndex, stimIndex, hintLevel, i, stimCluster) {
       const card = cardProbabilities.cards[cardIndex];
       const stim = card.stims[stimIndex];
-      const currentDeliveryParams = Session.get('currentDeliveryParams');
       
       // Store parameters in an object for easy logging/debugging
       const p = {};
@@ -862,7 +863,6 @@ function modelUnitEngine() {
       p.responseStudyTrialCount = p.resp.priorStudy;
 
       p.stimParameters = stimCluster.stims[stimIndex].params.split(',').map((x) => _.floatval(x));
-      if(currentDeliveryParams.optimalThreshold) p.stimParameters[1] = currentDeliveryParams.optimalThreshold;
 
       p.clusterPreviousCalculatedProbabilities = JSON.parse(JSON.stringify(card.previousCalculatedProbabilities));
       p.clusterOutcomeHistory = JSON.parse(JSON.stringify(card.outcomeStack));
