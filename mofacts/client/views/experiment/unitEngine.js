@@ -532,10 +532,14 @@ function modelUnitEngine() {
           const stim = card.stims[j];
           if (hiddenItems.includes(stim.stimulusKC) || !stim.canUse) continue
           const parameters = stim.parameter;
-          optimalProb = Math.log(parameters[1]/(1-parameters[1]));
+          const currentDeliveryParams = Session.get('currentDeliveryParams');
+          optimalProb = Math.log(currentDeliveryParams.optimalThreshold/(1-currentDeliveryParams.optimalThreshold) || false          if (!optimalProb) optimalProb = Math.log(parameters[1]/(1-parameters[1]) || false;
+          if (!optimalProb) optimalProb = Math.log(parameters[1]/(1-parameters[1]) || false;
           if (!optimalProb) {
-            // clientConsole(2, "NO OPTIMAL PROB SPECIFIED IN STIM, DEFAULTING TO 0.90");
-            optimalProb = currentDeliveryParams.optimalThreshold || 0.90;
+            clientConsole(2, "NO OPTIMAL PROBABILITY SPECIFIED IN STIM, THROWING ERROR");
+            throw new Error("NO OPTIMAL PROBABILITY SPECIFIED IN STIM, THROWING ERROR");
+            alert("There is an error with this lesson. Please contact the administrator.")
+            break;
           }
           const dist = Math.abs(Math.log(stim.probabilityEstimate/(1-stim.probabilityEstimate)) - optimalProb);
           if (dist < currentMin) {
@@ -863,6 +867,8 @@ function modelUnitEngine() {
       p.responseStudyTrialCount = p.resp.priorStudy;
 
       p.stimParameters = stimCluster.stims[stimIndex].params.split(',').map((x) => _.floatval(x));
+      const currentDeliveryParams = Session.get('currentDeliveryParams');
+      currentDeliveryParams.optimalThreshold ? p.stimParameters[1] = currentDeliveryParams.optimalThreshold : p.stimParameters[1] = p.stimParameters[1];
 
       p.clusterPreviousCalculatedProbabilities = JSON.parse(JSON.stringify(card.previousCalculatedProbabilities));
       p.clusterOutcomeHistory = JSON.parse(JSON.stringify(card.outcomeStack));
