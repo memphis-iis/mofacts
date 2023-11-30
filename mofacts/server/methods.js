@@ -2708,14 +2708,6 @@ const methods = {
     return "failure";
   },
 
-  //setUserTheme - sets the user's theme in profile
-  setUserTheme: function(theme) {
-    console.log('setUserTheme', theme);
-    let profile = Meteor.user().profile;
-    profile.theme = theme;
-    Meteor.users.update({_id: Meteor.userId()}, {$set: {profile: profile}});
-    //verify that the theme was set
-  },
 
   //Impersonate User
   impersonate: function(userId) {
@@ -3021,6 +3013,74 @@ const methods = {
     }
     return stims || [];
   },
+
+  initializeCustomTheme: function(themeName) {
+    serverConsole('initializeCustomTheme');
+    //This creates a theme key that contains an object with the theme name
+    //and an empty object for the theme's properties
+    let theme = {};
+    theme.themeName = themeName;
+    theme.enabled = true;
+    theme.properties = {
+      themeName: themeName,
+      background_color: '#F2F2F2',
+      text_color: '#000000',
+      accent_color: '#7ed957',
+      secondary_color: '#d9d9d9',
+      audio_alert_color: '#06723e',
+      success_color: '#00cc00',
+      alert_color: '#ff0000',
+      navbar_text_color: '#000000',
+      neutral_color: '#ffffff',
+      logo_url: ''
+    };
+    //This inserts the theme into the database, or updates it if it already exists
+    DynamicSettings.upsert({key: 'customTheme'}, {$set: {value: theme}});
+    return theme;
+  },
+
+  getTheme: function() {
+    serverConsole('getTheme');
+    ret = DynamicSettings.findOne({key: 'customTheme'}) 
+    if(!ret || ret.value.enabled == false) {
+      return {
+        themeName: 'MoFaCTS',
+        properties: {
+          themeName: 'MoFaCTS',
+          background_color: '#F2F2F2',
+          text_color: '#000000',
+          accent_color: '#7ed957',
+          secondary_color: '#d9d9d9',
+          audio_alert_color: '#06723e',
+          success_color: '#00cc00',
+          alert_color: '#ff0000',
+          logo_url: ''
+        }
+      }
+     }
+    return ret.value;
+  },
+
+  setCustomThemeProperty: function(property, value) {
+    //This sets the value of a property in the custom theme
+    path = 'value.properties.' + property;
+    serverConsole('setCustomThemeProperty', path, value);
+    DynamicSettings.update({key: 'customTheme'}, {$set: {[path]: value}});
+  },
+
+  toggleCustomTheme: function() {
+    serverConsole('toggleCustomTheme');
+    //This toggles the custom theme on or off
+    let theme = DynamicSettings.findOne({key: 'customTheme'});
+    if(!theme) { 
+      Meteor.call('initializeCustomTheme', 'Custom Theme');
+    } else {
+      theme = theme.value;
+      theme.enabled = !theme.enabled;
+      serverConsole('custom theme enabled:', theme.enabled);
+      DynamicSettings.update({key: 'customTheme'}, {$set: {'value.enabled': theme.enabled}});
+    }
+  }
 }
 
 const asyncMethods = {

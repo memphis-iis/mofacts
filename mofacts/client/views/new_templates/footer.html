@@ -1,6 +1,6 @@
 <template name="footer">
     <div class="vh-10"></div>
     <div class='row justify-content-center footer '>
-        MoFACTs &copy; 2023, University of Memphis.
+        {{currentTheme.properties.themeName}} &copy; 2023, University of Memphis. {{#if currentTheme.enabled}}Powered by MoFaCTs.{{/if}}
     </div>
 </template>

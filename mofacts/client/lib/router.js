@@ -208,6 +208,9 @@ const getRestrictedRouteAction = function(routeName) {
 // set up all routes with default behavior
 for (const route of restrictedRoutes) {
   Router.route('/' + route, {
+    waitOn: function() {
+      return Meteor.subscribe('settings');
+    },
     name: 'client.' + route,
     action: getRestrictedRouteAction(route),
   });
@@ -323,9 +326,6 @@ Router.route('/contentUpload', {
 
 Router.route('/adminControls', {
   name: 'client.adminControls',
-  waitOn: function() {
-    return Meteor.subscribe('settings');
-  },
   action: function() {
     if(Meteor.user() && Roles.userIsInRole(Meteor.user(), ['admin'])){
       this.render('adminControls');

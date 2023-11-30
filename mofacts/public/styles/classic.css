@@ -1,6 +1,20 @@
 /* Colors */
+:root {
+    --background-color: #F2F2F2;
+    --text-color: #000000;
+    --accent-color: #7ed957;
+    --secondary-color: #d9d9d9;
+    --audio-alert-color: #06723e;
+    --success-color: #00cc00;
+    --alert-color: #ff0000;
+    --neutral-color: #ffffff;
+    --navbar-text-color: #000000;
+}
+
+
 body{
-    background-color: #F2F2F2;
+    background-color: var(--background-color);
+    color: var(--text-color);
 }
 
 h3{
@@ -11,7 +25,7 @@ h3{
 }
 
 a{
-    color: #00cc00
+    color: var(--success-color)
 }
 h5{
     /* League Spartan */
@@ -24,33 +38,33 @@ p{
 }
 
 .full-menu-content li:hover{
-    background-color: #7ed957;
-    color: #000000;
+    background-color: var(--accent-color);
+    color: var(--text-color);
 }
 
 .btn, .btn-icon{
-    background-color: #7ed957 !important;
-    border-color: #7ed957 !important;
-    color: #000000;
+    background-color: var(--accent-color) !important;
+    border-color: var(--accent-color) !important;
+    color: var(--text-color);
     /* center button */
     margin-left: auto;
     margin-right: auto;
 }
 .btn-secondary{
-    background-color: #d9d9d9 !important;
-    color: #000000;
+    background-color: var(--secondary-color) !important;
+    color: var(--text-color);
     /* center button */
     margin-left: auto;
     margin-right: auto;
 }
 .btn:hover, .btn-icon:hover{
-    background-color: #00cc00;
-    border-color: #7ed957;
-    color: #000000;
+    background-color: var(--success-color);
+    border-color: var(--accent-color);
+    color: var(--text-color);
 
 }
 .modal-dialog, .modal-content{
-    background-color: #d9d9d9;
+    background-color: var(--secondary-color);
     display: flex;
 }
 
@@ -65,8 +79,8 @@ p{
     margin-left: auto;
 }
 .full-menu-content, .active-menu-button{
-    background-color: #d9d9d9 !important;
-    color: #000000;
+    background-color: var(--secondary-color) !important;
+    color: var(--text-color);
     /* slide in from right */
     animation: slideInRight 0.5s;
     -webkit-animation: slideInRight 0.5s;
@@ -75,7 +89,7 @@ p{
     -webkit-animation: slideOutRight 0.5s;
 }
 .alert, .header-box{
-    background-color: #d9d9d9;
+    background-color: var(--secondary-color);
     /*vertical center text*/
     display: flex;
     align-items: center;
@@ -84,11 +98,11 @@ p{
 }
 
 .text-alert-danger{
-    color: #ff0000;
+    color: var(--alert-color);
 }
 
 .alert-success, .alert-danger{
-    background-color: #F2F2F2 !important;
+    background-color: var(--background-color) !important;
     /* fix to bottom of page */
     position: fixed;
     bottom: 0;
@@ -99,13 +113,13 @@ p{
     /* slide out to bottom */
     animation: slideOutBottom 0.5s;
     -webkit-animation: slideOutBottom 0.5s;
-    background-color: #F2F2F2 !important;
+    background-color: var(--background-color) !important;
     /* make sure no border */
     border: none;
 
 }
 thead{
-    background-color: #7ed957;
+    background-color: var(--accent-color);
 }
 
 .card-header{
@@ -113,8 +127,8 @@ thead{
     padding: 10px;
 }
 .card-header .displaystats{
-    background-color: #d9d9d9;
-    color: #000000;
+    background-color: var(--secondary-color);
+    color: var(--text-color);
     font-family: 'Arimo';
     font-size: 15px;
     margin-top: -10px;
@@ -137,7 +151,7 @@ thead{
     font-family: 'League Spartan';
     font-weight: 800;
     /* border radius is 35px on left side*/
-    border: 1px solid #7ed957;
+    border: 1px solid var(--accent-color);
     border-top-left-radius: 35px;
     border-top-right-radius: 35px;
     padding: 10px;
@@ -167,7 +181,7 @@ input[type=file]{
     border-width: 1px;
     border-radius: 35px;
     padding: 5px;
-    border-color: #7ed957;
+    border-color: var(--accent-color);
     /*give margin to the left of the input*/
     margin-left: 10px;
 }
@@ -178,7 +192,7 @@ select{
     border-width: 1px;
     border-radius: 35px;
     padding: 5px;
-    border-color: #7ed957;
+    border-color: var(--accent-color);
     /*give margin to the left of the input*/
     margin-left: 10px;
 }
@@ -225,20 +239,30 @@ select{
     /* center icon */
     align-items: center;
 }
-
+.navbar{
+    background-color: var(--neutral-color) !important;
+    color: var(--navbar-text-color);
+}
+.navbar-toggler-icon{
+    background-image: none !important;
+}
+.fa-bars{
+    color: var(--navbar-text-color);
+}
 .navbar button{
     background-color: transparent;
     border: none;
 }
 
 .footer{
-    color: grey;
+    color: var(--navbar-text-color);
     /* Joefin Sans */
     font-family: 'Josefin Sans';
 }
 
 .navbar-brand{
     /* League Spartan */
+    color: var(--navbar-text-color);
     font-family: 'League Spartan';
     font-weight: 800;
     font-size: 35px;
@@ -325,11 +349,11 @@ select{
 
 
 .alert-danger b{
-    color: #ff0000;
+    color: var(--alert-color);
     font-size: 20px;
 }
 .alert-success b{
-    color: #7ed957;
+    color: var(--accent-color);
     font-size: 20px;
 }
 
@@ -374,8 +398,8 @@ select{
         margin: 0px;
     }
     .alert-audio-100{
-        color: #06723e;
-        background-color: #7ed957;
+        color: var(--audio-alert-color);
+        background-color: var(--accent-color);
         padding: 20px;
         margin-top: 20px;
     }
@@ -443,8 +467,8 @@ select{
         margin: 0px;
     }
     .alert-audio-100{
-        color: #06723e;
-        background-color: #7ed957;
+        color: var(--audio-alert-color);
+        background-color: var(--accent-color);
         padding: 20px;
         margin-top: 20px;
         margin-right: -8vw;
@@ -455,8 +479,8 @@ select{
 /* hack for bootstrap between 768px and 1024px */
 @media screen and (min-width: 768px) and (max-width: 1024px) {
     .alert-audio-100{
-        color: #06723e;
-        background-color: #7ed957;
+        color: var(--audio-alert-color);
+        background-color: var(--accent-color);
         padding: 20px;
         margin-top: 20px;
         margin-right: -6vw;
@@ -546,7 +570,7 @@ select{
     height: 3em;
     margin-left: -2.5em;
     background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='%23fff'/%3e%3c/svg%3e");
-    background-color: rgba(126, 217, 87, 0.25);
+    background-color: var(--accent-color)
     background-position: left center;
     border-radius: 2em;
     transition: background-position .15s ease-in-out;
@@ -561,13 +585,13 @@ select{
 
 
 input[type="range"]::-webkit-slider-runnable-track {
-    background: #00cc00;
+    background: var(--success-color);
     height: 0.5rem;
   }
   
   /******** Firefox ********/
   input[type="range"]::-moz-range-track {
-    background: #00cc00;
+    background: var(--success-color);
     height: 0.5rem;
   }
 
@@ -577,7 +601,7 @@ input[type="range"]::-webkit-slider-runnable-track {
     bottom: 0;
     left: 0;
     width: 100%;
-    background-color:#F2F2F2; /* Set the background color as needed */
+    background-color:var(--background-color); /* Set the background color as needed */
     z-index: 999; /* Set a high z-index to ensure it's on top of other content */
   }
 
@@ -588,7 +612,7 @@ input[type="range"]::-webkit-slider-runnable-track {
  input[type="range"]::-moz-range-thumb {
     border: none; /*Removes extra border that FF applies*/
     appearance: none;
-    background-color: #000000;
+    background-color: var(--text-color);
     height: 2rem;
     width: 1rem;    
     margin-top: -5px; /* Centers thumb on the track */
@@ -598,7 +622,7 @@ input[type="range"]::-webkit-slider-thumb {
     -webkit-appearance: none; /* Override default look */
     appearance: none;
     margin-top: -5px; /* Centers thumb on the track */
-    background-color: #06723c;
+    background-color: var(--accent-color);
     height: 2rem;
     width: 1rem;    
  }
@@ -606,28 +630,28 @@ input[type="range"]::-webkit-slider-thumb {
  #signInButtonOAuth {
     /* use google's blue for outline with white background */
     border: 1px solid #4285f4;
-    background-color: #ffffff !important;
-    color: #4285f4;
+    background-color: var(--background-color) !important;
+    color: var(--text-color);
  }
 
  #backkTosignInButton{
     /* use google's blue for outline with white background */
-    border: 1px solid #4285f4;
-    background-color: #ffffff !important;
+    border: 1px solid var(--accent-color);
+    background-color: var(--background-color) !important;
  }
  
  #signInWithMicrosoftSSO{
     /* use microsoft black for outline with white background */
-    border: 1px solid #000000;
-    background-color: #ffffff !important;
-    color: #000000;
+    border: 1px solid var(--text-color);
+    background-color: var(--background-color) !important;
+    color: var(--text-color);
  }
 
  #classSelectButton{
     /* use microsoft black for outline with white background */
-    border: 1px solid #000000;
-    background-color: #ffffff !important;
-    color: #000000;
+    border: 1px solid var(--text-color);
+    background-color: var(--background-color) !important;
+    color: var(--text-color);
  }
 
  .img-responsive{
