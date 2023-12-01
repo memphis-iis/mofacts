@@ -555,24 +555,25 @@ function modelUnitEngine() {
             continue;
           }
           
-          for (let k = 1; k < Math.min(stim.hintLevelProbabilites.length, 3); k++) {
-            // Check if hintLevelProbabilites array exists
-            if (!stim.hintLevelProbabilites) {
-              continue;
-            }
-          
-            let hintDist = Math.abs(
-              Math.log(stim.hintLevelProbabilites[k] / (1 - stim.hintLevelProbabilites[k])) - optimalProb
-            );
-          
-            if (hintDist < currentMin) {
-              currentMin = hintDist;
-              clusterIndex = i;
-              stimIndex = j;
-              hintLevelIndex = k;
+          if(stim.hintLevelProbabilites) {
+            for (let k = 1; k < Math.min(stim.hintLevelProbabilites.length, 3); k++) {
+              // Check if hintLevelProbabilites array exists
+              if (!stim.hintLevelProbabilites) {
+                continue;
+              }
+            
+              let hintDist = Math.abs(
+                Math.log(stim.hintLevelProbabilites[k] / (1 - stim.hintLevelProbabilites[k])) - optimalProb
+              );
+            
+              if (hintDist < currentMin) {
+                currentMin = hintDist;
+                clusterIndex = i;
+                stimIndex = j;
+                hintLevelIndex = k;
+              }
             }
           }
-          
         }
       }
     }
@@ -678,9 +679,9 @@ function modelUnitEngine() {
       const ptemp=[];
       const tdfDebugLog=[];
       const unitNumber = Session.get('currentUnitNumber');
-      const curTdf = Session.get('currentTdf');
-      const clusterList = curTdf.content.tdfs.tutor.unit[unitNumber].clusterlist;
-      const unitClusterList = clusterList.split(' ').map((x) => x.split('-').map((y) => parseInt(y)));
+      const curTdf = Tdfs.findOne({_id: Session.get('currentTdfId')});
+      const clusterList = curTdf.content.tdfs.tutor.unit[unitNumber].clusterlist || false;
+      clusterList ? unitClusterList = clusterList.split(' ').map((x) => x.split('-').map((y) => parseInt(y))) : unitClusterList = [];
       for (clusterIndex of unitClusterList) {
         const card = cardProbabilities.cards[clusterIndex];
         const stimCluster = stimClusters[clusterIndex];
