@@ -2,15 +2,15 @@
   <div class="row">
     <div class="col-12">
       <div class="form-check form-switch">
-        <label class="form-check-label" for="audioPromptQuestionOn">MoFaCTs reads the question to me</label>
+        <label class="form-check-label" for="audioPromptQuestionOn">{{currentTheme.properties.themeName}} reads the question to me</label>
         <input class="form-check-input" type="checkbox" role="switch" id="audioPromptQuestionOn">
       </div>
       <div class="form-check form-switch">
-        <label class="form-check-label" for="audioInputOn">MoFaCTs listens to my answers.</label>
+        <label class="form-check-label" for="audioInputOn">{{currentTheme.properties.themeName}} listens to my answers.</label>
         <input class="form-check-input" type="checkbox" role="switch" id="audioInputOn">
       </div>
       <div class="form-check form-switch">
-        <label class="form-check-label" for="audioPromptFeedbackOn">MoFACTs reads me
+        <label class="form-check-label" for="audioPromptFeedbackOn">{{currentTheme.properties.themeName}} reads me
           feedback.</label>
         <input class="form-check-input" type="checkbox" role="switch" id="audioPromptFeedbackOn">
       </div>

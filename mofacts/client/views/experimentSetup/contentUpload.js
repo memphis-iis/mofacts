@@ -54,8 +54,13 @@ Template.contentUpload.helpers({
         continue;
       }
       //get the original package filename by looking up the assetId in the tdf
-      thisTdf.packageAssetId = tdf.packageFileName.split('.')[0];
-      thisTdf.packageFileLink = DynamicAssets.findOne({_id: thisTdf.packageAssetId}).link();
+      tdf.packageFileName ? thisTdf.packageAssetId = tdf.packageFileName.split('.')[0] : thisTdf.packageAssetId = false;
+      if(!thisTdf.packageAssetId){
+        thisTdf.errors.push('Package ID not found. This package was uploaded before the new upload system was implemented. Please delete this package and re-upload it.');
+        thisTdf.packageFileLink = null;
+      } else {
+        thisTdf.packageFileLink = DynamicAssets.findOne({_id: thisTdf.packageAssetId}).link() || false;
+      }
       //iterate through tdf.stimuli and get all stimuli
       for (const stim of tdf.stimuli) {
         //check if thisTdf.stimFileInfo already contains a file with this stim.stimuliSetId
