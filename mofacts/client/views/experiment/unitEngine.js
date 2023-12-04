@@ -680,8 +680,22 @@ function modelUnitEngine() {
       const tdfDebugLog=[];
       const unitNumber = Session.get('currentUnitNumber');
       const curTdf = Tdfs.findOne({_id: Session.get('currentTdfId')});
-      const clusterList = curTdf.content.tdfs.tutor.unit[unitNumber].clusterlist || false;
-      clusterList ? unitClusterList = clusterList.split(' ').map((x) => x.split('-').map((y) => parseInt(y))) : unitClusterList = [];
+      const unitTypeParams = curTdf.content.tdfs.tutor.unit[unitNumber].assessmentsession || curTdf.content.tdfs.tutor.unit[unitNumber].learningsession;  
+      unitTypeParams ? clusterList = unitTypeParams.clusterlist : clusterList = false;
+      unitClusterList = [];
+      if(!clusterList){ clientConsole(2, 'no clusterlist found for unit ' + unitNumber); }
+      clusterList.split(' ').forEach(
+        value => {
+          if(value.includes('-')){
+            const [start, end] = value.split('-').map(Number);
+            for(let i = start; i <= end; i++){
+              unitClusterList.push(i);
+            }
+          } else {
+            unitClusterList.push(Number(value));
+          }
+        }
+      );
       for (clusterIndex of unitClusterList) {
         const card = cardProbabilities.cards[clusterIndex];
         const stimCluster = stimClusters[clusterIndex];

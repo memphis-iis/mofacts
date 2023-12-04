@@ -436,6 +436,7 @@ function getCurrentDeliveryParams() {
     return list;
   }
 
+
   const xlations = {
     'showhistory': xlateBool,
     'forceCorrection': xlateBool,
@@ -463,7 +464,7 @@ function getCurrentDeliveryParams() {
     'allowPhoneticMatching': xlateBool,
     'useSpellingCorrection': xlateBool,
     'editDistance': _.intval,
-    'optimalThreshold': _.intval,
+    'optimalThreshold': parseFloat,
     'resetStudentPerformance': xlateBool,
     'practicetimer': xlateString,
     'readyPromptString': xlateString,
