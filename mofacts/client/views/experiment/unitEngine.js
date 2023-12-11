@@ -733,6 +733,8 @@ function modelUnitEngine() {
             stim.canUse = false;
           }
           stim.probabilityEstimate = parms.probability;
+          stim.previousCalculatedProbabilities.push(parms.probability);
+          card.previousCalculatedProbabilities.push(parms.probability);
           stim.probFunctionParameters = parms;
           if(!typeof stim.probabilityEstimate == "number"){
             throw 'Error: Probability Estimate is undefined or NaN.';
@@ -1646,8 +1648,6 @@ function modelUnitEngine() {
       }
 
       const currentStimProbability = stim.probabilityEstimate;
-      stim.previousCalculatedProbabilities.push(currentStimProbability);
-      card.previousCalculatedProbabilities.push(currentStimProbability);
 
       clientConsole(2, 'cardAnswered, curTrialInfo:', currentStimProbability, card, stim);
       if (wasCorrect) {
