@@ -1711,6 +1711,14 @@ async function afterAnswerFeedbackCallback(trialEndTimeStamp, trialStartTimeStam
     Session.set('overallOutcomeHistory', overallOutcomeHistory);
   }
 
+  const overallStudyHistory = Session.get('overallStudyHistory') || [];
+  if (testType === 's') {
+    overallStudyHistory.push(1);
+  }
+  if (testType === 'd') {
+    overallStudyHistory.push(0);
+  }
+  
   let dialogueHistory;
   if (Session.get('dialogueHistory')) {
     dialogueHistory = JSON.parse(JSON.stringify(Session.get('dialogueHistory')));
