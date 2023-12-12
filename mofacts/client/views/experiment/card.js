@@ -1498,6 +1498,10 @@ async function showUserFeedback(isCorrect, feedbackMessage, afterAnswerFeedbackC
       }
       if (Session.get('curTdfUISettings').onlyShowSimpleFeedback) {
         isCorrect ? feedbackMessage = "<b style='color:" + uiCorrectColor + ";'>Correct.</b>" : feedbackMessage = "<b style='color:" + uiIncorrectColor + ";'>Incorrect.</b>";
+      } else {
+        if (!feedbackMessage.includes(" is ")) {
+          feedbackMessage += " The correct answer is " + Session.get('currentExperimentState').originalAnswer;
+        }
       }
     $('.hints').hide();
     const hSize = Session.get('currentDeliveryParams') ? Session.get('currentDeliveryParams').fontsize.toString() : 2;
@@ -1528,31 +1532,38 @@ async function showUserFeedback(isCorrect, feedbackMessage, afterAnswerFeedbackC
       case "top":
         target = "#UserInteraction";
         $('#userInteractionContainer').attr("hidden",false).show();
+        $('#feedbackOverrideContainer').attr("hidden",true).hide();
         break;
       case "middle":
         target = "#feedbackOverride";
-        $('#feedbackOverrideContainer').attr("hidden",false).show();
+        $('#').attr("hidden",false).show();
+        $('#userInteractionContainer').attr("hidden",true).hide();
         break;
       case "bottom":
         target = "#userLowerInteraction";
         //add the fontSize class to the target
         const hSize = Session.get('currentDeliveryParams') ? Session.get('currentDeliveryParams').fontsize.toString() : 2;
         $(target).addClass('h' + hSize);
+        $('#feedbackOverrideContainer').attr("hidden",true).hide();
         break;
     }
     //remove the first <br> tag from feedback message if it exists
     if(feedbackMessage.startsWith("<br>")){
       feedbackMessage = feedbackMessage.substring(4);
     }
+    //encapsulate the message in a span tag
+    feedbackMessage = "<span>" + feedbackMessage + "</span>";
     //hide the buttons
     $('#multipleChoiceContainer').hide();
+    $('input-box').hide();
     $('#displayContainer').removeClass('col-md-6').addClass('mx-auto');
+    $('#displaySubContainer').addClass(Session.get('curTdfUISettings').textInputDisplay);
     //use jquery to select the target and display the feedback message
           //if the displayOnlyCorrectAnswerAsFeedbackOverride is set to true, then we will display the correct answer in feedbackOverride div
           if (displayCorrectAnswerInCenter) {
             const correctAnswer = Answers.getDisplayAnswerText(Session.get('currentExperimentState').currentAnswer);
             $('#correctAnswerDisplayContainer').html(correctAnswer);
-            $('#correctAnswerDisplayContainer').attr("hidden",false).show();
+            $('#correctAnswerDisplayContainer').removeClass('d-none');
           }
           if(isTimeout && !Session.get('curTdfUISettings').displayUserAnswerInFeedback){
             feedbackMessage =  ". " + feedbackMessage;
@@ -1618,7 +1629,7 @@ async function showUserFeedback(isCorrect, feedbackMessage, afterAnswerFeedbackC
           document.getElementById("progressbar").style.width = 0 + "%";
           uiCorrectColor = Session.get('curTdfUISettings').correctColor;
           $(target)
-          .html("<b style='color:" + uiCorrectColor + ";'>Correct.</b>")
+          .html(feedbackMessage)
           .attr("hidden",false)
           .show()
         }
@@ -3221,17 +3232,17 @@ async function resumeFromComponentState() {
 
   const displayPresets = {
     default:{
-      "displayReviewTimeoutAsBarOrText": "both",
-      "displayReadyPromptTimeoutAsBarOrText": "both",
-      "displayCardTimeoutAsBarOrText": "both",
-      "displayTimeOutDuringStudy": true,
+      "displayReviewTimeoutAsBarOrText": false,
+      "displayReadyPromptTimeoutAsBarOrText": false,
+      "displayCardTimeoutAsBarOrText": false,
+      "displayTimeOutDuringStudy": false,
       "displayUserAnswerInFeedback": true,
-      "displayPerformanceDuringStudy": false,
+      "displayPerformanceDuringStudy": true,
       "displayPerformanceDuringTrial": true,
       "displayCorrectAnswerInCenter": false,
       "singleLineFeedback" : false,
       "feedbackDisplayPosition" : "middle",
-      "stimuliPosition" : "top",
+      "stimuliPosition" : "left",
       "choiceButtonCols": 1,
       "onlyShowSimpleFeedback": false,
       "incorrectColor": "darkorange",
@@ -3269,10 +3280,14 @@ async function resumeFromComponentState() {
     case 'top':
       UIsettings.choiceColWidth = 'col-12';
       UIsettings.displayColWidth = 'col-12';
+      UIsettings.textInputDisplay = "";
+      UIsettings.textInputDisplay2 = "";
       break;
     case 'left':
       UIsettings.choiceColWidth = 'col-6';
       UIsettings.displayColWidth = 'col-6';
+      UIsettings.textInputDisplay = "justify-content-end";
+      UIsettings.textInputDisplay2 = "justify-content-start";
   }
 
   Session.set('curTdfUISettings', UIsettings);
