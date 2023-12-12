@@ -327,13 +327,16 @@ select{
 }
 
 .alert{
-    width: 100%;
     margin-top: 5vh;
     margin-bottom: 5vh;
     padding: 5vh;
     border-radius: 0px;
 }
 
+.alert-bg{
+    background-color: var(--neutral-color) !important;
+    color: var(--text-color) !important;
+}
 .alert-icon{
     /*display an icon on the top left of the alert*/
     float: left;
@@ -446,9 +449,11 @@ select{
         padding: 3vh;
         border-radius: 0px;
     }
-    .alert{
-        margin-left: 0px;
-        margin-right: 0px;
+    .null-alert
+    {
+        /* remove width and height, setting them to null */
+        width: null !important;
+        height: null !important;
     }
     .alert-icon{
         margin-left:5vw;
