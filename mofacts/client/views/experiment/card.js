@@ -1729,6 +1729,7 @@ async function afterAnswerFeedbackCallback(trialEndTimeStamp, trialStartTimeStam
   if (testType === 'd') {
     overallStudyHistory.push(0);
   }
+  Session.set('overallStudyHistory', overallStudyHistory);
   
   let dialogueHistory;
   if (Session.get('dialogueHistory')) {
@@ -3240,17 +3241,17 @@ async function resumeFromComponentState() {
 
   const displayPresets = {
     default:{
-      "displayReviewTimeoutAsBarOrText": false,
-      "displayReadyPromptTimeoutAsBarOrText": false,
-      "displayCardTimeoutAsBarOrText": false,
-      "displayTimeOutDuringStudy": false,
+      "displayReviewTimeoutAsBarOrText": "both",
+      "displayReadyPromptTimeoutAsBarOrText": "both",
+      "displayCardTimeoutAsBarOrText": "both",
+      "displayTimeOutDuringStudy": true,
       "displayUserAnswerInFeedback": true,
-      "displayPerformanceDuringStudy": true,
+      "displayPerformanceDuringStudy": false,
       "displayPerformanceDuringTrial": true,
       "displayCorrectAnswerInCenter": false,
       "singleLineFeedback" : false,
       "feedbackDisplayPosition" : "middle",
-      "stimuliPosition" : "left",
+      "stimuliPosition" : "top",
       "choiceButtonCols": 1,
       "onlyShowSimpleFeedback": false,
       "incorrectColor": "darkorange",

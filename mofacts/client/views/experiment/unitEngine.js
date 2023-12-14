@@ -733,8 +733,6 @@ function modelUnitEngine() {
             stim.canUse = false;
           }
           stim.probabilityEstimate = parms.probability;
-          stim.previousCalculatedProbabilities.push(parms.probability);
-          card.previousCalculatedProbabilities.push(parms.probability);
           stim.probFunctionParameters = parms;
           if(!typeof stim.probabilityEstimate == "number"){
             throw 'Error: Probability Estimate is undefined or NaN.';
@@ -896,6 +894,7 @@ function modelUnitEngine() {
       }
 
       p.overallOutcomeHistory = Session.get('overallOutcomeHistory');
+      p.overallStudyHistory = Session.get('overallStudyHistory');
 
       if (p.i<15) {
         clientConsole(1, 'cardProbability parameters:', JSON.parse(JSON.stringify(p)));
@@ -1491,6 +1490,8 @@ function modelUnitEngine() {
       const whichHintLevel = newHintLevel;
       const stim = card.stims[whichStim];
 
+      stim.previousCalculatedProbabilities.push(stim.probabilityEstimate);
+      card.previousCalculatedProbabilities.push(stim.probabilityEstimate);
 
       // Save the stim's probability function input parameters for display in the UI
       Session.set('currentStimProbFunctionParameters', stim.probFunctionParameters);
