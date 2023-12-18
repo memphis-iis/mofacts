@@ -3391,6 +3391,37 @@ Meteor.startup(async function() {
     });
   }
 
+  //service account handler for lms
+  Accounts.registerLoginHandler('lti', function(loginRequest) {
+    if (!loginRequest.lti) {
+      return undefined;
+    }
+    const lti = loginRequest.lti;
+    const user = Meteor.users.findOne({'services.lti.user_id': lti.user_id});
+    if (!user) {
+      //we need to create a new user
+      const userId = Accounts.createUser({
+        username: lti.user_id,
+        email: lti.lis_person_contact_email_primary,
+        profile: {
+          firstName: lti.lis_person_name_given,
+          lastName: lti.lis_person_name_family,
+          lti: true,
+        },
+      });
+      serverConsole('Created new user', userId);
+      return {
+        userId: userId,
+      };
+    } else {
+      return {
+        userId: user._id,
+      };
+    }
+  });
+
+
+
   // Figure out the "prime admin" (owner of repo TDF/stim files)
   // Note that we accept username or email and then find the ID
   const adminUser = findUserByName(getConfigProperty('owner'));

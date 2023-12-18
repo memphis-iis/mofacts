@@ -254,6 +254,174 @@ Router.route('/signup', {
   }
 });
 
+//lti routes
+
+//route that takes post data from lti login and creates a user
+Router.route('/ltiLogin', {
+  name: 'client.ltiLogin',
+  action: function() {
+    //if the user is logged in, redirect to profile, otherwise render signup
+    if(Meteor.userId()){
+      Router.go('/profile');
+    } else {
+      lti = this.request.body;
+      user = Meteor.users.findOne({username: lti.lis_person_contact_email_primary});
+      if(user){
+        Accounts.loginWithPassword(user.username, lti.oauth_consumer_key);
+        Router.go('/profile');
+      } else {
+        Accounts.createUser({
+          username: lti.lis_person_contact_email_primary,
+          password: lti.oauth_consumer_key,
+          profile: {
+            firstName: lti.lis_person_name_given,
+            lastName: lti.lis_person_name_family,
+            loginMode: 'password',
+            lti: true,
+          }
+        });
+        Router.go('/profile');
+      }
+    }
+  }
+});
+
+//lti routes for launching a specific teacher and class
+Router.route('/ltiLaunch/:classId/:teacherId', {
+  //check if this is a POST request
+  where: 'server',
+  action: function() {
+    if(this.request.method == 'POST'){
+      //check if the message is a launch request
+      if(this.request.body.lti_message_type == 'basic-lti-launch-request'){
+        //check the lit version
+        if(this.request.body.lti_version == 'LTI-1p0' || this.request.body.lti_version == 'LTI-2p0" || this.request.body.lti_version == "LTI-2p1'){
+          //check if a consumer key was provided
+          if(this.request.body.oauth_consumer_key){
+            //check if the consumer key is valid
+            if(Meteor.settings.public.ltiKeys.includes(this.request.body.oauth_consumer_key)){
+              //check if the user is already logged in
+              if(Meteor.userId()){
+                //if the user is logged in, redirect to profile, otherwise render signup
+                Router.go('/classes/' + this.params.teacherId + '/' + this.params.classId);
+              } else {
+                //if the user is not logged in, create a user
+                user = Meteor.users.findOne({username: this.request.body.lis_person_contact_email_primary});
+                if(user){
+                  Accounts.loginWithPassword(user.username, this.request.body.oauth_consumer_key);
+                  Router.go('/profile');
+                } else {
+                  Accounts.createUser({
+                    username: this.request.body.lis_person_contact_email_primary,
+                    password: this.request.body.oauth_consumer_key,
+                    profile: {
+                      firstName: this.request.body.lis_person_name_given,
+                      lastName: this.request.body.lis_person_name_family,
+                      loginMode: 'password',
+                      lti: true,
+                    }
+                  });
+                  Router.go('/classes/' + this.params.teacherId + '/' + this.params.classId);
+                }
+              }
+            } else {
+              //if the consumer key is not valid, return the user to the lms
+              this.response.writeHead(401, {'Content-Type': 'text/html'});
+              this.response.end('Invalid consumer key');
+            }
+          } else {
+            //if no consumer key was provided, return the user to the lms
+            this.response.writeHead(401, {'Content-Type': 'text/html'});
+            this.response.end('No consumer key provided');
+          }
+        } else {
+          //if the lti version is not supported, return the user to the lms
+          this.response.writeHead(401, {'Content-Type': 'text/html'});
+          this.response.end('Unsupported LTI version');
+        }
+      } else {
+        //if the message is not a launch request, return the user to the lms
+        this.response.writeHead(401, {'Content-Type': 'text/html'});
+        this.response.end('Not a launch request');
+      }
+    } else {
+      //if this is not a POST request, return the user to the lms
+      this.response.writeHead(401, {'Content-Type': 'text/html'});
+      this.response.end('Not a POST request');
+    }
+  }
+});
+
+//lti routes for launching a specific experiment
+Router.route('/ltiLaunch/:experimentTarget?/:experimentXCond?', {
+  //check if this is a POST request
+  where: 'server',
+  action: function() {
+    if(this.request.method == 'POST'){
+      //check if the message is a launch request
+      if(this.request.body.lti_message_type == 'basic-lti-launch-request'){
+        //check the lit version
+        if(this.request.body.lti_version == 'LTI-1p0' || this.request.body.lti_version == 'LTI-2p0" || this.request.body.lti_version == "LTI-2p1'){
+          //check if a consumer key was provided
+          if(this.request.body.oauth_consumer_key){
+            //check if the consumer key is valid
+            if(Meteor.settings.public.ltiKeys.includes(this.request.body.oauth_consumer_key)){
+              //check if the user is already logged in
+              if(Meteor.userId()){
+                //if the user is logged in, redirect to profile, otherwise render signup
+                route = '/experiment' + (this.params.experimentTarget ? '/' + this.params.experimentTarget : '') + (this.params.experimentXCond ? '/' + this.params.experimentXCond : '');
+                Router.go(route);
+              } else {
+                //if the user is not logged in, create a user
+                user = Meteor.users.findOne({username: this.request.body.lis_person_contact_email_primary});
+                if(user){
+                  Accounts.loginWithPassword(user.username, this.request.body.oauth_consumer_key);
+                  route = '/experiment' + (this.params.experimentTarget ? '/' + this.params.experimentTarget : '') + (this.params.experimentXCond ? '/' + this.params.experimentXCond : '');
+                  Router.go(route);
+                } else {
+                  Accounts.createUser({
+                    username: this.request.body.lis_person_contact_email_primary,
+                    password: this.request.body.oauth_consumer_key,
+                    profile: {
+                      firstName: this.request.body.lis_person_name_given,
+                      lastName: this.request.body.lis_person_name_family,
+                      loginMode: 'password',
+                      lti: true,
+                    }
+                  });
+                  route = '/experiment' + (this.params.experimentTarget ? '/' + this.params.experimentTarget : '') + (this.params.experimentXCond ? '/' + this.params.experimentXCond : '');
+                  Router.go(route);
+                }
+              }
+            } else {
+              //if the consumer key is not valid, return the user to the lms
+              this.response.writeHead(401, {'Content-Type': 'text/html'});
+              this.response.end('Invalid consumer key');
+            }
+          } else {
+            //if no consumer key was provided, return the user to the lms
+            this.response.writeHead(401, {'Content-Type': 'text/html'});
+            this.response.end('No consumer key provided');
+          }
+        } else {
+          //if the lti version is not supported, return the user to the lms
+          this.response.writeHead(401, {'Content-Type': 'text/html'});
+          this.response.end('Unsupported LTI version');
+        }
+      } else {
+        //if the message is not a launch request, return the user to the lms
+        this.response.writeHead(401, {'Content-Type': 'text/html'});
+        this.response.end('Not a launch request');
+      }
+    } else {
+      //if this is not a POST request, return the user to the lms
+      this.response.writeHead(401, {'Content-Type': 'text/html'});
+      this.response.end('Not a POST request');
+    }
+  }
+});
+
+
 Router.route('/turkWorkflow', {
   name: 'client.turkWorkflow',
   waitOn: function() {

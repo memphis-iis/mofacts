@@ -17,6 +17,7 @@
     "double-metaphone": "^2.0.0",
     "hark": "^1.2.3",
     "http": "0.0.1-security",
+    "ims-lti": "^3.0.2",
     "isomorphic-fetch": "^3.0.0",
     "node-symspell": "^0.1.0",
     "passport": "^0.6.0",
