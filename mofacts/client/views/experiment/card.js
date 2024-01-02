@@ -1249,8 +1249,6 @@ function handleUserInput(e, source, simAnswerCorrect) {
   if(!(testType === 't' || testType === 'i'))
     $('#helpButton').prop("disabled",true);
 
-  if(Meteor.isDevelopment)
-    Meteor.call('captureProfile', 10000, 'answerTrial');
   
   // Stop current timeout and stop user input
   stopUserInput();
@@ -2160,7 +2158,7 @@ async function unitIsFinished(reason) {
   const curUnitNum = Session.get('currentUnitNumber');
   const newUnitNum = curUnitNum + 1;
   const curTdfUnit = curTdf.tdfs.tutor.unit[newUnitNum];
-  const countCompletion = curTdf.tdfs.tutor.unit[newUnitNum].countcompletion;
+  const countCompletion = curTdf.tdfs.tutor.unit[curUnitNum].countCompletion
 
   Session.set('questionIndex', 0);
   Session.set('clusterIndex', undefined);
@@ -2197,14 +2195,16 @@ async function unitIsFinished(reason) {
     const rootTDFBoxed = Tdfs.findOne({_id: Session.get('currentRootTdfId')});
     const rootTDF = rootTDFBoxed.content;
     const setspec = rootTDF.tdfs.tutor.setspec;
-    if(setspec.loadbalancing && setspec.countcompletion == "end"){
-      const curConditionFileName = Session.get('currentTdfFile');
-      //get the condition number from the rootTDF
-      const curConditionNumber = setspec.condition.indexOf(curConditionFileName);
-      //increment the completion count for the current condition
-      rootTDF.loadbalancing.completionCount[curConditionNumber] = rootTDF.loadbalancing.completionCount[curConditionNumber] + 1;
-      //update the rootTDF
-      Meteor.call('updateTdfConditionCounts', Session.get('currentRootTdfId'), conditionCounts);
+    if(setspec.loadbalancing && setspec.countcompletion){
+      if(setspec.countcompletion == "end"){ 
+        const curConditionFileName = Session.get('currentTdfFile');
+        //get the condition number from the rootTDF
+        const curConditionNumber = setspec.condition.indexOf(curConditionFileName);
+        //increment the completion count for the current condition
+        rootTDF.loadbalancing.completionCount[curConditionNumber] = rootTDF.loadbalancing.completionCount[curConditionNumber] + 1;
+        //update the rootTDF
+        Meteor.call('updateTdfConditionCounts', Session.get('currentRootTdfId'), conditionCounts);
+      }
     }
 
     leaveTarget = '/profile';
