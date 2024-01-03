@@ -19,6 +19,7 @@ import {Answers} from './answerAssess';
 import {sessionCleanUp} from '../../lib/sessionUtils';
 import {checkUserSession} from '../../index'
 import {instructContinue, unitHasLockout, checkForFileImage} from './instructions';
+import { is } from 'bluebird';
 
 export {
   speakMessageIfAudioPromptFeedbackEnabled,
@@ -2245,7 +2246,7 @@ async function unitIsFinished(reason) {
 function getButtonTrial() {
   const curUnit = Session.get('currentTdfUnit');
   // Default to value given in the unit
-  let isButtonTrial = 'true' === (curUnit.buttontrial ? curUnit.buttontrial.toLowerCase() : "");
+  curUnit.isButtonTrial ? isButtonTrial = true : isButtonTrial = false;
 
   const curCardInfo = engine.findCurrentCardInfo();
   if (curCardInfo.forceButtonTrial) {
