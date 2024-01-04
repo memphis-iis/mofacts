@@ -1521,10 +1521,6 @@ async function showUserFeedback(isCorrect, feedbackMessage, afterAnswerFeedbackC
       } else {  
         feedbackMessage = "<br>Your answer: " + userAnswer + '. ' + feedbackMessage;
       }
-      if(displayCorrectAnswerInCenter && feedbackDisplayPosition == "middle"){
-        //prepend a period to the feedback message
-        feedbackMessage = ". " + feedbackMessage;
-      }
     }
     //we have several options for displaying the feedback, we can display it in the top (#userInteraction), bottom (#userLowerInteraction). We write a case for this
     switch(feedbackDisplayPosition){
@@ -1537,6 +1533,7 @@ async function showUserFeedback(isCorrect, feedbackMessage, afterAnswerFeedbackC
         target = "#feedbackOverride";
         $('#').attr("hidden",false).show();
         $('#userInteractionContainer').attr("hidden",true).hide();
+        $('#feedbackOverrideContainer').attr("hidden",false).show();
         break;
       case "bottom":
         target = "#userLowerInteraction";
