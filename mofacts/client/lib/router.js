@@ -596,18 +596,10 @@ Router.route('/classes/:_teacher/:_class', {
       const allClasses = Session.get('curTeacherClasses');
       const curClass = allClasses.find((aClass) => aClass.sectionId == curClassID);
       Session.set('curClass', curClass);
-      Session.set('curSectionId', curClass.sectionId)
-      $('.login').prop('hidden', '');
     }
-    if (loginMode === 'southwest') {
-      console.log('southwest login, routing to southwest profile');
-      Session.set('curModule', 'profileSouthwest');
-      this.render('/signInSouthwest');
-    } else { // Normal login mode
-      console.log('else, progress');
-      Session.set('curModule', 'profile');
-      this.render('signIn');
-    }
+    console.log('else, progress');
+    Session.set('curModule', 'profile');
+    Router.go('/');
   },
 });
 
