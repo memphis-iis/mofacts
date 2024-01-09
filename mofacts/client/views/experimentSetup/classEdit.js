@@ -73,7 +73,7 @@ Template.classEdit.helpers({
   'curTeacher': () => Meteor.user().username,
 
   'baseLink': function(){
-    return "http://" + window.location.host + "/";
+    return "https://" + window.location.host + "/";
   }
 
 });
