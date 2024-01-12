@@ -1,4 +1,3 @@
-import { all } from 'bluebird';
 import {meteorCallAsync} from '../..';
 import { ReactiveVar } from 'meteor/reactive-var';
 export {doFileUpload};
@@ -9,9 +8,6 @@ Template.contentUpload.helpers({
   },
   StimFiles: function() {
     return Stims.find();
-  },
-  curFilesToUpload() {
-    return Template.instance().curFilesToUpload.get();
   },
   currentUpload() {
     return Template.instance().currentUpload.get();
@@ -132,22 +128,13 @@ Template.contentUpload.events({
     const files = Template.instance().curFilesToUpload.get();
     //add new files to array, appending the current file type from the dropdown
     for (const file of Array.from($('#upload-file').prop('files'))) {
-      //if the file has extension .json, read and parse it, if it is a TDF file it will have "tutor" field, if it is a stimuli file it will have "setspec" field
-      if (file.name.endsWith('.json')) {
-        //send an alert that json files are not supported
-        alert('JSON files are not supported. Please upload a ZIP file.');
-
-      } else {
-        file.fileType = 'package';
-      }
-      files.push(file);
+      doPackageUpload(file, Template.instance());
     }
     //update reactive var with new array
     console.log('files:', files);
-    Template.instance().curFilesToUpload.set(files);
     //clear file input
     $('#upload-file').val('');
-  },
+  },  
   'click #show_assets': function(event){
     event.preventDefault();
     //get data-file field
@@ -175,13 +162,10 @@ Template.contentUpload.events({
   'click #doUpload': async function(event) {
     //get files array from reactive var
     const files = Template.instance().curFilesToUpload.get();
-    $('#stimUploadLoadingSymbol').show()
     //call doFileUpload function for each file
     for (const file of files) {
       await doPackageUpload(file, Template.instance());
     }
-    //reset reactive var
-    Template.instance().curFilesToUpload.set(false);
   },
     'click #tdf-download-btn': function(event){
       event.preventDefault();
@@ -478,6 +462,9 @@ async function doPackageUpload(file, template){
     }
   });
   upload.start();
+  //return the filename
+  res = {fileName: file.name};
+  return res;
 }
 
 async function readFileAsDataURL(file) {
