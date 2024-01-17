@@ -781,7 +781,19 @@ Template.card.helpers({
     return 'h' + hSize;
   },
 
-  'skipstudy': () => Session.get('currentDeliveryParams').skipstudy,
+  'skipstudy': function() {
+    let parms = Session.get('currentDeliveryParams').skipstudy
+    if(parms){
+      const testType = getTestType();
+      if (testType === 's' || testType === 'f') {
+        return true;
+      }
+      if(testType === 'd' && Session.get('inFeedback')){
+        return true;
+      }
+    }
+    return false;
+  },
 
   'buttonTrial': () => Session.get('buttonTrial'),
 
@@ -1243,7 +1255,7 @@ function handleUserInput(e, source, simAnswerCorrect) {
   if ( e.currentTarget.name === 'continueStudy'){
     key = ENTER_KEY;
     isSkip = true;
-    console.log('question skipped');
+    console.log('skipped study');
   }
 
   // If we haven't seen the correct keypress, then we want to reset our
@@ -1272,8 +1284,6 @@ function handleUserInput(e, source, simAnswerCorrect) {
 
   if(testType === 's'){
     userAnswer = '' //no response for study trial
-  } else if (isSkip) {
-    userAnswer = '[skip]'
   } else if (isTimeout) {
     userAnswer =  _.trim($('#userAnswer').val()).toLowerCase() + ' [timeout]';
   } else if (source === 'keypress') {
@@ -1290,6 +1300,9 @@ function handleUserInput(e, source, simAnswerCorrect) {
       userAnswer = _.trim($('#userAnswer').val()).toLowerCase();
     }
   } 
+  if(isSkip){
+    userAnswer = '[skip]'
+  }
 
   const trialEndTimeStamp = Date.now();
   const afterAnswerFeedbackCallbackWithEndTime = afterAnswerFeedbackCallback.bind(null,
@@ -1481,6 +1494,7 @@ function afterAnswerAssessmentCb(userAnswer, isCorrect, feedbackForAnswer, after
 async function showUserFeedback(isCorrect, feedbackMessage, afterAnswerFeedbackCbBound, isTimeout, isSkip) {
   console.log('showUserFeedback');
   userFeedbackStart = Date.now();
+  Session.set('inFeedback', true);
   const isButtonTrial = getButtonTrial();
   feedbackDisplayPosition = Session.get('curTdfUISettings').feedbackDisplayPosition;
   // For button trials with images where they get the answer wrong, assume incorrect feedback is an image path
@@ -1573,9 +1587,6 @@ async function showUserFeedback(isCorrect, feedbackMessage, afterAnswerFeedbackC
           if(isTimeout && !Session.get('curTdfUISettings').displayUserAnswerInFeedback){
             feedbackMessage =  ". " + feedbackMessage;
           }
-          if(isSkip){
-            feedbackMessage = "Skipped.";
-          }
           if(!isCorrect){
             $(target)
           .html($(target).html() + feedbackMessage)
@@ -1627,6 +1638,7 @@ async function showUserFeedback(isCorrect, feedbackMessage, afterAnswerFeedbackC
                 $('#CountdownTimerText').text("Continuing...");
               }
               Session.set('CurIntervalId', undefined);
+              Session.set('inFeedback', false)
             }
           }, 100);
           Session.set('CurIntervalId', CountdownTimerInterval);
@@ -1847,6 +1859,7 @@ async function afterFeedbackCallback(trialEndTimeStamp, trialStartTimeStamp, isT
 
 async function cardEnd() {
   hideUserFeedback();
+  Session.set('inFeedback', false);
   $('#CountdownTimerText').text("Continuing...");
   $('#userLowerInteraction').html('');
   $('#userAnswer').val('');
@@ -2548,10 +2561,10 @@ function allowUserInput() {
       // Use inputDisabled variable so that successive calls of stop and allow
       // are resolved synchronously i.e. whoever last set the inputDisabled variable
       // should win
-      $('#continueStudy, #userAnswer, #multipleChoiceContainer button').prop('disabled', inputDisabled);
+      $('#userAnswer, #multipleChoiceContainer button').prop('disabled', inputDisabled);
       inputDisabled = undefined;
     } else {
-      $('#continueStudy, #userAnswer, #multipleChoiceContainer button').prop('disabled', false);
+      $('#userAnswer, #multipleChoiceContainer button').prop('disabled', false);
     }
     // Force scrolling to bottom of screen for the input
 
@@ -2581,7 +2594,7 @@ function stopUserInput() {
   // Need a delay here so we can wait for the DOM to load before manipulating it
   setTimeout(function() {
     console.log('after delay, stopping user input');
-    $('#continueStudy, #userAnswer, #multipleChoiceContainer button').prop('disabled', true);
+    $('#userAnswer, #multipleChoiceContainer button').prop('disabled', true);
   }, 200);
 }
 
