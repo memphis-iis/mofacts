@@ -103,18 +103,20 @@
                 {{/if}}
             {{/if}}
 
+            {{#if skipstudy}}
+            <div class="col-12 text-center">
+                <button type='button' id='continueStudy' name='continueStudy' class='btn btn-block btn-responsive' disabled>
+                    Skip
+                </button>
+            </div>
+            <div class="vh-5"></div>
+            {{/if}}
+
             {{#if study}}
                 <div class="alert {{UIsettings.displayColWidth}} {{fontSizeClass}} {{UIsettings.textInputDisplay2}} ">
                     {{#if hideResponse}}
                         <p id="answerLabel" class="answer-display-trial text-center">{{displayAnswer}}</p>
                     {{/if}}
-                    <div>
-                        {{#if skipstudy}}
-                        <button type='button' id='continueStudy' name='continueStudy' class='btn btn-block btn-responsive' disabled>
-                            Continue
-                        </button>
-                        {{/if}}
-                    </div>
                 </div>  <!-- close column -->
             {{/if}}
 

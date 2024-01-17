@@ -492,7 +492,7 @@ Template.card.events({
     if(!Session.get('wasReportedForRemoval'))
       removeCardByUser();
       Session.set('wasReportedForRemoval', true)
-      afterAnswerFeedbackCallback(Date.now(), trialStartTimestamp, 'removal', "", false, false);
+      afterAnswerFeedbackCallback(Date.now(), trialStartTimestamp, 'removal', "", false, false, false);
   },
 
   'click #dialogueIntroExit': function() {
@@ -1222,7 +1222,9 @@ function handleUserForceCorrectInput(e, source) {
 }
 
 function handleUserInput(e, source, simAnswerCorrect) {
+  console.log('handleUserInput, source: ' + source, e.currentTarget.name);
   let isTimeout = false;
+  let isSkip = false;
   let key;
   if (source === 'timeout') {
     key = ENTER_KEY;
@@ -1237,6 +1239,11 @@ function handleUserInput(e, source, simAnswerCorrect) {
     // to save space we will just go ahead and act like it was a key press.
     key = ENTER_KEY;
     Session.set('userAnswerSubmitTimestamp', Date.now());
+  } 
+  if ( e.currentTarget.name === 'continueStudy'){
+    key = ENTER_KEY;
+    isSkip = true;
+    console.log('question skipped');
   }
 
   // If we haven't seen the correct keypress, then we want to reset our
@@ -1265,6 +1272,8 @@ function handleUserInput(e, source, simAnswerCorrect) {
 
   if(testType === 's'){
     userAnswer = '' //no response for study trial
+  } else if (isSkip) {
+    userAnswer = '[skip]'
   } else if (isTimeout) {
     userAnswer =  _.trim($('#userAnswer').val()).toLowerCase() + ' [timeout]';
   } else if (source === 'keypress') {
@@ -1455,7 +1464,7 @@ function afterAnswerAssessmentCb(userAnswer, isCorrect, feedbackForAnswer, after
       if (feedbackForAnswer == null && correctAndText != null) {
         feedbackForAnswer = correctAndText.matchText;
       }
-      showUserFeedback(isCorrect, feedbackForAnswer, afterAnswerFeedbackCbBound, userAnswer.includes('[timeout]'));
+      showUserFeedback(isCorrect, feedbackForAnswer, afterAnswerFeedbackCbBound, userAnswer.includes('[timeout]'), userAnswer.includes('[skip]'));
     };
     if (currentDeliveryParams.feedbackType == 'dialogue' && !isCorrect) {
       speechTranscriptionTimeoutsSeen = 0;
@@ -1469,7 +1478,7 @@ function afterAnswerAssessmentCb(userAnswer, isCorrect, feedbackForAnswer, after
   }
 }
 
-async function showUserFeedback(isCorrect, feedbackMessage, afterAnswerFeedbackCbBound, isTimeout) {
+async function showUserFeedback(isCorrect, feedbackMessage, afterAnswerFeedbackCbBound, isTimeout, isSkip) {
   console.log('showUserFeedback');
   userFeedbackStart = Date.now();
   const isButtonTrial = getButtonTrial();
@@ -1564,6 +1573,9 @@ async function showUserFeedback(isCorrect, feedbackMessage, afterAnswerFeedbackC
           if(isTimeout && !Session.get('curTdfUISettings').displayUserAnswerInFeedback){
             feedbackMessage =  ". " + feedbackMessage;
           }
+          if(isSkip){
+            feedbackMessage = "Skipped.";
+          }
           if(!isCorrect){
             $(target)
           .html($(target).html() + feedbackMessage)
@@ -1574,7 +1586,7 @@ async function showUserFeedback(isCorrect, feedbackMessage, afterAnswerFeedbackC
           if (Session.get('dialogueHistory')) {
             dialogueHistory = JSON.parse(JSON.stringify(Session.get('dialogueHistory')));
           }
-          countDownStart += getReviewTimeout(getTestType(), Session.get('currentDeliveryParams'), isCorrect, dialogueHistory, isTimeout);
+          countDownStart += getReviewTimeout(getTestType(), Session.get('currentDeliveryParams'), isCorrect, dialogueHistory, isTimeout, isSkip);
           var originalnow = new Date().getTime();
           var originalDist = countDownStart - originalnow;
           var originalSecs = Math.ceil((originalDist % (1000 * 60)) / 1000);
@@ -1704,10 +1716,11 @@ async function giveWrongAnswer(){
   }
 }
 
-async function afterAnswerFeedbackCallback(trialEndTimeStamp, trialStartTimeStamp, source, userAnswer, isTimeout, isCorrect) {
+async function afterAnswerFeedbackCallback(trialEndTimeStamp, trialStartTimeStamp, source, userAnswer, isTimeout, isSkip, isCorrect) {
   Session.set('showDialogueText', false);
   //if the user presses the removal button after answering we need to shortcut the timeout
-  const wasReportedForRemoval = source == 'removal';
+  const wasReportedForRemoval = source == 'removal'
+  userAnswer === '[skip]' ? isSkip = true : isSkip = false;
 
   const testType = getTestType();
   const deliveryParams = Session.get('currentDeliveryParams')
@@ -1731,7 +1744,7 @@ async function afterAnswerFeedbackCallback(trialEndTimeStamp, trialStartTimeStam
   if (Session.get('dialogueHistory')) {
     dialogueHistory = JSON.parse(JSON.stringify(Session.get('dialogueHistory')));
   }
-  const reviewTimeout = wasReportedForRemoval ? 2000 : getReviewTimeout(testType, deliveryParams, isCorrect, dialogueHistory, isTimeout);
+  const reviewTimeout = wasReportedForRemoval ? 2000 : getReviewTimeout(testType, deliveryParams, isCorrect, dialogueHistory, isTimeout, isSkip);
 
   // Stop previous timeout, log response data, and clear up any other vars for next question
   clearCardTimeout();
@@ -1760,7 +1773,14 @@ async function afterFeedbackCallback(trialEndTimeStamp, trialStartTimeStamp, isT
       
   let {responseDuration, startLatency, endLatency, feedbackLatency} = getTrialTime(trialEndTimeStamp, trialStartTimeStamp, reviewEnd, testType);
 
-  const answerLogAction = isTimeout ? '[timeout]' : 'answer';
+  //answerLogAction can be 'answer', 'timeout', or 'skip' depending on userAnswer, isTimeout, and isSkip
+  if(isTimeout){
+    answerLogAction = '[timeout]';
+  } else if (userAnswer == '[skip]') {
+    answerLogAction = '[skip]';
+  } else {
+    answerLogAction = '[answer]';
+  }
   //if dialogueStart is set that means the user went through interactive dialogue
   Session.set('dialogueTotalTime', undefined);
   Session.set('dialogueHistory', undefined);
@@ -1834,7 +1854,7 @@ async function cardEnd() {
   prepareCard();
 }
 
-function getReviewTimeout(testType, deliveryParams, isCorrect, dialogueHistory, isTimeout) {
+function getReviewTimeout(testType, deliveryParams, isCorrect, dialogueHistory, isTimeout, isSkip) {
   let reviewTimeout = 0;
 
   if (testType === 's' || testType === 'f') {
@@ -1863,6 +1883,10 @@ function getReviewTimeout(testType, deliveryParams, isCorrect, dialogueHistory, 
   } else {
     // We don't know what to do since this is an unsupported test type - fail
     throw new Error('Unknown trial type was specified - no way to proceed');
+  }
+  //if flagged to skip the timeout, set the timeout to 0.001
+  if (isSkip) {
+    reviewTimeout = 2;
   }
   if(Meteor.isDevelopment && Session.get('skipTimeout')){
     reviewTimeout = 0.001;
@@ -3443,6 +3467,8 @@ async function processUserTimesLog() {
     case '[timeout]':
       // resumeToQuestion = true;//TODO: may want true here
       // writeCurrentToScrollList(entry.answer, action === "[timeout]", simCorrect, 0);//TODO restore all scroll list state
+      break;
+    case '[skip]':
       break;
   }
 
