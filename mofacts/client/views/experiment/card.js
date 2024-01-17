@@ -1494,7 +1494,6 @@ function afterAnswerAssessmentCb(userAnswer, isCorrect, feedbackForAnswer, after
 async function showUserFeedback(isCorrect, feedbackMessage, afterAnswerFeedbackCbBound, isTimeout, isSkip) {
   console.log('showUserFeedback');
   userFeedbackStart = Date.now();
-  Session.set('inFeedback', true);
   const isButtonTrial = getButtonTrial();
   feedbackDisplayPosition = Session.get('curTdfUISettings').feedbackDisplayPosition;
   // For button trials with images where they get the answer wrong, assume incorrect feedback is an image path
@@ -1588,6 +1587,7 @@ async function showUserFeedback(isCorrect, feedbackMessage, afterAnswerFeedbackC
             feedbackMessage =  ". " + feedbackMessage;
           }
           if(!isCorrect){
+            Session.set('inFeedback', true);
             $(target)
           .html($(target).html() + feedbackMessage)
           .attr("hidden",false)
