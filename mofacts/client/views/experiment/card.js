@@ -1343,7 +1343,7 @@ async function userAnswerFeedback(userAnswer, isTimeout, simCorrect, afterAnswer
 
   // Make sure to record what they just did (and set justAdded)
   await writeCurrentToScrollList(userAnswer, isTimeout, simCorrect, 1);
-
+  
   const afterAnswerFeedbackCbWithTimeout = afterAnswerFeedbackCb.bind(null, isTimeout);
   const afterAnswerAssessmentCbWithArgs = afterAnswerAssessmentCb.bind(null,
       userAnswer, isCorrectAccumulator, feedbackForAnswer, afterAnswerFeedbackCbWithTimeout);
@@ -1481,7 +1481,7 @@ function afterAnswerAssessmentCb(userAnswer, isCorrect, feedbackForAnswer, after
     };
     if (currentDeliveryParams.feedbackType == 'dialogue' && !isCorrect) {
       speechTranscriptionTimeoutsSeen = 0;
-      initiateDialogue(userAnswer, afterAnswerFeedbackCbBound, Session.get('currentExperimentState'), showUserFeedbackBound);
+      initiateDialogue(userAnswer, afterAnswAerFeedbackCbBound, Session.get('currentExperimentState'), showUserFeedbackBound);
     } else {
       showUserFeedbackBound();
     }
@@ -1586,72 +1586,74 @@ async function showUserFeedback(isCorrect, feedbackMessage, afterAnswerFeedbackC
           if(isTimeout && !Session.get('curTdfUISettings').displayUserAnswerInFeedback){
             feedbackMessage =  ". " + feedbackMessage;
           }
-          if(!isCorrect){
-            Session.set('inFeedback', true);
-            $(target)
-          .html($(target).html() + feedbackMessage)
-          .attr("hidden",false)
-          .show()
-          var countDownStart = new Date().getTime();
-          let dialogueHistory;
-          if (Session.get('dialogueHistory')) {
-            dialogueHistory = JSON.parse(JSON.stringify(Session.get('dialogueHistory')));
-          }
-          countDownStart += getReviewTimeout(getTestType(), Session.get('currentDeliveryParams'), isCorrect, dialogueHistory, isTimeout, isSkip);
-          var originalnow = new Date().getTime();
-          var originalDist = countDownStart - originalnow;
-          var originalSecs = Math.ceil((originalDist % (1000 * 60)) / 1000);
-
-          var CountdownTimerInterval = Meteor.setInterval(function() {
-            var now = new Date().getTime()
-            var distance = countDownStart - now;
-            var seconds = Math.ceil((distance % (1000 * 60)) / 1000);
-            var percent = 100 - ((seconds / originalSecs) * 100);
-            if(Session.get('curTdfUISettings').displayReviewTimeoutAsBarOrText == "text" || Session.get('curTdfUISettings').displayReviewTimeoutAsBarOrText == "both"){
-                        
-              document.getElementById("CountdownTimerText").innerHTML = 'Continuing in: ' + seconds + "s";
-            } else {
-              document.getElementById("CountdownTimerText").innerHTML = '';
+          if(!isSkip){
+            if(!isCorrect){
+              Session.set('inFeedback', true);
+              $(target)
+            .html($(target).html() + feedbackMessage)
+            .attr("hidden",false)
+            .show()
+            var countDownStart = new Date().getTime();
+            let dialogueHistory;
+            if (Session.get('dialogueHistory')) {
+              dialogueHistory = JSON.parse(JSON.stringify(Session.get('dialogueHistory')));
             }
-            if(Session.get('curTdfUISettings').displayReviewTimeoutAsBarOrText == "bar" || Session.get('curTdfUISettings').displayCardTimeoutAsBarOrText == "both"){
-              //add the progress bar class
-              $('#progressbar').addClass('progress-bar');
-              document.getElementById("progressbar").style.width = percent + "%";
-            } else {
-              //set width to 0% 
-              document.getElementById("progressbar").style.width = 0 + "%";
-              //remove progress bar class
-              $('#progressbar').removeClass('progress-bar');
-            }
-            
+            countDownStart += getReviewTimeout(getTestType(), Session.get('currentDeliveryParams'), isCorrect, dialogueHistory, isTimeout, isSkip);
+            var originalnow = new Date().getTime();
+            var originalDist = countDownStart - originalnow;
+            var originalSecs = Math.ceil((originalDist % (1000 * 60)) / 1000);
 
-
-            // If the count down is finished, end interval and clear CountdownTimer
-            if (distance < 0) {
-              $('#userLowerInteraction').html('');
-              Meteor.clearInterval(CountdownTimerInterval);
-              //reset the progress bar
-              document.getElementById("progressbar").style.width = 0 + "%";
-              if(window.currentAudioObj) {
-                $('#CountdownTimerText').text('Continuing after feedback...');
+            var CountdownTimerInterval = Meteor.setInterval(function() {
+              var now = new Date().getTime()
+              var distance = countDownStart - now;
+              var seconds = Math.ceil((distance % (1000 * 60)) / 1000);
+              var percent = 100 - ((seconds / originalSecs) * 100);
+              if(Session.get('curTdfUISettings').displayReviewTimeoutAsBarOrText == "text" || Session.get('curTdfUISettings').displayReviewTimeoutAsBarOrText == "both"){
+                          
+                document.getElementById("CountdownTimerText").innerHTML = 'Continuing in: ' + seconds + "s";
               } else {
-                $('#CountdownTimerText').text("Continuing...");
+                document.getElementById("CountdownTimerText").innerHTML = '';
               }
-              Session.set('CurIntervalId', undefined);
-              Session.set('inFeedback', false)
-            }
-          }, 100);
-          Session.set('CurIntervalId', CountdownTimerInterval);
-        } else {
-          //remove progress bar class
-          $('#progressbar').removeClass('progress-bar');
-          //set width to 0%
-          document.getElementById("progressbar").style.width = 0 + "%";
-          uiCorrectColor = Session.get('curTdfUISettings').correctColor;
-          $(target)
-          .html(feedbackMessage)
-          .attr("hidden",false)
-          .show()
+              if(Session.get('curTdfUISettings').displayReviewTimeoutAsBarOrText == "bar" || Session.get('curTdfUISettings').displayCardTimeoutAsBarOrText == "both"){
+                //add the progress bar class
+                $('#progressbar').addClass('progress-bar');
+                document.getElementById("progressbar").style.width = percent + "%";
+              } else {
+                //set width to 0% 
+                document.getElementById("progressbar").style.width = 0 + "%";
+                //remove progress bar class
+                $('#progressbar').removeClass('progress-bar');
+              }
+              
+
+
+              // If the count down is finished, end interval and clear CountdownTimer
+              if (distance < 0) {
+                $('#userLowerInteraction').html('');
+                Meteor.clearInterval(CountdownTimerInterval);
+                //reset the progress bar
+                document.getElementById("progressbar").style.width = 0 + "%";
+                if(window.currentAudioObj) {
+                  $('#CountdownTimerText').text('Continuing after feedback...');
+                } else {
+                  $('#CountdownTimerText').text("Continuing...");
+                }
+                Session.set('CurIntervalId', undefined);
+                Session.set('inFeedback', false)
+              }
+            }, 100);
+            Session.set('CurIntervalId', CountdownTimerInterval);
+          } else {
+            //remove progress bar class
+            $('#progressbar').removeClass('progress-bar');
+            //set width to 0%
+            document.getElementById("progressbar").style.width = 0 + "%";
+            uiCorrectColor = Session.get('curTdfUISettings').correctColor;
+            $(target)
+            .html(feedbackMessage)
+            .attr("hidden",false)
+            .show()
+          }
         }
   }
 
@@ -1728,7 +1730,7 @@ async function giveWrongAnswer(){
   }
 }
 
-async function afterAnswerFeedbackCallback(trialEndTimeStamp, trialStartTimeStamp, source, userAnswer, isTimeout, isSkip, isCorrect) {
+async function afterAnswerFeedbackCallback(trialEndTimeStamp, trialStartTimeStamp, source, userAnswer, isTimeout,  isCorrect) {
   Session.set('showDialogueText', false);
   //if the user presses the removal button after answering we need to shortcut the timeout
   const wasReportedForRemoval = source == 'removal'
