@@ -42,6 +42,11 @@ Template.contentUpload.helpers({
       if(tdf.content.tdfs.tutor.setspec.condition){
         thisTdf.conditions = [];
         for(let i=0; i<tdf.content.tdfs.tutor.setspec.condition.length; i++){
+          if(tdf.conditionCounts == undefined){
+            tdf.conditionCounts = [];
+            //add an error to thisTdf.errors
+            thisTdf.errors.push('Condition counts not found. Condition count reset needed. Please click the refresh icon for this lesson.');
+          }
           thisTdf.conditions.push({condition: tdf.content.tdfs.tutor.setspec.condition[i], count: tdf.conditionCounts[i]});
         }
       }
