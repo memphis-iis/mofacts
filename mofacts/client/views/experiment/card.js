@@ -3109,7 +3109,9 @@ async function resumeFromComponentState() {
             minConditions = setspec.condition;
           }
           const randomConditionFileName =  _.sample(minConditions)
-          conditionTdfId = Tdfs.findOne({"content.fileName": randomConditionFileName})._id;
+          conditionTdf = Tdfs.findOne({"content.fileName": randomConditionFileName});
+          conditionTdfId = conditionTdf._id;
+          console.log('conditionTdf, conditionTdfId', conditionTdf, conditionTdf._id);
       } else {
         console.log('Invalid loadbalancing parameter');
         alert('Unfortunately, something is broken and this lesson cannot continue');

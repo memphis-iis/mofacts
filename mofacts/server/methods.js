@@ -2123,7 +2123,7 @@ async function upsertTDFFile(tdfFilename, tdfJSON, ownerId, packagePath = null) 
     }
   }
   //create a new array the length of the number of conditions, fill it with 0
-  const conditionCounts = new Array(tdfJSONtoUpsert.tdfs.tutor.setspec.condition.length).fill(0);
+  tdfJSONtoUpsert.tdfs.tutor.setspec.condition ? conditionCounts = new Array(tdfJSONtoUpsert.tdfs.tutor.setspec.condition.length).fill(0) : conditionCounts = [];
   
   Tdfs.upsert({_id: prev._id}, {$set: {
     path: packagePath,
@@ -2241,7 +2241,7 @@ async function upsertPackage(packageJSON, ownerId) {
     }
   }
   //create a new array the length of the number of conditions, fill it with 0
-  const conditionCounts = new Array(tdfJSONtoUpsert.tdfs.tutor.setspec.condition.length).fill(0);
+  tdfJSONtoUpsert.tdfs.tutor.setspec.condition ? conditionCounts = new Array(tdfJSONtoUpsert.tdfs.tutor.setspec.condition.length).fill(0) : conditionCounts = [];
 
   Tdfs.upsert({"content.fileName": packageJSON.fileName}, {$set: {
     tdfFileName: packageJSON.fileName,
