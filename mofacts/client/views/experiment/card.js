@@ -556,7 +556,7 @@ Template.card.events({
 
   'click #continueStudy': function(event) {
     event.preventDefault();
-    handleUserInput(event, 'buttonClick');
+    handleUserInput(event, 'skip');
   },
 
   'click .instructModalDismiss': function(event) {
@@ -1234,7 +1234,6 @@ function handleUserForceCorrectInput(e, source) {
 }
 
 function handleUserInput(e, source, simAnswerCorrect) {
-  console.log('handleUserInput, source: ' + source, e.currentTarget.name);
   let isTimeout = false;
   let isSkip = false;
   let key;
@@ -1252,7 +1251,7 @@ function handleUserInput(e, source, simAnswerCorrect) {
     key = ENTER_KEY;
     Session.set('userAnswerSubmitTimestamp', Date.now());
   } 
-  if ( e.currentTarget.name === 'continueStudy'){
+  if (source = "skip"){
     key = ENTER_KEY;
     isSkip = true;
     console.log('skipped study');
