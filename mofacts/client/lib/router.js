@@ -146,6 +146,8 @@ Router.route('/experiment/:target?/:xcond?', {
 
       if (tdf.content.tdfs.tutor.setspec.condition){
         Session.set('experimentConditions', tdf.content.tdfs.tutor.setspec.condition)
+        const condition = tdf.content.tdfs.tutor.setspec.condition;
+        Meteor.subscribe('tdfByExperimentTarget', target, condition)
       }
       console.log('tdf found');
       const experimentPasswordRequired = tdf.content.tdfs.tutor.setspec.experimentPasswordRequired ?

@@ -32,7 +32,7 @@ Template.signIn.onRendered(async function() {
   }
   Session.set('classesByInstructorId', classesByInstructorId);
   curTeacher = Session.get('curTeacher');
-  console.log("teacher:", curTeacher._id || 'none');
+  console.log("teacher:", curTeacher?._id || 'none');
   if (curTeacher._id){
     $('#initialInstructorSelection').prop('hidden', 'true');
     $('#classSelection').prop('hidden', 'false');
