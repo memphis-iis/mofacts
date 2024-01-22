@@ -3062,7 +3062,7 @@ async function resumeFromComponentState() {
           }
           for(condition in setspec.condition){
             if(conditionCounts[condition] == min){
-              minConditions.push(setpec.condition[condition]);
+              minConditions.push(setspec.condition[condition]);
             }
           }
           //if the minConditions array is empty, we select randomly from all conditions

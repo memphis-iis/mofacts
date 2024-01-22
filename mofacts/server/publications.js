@@ -53,7 +53,7 @@ Meteor.publish('tdfByExperimentTarget', function(experimentTarget, experimentCon
     let query = {"content.tdfs.tutor.setspec.experimentTarget": {$regex: experimentTarget, $options: '-i'}}
     if(experimentConditions && Array.isArray(experimentConditions)){
         query = {$or: [{"content.fileName": {$in: experimentConditions}}, {"content.tdfs.tutor.setspec.experimentTarget": {$regex: experimentTarget, $options: '-i'}}]}
-        console.log(query)
+        console.log(JSON.stringify(query))
     }
     return Tdfs.find(query);
 });
