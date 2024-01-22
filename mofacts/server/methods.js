@@ -2122,12 +2122,16 @@ async function upsertTDFFile(tdfFilename, tdfJSON, ownerId, packagePath = null) 
       tdfJSONtoUpsert = tdfJSON;
     }
   }
+  //create a new array the length of the number of conditions, fill it with 0
+  const conditionCounts = new Array(tdfJSONtoUpsert.tdfs.tutor.setspec.condition.length).fill(0);
+  
   Tdfs.upsert({_id: prev._id}, {$set: {
     path: packagePath,
     content: tdfJSONtoUpsert,
     ownerId: ownerId,
-    visibility: 'profileOnly'
-  }});
+    visibility: 'profileOnly',
+    conditionCount: conditionCounts
+    }});
 }
 
 async function upsertPackage(packageJSON, ownerId) {
@@ -2236,6 +2240,8 @@ async function upsertPackage(packageJSON, ownerId) {
       tdfJSONtoUpsert = tdfJSON;
     }
   }
+  //create a new array the length of the number of conditions, fill it with 0
+  const conditionCounts = new Array(tdfJSONtoUpsert.tdfs.tutor.setspec.condition.length).fill(0);
 
   Tdfs.upsert({"content.fileName": packageJSON.fileName}, {$set: {
     tdfFileName: packageJSON.fileName,
@@ -2245,7 +2251,8 @@ async function upsertPackage(packageJSON, ownerId) {
     rawStimuliFile: stimJSON, //raw stimuli
     stimuli: formattedStims, //formatted stimuli for use in the app
     stimuliSetId: stimuliSetId,
-    visibility: 'profileOnly'
+    visibility: 'profileOnly',
+    conditionCounts: conditionCounts
   }});
 
   //update stim syllables
