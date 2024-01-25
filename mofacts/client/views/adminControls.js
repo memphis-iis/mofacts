@@ -86,19 +86,37 @@ Template.adminControls.events({
             Session.set('curTheme', getCurrentTheme());
         });
     },
-    'keypress #currentThemeProp': function(event) {
-        if (event.keyCode === 13) {
-            const data_id = event.currentTarget.getAttribute('data-id');
-            const value = event.currentTarget.value;
-            Meteor.call('setCustomThemeProperty', data_id, value, function(err, res) {
+    'input .currentThemeProp': function(event) {
+        //show unsaved change warning
+        $('#unsavedThemeChanges').attr('hidden', false).removeAttr('hidden');
+    },
+    'input .currentThemePropColor': function(event) {
+        const data_id = event.currentTarget.getAttribute('data-id');
+        const value = event.currentTarget.value;
+        //change the corresponding currentThemeProp value. we need to find a input with the same data-id and change its value
+        $(`.currentThemeProp[data-id=${data_id}]`).val(value);
+        //show unsaved change warning
+        $('#unsavedThemeChanges').attr('hidden', false).removeAttr('hidden');
+    },
+    'click #themeSaveButton': function(event) {
+        //get all the currentThemeProp values and data-ids and put them in a json object [{data-id: value}]
+        const themeProps = [];
+        $('.currentThemeProp').each(function() {
+            console.log("currentThemeProp: " + $(this).data('id'), $(this).val());
+            themeProps.push({data_id: $(this).data('id'), value: $(this).val()});
+        });
+        console.log("themeProps: " + JSON.stringify(themeProps));
+        //call the setCustomThemeProperty method for each themeProp
+        themeProps.forEach(function(themeProp) {
+            Meteor.call('setCustomThemeProperty', themeProp.data_id, themeProp.value, function(err, res) {
                 if (err) {
                     alert("Error setting custom theme property: " + err);
                 } else {
-                    console.log("Set custom theme property: " + res);
-                    Session.set('curTheme', getCurrentTheme());
+                    console.log("Set custom theme property: " + res);   
                 }
             });
-        }
+        });
+        Session.set('curTheme', getCurrentTheme());
     }
 });
   
