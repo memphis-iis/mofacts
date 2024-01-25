@@ -19,6 +19,7 @@ import {Answers} from './answerAssess';
 import {sessionCleanUp} from '../../lib/sessionUtils';
 import {checkUserSession} from '../../index'
 import {instructContinue, unitHasLockout, checkForFileImage} from './instructions';
+import { is } from 'bluebird';
 
 export {
   speakMessageIfAudioPromptFeedbackEnabled,
@@ -432,7 +433,7 @@ async function initCard() {
     Session.set('stimDisplayTypeMap', stimDisplayTypeMap);
   }
 
-  const audioInputEnabled = Session.get('audioEnabled');
+  const audioInputEnabled = Meteor.user().audioInputMode;
   if (audioInputEnabled) {
     if (!Session.get('audioInputSensitivity')) {
       // Default to 20 in case tdf doesn't specify and we're in an experiment
@@ -491,7 +492,7 @@ Template.card.events({
     if(!Session.get('wasReportedForRemoval'))
       removeCardByUser();
       Session.set('wasReportedForRemoval', true)
-      afterAnswerFeedbackCallback(Date.now(), trialStartTimestamp, 'removal', "", false, false);
+      afterAnswerFeedbackCallback(Date.now(), trialStartTimestamp, 'removal', "", false, false, false);
   },
 
   'click #dialogueIntroExit': function() {
@@ -780,7 +781,19 @@ Template.card.helpers({
     return 'h' + hSize;
   },
 
-  'skipstudy': () => Session.get('currentDeliveryParams').skipstudy,
+  'skipstudy': function() {
+    let parms = Session.get('currentDeliveryParams').skipstudy
+    if(parms){
+      const testType = getTestType();
+      if (testType === 's' || testType === 'f') {
+        return true;
+      }
+      if(testType === 'd' && Session.get('inFeedback')){
+        return true;
+      }
+    }
+    return false;
+  },
 
   'buttonTrial': () => Session.get('buttonTrial'),
 
@@ -823,7 +836,7 @@ Template.card.helpers({
 
   'userInDiaglogue': () => Session.get('showDialogueText') && Session.get('dialogueDisplay'),
 
-  'audioEnabled': () => Session.get('audioEnabled'),
+  'audioEnabled': () => Meteor.user().audioInputMode,
 
   'showDialogueHints': function() {
     if(Meteor.isDevelopment){
@@ -994,7 +1007,7 @@ function preloadStimuliFiles() {
 }
 
 function checkUserAudioConfigCompatability(){
-  const audioPromptMode = Session.get('audioPromptMode');
+  const audioPromptMode = Meteor.user().audioPromptMode;
   if (curStimHasImageDisplayType() && ((audioPromptMode == 'all' || audioPromptMode == 'question'))) {
     console.log('PANIC: Unable to process TTS for image response', Session.get('currentRootTdfId'));
     alert('Question reading not supported on this TDF. Please disable and try again.');
@@ -1222,6 +1235,7 @@ function handleUserForceCorrectInput(e, source) {
 
 function handleUserInput(e, source, simAnswerCorrect) {
   let isTimeout = false;
+  let isSkip = false;
   let key;
   if (source === 'timeout') {
     key = ENTER_KEY;
@@ -1236,6 +1250,11 @@ function handleUserInput(e, source, simAnswerCorrect) {
     // to save space we will just go ahead and act like it was a key press.
     key = ENTER_KEY;
     Session.set('userAnswerSubmitTimestamp', Date.now());
+  } 
+  if (e.currentTarget ? e.currentTarget.id === 'continueStudy' : false) {
+    key = ENTER_KEY;
+    isSkip = true;
+    console.log('skipped study');
   }
 
   // If we haven't seen the correct keypress, then we want to reset our
@@ -1249,8 +1268,6 @@ function handleUserInput(e, source, simAnswerCorrect) {
   if(!(testType === 't' || testType === 'i'))
     $('#helpButton').prop("disabled",true);
 
-  if(Meteor.isDevelopment)
-    Meteor.call('captureProfile', 10000, 'answerTrial');
   
   // Stop current timeout and stop user input
   stopUserInput();
@@ -1282,6 +1299,9 @@ function handleUserInput(e, source, simAnswerCorrect) {
       userAnswer = _.trim($('#userAnswer').val()).toLowerCase();
     }
   } 
+  if(isSkip){
+    userAnswer = '[skip]'
+  }
 
   const trialEndTimeStamp = Date.now();
   const afterAnswerFeedbackCallbackWithEndTime = afterAnswerFeedbackCallback.bind(null,
@@ -1322,7 +1342,7 @@ async function userAnswerFeedback(userAnswer, isTimeout, simCorrect, afterAnswer
 
   // Make sure to record what they just did (and set justAdded)
   await writeCurrentToScrollList(userAnswer, isTimeout, simCorrect, 1);
-
+  
   const afterAnswerFeedbackCbWithTimeout = afterAnswerFeedbackCb.bind(null, isTimeout);
   const afterAnswerAssessmentCbWithArgs = afterAnswerAssessmentCb.bind(null,
       userAnswer, isCorrectAccumulator, feedbackForAnswer, afterAnswerFeedbackCbWithTimeout);
@@ -1456,11 +1476,11 @@ function afterAnswerAssessmentCb(userAnswer, isCorrect, feedbackForAnswer, after
       if (feedbackForAnswer == null && correctAndText != null) {
         feedbackForAnswer = correctAndText.matchText;
       }
-      showUserFeedback(isCorrect, feedbackForAnswer, afterAnswerFeedbackCbBound, userAnswer.includes('[timeout]'));
+      showUserFeedback(isCorrect, feedbackForAnswer, afterAnswerFeedbackCbBound, userAnswer.includes('[timeout]'), userAnswer.includes('[skip]'));
     };
     if (currentDeliveryParams.feedbackType == 'dialogue' && !isCorrect) {
       speechTranscriptionTimeoutsSeen = 0;
-      initiateDialogue(userAnswer, afterAnswerFeedbackCbBound, Session.get('currentExperimentState'), showUserFeedbackBound);
+      initiateDialogue(userAnswer, afterAnswAerFeedbackCbBound, Session.get('currentExperimentState'), showUserFeedbackBound);
     } else {
       showUserFeedbackBound();
     }
@@ -1470,7 +1490,7 @@ function afterAnswerAssessmentCb(userAnswer, isCorrect, feedbackForAnswer, after
   }
 }
 
-async function showUserFeedback(isCorrect, feedbackMessage, afterAnswerFeedbackCbBound, isTimeout) {
+async function showUserFeedback(isCorrect, feedbackMessage, afterAnswerFeedbackCbBound, isTimeout, isSkip) {
   console.log('showUserFeedback');
   userFeedbackStart = Date.now();
   const isButtonTrial = getButtonTrial();
@@ -1498,6 +1518,10 @@ async function showUserFeedback(isCorrect, feedbackMessage, afterAnswerFeedbackC
       }
       if (Session.get('curTdfUISettings').onlyShowSimpleFeedback) {
         isCorrect ? feedbackMessage = "<b style='color:" + uiCorrectColor + ";'>Correct.</b>" : feedbackMessage = "<b style='color:" + uiIncorrectColor + ";'>Incorrect.</b>";
+      } else {
+        if (!feedbackMessage.includes(" is ")) {
+          feedbackMessage += " The correct answer is " + Session.get('currentExperimentState').originalAnswer;
+        }
       }
     $('.hints').hide();
     const hSize = Session.get('currentDeliveryParams') ? Session.get('currentDeliveryParams').fontsize.toString() : 2;
@@ -1518,19 +1542,18 @@ async function showUserFeedback(isCorrect, feedbackMessage, afterAnswerFeedbackC
       } else {  
         feedbackMessage = "<br>Your answer: " + userAnswer + '. ' + feedbackMessage;
       }
-      if(displayCorrectAnswerInCenter && feedbackDisplayPosition == "middle"){
-        //prepend a period to the feedback message
-        feedbackMessage = ". " + feedbackMessage;
-      }
     }
     //we have several options for displaying the feedback, we can display it in the top (#userInteraction), bottom (#userLowerInteraction). We write a case for this
     switch(feedbackDisplayPosition){
       case "top":
         target = "#UserInteraction";
         $('#userInteractionContainer').attr("hidden",false).show();
+        $('#feedbackOverrideContainer').attr("hidden",true).hide();
         break;
       case "middle":
         target = "#feedbackOverride";
+        $('#').attr("hidden",false).show();
+        $('#userInteractionContainer').attr("hidden",true).hide();
         $('#feedbackOverrideContainer').attr("hidden",false).show();
         break;
       case "bottom":
@@ -1538,89 +1561,98 @@ async function showUserFeedback(isCorrect, feedbackMessage, afterAnswerFeedbackC
         //add the fontSize class to the target
         const hSize = Session.get('currentDeliveryParams') ? Session.get('currentDeliveryParams').fontsize.toString() : 2;
         $(target).addClass('h' + hSize);
+        $('#feedbackOverrideContainer').attr("hidden",true).hide();
         break;
     }
     //remove the first <br> tag from feedback message if it exists
     if(feedbackMessage.startsWith("<br>")){
       feedbackMessage = feedbackMessage.substring(4);
     }
+    //encapsulate the message in a span tag
+    feedbackMessage = "<span>" + feedbackMessage + "</span>";
     //hide the buttons
     $('#multipleChoiceContainer').hide();
+    $('input-box').hide();
     $('#displayContainer').removeClass('col-md-6').addClass('mx-auto');
+    $('#displaySubContainer').addClass(Session.get('curTdfUISettings').textInputDisplay);
     //use jquery to select the target and display the feedback message
           //if the displayOnlyCorrectAnswerAsFeedbackOverride is set to true, then we will display the correct answer in feedbackOverride div
           if (displayCorrectAnswerInCenter) {
             const correctAnswer = Answers.getDisplayAnswerText(Session.get('currentExperimentState').currentAnswer);
             $('#correctAnswerDisplayContainer').html(correctAnswer);
-            $('#correctAnswerDisplayContainer').attr("hidden",false).show();
+            $('#correctAnswerDisplayContainer').removeClass('d-none');
           }
           if(isTimeout && !Session.get('curTdfUISettings').displayUserAnswerInFeedback){
             feedbackMessage =  ". " + feedbackMessage;
           }
-          if(!isCorrect){
-            $(target)
-          .html($(target).html() + feedbackMessage)
-          .attr("hidden",false)
-          .show()
-          var countDownStart = new Date().getTime();
-          let dialogueHistory;
-          if (Session.get('dialogueHistory')) {
-            dialogueHistory = JSON.parse(JSON.stringify(Session.get('dialogueHistory')));
-          }
-          countDownStart += getReviewTimeout(getTestType(), Session.get('currentDeliveryParams'), isCorrect, dialogueHistory, isTimeout);
-          var originalnow = new Date().getTime();
-          var originalDist = countDownStart - originalnow;
-          var originalSecs = Math.ceil((originalDist % (1000 * 60)) / 1000);
-
-          var CountdownTimerInterval = Meteor.setInterval(function() {
-            var now = new Date().getTime()
-            var distance = countDownStart - now;
-            var seconds = Math.ceil((distance % (1000 * 60)) / 1000);
-            var percent = 100 - ((seconds / originalSecs) * 100);
-            if(Session.get('curTdfUISettings').displayReviewTimeoutAsBarOrText == "text" || Session.get('curTdfUISettings').displayReviewTimeoutAsBarOrText == "both"){
-                        
-              document.getElementById("CountdownTimerText").innerHTML = 'Continuing in: ' + seconds + "s";
-            } else {
-              document.getElementById("CountdownTimerText").innerHTML = '';
+          if(!isSkip){
+            if(!isCorrect){
+              Session.set('inFeedback', true);
+              $(target)
+            .html($(target).html() + feedbackMessage)
+            .attr("hidden",false)
+            .show()
+            var countDownStart = new Date().getTime();
+            let dialogueHistory;
+            if (Session.get('dialogueHistory')) {
+              dialogueHistory = JSON.parse(JSON.stringify(Session.get('dialogueHistory')));
             }
-            if(Session.get('curTdfUISettings').displayReviewTimeoutAsBarOrText == "bar" || Session.get('curTdfUISettings').displayCardTimeoutAsBarOrText == "both"){
-              //add the progress bar class
-              $('#progressbar').addClass('progress-bar');
-              document.getElementById("progressbar").style.width = percent + "%";
-            } else {
-              //set width to 0% 
-              document.getElementById("progressbar").style.width = 0 + "%";
-              //remove progress bar class
-              $('#progressbar').removeClass('progress-bar');
-            }
-            
+            countDownStart += getReviewTimeout(getTestType(), Session.get('currentDeliveryParams'), isCorrect, dialogueHistory, isTimeout, isSkip);
+            var originalnow = new Date().getTime();
+            var originalDist = countDownStart - originalnow;
+            var originalSecs = Math.ceil((originalDist % (1000 * 60)) / 1000);
 
-
-            // If the count down is finished, end interval and clear CountdownTimer
-            if (distance < 0) {
-              $('#userLowerInteraction').html('');
-              Meteor.clearInterval(CountdownTimerInterval);
-              //reset the progress bar
-              document.getElementById("progressbar").style.width = 0 + "%";
-              if(window.currentAudioObj) {
-                $('#CountdownTimerText').text('Continuing after feedback...');
+            var CountdownTimerInterval = Meteor.setInterval(function() {
+              var now = new Date().getTime()
+              var distance = countDownStart - now;
+              var seconds = Math.ceil((distance % (1000 * 60)) / 1000);
+              var percent = 100 - ((seconds / originalSecs) * 100);
+              if(Session.get('curTdfUISettings').displayReviewTimeoutAsBarOrText == "text" || Session.get('curTdfUISettings').displayReviewTimeoutAsBarOrText == "both"){
+                          
+                document.getElementById("CountdownTimerText").innerHTML = 'Continuing in: ' + seconds + "s";
               } else {
-                $('#CountdownTimerText').text("Continuing...");
+                document.getElementById("CountdownTimerText").innerHTML = '';
               }
-              Session.set('CurIntervalId', undefined);
-            }
-          }, 100);
-          Session.set('CurIntervalId', CountdownTimerInterval);
-        } else {
-          //remove progress bar class
-          $('#progressbar').removeClass('progress-bar');
-          //set width to 0%
-          document.getElementById("progressbar").style.width = 0 + "%";
-          uiCorrectColor = Session.get('curTdfUISettings').correctColor;
-          $(target)
-          .html("<b style='color:" + uiCorrectColor + ";'>Correct.</b>")
-          .attr("hidden",false)
-          .show()
+              if(Session.get('curTdfUISettings').displayReviewTimeoutAsBarOrText == "bar" || Session.get('curTdfUISettings').displayCardTimeoutAsBarOrText == "both"){
+                //add the progress bar class
+                $('#progressbar').addClass('progress-bar');
+                document.getElementById("progressbar").style.width = percent + "%";
+              } else {
+                //set width to 0% 
+                document.getElementById("progressbar").style.width = 0 + "%";
+                //remove progress bar class
+                $('#progressbar').removeClass('progress-bar');
+              }
+              
+
+
+              // If the count down is finished, end interval and clear CountdownTimer
+              if (distance < 0) {
+                $('#userLowerInteraction').html('');
+                Meteor.clearInterval(CountdownTimerInterval);
+                //reset the progress bar
+                document.getElementById("progressbar").style.width = 0 + "%";
+                if(window.currentAudioObj) {
+                  $('#CountdownTimerText').text('Continuing after feedback...');
+                } else {
+                  $('#CountdownTimerText').text("Continuing...");
+                }
+                Session.set('CurIntervalId', undefined);
+                Session.set('inFeedback', false)
+              }
+            }, 100);
+            Session.set('CurIntervalId', CountdownTimerInterval);
+          } else {
+            //remove progress bar class
+            $('#progressbar').removeClass('progress-bar');
+            //set width to 0%
+            document.getElementById("progressbar").style.width = 0 + "%";
+            uiCorrectColor = Session.get('curTdfUISettings').correctColor;
+            $(target)
+            .html(feedbackMessage)
+            .attr("hidden",false)
+            .show()
+          }
         }
   }
 
@@ -1697,10 +1729,11 @@ async function giveWrongAnswer(){
   }
 }
 
-async function afterAnswerFeedbackCallback(trialEndTimeStamp, trialStartTimeStamp, source, userAnswer, isTimeout, isCorrect) {
+async function afterAnswerFeedbackCallback(trialEndTimeStamp, trialStartTimeStamp, source, userAnswer, isTimeout,  isCorrect) {
   Session.set('showDialogueText', false);
   //if the user presses the removal button after answering we need to shortcut the timeout
-  const wasReportedForRemoval = source == 'removal';
+  const wasReportedForRemoval = source == 'removal'
+  userAnswer === '[skip]' ? isSkip = true : isSkip = false;
 
   const testType = getTestType();
   const deliveryParams = Session.get('currentDeliveryParams')
@@ -1711,11 +1744,20 @@ async function afterAnswerFeedbackCallback(trialEndTimeStamp, trialStartTimeStam
     Session.set('overallOutcomeHistory', overallOutcomeHistory);
   }
 
+  const overallStudyHistory = Session.get('overallStudyHistory') || [];
+  if (testType === 's') {
+    overallStudyHistory.push(1);
+  }
+  if (testType === 'd') {
+    overallStudyHistory.push(0);
+  }
+  Session.set('overallStudyHistory', overallStudyHistory);
+  
   let dialogueHistory;
   if (Session.get('dialogueHistory')) {
     dialogueHistory = JSON.parse(JSON.stringify(Session.get('dialogueHistory')));
   }
-  const reviewTimeout = wasReportedForRemoval ? 2000 : getReviewTimeout(testType, deliveryParams, isCorrect, dialogueHistory, isTimeout);
+  const reviewTimeout = wasReportedForRemoval ? 2000 : getReviewTimeout(testType, deliveryParams, isCorrect, dialogueHistory, isTimeout, isSkip);
 
   // Stop previous timeout, log response data, and clear up any other vars for next question
   clearCardTimeout();
@@ -1744,7 +1786,14 @@ async function afterFeedbackCallback(trialEndTimeStamp, trialStartTimeStamp, isT
       
   let {responseDuration, startLatency, endLatency, feedbackLatency} = getTrialTime(trialEndTimeStamp, trialStartTimeStamp, reviewEnd, testType);
 
-  const answerLogAction = isTimeout ? '[timeout]' : 'answer';
+  //answerLogAction can be 'answer', 'timeout', or 'skip' depending on userAnswer, isTimeout, and isSkip
+  if(isTimeout){
+    answerLogAction = '[timeout]';
+  } else if (userAnswer == '[skip]') {
+    answerLogAction = '[skip]';
+  } else {
+    answerLogAction = '[answer]';
+  }
   //if dialogueStart is set that means the user went through interactive dialogue
   Session.set('dialogueTotalTime', undefined);
   Session.set('dialogueHistory', undefined);
@@ -1811,6 +1860,7 @@ async function afterFeedbackCallback(trialEndTimeStamp, trialStartTimeStamp, isT
 
 async function cardEnd() {
   hideUserFeedback();
+  Session.set('inFeedback', false);
   $('#CountdownTimerText').text("Continuing...");
   $('#userLowerInteraction').html('');
   $('#userAnswer').val('');
@@ -1818,7 +1868,7 @@ async function cardEnd() {
   prepareCard();
 }
 
-function getReviewTimeout(testType, deliveryParams, isCorrect, dialogueHistory, isTimeout) {
+function getReviewTimeout(testType, deliveryParams, isCorrect, dialogueHistory, isTimeout, isSkip) {
   let reviewTimeout = 0;
 
   if (testType === 's' || testType === 'f') {
@@ -1847,6 +1897,10 @@ function getReviewTimeout(testType, deliveryParams, isCorrect, dialogueHistory, 
   } else {
     // We don't know what to do since this is an unsupported test type - fail
     throw new Error('Unknown trial type was specified - no way to proceed');
+  }
+  //if flagged to skip the timeout, set the timeout to 0.001
+  if (isSkip) {
+    reviewTimeout = 2;
   }
   if(Meteor.isDevelopment && Session.get('skipTimeout')){
     reviewTimeout = 0.001;
@@ -2056,7 +2110,7 @@ function gatherAnswerLogRecord(trialEndTimeStamp, trialStartTimeStamp, source, u
     'KCCategoryDefault': '',
     'KCCluster': clusterKC,
     'KCCategoryCluster': '',
-    'CFAudioInputEnabled': Session.get('audioEnabled'),
+    'CFAudioInputEnabled': Meteor.user().audioInputMode,
     'CFAudioOutputEnabled': Session.get('enableAudioPromptAndFeedback'),
     'CFDisplayOrder': Session.get('questionIndex'),
     'CFStimFileIndex': clusterIndex,
@@ -2140,6 +2194,7 @@ async function unitIsFinished(reason) {
   const curUnitNum = Session.get('currentUnitNumber');
   const newUnitNum = curUnitNum + 1;
   const curTdfUnit = curTdf.tdfs.tutor.unit[newUnitNum];
+  const countCompletion = curTdf.tdfs.tutor.unit[curUnitNum].countCompletion
 
   Session.set('questionIndex', 0);
   Session.set('clusterIndex', undefined);
@@ -2156,11 +2211,40 @@ async function unitIsFinished(reason) {
   if (newUnitNum < curTdf.tdfs.tutor.unit.length) {
     // Just hit a new unit - we need to restart with instructions
     console.log('UNIT FINISHED: show instructions for next unit', newUnitNum);
+    const rootTDFBoxed = Tdfs.findOne({_id: Session.get('currentRootTdfId')});
+    const rootTDF = rootTDFBoxed.content;
+    const setspec = rootTDF.tdfs.tutor.setspec;
+    if((setspec.loadbalancing && setspec.countcompletion == newUnitNum) || (setspec.loadbalancing && countCompletion && !setspec.countcompletion)){
+      const curConditionFileName = Session.get('currentTdfFile');
+      //get the condition number from the rootTDF
+      const curConditionNumber = setspec.condition.indexOf(curConditionFileName);
+      //increment the completion count for the current condition
+      rootTDF.loadbalancing.completionCount[curConditionNumber] = rootTDF.loadbalancing.completionCount[curConditionNumber] + 1;
+      //update the rootTDF
+      Meteor.call('updateTdfConditionCounts', Session.get('currentRootTdfId'), conditionCounts);
+    }
     leaveTarget = '/instructions';
   } else {
     // We have run out of units - return home for now
     console.log('UNIT FINISHED: No More Units');
+    //if loadbalancing is enabled and countcompletion is "end" then we need to increment the completion count of the current condition in the root tdf
+    const rootTDFBoxed = Tdfs.findOne({_id: Session.get('currentRootTdfId')});
+    const rootTDF = rootTDFBoxed.content;
+    const setspec = rootTDF.tdfs.tutor.setspec;
+    if(setspec.loadbalancing && setspec.countcompletion){
+      if(setspec.countcompletion == "end"){ 
+        const curConditionFileName = Session.get('currentTdfFile');
+        //get the condition number from the rootTDF
+        const curConditionNumber = setspec.condition.indexOf(curConditionFileName);
+        //increment the completion count for the current condition
+        rootTDF.loadbalancing.completionCount[curConditionNumber] = rootTDF.loadbalancing.completionCount[curConditionNumber] + 1;
+        //update the rootTDF
+        Meteor.call('updateTdfConditionCounts', Session.get('currentRootTdfId'), conditionCounts);
+      }
+    }
+
     leaveTarget = '/profile';
+    
   }
 
   const newExperimentState = {
@@ -2197,7 +2281,7 @@ async function unitIsFinished(reason) {
 function getButtonTrial() {
   const curUnit = Session.get('currentTdfUnit');
   // Default to value given in the unit
-  let isButtonTrial = 'true' === (curUnit.buttontrial ? curUnit.buttontrial.toLowerCase() : "");
+  curUnit.isButtonTrial ? isButtonTrial = true : isButtonTrial = false;
 
   const curCardInfo = engine.findCurrentCardInfo();
   if (curCardInfo.forceButtonTrial) {
@@ -2478,10 +2562,10 @@ function allowUserInput() {
       // Use inputDisabled variable so that successive calls of stop and allow
       // are resolved synchronously i.e. whoever last set the inputDisabled variable
       // should win
-      $('#continueStudy, #userAnswer, #multipleChoiceContainer button').prop('disabled', inputDisabled);
+      $('#userAnswer, #multipleChoiceContainer button').prop('disabled', inputDisabled);
       inputDisabled = undefined;
     } else {
-      $('#continueStudy, #userAnswer, #multipleChoiceContainer button').prop('disabled', false);
+      $('#userAnswer, #multipleChoiceContainer button').prop('disabled', false);
     }
     // Force scrolling to bottom of screen for the input
 
@@ -2511,7 +2595,7 @@ function stopUserInput() {
   // Need a delay here so we can wait for the DOM to load before manipulating it
   setTimeout(function() {
     console.log('after delay, stopping user input');
-    $('#continueStudy, #userAnswer, #multipleChoiceContainer button').prop('disabled', true);
+    $('#userAnswer, #multipleChoiceContainer button').prop('disabled', true);
   }, 200);
 }
 
@@ -2519,8 +2603,8 @@ function stopUserInput() {
 
 // Audio prompt/feedback
 function speakMessageIfAudioPromptFeedbackEnabled(msg, audioPromptSource) {
-  const enableAudioPromptAndFeedback = Session.get('enableAudioPromptAndFeedback');
-  const audioPromptMode = Session.get('audioPromptMode');
+  const audioPromptMode = Meteor.user().audioPromptMode;
+  const enableAudioPromptAndFeedback = audioPromptMode && audioPromptMode != 'silent';
   let synthesis = window.speechSynthesis;
   if (enableAudioPromptAndFeedback) {
     if (audioPromptSource === audioPromptMode || audioPromptMode === 'all') {
@@ -2639,10 +2723,11 @@ async function processLINEAR16(data) {
       // is within the realm of reasonable responses before transcribing it
       answerGrammar = getAllCurrentStimAnswers(false);
     }
-    if($Session.get('useEmbeddedAPIKeys')){
-      const tdfSpeechAPIKey = Session.get('currentTdfFile').tdfs.tutor.setspec.speechAPIKey;
+    let tdfSpeechAPIKey;
+    if(Session.get('useEmbeddedAPIKeys')){
+      tdfSpeechAPIKey = Session.get('currentTdfFile').tdfs.tutor.setspec.speechAPIKey;
     } else {
-      const tdfSpeechAPIKey = '';
+      tdfSpeechAPIKey = '';
     }
     // Make the actual call to the google speech api with the audio data for transcription
     if (tdfSpeechAPIKey && tdfSpeechAPIKey != '') {
@@ -2865,7 +2950,7 @@ function startUserMedia(stream) {
 }
 
 function startRecording() {
-  if (recorder && !Session.get('recordingLocked') && Session.get('audioEnabledView')) {
+  if (recorder && !Session.get('recordingLocked') && Meteor.user().audioInputMode) {
     Session.set('recording', true);
     recorder.record();
     console.log('RECORDING START');
@@ -2947,8 +3032,8 @@ async function resumeFromComponentState() {
   // condition selection. It will be our responsibility to update
   // currentTdfId and currentStimuliSetId based on experimental conditions
   // (if necessary)
-  const rootTDFBoxed = Tdfs.findOne({_id: Session.get('currentRootTdfId')});
-  const rootTDF = rootTDFBoxed.content;
+  let rootTDFBoxed = Tdfs.findOne({_id: Session.get('currentRootTdfId')});
+  let rootTDF = rootTDFBoxed.content;
   if (!rootTDF) {
     console.log('PANIC: Unable to load the root TDF for learning', Session.get('currentRootTdfId'));
     alert('Unfortunately, something is broken and this lesson cannot continue');
@@ -2974,21 +3059,92 @@ async function resumeFromComponentState() {
       console.log('Found previous experimental condition: using that');
       conditionTdfId = prevCondition;
     } else {
-      // Select condition and save it
-      console.log('No previous experimental condition: Selecting from ' + setspec.condition.length);
-      const randomConditionFileName =  _.sample(setspec.condition)
-      conditionTdfId = Tdfs.findOne({"content.fileName": randomConditionFileName})._id;
-      newExperimentState.conditionTdfId = conditionTdfId;
-      newExperimentState.conditionNote = 'Selected from ' + _.display(setspec.condition.length) + ' conditions';
-      console.log('Exp Condition', conditionTdfId, newExperimentState.conditionNote);
+      if(!setspec.loadbalancing){
+        // Select condition and save it
+        console.log('No previous experimental condition: Selecting from ' + setspec.condition.length);
+        const randomConditionFileName =  _.sample(setspec.condition)
+        conditionTdfId = Tdfs.findOne({"content.fileName": randomConditionFileName})._id;
+        newExperimentState.conditionTdfId = conditionTdfId;
+        newExperimentState.conditionNote = 'Selected from ' + _.display(setspec.condition.length) + ' conditions';
+        console.log('Exp Condition', conditionTdfId, newExperimentState.conditionNote);
+      } else {
+        conditionCounts = rootTDFBoxed.conditionCounts;
+        if(setspec.loadbalancing == "max"){
+          //we check the conditionCounts and select randomly from the conditions with a count less than the max
+          let max = 0;
+          let maxConditions = [];
+          for(condition in setspec.condition){
+            if(conditionCounts[condition] > max){
+              max = conditionCounts[condition];
+            }
+          }
+          for(condition in setspec.condition){
+            if(conditionCounts[condition] < max){
+              maxConditions.push(setspec.condition[condition]);
+            }
+          }
+          //if the maxConditions array is empty, we select randomly from all conditions
+          if(maxConditions.length == 0){
+            maxConditions = setspec.condition;
+          }
+          const randomConditionFileName =  _.sample(maxConditions)
+          conditionTdfId = Tdfs.findOne({"content.fileName": randomConditionFileName})._id;
+        } else if(setspec.loadbalancing == "min"){
+          //we check the conditionCounts and select randomly from the conditions with a count equal to the min
+          let min = 1000000000;
+          let minConditions = [];
+          for(condition in setspec.condition){
+            if(conditionCounts[condition] < min){
+              min = conditionCounts[condition];
+            }
+          }
+          for(condition in setspec.condition){
+            if(conditionCounts[condition] == min){
+              minConditions.push(setspec.condition[condition]);
+            }
+          }
+          //if the minConditions array is empty, we select randomly from all conditions
+          if(minConditions.length == 0){
+            minConditions = setspec.condition;
+          }
+          const randomConditionFileName =  _.sample(minConditions)
+          conditionTdf = Tdfs.findOne({"content.fileName": randomConditionFileName});
+          conditionTdfId = conditionTdf._id;
+          console.log('conditionTdf, conditionTdfId', conditionTdf, conditionTdf._id);
+      } else {
+        console.log('Invalid loadbalancing parameter');
+        alert('Unfortunately, something is broken and this lesson cannot continue');
+        leavePage('/profile');
+        return;
+      }
     }
+    if (setspec.countcompletion == "beginning") {
+      //reload the conditionCounts from the rootTDF
+      rootTDFBoxed = Tdfs.findOne({_id: Session.get('currentRootTdfId')});
+      conditionCounts = rootTDFBoxed.conditionCounts;
+      conditions = rootTDF.tdfs.tutor.setspec.condition;
+      //iterate the conditionCounts for the condition we selected
+      conditionFileName = Tdfs.findOne({_id: conditionTdfId}).content.fileName;
+      for(condition in conditions){
+        if(conditions[condition] == conditionFileName){
+          conditionCounts[condition] = conditionCounts[condition] + 1;
+          break;
+        }
+      }
+
+      Meteor.call('updateTdfConditionCounts', Session.get('currentRootTdfId'), conditionCounts);
+    }
+
+    newExperimentState.conditionTdfId = conditionTdfId;
+    updateExperimentState(newExperimentState, 'setExpCondition');
+  }
 
     if (!conditionTdfId) {
       console.log('No experimental condition could be selected!');
       alert('Unfortunately, something is broken and this lesson cannot continue');
       leavePage('/profile');
       return;
-    }
+    } 
 
     // Now we have a different current TDF (but root stays the same)
     Session.set('currentTdfId', conditionTdfId);
@@ -3171,10 +3327,14 @@ async function resumeFromComponentState() {
     case 'top':
       UIsettings.choiceColWidth = 'col-12';
       UIsettings.displayColWidth = 'col-12';
+      UIsettings.textInputDisplay = "";
+      UIsettings.textInputDisplay2 = "";
       break;
     case 'left':
       UIsettings.choiceColWidth = 'col-6';
       UIsettings.displayColWidth = 'col-6';
+      UIsettings.textInputDisplay = "justify-content-end";
+      UIsettings.textInputDisplay2 = "justify-content-start";
   }
 
   Session.set('curTdfUISettings', UIsettings);
@@ -3323,6 +3483,8 @@ async function processUserTimesLog() {
     case '[timeout]':
       // resumeToQuestion = true;//TODO: may want true here
       // writeCurrentToScrollList(entry.answer, action === "[timeout]", simCorrect, 0);//TODO restore all scroll list state
+      break;
+    case '[skip]':
       break;
   }
 

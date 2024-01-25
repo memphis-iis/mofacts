@@ -151,19 +151,14 @@ Template.lessonSelect.helpers({
 
     //if curclass is set, then get the tdfs for that class
     if (Session.get('curClass') && Session.get('curClass').sectionId) {
-      const teacherId = Session.get('curClass').teacherUserId;
-      const teacherTdfs = await meteorCallAsync('getAllCourseAssignmentsForInstructor', teacherId);
-      console.log('teacherTdfs', teacherTdfs);
-      //get allTdfs._id that match each teacherTdfs.tdfId
-      const classTdfs = allTdfs.filter((tdf) => {
-        return teacherTdfs.some((teacherTdf) => {
-          return teacherTdf.tdfId == tdf._id;
-        });
+      console.log('getting tdfs for class');
+      const sectionId = Session.get('curClass').sectionId;
+      const sectionTdfs = await meteorCallAsync('getTdfsAssignedToStudent', Meteor.userId(), sectionId);
+      console.log('sectionTdfs', sectionTdfs);
+      allTdfs = allTdfs.filter((tdf) => {
+        return sectionTdfs.includes(tdf._id);
       });
-      console.log('classTdfs', classTdfs);
-      allTdfs = classTdfs;
     }
-
   
     // Check all the valid TDF's
     for (const tdf of allTdfs) {
@@ -218,7 +213,6 @@ Template.lessonSelect.helpers({
             ),
         );
       }
-         
       const audioInputEnabled = setspec.audioInputEnabled ? setspec.audioInputEnabled == 'true' : false;
       const enableAudioPromptAndFeedback = setspec.enableAudioPromptAndFeedback ?
           setspec.enableAudioPromptAndFeedback == 'true' : false;
@@ -285,9 +279,9 @@ Template.lessonSelect.helpers({
       //sort tdfTags by natural alphabetical order
       tdfTags.sort((a, b) => a.tag.localeCompare(b.tag, 'en', {numeric: true, sensitivity: 'base'}));
       this.tdfTags.set(tdfTags);
+      
   
-  
-      if ((tdf.visibility == 'profileOnly' || tdf.visibility == 'enabled') & typeof name != "undefined" & name != "" || setspec.userseleet != 'false') {
+      if ((tdf.visibility == 'profileOnly' || tdf.visibility == 'enabled') & typeof name != "undefined" & name != "" && setspec.userselect != 'false') {
         enabledTdfs.push(tdfObject);
       } else {
         disabledTdfs.push(tdfObject);
@@ -298,7 +292,8 @@ Template.lessonSelect.helpers({
           tdfOwnerIds.push(tdf.ownerId);
         }
       }
-  
+      
+
       if(enabledTdfs){
         enabledTdfs.sort((a, b) => a.name.localeCompare(b.name, 'en', {numeric: true, sensitivity: 'base'}));
       }
@@ -560,16 +555,16 @@ Template.lessonSelect.helpers({
     }
   }
 
-  function getAudioInputFromPage() {
-    return $('#audioInputOn').checked;
-  }
-  
-  function getAudioPromptModeFromPage() {
-  if ($('#audioPromptFeedbackOn').checked && $('#audioPromptQuestionOn').checked) {
+function getAudioInputFromPage() {
+  return $('#audioInputOn').checked;
+}
+
+function getAudioPromptModeFromPage() {
+  if ($('#audioPromptFeedbackOn')[0].checked && $('#audioPromptQuestionOn')[0].checked) {
     return 'all';
-  } else if ($('#audioPromptFeedbackOn').checked){
+  } else if ($('#audioPromptFeedbackOn')[0].checked){
     return 'feedback';
-  } else if ($('#audioPromptQuestionOn').checked) {
+  } else if ($('#audioPromptQuestionOn')[0].checked) {
     return 'question';
   } else {
     return 'silent';

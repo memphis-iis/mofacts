@@ -1,5 +1,4 @@
-import { meteorCallAsync } from "../index";
-
+import { getCurrentTheme } from '../lib/currentTestingHelpers'
 Template.adminControls.created = function() {
     Meteor.call('getVerbosity', function(err, verbosity) {
         if (err) {
@@ -44,7 +43,10 @@ Template.adminControls.helpers({
     },
     'testLoginsEnabled': function() {
         return DynamicSettings.findOne({key: 'testLoginsEnabled'}).value;
-    }
+    },
+    'currentTheme': function() {
+        return Session.get('curTheme');
+    }   
 });
 
 Template.adminControls.events({
@@ -69,5 +71,34 @@ Template.adminControls.events({
         const testLoginsEnabled = $('#testLoginsCheckbox').prop('checked');
         DynamicSettings.update({_id: _id}, {$set: {value: testLoginsEnabled}});  
     },
+    'click #themeInitButton': function(event) {
+        Meteor.call('toggleCustomTheme', function(err, res) {
+            if (err) {
+                alert("Error toggling custom theme: " + err);
+            } else {
+                console.log("Toggled custom theme: " + res);
+                Session.set('curTheme', getCurrentTheme());
+            }
+        });
+    },
+    'click #themeResetButton': function(event) {
+        Meteor.call('initializeCustomTheme', function(err, res) {
+            Session.set('curTheme', getCurrentTheme());
+        });
+    },
+    'keypress #currentThemeProp': function(event) {
+        if (event.keyCode === 13) {
+            const data_id = event.currentTarget.getAttribute('data-id');
+            const value = event.currentTarget.value;
+            Meteor.call('setCustomThemeProperty', data_id, value, function(err, res) {
+                if (err) {
+                    alert("Error setting custom theme property: " + err);
+                } else {
+                    console.log("Set custom theme property: " + res);
+                    Session.set('curTheme', getCurrentTheme());
+                }
+            });
+        }
+    }
 });
   

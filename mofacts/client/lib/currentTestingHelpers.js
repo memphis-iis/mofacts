@@ -4,7 +4,7 @@ import {dialogueSelectState} from '../views/home/profileDialogueToggles';
 import {isEmpty} from '../../common/globalHelpers';
 import {getCurrentClusterAndStimIndices} from '../views/experiment/card';
 import { _ } from 'core-js';
-
+import { clientConsole } from '../index';
 export {
   blankPassword,
   extractDelimFields,
@@ -22,7 +22,26 @@ export {
   getAllCurrentStimAnswers,
   getTestType,
   getCurrentDeliveryParams,
+  getCurrentTheme,
 };
+
+
+//function to get current theme from server and set the css variables
+function getCurrentTheme() {
+  let theme = Meteor.call('getTheme', function(err, res) {
+    console.log('getCurrentTheme', err, res);
+    Session.set('curTheme', res);
+    //set the css variables to the theme values
+    themeProps = res.properties;
+    for (let prop in themeProps) {
+      //add -- to the front of the property name and convert _ to -
+      propConverted = '--' + prop.replace(/_/g, '-');
+      console.log(propConverted, themeProps[prop]);
+      document.documentElement.style.setProperty(propConverted, themeProps[prop]); 
+    }
+    document.title = themeProps['themeName'];
+  });
+}
 
 // Given a user ID, return the "dummy" password that stands in for a blank
 // password. This is because we REALLY do want to use blanks passwords for
@@ -417,6 +436,7 @@ function getCurrentDeliveryParams() {
     return list;
   }
 
+
   const xlations = {
     'showhistory': xlateBool,
     'forceCorrection': xlateBool,
@@ -444,7 +464,7 @@ function getCurrentDeliveryParams() {
     'allowPhoneticMatching': xlateBool,
     'useSpellingCorrection': xlateBool,
     'editDistance': _.intval,
-    'optimalThreshold': _.intval,
+    'optimalThreshold': parseFloat,
     'resetStudentPerformance': xlateBool,
     'practicetimer': xlateString,
     'readyPromptString': xlateString,

@@ -88,20 +88,13 @@ Template.dataDownload.helpers({
         return false; // Reject any TDF data that does not have a unit
       }
 
-      if (isAdmin()) {
-        if (_.isEmpty(Template.instance().selectedTeacherId.get())) {
-          return true; // If no teacher is selected, view all available TDF data downloads
-        }
-
-        if (Template.instance().selectedTeacherId.get() == tdf.ownerId) {
-          return true; // If a teacher is selected, only return TDF data downloads where selected teacher is owner
-        }
-
-        return false;
-      }
-
       if (Meteor.userId() == tdf.ownerId) {
         return true; // If user is not admin role, return only TDF data downloads where current user is owner
+      }
+
+      //if tdf.accessors contains current user id, return true
+      if (tdf.accessors && tdf.accessors.includes(Meteor.userId())) {
+        return true;
       }
 
       return false;

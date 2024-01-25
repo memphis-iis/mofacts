@@ -465,6 +465,8 @@ async function processPackageUpload(fileObj, owner, zipLink, emailToggle){
   let filePath
   let fileName
   let extension
+  //convert the path to a filename
+  let packageFile = path.split('/').pop();
   try{
     const unzipper = Npm.require('unzipper');
     const zip = await unzipper.Open.file(path);
@@ -490,6 +492,7 @@ async function processPackageUpload(fileObj, owner, zipLink, emailToggle){
         path: filePath,
         extension: extension,
         contents: fileContents,
+        packageFile: packageFile,
         type: type
       };
       unzippedFiles.push(fileMeta);
@@ -701,6 +704,7 @@ async function combineAndSaveContentFile(tdf, stim, owner) {
 
   try {
     const jsonContents = typeof tdf.contents == 'string' ? JSON.parse(tdf.contents) : tdf.contents;
+    const jsonPackageFile = tdf.packageFile;
     const json = {tutor: jsonContents.tutor};
     const lessonName = _.trim(jsonContents.tutor.setspec.lessonname);
     if (lessonName.length < 1) {
@@ -711,7 +715,7 @@ async function combineAndSaveContentFile(tdf, stim, owner) {
     }
     const stimContents = typeof stim.contents == 'string' ? JSON.parse(stim.contents) : stim.contents;
     try {
-      const rec = {'fileName': tdf.name, 'tdfs': json, 'ownerId': ownerId, 'source': 'upload', 'stimuli': stimContents, 'stimFileName': stim.name};
+      const rec = {'fileName': tdf.name, 'tdfs': json, 'ownerId': ownerId, 'source': 'upload', 'stimuli': stimContents, 'stimFileName': stim.name, 'packageFile': jsonPackageFile};
       const ret = await upsertPackage(rec, ownerId);
       if(ret && ret.res == 'awaitClientTDF'){
         serverConsole('awaitClientTDF', ret)
@@ -2118,12 +2122,16 @@ async function upsertTDFFile(tdfFilename, tdfJSON, ownerId, packagePath = null) 
       tdfJSONtoUpsert = tdfJSON;
     }
   }
+  //create a new array the length of the number of conditions, fill it with 0
+  tdfJSONtoUpsert.tdfs.tutor.setspec.condition ? conditionCounts = new Array(tdfJSONtoUpsert.tdfs.tutor.setspec.condition.length).fill(0) : conditionCounts = [];
+  
   Tdfs.upsert({_id: prev._id}, {$set: {
     path: packagePath,
     content: tdfJSONtoUpsert,
     ownerId: ownerId,
-    visibility: 'profileOnly'
-  }});
+    visibility: 'profileOnly',
+    conditionCount: conditionCounts
+    }});
 }
 
 async function upsertPackage(packageJSON, ownerId) {
@@ -2131,6 +2139,7 @@ async function upsertPackage(packageJSON, ownerId) {
   const responseKCMap = await getResponseKCMap();
   const stimulusFileName = packageJSON.stimFileName
   const stimJSON = packageJSON.stimuli
+  const packageFile = packageJSON.packageFile
   let ret = {reason: []};
   let Tdf = packageJSON.tdfs;
   let lessonName = _.trim(Tdf.tutor.setspec.lessonname);
@@ -2204,6 +2213,7 @@ async function upsertPackage(packageJSON, ownerId) {
       tdfFileName: packageJSON.fileName,
       content: tdfJSONtoUpsert,
       ownerId: ownerId,
+      packageFileName: packageFile || "No Package File",
       rawStimuliFile: stimJSON, //raw stimuli
       stimuli: formattedStims, //formatted stimuli for use in the app
       stimuliSetId: stimuliSetId,
@@ -2230,17 +2240,21 @@ async function upsertPackage(packageJSON, ownerId) {
       tdfJSONtoUpsert = tdfJSON;
     }
   }
+  //create a new array the length of the number of conditions, fill it with 0
+  tdfJSONtoUpsert.tdfs.tutor.setspec.condition ? conditionCounts = new Array(tdfJSONtoUpsert.tdfs.tutor.setspec.condition.length).fill(0) : conditionCounts = [];
 
   Tdfs.upsert({"content.fileName": packageJSON.fileName}, {$set: {
     tdfFileName: packageJSON.fileName,
     content: tdfJSONtoUpsert,
     ownerId: ownerId,
+    packageFileName: packageFile || "No Package File",
     rawStimuliFile: stimJSON, //raw stimuli
     stimuli: formattedStims, //formatted stimuli for use in the app
     stimuliSetId: stimuliSetId,
-    visibility: 'profileOnly'
+    visibility: 'profileOnly',
+    conditionCounts: conditionCounts
   }});
-  
+
   //update stim syllables
   Meteor.call('updateStimSyllables', stimuliSetId);
 
@@ -2260,17 +2274,14 @@ function tdfUpdateConfirmed(updateObj, resetShuffleClusters = false){
 }
 
 function setUserLoginData(entryPoint, loginMode, curTeacher = undefined, curClass = undefined, assignedTdfs = undefined){
-  serverConsole(Meteor.userId());
-  let query = { 
-    'profile.entryPoint': entryPoint,
-    'profile.curTeacher': curTeacher,
-    'profile.curClass': curClass,
-    'profile.loginMode': loginMode,
-    'profile.assignedTdfs': assignedTdfs
-  };
-  if(Meteor.userId()){
-    Meteor.users.update(Meteor.userId(), { $set: query })
-  }
+  serverConsole('setUserLoginData', entryPoint, loginMode, curTeacher, curClass, assignedTdfs);
+  let profile = Meteor.user().profile;
+  profile.entryPoint = entryPoint;
+  profile.curTeacher = curTeacher;
+  profile.curClass = curClass;
+  profile.loginMode = loginMode;
+  profile.assignedTdfs = assignedTdfs;
+  Meteor.users.update({_id: Meteor.userId()}, {$set: {profile: profile}});
 }
 
 async function loadStimsAndTdfsFromPrivate(adminUserId) {
@@ -2375,7 +2386,19 @@ const methods = {
   removeTurkById: function(turkId, experimentId){
     serverConsole('removeTurkById', turkId, experimentId)
     ScheduledTurkMessages.remove({workerUserId: turkId, experiment: experimentId});
-    Meteor.users.update({_id: turkId}, {$set: {[`profile.lockouts.${experimentId}.lockoutMinutes`]: Number.MAX_SAFE_INTEGER}})
+    let profile = Meteor.user().profile;
+    profile.lockoiuts[experimentId].lockoutMinutes = Number.MAX_SAFE_INTEGER;
+    Meteor.users.update({_id: Meteor.userId()}, {$set: {profile: profile}});
+  },
+
+  saveAudioPromptMode: function(audioPromptMode){
+    serverConsole('saveAudioPromptMode', audioPromptMode);
+    Meteor.users.update({_id: Meteor.userId()}, {$set: {audioPromptMode: audioPromptMode}});
+  },
+
+  saveAudioInputMode: function(audioInputMode){
+    serverConsole('saveAudioInputMode', audioInputMode);
+    Meteor.users.update({_id: Meteor.userId()}, {$set: {audioInputMode: audioInputMode}});
   },
 
   updateExperimentState: function(curExperimentState) {
@@ -2692,12 +2715,6 @@ const methods = {
     return "failure";
   },
 
-  //setUserTheme - sets the user's theme in profile
-  setUserTheme: function(theme) {
-    console.log('setUserTheme', theme);
-    Meteor.users.update(Meteor.userId(), { $set: { 'profile.theme': theme }});
-    //verify that the theme was set
-  },
 
   //Impersonate User
   impersonate: function(userId) {
@@ -2705,22 +2722,25 @@ const methods = {
     if (!Meteor.users.findOne(userId)) {
       throw new Meteor.Error(404, 'User not found');
     }
-    Meteor.users.update(this.userId, { $set: { 'profile.impersonating': userId }});
+    let profile = Meteor.user().profile;
+    profile.impersonating = userId;
+    Meteor.users.update({_id: Meteor.userId()}, {$set: {profile: profile}});
     this.setUserId(userId);
   },
 
   clearLoginData: function(){
-    let query = { 
-      'profile.entryPoint': null, 
-      'profile.curTeacher': null, 
-      'profile.curClass': null,
-      'profile.loginMode': null
-    };
-    Meteor.users.update(Meteor.userId(), { $set: query })
+    let profile = Meteor.user().profile;
+    profile.entryPoint = null;
+    profile.curTeacher = null;
+    profile.curClass = null;
+    profile.loginMode = null;
+    Meteor.users.update({_id: Meteor.userId()}, {$set: {profile: profile}});
   },
 
   clearImpersonation: function(){
-    Meteor.users.update(this.userId, { $set: { 'profile.impersonating': false }});
+    let profile = Meteor.user().profile;
+    profile.impersonating = false;
+    Meteor.users.update({_id: Meteor.userId()}, {$set: {profile: profile}});
     return;
   },
 
@@ -2767,8 +2787,13 @@ const methods = {
   },
 
   setUserSessionId: function(sessionId, sessionIdTimestamp) {
-    const userID = Meteor.userId();
-    Meteor.users.update(userID, {$set: {'profile.lastSessionId': sessionId, 'profile.lastSessionIdTimestamp': sessionIdTimestamp}});
+    let profile = Meteor.users.findOne({_id: Meteor.userId()}).profile;
+    serverConsole('setUserSessionId', sessionId, sessionIdTimestamp)
+    serverConsole('profile', profile)
+    profile.lastSessionId = sessionId;
+    profile.lastSessionIdTimestamp = sessionIdTimestamp;
+    serverConsole('profile2', profile)
+    Meteor.users.update({_id: Meteor.userId()}, {$set: {profile: profile}});
   },
 
   deleteUserSpeechAPIKey: function() {
@@ -2995,6 +3020,74 @@ const methods = {
     }
     return stims || [];
   },
+
+  initializeCustomTheme: function(themeName) {
+    serverConsole('initializeCustomTheme');
+    //This creates a theme key that contains an object with the theme name
+    //and an empty object for the theme's properties
+    let theme = {};
+    theme.themeName = themeName;
+    theme.enabled = true;
+    theme.properties = {
+      themeName: themeName,
+      background_color: '#F2F2F2',
+      text_color: '#000000',
+      accent_color: '#7ed957',
+      secondary_color: '#d9d9d9',
+      audio_alert_color: '#06723e',
+      success_color: '#00cc00',
+      alert_color: '#ff0000',
+      navbar_text_color: '#000000',
+      neutral_color: '#ffffff',
+      logo_url: ''
+    };
+    //This inserts the theme into the database, or updates it if it already exists
+    DynamicSettings.upsert({key: 'customTheme'}, {$set: {value: theme}});
+    return theme;
+  },
+
+  getTheme: function() {
+    serverConsole('getTheme');
+    ret = DynamicSettings.findOne({key: 'customTheme'}) 
+    if(!ret || ret.value.enabled == false) {
+      return {
+        themeName: 'MoFaCTS',
+        properties: {
+          themeName: 'MoFaCTS',
+          background_color: '#F2F2F2',
+          text_color: '#000000',
+          accent_color: '#7ed957',
+          secondary_color: '#d9d9d9',
+          audio_alert_color: '#06723e',
+          success_color: '#00cc00',
+          alert_color: '#ff0000',
+          logo_url: ''
+        }
+      }
+     }
+    return ret.value;
+  },
+
+  setCustomThemeProperty: function(property, value) {
+    //This sets the value of a property in the custom theme
+    path = 'value.properties.' + property;
+    serverConsole('setCustomThemeProperty', path, value);
+    DynamicSettings.update({key: 'customTheme'}, {$set: {[path]: value}});
+  },
+
+  toggleCustomTheme: function() {
+    serverConsole('toggleCustomTheme');
+    //This toggles the custom theme on or off
+    let theme = DynamicSettings.findOne({key: 'customTheme'});
+    if(!theme) { 
+      Meteor.call('initializeCustomTheme', 'Custom Theme');
+    } else {
+      theme = theme.value;
+      theme.enabled = !theme.enabled;
+      serverConsole('custom theme enabled:', theme.enabled);
+      DynamicSettings.update({key: 'customTheme'}, {$set: {'value.enabled': theme.enabled}});
+    }
+  }
 }
 
 const asyncMethods = {
@@ -3057,14 +3150,14 @@ const asyncMethods = {
   
   setLockoutTimeStamp: async function(lockoutTimeStamp, lockoutMinutes, currentUnitNumber, TDFId) {
     serverConsole('setLockoutTimeStamp', lockoutTimeStamp, lockoutMinutes, currentUnitNumber, TDFId);
-    const lockout = {
-      [`profile.lockouts.${TDFId}.lockoutTimeStamp`]: lockoutTimeStamp,
-      [`profile.lockouts.${TDFId}.lockoutMinutes`]: lockoutMinutes,
-      [`profile.lockouts.${TDFId}.currentLockoutUnit`]: currentUnitNumber
-    }
-    Meteor.users.update(Meteor.userId(), { 
-      $set: lockout
-    });
+    let profile = Meteor.user().profile;
+    if(!profile.lockouts) profile.lockouts = {};
+    if(!profile.lockouts[TDFId]) profile.lockouts[TDFId] = {};
+
+    profile.lockouts[TDFId].lockoutTimeStamp = lockoutTimeStamp;
+    profile.lockouts[TDFId].lockoutMinutes = lockoutMinutes;
+    profile.lockouts[TDFId].currentLockoutUnit = currentUnitNumber;
+    Meteor.users.update({_id: Meteor.userId()}, {$set: {profile: profile}});
   },
 
   makeGoogleSpeechAPICall: async function(TDFId, speechAPIKey = '', request, answerGrammar){
@@ -3112,7 +3205,23 @@ const asyncMethods = {
     ComponentStates.update({_id: unit._id}, unit);
   },
 
+  updateTdfConditionCounts: async function(TDFId, conditionCounts) {
+    serverConsole('updateTdfConditionCounts', TDFId, conditionCounts);
+    Tdfs.update({_id: TDFId}, {$set: {conditionCounts: conditionCounts}});
+  },
 
+  resetTdfConditionCounts: async function(TDFId) {
+    serverConsole('resetTdfConditionCounts', TDFId);
+    setspec = Tdfs.findOne({_id: TDFId}).content.tdfs.tutor.setspec;
+    serverConsole("setspec:", setspec)
+    conditions = setspec.condition;
+    conditionCounts = {};
+    for(let condition in conditions){
+      conditionCounts[condition] = 0;
+    }
+    Tdfs.update({_id: TDFId}, {$set: {conditionCounts: conditionCounts}});
+  },
+  
   updateStimSyllables: async function(stimuliSetId, stimuli = undefined) {
     serverConsole('updateStimSyllables', stimuliSetId);
     if(!stimuli){

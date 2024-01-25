@@ -1,3 +1,3 @@
 #! /bin/sh
 mongo MoFaCT --eval "db.dropDatabase()"
-mongorestore mongodump/
+mongodb://mongodb:27017/MoFACT

@@ -2,7 +2,7 @@ version: '3.2'
 
 services:
   mofacts:
-    image: jrustyhaner/mofacts-mini
+    image: jrustyhaner/mofacts-mini:staging
     volumes:
       - type: bind
         source: /mofactsAssets

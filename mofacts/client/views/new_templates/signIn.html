@@ -4,7 +4,7 @@
         <div class="row text-center">
             <div class="col-12 mx-auto">
                 <div class="vh-10"></div>
-                <h1 align-bottom>MoFaCTS</h1>
+                <h1 align-bottom>{{currentTheme.properties.themeName}}</h1>
                 <span id="serverErrors"></span>
                 <div class="vh-5"></div>
             </div>
@@ -45,7 +45,7 @@
                 </button>
                 <br>
                 <button type="button" id="signInButtonOAuth" class="btn btn-fixed">
-                    <img width="20px" style="margin-bottom:3px; margin-right:5px" alt="Google sign-in" src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Google_%22G%22_Logo.svg/512px-Google_%22G%22_Logo.svg.png" />
+                    <img width="20px" style="margin-bottom:3px; margin-right:5px" alt="Google sign-in" src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/1024px-Google_%22G%22_logo.svg.png" />
                     Sign in with Google
                 </button><br>
                 <button type="button" id="signInWithMicrosoftSSO" class="btn btn-fixed">
@@ -76,7 +76,7 @@
                         <select id="teacherSelect" style="width:80%;" aria-label="Default select example">
                             <option selected>Select your teacher</option>
                             {{#each teachers}}
-                                <option value="{{this._id}}">{{this.profile.name}}</option>
+                                <option value="{{this._id}}">{{this.username}}</option>
                             {{/each}}
                         </select>
                         <!-- hidden class select form -->
