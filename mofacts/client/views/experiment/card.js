@@ -1493,8 +1493,10 @@ function afterAnswerAssessmentCb(userAnswer, isSkip, isCorrect, feedbackForAnswe
 }
 
 async function showUserFeedback(isCorrect, feedbackMessage, afterAnswerFeedbackCbBound, isTimeout, isSkip) {
-  console.log('showUserFeedback');
-  userFeedbackStart = Date.now();
+  console.log('showUserFeedback')
+  if(!isSkip){
+    userFeedbackStart = Date.now();
+  }
   const isButtonTrial = getButtonTrial();
   feedbackDisplayPosition = Session.get('curTdfUISettings').feedbackDisplayPosition;
   // For button trials with images where they get the answer wrong, assume incorrect feedback is an image path
