@@ -1288,7 +1288,12 @@ function handleUserInput(e, source, simAnswerCorrect) {
   } else if (source === 'keypress') {
     userAnswer = _.trim($('#userAnswer').val()).toLowerCase();
   } else if (source === 'buttonClick') {
-    userAnswer = e.currentTarget.name;
+    //if the source was the button name continueStudy, get the last answer from the experiment state
+    if(e.currentTarget ? e.currentTarget.name === 'continueStudy' : false){
+      userAnswer = Session.get('currentExperimentState').currentAnswer;
+    } else {
+      userAnswer = e.currentTarget.name;
+    }
   } else if (source === 'simulation') {
     userAnswer = simAnswerCorrect ? 'SIM: Correct Answer' : 'SIM: Wrong Answer';
   } else if (source === 'voice') {
@@ -1299,9 +1304,6 @@ function handleUserInput(e, source, simAnswerCorrect) {
       userAnswer = _.trim($('#userAnswer').val()).toLowerCase();
     }
   } 
-  if(isSkip){
-    userAnswer = '[skip]'
-  }
 
   const trialEndTimeStamp = Date.now();
   const afterAnswerFeedbackCallbackWithEndTime = afterAnswerFeedbackCallback.bind(null,
@@ -1310,12 +1312,12 @@ function handleUserInput(e, source, simAnswerCorrect) {
   // Show user feedback and find out if they answered correctly
   // Note that userAnswerFeedback will display text and/or media - it is
   // our responsbility to decide when to hide it and move on
-  userAnswerFeedback(userAnswer, isTimeout, simAnswerCorrect, afterAnswerFeedbackCallbackWithEndTime);
+  userAnswerFeedback(userAnswer, isTimeout, isSkip, simAnswerCorrect, afterAnswerFeedbackCallbackWithEndTime);
 }
 
 // Take care of user feedback - simCorrect will usually be undefined/null BUT if
 // it is true or false we know this is part of a simulation call
-async function userAnswerFeedback(userAnswer, isTimeout, simCorrect, afterAnswerFeedbackCb) {
+async function userAnswerFeedback(userAnswer, isTimeout, isSkip, simCorrect, afterAnswerFeedbackCb) {
   const isButtonTrial = getButtonTrial();
   const setspec = !isButtonTrial ? Session.get('currentTdfFile').tdfs.tutor.setspec : undefined;
   let isCorrectAccumulator = null;
@@ -1343,9 +1345,9 @@ async function userAnswerFeedback(userAnswer, isTimeout, simCorrect, afterAnswer
   // Make sure to record what they just did (and set justAdded)
   await writeCurrentToScrollList(userAnswer, isTimeout, simCorrect, 1);
   
-  const afterAnswerFeedbackCbWithTimeout = afterAnswerFeedbackCb.bind(null, isTimeout);
+  const afterAnswerFeedbackCbWithTimeout = afterAnswerFeedbackCb.bind(null, isTimeout, isSkip);
   const afterAnswerAssessmentCbWithArgs = afterAnswerAssessmentCb.bind(null,
-      userAnswer, isCorrectAccumulator, feedbackForAnswer, afterAnswerFeedbackCbWithTimeout);
+      userAnswer, isSkip, isCorrectAccumulator, feedbackForAnswer, afterAnswerFeedbackCbWithTimeout);
 
   // Answer assessment ->
   if (userAnswerWithTimeout != null) {
@@ -1448,7 +1450,7 @@ function clearScrollList() {
 }
 
 
-function afterAnswerAssessmentCb(userAnswer, isCorrect, feedbackForAnswer, afterAnswerFeedbackCb, correctAndText) {
+function afterAnswerAssessmentCb(userAnswer, isSkip, isCorrect, feedbackForAnswer, afterAnswerFeedbackCb, correctAndText) {
   Session.set('isRefutation', undefined);
   if (isCorrect == null && correctAndText != null) {
     isCorrect = correctAndText.isCorrect;
@@ -1476,7 +1478,7 @@ function afterAnswerAssessmentCb(userAnswer, isCorrect, feedbackForAnswer, after
       if (feedbackForAnswer == null && correctAndText != null) {
         feedbackForAnswer = correctAndText.matchText;
       }
-      showUserFeedback(isCorrect, feedbackForAnswer, afterAnswerFeedbackCbBound, userAnswer.includes('[timeout]'), userAnswer.includes('[skip]'));
+      showUserFeedback(isCorrect, feedbackForAnswer, afterAnswerFeedbackCbBound, userAnswer.includes('[timeout]'), isSkip);
     };
     if (currentDeliveryParams.feedbackType == 'dialogue' && !isCorrect) {
       speechTranscriptionTimeoutsSeen = 0;
@@ -1491,8 +1493,10 @@ function afterAnswerAssessmentCb(userAnswer, isCorrect, feedbackForAnswer, after
 }
 
 async function showUserFeedback(isCorrect, feedbackMessage, afterAnswerFeedbackCbBound, isTimeout, isSkip) {
-  console.log('showUserFeedback');
-  userFeedbackStart = Date.now();
+  console.log('showUserFeedback')
+  if(!isSkip){
+    userFeedbackStart = Date.now();
+  }
   const isButtonTrial = getButtonTrial();
   feedbackDisplayPosition = Session.get('curTdfUISettings').feedbackDisplayPosition;
   // For button trials with images where they get the answer wrong, assume incorrect feedback is an image path
@@ -1729,11 +1733,10 @@ async function giveWrongAnswer(){
   }
 }
 
-async function afterAnswerFeedbackCallback(trialEndTimeStamp, trialStartTimeStamp, source, userAnswer, isTimeout,  isCorrect) {
+async function afterAnswerFeedbackCallback(trialEndTimeStamp, trialStartTimeStamp, source, userAnswer, isTimeout, isSkip, isCorrect) {
   Session.set('showDialogueText', false);
   //if the user presses the removal button after answering we need to shortcut the timeout
   const wasReportedForRemoval = source == 'removal'
-  userAnswer === '[skip]' ? isSkip = true : isSkip = false;
 
   const testType = getTestType();
   const deliveryParams = Session.get('currentDeliveryParams')
@@ -1765,7 +1768,7 @@ async function afterAnswerFeedbackCallback(trialEndTimeStamp, trialStartTimeStam
   Session.set('feedbackTimeoutBegins', Date.now())
   const answerLogRecord = gatherAnswerLogRecord(trialEndTimeStamp, trialStartTimeStamp, source, userAnswer, isCorrect,
       testType, deliveryParams, dialogueHistory, wasReportedForRemoval);
-  const afterFeedbackCallbackBind = afterFeedbackCallback.bind(null, trialEndTimeStamp, trialStartTimeStamp, isTimeout, isCorrect, testType, deliveryParams, answerLogRecord, 'card')
+  const afterFeedbackCallbackBind = afterFeedbackCallback.bind(null, trialEndTimeStamp, trialStartTimeStamp, isTimeout, isSkip, isCorrect, testType, deliveryParams, answerLogRecord, 'card')
   const timeout = Meteor.setTimeout(async function() {
     afterFeedbackCallbackBind()
   }, reviewTimeout)
@@ -1779,7 +1782,7 @@ async function afterAnswerFeedbackCallback(trialEndTimeStamp, trialStartTimeStam
     Session.set('engineIndices', undefined);
 }
 
-async function afterFeedbackCallback(trialEndTimeStamp, trialStartTimeStamp, isTimeout, isCorrect, testType, deliveryParams, answerLogRecord, callLocation) {
+async function afterFeedbackCallback(trialEndTimeStamp, trialStartTimeStamp, isTimeout, isSkip, isCorrect, testType, deliveryParams, answerLogRecord, callLocation) {
   Session.set('CurTimeoutId', null)
   const userLeavingTrial = callLocation != 'card';
   let reviewEnd = Date.now();
@@ -1789,7 +1792,7 @@ async function afterFeedbackCallback(trialEndTimeStamp, trialStartTimeStamp, isT
   //answerLogAction can be 'answer', 'timeout', or 'skip' depending on userAnswer, isTimeout, and isSkip
   if(isTimeout){
     answerLogAction = '[timeout]';
-  } else if (userAnswer == '[skip]') {
+  } else if (isSkip) {
     answerLogAction = '[skip]';
   } else {
     answerLogAction = '[answer]';
@@ -3484,12 +3487,10 @@ async function processUserTimesLog() {
       // resumeToQuestion = true;//TODO: may want true here
       // writeCurrentToScrollList(entry.answer, action === "[timeout]", simCorrect, 0);//TODO restore all scroll list state
       break;
-    case '[skip]':
-      break;
   }
 
   if (moduleCompleted) {
-    // They are DONE!
+    // They are DONE!afterAnswerAssessmentCb
     console.log('TDF already completed - leaving for profile page.');
     if (Meteor.user().profile.loginMode === 'experiment') {
       // Experiment users don't *have* a normal page
