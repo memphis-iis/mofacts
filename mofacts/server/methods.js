@@ -3032,13 +3032,16 @@ const methods = {
       themeName: themeName,
       background_color: '#F2F2F2',
       text_color: '#000000',
+      button_color: '#7ed957',
+      primary_button_text_color: '#000000',
       accent_color: '#7ed957',
       secondary_color: '#d9d9d9',
+      secondary_text_color: '#000000',
       audio_alert_color: '#06723e',
       success_color: '#00cc00',
-      alert_color: '#ff0000',
       navbar_text_color: '#000000',
       neutral_color: '#ffffff',
+      alert_color: '#ff0000',
       logo_url: ''
     };
     //This inserts the theme into the database, or updates it if it already exists
@@ -3056,10 +3059,15 @@ const methods = {
           themeName: 'MoFaCTS',
           background_color: '#F2F2F2',
           text_color: '#000000',
+          button_color: '#7ed957',
+          primary_button_text_color: '#000000',
           accent_color: '#7ed957',
           secondary_color: '#d9d9d9',
+          secondary_text_color: '#000000',
           audio_alert_color: '#06723e',
           success_color: '#00cc00',
+          navbar_text_color: '#000000',
+          neutral_color: '#ffffff',
           alert_color: '#ff0000',
           logo_url: ''
         }
