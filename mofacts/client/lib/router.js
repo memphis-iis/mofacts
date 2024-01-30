@@ -208,6 +208,9 @@ const getRestrictedRouteAction = function(routeName) {
 // set up all routes with default behavior
 for (const route of restrictedRoutes) {
   Router.route('/' + route, {
+    waitOn: function() {
+      return Meteor.subscribe('settings');
+    },
     name: 'client.' + route,
     action: getRestrictedRouteAction(route),
   });
@@ -323,9 +326,6 @@ Router.route('/contentUpload', {
 
 Router.route('/adminControls', {
   name: 'client.adminControls',
-  waitOn: function() {
-    return Meteor.subscribe('settings');
-  },
   action: function() {
     if(Meteor.user() && Roles.userIsInRole(Meteor.user(), ['admin'])){
       this.render('adminControls');
@@ -596,18 +596,10 @@ Router.route('/classes/:_teacher/:_class', {
       const allClasses = Session.get('curTeacherClasses');
       const curClass = allClasses.find((aClass) => aClass.sectionId == curClassID);
       Session.set('curClass', curClass);
-      Session.set('curSectionId', curClass.sectionId)
-      $('.login').prop('hidden', '');
     }
-    if (loginMode === 'southwest') {
-      console.log('southwest login, routing to southwest profile');
-      Session.set('curModule', 'profileSouthwest');
-      this.render('/signInSouthwest');
-    } else { // Normal login mode
-      console.log('else, progress');
-      Session.set('curModule', 'profile');
-      this.render('signIn');
-    }
+    console.log('else, progress');
+    Session.set('curModule', 'profile');
+    Router.go('/');
   },
 });
 

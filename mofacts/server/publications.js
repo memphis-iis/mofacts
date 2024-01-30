@@ -1,5 +1,3 @@
-import {curSemester, ALL_TDFS, KC_MULTIPLE} from '../common/Definitions';
-
 Meteor.publish('files.assets.all', function () {
     return DynamicAssets.collection.find();
 });

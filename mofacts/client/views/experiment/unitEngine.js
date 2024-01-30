@@ -534,10 +534,12 @@ function modelUnitEngine() {
           const stim = card.stims[j];
           if (hiddenItems.includes(stim.stimulusKC) || !stim.canUse) continue;
           const parameters = stim.parameter;
-          optimalProb = Math.log(parameters[1]/(1-parameters[1]));
+          const currentDeliveryParams = Session.get('currentDeliveryParams');
+          optimalProb = Math.log(currentDeliveryParams.optimalThreshold/(1-currentDeliveryParams.optimalThreshold)) || false;
+          if (!optimalProb) optimalProb = Math.log(parameters[1]/(1-parameters[1])) || false;
           if (!optimalProb) {
-            // clientConsole(2, "NO OPTIMAL PROB SPECIFIED IN STIM, DEFAULTING TO 0.90");
-            optimalProb = currentDeliveryParams.optimalThreshold || 0.90;
+            clientConsole(2, "NO OPTIMAL PROBABILITY SPECIFIED IN STIM, THROWING ERROR");
+            throw new Error("NO OPTIMAL PROBABILITY SPECIFIED IN STIM, THROWING ERROR");
           }
           const dist = Math.abs(Math.log(stim.probabilityEstimate/(1-stim.probabilityEstimate)) - optimalProb);
           if (dist < currentMin) {
@@ -555,24 +557,25 @@ function modelUnitEngine() {
             continue;
           }
           
-          for (let k = 1; k < Math.min(stim.hintLevelProbabilites.length, 3); k++) {
-            // Check if hintLevelProbabilites array exists
-            if (!stim.hintLevelProbabilites) {
-              continue;
-            }
-          
-            let hintDist = Math.abs(
-              Math.log(stim.hintLevelProbabilites[k] / (1 - stim.hintLevelProbabilites[k])) - optimalProb
-            );
-          
-            if (hintDist < currentMin) {
-              currentMin = hintDist;
-              clusterIndex = i;
-              stimIndex = j;
-              hintLevelIndex = k;
+          if(stim.hintLevelProbabilites) {
+            for (let k = 1; k < Math.min(stim.hintLevelProbabilites.length, 3); k++) {
+              // Check if hintLevelProbabilites array exists
+              if (!stim.hintLevelProbabilites) {
+                continue;
+              }
+            
+              let hintDist = Math.abs(
+                Math.log(stim.hintLevelProbabilites[k] / (1 - stim.hintLevelProbabilites[k])) - optimalProb
+              );
+            
+              if (hintDist < currentMin) {
+                currentMin = hintDist;
+                clusterIndex = i;
+                stimIndex = j;
+                hintLevelIndex = k;
+              }
             }
           }
-          
         }
       }
     }
@@ -677,9 +680,26 @@ function modelUnitEngine() {
       let parms;
       const ptemp=[];
       const tdfDebugLog=[];
-      for (let clusterIndex = 0; clusterIndex < cardProbabilities.cards.length; clusterIndex++) {
+      const unitNumber = Session.get('currentUnitNumber');
+      const curTdf = Tdfs.findOne({_id: Session.get('currentTdfId')});
+      const unitTypeParams = curTdf.content.tdfs.tutor.unit[unitNumber].assessmentsession || curTdf.content.tdfs.tutor.unit[unitNumber].learningsession;  
+      unitTypeParams ? clusterList = unitTypeParams.clusterlist : clusterList = false;
+      unitClusterList = [];
+      if(!clusterList){ clientConsole(2, 'no clusterlist found for unit ' + unitNumber); }
+      clusterList.split(' ').forEach(
+        value => {
+          if(value.includes('-')){
+            const [start, end] = value.split('-').map(Number);
+            for(let i = start; i <= end; i++){
+              unitClusterList.push(i);
+            }
+          } else {
+            unitClusterList.push(Number(value));
+          }
+        }
+      );
+      for (clusterIndex of unitClusterList) {
         const card = cardProbabilities.cards[clusterIndex];
-        const pParams=[];
         const stimCluster = stimClusters[clusterIndex];
         for (let stimIndex = 0; stimIndex < card.stims.length; stimIndex++) {
           const stim = card.stims[stimIndex];
@@ -862,6 +882,8 @@ function modelUnitEngine() {
       p.responseStudyTrialCount = p.resp.priorStudy;
 
       p.stimParameters = stimCluster.stims[stimIndex].params.split(',').map((x) => _.floatval(x));
+      const currentDeliveryParams = Session.get('currentDeliveryParams');
+      currentDeliveryParams.optimalThreshold ? p.stimParameters[1] = currentDeliveryParams.optimalThreshold : p.stimParameters[1] = p.stimParameters[1];
 
       p.clusterPreviousCalculatedProbabilities = JSON.parse(JSON.stringify(card.previousCalculatedProbabilities));
       p.clusterOutcomeHistory = JSON.parse(JSON.stringify(card.outcomeStack));
@@ -874,6 +896,7 @@ function modelUnitEngine() {
       }
 
       p.overallOutcomeHistory = Session.get('overallOutcomeHistory');
+      p.overallStudyHistory = Session.get('overallStudyHistory');
 
       if (p.i<15) {
         clientConsole(1, 'cardProbability parameters:', JSON.parse(JSON.stringify(p)));
@@ -1473,6 +1496,8 @@ function modelUnitEngine() {
       const whichHintLevel = newHintLevel;
       const stim = card.stims[whichStim];
 
+      stim.previousCalculatedProbabilities.push(stim.probabilityEstimate);
+      card.previousCalculatedProbabilities.push(stim.probabilityEstimate);
 
       // Save the stim's probability function input parameters for display in the UI
       Session.set('currentStimProbFunctionParameters', stim.probFunctionParameters);
@@ -1630,8 +1655,6 @@ function modelUnitEngine() {
       }
 
       const currentStimProbability = stim.probabilityEstimate;
-      stim.previousCalculatedProbabilities.push(currentStimProbability);
-      card.previousCalculatedProbabilities.push(currentStimProbability);
 
       clientConsole(2, 'cardAnswered, curTrialInfo:', currentStimProbability, card, stim);
       if (wasCorrect) {

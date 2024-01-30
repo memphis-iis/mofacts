@@ -1,6 +1,5 @@
 import Promise, { is } from 'bluebird';
 import {dialogueContinue} from './views/experiment/dialogueUtils.js';
-import {haveMeteorUser} from './lib/currentTestingHelpers';
 import {ENTER_KEY} from '../common/Definitions.js';
 import {sessionCleanUp} from './lib/sessionUtils.js';
 import {restartMainCardTimeoutIfNecessary} from './views/experiment/card.js';
@@ -9,6 +8,7 @@ import {routeToSignin} from './lib/router.js';
 import { init } from "meteor/simonsimcity:client-session-timeout";
 import {
   getTestType,
+  getCurrentTheme
 } from './lib/currentTestingHelpers';
 
 export {checkUserSession, clientConsole}
@@ -19,6 +19,9 @@ console.log('forceSSL', forceSSL);
 if (location.protocol !== 'https:' && forceSSL) {
   location.href = location.href.replace(/^http:/, 'https:');
 }
+
+getCurrentTheme();
+
 
 
 
@@ -340,6 +343,9 @@ Template.DefaultLayout.events({
 
 });
 // Global template helpers
+Template.registerHelper('currentTheme', function() {
+  return Session.get('curTheme');
+});
 Template.registerHelper('modalTemplate', function() {
   modalTemplate = Session.get('modalTemplate');
   console.log('modalTemplate: ' + JSON.stringify(modalTemplate));

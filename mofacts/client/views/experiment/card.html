@@ -55,9 +55,9 @@
             </div>
             <div class="row{{UIsettings.reverseStimuliAndInputColumns}}">
                 {{#if trial}}
-                <div class="{{UIsettings.displayColWidth}}" id="displayContainer">
+                <div class="{{UIsettings.displayColWidth}} mx-auto" id="displayContainer">
                     {{#if anythingButAudioCard}}
-                        <div class="text-center {{fontSizeClass}}">
+                        <div class="{{fontSizeClass}} {{#if study}} {{UIsettings.textInputDisplay}} {{/if}} alert alert-bg" id="displaySubContainer">
                             <p>
                             {{#if ifClozeDisplayTextExists}}
                                 {{#if textOrClozeCard}}
@@ -94,13 +94,12 @@
                         </div>
                         <div class="vh-5"></div>
                     {{/if}}
-                    <div id="correctAnswerDisplayContainer" class="alert {{fontSizeClass}} text-center" hidden>
-                            
-                    </div>
-                    <div id="feedbackOverrideContainer"  hidden>
-                        <div id="feedbackOverride" class="{{fontSizeClass}} text-center">
-                            
-                        </div>
+                </div>
+                <div id="correctAnswerDisplayContainer" class="{{UIsettings.textInputDisplay2}} alert {{fontSizeClass}} {{UIsettings.displayColWidth}} d-none text-center">
+                </div>         
+                <div id="feedbackOverrideContainer"  hidden>
+                    <div id="feedbackOverride" class="{{fontSizeClass}} text-center">
+                        
                     </div>
                 </div>
                 {{#if userInDiaglogue}}   
@@ -117,7 +116,7 @@
             {{/if}}
 
             {{#if study}}
-                <div class="alert mx-auto col-sm-12 col-xs-12 col-md-6 col-lg-6 mx-auto {{fontSizeClass}} ">
+                <div class="alert {{UIsettings.displayColWidth}} {{fontSizeClass}} {{UIsettings.textInputDisplay2}} ">
                     {{#if hideResponse}}
                         <p id="answerLabel" class="answer-display-trial text-center">{{displayAnswer}}</p>
                     {{/if}}
@@ -140,7 +139,7 @@
                     {{/if}}
                 {{/if}}
                 {{#if notButtonTrialOrInDialogueLoop}}
-                        <div class="input-box vh-5 col-12" style="box-sizing: border-box;">
+                        <div class="input-box col-12" style="box-sizing: border-box;">
                             {{#if showDialogueHints}}
                                 {{#if dialogueCacheHint}}
                                     <div class="row hints">

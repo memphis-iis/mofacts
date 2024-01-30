@@ -1,4 +1,3 @@
-import { all } from 'bluebird';
 import {meteorCallAsync} from '../..';
 import { ReactiveVar } from 'meteor/reactive-var';
 export {doFileUpload};
@@ -9,9 +8,6 @@ Template.contentUpload.helpers({
   },
   StimFiles: function() {
     return Stims.find();
-  },
-  curFilesToUpload() {
-    return Template.instance().curFilesToUpload.get();
   },
   currentUpload() {
     return Template.instance().currentUpload.get();
@@ -24,8 +20,7 @@ Template.contentUpload.helpers({
     allTDfs = Tdfs.find({ownerId: Meteor.userId()}).fetch();
     console.log('allTdfs:', allTDfs);
     //iterate through allTdfs and get all stimuli
-    tdfSummaries = [];
-    for (const tdf of allTDfs) {
+    tdfSummaries = [];    for (const tdf of allTDfs) {
       thisTdf = {};
       thisTdf.lessonName = tdf.content.tdfs.tutor.setspec.lessonname;
       thisTdf.stimuliCount = tdf.stimuli.length;
@@ -36,7 +31,33 @@ Template.contentUpload.helpers({
       thisTdf.errors = [];
       thisTdf.stimFileInfo = [];
       thisTdf.stimFilesCount = 0;
-      //iterart through tdf.stimuli and get all stimuli
+      thisTdf.fileName = tdf.content.fileName;
+      checkIfConditional = allTDfs.some(function(tdf){
+        conditions = tdf.content.tdfs.tutor.setspec.condition;
+        //check if condition contains the TDF filename
+        if(conditions && conditions.includes(thisTdf.fileName)){
+          return true;
+        }
+      });
+      if(tdf.content.tdfs.tutor.setspec.condition){
+        thisTdf.conditions = [];
+        for(let i=0; i<tdf.content.tdfs.tutor.setspec.condition.length; i++){
+          thisTdf.conditions.push({condition: tdf.content.tdfs.tutor.setspec.condition[i], count: tdf.conditionCounts[i]});
+        }
+      }
+      //if thisTdf is conditional, skip it
+      if(checkIfConditional){
+        continue;
+      }
+      //get the original package filename by looking up the assetId in the tdf
+      tdf.packageFileName ? thisTdf.packageAssetId = tdf.packageFileName.split('.')[0] : thisTdf.packageAssetId = false;
+      if(!thisTdf.packageAssetId){
+        thisTdf.errors.push('Package ID not found. This package was uploaded before the new upload system was implemented. Please delete this package and re-upload it.');
+        thisTdf.packageFileLink = null;
+      } else {
+        thisTdf.packageFileLink = DynamicAssets.findOne({_id: thisTdf.packageAssetId}).link() || false;
+      }
+      //iterate through tdf.stimuli and get all stimuli
       for (const stim of tdf.stimuli) {
         //check if thisTdf.stimFileInfo already contains a file with this stim.stimuliSetId
         //if not, add it to thisTdf.stimFileInfo
@@ -107,22 +128,13 @@ Template.contentUpload.events({
     const files = Template.instance().curFilesToUpload.get();
     //add new files to array, appending the current file type from the dropdown
     for (const file of Array.from($('#upload-file').prop('files'))) {
-      //if the file has extension .json, read and parse it, if it is a TDF file it will have "tutor" field, if it is a stimuli file it will have "setspec" field
-      if (file.name.endsWith('.json')) {
-        //send an alert that json files are not supported
-        alert('JSON files are not supported. Please upload a ZIP file.');
-
-      } else {
-        file.fileType = 'package';
-      }
-      files.push(file);
+      doPackageUpload(file, Template.instance());
     }
     //update reactive var with new array
     console.log('files:', files);
-    Template.instance().curFilesToUpload.set(files);
     //clear file input
     $('#upload-file').val('');
-  },
+  },  
   'click #show_assets': function(event){
     event.preventDefault();
     //get data-file field
@@ -150,33 +162,22 @@ Template.contentUpload.events({
   'click #doUpload': async function(event) {
     //get files array from reactive var
     const files = Template.instance().curFilesToUpload.get();
-    $('#stimUploadLoadingSymbol').show()
     //call doFileUpload function for each file
     for (const file of files) {
       await doPackageUpload(file, Template.instance());
     }
-    //reset reactive var
-    Template.instance().curFilesToUpload.set(false);
   },
     'click #tdf-download-btn': function(event){
       event.preventDefault();
-      const TDFId = event.currentTarget.getAttribute('value')
-      let selectedTdf = Tdfs.findOne({_id: TDFId});
-      console.log('downloading tdf id', TDFId);
-      let blob = new Blob([JSON.stringify(selectedTdf.content.tdfs,null,2)], { type: 'application/json' });
-      let url = window.URL.createObjectURL(blob);
-      let downloadFileName = selectedTdf.content.fileName.trim();
-      var a = document.createElement("a");
-      document.body.appendChild(a);
-      a.style = "display: none";
-      a.href = url;
-      a.download = downloadFileName;
-      a.click();
-      window.URL.revokeObjectURL(url);
+      window.open(event.currentTarget.getAttribute('value'));
     },
   'click #tdf-delete-btn': function(event){
     const tdfId = event.currentTarget.getAttribute('value')
     Meteor.call('deleteTDFFile',tdfId);
+  },
+  'click #reset-conditions-btn': function(event){
+    const tdfId = event.currentTarget.getAttribute('value')
+    Meteor.call('resetTdfConditionCounts',tdfId);
   },
 
   'click #assetDeleteButton': function(event){
@@ -461,6 +462,9 @@ async function doPackageUpload(file, template){
     }
   });
   upload.start();
+  //return the filename
+  res = {fileName: file.name};
+  return res;
 }
 
 async function readFileAsDataURL(file) {

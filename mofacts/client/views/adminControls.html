@@ -30,6 +30,92 @@
                     </div>
                 </div>
                 <div class="row text-center">
+                    <h3>Theme</h3>
+                </div>
+                {{#if currentTheme.enabled}}
+                <div class="row row-cols-2">
+                    <div class="col text-end">
+                        <button type="button" id="themeInitButton" class="btn btn-fixed">Disable Custom Theme</button>
+                    </div>
+                    <div class="col">
+                        <button type="button" id="themeResetButton" class="btn btn-fixed">Reset Custom Theme</button>
+                    </div>
+                    <div class="col text-end">
+                        Theme Name:
+                    </div>
+                    <div class="col">
+                        <input type="text" id="currentThemeProp" value="{{currentTheme.properties.themeName}}" data-id="themeName">    
+                    </div>
+                    <div class="col text-end">
+                        Background Color:
+                    </div>
+                    <div class="col">
+                        <input type="text" id="currentThemeProp" value="{{currentTheme.properties.background_color}}" data-id="background_color">
+                    </div>
+                    <div class="col text-end">
+                        Navigation Text Color:
+                    </div>
+                    <div class="col">
+                        <input type="text" id="currentThemeProp" value="{{currentTheme.properties.navbar_text_color}}" data-id="navbar_text_color">
+                    </div>
+                    <div class="col text-end">
+                        Neutral Color:
+                    </div>
+                    <div class="col">
+                        <input type="text" id="currentThemeProp" value="{{currentTheme.properties.neutral_color}}" data-id="neutral_color">
+                    </div>
+                    <div class="col text-end">
+                        Accent Color:
+                    </div>
+                    <div class="col">
+                        <input type="text" id="currentThemeProp" value="{{currentTheme.properties.accent_color}}" data-id="accent_color">
+                    </div>
+                    <div class="col text-end">
+                        Secondary Accent Color:
+                    </div>
+                    <div class="col">
+                        <input type="text" id="currentThemeProp" value="{{currentTheme.properties.secondary_color}}" data-id="secondary_color">
+                    </div>
+                    <div class="col text-end">
+                        Alert Color:
+                    </div>
+                    <div class="col">
+                        <input type="text" id="currentThemeProp" value="{{currentTheme.properties.alert_color}}" data-id="alert_color">"    
+                    </div>
+                    <div class="col text-end">
+                        Success Color:
+                    </div>
+                    <div class="col">
+                        <input type="text" id="currentThemeProp" value="{{currentTheme.properties.success_color}}" data-id="success_color">
+                    </div>
+                    <div class="col text-end">
+                        Text Color:
+                    </div>
+                    <div class="col">
+                        <input type="text" id="currentThemeProp" value="{{currentTheme.properties.text_color}}" data-id="text_color">
+                    </div>
+                    <div class="col text-end">
+                        Audio Alert Color
+                    </div>
+                    <div class="col">
+                        <input type="text" id="currentThemeProp" value="{{currentTheme.properties.audio_alert_color}}" data-id="audio_alert_color">
+                    </div>
+                    <div class="col text-end">
+                        Logo URL:
+                    </div>
+                    <div class="col">
+                        <input type="text" id="currentThemeProp" value="{{currentTheme.properties.logo_url}}" data-id="logo_url">
+                    </div>
+                    
+                </div>
+                {{else}}
+                <div class="row">    
+                    <div class="col text-center">
+                        <button type="button" id="themeInitButton" class="btn btn-fixed">Enable Custom Theme</button>
+                    </div>
+                </div>
+                {{/if}}
+                <div class="row text-center">
                     <h3>Test Logins</h3>
                 </div>
                 <form>
