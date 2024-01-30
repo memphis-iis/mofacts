@@ -130,12 +130,20 @@ function getHistory(history) {
     'CF (Review Entry)': history.CFReviewEntry,
     'CF (Button Order)': history.CFButtonOrder,
     'CF (Item Removed)': history.CFItemRemoved,
+    'CF (Entry Point)': history.entryPoint,
+    'CF (Video TimeStamp)': history.CFVideoTimeStamp,
+    'CF (Video Seek Start)': history.CFVideoSeekStart,
+    'CF (Video Seek End)': history.CFVideoSeekEnd,
+    'CF (Video Current Speed)': history.CFVideoCurrentSpeed,
+    'CF (Video Current Volume)': history.CFVideoCurrentVolume,
+    'CF (Video Previous Speed)': history.CFVideoPreviousSpeed,
+    'CF (Video Previous Volume)': history.CFVideoPreviousVolume,
+    'CF (Video Is Playing)': history.CFVideoIsPlaying,
     'Feedback Text': history.feedbackText,
     'Feedback Type': history.feedbackType,
     'dynamicTagFields': history.dynamicTagFields,
     'recordedServerTime': history.recordedServerTime,
     'Hint Level':history.hintLevel,
-    'CF (Entry Point)': history.entryPoint
   };
   return historyOutput;
 }

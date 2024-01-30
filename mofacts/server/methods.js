@@ -499,56 +499,63 @@ async function processPackageUpload(fileObj, owner, zipLink, emailToggle){
     }
     serverConsole('unzippedFiles', unzippedFiles);
     const stimFileName = unzippedFiles.filter(f => f.type == 'stim')[0].name;
-    let stimSetId;
-    try {
-      for(const tdf of unzippedFiles.filter(f => f.type == 'tdf')){
-        const stim = unzippedFiles.find(f => f.name == tdf.contents.tutor.setspec.stimulusfile);
-        serverConsole('stim', stim, 'stimFileName', stimFileName, tdf.contents.tutor.setspec.stimulusfile);
-        const packageResult = await combineAndSaveContentFile(tdf, stim, owner);
-        results.push(packageResult);
-        serverConsole('packageResult', packageResult);
-        if(packageResult.data && packageResult.data.TDF && packageResult.data.TDF.stimuliSetId)
-          stimSetId = packageResult.data.TDF.stimuliSetId;
+    const fileUploadPromise = new Promise(async (resolve, reject) => {
+      try {
+        for(const tdf of unzippedFiles.filter(f => f.type == 'tdf')){
+          const stim = unzippedFiles.find(f => f.name == tdf.contents.tutor.setspec.stimulusfile);
+          serverConsole('stim', stim, 'stimFileName', stimFileName, tdf.contents.tutor.setspec.stimulusfile);
+          const packageResult = await combineAndSaveContentFile(tdf, stim, owner);
+          results.push(packageResult);
+          serverConsole('packageResult', packageResult);
+        }
+        resolve(results)
+      } catch(e) {
+        if(emailToggle){
+          sendEmail(
+            Meteor.user().emails[0].address,
+            Meteor.settings.owner,
+            "Package Upload Failed",
+            "Package upload failed: " + e + " on file: " + filePath
+          )
+        }
+        serverConsole('1 processPackageUpload ERROR,', path, ',', e + ' on file: ' + filePath);
+        reject("Package upload failed: " + e + " on file: " + filePath)
       }
-    } catch(e) {
+    });
+
+    fileUploadPromise.then(async (results) => {
+      serverConsole('fileUploadPromiseThen', results, stimFileName);
+      let stimSetId;
+      if(results && results[0] && results[0].data && results[0].data.stimuliSetId)
+        stimSetId = results[0].data.stimuliSetId;
+      if (!stimSetId) stimSetId = await getStimuliSetIdByFilename(stimFileName);
+      try {
+        for(const media of unzippedFiles.filter(f => f.type == 'media')){
+          await saveMediaFile(media, owner, stimSetId);
+        }
+      } catch(e) {
+        if(emailToggle){
+          sendEmail(
+            Meteor.user().emails[0].address,
+            Meteor.settings.owner,
+            "Package Upload Failed",
+            "Package upload failed at media upload: " + e + " on file: " + filePath
+          )
+        }
+        serverConsole('2 processPackageUpload ERROR,', path, ',', e + ' on file: ' + filePath);
+        throw new Meteor.Error('package upload failed at media upload: ' + e + ' on file: ' + filePath)
+      }
+      serverConsole('results', results);
       if(emailToggle){
         sendEmail(
           Meteor.user().emails[0].address,
           Meteor.settings.owner,
-          "Package Upload Failed",
-          "Package upload failed: " + e + " on file: " + filePath
+          "Package Upload Successful",
+          "Package upload successful: " + fileName
         )
       }
-      serverConsole('1 processPackageUpload ERROR,', path, ',', e + ' on file: ' + filePath);
-      throw new Meteor.Error("Package upload failed: " + e + " on file: " + filePath)
-    }
-    if (!stimSetId) stimSetId = await getStimuliSetIdByFilename(stimFileName);
-    try {
-      for(const media of unzippedFiles.filter(f => f.type == 'media')){
-        await saveMediaFile(media, owner, stimSetId);
-      }
-    } catch(e) {
-      if(emailToggle){
-        sendEmail(
-          Meteor.user().emails[0].address,
-          Meteor.settings.owner,
-          "Package Upload Failed",
-          "Package upload failed at media upload: " + e + " on file: " + filePath
-        )
-      }
-      serverConsole('2 processPackageUpload ERROR,', path, ',', e + ' on file: ' + filePath);
-      throw new Meteor.Error('package upload failed at media upload: ' + e + ' on file: ' + filePath)
-    }
-    serverConsole('results', results);
-    if(emailToggle){
-      sendEmail(
-        Meteor.user().emails[0].address,
-        Meteor.settings.owner,
-        "Package Upload Successful",
-        "Package upload successful: " + fileName
-      )
-    }
-    return {results, stimSetId};
+      return {results, stimSetId};
+    })
   } catch(e) {
       if(emailToggle){
         sendEmail(
@@ -720,10 +727,10 @@ async function combineAndSaveContentFile(tdf, stim, owner) {
       if(ret && ret.res == 'awaitClientTDF'){
         serverConsole('awaitClientTDF', ret)
         results.result = false;
-        results.data = ret;
       } else {
         results.result = true;
       }
+      results.data = ret;
     } catch (err) {
       results.result=false;
       results.errmsg=err.toString();

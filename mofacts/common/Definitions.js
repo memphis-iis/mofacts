@@ -8,6 +8,7 @@ export const DISABLED = 'disabled';
 export const ENABLED = 'enabled';
 export const MODEL_UNIT = 'model';
 export const SCHEDULE_UNIT = 'schedule';
+export const VIDEO_UNIT = 'video';
 // Define an ordering for the fields and the column name we'll put in the
 // output file. Note that these names must match the fields used in populate
 // record.
@@ -66,5 +67,13 @@ export const outputFields = [
   'CF (Button Order)', // CF buttonOrder
   'CF (Item Removed)', // item was reported by the user as wrong
   'CF (Note)', // CF note
-  'CF (Entry Point)'
+  'CF (Entry Point)',
+  'CF (Video TimeStamp)',
+  'CF (Video Seek Start)',
+  'CF (Video Seek End)',
+  'CF (Video Current Speed)',
+  'CF (Video Current Volume)',
+  'CF (Video Previous Speed)',
+  'CF (Video Previous Volume)',
+  'CF (Video Is Playing)',
 ];

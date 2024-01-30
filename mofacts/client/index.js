@@ -361,6 +361,7 @@ Template.registerHelper('showPerformanceDetails', function() {
   if(Session.get('curModule') == 'instructions') return false;
   if(type == "s" && uiSettings.displayPerformanceDuringStudy) return true;
   if(type == "s" && !uiSettings.displayPerformanceDuringStudy) return false;
+  if(Session.get('isVideoSession')) return false;
   if(type == "t" && uiSettings.displayPerformanceDuringTrial) return true;
   if(type == "t" && !uiSettings.displayPerformanceDuringTrial) return false;
   return ((Session.get('curModule') == 'card' || Session.get('curModule') !== 'instructions') && Session.get('scoringEnabled') && Session.get('unitType') != 'schedule');

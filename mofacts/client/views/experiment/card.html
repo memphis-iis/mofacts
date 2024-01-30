@@ -1,5 +1,16 @@
 <template name="card">
     <div class="container" id="cardContainer">
+        {{#if isVideoSession}}
+            {{#if isYoutubeVideo}}
+                <div id="videoUnitContainer">
+                    <div id="videoUnitPlayer" data-plyr-provider="youtube" data-plyr-embed-id="{{videoId}}"></div>
+                </div>
+            {{else}}
+                <video id="videoUnitPlayer" playsinline controls>
+                    <source src="{{videoSource}}" type="video/mp4" />
+                </video>
+            {{/if}}
+        {{/if}}
         <br>
         {{#if isImpersonating}}
         <div class='text-center alert alert-warning'>
@@ -16,7 +27,7 @@
                 <button id='confirmFeedbackSelection' class='btn width-100-percent'>Confirm feedback settings</button>
             {{/if}}
         </div>
-    {{else}}
+    {{/if}}
         {{#if displayReady}}
         <div id="userInteractionContainer" class="vh-5" hidden>
                 <div class="text-center {{fontSizeClass}}" id="UserInteraction" style="margin-top: 0px;" hidden></div>
@@ -238,7 +249,6 @@
                 </div>
             </div>
         {{/if}}
-    {{/if}}
     {{#if displayReadyPromptString}}
         <div class="marginLeftAndRight alert alert-info {{fontSizeClass}} text-center" id="textQuestion">
             {{readyPromptString}}

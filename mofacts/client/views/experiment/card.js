@@ -9,6 +9,10 @@ import {
   getAllCurrentStimAnswers,
   getTestType,
 } from '../../lib/currentTestingHelpers';
+import { 
+  initializePlyr,
+  playVideo,
+} from '../../lib/plyrHelper.js'
 import {meteorCallAsync, redoCardImage} from '../../index';
 import {DialogueUtils, dialogueContinue, dialogueLoop, initiateDialogue} from './dialogueUtils';
 import {SCHEDULE_UNIT, ENTER_KEY} from '../../../common/Definitions';
@@ -21,6 +25,7 @@ import {checkUserSession} from '../../index'
 import {instructContinue, unitHasLockout, checkForFileImage} from './instructions';
 import { is } from 'bluebird';
 
+
 export {
   speakMessageIfAudioPromptFeedbackEnabled,
   startRecording,
@@ -30,7 +35,9 @@ export {
   restartMainCardTimeoutIfNecessary,
   getCurrentClusterAndStimIndices,
   initCard,
-  unitIsFinished
+  unitIsFinished,
+  gatherAnswerLogRecord,
+  newQuestionHandler
 };
 
 /*
@@ -132,9 +139,11 @@ let cachedSyllables = null;
 let speechTranscriptionTimeoutsSeen = 0;
 let timeoutsSeen = 0; // Reset to zero on resume or non-timeout
 let trialStartTimestamp = 0;
+Session.set('trialStartTimestamp', trialStartTimestamp);
 let firstKeypressTimestamp = 0;
 let currentSound = null; // See later in this file for sound functions
 let userFeedbackStart = null;
+let player = null;
 // We need to track the name/ID for clear and reset. We need the function and
 // delay used for reset
 let timeoutName = null;
@@ -747,6 +756,26 @@ Template.card.helpers({
     return rt === 'image';
   },
 
+  'isVideoSession': () => Session.get('isVideoSession'),
+
+  'isYoutubeVideo': function() {
+    return (Session.get('isVideoSession') && Session.get('videoSource') && Session.get('videoSource').includes('http'))
+  },
+
+  'videoId': function() {
+    if(Session.get('isVideoSession') && Session.get('videoSource')){
+      if(Session.get('videoSource').includes('youtu.be'))
+        return Session.get('videoSource').split('youtu.be/')[1].split('?')[0];
+      else if(Session.get('videoSource').includes('youtube'))
+        return Session.get('videoSource').split('v=')[1].split('&')[0];
+    }
+  },
+
+  'videoSource': function() {
+    if(Session.get('isVideoSession') && Session.get('videoSource'))
+      return Session.get('videoSource')
+  },
+
   'test': function() {
     return getTestType() === 't';
   },
@@ -955,6 +984,18 @@ function initializeAudio() {
         });
   } catch (e) {
     console.log('Error initializing Web Audio browser');
+  }
+}
+
+function preloadVideos() {
+  if (Session.get('currentTdfUnit') && 
+  Session.get('currentTdfUnit').videosession &&
+  Session.get('currentTdfUnit').videosession.videosource) {
+    if(Session.get('currentTdfUnit').videosession.videosource.includes('http')){
+      Session.set('videoSource', Session.get('currentTdfUnit').videosession.videosource);
+    } else {
+      Session.set('videoSource', DynamicAssets.findOne({name: Session.get('currentTdfUnit').videosession.videosource}).link());
+    }
   }
 }
 
@@ -1774,12 +1815,14 @@ async function afterAnswerFeedbackCallback(trialEndTimeStamp, trialStartTimeStam
   }, reviewTimeout)
   Session.set('CurTimeoutId', timeout)
 
-  if(Session.get('unitType') == "model")
+  if(!Session.get('isVideoSession')){
+    if(Session.get('unitType') == "model")
     engine.calculateIndices().then(function(res, err) {
       Session.set('engineIndices', res );
     })
-  else
-    Session.set('engineIndices', undefined);
+    else
+      Session.set('engineIndices', undefined);
+  }
 }
 
 async function afterFeedbackCallback(trialEndTimeStamp, trialStartTimeStamp, isTimeout, isSkip, isCorrect, testType, deliveryParams, answerLogRecord, callLocation) {
@@ -2335,6 +2378,18 @@ async function prepareCard() {
   $('#helpButton').prop("disabled",false);
   if (engine.unitFinished()) {
     unitIsFinished('Unit Engine');
+  } else if (Session.get('isVideoSession')) {
+    let indices = Session.get('engineIndices');
+    if(!indices){
+      indices = {
+        'clusterIndex': 0,
+        'stimIndex': 0
+      }
+      Session.set('engineIndices', indices);
+      initializePlyr();
+    } else {
+      playVideo();
+    }
   } else {
     await engine.selectNextCard(Session.get('engineIndices'), Session.get('currentExperimentState'));
     await newQuestionHandler();
@@ -2426,6 +2481,7 @@ function startQuestionTimeout() {
     readyPromptTimeout = Session.get('currentDeliveryParams').readyPromptStringDisplayTime
   }
   trialStartTimestamp = Date.now();
+  Session.set('trialStartTimestamp', trialStartTimestamp);
   Meteor.setTimeout(() => {
     const beginQuestionAndInitiateUserInputBound = beginQuestionAndInitiateUserInput.bind(null, delayMs, deliveryParams);
     const pipeline = checkAndDisplayTwoPartQuestion.bind(null,
@@ -2468,7 +2524,8 @@ function checkAndDisplayPrestimulus(deliveryParams, nextStageCb) {
     const prestimulusDisplayWrapper = {'text': prestimulusDisplay};
     console.log('prestimulusDisplay detected, displaying', prestimulusDisplayWrapper);
     Session.set('currentDisplay', prestimulusDisplayWrapper);
-    Session.set('displayReady', true);
+    const isVideoSession = Session.get('isVideoSession')
+    Session.set('displayReady', isVideoSession ? false : true); //displayReady handled by video session if video unit
     const prestimulusdisplaytime = deliveryParams.prestimulusdisplaytime;
     console.log('delaying for ' + prestimulusdisplaytime + ' ms then starting question', new Date());
     setTimeout(function() {
@@ -2483,10 +2540,11 @@ function checkAndDisplayPrestimulus(deliveryParams, nextStageCb) {
 
 function checkAndDisplayTwoPartQuestion(deliveryParams, currentDisplayEngine, closeQuestionParts, nextStageCb) {
   // In either case we want to set up the current display now
+  const isVideoSession = Session.get('isVideoSession')
   Session.set('displayReady', false);
   Session.set('currentDisplay', currentDisplayEngine);
   Session.get('currentExperimentState').clozeQuestionParts = closeQuestionParts;
-  Session.set('displayReady', true);
+  Session.set('displayReady', isVideoSession ? false : true);
   console.log('checking for two part questions');
   // Handle two part questions
   const currentQuestionPart2 = Session.get('currentExperimentState').currentQuestionPart2;
@@ -2499,7 +2557,7 @@ function checkAndDisplayTwoPartQuestion(deliveryParams, currentDisplayEngine, cl
       console.log('after timeout, displaying question part two', new Date());
       Session.set('displayReady', false);
       Session.set('currentDisplay', twoPartQuestionWrapper);
-      Session.set('displayReady', true);
+      Session.set('displayReady', isVideoSession ? false : true);
       console.log('displayReadyTrue, checkAndDisplayTwoPartQuestion');
       Session.get('currentExperimentState').currentQuestionPart2 = undefined;
       redoCardImage();
@@ -2545,12 +2603,14 @@ function beginQuestionAndInitiateUserInput(delayMs, deliveryParams) {
       }
       speakMessageIfAudioPromptFeedbackEnabled(questionToSpeak + buttonsToSpeak, 'question');
     }
-    allowUserInput();
-    beginMainCardTimeout(delayMs, function() {
-      console.log('stopping input after ' + delayMs + ' ms');
-      stopUserInput();
-      handleUserInput({}, 'timeout');
-    });
+    if(!Session.get('isVideoSession')) {
+      allowUserInput();
+      beginMainCardTimeout(delayMs, function() {
+        console.log('stopping input after ' + delayMs + ' ms');
+        stopUserInput();
+        handleUserInput({}, 'timeout');
+      });
+    }
   }
 }
 
@@ -3023,6 +3083,7 @@ async function resumeFromComponentState() {
   timeoutsSeen = 0;
   firstKeypressTimestamp = 0;
   trialStartTimestamp = 0;
+  Session.set('trialStartTimestamp', trialStartTimestamp);
   clearScrollList();
   clearCardTimeout();
 
@@ -3246,6 +3307,10 @@ async function resumeFromComponentState() {
   }
 
   const curTdfUnit = Session.get('currentTdfFile').tdfs.tutor.unit[Session.get('currentUnitNumber')];
+  if (curTdfUnit.videosession) { 
+    Session.set('isVideoSession', true)
+  } else
+    Session.set('isVideoSession', false)
   Session.set('currentTdfUnit', curTdfUnit);
   console.log('resume, currentTdfUnit:', curTdfUnit);
 
@@ -3254,6 +3319,13 @@ async function resumeFromComponentState() {
   } else {
     Session.set('questionIndex', 0);
     newExperimentState.questionIndex = 0;
+  }
+  
+  if(curTdfUnit.videosession){
+    console.log('video type questions detected, pre-loading video');
+    preloadVideos();
+  } else {
+    console.log('Non video type detected');
   }
 
   updateExperimentState(newExperimentState, 'card.resumeFromComponentState');
@@ -3365,23 +3437,6 @@ async function getFeedbackParameters(){
   } 
 }
 
-// cached syllables depreciated by mongo migration
-// async function checkSyllableCacheForCurrentStimFile(cb) {
-//   const currentStimuliSetId = Session.get('currentStimuliSetId');
-//   cachedSyllables = StimSyllables.findOne({filename: currentStimuliSetId});
-//   console.log('cachedSyllables start: ', cachedSyllables);
-//   if (!cachedSyllables) {
-//     console.log('no cached syllables for this stim, calling server method to create them');
-//     Meteor.call('updateStimSyllables', currentStimuliSetId, function() {
-//       // cachedSyllables = StimSyllables.findOne({filename: currentStimuliSetId});
-//       // console.log('new cachedSyllables: ', cachedSyllables);
-//       cb();
-//     });
-//   } else {
-//     cb();
-//   }
-// }
-
 async function removeCardByUser() {
   Meteor.clearTimeout(Session.get('CurTimeoutId'));
   Meteor.clearInterval(Session.get('CurIntervalId'));
@@ -3448,7 +3503,7 @@ async function processUserTimesLog() {
 
     if (tdfFile.tdfs.tutor.unit[curUnitNum].assessmentsession) {
       engine = await createScheduleUnit(curExperimentData);
-    } else if (tdfFile.tdfs.tutor.unit[curUnitNum].learningsession) {
+    } else if (tdfFile.tdfs.tutor.unit[curUnitNum].learningsession || tdfFile.tdfs.tutor.unit[curUnitNum].videosession) {
       engine = await createModelUnit(curExperimentData);
     } else {
       engine = await createEmptyUnit(curExperimentData); // used for instructional units
@@ -3523,7 +3578,17 @@ async function processUserTimesLog() {
     const curTdfUnit = curTdf.tdfs.tutor.unit[Session.get('currentUnitNumber')];
     await setStudentPerformance(curUser._id, curUser.username, currentTdfId);
 
-    if (resumeToQuestion) {
+    if(Session.get('isVideoSession')){
+      let indices = Session.get('engineIndices');
+      if(!indices){
+        indices = {
+          'clusterIndex': 0,
+          'stimIndex': 0
+        }
+      }
+      Session.set('engineIndices', indices);
+      initializePlyr();
+    } else if (resumeToQuestion) {
       // Question outstanding: force question display and let them give an answer
       console.log('RESUME FINISHED: displaying current question');
       await newQuestionHandler();
