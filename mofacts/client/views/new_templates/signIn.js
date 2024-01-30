@@ -136,6 +136,7 @@ Template.signIn.events({
           return;
         } else {
           //redirect to profile edit page, since we don't have a profile yet
+          signInNotify();
           Router.go('/profile');
         }
       });
