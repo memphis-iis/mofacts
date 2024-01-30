@@ -2,7 +2,9 @@
     <div class="container" id="cardContainer">
         {{#if isVideoSession}}
             {{#if isYoutubeVideo}}
-                <div id="videoUnitPlayer" data-plyr-provider="youtube" data-plyr-embed-id="{{videoId}}"></div>
+                <div id="videoUnitContainer">
+                    <div id="videoUnitPlayer" data-plyr-provider="youtube" data-plyr-embed-id="{{videoId}}"></div>
+                </div>
             {{else}}
                 <video id="videoUnitPlayer" playsinline controls>
                     <source src="{{videoSource}}" type="video/mp4" />

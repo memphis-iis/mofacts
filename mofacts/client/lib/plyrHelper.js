@@ -6,9 +6,13 @@ let lastSpeed = 0;
 let loggingSeek = false;
 let seekStart = 0;
 let player;
+let containerName = '#videoUnitPlayer'
 
 function initVideoCards(player) {
   const times = Session.get('currentTdfUnit')?.videosession?.questiontimes;
+  const source = Session.get('currentTdfUnit')?.videosession?.videosource;
+  if(source.includes('youtube') || source.includes('youtu.be'))
+    containerName = '#videoUnitContainer';
   loggingSeek = false;
   if(!times){
     return
@@ -36,7 +40,7 @@ function initVideoCards(player) {
 
     //running here ensures that player pauses before being hidden
     if(instance.currentTime >= nextTime){
-      $('#videoUnitPlayer').hide();
+      $(containerName).hide();
       nextTimeIndex++;
       if(nextTimeIndex < timesCopy.length){
         nextTime = timesCopy[nextTimeIndex];
@@ -60,38 +64,42 @@ function initVideoCards(player) {
     logPlyrAction('volumeChange', instance);
   });
 
-  $("[id*='plyr-seek']")[0].addEventListener("mouseup", async function(){
-    if(loggingSeek) {
-      console.log('seeked to ', player.currentTime, ' from ', seekStart);
-      logPlyrAction('seek', player, player.currentTime, seekStart);
-      loggingSeek = false; 
-      if (seekStart > player.currentTime){
-        nextTimeIndex = getIndex(timesCopy, player.currentTime); //allow user to see old questions
-        nextTime = timesCopy[nextTimeIndex];
-        let nextQuestion = times.indexOf(nextTime);
-        Session.set('engineIndices', {stimIndex: 0, clusterIndex: nextQuestion});
-        await engine.selectNextCard(Session.get('engineIndices'), Session.get('currentExperimentState'));
-        newQuestionHandler();
-      } else if(player.currentTime >= nextTime) {
-        player.pause();
-        $('#videoUnitPlayer').hide();
-        if(nextTimeIndex < timesCopy.length){
+  waitForElm("[id*='plyr-seek']").then(function(elm) {
+    elm.addEventListener("mouseup", async function(){
+      if(loggingSeek) {
+        console.log('seeked to ', player.currentTime, ' from ', seekStart);
+        logPlyrAction('seek', player, player.currentTime, seekStart);
+        loggingSeek = false; 
+        if (seekStart > player.currentTime){
+          nextTimeIndex = getIndex(timesCopy, player.currentTime); //allow user to see old questions
           nextTime = timesCopy[nextTimeIndex];
           let nextQuestion = times.indexOf(nextTime);
           Session.set('engineIndices', {stimIndex: 0, clusterIndex: nextQuestion});
-          Session.set('displayReady', true);
-          nextTimeIndex++;
+          await engine.selectNextCard(Session.get('engineIndices'), Session.get('currentExperimentState'));
+          newQuestionHandler();
+        } else if(player.currentTime >= nextTime) {
+          player.pause();
+          $(containerName).hide();
+          if(nextTimeIndex < timesCopy.length){
+            nextTime = timesCopy[nextTimeIndex];
+            let nextQuestion = times.indexOf(nextTime);
+            Session.set('engineIndices', {stimIndex: 0, clusterIndex: nextQuestion});
+            Session.set('displayReady', true);
+            nextTimeIndex++;
+          }
         }
       }
-    }
+    });
   });
 
-  $("[id*='plyr-seek']")[0].addEventListener("mousedown", async function(){ 
-    if(loggingSeek) return;
-    loggingSeek = true;
-    const instance = player
-    seekStart = instance.currentTime;
-    console.log('seeking from ', instance.currentTime);
+  waitForElm("[id*='plyr-seek']").then(function(elm) {
+    elm.addEventListener("mousedown", async function(){ 
+      if(loggingSeek) return;
+      loggingSeek = true;
+      const instance = player
+      seekStart = instance.currentTime;
+      console.log('seeking from ', instance.currentTime);
+    });
   });
 
   player.on('ratechange', async function(event){
@@ -207,10 +215,31 @@ export async function initializePlyr() {
 }
 
 export async function playVideo() {
-  $('#videoUnitPlayer').show();
+  $(containerName).show();
   player.play();
   let indices = Session.get('engineIndices');
   await engine.selectNextCard(indices, Session.get('currentExperimentState'));
   Session.set('engineIndices', indices);
   newQuestionHandler();
+}
+
+function waitForElm(selector) {
+  return new Promise(resolve => {
+      if (document.querySelector(selector)) {
+          return resolve(document.querySelector(selector));
+      }
+
+      const observer = new MutationObserver(mutations => {
+          if (document.querySelector(selector)) {
+              observer.disconnect();
+              resolve(document.querySelector(selector));
+          }
+      });
+
+      // If you get "parameter 1 is not of type 'Node'" error, see https://stackoverflow.com/a/77855838/492336
+      observer.observe(document.body, {
+          childList: true,
+          subtree: true
+      });
+  });
 }
