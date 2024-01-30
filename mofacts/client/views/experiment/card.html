@@ -1,12 +1,16 @@
 <template name="card">
     <div class="container" id="cardContainer">
         {{#if isVideoSession}}
-        <video id="videoUnitPlayer" playsinline controls data-poster="/path/to/poster.jpg">
-            <source src="{{videoSource}}" type="video/mp4" />
-          
-            <!-- Captions are optional -->
-            <track kind="captions" label="English captions" src="/path/to/captions.vtt" srclang="en" default />
-        </video>
+            {{#if isYoutubeVideo}}
+                <div id="videoUnitPlayer" data-plyr-provider="youtube" data-plyr-embed-id="{{videoId}}"></div>
+            {{else}}
+                <video id="videoUnitPlayer" playsinline controls>
+                    <source src="{{videoSource}}" type="video/mp4" />
+                
+                    <!-- Captions are optional -->
+                    <track kind="captions" label="English captions" src="/path/to/captions.vtt" srclang="en" default />
+                </video>
+            {{/if}}
         {{/if}}
         <br>
         {{#if isImpersonating}}

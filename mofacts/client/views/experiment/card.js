@@ -757,6 +757,19 @@ Template.card.helpers({
 
   'isVideoSession': () => Session.get('isVideoSession'),
 
+  'isYoutubeVideo': function() {
+    return (Session.get('isVideoSession') && Session.get('videoSource') && Session.get('videoSource').includes('http'))
+  },
+
+  'videoId': function() {
+    if(Session.get('isVideoSession') && Session.get('videoSource')){
+      if(Session.get('videoSource').includes('youtu.be'))
+        return Session.get('videoSource').split('youtu.be/')[1].split('?')[0];
+      else if(Session.get('videoSource').includes('youtube'))
+        return Session.get('videoSource').split('v=')[1].split('&')[0];
+    }
+  },
+
   'videoSource': function() {
     if(Session.get('isVideoSession') && Session.get('videoSource'))
       return Session.get('videoSource')
