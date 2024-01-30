@@ -4,6 +4,7 @@ import {sessionCleanUp} from '../../lib/sessionUtils';
 import {displayify} from '../../../common/globalHelpers';
 import {selectTdf} from '../home/profile'
 import {routeToSignin} from '../../lib/router';
+import { Sign } from 'crypto';
 
 
 Template.signIn.onRendered(async function() {
@@ -128,14 +129,13 @@ Template.signIn.events({
         //if we are not in a class and we log in, we need to disable embedded API keys.
         if(!Session.get('curClass')){
           Session.set('useEmbeddedAPIKeys', false);
-        }
         if (err) {
           // error handling
           console.log('Could not log in with Microsoft', err);
           $('#signInButton').prop('disabled', false);
           return;
         } else {
-          //redirect to profile edit page, since we don't have a profile yet
+          SignInNotify();
           Router.go('/profile');
         }
       });
