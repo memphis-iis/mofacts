@@ -6,13 +6,9 @@ let lastSpeed = 0;
 let loggingSeek = false;
 let seekStart = 0;
 let player;
-let containerName = '#videoUnitPlayer'
 
 function initVideoCards(player) {
   const times = Session.get('currentTdfUnit')?.videosession?.questiontimes;
-  const source = Session.get('currentTdfUnit')?.videosession?.videosource;
-  if(source.includes('youtube') || source.includes('youtu.be'))
-    containerName = '#videoUnitContainer';
   loggingSeek = false;
   if(!times){
     return
@@ -40,7 +36,7 @@ function initVideoCards(player) {
 
     //running here ensures that player pauses before being hidden
     if(instance.currentTime >= nextTime){
-      $(containerName).hide();
+      $("#videoUnitContainer").hide();
       nextTimeIndex++;
       if(nextTimeIndex < timesCopy.length){
         nextTime = timesCopy[nextTimeIndex];
@@ -79,7 +75,7 @@ function initVideoCards(player) {
           newQuestionHandler();
         } else if(player.currentTime >= nextTime) {
           player.pause();
-          $(containerName).hide();
+          $("#videoUnitContainer").hide();
           if(nextTimeIndex < timesCopy.length){
             nextTime = timesCopy[nextTimeIndex];
             let nextQuestion = times.indexOf(nextTime);
@@ -204,7 +200,7 @@ export async function initializePlyr() {
   const times = Session.get('currentTdfUnit')?.videosession?.questiontimes;
   if(times){
     times.forEach(time => {
-      points.push({time: time, label: 'Question'});
+      points.push({time: Math.floor(time), label: 'Question ' + (times.indexOf(time) + 1)});
     });
   }
   player = new Plyr('#videoUnitPlayer', {
@@ -215,7 +211,7 @@ export async function initializePlyr() {
 }
 
 export async function playVideo() {
-  $(containerName).show();
+  $("#videoUnitContainer").show();
   player.play();
   let indices = Session.get('engineIndices');
   await engine.selectNextCard(indices, Session.get('currentExperimentState'));
