@@ -31,7 +31,7 @@ function initVideoCards(player) {
     const totalTimeDiff =  nextTime - lastTime;
     //get the percentage of the progress bar that should be filled
     const percentage = (timeDiff / totalTimeDiff) * 100;
-    console.log('timeupdate', instance.currentTime, nextTime, '-', lastTime, '=', totalTimeDiff, timeDiff, percentage);
+    //console.log('timeupdate', instance.currentTime, nextTime, '-', lastTime, '=', totalTimeDiff, timeDiff, percentage);
     //add class
     $('#progressbar').addClass('progress-bar');
     //set the width of the progress bar
