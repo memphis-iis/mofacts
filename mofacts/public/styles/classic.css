@@ -20,6 +20,15 @@ body{
     color: var(--text-color);
 }
 
+#cardContainer{
+    background-color: var(--background-color);
+}
+
+.videoOverlay{
+    /* make very faintly transparent */
+    background-color: rgba(255,255,255,0.5);
+}
+
 h3{
     /* League Spartan */
     font-family: 'League Spartan';
