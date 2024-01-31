@@ -6,13 +6,9 @@ let lastSpeed = 0;
 let loggingSeek = false;
 let seekStart = 0;
 let player;
-let containerName = '#videoUnitPlayer'
 
 function initVideoCards(player) {
   const times = Session.get('currentTdfUnit')?.videosession?.questiontimes;
-  const source = Session.get('currentTdfUnit')?.videosession?.videosource;
-  if(source.includes('youtube') || source.includes('youtu.be'))
-    containerName = '#videoUnitContainer';
   loggingSeek = false;
   if(!times){
     return
@@ -27,9 +23,25 @@ function initVideoCards(player) {
   //add event listeners to pause video playback
   player.on('timeupdate', async function(event){
     const instance = event.detail.plyr;
-
+    //get the difference between the current time and the next time
+    const timeDiff = nextTime - instance.currentTime;
+    //get the difference between the next time and the previous time
+    const lattime = timesCopy[nextTimeIndex - 1] || 0;
+    const totalTimeDiff = nextTime - lattime;
+    //get the percentage of the progress bar that should be filled
+    const percentage = (timeDiff / totalTimeDiff) * 100;
+    //add class
+    $('#progressbar').addClass('progress-bar');
+    //set the width of the progress bar
+    document.getElementById('progressbar').style.width = percentage + '%';
+    //set the CountdownTimerText to the time remaining
+    document.getElementById('CountdownTimerText').innerHTML = Math.round(timeDiff) + ' seconds ubtil next question.';
     if(instance.currentTime >= nextTime){
       instance.pause();
+      //remove class from progress bar
+      $('#progressbar').removeClass('progress-bar');
+      //reset progress bar
+      document.getElementById('progressbar').style.width = '0%';
     }
   });
 
@@ -202,7 +214,7 @@ export async function initializePlyr() {
   const times = Session.get('currentTdfUnit')?.videosession?.questiontimes;
   if(times){
     times.forEach(time => {
-      points.push({time: time, label: 'Question'});
+      points.push({time: Math.floor(time), label: 'Question ' + (times.indexOf(time) + 1)});
     });
   }
   player = new Plyr('#videoUnitPlayer', {
@@ -213,7 +225,7 @@ export async function initializePlyr() {
 }
 
 export async function playVideo() {
-  $(containerName).show();
+  $("#videoUnitContainer").show();
   player.play();
   let indices = Session.get('engineIndices');
   await engine.selectNextCard(indices, Session.get('currentExperimentState'));
