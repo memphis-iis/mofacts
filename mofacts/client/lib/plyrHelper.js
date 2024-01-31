@@ -17,6 +17,7 @@ function initVideoCards(player) {
   timesCopy.sort((a, b) => a - b);
   let nextTimeIndex = 0;
   let nextTime = timesCopy[nextTimeIndex];
+  let lastTimeIndex = 0;
   lastVolume = player.volume;
   lastSpeed = player.speed;
 
@@ -26,20 +27,19 @@ function initVideoCards(player) {
     //get the difference between the current time and the next time
     const timeDiff = nextTime - instance.currentTime;
     //get the difference between the next time and the previous time
-    const lattime = timesCopy[nextTimeIndex - 1] || 0;
-    const totalTimeDiff = nextTime - lattime;
+    const lastTime = nextTimeIndex == 0 ? 0: timesCopy[lastTimeIndex];
+    const totalTimeDiff =  nextTime - lastTime;
     //get the percentage of the progress bar that should be filled
     const percentage = (timeDiff / totalTimeDiff) * 100;
+    console.log('timeupdate', instance.currentTime, nextTime, '-', lastTime, '=', totalTimeDiff, timeDiff, percentage);
     //add class
     $('#progressbar').addClass('progress-bar');
     //set the width of the progress bar
     document.getElementById('progressbar').style.width = percentage + '%';
     //set the CountdownTimerText to the time remaining
-    document.getElementById('CountdownTimerText').innerHTML = Math.round(timeDiff) + ' seconds ubtil next question.';
+    document.getElementById('CountdownTimerText').innerHTML = Math.round(timeDiff) + ' seconds until next question.';
     if(instance.currentTime >= nextTime){
       instance.pause();
-      //remove class from progress bar
-      $('#progressbar').removeClass('progress-bar');
       //reset progress bar
       document.getElementById('progressbar').style.width = '0%';
     }
@@ -52,13 +52,13 @@ function initVideoCards(player) {
 
     //running here ensures that player pauses before being hidden
     if(instance.currentTime >= nextTime){
+      lastTimeIndex = nextTimeIndex;
       nextTimeIndex++;
       if(nextTimeIndex < timesCopy.length){
         nextTime = timesCopy[nextTimeIndex];
         let nextQuestion = times.indexOf(nextTime);
         Session.set('engineIndices', {stimIndex: 0, clusterIndex: nextQuestion});
         Session.set('displayReady', true);
-        nextTimeIndex++;
       }
     }
   });
@@ -90,12 +90,13 @@ function initVideoCards(player) {
           newQuestionHandler();
         } else if(player.currentTime >= nextTime) {
           player.pause();
+          lastTimeIndex = nextTimeIndex;
+          nextTimeIndex++;
           if(nextTimeIndex < timesCopy.length){
             nextTime = timesCopy[nextTimeIndex];
             let nextQuestion = times.indexOf(nextTime);
             Session.set('engineIndices', {stimIndex: 0, clusterIndex: nextQuestion});
             Session.set('displayReady', true);
-            nextTimeIndex++;
           }
         }
       }

@@ -20,6 +20,10 @@ body{
     color: var(--text-color);
 }
 
+#feedbackOverrideContainer{
+    background-color: var(--background-color);
+}
+
 #cardContainer{
     background-color: var(--background-color);
 }
