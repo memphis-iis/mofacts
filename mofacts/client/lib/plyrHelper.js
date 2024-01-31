@@ -27,9 +27,25 @@ function initVideoCards(player) {
   //add event listeners to pause video playback
   player.on('timeupdate', async function(event){
     const instance = event.detail.plyr;
-
+    //get the difference between the current time and the next time
+    const timeDiff = nextTime - instance.currentTime;
+    //get the difference between the next time and the previous time
+    const lattime = timesCopy[nextTimeIndex - 1] || 0;
+    const totalTimeDiff = nextTime - lattime;
+    //get the percentage of the progress bar that should be filled
+    const percentage = (timeDiff / totalTimeDiff) * 100;
+    //add class
+    $('#progressbar').addClass('progress-bar');
+    //set the width of the progress bar
+    document.getElementById('progressbar').style.width = percentage + '%';
+    //set the CountdownTimerText to the time remaining
+    document.getElementById('CountdownTimerText').innerHTML = Math.round(timeDiff) + ' seconds ubtil next question.';
     if(instance.currentTime >= nextTime){
       instance.pause();
+      //remove class from progress bar
+      $('#progressbar').removeClass('progress-bar');
+      //reset progress bar
+      document.getElementById('progressbar').style.width = '0%';
     }
   });
 
