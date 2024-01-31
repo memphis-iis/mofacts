@@ -52,7 +52,6 @@ function initVideoCards(player) {
 
     //running here ensures that player pauses before being hidden
     if(instance.currentTime >= nextTime){
-      $("#videoUnitContainer").hide();
       nextTimeIndex++;
       if(nextTimeIndex < timesCopy.length){
         nextTime = timesCopy[nextTimeIndex];
@@ -91,7 +90,6 @@ function initVideoCards(player) {
           newQuestionHandler();
         } else if(player.currentTime >= nextTime) {
           player.pause();
-          $("#videoUnitContainer").hide();
           if(nextTimeIndex < timesCopy.length){
             nextTime = timesCopy[nextTimeIndex];
             let nextQuestion = times.indexOf(nextTime);

@@ -1,15 +1,16 @@
 <template name="card">
-    <div class="container" id="cardContainer">
+    <div class="container position-relative">
         {{#if isVideoSession}}
-            <div id="videoUnitContainer">
                 {{#if isYoutubeVideo}}
-                    <div id="videoUnitPlayer" data-plyr-provider="youtube" data-plyr-embed-id="{{videoId}}"></div>
+                    <div id="videoUnitContainer" class="position-absolute z-0 w-100">
+                        <div id="videoUnitPlayer" data-plyr-provider="youtube" data-plyr-embed-id="{{videoId}}"></div>
+                    </div>
                 {{else}}
-                    <video id="videoUnitPlayer" playsinline controls>
+                    <video id="videoUnitPlayer" class="position-absolute z-0 w-100" playsinline controls>
                         <source src="{{videoSource}}" type="video/mp4" />
                     </video>
-                {{/if}}
-            </div>
+            {{/if}}
+
         {{/if}}
         <br>
         {{#if isImpersonating}}
@@ -52,7 +53,7 @@
                 {{/each}}
                 {{/if}}
             </div>
-            <div class="row{{UIsettings.reverseStimuliAndInputColumns}}">
+            <div class="row{{UIsettings.reverseStimuliAndInputColumns}} position-absolute z-1 mx-auto w-100">
                 {{#if trial}}
                 <div class="{{UIsettings.displayColWidth}} mx-auto" id="displayContainer">
                     {{#if anythingButAudioCard}}
