@@ -1,15 +1,15 @@
 <template name="card">
     <div class="container" id="cardContainer">
         {{#if isVideoSession}}
-            {{#if isYoutubeVideo}}
-                <div id="videoUnitContainer">
+            <div id="videoUnitContainer">
+                {{#if isYoutubeVideo}}
                     <div id="videoUnitPlayer" data-plyr-provider="youtube" data-plyr-embed-id="{{videoId}}"></div>
-                </div>
-            {{else}}
-                <video id="videoUnitPlayer" playsinline controls>
-                    <source src="{{videoSource}}" type="video/mp4" />
-                </video>
-            {{/if}}
+                {{else}}
+                    <video id="videoUnitPlayer" playsinline controls>
+                        <source src="{{videoSource}}" type="video/mp4" />
+                    </video>
+                {{/if}}
+            </div>
         {{/if}}
         <br>
         {{#if isImpersonating}}
