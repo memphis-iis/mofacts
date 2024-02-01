@@ -2240,7 +2240,7 @@ async function unitIsFinished(reason) {
   const curUnitNum = Session.get('currentUnitNumber');
   const newUnitNum = curUnitNum + 1;
   const curTdfUnit = curTdf.tdfs.tutor.unit[newUnitNum];
-  const countCompletion = curTdf.tdfs.tutor.unit[curUnitNum].countCompletion
+  const countCompletion = curTdf.tdfs.tutor.unit[curUnitNum].countcompletion
 
   Session.set('questionIndex', 0);
   Session.set('clusterIndex', undefined);
@@ -2257,28 +2257,10 @@ async function unitIsFinished(reason) {
   if (newUnitNum < curTdf.tdfs.tutor.unit.length) {
     // Just hit a new unit - we need to restart with instructions
     console.log('UNIT FINISHED: show instructions for next unit', newUnitNum);
-    const rootTDFBoxed = Tdfs.findOne({_id: Session.get('currentRootTdfId')});
-    const rootTDF = rootTDFBoxed.content;
-    const setspec = rootTDF.tdfs.tutor.setspec;
-    if((setspec.loadbalancing && setspec.countcompletion == newUnitNum) || (setspec.loadbalancing && countCompletion && !setspec.countcompletion)){
-      const curConditionFileName = Session.get('currentTdfFile');
-      //get the condition number from the rootTDF
-      const curConditionNumber = setspec.condition.indexOf(curConditionFileName);
-      //increment the completion count for the current condition
-      rootTDF.loadbalancing.completionCount[curConditionNumber] = rootTDF.loadbalancing.completionCount[curConditionNumber] + 1;
-      //update the rootTDF
-      Meteor.call('updateTdfConditionCounts', Session.get('currentRootTdfId'), conditionCounts);
-    }
-    leaveTarget = '/instructions';
-  } else {
-    // We have run out of units - return home for now
-    console.log('UNIT FINISHED: No More Units');
-    //if loadbalancing is enabled and countcompletion is "end" then we need to increment the completion count of the current condition in the root tdf
-    const rootTDFBoxed = Tdfs.findOne({_id: Session.get('currentRootTdfId')});
-    const rootTDF = rootTDFBoxed.content;
-    const setspec = rootTDF.tdfs.tutor.setspec;
-    if(setspec.loadbalancing && setspec.countcompletion){
-      if(setspec.countcompletion == "end"){ 
+      const rootTDFBoxed = Tdfs.findOne({_id: Session.get('currentRootTdfId')});
+      const rootTDF = rootTDFBoxed.content;
+      const setspec = rootTDF.tdfs.tutor.setspec;
+      if((setspec.loadbalancing && setspec.countcompletion == newUnitNum) || (setspec.loadbalancing && countCompletion && !setspec.countcompletion)){
         const curConditionFileName = Session.get('currentTdfFile');
         //get the condition number from the rootTDF
         const curConditionNumber = setspec.condition.indexOf(curConditionFileName);
@@ -2287,6 +2269,22 @@ async function unitIsFinished(reason) {
         //update the rootTDF
         Meteor.call('updateTdfConditionCounts', Session.get('currentRootTdfId'), conditionCounts);
       }
+    leaveTarget = '/instructions';
+  } else {
+    // We have run out of units - return home for now
+    console.log('UNIT FINISHED: No More Units');
+    //if loadbalancing is enabled and countcompletion is "end" then we need to increment the completion count of the current condition in the root tdf
+    const rootTDFBoxed = Tdfs.findOne({_id: Session.get('currentRootTdfId')});
+    const rootTDF = rootTDFBoxed.content;
+    const setspec = rootTDF.tdfs.tutor.setspec;
+    if(setspec.countcompletion == "end" && setspec.loadbalancing){
+        const curConditionFileName = Session.get('currentTdfFile');
+        //get the condition number from the rootTDF
+        const curConditionNumber = setspec.condition.indexOf(curConditionFileName);
+        //increment the completion count for the current condition
+        rootTDF.loadbalancing.completionCount[curConditionNumber] = rootTDF.loadbalancing.completionCount[curConditionNumber] + 1;
+        //update the rootTDF
+        Meteor.call('updateTdfConditionCounts', Session.get('currentRootTdfId'), conditionCounts);
     }
 
     leaveTarget = '/profile';
