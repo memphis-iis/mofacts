@@ -1578,7 +1578,7 @@ async function showUserFeedback(isCorrect, feedbackMessage, afterAnswerFeedbackC
         feedbackMessage = "<b style='color:" + uiIncorrectColor + ";'>Incorrect.</b><br>" + feedbackMessage;
       }
     }
-    if(Session.get('curTdfUISettings').displayUserAnswerInCorrectFeedback && isCorrect){
+    if(Session.get('curTdfUISettings').displayUserAnswerCorrectFeedback && isCorrect){
         //prepend the user answer to the feedback message
       
       if(singleLineFeedback){
