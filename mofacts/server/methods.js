@@ -3568,17 +3568,30 @@ Meteor.startup(async function() {
       }
     });
   }
-  
+  //combine owner emails, teacher emails, and admin emails into one array
+  allEmails = [];
+  allEmails.push(ownerEmail);
+  const teacherEmails = roles.teachers;
+  allEmails = allEmails.concat(teacherEmails);
+  const adminEmails = roles.admins;
+  allEmails = allEmails.concat(adminEmails);
+  //remove any duplicates
+  allEmails = allEmails.filter((v, i, a) => a.indexOf(v) === i);
+  console.log("Sending startup email to: ", allEmails);
+
+
+
   //email admin that the server has restarted
-  if (ownerEmail && Meteor.isProduction) {
+  for (const emailaddr of allEmails){
     const versionFile = Assets.getText('versionInfo.json');
     const version = JSON.parse(versionFile);
     server = Meteor.absoluteUrl().split('//')[1];
     server = server.substring(0, server.length - 1);
     subject = `MoFaCTs Deployed on ${server}`;
     text = `The server has restarted.\nServer: ${server}\nVersion: ${JSON.stringify(version, null, 2)}`;
-    sendEmail(ownerEmail, ownerEmail, subject, text)
+    sendEmail(emailaddr, ownerEmail, subject, text)
   }
+  
 });
 
 Router.route('/dynamic-assets/:tdfid?/:filetype?/:filename?', {
