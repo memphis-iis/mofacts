@@ -1561,12 +1561,11 @@ async function showUserFeedback(isCorrect, feedbackMessage, afterAnswerFeedbackC
         feedbackMessage = feedbackMessage.replace("Incorrect.", "<br><b style='color:" + uiIncorrectColor + ";'>Incorrect.</b><br>");
         feedbackMessage = feedbackMessage.replace("Correct.", "<br><b style='color:" + uiCorrectColor + ";'>Correct.</b><br>");
       }
-      if (Session.get('curTdfUISettings').onlyShowSimpleFeedback) {
-        isCorrect ? feedbackMessage = "<b style='color:" + uiCorrectColor + ";'>Correct.</b>" : feedbackMessage = "<b style='color:" + uiIncorrectColor + ";'>Incorrect.</b>";
-      } else {
-        if (!feedbackMessage.includes(" is ")) {
-          feedbackMessage += " The correct answer is " + Session.get('currentExperimentState').originalAnswer;
-        }
+      if(Session.get('curTdfUISettings').simplefeedbackOnCorrect && isCorrect){
+        feedbackMessage = "<b style='color:" + uiCorrectColor + ";'>Correct.</b>";
+      }
+      if(Session.get('curTdfUISettings').simplefeedbackOnIncorrect && !isCorrect){
+        feedbackMessage = "<b style='color:" + uiIncorrectColor + ";'>Incorrect.</b>";
       }
     $('.hints').hide();
     const hSize = Session.get('currentDeliveryParams') ? Session.get('currentDeliveryParams').fontsize.toString() : 2;
@@ -1579,12 +1578,20 @@ async function showUserFeedback(isCorrect, feedbackMessage, afterAnswerFeedbackC
         feedbackMessage = "<b style='color:" + uiIncorrectColor + ";'>Incorrect.</b><br>" + feedbackMessage;
       }
     }
-    if(Session.get('curTdfUISettings').displayUserAnswerInFeedback){
+    if(Session.get('curTdfUISettings').displayUserAnswerInCorrectFeedback && isCorrect){
         //prepend the user answer to the feedback message
       
       if(singleLineFeedback){
         feedbackMessage =  "Your answer: " + userAnswer + '. ' + feedbackMessage;
       } else {  
+        feedbackMessage = "<br>Your answer: " + userAnswer + '. ' + feedbackMessage;
+      }
+    }
+    if(Session.get('curTdfUISettings').displayUserAnswerInIncorrectFeedback && !isCorrect){
+      //prepend the user answer to the feedback message
+      if(singleLineFeedback){
+        feedbackMessage =  "Your answer: " + userAnswer + '. ' + feedbackMessage;
+      } else {
         feedbackMessage = "<br>Your answer: " + userAnswer + '. ' + feedbackMessage;
       }
     }
@@ -3356,7 +3363,7 @@ async function resumeFromComponentState() {
       "displayReadyPromptTimeoutAsBarOrText": "both",
       "displayCardTimeoutAsBarOrText": "both",
       "displayTimeOutDuringStudy": true,
-      "displayUserAnswerInFeedback": true,
+      "displayUserAnswerInFeedback": "onIncorrect",
       "displayPerformanceDuringStudy": false,
       "displayPerformanceDuringTrial": true,
       "displayCorrectAnswerInCenter": false,
@@ -3364,7 +3371,7 @@ async function resumeFromComponentState() {
       "feedbackDisplayPosition" : "middle",
       "stimuliPosition" : "top",
       "choiceButtonCols": 1,
-      "onlyShowSimpleFeedback": false,
+      "onlyShowSimpleFeedback": "onCorrect",
       "incorrectColor": "darkorange",
       "correctColor": "green"
     },
@@ -3408,6 +3415,46 @@ async function resumeFromComponentState() {
       UIsettings.displayColWidth = 'col-6';
       UIsettings.textInputDisplay = "justify-content-end";
       UIsettings.textInputDisplay2 = "justify-content-start";
+  }
+
+  //switch for simple feedback
+  switch(UIsettings.onlyShowSimpleFeedback){
+    case "onCorrect":
+      UIsettings.simplefeedbackOnCorrect = true;
+      UIsettings.simplefeedbackOnIncorrect = false;
+      break;
+    case "onIncorrect":
+      UIsettings.simplefeedbackOnCorrect = false;
+      UIsettings.simplefeedbackOnIncorrect = true;
+      break;
+    case "true" || true:
+      UIsettings.simplefeedbackOnCorrect = true;
+      UIsettings.simplefeedbackOnIncorrect = true;
+      break;
+    case "false" || false:
+      UIsettings.simplefeedbackOnCorrect = false;
+      UIsettings.simplefeedbackOnIncorrect = false;
+      break;
+  }
+
+  //switch for displayUserAnswerInFeedback
+  switch(UIsettings.displayUserAnswerInFeedback){
+    case "true" || true:
+      UIsettings.displayUserAnswerInCorrectFeedback = true;
+      UIsettings.displayUserAnswerInIncorrectFeedback = true;
+      break;
+    case "false" || false:
+      UIsettings.displayUserAnswerInCorrectFeedback = false;
+      UIsettings.displayUserAnswerInIncorrectFeedback = false;
+      break;
+    case "onCorrect":
+      UIsettings.displayUserAnswerInCorrectFeedback = true;
+      UIsettings.displayUserAnswerInIncorrectFeedback = false;
+      break;
+    case "onIncorrect":
+      UIsettings.displayUserAnswerInCorrectFeedback = false;
+      UIsettings.displayUserAnswerInIncorrectFeedback = true;
+      break;
   }
 
   Session.set('curTdfUISettings', UIsettings);
