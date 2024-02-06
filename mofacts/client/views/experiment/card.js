@@ -1578,22 +1578,14 @@ async function showUserFeedback(isCorrect, feedbackMessage, afterAnswerFeedbackC
         feedbackMessage = "<b style='color:" + uiIncorrectColor + ";'>Incorrect.</b><br>" + feedbackMessage;
       }
     }
-    if(Session.get('curTdfUISettings').displayUserAnswerCorrectFeedback && isCorrect){
-        //prepend the user answer to the feedback message
-      
-      if(singleLineFeedback){
-        feedbackMessage =  "Your answer: " + userAnswer + '. ' + feedbackMessage;
-      } else {  
-        feedbackMessage = "<br>Your answer: " + userAnswer + '. ' + feedbackMessage;
-      }
-    }
-    if(Session.get('curTdfUISettings').displayUserAnswerInIncorrectFeedback && !isCorrect){
+    const displayCorrectFeedback = Session.get('curTdfUISettings').displayUserAnswerInCorrectFeedback && isCorrect;
+    const displayIncorrectFeedback = Session.get('curTdfUISettings').displayUserAnswerInIncorrectFeedback && !isCorrect;
+    if(displayCorrectFeedback || displayIncorrectFeedback){
       //prepend the user answer to the feedback message
-      if(singleLineFeedback){
-        feedbackMessage =  "Your answer: " + userAnswer + '. ' + feedbackMessage;
-      } else {
-        feedbackMessage = "<br>Your answer: " + userAnswer + '. ' + feedbackMessage;
-      }
+      feedbackMessage =  "Your answer: " + userAnswer + '. ' + feedbackMessage;
+    }
+    if(!singleLineFeedback){
+      feedbackMessage = "<br>" + feedbackMessage;
     }
     //we have several options for displaying the feedback, we can display it in the top (#userInteraction), bottom (#userLowerInteraction). We write a case for this
     switch(feedbackDisplayPosition){
