@@ -1904,29 +1904,24 @@ function sendErrorReportSummaries() {
 //function to check drive space and send email if it is low
 function checkDriveSpace() {
   serverConsole('checkDriveSpace');
-  fs = Npm.require('fs');
-  const driveSpace = fs.statSync('/').size;
-  //get total drive space
-  const driveSpaceTotal = fs.statSync('/').blksize * fs.statSync('/').blocks;
-  //get drive space used
-  const driveSpaceUsed = driveSpaceTotal - driveSpace;
-  //get drive space used as a percentage
-  const driveSpaceUsedPercent = (driveSpaceUsed / driveSpaceTotal) * 100;
-  //if drive space used is greater than 90%, send email
-  if (driveSpaceUsedPercent > 90) {
-    const from = ownerEmail;
-    const subject = 'Drive Space Warning - ' + thisServerUrl;
-    const text = 'Drive space is ' + driveSpaceUsedPercent + '% full. ' +
-                  'Please check the server and delete any unnecessary files. ';
-    // send email to admins
-    for (const index in adminUsers) {
-      const admin = adminUsers[index];
-      try {
-        sendEmail(admin, from, subject, text);
-      } catch (err) {
-        serverConsole(err);
-      }
+  diskusage = Npm.require('diskusage');
+  const path = "/"
+  try{
+    let info = diskusage.checkSync(path);
+    let freeSpace = info.free;
+    let totalSpace = info.total;
+    let percentFree = (freeSpace / totalSpace) * 100;
+    serverConsole('freeSpace: ' + freeSpace + ', totalSpace: ' + totalSpace + ', percentFree: ' + percentFree);
+    if(percentFree < 10){
+      serverConsole('Low disk space: ' + percentFree + '%');
+      const from = ownerEmail;
+      const subject = 'MoFaCTs Low Disk Space - ' + thisServerUrl;
+      const text = 'Low disk space: ' + percentFree + '%';
+      sendEmail(ownerEmail, from, subject, text);
     }
+  } 
+  catch (err) {
+    serverConsole(err);
   }
 }
 
@@ -2428,16 +2423,19 @@ const methods = {
   },
 
   getServerStatus: function() {
-    const driveSpace = fs.statSync('/').size;
-    //get total drive space
-    const driveSpaceTotal = fs.statSync('/').blksize * fs.statSync('/').blocks;
-    //get drive space used
-    const driveSpaceUsed = driveSpaceTotal - driveSpace;
-    //get drive space remaining
-    const remainingSpace = driveSpaceTotal - driveSpaceUsed;
-    //get drive space used as a percentage
-    const driveSpaceUsedPercent = (driveSpaceUsed / driveSpaceTotal) * 100;
-    return {diskSpacePercent: driveSpaceUsedPercent, remainingSpace: remainingSpace, diskSpace: driveSpaceTotal, diskSpaceUsed: driveSpaceUsed};
+    diskusage = Npm.require('diskusage');
+    const path = "/"
+    let info = diskusage.checkSync(path);
+    let diskSpaceTotal = info.total;
+    let diskSpaceUsed = info.total - info.free;
+    let driveSpaceUsedPercent = (diskSpaceUsed / diskSpaceTotal) * 100;
+    let remainingSpace = diskSpaceTotal - diskSpaceUsed;
+    //float percentages to 2 decimal places, and space sizes to GB
+    driveSpaceUsedPercent = driveSpaceUsedPercent.toFixed(2);
+    diskSpaceTotal = (diskSpaceTotal / 1000000000).toFixed(2);
+    diskSpaceUsed = (diskSpaceUsed / 1000000000).toFixed(2);
+    remainingSpace = (remainingSpace / 1000000000).toFixed(2);
+    return {diskSpacePercent: driveSpaceUsedPercent, remainingSpace: remainingSpace, diskSpace: diskSpaceTotal, diskSpaceUsed: diskSpaceUsed};
   },
 
   resetAllSecretKeys: function() {
@@ -3568,17 +3566,30 @@ Meteor.startup(async function() {
       }
     });
   }
-  
+  //combine owner emails, teacher emails, and admin emails into one array
+  allEmails = [];
+  allEmails.push(ownerEmail);
+  const teacherEmails = roles.teachers;
+  allEmails = allEmails.concat(teacherEmails);
+  const adminEmails = roles.admins;
+  allEmails = allEmails.concat(adminEmails);
+  //remove any duplicates
+  allEmails = allEmails.filter((v, i, a) => a.indexOf(v) === i);
+  console.log("Sending startup email to: ", allEmails);
+
+
+
   //email admin that the server has restarted
-  if (ownerEmail && Meteor.isProduction) {
+  for (const emailaddr of allEmails){
     const versionFile = Assets.getText('versionInfo.json');
     const version = JSON.parse(versionFile);
     server = Meteor.absoluteUrl().split('//')[1];
     server = server.substring(0, server.length - 1);
     subject = `MoFaCTs Deployed on ${server}`;
     text = `The server has restarted.\nServer: ${server}\nVersion: ${JSON.stringify(version, null, 2)}`;
-    sendEmail(ownerEmail, ownerEmail, subject, text)
+    sendEmail(emailaddr, ownerEmail, subject, text)
   }
+  
 });
 
 Router.route('/dynamic-assets/:tdfid?/:filetype?/:filename?', {
