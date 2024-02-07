@@ -55,7 +55,7 @@ Template.contentUpload.helpers({
         continue;
       }
       //get the original package filename by looking up the assetId in the tdf
-      tdf.packageFileName ? thisTdf.packageAssetId = tdf.packageFileName.split('.')[0] : thisTdf.packageAssetId = false;
+      tdf.packageFile ? thisTdf.packageAssetId = tdf.packageFile.split('/').pop().split('.').shift() : thisTdf.packageAssetId = false;
       if(!thisTdf.packageAssetId){
         thisTdf.errors.push('Package ID not found. This package was uploaded before the new upload system was implemented. Please delete this package and re-upload it.');
         thisTdf.packageFileLink = null;
@@ -434,6 +434,7 @@ async function doPackageUpload(file, template){
             if(err){
             alert(err);
           } 
+          console.log('result:', result);
           for(res of result.results){
             if (res.data && res.data.res == 'awaitClientTDF') {
               let reason = []
