@@ -3300,12 +3300,20 @@ async function resumeFromComponentState() {
   } else {
     Session.set('currentUnitNumber', 0);
     newExperimentState.currentUnitNumber = 0;
-    newExperimentState.lastUnitStarted = 0;
+    newExperimentState.lastUnitStarted = 0; 
+  }
+
+  //if this unit number is greater than the number of units in the tdf, we need to send the user to the profile page
+  if(curExperimentState.currentUnitNumber > Session.get('currentTdfFile').tdfs.tutor.unit.length - 1){
+    alert('You have completed all the units in this lesson.');
+    leavePage('/profile');
   }
 
   const curTdfUnit = Session.get('currentTdfFile').tdfs.tutor.unit[Session.get('currentUnitNumber')];
   if (curTdfUnit.videosession) { 
     Session.set('isVideoSession', true)
+    console.log('video type questions detected, pre-loading video');
+    preloadVideos();
   } else
     Session.set('isVideoSession', false)
   Session.set('currentTdfUnit', curTdfUnit);
@@ -3318,16 +3326,9 @@ async function resumeFromComponentState() {
     newExperimentState.questionIndex = 0;
   }
   
-  if(curTdfUnit.videosession){
-    console.log('video type questions detected, pre-loading video');
-    preloadVideos();
-  } else {
-    console.log('Non video type detected');
-  }
+updateExperimentState(newExperimentState, 'card.resumeFromComponentState');  
 
-  updateExperimentState(newExperimentState, 'card.resumeFromComponentState');
-
-  const componentStates = ComponentStates.find().fetch();
+const componentStates = ComponentStates.find().fetch();
   const curUnitNum = Session.get('currentUnitNumber');
   const curQuestionIndex = curExperimentState.questionIndex
   const curQuestion = curTdfUnit.question ? curTdfUnit.question[curQuestionIndex] : false;
