@@ -499,16 +499,18 @@ async function processPackageUpload(fileObj, owner, zipLink, emailToggle){
     }
     serverConsole('unzippedFiles', unzippedFiles);
     const stimFileName = unzippedFiles.filter(f => f.type == 'stim')[0].name;
-    const fileUploadPromise = new Promise(async (resolve, reject) => {
+    const results = await new Promise(async (resolve, reject) => {
+      res = [];
       try {
         for(const tdf of unzippedFiles.filter(f => f.type == 'tdf')){
           const stim = unzippedFiles.find(f => f.name == tdf.contents.tutor.setspec.stimulusfile);
           serverConsole('stim', stim, 'stimFileName', stimFileName, tdf.contents.tutor.setspec.stimulusfile);
+          tdf.packageFile = packageFile;
           const packageResult = await combineAndSaveContentFile(tdf, stim, owner);
-          results.push(packageResult);
+          res.push(packageResult);
           serverConsole('packageResult', packageResult);
         }
-        resolve(results)
+        resolve(res)
       } catch(e) {
         if(emailToggle){
           sendEmail(
@@ -519,43 +521,40 @@ async function processPackageUpload(fileObj, owner, zipLink, emailToggle){
           )
         }
         serverConsole('1 processPackageUpload ERROR,', path, ',', e + ' on file: ' + filePath);
-        reject("Package upload failed: " + e + " on file: " + filePath)
+        reject(new Meteor.Error('package upload failed: ' + e + ' on file: ' + filePath))
       }
     });
-
-    fileUploadPromise.then(async (results) => {
-      serverConsole('fileUploadPromiseThen', results, stimFileName);
-      let stimSetId;
-      if(results && results[0] && results[0].data && results[0].data.stimuliSetId)
-        stimSetId = results[0].data.stimuliSetId;
-      if (!stimSetId) stimSetId = await getStimuliSetIdByFilename(stimFileName);
-      try {
-        for(const media of unzippedFiles.filter(f => f.type == 'media')){
-          await saveMediaFile(media, owner, stimSetId);
-        }
-      } catch(e) {
-        if(emailToggle){
-          sendEmail(
-            Meteor.user().emails[0].address,
-            Meteor.settings.owner,
-            "Package Upload Failed",
-            "Package upload failed at media upload: " + e + " on file: " + filePath
-          )
-        }
-        serverConsole('2 processPackageUpload ERROR,', path, ',', e + ' on file: ' + filePath);
-        throw new Meteor.Error('package upload failed at media upload: ' + e + ' on file: ' + filePath)
+  
+    let stimSetId;
+    if(results && results[0] && results[0].data && results[0].data.stimuliSetId)
+      stimSetId = results[0].data.stimuliSetId;
+    if (!stimSetId) stimSetId = await getStimuliSetIdByFilename(stimFileName);
+    try {
+      for(const media of unzippedFiles.filter(f => f.type == 'media')){
+        await saveMediaFile(media, owner, stimSetId);
       }
-      serverConsole('results', results);
+    } catch(e) {
       if(emailToggle){
         sendEmail(
           Meteor.user().emails[0].address,
           Meteor.settings.owner,
-          "Package Upload Successful",
-          "Package upload successful: " + fileName
+          "Package Upload Failed",
+          "Package upload failed at media upload: " + e + " on file: " + filePath
         )
       }
-      return {results, stimSetId};
-    })
+      serverConsole('2 processPackageUpload ERROR,', path, ',', e + ' on file: ' + filePath);
+      throw new Meteor.Error('package upload failed at media upload: ' + e + ' on file: ' + filePath)
+    }
+    serverConsole('results', results);
+    if(emailToggle){
+      sendEmail(
+        Meteor.user().emails[0].address,
+        Meteor.settings.owner,
+        "Package Upload Successful",
+        "Package upload successful: " + fileName
+      )
+    }
+    return {results, stimSetId};
   } catch(e) {
       if(emailToggle){
         sendEmail(
@@ -566,7 +565,7 @@ async function processPackageUpload(fileObj, owner, zipLink, emailToggle){
         )
       }
     serverConsole('3 processPackageUpload ERROR,', path, ',', e + ' on file: ' + filePath);
-    console.error(e);
+    throw new Meteor.Error('package upload failed at initialization: ' + e + ' on file: ' + filePath)
   }
 }
 
@@ -648,12 +647,13 @@ async function saveContentFile(type, filename, filecontents, owner, packagePath 
           results.errmsg = 'Please upload stimulus file before uploading a TDF: ' + stimFileName;
         } else {
           try {
-            const rec = {'fileName': filename, 'tdfs': json, 'ownerId': ownerId, 'source': 'upload'};
+            const rec = {'fileName': filename, 'tdfs': json, 'ownerId': ownerId, 'source': 'upload', 'packageFile': filecontents.packageFile};
             const ret = await upsertTDFFile(filename, rec, ownerId);
             if(ret && ret.res == 'awaitClientTDF'){
               serverConsole('awaitClientTDF', ret)
               results.result = false;
               results.data = ret;
+              return results;
             } else {
               results.result = true;
             }
@@ -683,7 +683,7 @@ async function saveContentFile(type, filename, filecontents, owner, packagePath 
 }
 
 async function combineAndSaveContentFile(tdf, stim, owner) {
-  serverConsole('saveContentFile', tdf, stim, owner);
+  serverConsole('combineAndSaveContentFile', tdf, stim, owner);
   const results = {
     'result': null,
     'errmsg': 'No action taken?',
@@ -2137,7 +2137,7 @@ async function upsertTDFFile(tdfFilename, tdfJSON, ownerId, packagePath = null) 
 }
 
 async function upsertPackage(packageJSON, ownerId) {
-  //serverConsole('tdfJSON', packageJSON);
+  serverConsole('upsertPackage', packageJSON);
   const responseKCMap = await getResponseKCMap();
   const stimulusFileName = packageJSON.stimFileName
   const stimJSON = packageJSON.stimuli
@@ -2215,7 +2215,7 @@ async function upsertPackage(packageJSON, ownerId) {
       tdfFileName: packageJSON.fileName,
       content: tdfJSONtoUpsert,
       ownerId: ownerId,
-      packageFileName: packageFile || "No Package File",
+      packageFile: packageFile,
       rawStimuliFile: stimJSON, //raw stimuli
       stimuli: formattedStims, //formatted stimuli for use in the app
       stimuliSetId: stimuliSetId,
@@ -2249,7 +2249,7 @@ async function upsertPackage(packageJSON, ownerId) {
     tdfFileName: packageJSON.fileName,
     content: tdfJSONtoUpsert,
     ownerId: ownerId,
-    packageFileName: packageFile || "No Package File",
+    packageFile: packageFile,
     rawStimuliFile: stimJSON, //raw stimuli
     stimuli: formattedStims, //formatted stimuli for use in the app
     stimuliSetId: stimuliSetId,
@@ -2265,7 +2265,7 @@ async function upsertPackage(packageJSON, ownerId) {
 
 function tdfUpdateConfirmed(updateObj, resetShuffleClusters = false){
   serverConsole('tdfUpdateConfirmed', updateObj);
-  Tdfs.update({_id: updateObj._id},{$set:updateObj});
+  Tdfs.upsert({_id: updateObj._id},{$set:updateObj});
   if(resetShuffleClusters){
     const expStatses = GlobalExperimentStates.find({TDFId: updateObj._id}).fetch();
     for(let expState of expStatses){
