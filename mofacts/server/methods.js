@@ -11,6 +11,7 @@ import {sendScheduledTurkMessages} from './turk_methods';
 import {getItem, getCourse} from './orm';
 import {result} from 'underscore';
 import { _ } from 'core-js';
+import { all } from 'bluebird';
 
 
 export {
@@ -3573,10 +3574,23 @@ Meteor.startup(async function() {
   allEmails = allEmails.concat(teacherEmails);
   const adminEmails = roles.admins;
   allEmails = allEmails.concat(adminEmails);
+
+  //we also need to get the users in roles admin and teacher and send them an email
+  db_admins = Meteor.users.find({roles: 'admin'}).fetch();
+  db_teachers = Meteor.users.find({roles: 'teacher'}).fetch();
+
+  //the emails are the username of the user
+  for (const admin of db_admins){
+    allEmails.push(admin.username);
+  }
+  for (const teacher of db_teachers){
+    allEmails.push(teacher.username);
+  }
+  
   //remove any duplicates
   allEmails = allEmails.filter((v, i, a) => a.indexOf(v) === i);
   console.log("Sending startup email to: ", allEmails);
-
+  
 
 
   //email admin that the server has restarted
