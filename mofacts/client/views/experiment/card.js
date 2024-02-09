@@ -2264,7 +2264,8 @@ async function unitIsFinished(reason) {
         //get the condition number from the rootTDF
         const curConditionNumber = setspec.condition.indexOf(curConditionFileName);
         //increment the completion count for the current condition
-        rootTDF.loadbalancing.completionCount[curConditionNumber] = rootTDF.loadbalancing.completionCount[curConditionNumber] + 1;
+        rootTDFBoxed.conditionCounts[curConditionNumber] = rootTDF.conditionCounts[curConditionNumber] + 1;
+        conditionCounts = rootTDF.conditionCounts;
         //update the rootTDF
         Meteor.call('updateTdfConditionCounts', Session.get('currentRootTdfId'), conditionCounts);
       }
@@ -2280,8 +2281,8 @@ async function unitIsFinished(reason) {
         const curConditionFileName = Session.get('currentTdfFile').fileName;
         //get the condition number from the rootTDF
         const curConditionNumber = setspec.condition.indexOf(curConditionFileName);
-        //increment the completion count for the current condition
-        conditionCounts[curConditionNumber] = conditionCounts[curConditionNumber] + 1;
+        rootTDFBoxed.conditionCounts[curConditionNumber] = rootTDF.conditionCounts[curConditionNumber] + 1;
+        conditionCounts = rootTDF.completionCount;
         //update the rootTDF
         Meteor.call('updateTdfConditionCounts', Session.get('currentRootTdfId'), conditionCounts);
     }
