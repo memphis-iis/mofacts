@@ -3410,6 +3410,19 @@ const componentStates = ComponentStates.find().fetch();
       UIsettings.textInputDisplay = "justify-content-end";
       UIsettings.textInputDisplay2 = "justify-content-start";
   }
+  //convert UIsettings.simplefeedbackOnCorrect to string
+  if(UIsettings.simplefeedbackOnCorrect){
+    UIsettings.simplefeedbackOnCorrect = "true";
+  } else {
+    UIsettings.simplefeedbackOnCorrect = "false";
+  }
+  
+  //convert UIsettings.simplefeedbackOnIncorrect to string
+  if(UIsettings.simplefeedbackOnIncorrect){
+    UIsettings.simplefeedbackOnIncorrect = "true";
+  } else {
+    UIsettings.simplefeedbackOnIncorrect = "false";
+  }
 
   //switch for simple feedback
   switch(UIsettings.onlyShowSimpleFeedback){
@@ -3421,11 +3434,11 @@ const componentStates = ComponentStates.find().fetch();
       UIsettings.simplefeedbackOnCorrect = false;
       UIsettings.simplefeedbackOnIncorrect = true;
       break;
-    case "true" || true:
+    case true:
       UIsettings.simplefeedbackOnCorrect = true;
       UIsettings.simplefeedbackOnIncorrect = true;
       break;
-    case "false" || false:
+    case false:
       UIsettings.simplefeedbackOnCorrect = false;
       UIsettings.simplefeedbackOnIncorrect = false;
       break;
@@ -3433,11 +3446,11 @@ const componentStates = ComponentStates.find().fetch();
 
   //switch for displayUserAnswerInFeedback
   switch(UIsettings.displayUserAnswerInFeedback){
-    case "true" || true:
+    case true:
       UIsettings.displayUserAnswerInCorrectFeedback = true;
       UIsettings.displayUserAnswerInIncorrectFeedback = true;
       break;
-    case "false" || false:
+    case  false:
       UIsettings.displayUserAnswerInCorrectFeedback = false;
       UIsettings.displayUserAnswerInIncorrectFeedback = false;
       break;
