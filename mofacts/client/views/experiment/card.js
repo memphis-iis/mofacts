@@ -3641,7 +3641,9 @@ async function processUserTimesLog() {
       // lockout period hasn't finished (which prepareCard won't handle)
       if (engine.unitFinished()) {
         let lockoutMins = Session.get('currentDeliveryParams').lockoutminutes;
-        if (lockoutMins > 0) {
+        user = Meteor.user();
+        isAdmin = Roles.userIsInRole(user, 'admin');
+        if (lockoutMins > 0 &&  !isAdmin) {
           let unitStartTimestamp = Session.get('currentUnitStartTime');
           if(Meteor.user().profile?.lockouts && Meteor.user().profile.lockouts[Session.get('currentTdfId')] && 
           Meteor.user().profile.lockouts[Session.get('currentTdfId')].currentLockoutUnit == Session.get('currentUnitNumber')){

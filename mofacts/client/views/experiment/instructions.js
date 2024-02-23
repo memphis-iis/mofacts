@@ -71,7 +71,7 @@ function currLockOutMinutes() {
     const lockoutTime = lockoutTimeStamp + lockoutMinutes*60*1000;
     const currTime = new Date().getTime();
     if(currTime < lockoutTime){
-      // lockout is still in effect
+      // lockout is still in effect, if the user is an admin, we will allow them to continue
       const newLockoutMinutes = Math.ceil((lockoutTime - currTime)/(60*1000));
       logLockout(newLockoutMinutes);
       return newLockoutMinutes;
@@ -159,7 +159,10 @@ function lockoutPeriodicCheck() {
   }
 
   // Lockout handling
-  if (Date.now() >= lockoutFreeTime) {
+  //if the user is an admin, we will allow them to continue
+  user = Meteor.user();
+  isAnAdmin = Roles.userIsInRole(user, 'admin');
+  if (Date.now() >= lockoutFreeTime || isAnAdmin) {
     // All done - clear out time remaining, hide the display, enable the
     // continue button, and stop the lockout timer
     if (!lockoutHandled) {
