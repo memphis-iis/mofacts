@@ -500,14 +500,12 @@ function getCurrentDeliveryParams() {
       xcondIndex = 0; // Incorrect index gets 0
     }
 
-    // If found del params, then use any values we find
-    if (sourceDelParams) {
-      for (fieldName in deliveryParams) {
-        const fieldVal = sourceDelParams[fieldName];
-        if (fieldVal) {
-          deliveryParams[fieldName] = fieldVal;
-          modified = true;
-        }
+    // If found del params, then replace the defaults with the values
+    for (fieldName in sourceDelParams) {
+      const srcVal = sourceDelParams[fieldName];
+      if (srcVal !== undefined) {
+        deliveryParams[fieldName] = srcVal;
+        modified = true;
       }
     }
   }
