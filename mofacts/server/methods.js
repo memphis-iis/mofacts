@@ -1995,7 +1995,8 @@ function findUserByName(username) {
 function sendEmail(to, from, subject, text) {
   serverConsole('sendEmail', to, from, subject, text);
   check([to, from, subject, text], [String]);
-  Email.send({to, from, subject, text});
+  if(Meteor.isProduction)
+    Email.send({to, from, subject, text});
 }
 
 function hasGeneratedTdfs(TDFjson) {
