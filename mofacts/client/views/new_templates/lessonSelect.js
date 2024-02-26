@@ -280,7 +280,7 @@ Template.lessonSelect.helpers({
       tdfTags.sort((a, b) => a.tag.localeCompare(b.tag, 'en', {numeric: true, sensitivity: 'base'}));
       this.tdfTags.set(tdfTags);
       
-  
+
       if ((tdf.visibility == 'profileOnly' || tdf.visibility == 'enabled') & typeof name != "undefined" & name != "" && setspec.userselect != 'false') {
         enabledTdfs.push(tdfObject);
       } else {

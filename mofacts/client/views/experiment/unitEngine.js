@@ -2070,7 +2070,12 @@ function scheduleUnitEngine() {
       const currUnit = file.tdfs.tutor.unit[curUnitNum];
 
       clientConsole(2, 'creating schedule with params:', setSpec, curUnitNum, currUnit);
-      schedule = createSchedule(setSpec, curUnitNum, currUnit);
+      //load schedule from experiment state if in resume
+      if (Session.get('currentExperimentState')?.schedule && !Session.get('resetSchedule')) {
+        schedule = Session.get('currentExperimentState').schedule;
+      } else {
+        schedule = createSchedule(setSpec, curUnitNum, currUnit);
+      }
       if (!schedule) {
         alert('There is an issue with the TDF - experiment cannot continue');
         throw new Error('There is an issue with the TDF - experiment cannot continue');
