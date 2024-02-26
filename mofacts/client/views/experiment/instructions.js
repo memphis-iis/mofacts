@@ -69,7 +69,7 @@ function currLockOutMinutes() {
     const lockoutTimeStamp = userLockout.lockoutTimeStamp;
     const lockoutMinutes = userLockout.lockoutMinutes;
     const lockoutTime = lockoutTimeStamp + lockoutMinutes*60*1000;
-    const currTime = new Date().getTime();
+    const currTime = Date.now();
     if(currTime < lockoutTime){
       // lockout is still in effect
       const newLockoutMinutes = Math.ceil((lockoutTime - currTime)/(60*1000));
