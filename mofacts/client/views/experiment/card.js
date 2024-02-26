@@ -3426,43 +3426,33 @@ const componentStates = ComponentStates.find().fetch();
   }
 
   //switch for simple feedback
-  switch(UIsettings.onlyShowSimpleFeedback){
-    case "onCorrect":
-      UIsettings.simplefeedbackOnCorrect = true;
-      UIsettings.simplefeedbackOnIncorrect = false;
-      break;
-    case "onIncorrect":
-      UIsettings.simplefeedbackOnCorrect = false;
-      UIsettings.simplefeedbackOnIncorrect = true;
-      break;
-    case true:
-      UIsettings.simplefeedbackOnCorrect = true;
-      UIsettings.simplefeedbackOnIncorrect = true;
-      break;
-    case false:
-      UIsettings.simplefeedbackOnCorrect = false;
-      UIsettings.simplefeedbackOnIncorrect = false;
-      break;
+  if(UIsettings.onlyShowSimpleFeedback == "onCorrect"){
+    UIsettings.simplefeedbackOnCorrect = true;
+    UIsettings.simplefeedbackOnIncorrect = false;
+  } else if(UIsettings.onlyShowSimpleFeedback == "onIncorrect"){
+    UIsettings.simplefeedbackOnCorrect = false;
+    UIsettings.simplefeedbackOnIncorrect = true;
+  } else if(UIsettings.onlyShowSimpleFeedback || UIsettings.onlyShowSimpleFeedback == "true"){
+    UIsettings.simplefeedbackOnCorrect = true;
+    UIsettings.simplefeedbackOnIncorrect = true;
+  } else if(!UIsettings.onlyShowSimpleFeedback || UIsettings.onlyShowSimpleFeedback == "false"){
+    UIsettings.simplefeedbackOnCorrect = false;
+    UIsettings.simplefeedbackOnIncorrect = false;
   }
 
   //switch for displayUserAnswerInFeedback
-  switch(UIsettings.displayUserAnswerInFeedback){
-    case true:
-      UIsettings.displayUserAnswerInCorrectFeedback = true;
-      UIsettings.displayUserAnswerInIncorrectFeedback = true;
-      break;
-    case  false:
-      UIsettings.displayUserAnswerInCorrectFeedback = false;
-      UIsettings.displayUserAnswerInIncorrectFeedback = false;
-      break;
-    case "onCorrect":
-      UIsettings.displayUserAnswerInCorrectFeedback = true;
-      UIsettings.displayUserAnswerInIncorrectFeedback = false;
-      break;
-    case "onIncorrect":
-      UIsettings.displayUserAnswerInCorrectFeedback = false;
-      UIsettings.displayUserAnswerInIncorrectFeedback = true;
-      break;
+  if(UIsettings.displayUserAnswerInFeedback == "onCorrect"){
+    UIsettings.displayUserAnswerInCorrectFeedback = true;
+    UIsettings.displayUserAnswerInIncorrectFeedback = false;
+  } else if(UIsettings.displayUserAnswerInFeedback == "onIncorrect"){
+    UIsettings.displayUserAnswerInCorrectFeedback = false;
+    UIsettings.displayUserAnswerInIncorrectFeedback = true;
+  } else if(UIsettings.displayUserAnswerInFeedback || UIsettings.displayUserAnswerInFeedback == "true"){
+    UIsettings.displayUserAnswerInCorrectFeedback = true;
+    UIsettings.displayUserAnswerInIncorrectFeedback = true;
+  } else if(!UIsettings.displayUserAnswerInFeedback || UIsettings.displayUserAnswerInFeedback == "false"){
+    UIsettings.displayUserAnswerInCorrectFeedback = false;
+    UIsettings.displayUserAnswerInIncorrectFeedback = false;
   }
 
   Session.set('curTdfUISettings', UIsettings);
