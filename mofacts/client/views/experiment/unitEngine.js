@@ -2071,7 +2071,7 @@ function scheduleUnitEngine() {
 
       clientConsole(2, 'creating schedule with params:', setSpec, curUnitNum, currUnit);
       //load schedule from experiment state if in resume
-      if (Session.get('currentExperimentState')?.schedule) {
+      if (Session.get('currentExperimentState')?.schedule && !Session.get('resetSchedule')) {
         schedule = Session.get('currentExperimentState').schedule;
       } else {
         schedule = createSchedule(setSpec, curUnitNum, currUnit);

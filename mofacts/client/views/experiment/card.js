@@ -2245,6 +2245,7 @@ async function unitIsFinished(reason) {
   Session.set('clusterIndex', undefined);
   Session.set('currentUnitNumber', newUnitNum);
   Session.set('currentTdfUnit', curTdfUnit);
+  Session.set('resetSchedule', true);
   Session.set('currentDeliveryParams', getCurrentDeliveryParams());
   Session.set('currentUnitStartTime', Date.now());
   Session.set('feedbackUnset', true);
