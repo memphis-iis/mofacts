@@ -1,5 +1,22 @@
 <template name="instructions">
     <div class="container">
+        <div class="row full-width">
+            <div class="header-box">
+                <h3 class="text-center">{{curTdfName}}: Instructions</h3>
+            </div>
+        </div>
+        <div class="row">
+            {{#if backgroundImage}}
+            <div class="col-lg-12">
+                <img src="{{backgroundImage}}">
+            </div>
+            {{/if}}
+        </div>
+        {{#if instructionText}}
+            <div class="row">
+                <p>{{{instructionText}}}</p>
+            </div>
+        {{/if}}     
         {{#if islockout}}
         <div class="alert">
             <div class="alert-icon">
@@ -7,25 +24,7 @@
             </div>
                 <p>The lesson cannot continue just yet due to a lockout timer. Please wait before resuming.</p>
         </div> 
-        {{else}}
-            <div class="row full-width">
-                <div class="header-box">
-                    <h3 class="text-center">{{curTdfName}}: Instructions</h3>
-                </div>
-            </div>
-            <div class="row">
-                {{#if backgroundImage}}
-                <div class="col-lg-12">
-                    <img src="{{backgroundImage}}">
-                </div>
-                {{/if}}
-            </div>
-            {{#if instructionText}}
-                <div class="row">
-                    <p>{{{instructionText}}}</p>
-                </div>
-            {{/if}}
-        {{/if}}          
+        {{/if}}  
         {{#if allowcontinue}}
             <div class="vh-5"></div>
             <div class="text-center"><span id="lockoutTimeRemaining"></span></div>
