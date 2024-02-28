@@ -417,7 +417,7 @@ Template.instructions.rendered = function() {
 
 // instructionlog 
 
-function gatherAnswerLogRecord(trialEndTimeStamp, trialStartTimeStamp,  
+function gatherInstructionLogRecord(trialEndTimeStamp, trialStartTimeStamp,  
   deliveryParams) {
 
   // Figure out button trial entries
@@ -464,7 +464,7 @@ Template.instructions.events({
     const curTdf = Session.get('currentTdfFile');
     const recordInstructions = curUnit.recordInstructions || curTdf.tdfs.tutor.setspec.recordInstructions.includes(Session.get('currentUnitNumber')) || curTdf.tdfs.tutor.setspec.recordInstructions === true || curTdf.tdfs.tutor.setspec.recordInstructions === "true";
     if(recordInstructions){
-      const instructionLog = gatherAnswerLogRecord(Date.now(), timeRendered, Session.get('currentDeliveryParams'));
+      const instructionLog = gatherInstructionLogRecord(Date.now(), timeRendered, Session.get('currentDeliveryParams'));
       console.log('instructionLog', instructionLog);
       Meteor.call('insertHistory', instructionLog)
     }
