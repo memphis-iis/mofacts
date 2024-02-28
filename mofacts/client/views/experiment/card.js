@@ -1813,6 +1813,9 @@ async function afterAnswerFeedbackCallback(trialEndTimeStamp, trialStartTimeStam
     afterFeedbackCallbackBind()
   }, reviewTimeout)
   Session.set('CurTimeoutId', timeout)
+  let {responseDuration, startLatency, endLatency, feedbackLatency} = getTrialTime(trialEndTimeStamp, trialStartTimeStamp, trialEndTimeStamp + reviewTimeout, testType)
+  const practiceTime = endLatency + feedbackLatency;
+  engine.cardAnswered(isCorrect, practiceTime);
 
   if(!Session.get('isVideoSession')){
     if(Session.get('unitType') == "model")
@@ -1848,14 +1851,6 @@ async function afterFeedbackCallback(trialEndTimeStamp, trialStartTimeStamp, isT
   };
 
   newExperimentState.overallOutcomeHistory = Session.get('overallOutcomeHistory');
-
-  // Give unit engine a chance to update any necessary stats
-  const practiceTime = endLatency + feedbackLatency;
-  if(userLeavingTrial){
-    engine.cardAnswered(isCorrect, practiceTime);
-  } else {
-    await engine.cardAnswered(isCorrect, practiceTime);
-  }
   console.log('writing answerLogRecord to history:', answerLogRecord);
   if(Meteor.user().profile === undefined || !Meteor.user().profile.impersonating){
     try {
