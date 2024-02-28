@@ -462,6 +462,12 @@ Template.instructions.events({
     // OR if the tdf setspec has the recordInstructions has an array of unit numbers that includes the current unit number
     const curUnit = Session.get('currentUnitNumber');
     const curTdf = Session.get('currentTdfFile');
+    if(typeof curUnit.recordInstructions === "undefined"){
+      curUnit.recordInstructions = true;
+    } 
+    if(typeof curTdf.tdfs.tutor.setspec.recordInstructions === "undefined"){
+      curTdf.tdfs.tutor.setspec.recordInstructions = true;
+    }
     const recordInstructions = curUnit.recordInstructions || curTdf.tdfs.tutor.setspec.recordInstructions.includes(Session.get('currentUnitNumber')) || curTdf.tdfs.tutor.setspec.recordInstructions === true || curTdf.tdfs.tutor.setspec.recordInstructions === "true";
     if(recordInstructions){
       const instructionLog = gatherInstructionLogRecord(Date.now(), timeRendered, Session.get('currentDeliveryParams'));
