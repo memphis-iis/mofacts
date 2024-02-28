@@ -460,7 +460,7 @@ Template.instructions.events({
     //record the unit instructions if the unit setspec has the recordInstructions tag set to true
     // OR if the tdf setspec has the recordInstructions tag set to true
     // OR if the tdf setspec has the recordInstructions has an array of unit numbers that includes the current unit number
-    const curUnit = Session.get('currentTdfUnit');
+    const curUnit = Session.get('currentUnitNumber');
     const curTdf = Session.get('currentTdfFile');
     const recordInstructions = curUnit.recordInstructions || curTdf.tdfs.tutor.setspec.recordInstructions.includes(Session.get('currentUnitNumber')) || curTdf.tdfs.tutor.setspec.recordInstructions === true || curTdf.tdfs.tutor.setspec.recordInstructions === "true";
     if(recordInstructions){
