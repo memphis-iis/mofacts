@@ -720,7 +720,11 @@ function modelUnitEngine() {
           tdfDebugLog.push(parms.debugLog);
           
           stim.available = parms.available;
-          if(parms.available === undefined || parms.available){
+          if(typeof stim.available == "string" && (stim.available == "true" || stim.available == "false")){
+            //convert to bool
+            stim.available = stim.available == "true";
+          }
+          if(stim.available || stim.available === undefined){
             stim.canUse = true;
             if((stimCluster.stims[stimIndex].textStimulus || stimCluster.stims[stimIndex].clozeStimulus) && hintLevelIndex > 2){ //hints can't be used if there are fewer than 3 syllables
               for(let hintLevel = 0; hintLevel < 3; hintLevel++){
