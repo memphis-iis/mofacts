@@ -62,10 +62,10 @@ const logLockout = _.throttle(
 
 // Return current TDF unit's lockout minutes (or 0 if none-specified)
 function currLockOutMinutes() {
-  if(Meteor.user() && Meteor.user().profile.lockouts && Meteor.user().profile.lockouts[Session.get('currentTdfId')] &&
-  Meteor.user().profile.lockouts[Session.get('currentTdfId')].currentLockoutUnit == Session.get('currentUnitNumber')){
+  if(Meteor.user() && Meteor.user().lockouts && Meteor.user().lockouts[Session.get('currentTdfId')] &&
+  Meteor.user().lockouts[Session.get('currentTdfId')].currentLockoutUnit == Session.get('currentUnitNumber')){
     // user has started the lockout previously
-    const userLockout = Meteor.user().profile.lockouts[Session.get('currentTdfId')];
+    const userLockout = Meteor.user().lockouts[Session.get('currentTdfId')];
     const lockoutTimeStamp = userLockout.lockoutTimeStamp;
     const lockoutMinutes = userLockout.lockoutMinutes;
     const lockoutTime = lockoutTimeStamp + lockoutMinutes*60*1000;
@@ -101,9 +101,9 @@ function checkForFileImage(string) {
 }
 
 function unitHasLockout() {
-  if(Meteor.user() && Meteor.user().profile.lockouts && Meteor.user().profile.lockouts[Session.get('currentTdfId')] &&
-  Meteor.user().profile.lockouts[Session.get('currentTdfId')].currentLockoutUnit == Session.get('currentUnitNumber')){
-    const userLockout = Meteor.user().profile.lockouts[Session.get('currentTdfId')];
+  if(Meteor.user() && Meteor.user().lockouts && Meteor.user().lockouts[Session.get('currentTdfId')] &&
+  Meteor.user().lockouts[Session.get('currentTdfId')].currentLockoutUnit == Session.get('currentUnitNumber')){
+    const userLockout = Meteor.user().lockouts[Session.get('currentTdfId')];
     const lockoutTimeStamp = userLockout.lockoutTimeStamp;
     const lockoutMinutes = userLockout.lockoutMinutes;
     const lockoutTime = lockoutTimeStamp + lockoutMinutes*60*1000;
