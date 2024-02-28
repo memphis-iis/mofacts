@@ -3164,14 +3164,13 @@ const asyncMethods = {
   
   setLockoutTimeStamp: async function(lockoutTimeStamp, lockoutMinutes, currentUnitNumber, TDFId) {
     serverConsole('setLockoutTimeStamp', lockoutTimeStamp, lockoutMinutes, currentUnitNumber, TDFId);
-    let profile = Meteor.user().profile;
-    if(!profile.lockouts) profile.lockouts = {};
-    if(!profile.lockouts[TDFId]) profile.lockouts[TDFId] = {};
-
-    profile.lockouts[TDFId].lockoutTimeStamp = lockoutTimeStamp;
-    profile.lockouts[TDFId].lockoutMinutes = lockoutMinutes;
-    profile.lockouts[TDFId].currentLockoutUnit = currentUnitNumber;
-    Meteor.users.update({_id: Meteor.userId()}, {$set: {profile: profile}});
+    let lockouts = Meteor.user().lockouts
+    if(!lockouts) lockouts = {};
+    if(!lockouts[TDFId]) lockouts[TDFId] = {};
+    lockouts[TDFId].lockoutTimeStamp = lockoutTimeStamp;
+    lockouts[TDFId].lockoutMinutes = lockoutMinutes;
+    lockouts[TDFId].currentLockoutUnit = currentUnitNumber;
+    Meteor.users.update({_id: Meteor.userId()}, {$set: {lockouts: lockouts}});
   },
 
   makeGoogleSpeechAPICall: async function(TDFId, speechAPIKey = '', request, answerGrammar){
