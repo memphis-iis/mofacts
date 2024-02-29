@@ -468,7 +468,8 @@ Template.instructions.events({
     if(typeof curTdf.tdfs.tutor.setspec.recordInstructions === "undefined"){
       curTdf.tdfs.tutor.setspec.recordInstructions = true;
     }
-    const recordInstructions = curUnit.recordInstructions || curTdf.tdfs.tutor.setspec.recordInstructions.includes(Session.get('currentUnitNumber')) || curTdf.tdfs.tutor.setspec.recordInstructions === true || curTdf.tdfs.tutor.setspec.recordInstructions === "true";
+    typeof curTdf.tdfs.tutor.setspec.recordInstructions === "array" ? recordInstructionsIncludesUnit = curTdf.tdfs.tutor.setspec.recordInstructions.includes(curUnit) : recordInstructionsIncludesUnit = false;
+    const recordInstructions = curUnit.recordInstructions || recordInstructionsIncludesUnit|| curTdf.tdfs.tutor.setspec.recordInstructions === true || curTdf.tdfs.tutor.setspec.recordInstructions === "true";
     if(recordInstructions){
       const instructionLog = gatherInstructionLogRecord(Date.now(), timeRendered, Session.get('currentDeliveryParams'));
       console.log('instructionLog', instructionLog);
