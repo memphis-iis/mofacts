@@ -14,6 +14,7 @@ let lockoutHandled = false;
 let serverNotify = null;
 // Will get set on first periodic check and cleared when we leave the page
 let displayTimeStart = null;
+let timeRendered = 0
 
 function startLockoutInterval() {
   clearLockoutInterval();
@@ -402,6 +403,7 @@ Template.instructions.helpers({
 Template.instructions.rendered = function() {
   // Make sure lockout interval timer is running
   lockoutKick();
+  timeRendered = Date.now();
   const unitInstructionsExist = typeof Session.get('currentTdfFile').tdfs.tutor.unit[Session.get('currentUnitNumber')].unitinstructions !== "undefined";
   const instructionQuestionExists = typeof Session.get('instructionQuestionResults') === "undefined";
   const unitInstructionsQuestionExists = typeof Session.get('currentTdfFile').tdfs.tutor.unit[Session.get('currentUnitNumber')].unitinstructionsquestion !== "undefined";
@@ -412,12 +414,66 @@ Template.instructions.rendered = function() {
   }
 };
 
+
+// instructionlog 
+
+function gatherInstructionLogRecord(trialEndTimeStamp, trialStartTimeStamp,  
+  deliveryParams) {
+
+  // Figure out button trial entries
+  const curTdf = Session.get('currentTdfFile');
+  const unitName = _.trim(curTdf.tdfs.tutor.unit[Session.get('currentUnitNumber')].unitname);
+
+  const instructionLog = {
+    'userId': Meteor.userId(),
+    'TDFId': Session.get('currentTdfId'),
+    'sectionId': Session.get('curSectionId'),
+    'teacherId': Session.get('curTeacher')?._id,
+    'anonStudentId': Meteor.user().username,
+    'sessionID': Meteor.default_connection._lastSessionId,
+    'conditionNameA': 'tdf file',
+    // Note: we use this to enrich the history record server side, change both places if at all
+    'conditionTypeA': Session.get('currentTdfName'),
+    'conditionNameB': 'xcondition',
+    'conditionTypeB': Session.get('experimentXCond') || null,
+    'conditionNameE': 'section',
+    'conditionTypeE': Meteor.user().profile.entryPoint && 
+        Meteor.user().profile.entryPoint !== 'direct' ? Meteor.user().profile.entryPoint : null,
+    'responseDuration': null,
+    'levelUnit': Session.get('currentUnitNumber'),
+    'levelUnitType': "Instruction",
+    'time': trialStartTimeStamp,
+    'CFAudioInputEnabled': Meteor.user().audioInputMode,
+    'CFAudioOutputEnabled': Session.get('enableAudioPromptAndFeedback'),
+    'CFResponseTime': trialEndTimeStamp,
+    'entryPoint': Meteor.user().profile.entryPoint
+  };
+  return instructionLog;
+}
+
 // //////////////////////////////////////////////////////////////////////////
 // Template Events
 
 Template.instructions.events({
   'click #continueButton': function(event) {
     event.preventDefault();
+    //record the unit instructions if the unit setspec has the recordInstructions tag set to true
+    // OR if the tdf setspec has the recordInstructions tag set to true
+    // OR if the tdf setspec has the recordInstructions has an array of unit numbers that includes the current unit number
+    const curUnit = Session.get('currentUnitNumber');
+    const curTdf = Session.get('currentTdfFile');
+    if(typeof curUnit.recordInstructions === "undefined"){
+      curUnit.recordInstructions = true;
+    } 
+    if(typeof curTdf.tdfs.tutor.setspec.recordInstructions === "undefined"){
+      curTdf.tdfs.tutor.setspec.recordInstructions = true;
+    }
+    const recordInstructions = curUnit.recordInstructions || curTdf.tdfs.tutor.setspec.recordInstructions.includes(Session.get('currentUnitNumber')) || curTdf.tdfs.tutor.setspec.recordInstructions === true || curTdf.tdfs.tutor.setspec.recordInstructions === "true";
+    if(recordInstructions){
+      const instructionLog = gatherInstructionLogRecord(Date.now(), timeRendered, Session.get('currentDeliveryParams'));
+      console.log('instructionLog', instructionLog);
+      Meteor.call('insertHistory', instructionLog)
+    }
     instructContinue();
   },
   'click #instructionQuestionAffrimative': function() {
