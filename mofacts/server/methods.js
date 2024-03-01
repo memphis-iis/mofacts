@@ -747,6 +747,55 @@ async function combineAndSaveContentFile(tdf, stim, owner) {
   }
 }
 
+//for testing only
+async function combineConetenFile(tdf, stim, owner){
+  serverConsole('combineContentFile', tdf, stim, owner);
+  const results = {
+    'result': null,
+    'errmsg': 'No action taken?',
+    'action': 'None',
+  };
+  let ownerId = "";
+  // We need a valid use that is either admin or teacher
+  if(owner){
+    ownerId = owner;
+  } else {
+    ownerId = Meteor.user()._id;
+  }
+
+  try {
+    const lessonName = _.trim(tdf.tutor.setspec.lessonname);
+    if (lessonName.length < 1) {
+      results.result = false;
+      results.errmsg = 'TDF has no lessonname - it cannot be valid';
+
+      return results;
+    }
+    try {
+      const rec = {'fileName': tdf.tutor.setspec.name + '.json', 'tdfs': tdf, 'ownerId': ownerId, 'source': 'upload', 'stimuli': stim, 'stimFileName': 'testStim.json'};
+      const ret = await upsertPackage(rec, ownerId);
+      if(ret && ret.res == 'awaitClientTDF'){
+        serverConsole('awaitClientTDF', ret)
+        results.result = false;
+      } else {
+        results.result = true;
+      }
+      results.data = ret;
+    } catch (err) {
+      results.result=false;
+      results.errmsg=err.toString();
+      console.error(err);
+    }
+    return results;
+  } catch (e) {
+    serverConsole('ERROR saving content file:', e, e.stack);
+    results.result = false;
+    results.errmsg = JSON.stringify(e);
+    console.error(e);
+    return results;
+  }
+}
+
 function stripSpacesAndLowerCase(input) {
   return input.replace(/ /g, '').toLowerCase();
 }
@@ -3108,7 +3157,7 @@ const methods = {
 const asyncMethods = {
   getAllTdfs, getTdfByFileName, getTdfByExperimentTarget, getTdfIDsAndDisplaysAttemptedByUserId,
 
-  getStimDisplayTypeMap, getStimuliSetById, getSourceSentences,
+  getStimDisplayTypeMap, getStimuliSetById, getSourceSentences, combineConetenFile,
 
   getAllCourses, getAllCourseSections, getAllCoursesForInstructor, getAllCourseAssignmentsForInstructor,
 
@@ -3455,7 +3504,7 @@ Meteor.startup(async function() {
   roleAdd('admins', 'admin');
   roleAdd('teachers', 'teacher');
   const ret = Tdfs.find().count();
-  if (ret == 0) loadStimsAndTdfsFromPrivate(adminUserId);
+  //if (ret == 0) loadStimsAndTdfsFromPrivate(adminUserId);
 
   // Make sure we create a default user profile record when a new Google user
   // shows up. We still want the default hook's 'profile' behavior, AND we want
