@@ -3644,10 +3644,10 @@ async function processUserTimesLog() {
         isAdmin = Roles.userIsInRole(user, 'admin');
         if (lockoutMins > 0 &&  !isAdmin) {
           let unitStartTimestamp = Session.get('currentUnitStartTime');
-          if(Meteor.user().profile?.lockouts && Meteor.user().profile.lockouts[Session.get('currentTdfId')] && 
-          Meteor.user().profile.lockouts[Session.get('currentTdfId')].currentLockoutUnit == Session.get('currentUnitNumber')){
-            unitStartTimestamp = Meteor.user().profile.lockouts[Session.get('currentTdfId')].lockoutTimeStamp;
-            lockoutMins = Meteor.user().profile.lockouts[Session.get('currentTdfId')].lockoutMinutes;
+          if(Meteor.user().lockouts && Meteor.user().lockouts[Session.get('currentTdfId')] && 
+          Meteor.user().lockouts[Session.get('currentTdfId')].currentLockoutUnit == Session.get('currentUnitNumber')){
+            unitStartTimestamp = Meteor.user().lockouts[Session.get('currentTdfId')].lockoutTimeStamp;
+            lockoutMins = Meteor.user().lockouts[Session.get('currentTdfId')].lockoutMinutes;
           }
           lockoutFreeTime = unitStartTimestamp + (lockoutMins * (60 * 1000)); // minutes to ms
           if (Date.now() < lockoutFreeTime && (typeof curTdfUnit.unitinstructions !== 'undefined') ){
