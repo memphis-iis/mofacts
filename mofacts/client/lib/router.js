@@ -3,6 +3,8 @@ import {haveMeteorUser} from '../lib/currentTestingHelpers';
 import {instructContinue, unitHasLockout} from '../views/experiment/instructions';
 import {Cookie} from './cookies';
 import {displayify} from '../../common/globalHelpers';
+import {selectTdf} from '../views/home/profile';
+import {sessionCleanUp} from '../lib/sessionUtils';
 
 export {routeToSignin};
 /* router.js - the routing logic we use for the application.
@@ -158,7 +160,45 @@ Router.route('/experiment/:target?/:xcond?', {
       console.log('EXPERIMENT target:', target, 'xcond', xcond);
 
       Session.set('clusterMapping', '');
-      this.render('signIn');
+      //if the user is not logged in, redirect to the signin page
+      if (!Meteor.user()) {
+        this.render('signIn');
+      } else {
+        sessionCleanUp();
+        Session.set('experimentPasswordRequired', true);
+      
+        let experimentTarget = Session.get('experimentTarget');
+        if (experimentTarget) experimentTarget = experimentTarget.toLowerCase();
+        let foundExpTarget = await meteorCallAsync('getTdfByExperimentTarget', experimentTarget);
+        const setspec = foundExpTarget.content.tdfs.tutor.setspec ? foundExpTarget.content.tdfs.tutor.setspec : null;
+        const ignoreOutOfGrammarResponses = setspec.speechIgnoreOutOfGrammarResponses ?
+        setspec.speechIgnoreOutOfGrammarResponses.toLowerCase() == 'true' : false;
+        const speechOutOfGrammarFeedback = setspec.speechOutOfGrammarFeedback ?
+        setspec.speechOutOfGrammarFeedback : 'Response not in answer set';
+
+        if (foundExpTarget) {
+          selectTdf(
+              foundExpTarget._id,
+              setspec.lessonname,
+              foundExpTarget.stimuliSetId,
+              ignoreOutOfGrammarResponses,
+              speechOutOfGrammarFeedback,
+              'Auto-selected by experiment target ' + experimentTarget,
+              foundExpTarget.content.isMultiTdf,
+              false,
+              setspec,
+              true
+          );
+        }
+        await meteorCallAsync('setUserLoginData', 'direct', Session.get('loginMode'));
+      }
+    } else {
+      console.log('tdf not found');
+      alert('The experiment you are trying to access does not exist.');
+      if (Meteor.user()) {
+        Meteor.logout();
+      }
+      this.redirect('/');
     }
   },
 });
