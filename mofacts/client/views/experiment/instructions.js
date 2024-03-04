@@ -61,7 +61,7 @@ const logLockout = _.throttle(
 );
 
 // Return current TDF unit's lockout minutes (or 0 if none-specified)
-function currLockOutMinutes() {
+function currLockOut() {
   if(Meteor.user() && Meteor.user().lockouts && Meteor.user().lockouts[Session.get('currentTdfId')] &&
   Meteor.user().lockouts[Session.get('currentTdfId')].currentLockoutUnit == Session.get('currentUnitNumber')){
     // user has started the lockout previously
@@ -70,8 +70,8 @@ function currLockOutMinutes() {
     const lockoutMinutes = userLockout.lockoutMinutes;
     const lockoutTime = lockoutTimeStamp + lockoutMinutes*60*1000;
     const currTime = Date.now();
-    const newLockoutMinutes = Math.ceil((lockoutTime - currTime)/(60*1000));
-    return newLockoutMinutes;
+    const newLockout = lockoutTime - currTime;
+    return newLockout;
   } else {
     return 0;
   }
@@ -119,7 +119,7 @@ async function lockoutKick() {
   }
   logLockout(lockoutminutes);
   const doDisplay = (display.minSecs > 0 || display.maxSecs > 0);
-  const doLockout = (!lockoutInterval && currLockOutMinutes() > 0);
+  const doLockout = (!lockoutInterval && currLockOut() > 0);
   if (doDisplay || doLockout) {
     console.log('interval kicked');
     startLockoutInterval();
@@ -160,9 +160,9 @@ function setDispTimeoutText(txt) {
 function lockoutPeriodicCheck() {
   if (!lockoutFreeTime) {
     const unitStartTimestamp = Session.get('currentUnitStartTime');
-    const lockoutMins = currLockOutMinutes();
+    const lockoutMins = currLockOut();
     if (lockoutMins) {
-      lockoutFreeTime = unitStartTimestamp + lockoutMins * (60 * 1000); // Minutes to millisecs
+      lockoutFreeTime = unitStartTimestamp + lockoutMins;
     }
   }
 
@@ -376,11 +376,11 @@ Template.instructions.helpers({
   },
 
   islockout: function() {
-    return currLockOutMinutes() > 0;
+    return currLockOut() > 0;
   },
 
   lockoutminutes: function() {
-    return currLockOutMinutes();
+    return currLockOut();
   },
 
   username: function() {
