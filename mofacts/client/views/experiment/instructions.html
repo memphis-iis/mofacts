@@ -30,9 +30,15 @@
             <div class="text-center"><span id="lockoutTimeRemaining"></span></div>
             <div id="continueBar" class="full-width text-center" >
                 <span id="displayTimeoutMsg"></span>
-                <button type="button" id="continueButton" class="btn width-80-percent mx-auto">
+                {{#if islockout}}
+                    <button type="button" id="continueButton" class="btn width-80-percent mx-auto" disabled>
                     Continue
-                </button>
+                    </button>
+                {{else}}
+                    <button type="button" id="continueButton" class="btn width-80-percent mx-auto">
+                        Continue
+                    </button>
+                {{/if}}
             </div>
         {{/if}}
     </div>

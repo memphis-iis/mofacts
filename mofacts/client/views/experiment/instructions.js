@@ -2,6 +2,7 @@ import {secsIntervalString} from '../../../common/globalHelpers';
 import {haveMeteorUser} from '../../lib/currentTestingHelpers';
 import {updateExperimentState, initCard} from './card';
 import {routeToSignin} from '../../lib/router';
+import { meteorCallAsync } from '../../index';
 
 export {instructContinue, unitHasLockout, checkForFileImage};
 // //////////////////////////////////////////////////////////////////////////
@@ -18,8 +19,6 @@ let timeRendered = 0
 
 function startLockoutInterval() {
   clearLockoutInterval();
-  // See below for lockoutPeriodicCheck - notice that we also do an immediate
-  // check and then start the interval
   lockoutPeriodicCheck();
   lockoutInterval = Meteor.setInterval(lockoutPeriodicCheck, 250);
 }
@@ -71,20 +70,10 @@ function currLockOutMinutes() {
     const lockoutMinutes = userLockout.lockoutMinutes;
     const lockoutTime = lockoutTimeStamp + lockoutMinutes*60*1000;
     const currTime = Date.now();
-    if(currTime < lockoutTime){
-      // lockout is still in effect, if the user is an admin, we will allow them to continue
-      const newLockoutMinutes = Math.ceil((lockoutTime - currTime)/(60*1000));
-      logLockout(newLockoutMinutes);
-      return newLockoutMinutes;
-    }
+    const newLockoutMinutes = Math.ceil((lockoutTime - currTime)/(60*1000));
+    return newLockoutMinutes;
   } else {
-    // user has not started the lockout previously
-    const lockoutminutes = parseInt(Session.get('currentDeliveryParams').lockoutminutes || 0);
-    if(lockoutminutes > 0){
-      Meteor.call('setLockoutTimeStamp', new Date().getTime(), lockoutminutes, Session.get('currentUnitNumber'), Session.get('currentTdfId'));
-    }
-    logLockout(lockoutminutes);
-    return lockoutminutes;
+    return 0;
   }
 }
 
@@ -119,8 +108,16 @@ function unitHasLockout() {
   }
 }
 
-function lockoutKick() {
+async function lockoutKick() {
   const display = getDisplayTimeouts();
+  //if an existing lockout is not in place, we will set one if the current unit has a lockout
+  const lockoutminutes = parseInt(Session.get('currentDeliveryParams').lockoutminutes || 0);
+  if(lockoutminutes > 0 && !checkForExistingLockout()){
+    await meteorCallAsync('setLockoutTimeStamp', new Date().getTime(), lockoutminutes, Session.get('currentUnitNumber'), Session.get('currentTdfId'));
+    startLockoutInterval();
+    return
+  }
+  logLockout(lockoutminutes);
   const doDisplay = (display.minSecs > 0 || display.maxSecs > 0);
   const doLockout = (!lockoutInterval && currLockOutMinutes() > 0);
   if (doDisplay || doLockout) {
@@ -129,6 +126,16 @@ function lockoutKick() {
   }
 }
 
+
+function checkForExistingLockout() {
+  if(Meteor.user() && Meteor.user().lockouts && Meteor.user().lockouts[Session.get('currentTdfId')] &&
+  Meteor.user().lockouts[Session.get('currentTdfId')].currentLockoutUnit == Session.get('currentUnitNumber')){
+    return true;
+  } else {
+    return false;
+  }
+}
+  
 // Min and Max display seconds: if these are enabled, they determine
 // potential messages, the continue button functionality, and may even move
 // the screen forward. HOWEVER, the lockout functionality currently overrides
@@ -408,10 +415,6 @@ Template.instructions.rendered = function() {
   const instructionQuestionExists = typeof Session.get('instructionQuestionResults') === "undefined";
   const unitInstructionsQuestionExists = typeof Session.get('currentTdfFile').tdfs.tutor.unit[Session.get('currentUnitNumber')].unitinstructionsquestion !== "undefined";
   const displayContinueBotton = unitInstructionsExist || instructionQuestionExists || unitInstructionsQuestionExists;
-  const lockout = currLockOutMinutes() > 0;
-  if(!lockout && displayContinueBotton){
-    $('#continueBar').show();
-  }
 };
 
 
