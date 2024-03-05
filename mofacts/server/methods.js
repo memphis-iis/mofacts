@@ -748,7 +748,7 @@ async function combineAndSaveContentFile(tdf, stim, owner) {
 }
 
 //for testing only
-async function combineConetenFile(tdf, stim, owner){
+async function combineConetentFile(tdf, stim, owner){
   serverConsole('combineContentFile', tdf, stim, owner);
   const results = {
     'result': null,
@@ -774,12 +774,6 @@ async function combineConetenFile(tdf, stim, owner){
     try {
       const rec = {'fileName': tdf.tutor.setspec.name + '.json', 'tdfs': tdf, 'ownerId': ownerId, 'source': 'upload', 'stimuli': stim, 'stimFileName': 'testStim.json'};
       const ret = await upsertPackage(rec, ownerId);
-      if(ret && ret.res == 'awaitClientTDF'){
-        serverConsole('awaitClientTDF', ret)
-        results.result = false;
-      } else {
-        results.result = true;
-      }
       results.data = ret;
     } catch (err) {
       results.result=false;
@@ -3157,7 +3151,7 @@ const methods = {
 const asyncMethods = {
   getAllTdfs, getTdfByFileName, getTdfByExperimentTarget, getTdfIDsAndDisplaysAttemptedByUserId,
 
-  getStimDisplayTypeMap, getStimuliSetById, getSourceSentences, combineConetenFile,
+  getStimDisplayTypeMap, getStimuliSetById, getSourceSentences, combineConetentFile, saveMediaFile,
 
   getAllCourses, getAllCourseSections, getAllCoursesForInstructor, getAllCourseAssignmentsForInstructor,
 

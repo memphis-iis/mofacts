@@ -1,26 +1,26 @@
-import {meteorCallAsync} from '../..';
+import { meteorCallAsync } from '../..';
 import { ReactiveVar } from 'meteor/reactive-var';
-export {doFileUpload};
+export { doFileUpload };
 
 Template.contentUpload.helpers({
-  TdfFiles: function() {
+  TdfFiles: function () {
     return Tdfs.find();
   },
-  StimFiles: function() {
+  StimFiles: function () {
     return Stims.find();
   },
   currentUpload() {
     return Template.instance().currentUpload.get();
   },
-  assets: function() {
+  assets: function () {
     userId = Meteor.userId();
-    const files = DynamicAssets.find({userId: userId}).fetch();
+    const files = DynamicAssets.find({ userId: userId }).fetch();
     sortedFiles = [];
     //get all tdfs
-    allTDfs = Tdfs.find({ownerId: Meteor.userId()}).fetch();
+    allTDfs = Tdfs.find({ ownerId: Meteor.userId() }).fetch();
     console.log('allTdfs:', allTDfs);
     //iterate through allTdfs and get all stimuli
-    tdfSummaries = [];    for (const tdf of allTDfs) {
+    tdfSummaries = []; for (const tdf of allTDfs) {
       thisTdf = {};
       thisTdf.lessonName = tdf.content.tdfs.tutor.setspec.lessonname;
       thisTdf.stimuliCount = tdf.stimuli.length;
@@ -32,78 +32,78 @@ Template.contentUpload.helpers({
       thisTdf.stimFileInfo = [];
       thisTdf.stimFilesCount = 0;
       thisTdf.fileName = tdf.content.fileName;
-      checkIfConditional = allTDfs.some(function(tdf){
+      checkIfConditional = allTDfs.some(function (tdf) {
         conditions = tdf.content.tdfs.tutor.setspec.condition;
         //check if condition contains the TDF filename
-        if(conditions && conditions.includes(thisTdf.fileName)){
+        if (conditions && conditions.includes(thisTdf.fileName)) {
           return true;
         }
       });
-      if(tdf.content.tdfs.tutor.setspec.condition){
+      if (tdf.content.tdfs.tutor.setspec.condition) {
         thisTdf.conditions = [];
-        for(let i=0; i<tdf.content.tdfs.tutor.setspec.condition.length; i++){
-          if(tdf.conditionCounts == undefined){
+        for (let i = 0; i < tdf.content.tdfs.tutor.setspec.condition.length; i++) {
+          if (tdf.conditionCounts == undefined) {
             tdf.conditionCounts = [];
             //add an error to thisTdf.errors
             thisTdf.errors.push('Condition counts not found. Condition count reset needed. Please click the refresh icon for this lesson.');
           }
-          thisTdf.conditions.push({condition: tdf.content.tdfs.tutor.setspec.condition[i], count: tdf.conditionCounts[i]});
+          thisTdf.conditions.push({ condition: tdf.content.tdfs.tutor.setspec.condition[i], count: tdf.conditionCounts[i] });
         }
       }
       //if thisTdf is conditional, skip it
-      if(checkIfConditional){
+      if (checkIfConditional) {
         continue;
       }
       //get the original package filename by looking up the assetId in the tdf
       tdf.packageFile ? thisTdf.packageAssetId = tdf.packageFile.split('/').pop().split('.').shift() : thisTdf.packageAssetId = false;
-      if(!thisTdf.packageAssetId){
+      if (!thisTdf.packageAssetId) {
         thisTdf.errors.push('Package ID not found. This package was uploaded before the new upload system was implemented. Please delete this package and re-upload it.');
         thisTdf.packageFileLink = null;
       } else {
-        thisTdf.packageFileLink = DynamicAssets.findOne({_id: thisTdf.packageAssetId}).link() || false;
+        thisTdf.packageFileLink = DynamicAssets.findOne({ _id: thisTdf.packageAssetId }).link() || false;
       }
       //iterate through tdf.stimuli and get all stimuli
       for (const stim of tdf.stimuli) {
         //check if thisTdf.stimFileInfo already contains a file with this stim.stimuliSetId
         //if not, add it to thisTdf.stimFileInfo
-        if(!thisTdf.stimFileInfo.some(function(stimFileInfo){
-            return stimFileInfo.stimuliSetId === stim.stimuliSetId;
-        })){
+        if (!thisTdf.stimFileInfo.some(function (stimFileInfo) {
+          return stimFileInfo.stimuliSetId === stim.stimuliSetId;
+        })) {
           thisTdf.stimFilesCount++;
-          thisTdf.stimFileInfo.push( {stimuliSetId: stim.stimuliSetId, fileName: stim.stimulusFileName} );
+          thisTdf.stimFileInfo.push({ stimuliSetId: stim.stimuliSetId, fileName: stim.stimulusFileName });
         }
         thisAsset = {};
         thisAsset.filename = stim.imageStimulus || stim.audioStimulus || stim.videoStimulus;
         thisAsset.fileType = stim.imageStimulus ? 'image' : stim.audioStimulus ? 'audio' : stim.videoStimulus ? 'video' : "unknown"
-        thisAsset.filename ? fileObj = DynamicAssets.findOne({name: thisAsset.filename}) : fileObj = false;
+        thisAsset.filename ? fileObj = DynamicAssets.findOne({ name: thisAsset.filename }) : fileObj = false;
         //if fileObj exists, get the file link
         if (thisAsset.filename && fileObj) {
           thisAsset.link = fileObj.meta.link || fileObj.link();
         } else {
-          if(typeof thisAsset.filename !== 'undefined'){
+          if (typeof thisAsset.filename !== 'undefined') {
             thisTdf.errors.push(thisAsset.filename + ' not found. This will cause errors in the lesson.<br>');
           }
         }
         //check if thisTdf.assets already contains a file with thisAsset.filename
         //if not, add it to thisTdf.assets
-        if(!thisTdf.assets.some(function(asset){
-            return asset.filename === thisAsset.filename;
-        })){
+        if (!thisTdf.assets.some(function (asset) {
+          return asset.filename === thisAsset.filename;
+        })) {
           //check that thisAsset.filename is not false
-          if (thisAsset.filename){
+          if (thisAsset.filename) {
             thisTdf.assets.push(thisAsset);
           }
         }
       }
       tdfSummaries.push(thisTdf);
     }
-  console.log('tdfSummaries:', tdfSummaries);
-  return tdfSummaries;
+    console.log('tdfSummaries:', tdfSummaries);
+    return tdfSummaries;
   },
-  'packagesUploaded': function() {
-    packages = DynamicAssets.find({userId: Meteor.userId()}).fetch();
+  'packagesUploaded': function () {
+    packages = DynamicAssets.find({ userId: Meteor.userId() }).fetch();
     //get a link for each package
-    packages.forEach(function(thispackage){
+    packages.forEach(function (thispackage) {
       thispackage.link = DynamicAssets.link(thispackage);
     });
     console.log('packages:', packages);
@@ -111,14 +111,14 @@ Template.contentUpload.helpers({
   }
 });
 
-Template.contentUpload.onCreated(function() {
+Template.contentUpload.onCreated(function () {
   this.currentUpload = new ReactiveVar(false);
   this.curFilesToUpload = new ReactiveVar([]);
 });
 
-Template.contentUpload.rendered = function() {
-  Meteor.subscribe('allUsers', function() {
-    Session.set('allUsers', Meteor.users.find({}, {fields: {username: 1}, sort: [['username', 'asc']]}).fetch());
+Template.contentUpload.rendered = function () {
+  Meteor.subscribe('allUsers', function () {
+    Session.set('allUsers', Meteor.users.find({}, { fields: { username: 1 }, sort: [['username', 'asc']] }).fetch());
   });
 };
 
@@ -128,7 +128,7 @@ Template.contentUpload.rendered = function() {
 
 Template.contentUpload.events({
   // Admin/Teachers - upload a TDF file
-  'change #upload-file': function(event) {
+  'change #upload-file': function (event) {
     //get files array from reactive var
     const files = Template.instance().curFilesToUpload.get();
     //add new files to array, appending the current file type from the dropdown
@@ -139,32 +139,32 @@ Template.contentUpload.events({
     console.log('files:', files);
     //clear file input
     $('#upload-file').val('');
-  },  
-  'click #show_assets': function(event){
+  },
+  'click #show_assets': function (event) {
     event.preventDefault();
     //get data-file field
     const tdfId = event.currentTarget.getAttribute('data-file');
     console.log('tdfId:', tdfId);
     //toggle the attribute hidden of assets-tdfid
-    if($('#assets-'+tdfId).attr('hidden')){
-      $('#assets-'+tdfId).removeAttr('hidden');
+    if ($('#assets-' + tdfId).attr('hidden')) {
+      $('#assets-' + tdfId).removeAttr('hidden');
     } else {
-      $('#assets-'+tdfId).attr('hidden', true);
+      $('#assets-' + tdfId).attr('hidden', true);
     }
   },
-  'click #show_stimuli': function(event){
+  'click #show_stimuli': function (event) {
     event.preventDefault();
     //get data-file field
     const tdf = event.currentTarget.getAttribute('data-file');
     console.log('tdf:', tdf);
     //toggle the attribute hidden of assets-tdfid
-    if($('#stimuli-'+tdf).attr('hidden')){
-      $('#stimuli-'+tdf).removeAttr('hidden');
+    if ($('#stimuli-' + tdf).attr('hidden')) {
+      $('#stimuli-' + tdf).removeAttr('hidden');
     } else {
-      $('#stimuli-'+tdf).attr('hidden', true);
+      $('#stimuli-' + tdf).attr('hidden', true);
     }
   },
-  'click #doUpload': async function(event) {
+  'click #doUpload': async function (event) {
     //get files array from reactive var
     const files = Template.instance().curFilesToUpload.get();
     //call doFileUpload function for each file
@@ -172,29 +172,29 @@ Template.contentUpload.events({
       await doPackageUpload(file, Template.instance());
     }
   },
-    'click #tdf-download-btn': function(event){
-      event.preventDefault();
-      window.open(event.currentTarget.getAttribute('value'));
-    },
-  'click #tdf-delete-btn': function(event){
-    const tdfId = event.currentTarget.getAttribute('value')
-    Meteor.call('deleteTDFFile',tdfId);
+  'click #tdf-download-btn': function (event) {
+    event.preventDefault();
+    window.open(event.currentTarget.getAttribute('value'));
   },
-  'click #reset-conditions-btn': function(event){
+  'click #tdf-delete-btn': function (event) {
     const tdfId = event.currentTarget.getAttribute('value')
-    Meteor.call('resetTdfConditionCounts',tdfId);
+    Meteor.call('deleteTDFFile', tdfId);
+  },
+  'click #reset-conditions-btn': function (event) {
+    const tdfId = event.currentTarget.getAttribute('value')
+    Meteor.call('resetTdfConditionCounts', tdfId);
   },
 
-  'click #assetDeleteButton': function(event){
+  'click #assetDeleteButton': function (event) {
     const assetId = event.currentTarget.getAttribute('value')
     Meteor.call('removeAssetById', assetId);
   },
 
-  'click #stim-download-btn': async function(event){
+  'click #stim-download-btn': async function (event) {
     event.preventDefault();
     const stimSetId = parseInt(event.currentTarget.getAttribute('value'));
-    const stimFile = Stims.findOne({'stimuliSetId': stimSetId})
-    let blob = new Blob([JSON.stringify(stimFile.stimuli,null,2)], { type: 'application/json' });
+    const stimFile = Stims.findOne({ 'stimuliSetId': stimSetId })
+    let blob = new Blob([JSON.stringify(stimFile.stimuli, null, 2)], { type: 'application/json' });
     let url = window.URL.createObjectURL(blob);
     let downloadFileName = stimFile.fileName.trim();
     var a = document.createElement("a");
@@ -206,9 +206,9 @@ Template.contentUpload.events({
     window.URL.revokeObjectURL(url);
   },
 
-  'click #stim-delete-btn': function(event){
+  'click #stim-delete-btn': function (event) {
     const stimuliSetId = event.currentTarget.getAttribute('value')
-    Meteor.call('deleteStimFile',stimuliSetId);
+    Meteor.call('deleteStimFile', stimuliSetId);
   },
   'click #deleteAllAssetsPrompt'(e, template) {
     e.preventDefault();
@@ -217,9 +217,9 @@ Template.contentUpload.events({
     $('#deleteAllAssetsConfirm').removeAttr('hidden');
 
   },
-  'click #deleteAllAssetsConfirm': async function(e, template) {
+  'click #deleteAllAssetsConfirm': async function (e, template) {
     Meteor.call('deleteAllFiles',
-      function(error, result) {
+      function (error, result) {
         if (error) {
           console.log('error:', error);
         } else {
@@ -230,23 +230,23 @@ Template.contentUpload.events({
   },
   'click .imageLink'(e) {
     const url = $(e.currentTarget).data('link');
-    const img = '<img src="'+url+'">';
+    const img = '<img src="' + url + '">';
     const popup = window.open();
-    popup.document.write(img);                        
+    popup.document.write(img);
     popup.print();
   },
-  'click #add-access-btn': function(event){
+  'click #add-access-btn': function (event) {
     //call assignAccessors meteor method with args tdfId and [accessors] and [revokedAccessors]
     const tdfId = event.currentTarget.getAttribute('value');
     console.log('tdfId:', tdfId);
     //get current accessors
-    const curAccessors = Tdfs.findOne({_id: tdfId}).accessors;
-    const accessors = ($('#add-access-'+tdfId).val()).split(',');  //iterate through accessors to get _id for each by email
+    const curAccessors = Tdfs.findOne({ _id: tdfId }).accessors;
+    const accessors = ($('#add-access-' + tdfId).val()).split(',');  //iterate through accessors to get _id for each by email
     var newAccessors = [];
-    for(let i=0; i<accessors.length; i++){
+    for (let i = 0; i < accessors.length; i++) {
       const accessor = Session.get('allUsers').filter(user => user.username == accessors[i]);
-      if(accessor.length > 0){
-        newAccessors.push({userId: accessor[0]._id, username: accessor[0].username});
+      if (accessor.length > 0) {
+        newAccessors.push({ userId: accessor[0]._id, username: accessor[0].username });
       } else {
         console.log('accessor not found:', accessors[i]);
         alert('User does not exist.' + accessors[i]);
@@ -255,40 +255,40 @@ Template.contentUpload.events({
     }
     console.log('accessors:', newAccessors);
     const revokedAccessors = [];
-    Meteor.call('assignAccessors', tdfId, newAccessors, revokedAccessors, function(error, result){
-      if(error){
+    Meteor.call('assignAccessors', tdfId, newAccessors, revokedAccessors, function (error, result) {
+      if (error) {
         console.log('error:', error);
       } else {
         console.log('result:', result);
       }
     });
   },
-  'click #remove-access-btn': function(event){
+  'click #remove-access-btn': function (event) {
     //call assignAccessors meteor method with args tdfId and [accessors] and [revokedAccessors]
     const tdfId = event.currentTarget.getAttribute('value');
     console.log('tdfId:', tdfId, 'user:', event.currentTarget.getAttribute('data-user'));
     //get current accessors
-    var curAccessors = Tdfs.findOne({_id: tdfId}).accessors;
+    var curAccessors = Tdfs.findOne({ _id: tdfId }).accessors;
     //remove the accessor from the array
     curAccessors = curAccessors.filter(accessor => accessor.userId != event.currentTarget.getAttribute('data-user'));
     //get accessors to revoke
     const revokedAccessorId = event.currentTarget.getAttribute('data-user');
     //get the revoked accessors _id
     const revokedAccessors = [revokedAccessorId];
-    Meteor.call('assignAccessors', tdfId, curAccessors, revokedAccessors, function(error, result){
-      if(error){
+    Meteor.call('assignAccessors', tdfId, curAccessors, revokedAccessors, function (error, result) {
+      if (error) {
         console.log('error:', error);
       } else {
         console.log('result:', result);
       }
     });
   },
-  'click #transfer-btn': function(event){
+  'click #transfer-btn': function (event) {
     const tdfId = event.currentTarget.getAttribute('value');
     const newOwnerUsername = $('#transfer-' + tdfId).val();
     const newOwner = Session.get('allUsers').filter(user => user.username == newOwnerUsername)[0];
-    Meteor.call('transferDataOwnership', tdfId, newOwner, function(error, result){
-      if(error){
+    Meteor.call('transferDataOwnership', tdfId, newOwner, function (error, result) {
+      if (error) {
         console.log('error:', error);
       } else {
         console.log('result:', result);
@@ -322,22 +322,22 @@ async function doFileUpload(fileArray) {
   const errorStack = [];
 
   for (const file of files) {
-  //check if file type is package
-  if (file.fileType == 'package') {
-    //check if package exists in dynamicAssets
-    const existingFile = DynamicAssets.findOne({fileName: file.name});
-    if (existingFile) {
-      //atempts to delete existing file
-      try {
-        existingFile.remove();
-      } catch (e) {
-        console.log('error deleting existing file', e);
-        alert('Error deleting existing file. Please try again. If this error persists, please file a bug report.');
+    //check if file type is package
+    if (file.fileType == 'package') {
+      //check if package exists in dynamicAssets
+      const existingFile = DynamicAssets.findOne({ fileName: file.name });
+      if (existingFile) {
+        //atempts to delete existing file
+        try {
+          existingFile.remove();
+        } catch (e) {
+          console.log('error deleting existing file', e);
+          alert('Error deleting existing file. Please try again. If this error persists, please file a bug report.');
+        }
+      } else {
+        doPackageUpload(file, Template.instance());
       }
     } else {
-      doPackageUpload(file, Template.instance());
-    }
-  } else {
       count += 1;
       const name = file.name;
       const fileType = file.fileType;
@@ -353,11 +353,11 @@ async function doFileUpload(fileArray) {
         try {
           const result = await meteorCallAsync('saveContentFile', fileType, name, fileData, Meteor.userId());
           if (!result.result) {
-            if(result.data && result.data.res == 'awaitClientTDF'){
+            if (result.data && result.data.res == 'awaitClientTDF') {
               console.log('Client TDF could break experiment, asking for confirmation');
-              if(confirm(`The uploaded package contains a TDF file that could break the experiment. Do you want to continue?\nFile Name: ${result.data.TDF.content.fileName}`)){
-                Meteor.call('tdfUpdateConfirmed', result.data.TDF, function(err,res){
-                  if(err){
+              if (confirm(`The uploaded package contains a TDF file that could break the experiment. Do you want to continue?\nFile Name: ${result.data.TDF.content.fileName}`)) {
+                Meteor.call('tdfUpdateConfirmed', result.data.TDF, function (err, res) {
+                  if (err) {
                     alert(err);
                   }
                 });
@@ -377,7 +377,7 @@ async function doFileUpload(fileArray) {
     }
 
     $('#stimUploadLoadingSymbol').hide()
-    
+
     if (errorStack.length == 0) {
       alert("Files saved successfully. It may take a few minutes for the changes to take effect.");
     } else {
@@ -391,21 +391,21 @@ async function doFileUpload(fileArray) {
     //clear the file upload fields
     $('#upload-file').val('');
 
-     // Now we can clear the selected file
+    // Now we can clear the selected file
     $('#upload-file').val('');
     $('#upload-file').parent().find('.file-info').html('');
-    
+
     console.log(fileType, ':', fileDescrip, 'at ele', fileElementSelector, 'scheduled', count, 'uploads');
     //alert('Upload complete');
-    }
   }
+}
 
 
 
-async function doPackageUpload(file, template){
+async function doPackageUpload(file, template) {
   const existingFile = await DynamicAssets.findOne({ name: file.name, userId: Meteor.userId() });
   if (existingFile) {
-    if(confirm(`Uploading this file will overwrite existing data. Continue?`)){
+    if (confirm(`Uploading this file will overwrite existing data. Continue?`)) {
       console.log(`File ${file.name} already exists, overwritting.`)
       existingFile.remove();
     } else {
@@ -426,50 +426,51 @@ async function doPackageUpload(file, template){
       alert(`Error during upload: ${error}`);
     } else {
       const link = DynamicAssets.link(fileObj);
-      if(fileObj.ext == "zip"){
+      if (fileObj.ext == "zip") {
         console.log('package detected')
         // check if emailInsteadOfAlert is checked
         const emailToggle = $('#emailInsteadOfAlert').is(':checked') ? true : false;
-        Meteor.call('processPackageUpload', fileObj, Meteor.userId(), link, emailToggle, function(err,result){
-            if(err){
+        Meteor.call('processPackageUpload', fileObj, Meteor.userId(), link, emailToggle, function (err, result) {
+          if (err) {
             alert(err);
-          } 
+          }
           console.log('result:', result);
-          for(res of result.results){
+          for (res of result.results) {
             if (res.data && res.data.res == 'awaitClientTDF') {
               let reason = []
-              if(res.data.reason.includes('prevTDFExists'))
+              if (res.data.reason.includes('prevTDFExists'))
                 reason.push(`Previous ${res.data.TDF.content.fileName} already exists, continuing the upload will overwrite the old file. Continue?`)
-              if(res.data.reason.includes(`prevStimExists`))
+              if (res.data.reason.includes(`prevStimExists`))
                 reason.push(`Previous ${res.data.TDF.content.tdfs.tutor.setspec.stimulusfile} already exists, continuing the upload will overwrite the old file. Continue?`)
-              if(res.data.reason.includes('shuffleclusterMissmatch'))
+              if (res.data.reason.includes('shuffleclusterMissmatch'))
                 reason.push(`The uploaded package contains a TDF file that could break the experiment. Do you want to continue?\nFile Name: ${res.data.TDF.content.fileName}`)
               console.log('Client TDF could break experiment, asking for confirmation');
-              if(confirm(reason.join('\n'))){
-                Meteor.call('tdfUpdateConfirmed', res.data.TDF, res.data.reason.includes('shuffleclusterMissmatch'), function(err,res){
-                  if(err){
+              if (confirm(reason.join('\n'))) {
+                Meteor.call('tdfUpdateConfirmed', res.data.TDF, res.data.reason.includes('shuffleclusterMissmatch'), function (err, res) {
+                  if (err) {
                     alert(err);
                   }
                 });
               }
             }
-            else if(!res.result) {
+            else if (!res.result) {
               alert("Package upload failed: " + res.errmsg);
               return
             }
           }
-        //if email toggle, then we don't wait for the server to process the package
-        if(!emailToggle){
-          alert("Package upload succeded.");
-        } else {
-          alert("Package is being processed. You will be notified when it is complete or if there are any errors.");}
-        });  
+          //if email toggle, then we don't wait for the server to process the package
+          if (!emailToggle) {
+            alert("Package upload succeded.");
+          } else {
+            alert("Package is being processed. You will be notified when it is complete or if there are any errors.");
+          }
+        });
       }
     }
   });
   upload.start();
   //return the filename
-  res = {fileName: file.name};
+  res = { fileName: file.name };
   return res;
 }
 

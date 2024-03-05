@@ -2,11 +2,10 @@
 // ensuring the method is always available
 
 import { Meteor } from 'meteor/meteor';
-import { Random } from 'meteor/random';
 //import * as data from './example.json';
 
-const testTdf  = require("./testTdf.json");
-const testStim = require("./testStim.json");
+const fs = require('fs');
+const testZip = fs.readFileSync(process.env.PWD + '/test.zip');
 
 function makeId(length) {
     let result = '';
@@ -14,8 +13,8 @@ function makeId(length) {
     const charactersLength = characters.length;
     let counter = 0;
     while (counter < length) {
-      result += characters.charAt(Math.floor(Math.random() * charactersLength));
-      counter += 1;
+        result += characters.charAt(Math.floor(Math.random() * charactersLength));
+        counter += 1;
     }
     return result;
 }
@@ -29,7 +28,7 @@ const createTDF = (userId) => {
     return Tdf;
 };
 
-resetDatabase = () => {
+resetDatabase = async () => {
     // Clear the database
     StimSyllables.remove({});
     Tdfs.remove({});
@@ -56,14 +55,17 @@ resetDatabase = () => {
     DynamicConfig.remove({});
     UserProfileData.remove({});
     ProbabilityEstimates.remove({});
+    DynamicAssets.remove({});
 };
 
 // Remember to double check this is a test-only file before
 // adding a method like this!
 Meteor.methods({
     generateFixtures() {
-        resetDatabase();
-
-        Meteor.call('combineConetenFile', createTDF(), testStim);
+        //resetDatabase()
     },
+
+    getPackage() {
+        return testZip;
+    }
 });

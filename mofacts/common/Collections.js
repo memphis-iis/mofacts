@@ -62,8 +62,8 @@ GlobalExperimentStates.allow({
   }
 });
 
-DynamicSettings.allow({
-  update: function(userId) {
-    return Roles.userIsInRole(userId, ['admin']);
-  }
-});
+// DynamicSettings.allow({
+//   update: function(userId) {
+//     return Roles.userIsInRole(userId, ['admin']);
+//   }
+// });
