@@ -3541,10 +3541,13 @@ async function processUserTimesLog() {
 
     if (tdfFile.tdfs.tutor.unit[curUnitNum].assessmentsession) {
       engine = await createScheduleUnit(curExperimentData);
+      Session.set('unitType', 'schedule')
     } else if (tdfFile.tdfs.tutor.unit[curUnitNum].learningsession || tdfFile.tdfs.tutor.unit[curUnitNum].videosession) {
       engine = await createModelUnit(curExperimentData);
+      Session.set('unitType', 'model')
     } else {
       engine = await createEmptyUnit(curExperimentData); // used for instructional units
+      Session.set('unitType', undefined)
     }
     window.engine = engine;
   }
