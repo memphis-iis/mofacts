@@ -35,13 +35,21 @@ function initVideoCards(player) {
     //add class
     $('#progressbar').addClass('progress-bar');
     //set the width of the progress bar
-    document.getElementById('progressbar').style.width = percentage + '%';
-    //set the CountdownTimerText to the time remaining
-    document.getElementById('CountdownTimerText').innerHTML = Math.round(timeDiff) + ' seconds until next question.';
-    if(instance.currentTime >= nextTime){
-      instance.pause();
-      //reset progress bar
-      document.getElementById('progressbar').style.width = '0%';
+    if(Session.get('curTdfUISettings').displayReviewTimeoutAsBarOrText == "text" || Session.get('curTdfUISettings').displayReviewTimeoutAsBarOrText == "both"){
+                          
+      document.getElementById("CountdownTimerText").innerHTML = 'Continuing in: ' + seconds + "s";
+    } else {
+      document.getElementById("CountdownTimerText").innerHTML = '';
+    }
+    if(Session.get('curTdfUISettings').displayReviewTimeoutAsBarOrText == "bar" || Session.get('curTdfUISettings').displayCardTimeoutAsBarOrText == "both"){
+      //add the progress bar class
+      $('#progressbar').addClass('progress-bar');
+      document.getElementById("progressbar").style.width = percent + "%";
+    } else {
+      //set width to 0% 
+      document.getElementById("progressbar").style.width = 0 + "%";
+      //remove progress bar class
+      $('#progressbar').removeClass('progress-bar');
     }
   });
 
@@ -219,7 +227,7 @@ export async function initializePlyr() {
     });
   }
   player = new Plyr('#videoUnitPlayer', {
-    markers: { enabled: true, points: points }
+    markers: { enabled: times.length > 0 , points: points }
   });
   initVideoCards(player)
   playVideo();
