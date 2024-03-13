@@ -24,19 +24,25 @@ function initVideoCards(player) {
   //add event listeners to pause video playback
   player.on('timeupdate', async function(event){
     const instance = event.detail.plyr;
+    if(timesCopy.length == 0) {
+      thisNextTime = instance.duration;
+      thisLastTime = 0;
+    } else {
+      thisNextTime = timesCopy[nextTimeIndex];
+      thisLastTime = nextTimeIndex == 0 ? 0: timesCopy[lastTimeIndex];
+    }
     //get the difference between the current time and the next time
-    const timeDiff = nextTime - instance.currentTime;
+    const timeDiff = thisNextTime - instance.currentTime;
     //get the difference between the next time and the previous time
-    const lastTime = nextTimeIndex == 0 ? 0: timesCopy[lastTimeIndex];
-    const totalTimeDiff =  nextTime - lastTime;
+    const totalTimeDiff =  thisNextTime - thisLastTime;
     //get the percentage of the progress bar that should be filled
     const percentage = (timeDiff / totalTimeDiff) * 100;
     //console.log('timeupdate', instance.currentTime, nextTime, '-', lastTime, '=', totalTimeDiff, timeDiff, percentage);
     //add class
     $('#progressbar').addClass('progress-bar');
     //set the width of the progress bar
-    if(Session.get('curTdfUISettings').displayReviewTimeoutAsBarOrText == "text" || Session.get('curTdfUISettings').displayReviewTimeoutAsBarOrText == "both"){
-      document.getElementById("CountdownTimerText").innerHTML = 'Continuing in: ' + timeDiff + "s";
+    if(Session.get('curTdfUISettings').displayReviewTimeoutAsBarOrText == "text" || Session.get('curTdfUISettings').displayReviewTimeoutAsBarOrText == "both"){                
+      document.getElementById("CountdownTimerText").innerHTML = 'Continuing in: ' + Math.floor(timeDiff) + ' seconds';
     } else {
       document.getElementById("CountdownTimerText").innerHTML = '';
     }
@@ -87,23 +93,25 @@ function initVideoCards(player) {
       if(loggingSeek) {
         console.log('seeked to ', player.currentTime, ' from ', seekStart);
         logPlyrAction('seek', player, player.currentTime, seekStart);
-        loggingSeek = false; 
-        if (seekStart > player.currentTime){
-          nextTimeIndex = getIndex(timesCopy, player.currentTime); //allow user to see old questions
-          nextTime = timesCopy[nextTimeIndex];
-          let nextQuestion = times.indexOf(nextTime);
-          Session.set('engineIndices', {stimIndex: 0, clusterIndex: nextQuestion});
-          await engine.selectNextCard(Session.get('engineIndices'), Session.get('currentExperimentState'));
-          newQuestionHandler();
-        } else if(player.currentTime >= nextTime) {
-          player.pause();
-          lastTimeIndex = nextTimeIndex;
-          nextTimeIndex++;
-          if(nextTimeIndex < timesCopy.length){
+        loggingSeek = false;
+        if (Session.get('currentTdfUnit')?.videosession?.questiontimes.length > 0){
+          if (seekStart > player.currentTime){
+            nextTimeIndex = getIndex(timesCopy, player.currentTime); //allow user to see old questions
             nextTime = timesCopy[nextTimeIndex];
             let nextQuestion = times.indexOf(nextTime);
             Session.set('engineIndices', {stimIndex: 0, clusterIndex: nextQuestion});
-            Session.set('displayReady', true);
+            await engine.selectNextCard(Session.get('engineIndices'), Session.get('currentExperimentState'));
+            newQuestionHandler();
+          } else if(player.currentTime >= nextTime) {
+            player.pause();
+            lastTimeIndex = nextTimeIndex;
+            nextTimeIndex++;
+            if(nextTimeIndex < timesCopy.length){
+              nextTime = timesCopy[nextTimeIndex];
+              let nextQuestion = times.indexOf(nextTime);
+              Session.set('engineIndices', {stimIndex: 0, clusterIndex: nextQuestion});
+              Session.set('displayReady', true);
+            }
           }
         }
       }
