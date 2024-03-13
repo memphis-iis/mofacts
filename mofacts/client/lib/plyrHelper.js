@@ -16,7 +16,9 @@ function initVideoCards(player) {
   let timesCopy = times.slice(); 
   timesCopy.sort((a, b) => a - b);
   let nextTimeIndex = 0;
+  //if timesCopy is empty, set nextTime to the end of the video
   let nextTime = timesCopy[nextTimeIndex];
+
   let lastTimeIndex = 0;
   lastVolume = player.volume;
   lastSpeed = player.speed;
@@ -24,11 +26,17 @@ function initVideoCards(player) {
   //add event listeners to pause video playback
   player.on('timeupdate', async function(event){
     const instance = event.detail.plyr;
+    //if timesCopy is empty, set nextTime to the end of the video
+    if(timesCopy.length == 0){
+      thisNextTime = instance.duration;
+      thisLastTime = 0;
+    } else {
+      thisNextTime = timesCopy[nextTimeIndex];
+      thisLastTime = nextTimeIndex == 0 ? 0: timesCopy[lastTimeIndex];
+    }
     //get the difference between the current time and the next time
-    const timeDiff = nextTime - instance.currentTime;
-    //get the difference between the next time and the previous time
-    const lastTime = nextTimeIndex == 0 ? 0: timesCopy[lastTimeIndex];
-    const totalTimeDiff =  nextTime - lastTime;
+    const timeDiff = thisNextTime - instance.currentTime;
+    const totalTimeDiff =  thisNextTime - thisLastTime;
     //get the percentage of the progress bar that should be filled
     const percentage = (timeDiff / totalTimeDiff) * 100;
     //console.log('timeupdate', instance.currentTime, nextTime, '-', lastTime, '=', totalTimeDiff, timeDiff, percentage);
