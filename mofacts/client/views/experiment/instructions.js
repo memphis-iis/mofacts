@@ -391,6 +391,10 @@ Template.instructions.helpers({
     }
   },
 
+  UISettings: function() {
+    return Session.get('currentUISettings');
+  },
+
   allowcontinue: function() {
     // If we're in experiment mode, they can only continue if there are
     // units left.

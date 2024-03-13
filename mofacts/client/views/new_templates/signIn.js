@@ -223,6 +223,10 @@ Template.signIn.helpers({
     return Session.get('loginMode') === 'experiment';
   },
 
+ experimentLoginText: function() {
+    return Session.get('loginPrompt');
+  },
+
   experimentPasswordRequired: function() {
     return Session.get('experimentPasswordRequired');
   },

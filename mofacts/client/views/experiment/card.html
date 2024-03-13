@@ -1,15 +1,23 @@
 <template name="card">
-    <div class="container position-relative">
+    <div class="container position-relative my-20">
         {{#if isVideoSession}}
-                {{#if isYoutubeVideo}}
-                    <div id="videoUnitContainer" class="position-absolute z-0 w-100">
-                        <div id="videoUnitPlayer" data-plyr-provider="youtube" data-plyr-embed-id="{{videoId}}"></div>
-                    </div>
-                {{else}}
-                    <video id="videoUnitPlayer" class="position-absolute z-0 w-100" playsinline controls>
-                        <source src="{{videoSource}}" type="video/mp4" />
-                    </video>
+        <div class="row my-5">
+            <div class="col-lg-12 visible-text text-center">
+                {{{videoUnitDisplayText}}}
+            </div>
+        </div>
+        <div class="container position-relative">
+            {{#if isYoutubeVideo}}
+                <div id="videoUnitContainer" class="position-absolute z-0 w-100">
+                    <div id="videoUnitPlayer" data-plyr-provider="youtube" data-plyr-embed-id="{{videoId}}"></div>
+                </div>
+            {{else}}
+                <video id="videoUnitPlayer" class="position-absolute z-0 w-100" playsinline controls>
+                    <source src="{{videoSource}}" type="video/mp4" />
+                </video>
             {{/if}}
+            <div class="vh-100"></div>
+        </div>
 
         {{/if}}
         <br>

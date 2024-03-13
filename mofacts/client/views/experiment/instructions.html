@@ -1,9 +1,19 @@
 <template name="instructions">
     <div class="container">
         <div class="row full-width">
+            {{#if UISettings.displayInstructionsTitle}}
             <div class="header-box">
-                <h3 class="text-center">{{curTdfName}}: Instructions</h3>
+                <h3 class="text-center">
+
+                    {{curTdfName}}:
+                    {{#if UISettings.displayUnitNameInInstructions}}
+                        {{curTdfName}}:
+                    {{/if}} 
+                    Instructions
+                </h3>
             </div>
+            {{else}}
+            {{/if}}
         </div>
         <div class="row">
             {{#if backgroundImage}}

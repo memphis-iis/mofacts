@@ -589,6 +589,8 @@ Template.card.events({
 Template.card.helpers({
   'isExperiment': () => Meteor.user().profile.loginMode === 'experiment',
 
+  'experimentLoginText': () => curTdfUISettings.experimentLoginText || "Amazon Turk ID",
+
   'isNormal': () => Meteor.user().profile.loginMode !== 'experiment',
 
   'isNotInDialogueLoopStageIntroOrExit': () => Session.get('dialogueLoopStage') != 'intro' && Session.get('dialogueLoopStage') != 'exit',
@@ -662,8 +664,13 @@ Template.card.helpers({
   },
 
   'text': function() {
-    const text = Session.get('currentDisplay') ? Session.get('currentDisplay').text : undefined;
-    return text;
+      const text = Session.get('currentDisplay') ? Session.get('currentDisplay').text : undefined;
+      return text;
+  },
+
+  'videoUnitDisplayText': function() {
+    const curUnit = Session.get('currentTdfUnit');
+    return curUnit.videosession.displayText;
   },
 
   'dialogueText': function() {
@@ -3363,7 +3370,8 @@ const componentStates = ComponentStates.find().fetch();
       "choiceButtonCols": 1,
       "onlyShowSimpleFeedback": "onCorrect",
       "incorrectColor": "darkorange",
-      "correctColor": "green"
+      "correctColor": "green",
+      'instructionsTitleDisplay': "headerOnly",
     },
   }
   //here we interprit the stimulus and input position settings to set the colum widths. There are 4 possible combinations.
@@ -3448,6 +3456,18 @@ const componentStates = ComponentStates.find().fetch();
   } else if(!UIsettings.displayUserAnswerInFeedback || UIsettings.displayUserAnswerInFeedback == "false"){
     UIsettings.displayUserAnswerInCorrectFeedback = false;
     UIsettings.displayUserAnswerInIncorrectFeedback = false;
+  }
+
+  //switch for displayInstructionsTitle
+  if(UIsettings.instructionsTitleDisplay == "headerOnly"){
+    UIsettings.displayInstructionsTitle = true;
+    UIsettings.displayUnitNameInInstructions = false;
+  } else if(UIsettings.instructionsTitleDisplay == true) {
+    UIsettings.displayInstructionsTitle = true;
+    UIsettings.displayUnitNameInInstructions = true;
+  } else if(UIsettings.instructionsTitleDisplay == false){
+    UIsettings.displayInstructionsTitle = false;
+    UIsettings.displayUnitNameInInstructions = false;
   }
 
   Session.set('curTdfUISettings', UIsettings);
