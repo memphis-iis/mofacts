@@ -16,9 +16,7 @@ function initVideoCards(player) {
   let timesCopy = times.slice(); 
   timesCopy.sort((a, b) => a - b);
   let nextTimeIndex = 0;
-  //if timesCopy is empty, set nextTime to the end of the video
   let nextTime = timesCopy[nextTimeIndex];
-
   let lastTimeIndex = 0;
   lastVolume = player.volume;
   lastSpeed = player.speed;
@@ -26,8 +24,7 @@ function initVideoCards(player) {
   //add event listeners to pause video playback
   player.on('timeupdate', async function(event){
     const instance = event.detail.plyr;
-    //if timesCopy is empty, set nextTime to the end of the video
-    if(timesCopy.length == 0){
+    if(timesCopy.length == 0) {
       thisNextTime = instance.duration;
       thisLastTime = 0;
     } else {
@@ -36,6 +33,7 @@ function initVideoCards(player) {
     }
     //get the difference between the current time and the next time
     const timeDiff = thisNextTime - instance.currentTime;
+    //get the difference between the next time and the previous time
     const totalTimeDiff =  thisNextTime - thisLastTime;
     //get the percentage of the progress bar that should be filled
     const percentage = (timeDiff / totalTimeDiff) * 100;
@@ -45,14 +43,14 @@ function initVideoCards(player) {
     //set the width of the progress bar
     if(Session.get('curTdfUISettings').displayReviewTimeoutAsBarOrText == "text" || Session.get('curTdfUISettings').displayReviewTimeoutAsBarOrText == "both"){
                           
-      document.getElementById("CountdownTimerText").innerHTML = 'Continuing in: ' + seconds + "s";
+      document.getElementById("CountdownTimerText").innerHTML = 'Continuing in: ' + Math.floor(timeDiff) + ' seconds';
     } else {
       document.getElementById("CountdownTimerText").innerHTML = '';
     }
     if(Session.get('curTdfUISettings').displayReviewTimeoutAsBarOrText == "bar" || Session.get('curTdfUISettings').displayCardTimeoutAsBarOrText == "both"){
       //add the progress bar class
       $('#progressbar').addClass('progress-bar');
-      document.getElementById("progressbar").style.width = percent + "%";
+      document.getElementById("progressbar").style.width = percentage + "%";
     } else {
       //set width to 0% 
       document.getElementById("progressbar").style.width = 0 + "%";
