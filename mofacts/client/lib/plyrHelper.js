@@ -94,23 +94,25 @@ function initVideoCards(player) {
       if(loggingSeek) {
         console.log('seeked to ', player.currentTime, ' from ', seekStart);
         logPlyrAction('seek', player, player.currentTime, seekStart);
-        loggingSeek = false; 
-        if (seekStart > player.currentTime){
-          nextTimeIndex = getIndex(timesCopy, player.currentTime); //allow user to see old questions
-          nextTime = timesCopy[nextTimeIndex];
-          let nextQuestion = times.indexOf(nextTime);
-          Session.set('engineIndices', {stimIndex: 0, clusterIndex: nextQuestion});
-          await engine.selectNextCard(Session.get('engineIndices'), Session.get('currentExperimentState'));
-          newQuestionHandler();
-        } else if(player.currentTime >= nextTime) {
-          player.pause();
-          lastTimeIndex = nextTimeIndex;
-          nextTimeIndex++;
-          if(nextTimeIndex < timesCopy.length){
+        loggingSeek = false;
+        if (Session.get('currentTdfUnit')?.videosession?.questiontimes.length > 0){
+          if (seekStart > player.currentTime){
+            nextTimeIndex = getIndex(timesCopy, player.currentTime); //allow user to see old questions
             nextTime = timesCopy[nextTimeIndex];
             let nextQuestion = times.indexOf(nextTime);
             Session.set('engineIndices', {stimIndex: 0, clusterIndex: nextQuestion});
-            Session.set('displayReady', true);
+            await engine.selectNextCard(Session.get('engineIndices'), Session.get('currentExperimentState'));
+            newQuestionHandler();
+          } else if(player.currentTime >= nextTime) {
+            player.pause();
+            lastTimeIndex = nextTimeIndex;
+            nextTimeIndex++;
+            if(nextTimeIndex < timesCopy.length){
+              nextTime = timesCopy[nextTimeIndex];
+              let nextQuestion = times.indexOf(nextTime);
+              Session.set('engineIndices', {stimIndex: 0, clusterIndex: nextQuestion});
+              Session.set('displayReady', true);
+            }
           }
         }
       }
