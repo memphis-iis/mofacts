@@ -36,15 +36,14 @@ function initVideoCards(player) {
     $('#progressbar').addClass('progress-bar');
     //set the width of the progress bar
     if(Session.get('curTdfUISettings').displayReviewTimeoutAsBarOrText == "text" || Session.get('curTdfUISettings').displayReviewTimeoutAsBarOrText == "both"){
-                          
-      document.getElementById("CountdownTimerText").innerHTML = 'Continuing in: ' + seconds + "s";
+      document.getElementById("CountdownTimerText").innerHTML = 'Continuing in: ' + timeDiff + "s";
     } else {
       document.getElementById("CountdownTimerText").innerHTML = '';
     }
     if(Session.get('curTdfUISettings').displayReviewTimeoutAsBarOrText == "bar" || Session.get('curTdfUISettings').displayCardTimeoutAsBarOrText == "both"){
       //add the progress bar class
       $('#progressbar').addClass('progress-bar');
-      document.getElementById("progressbar").style.width = percent + "%";
+      document.getElementById("progressbar").style.width = percentage + "%";
     } else {
       //set width to 0% 
       document.getElementById("progressbar").style.width = 0 + "%";
@@ -131,7 +130,8 @@ function initVideoCards(player) {
     const instance = event.detail.plyr;
     console.log('video ended');
     logPlyrAction('end', instance);
-    unitIsFinished('videoUnitReachedEnd');
+    $("#continueBar").removeAttr('hidden');
+    $('#continueButton').prop('disabled', false);
   });
   
 }
