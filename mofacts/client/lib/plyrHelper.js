@@ -1,5 +1,5 @@
 import Plyr from 'plyr';
-import { newQuestionHandler } from '../views/experiment/card.js'
+import { newQuestionHandler, unitIsFinished } from '../views/experiment/card.js'
 
 let lastVolume = 0;
 let lastSpeed = 0;
@@ -125,6 +125,13 @@ function initVideoCards(player) {
     const instance = event.detail.plyr;
     console.log('playback speed changed to ', instance.speed, "from ", lastSpeed);
     logPlyrAction('playbackSpeedChange', instance);
+  });
+
+  player.on('ended', async function(event){
+    const instance = event.detail.plyr;
+    console.log('video ended');
+    logPlyrAction('end', instance);
+    unitIsFinished('videoUnitReachedEnd');
   });
   
 }
