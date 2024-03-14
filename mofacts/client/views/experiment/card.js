@@ -605,6 +605,8 @@ Template.card.events({
 Template.card.helpers({
   'isExperiment': () => Meteor.user().profile.loginMode === 'experiment',
 
+  'experimentLoginText': () => curTdfUISettings.experimentLoginText || "Amazon Turk ID",
+
   'isNormal': () => Meteor.user().profile.loginMode !== 'experiment',
 
   'isNotInDialogueLoopStageIntroOrExit': () => Session.get('dialogueLoopStage') != 'intro' && Session.get('dialogueLoopStage') != 'exit',
