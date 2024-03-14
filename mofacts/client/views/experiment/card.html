@@ -11,11 +11,26 @@
                     <source src="{{videoSource}}" type="video/mp4" />
                 </video>
             {{/if}}
-            <div id="continueBar" hidden style="text-align: center; padding: 20px">
-                <button type="button" id="continueButton" class="btn text-center">
-                    Continue
-                </button>
-            </div> 
+            <div class="row">
+                <dov class="col-6 offset-3">
+                    <div id="continueBar" hidden style="text-align: center; padding: 20px">
+                        <button type="button" id="continueButton" class="btn text-center">
+                            Continue
+                        </button>
+                    </div> 
+                </dov>
+                {{#if allowGoBack}}
+                <div class="col-1 offset-2">
+                    <div id="goBackBar" style="text-align: center; padding: 20px">
+                        <button type="button" id="stepBackButton" class="btn text-center">
+                            <!-- back icon -->
+                            <i class="fa fa-arrow-left" aria-hidden="true"></i>
+                        </button>
+                    </div> 
+                </div>
+                {{/if}}
+            </div>  
+            <div class="vh-50"></div>
         </div>
         {{/if}}
         <br>
@@ -296,9 +311,21 @@
                 </div>
             </div>
         </span>
-        <button type="button" id="continueButton" class="btn text-center">
-            Continue
-        </button>
+        <div class="row">
+            <div class="col-6 offset-3">
+                <button type="button" id="continueButton" class="btn text-center">
+                    Continue
+                </button>
+            </div>    
+            {{#if allowGoBack}}
+            <div class="col-1 offset-2">
+                <button type="button" id="stepBackButton" class="btn text-center">
+                    <!-- back icon -->
+                    <i class="fa fa-arrow-left" aria-hidden="true"></i>
+                </button>
+            </div>
+            {{/if}}
+        </div>
     </div> 
     {{/if}}
 

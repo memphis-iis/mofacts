@@ -3,6 +3,7 @@ import {haveMeteorUser} from '../../lib/currentTestingHelpers';
 import {updateExperimentState, initCard} from './card';
 import {routeToSignin} from '../../lib/router';
 import { meteorCallAsync } from '../../index';
+import { revisitUnit } from './card';
 
 export {instructContinue, unitHasLockout, checkForFileImage};
 // //////////////////////////////////////////////////////////////////////////
@@ -404,7 +405,22 @@ Template.instructions.helpers({
     lessonname = Session.get('currentTdfFile').tdfs.tutor.setspec.lessonname;
     console.log("lessonname",lessonname);
     return lessonname;
-  }
+  },
+  'allowGoBack': function() {
+    //check if this is allowed
+    if(Session.get('currentDeliveryParams').allowRevistUnit || Session.get('currentTdfFile').tdfs.tutor.setspec.allowRevistUnit){
+      //get the current unit number and decrement it by 1, and see if it exists
+      let curUnitNumber = Session.get('currentUnitNumber');
+      let newUnitNumber = curUnitNumber - 1;
+      if(newUnitNumber >= 0 && Session.get('currentTdfFile').tdfs.tutor.unit.length >= newUnitNumber){
+        return true;
+      } else {
+        return false;
+      }
+    } else {
+      return false;
+    }
+  },
 });
 
 Template.instructions.rendered = function() {
@@ -479,6 +495,13 @@ Template.instructions.events({
       Meteor.call('insertHistory', instructionLog)
     }
     instructContinue();
+  },
+  'click #stepBackButton': function(event) {
+    event.preventDefault();
+    //get the current unit number and decrement it by 1
+    let curUnit = Session.get('currentUnitNumber');
+    let newUnitNumber = curUnit - 1;
+    revisitUnit(newUnitNumber);
   },
   'click #instructionQuestionAffrimative': function() {
     Session.set('instructionQuestionResults',true);
