@@ -12,6 +12,7 @@ import {
 import { 
   initializePlyr,
   playVideo,
+  destroyPlyr,
 } from '../../lib/plyrHelper.js'
 import {meteorCallAsync, redoCardImage} from '../../index';
 import {DialogueUtils, dialogueContinue, dialogueLoop, initiateDialogue} from './dialogueUtils';
@@ -36,6 +37,7 @@ export {
   getCurrentClusterAndStimIndices,
   initCard,
   unitIsFinished,
+  revisitUnit,
   gatherAnswerLogRecord,
   newQuestionHandler
 };
@@ -584,6 +586,20 @@ Template.card.events({
     event.preventDefault();
     unitIsFinished('Continue Button Pressed');
   },
+
+  'click #stepBackButton': function(event) {
+    event.preventDefault();
+    //check if the current unit has instructions and if so, show them
+    if(Session.get('currentTdfUnit').unitinstructions){
+      leaveTarget = '/instructions';
+      Router.go('/instructions');
+    } else {
+      //get the current unit number and decrement it by 1
+      let curUnit = Session.get('currentUnitNumber');
+      let newUnitNumber = curUnit - 1;
+      revisitUnit(newUnitNumber);
+    }
+  },
 });
 
 Template.card.helpers({
@@ -662,8 +678,13 @@ Template.card.helpers({
   },
 
   'text': function() {
-    const text = Session.get('currentDisplay') ? Session.get('currentDisplay').text : undefined;
-    return text;
+      const text = Session.get('currentDisplay') ? Session.get('currentDisplay').text : undefined;
+      return text;
+  },
+
+  'videoUnitDisplayText': function() {
+    const curUnit = Session.get('currentTdfUnit');
+    return curUnit.videosession.displayText;
   },
 
   'dialogueText': function() {
@@ -893,7 +914,23 @@ Template.card.helpers({
     console.log("probability parms input",probParms);
     return probParms;
   },
-  'UIsettings': () => Session.get('curTdfUISettings')
+  'UIsettings': () => Session.get('curTdfUISettings'),
+
+  'allowGoBack': function() {
+    //check if this is allowed
+    if(Session.get('currentDeliveryParams').allowRevistUnit || Session.get('currentTdfFile').tdfs.tutor.setspec.allowRevistUnit){
+      //get the current unit number and decrement it by 1, and see if it exists
+      let curUnitNumber = Session.get('currentUnitNumber');
+      let newUnitNumber = curUnitNumber - 1;
+      if(newUnitNumber >= 0 && Session.get('currentTdfFile').tdfs.tutor.unit.length >= newUnitNumber){
+        return true;
+      } else {
+        return false;
+      }
+    } else {
+      return false;
+    }
+  },
 });
 
 function getResponseType() {
@@ -2224,6 +2261,75 @@ function hideUserFeedback() {
   $('#removeQuestion').hide();
 }
 
+
+//Called to revisit a previous unit in the current session. 
+async function revisitUnit(unitNumber) {
+  console.log('REVIST UNIT: ', unitNumber);
+  clearCardTimeout();
+  destroyPlyr();
+
+  const curTdf = Session.get('currentTdfFile');
+  const curUnitNum = Session.get('currentUnitNumber');
+  //check if the curUnitNum is the furthest unit the student has reached
+  let furthestUnit = Session.get('furthestUnit') || 0;
+  if(curUnitNum > furthestUnit){
+    furthestUnit = curUnitNum;
+  } 
+  Session.set('furthestUnit', furthestUnit);
+  const newUnitNum = parseInt(unitNumber)
+  const curTdfUnit = curTdf.tdfs.tutor.unit[newUnitNum];
+
+  logRecord = gatherAnswerLogRecord(Date.now(), Session.get('currentUnitStartTime'), 'revisitUnit ' + unitNumber, '', undefined, getTestType(), getCurrentDeliveryParams(), undefined, false);
+  //update the history record
+  Meteor.call('insertHistory', logRecord);
+
+  Session.set('questionIndex', 0);
+  Session.set('clusterIndex', undefined);
+  Session.set('currentUnitNumber', newUnitNum);
+  Session.set('currentTdfUnit', curTdfUnit);
+  Session.set('resetSchedule', true);
+  Session.set('currentDeliveryParams', getCurrentDeliveryParams());
+  Session.set('currentUnitStartTime', Date.now());
+  Session.set('feedbackUnset', true);
+  Session.set('feedbackTypeFromHistory', undefined);
+  Session.set('curUnitInstructionsSeen', false);
+
+  //get the old experiment state
+  const oldExperimentState = Session.get('currentExperimentState');
+
+  //update the experiment state
+  const newExperimentState = {
+    questionIndex: 0,
+    clusterIndex: 0,
+    shufIndex: 0,
+    whichHintLevel: 0,
+    whichStim: 0,
+    lastUnitCompleted: oldExperimentState.lastUnitCompleted,
+    lastUnitStarted: oldExperimentState.lastUnitStarted,
+    currentUnitNumber: newUnitNum,
+    currentTdfUnit: curTdfUnit,
+    lastAction: 'unit-revisit',
+    lastActionTimeStamp: Date.now(),
+  };
+
+  //update the experiment state
+  updateExperimentState(newExperimentState, 'revisitUnit');
+
+
+  let leaveTarget;
+  if (newUnitNum < curTdf.tdfs.tutor.unit.length || curTdf.tdfs.tutor.unit[newUnitNum] > 0) {
+    // Revisiting a Unit, we need to restart with instructions
+    // Check if the unit has a learning session, assess
+    console.log('REVISIT UNIT: show instructions for unit', newUnitNum);
+      const rootTDFBoxed = Tdfs.findOne({_id: Session.get('currentRootTdfId')});
+      const rootTDF = rootTDFBoxed.content;
+      const setspec = rootTDF.tdfs.tutor.setspec;
+    leaveTarget = '/instructions';
+    Router.go(leaveTarget);
+  }
+
+}
+
 // Called when the current unit is done. This should be either unit-defined (see
 // prepareCard) or user-initiated (see the continue button event and the var
 // len display timeout function)
@@ -3363,7 +3469,8 @@ const componentStates = ComponentStates.find().fetch();
       "choiceButtonCols": 1,
       "onlyShowSimpleFeedback": "onCorrect",
       "incorrectColor": "darkorange",
-      "correctColor": "green"
+      "correctColor": "green",
+      'instructionsTitleDisplay': "headerOnly",
     },
   }
   //here we interprit the stimulus and input position settings to set the colum widths. There are 4 possible combinations.
@@ -3448,6 +3555,18 @@ const componentStates = ComponentStates.find().fetch();
   } else if(!UIsettings.displayUserAnswerInFeedback || UIsettings.displayUserAnswerInFeedback == "false"){
     UIsettings.displayUserAnswerInCorrectFeedback = false;
     UIsettings.displayUserAnswerInIncorrectFeedback = false;
+  }
+
+  //switch for displayInstructionsTitle
+  if(UIsettings.instructionsTitleDisplay == "headerOnly"){
+    UIsettings.displayInstructionsTitle = true;
+    UIsettings.displayUnitNameInInstructions = false;
+  } else if(UIsettings.instructionsTitleDisplay == true) {
+    UIsettings.displayInstructionsTitle = true;
+    UIsettings.displayUnitNameInInstructions = true;
+  } else if(UIsettings.instructionsTitleDisplay == false){
+    UIsettings.displayInstructionsTitle = false;
+    UIsettings.displayUnitNameInInstructions = false;
   }
 
   Session.set('curTdfUISettings', UIsettings);
