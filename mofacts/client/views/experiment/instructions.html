@@ -41,13 +41,37 @@
             <div id="continueBar" class="full-width text-center" >
                 <span id="displayTimeoutMsg"></span>
                 {{#if islockout}}
-                    <button type="button" id="continueButton" class="btn width-80-percent mx-auto" disabled>
-                    Continue
-                    </button>
+                    <div class="row">
+                        <div class="col-6 offset-3">        
+                            <button type="button" id="continueButton" class="btn width-80-percent mx-auto" disabled>
+                            Continue
+                            </button>
+                        </div>
+                    {{#if allowGoBack}}
+                        <div class="col-1 offset-1">
+                            <button type="button" id="stepBackButton" class="btn width-80-percent mx-auto" disabled>
+                            <!-- back icon -->
+                            <i class="fa fa-arrow-left" aria-hidden="true"></i>
+                            </button>
+                        </div>
+                    {{/if}}
+                    </div>
                 {{else}}
-                    <button type="button" id="continueButton" class="btn width-80-percent mx-auto">
-                        Continue
-                    </button>
+                    <div class="row">
+                        <div class="col-6 offset-3">               
+                            <button type="button" id="continueButton" class="btn width-80-percent mx-auto">
+                            Continue
+                            </button>
+                        </div>
+                    {{#if allowGoBack}}
+                        <div class="col-1 offset-1">
+                            <button type="button" id="stepBackButton" class="btn width-80-percent mx-auto">
+                            <!-- back icon -->
+                            <i class="fa fa-arrow-left" aria-hidden="true"></i>
+                            </button>
+                        </div>
+                    {{/if}}
+                    </div>
                 {{/if}}
             </div>
         {{/if}}

@@ -21,12 +21,19 @@ function initVideoCards(player) {
   lastVolume = player.volume;
   lastSpeed = player.speed;
 
+  //if this is not the furthest unit the student has reached, display the continue button
+  if(Session.get('currentUnitNumber') < Session.get('currentExperimentState').lastUnitStarted){
+    $("#continueBar").removeAttr('hidden');
+    $('#continueButton').prop('disabled', false);
+  }
+
   //add event listeners to pause video playback
   player.on('timeupdate', async function(event){
     const instance = event.detail.plyr;
     if(timesCopy.length == 0) {
       thisNextTime = instance.duration;
       thisLastTime = 0;
+      timeIsEndTime = true;
     } else {
       thisNextTime = timesCopy[nextTimeIndex];
       thisLastTime = nextTimeIndex == 0 ? 0: timesCopy[lastTimeIndex];
@@ -41,20 +48,22 @@ function initVideoCards(player) {
     //add class
     $('#progressbar').addClass('progress-bar');
     //set the width of the progress bar
-    if(Session.get('curTdfUISettings').displayReviewTimeoutAsBarOrText == "text" || Session.get('curTdfUISettings').displayReviewTimeoutAsBarOrText == "both"){                
-      document.getElementById("CountdownTimerText").innerHTML = 'Continuing in: ' + Math.floor(timeDiff) + ' seconds';
-    } else {
-      document.getElementById("CountdownTimerText").innerHTML = '';
-    }
-    if(Session.get('curTdfUISettings').displayReviewTimeoutAsBarOrText == "bar" || Session.get('curTdfUISettings').displayCardTimeoutAsBarOrText == "both"){
-      //add the progress bar class
-      $('#progressbar').addClass('progress-bar');
-      document.getElementById("progressbar").style.width = percentage + "%";
-    } else {
-      //set width to 0% 
-      document.getElementById("progressbar").style.width = 0 + "%";
-      //remove progress bar class
-      $('#progressbar').removeClass('progress-bar');
+    if(timesCopy.length != 0 || Session.get('curTdfUISettings').displayReviewTimeoutAsBarOrText == "bar" || Session.get('curTdfUISettings').displayEndOfVideoCountdown){
+      if(Session.get('curTdfUISettings').displayReviewTimeoutAsBarOrText == "text" || Session.get('curTdfUISettings').displayReviewTimeoutAsBarOrText == "both"){                
+        document.getElementById("CountdownTimerText").innerHTML = 'Continuing in: ' + Math.floor(timeDiff) + ' seconds';
+      } else {
+        document.getElementById("CountdownTimerText").innerHTML = '';
+      }
+      if(Session.get('curTdfUISettings').displayReviewTimeoutAsBarOrText == "bar" || Session.get('curTdfUISettings').displayCardTimeoutAsBarOrText == "both"){
+        //add the progress bar class
+        $('#progressbar').addClass('progress-bar');
+        document.getElementById("progressbar").style.width = percentage + "%";
+      } else {
+        //set width to 0% 
+        document.getElementById("progressbar").style.width = 0 + "%";
+        //remove progress bar class
+        $('#progressbar').removeClass('progress-bar');
+      }
     }
   });
 
@@ -255,6 +264,14 @@ export async function playVideo() {
   await engine.selectNextCard(indices, Session.get('currentExperimentState'));
   Session.set('engineIndices', indices);
   newQuestionHandler();
+}
+
+export async function destroyPlyr() {
+  //find all plyr elements and destroy them
+  let plyrElements = document.querySelectorAll('plyr');
+  plyrElements.forEach(element => {
+    element.plyr.destroy();
+  });
 }
 
 function waitForElm(selector) {
