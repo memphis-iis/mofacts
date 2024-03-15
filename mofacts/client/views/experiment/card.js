@@ -584,6 +584,10 @@ Template.card.events({
 
   'click #continueButton': function(event) {
     event.preventDefault();
+    //destroy the plyr player if it exists
+    if(player){
+      destroyPlyr(player);
+    }
     unitIsFinished('Continue Button Pressed');
   },
 
@@ -2281,7 +2285,7 @@ async function revisitUnit(unitNumber) {
   const newUnitNum = parseInt(unitNumber)
   const curTdfUnit = curTdf.tdfs.tutor.unit[newUnitNum];
 
-  logRecord = gatherAnswerLogRecord(Date.now(), Session.get('currentUnitStartTime'), 'revisitUnit ' + unitNumber, '', undefined, getTestType(), getCurrentDeliveryParams(), undefined, false);
+  logRecord = gatherAnswerLogRecord(Date.now(), Session.get('currentUnitStartTime'), 'revisitUnit', '', true, 'r', Session.get('currentDeliveryParams'), undefined, false);
   //update the history record
   Meteor.call('insertHistory', logRecord);
 
