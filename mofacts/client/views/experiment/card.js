@@ -584,10 +584,9 @@ Template.card.events({
 
   'click #continueButton': function(event) {
     event.preventDefault();
-    //destroy the plyr player if it exists
-    if(player){
-      destroyPlyr(player);
-    }
+    //hide the continue button
+    $("#continueBar").attr("hidden", true);
+    $('#continueButton').prop('disabled', true);
     unitIsFinished('Continue Button Pressed');
   },
 

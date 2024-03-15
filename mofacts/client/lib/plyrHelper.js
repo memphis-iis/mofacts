@@ -250,10 +250,44 @@ export async function initializePlyr() {
       points.push({time: Math.floor(time), label: 'Question ' + (times.indexOf(time) + 1)});
     });
   }
-  player = new Plyr('#videoUnitPlayer', {
-    markers: { enabled: times.length > 0 , points: points }
-  });
-  initVideoCards(player)
+  if(!player){
+    player = new Plyr('#videoUnitPlayer', {
+      markers: { enabled: times.length > 0 , points: points }
+    });
+  }
+  //set the source of the video to the new video
+  source = Session.get('currentTdfUnit').videosession.videosource;
+  //check if its a youtube or shortened youtube link
+  if(source.includes('youtu')){
+    //check if youtube link is shortened
+    if(source.includes('youtu.be')){
+      source = source.split('youtu.be/')[1];
+    } else {
+      source = source.split('v=')[1]
+      source = source.split('&')[0];
+    }   
+    player.source = {
+      type: 'video',
+      sources: [
+        {
+          src: 'https://www.youtube.com/watch?v=' + source,
+          provider: 'youtube',
+        },
+      ],
+    };
+  } else {
+    //html5 video
+    player.source = {
+      type: 'video',
+      sources: [
+        {
+          src: source,
+          type: 'video/mp4',
+        },
+      ],
+    };
+  }
+  initVideoCards(player);
   playVideo();
 }
 
@@ -265,13 +299,9 @@ export async function playVideo() {
   Session.set('engineIndices', indices);
   newQuestionHandler();
 }
-
 export async function destroyPlyr() {
-  //find all plyr elements and destroy them
-  let plyrElements = document.querySelectorAll('plyr');
-  plyrElements.forEach(element => {
-    element.plyr.destroy();
-  });
+  player.destroy();
+  player = null;
 }
 
 function waitForElm(selector) {
