@@ -2284,10 +2284,11 @@ async function revisitUnit(unitNumber) {
   const newUnitNum = parseInt(unitNumber)
   const curTdfUnit = curTdf.tdfs.tutor.unit[newUnitNum];
 
-  logRecord = gatherAnswerLogRecord(Date.now(), Session.get('currentUnitStartTime'), 'revisitUnit', '', true, 'r', Session.get('currentDeliveryParams'), undefined, false);
-  //update the history record
-  Meteor.call('insertHistory', logRecord);
-
+  //if the current page is not instructions, then we need to log the revisitUnit action
+  if(document.location.pathname != '/instructions'){
+      logRecord = gatherAnswerLogRecord(Date.now(), Session.get('currentUnitStartTime'), 'revisitUnit', '', true, 'r', Session.get('currentDeliveryParams'), undefined, false);
+      Meteor.call('insertHistory', logRecord);
+  }
   Session.set('questionIndex', 0);
   Session.set('clusterIndex', undefined);
   Session.set('currentUnitNumber', newUnitNum);
