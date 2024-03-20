@@ -10,5 +10,5 @@ jobs:
         with:
           token: ${{ secrets.PAT }}
           project-location: memphis-iis
-          project-number: 3
+          project-name: IIS Development Tracking Board
           column-name: Todo
