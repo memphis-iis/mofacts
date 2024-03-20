@@ -1,14 +1,17 @@
+name: Add Recently Created Pull Requests to Project Column
 on:
-  issues:
-    types: [opened]
+  schedule:
+    - cron: "0/5 * * * *"
 jobs:
-  createCard:
+  build:
     runs-on: ubuntu-latest
     steps:
-      - name: Create or Update Project Card
-        uses: peter-evans/create-or-update-project-card@v3
-        with:
-          token: ${{ secrets.PAT }}
-          project-location: memphis-iis
-          project-name: IIS Development Tracking Board
-          column-name: Todo
+    - name: Handle Repo1
+      uses: subhamX/github-project-bot@v1.0.0
+      with:
+        ACCESS_TOKEN: ${{ secrets.PAT }}
+        COLUMN_NAME: Todo
+        PROJECT_URL: https://github.com/orgs/memphis-iis/projects/3
+        # For User Owned Project -> PROJECT_URL: https://github.com/users/UNAME/projects/1
+        REPO_URL: https://github.com/memphis-iis/mofacts
+        # For User Owned Repo -> REPO_URL: https://github.com/UNAME/repo1
