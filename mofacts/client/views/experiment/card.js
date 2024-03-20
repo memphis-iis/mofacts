@@ -491,8 +491,8 @@ Template.card.events({
     const key = e.keyCode || e.which;
     if (key == ENTER_KEY && !Session.get('submmissionLock')) {
       Session.set('submmissionLock', true);
-      handleUserInput(e, 'keypress');
     }
+    handleUserInput(e, 'keypress');
   },
 
   'click #removeQuestion': function(e) {
