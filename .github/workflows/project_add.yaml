@@ -1,17 +1,20 @@
-name: Add Recently Created Pull Requests to Project Column
-on:  
+name: Auto Assign to Project(s)
+
+on:
   issues:
     types: [opened]
+  pull_request_target:
+    types: [opened]
+env:
+  MY_GITHUB_TOKEN: ${{ secrets.PAT }}
+
 jobs:
-  build:
+  assign_one_project:
     runs-on: ubuntu-latest
+    name: Assign to One Project
     steps:
-    - name: Handle Repo1
-      uses: subhamX/github-project-bot@v1.0.0
+    - name: Assign NEW issues and NEW pull requests to project 2
+      uses: srggrs/assign-one-project-github-action@1.2.1
+      if: github.event.action == 'opened'
       with:
-        ACCESS_TOKEN: ${{ secrets.PAT }}
-        COLUMN_NAME: Todo
-        PROJECT_URL: https://github.com/orgs/memphis-iis/projects/3
-        # For User Owned Project -> PROJECT_URL: https://github.com/users/UNAME/projects/1
-        REPO_URL: https://github.com/memphis-iis/mofacts
-        # For User Owned Repo -> REPO_URL: https://github.com/UNAME/repo1
+        project: 'https://github.com/orgs/memphis-iis/projects/3'
