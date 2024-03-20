@@ -135,6 +135,7 @@ let trialStartTimestamp = 0;
 let firstKeypressTimestamp = 0;
 let currentSound = null; // See later in this file for sound functions
 let userFeedbackStart = null;
+let afterFeedbackCallbackBind = null;
 // We need to track the name/ID for clear and reset. We need the function and
 // delay used for reset
 let timeoutName = null;
@@ -557,6 +558,11 @@ Template.card.events({
   'click #continueStudy': function(event) {
     event.preventDefault();
     handleUserInput(event, 'buttonClick');
+    if (afterFeedbackCallbackBind != null) {
+      const timeout = Session.get('CurTimeoutId')
+      Meteor.clearTimeout(timeout);
+      afterFeedbackCallbackBind();
+    }
   },
 
   'click .instructModalDismiss': function(event) {
@@ -1251,11 +1257,6 @@ function handleUserInput(e, source, simAnswerCorrect) {
     key = ENTER_KEY;
     Session.set('userAnswerSubmitTimestamp', Date.now());
   } 
-  if (e.currentTarget ? e.currentTarget.id === 'continueStudy' : false) {
-    key = ENTER_KEY;
-    isSkip = true;
-    console.log('skipped study');
-  }
 
   // If we haven't seen the correct keypress, then we want to reset our
   // timeout and leave
@@ -1765,7 +1766,7 @@ async function afterAnswerFeedbackCallback(trialEndTimeStamp, trialStartTimeStam
   Session.set('feedbackTimeoutBegins', Date.now())
   const answerLogRecord = gatherAnswerLogRecord(trialEndTimeStamp, trialStartTimeStamp, source, userAnswer, isCorrect,
       testType, deliveryParams, dialogueHistory, wasReportedForRemoval);
-  const afterFeedbackCallbackBind = afterFeedbackCallback.bind(null, trialEndTimeStamp, trialStartTimeStamp, isTimeout, isCorrect, testType, deliveryParams, answerLogRecord, 'card')
+  afterFeedbackCallbackBind = afterFeedbackCallback.bind(null, trialEndTimeStamp, trialStartTimeStamp, isTimeout, isCorrect, testType, deliveryParams, answerLogRecord, 'card')
   const timeout = Meteor.setTimeout(async function() {
     afterFeedbackCallbackBind()
   }, reviewTimeout)
@@ -1780,6 +1781,7 @@ async function afterAnswerFeedbackCallback(trialEndTimeStamp, trialStartTimeStam
 }
 
 async function afterFeedbackCallback(trialEndTimeStamp, trialStartTimeStamp, isTimeout, isCorrect, testType, deliveryParams, answerLogRecord, callLocation) {
+  afterFeedbackCallbackBind = null;
   Session.set('CurTimeoutId', null)
   const userLeavingTrial = callLocation != 'card';
   let reviewEnd = Date.now();
