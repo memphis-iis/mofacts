@@ -8,5 +8,7 @@ jobs:
       - name: Create or Update Project Card
         uses: peter-evans/create-or-update-project-card@v3
         with:
-          project-name: IIS Development Tracking Board
+          token: ${{ secrets.PAT }}
+          project-location: memphis-iis
+          project-number: 3
           column-name: Todo
