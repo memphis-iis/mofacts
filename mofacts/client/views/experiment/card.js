@@ -1244,7 +1244,7 @@ function handleUserForceCorrectInput(e, source) {
 
 function handleUserInput(e, source, simAnswerCorrect) {
   let isTimeout = false;
-  let isSkip = false;
+  Session.set('isSkip', false);
   let key;
   if (source === 'timeout') {
     key = ENTER_KEY;
@@ -1260,7 +1260,11 @@ function handleUserInput(e, source, simAnswerCorrect) {
     key = ENTER_KEY;
     Session.set('userAnswerSubmitTimestamp', Date.now());
   } 
-
+  if (e.currentTarget ? e.currentTarget.id === 'continueStudy' : false) {
+    key = ENTER_KEY;
+    Session.set('isSkip', true);
+    console.log('skipped study');
+  }
   // If we haven't seen the correct keypress, then we want to reset our
   // timeout and leave
   if (key != ENTER_KEY) {
@@ -1302,9 +1306,6 @@ function handleUserInput(e, source, simAnswerCorrect) {
     } else {
       userAnswer = _.trim($('#userAnswer').val()).toLowerCase();
     }
-  } 
-  if(isSkip){
-    userAnswer = '[skip]'
   }
 
   const trialEndTimeStamp = Date.now();
@@ -1737,7 +1738,7 @@ async function afterAnswerFeedbackCallback(trialEndTimeStamp, trialStartTimeStam
   Session.set('showDialogueText', false);
   //if the user presses the removal button after answering we need to shortcut the timeout
   const wasReportedForRemoval = source == 'removal'
-  userAnswer === '[skip]' ? isSkip = true : isSkip = false;
+  isSkip = Session.get('isSkip');
 
   const testType = getTestType();
   const deliveryParams = Session.get('currentDeliveryParams')
@@ -1794,7 +1795,7 @@ async function afterFeedbackCallback(trialEndTimeStamp, trialStartTimeStamp, isT
   //answerLogAction can be 'answer', 'timeout', or 'skip' depending on userAnswer, isTimeout, and isSkip
   if(isTimeout){
     answerLogAction = '[timeout]';
-  } else if (userAnswer == '[skip]') {
+  } else if (Session.get('isSkip')) {
     answerLogAction = '[skip]';
   } else {
     answerLogAction = '[answer]';
