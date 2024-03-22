@@ -557,11 +557,14 @@ Template.card.events({
 
   'click #continueStudy': function(event) {
     event.preventDefault();
-    handleUserInput(event, 'buttonClick');
     if (afterFeedbackCallbackBind != null) {
+      // allow user to skip after answering
       const timeout = Session.get('CurTimeoutId')
       Meteor.clearTimeout(timeout);
       afterFeedbackCallbackBind();
+    } else {
+      // allow user to skip before answering
+      handleUserInput(event, 'buttonClick');
     }
   },
 
