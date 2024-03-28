@@ -123,7 +123,7 @@ Template.signIn.events({
       Meteor.loginWithOffice365({
         loginStyle: 'popup',
         requestOfflineToken: true,
-        requestPermissions: ['User.Read']
+        requestPermissions: ['User.Read', 'offline_access', 'openid', 'profile', 'email'],
       }, async function(err) {
         //if we are not in a class and we log in, we need to disable embedded API keys.
         if(!Session.get('curClass')){
