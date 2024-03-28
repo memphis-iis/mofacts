@@ -12,7 +12,7 @@ export default class AdaptiveQuestionLogic{
 
         // you may use logic operators AND, OR, NOT, and the following variables:
         // Questions (aka Q1), Units (aka U1), and combinations of the two (U1Q1)
-        // You may also use numbers, and PEMDAS operators
+        // You may also use numbers, and PEMDAS operators (using double == for equality)
         // Example: IF Q1 AND Q2 THEN (U1Q1, U2Q2)
         // This would evaluate to true if Q1 and Q2 are true in the history dictionary, and would return a schedule of U1Q1 and U2Q2
         // Example: IF (Q1 AND Q2) OR Q3 THEN (U1Q1, U2Q2, U3Q3)
