@@ -279,10 +279,6 @@ function performClusterShuffle(stimCount, shuffleclusters, mapping){
       shuffled[targetIndexes[j]] = mapping[randPerm[j]];
     }
   });
-  // get rid of undefined values from shuffled
-  shuffled = shuffled.filter(function(el) {
-    return el !== undefined;
-  });
 
   return shuffled.slice();
 }
