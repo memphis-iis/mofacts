@@ -9,7 +9,7 @@ export default class AdaptiveQuestionLogic{
         //currentUnit is the current unit that the logic is being evaluated for
         //history is an object that contains a boolean value for each question in each unit
         //example: {U1: {Q1: true, Q2: false}, U2: {Q1: true, Q2: true}}
-        
+
         // you may use logic operators AND, OR, NOT, and the following variables:
         // Questions (aka Q1), Units (aka U1), and combinations of the two (U1Q1)
         // You may also use numbers, and PEMDAS operators
@@ -61,7 +61,7 @@ export default class AdaptiveQuestionLogic{
             if(operators[token]){
                 conditionExpression += operators[token];
             } else if (token.startsWith("Q")){
-                conditionExpression += `this.history[currentUnit].${token}`;
+                conditionExpression += `history[currentUnit].${token}`;
             } else if (token.toLowerCase() === "true"){
                 conditionExpression += "true";
             } else if (token.toLowerCase() === "false"){
@@ -102,6 +102,8 @@ export default class AdaptiveQuestionLogic{
 
         //the action can be either a single action as a string or an array of actions. To check, we will find if parenthesis are present
         console.log('action:', actions);
+
+        let schedule = [];
         
         ///check if there are parenthesis, if so interpret as an array of actions
         if(actions.includes("(")){
@@ -111,8 +113,8 @@ export default class AdaptiveQuestionLogic{
             //add each action to the schedule
             for(const action of actionsString.split(",")){
                 if(action.startsWith("Q")){
-                    this.schedule.push({
-                        unit: this.currentUnit,
+                    schedule.push({
+                        unit: currentUnit,
                         question: parseInt(action.split("Q")[1] || 0)
                     });
                 }
@@ -120,12 +122,12 @@ export default class AdaptiveQuestionLogic{
                     //if it has a Q it has a defined question, otherwise it is just a unit and the question is 0
                     if(action.includes("Q")){
                         let parts = action.split("Q");
-                        this.schedule.push({
+                        schedule.push({
                             unit: parseInt(parts[0].split("U")[1]),
                             question: parseInt(parts[1])
                         });
                     } else {
-                        this.schedule.push({
+                        schedule.push({
                             unit: parseInt(action.split("U")[1]),
                             question: 0
                         });
@@ -135,8 +137,8 @@ export default class AdaptiveQuestionLogic{
         } else {
             //if no parenthesis, it is a single action. We check if it is a unit and question or just a unit
             if(actions.startsWith("Q")){
-                this.schedule.push({
-                    unit: this.currentUnit,
+                schedule.push({
+                    unit: currentUnit,
                     question: parseInt(actions.split("Q")[1] || 0)
                 });
             }
@@ -144,19 +146,19 @@ export default class AdaptiveQuestionLogic{
                 //if it has a Q it has a defined question, otherwise it is just a unit and the question is 0
                 if(actions.includes("Q")){
                     let parts = actions.split("Q");
-                    this.schedule.push({
+                    schedule.push({
                         unit: parseInt(parts[0].split("U")[1]),
                         question: parseInt(parts[1])
                     });
                 } else {
-                    this.schedule.push({
+                    schedule.push({
                         unit: parseInt(actions.split("U")[1]),
                         question: 0
                     });
                 }
             } 
         }
-        return {condition: condition, conditionExpression: conditionExpression, actions: actions, conditionResult: conditionResult, schedule: this.schedule};
+        return {condition: condition, conditionExpression: conditionExpression, actions: actions, conditionResult: conditionResult, schedule: schedule};
     }
 }
 
