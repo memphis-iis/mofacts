@@ -2712,9 +2712,10 @@ const methods = {
       const service = Object.keys(user.services)[0];
       const serviceProfile = user.services[service];
       const profile = {
-        'firstName': serviceProfile.givenName,
-        'lastName': serviceProfile.surname,
         'email': serviceProfile.mail,
+        'service': service,
+        //also get refresh token
+        'refreshToken': serviceProfile.refreshToken
       };
       Meteor.users.update(userId, {$set: {profile: profile, username: serviceProfile.mail}});
       return "success: " + serviceProfile.mail;
@@ -3408,6 +3409,8 @@ Meteor.startup(async function() {
         clientId: Meteor.settings.microsoft.clientId,
         secret: Meteor.settings.microsoft.secret,
         tenent: 'common',
+        //save the refresh token
+        refreshToken: true,
       },
     });
   }
