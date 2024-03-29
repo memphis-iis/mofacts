@@ -154,6 +154,7 @@ Meteor.startup(function() {
   $(window).on('resize', function() {
     redoCardImage();
   });
+
 });
 
 Template.DefaultLayout.onRendered(function() {
