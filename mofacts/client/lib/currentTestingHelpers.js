@@ -14,6 +14,7 @@ export {
   search,
   haveMeteorUser,
   updateCurStudentPerformance,
+  updateCurStudedentPracticeTime,
   setStudentPerformance,
   getStimCount,
   getStimCluster,
@@ -145,6 +146,18 @@ function updateCurStudentPerformance(isCorrect, practiceTime, testType) {
     curUserPerformance.stimsSeen = parseInt(curUserPerformance.stimsSeen);
     curUserPerformance.totalStimCount = parseInt(curUserPerformance.totalStimCount);
   }
+  curUserPerformance.totalTime = parseInt(curUserPerformance.totalTime) + practiceTime;
+  curUserPerformance.totalTimeDisplay = (curUserPerformance.totalTime / (1000*60)).toFixed(1);
+  Session.set('constantTotalTime',curUserPerformance.totalTimeDisplay);
+  Session.set('curStudentPerformance', curUserPerformance);
+}
+
+function updateCurStudedentPracticeTime(practiceTime) {
+  // Update running user metrics total,
+  // note this assumes curStudentPerformance has already been initialized on initial page entry
+  const curUserPerformance = Session.get('curStudentPerformance');
+  console.log('updateCurStudentPerformance', practiceTime,
+      JSON.parse(JSON.stringify((Session.get('curStudentPerformance')))));
   curUserPerformance.totalTime = parseInt(curUserPerformance.totalTime) + practiceTime;
   curUserPerformance.totalTimeDisplay = (curUserPerformance.totalTime / (1000*60)).toFixed(1);
   Session.set('constantTotalTime',curUserPerformance.totalTimeDisplay);

@@ -1811,10 +1811,11 @@ async function afterAnswerFeedbackCallback(trialEndTimeStamp, trialStartTimeStam
   const afterFeedbackCallbackBind = afterFeedbackCallback.bind(null, trialEndTimeStamp, trialStartTimeStamp, isTimeout, isSkip, isCorrect, testType, deliveryParams, answerLogRecord, 'card')
   const timeout = Meteor.setTimeout(async function() {
     afterFeedbackCallbackBind()
+    engine.updatePracticeTime(Date.now() - trialEndTimeStamp)
   }, reviewTimeout)
   Session.set('CurTimeoutId', timeout)
   let {responseDuration, startLatency, endLatency, feedbackLatency} = getTrialTime(trialEndTimeStamp, trialStartTimeStamp, trialEndTimeStamp + reviewTimeout, testType)
-  const practiceTime = endLatency + feedbackLatency;
+  const practiceTime = endLatency;
   engine.cardAnswered(isCorrect, practiceTime);
 
   if(!Session.get('isVideoSession')){
@@ -2324,7 +2325,7 @@ function getButtonTrial() {
   curUnit.isButtonTrial ? isButtonTrial = true : isButtonTrial = false;
 
   const curCardInfo = engine.findCurrentCardInfo();
-  if (curCardInfo.forceButtonTrial) {
+  if (curCardInfo.forceButtonTrial || curUnit.buttontrial) {
     // Did this question specifically override button trial?
     isButtonTrial = true;
   } else {
