@@ -14,7 +14,7 @@
             <div class="col-12 mx-auto">
                 <form>
                     {{#if isExperiment}}
-                        <input  type="text" id="signInUsername" value="" placeholder="Amazon Turk ID"><br>
+                        <input  type="text" id="signInUsername" value="" placeholder="{{experimentLoginText}}">
                         {{#if experimentPasswordRequired}}
                             <input  type="password" id="password" value="" placeholder="Password"><br><br>
                         {{/if}}
