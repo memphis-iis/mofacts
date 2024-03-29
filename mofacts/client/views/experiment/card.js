@@ -135,6 +135,7 @@ let trialStartTimestamp = 0;
 let firstKeypressTimestamp = 0;
 let currentSound = null; // See later in this file for sound functions
 let userFeedbackStart = null;
+let afterFeedbackCallbackBind = null;
 // We need to track the name/ID for clear and reset. We need the function and
 // delay used for reset
 let timeoutName = null;
@@ -482,8 +483,8 @@ Template.card.events({
     const key = e.keyCode || e.which;
     if (key == ENTER_KEY && !Session.get('submmissionLock')) {
       Session.set('submmissionLock', true);
-      handleUserInput(e, 'keypress');
     }
+    handleUserInput(e, 'keypress');
   },
 
   'click #removeQuestion': function(e) {
@@ -556,7 +557,15 @@ Template.card.events({
 
   'click #continueStudy': function(event) {
     event.preventDefault();
-    handleUserInput(event, 'buttonClick');
+    if (afterFeedbackCallbackBind != null) {
+      // allow user to skip after answering
+      const timeout = Session.get('CurTimeoutId')
+      Meteor.clearTimeout(timeout);
+      afterFeedbackCallbackBind();
+    } else {
+      // allow user to skip before answering
+      handleUserInput(event, 'buttonClick');
+    }
   },
 
   'click .instructModalDismiss': function(event) {
@@ -1235,7 +1244,7 @@ function handleUserForceCorrectInput(e, source) {
 
 function handleUserInput(e, source, simAnswerCorrect) {
   let isTimeout = false;
-  let isSkip = false;
+  Session.set('isSkip', false);
   let key;
   if (source === 'timeout') {
     key = ENTER_KEY;
@@ -1253,10 +1262,9 @@ function handleUserInput(e, source, simAnswerCorrect) {
   } 
   if (e.currentTarget ? e.currentTarget.id === 'continueStudy' : false) {
     key = ENTER_KEY;
-    isSkip = true;
+    Session.set('isSkip', true);
     console.log('skipped study');
   }
-
   // If we haven't seen the correct keypress, then we want to reset our
   // timeout and leave
   if (key != ENTER_KEY) {
@@ -1298,9 +1306,6 @@ function handleUserInput(e, source, simAnswerCorrect) {
     } else {
       userAnswer = _.trim($('#userAnswer').val()).toLowerCase();
     }
-  } 
-  if(isSkip){
-    userAnswer = '[skip]'
   }
 
   const trialEndTimeStamp = Date.now();
@@ -1733,7 +1738,7 @@ async function afterAnswerFeedbackCallback(trialEndTimeStamp, trialStartTimeStam
   Session.set('showDialogueText', false);
   //if the user presses the removal button after answering we need to shortcut the timeout
   const wasReportedForRemoval = source == 'removal'
-  userAnswer === '[skip]' ? isSkip = true : isSkip = false;
+  isSkip = Session.get('isSkip');
 
   const testType = getTestType();
   const deliveryParams = Session.get('currentDeliveryParams')
@@ -1765,7 +1770,7 @@ async function afterAnswerFeedbackCallback(trialEndTimeStamp, trialStartTimeStam
   Session.set('feedbackTimeoutBegins', Date.now())
   const answerLogRecord = gatherAnswerLogRecord(trialEndTimeStamp, trialStartTimeStamp, source, userAnswer, isCorrect,
       testType, deliveryParams, dialogueHistory, wasReportedForRemoval);
-  const afterFeedbackCallbackBind = afterFeedbackCallback.bind(null, trialEndTimeStamp, trialStartTimeStamp, isTimeout, isCorrect, testType, deliveryParams, answerLogRecord, 'card')
+  afterFeedbackCallbackBind = afterFeedbackCallback.bind(null, trialEndTimeStamp, trialStartTimeStamp, isTimeout, isCorrect, testType, deliveryParams, answerLogRecord, 'card')
   const timeout = Meteor.setTimeout(async function() {
     afterFeedbackCallbackBind()
   }, reviewTimeout)
@@ -1780,6 +1785,7 @@ async function afterAnswerFeedbackCallback(trialEndTimeStamp, trialStartTimeStam
 }
 
 async function afterFeedbackCallback(trialEndTimeStamp, trialStartTimeStamp, isTimeout, isCorrect, testType, deliveryParams, answerLogRecord, callLocation) {
+  afterFeedbackCallbackBind = null;
   Session.set('CurTimeoutId', null)
   const userLeavingTrial = callLocation != 'card';
   let reviewEnd = Date.now();
@@ -1789,7 +1795,7 @@ async function afterFeedbackCallback(trialEndTimeStamp, trialStartTimeStamp, isT
   //answerLogAction can be 'answer', 'timeout', or 'skip' depending on userAnswer, isTimeout, and isSkip
   if(isTimeout){
     answerLogAction = '[timeout]';
-  } else if (userAnswer == '[skip]') {
+  } else if (Session.get('isSkip')) {
     answerLogAction = '[skip]';
   } else {
     answerLogAction = '[answer]';
