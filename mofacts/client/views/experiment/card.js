@@ -3092,6 +3092,7 @@ async function resumeFromComponentState() {
   // currentTdfId and currentStimuliSetId based on experimental conditions
   // (if necessary)
   let rootTDFBoxed = Tdfs.findOne({_id: Session.get('currentRootTdfId')});
+  let curTdf = rootTDFBoxed;
   let rootTDF = rootTDFBoxed.content;
   if (!rootTDF) {
     console.log('PANIC: Unable to load the root TDF for learning', Session.get('currentRootTdfId'));
@@ -3208,7 +3209,7 @@ async function resumeFromComponentState() {
     // Now we have a different current TDF (but root stays the same)
     Session.set('currentTdfId', conditionTdfId);
 
-    const curTdf = Tdfs.findOne({_id: conditionTdfId});
+    curTdf = Tdfs.findOne({_id: conditionTdfId});
     Session.set('currentTdfFile', curTdf.content);
     Session.set('currentTdfName', curTdf.content.fileName);
 
@@ -3226,7 +3227,7 @@ async function resumeFromComponentState() {
     console.log('No Experimental condition is required: continuing', rootTDFBoxed);
   }
 
-  const stimuliSet = Tdfs.findOne({_id: Session.get('currentRootTdfId')}).stimuli
+  const stimuliSet = curTdf.stimuli
 
   Session.set('currentStimuliSet', stimuliSet);
   Session.set('feedbackUnset', Session.get('fromInstructions') || Session.get('feedbackUnset'));
@@ -3302,12 +3303,12 @@ async function resumeFromComponentState() {
   }
 
   //if this unit number is greater than the number of units in the tdf, we need to send the user to the profile page
-  if(curExperimentState.currentUnitNumber > Session.get('currentTdfFile').tdfs.tutor.unit.length - 1){
+  if(curExperimentState.currentUnitNumber > curTdf.content.tdfs.tutor.unit.length - 1){
     alert('You have completed all the units in this lesson.');
     leavePage('/profile');
   }
 
-  const curTdfUnit = Session.get('currentTdfFile').tdfs.tutor.unit[Session.get('currentUnitNumber')];
+  const curTdfUnit = curTdf.content.tdfs.tutor.unit[Session.get('currentUnitNumber')];
   if (curTdfUnit.videosession) { 
     Session.set('isVideoSession', true)
     console.log('video type questions detected, pre-loading video');
@@ -3324,12 +3325,7 @@ async function resumeFromComponentState() {
     newExperimentState.questionIndex = 0;
   }
   
-updateExperimentState(newExperimentState, 'card.resumeFromComponentState');  
-
-const componentStates = ComponentStates.find().fetch();
-  const curUnitNum = Session.get('currentUnitNumber');
-  const curQuestionIndex = curExperimentState.questionIndex
-  const curQuestion = curTdfUnit.question ? curTdfUnit.question[curQuestionIndex] : false;
+  updateExperimentState(newExperimentState, 'card.resumeFromComponentState');
 
   //custom settings for user interface
   //we get the current settings from the tdf file's setspec

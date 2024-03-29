@@ -281,7 +281,7 @@ function performClusterShuffle(stimCount, shuffleclusters, mapping){
   const shuffleRanges = [];
   extractDelimFields(shuffleclusters, shuffleRanges);
 
-  const shuffled = mapping.slice(); // work on a copy
+  let shuffled = mapping.slice(); // work on a copy
 
   _.each(shuffleRanges, function(rng) {
     const targetIndexes = rangeVal(rng);
