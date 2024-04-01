@@ -155,11 +155,7 @@ Router.route('/experiment/:target?/:xcond?', {
       const experimentPasswordRequired = tdf.content.tdfs.tutor.setspec.experimentPasswordRequired ?
           eval(tdf.content.tdfs.tutor.setspec.experimentPasswordRequired) : false;
       Session.set('experimentPasswordRequired', experimentPasswordRequired);
-      if(tdf.content.tdfs.tutor.setspec.uiSettings.experimentLoginText){
-        Session.set('loginPrompt', tdf.content.tdfs.tutor.setspec.uiSettings.experimentLoginText);
-      } else {
-        Session.set('loginPrompt', 'Amazon Turk ID');
-      }
+      tdf.content.tdfs.tutor.setspec.uiSettings?.experimentLoginText || "Amazon Turk ID");
       console.log('experimentPasswordRequired:' + experimentPasswordRequired);
 
       console.log('EXPERIMENT target:', target, 'xcond', xcond);
