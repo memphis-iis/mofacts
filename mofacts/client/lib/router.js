@@ -648,20 +648,25 @@ Router.route('/classes/:_teacher/:_class', {
 
 Router.route('/card', {
   name: 'client.card',
-  waitOn: function() {
-    return [ 
-      Meteor.subscribe('files.assets.all'),
-      Meteor.subscribe('userComponentStates', Session.get('currentTdfId')),
-      Meteor.subscribe('currentTdf', Session.get('currentTdfId')),
-      Meteor.subscribe('tdfByExperimentTarget', Session.get('experimentTarget'), Session.get('experimentConditions'))
-    ]
+  onBeforeAction: async function() {
+    if(!Session.get('currentTdfId')){
+      const userId = Meteor.userId();
+      Session.set('currentTdfId', await meteorCallAsync('getLastTDFAccessed', userId));
+    }
+    this.next();
   },
   action: function() {
-    if (Meteor.user()) {
-      Session.set('curModule', 'card');
-      this.render('card');
-    } else {
-      this.redirect('/');
+    this.subscribe('files.assets.all').wait();
+    this.subscribe('userComponentStates', Session.get('currentTdfId')).wait();
+    this.subscribe('currentTdf', Session.get('currentTdfId')).wait();
+    this.subscribe('tdfByExperimentTarget', Session.get('experimentTarget'), Session.get('experimentConditions')).wait();
+    if(this.ready()){
+      if (Meteor.user()) {
+        Session.set('curModule', 'card');
+        this.render('card');
+      } else {
+        this.redirect('/');
+      }
     }
   },
 });

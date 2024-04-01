@@ -1230,6 +1230,12 @@ async function insertHistory(historyRecord) {
   Histories.insert(historyRecord)
 }
 
+async function getLastTDFAccessed(userId) {
+  const lastHistoryItem = Histories.findOne({userId: userId}, {sort: {eventId: -1}});
+  const lastTDFId = lastHistoryItem.TDFId;
+  return lastTDFId;
+}
+
 async function getHistoryByTDFID(TDFId) {
   const history = Histories.find({TDFId: TDFId}).fetch();
   return history;
@@ -3123,7 +3129,7 @@ const asyncMethods = {
 
   getExperimentState, setExperimentState, getStimuliSetByFileName, getMaxResponseKC,
 
-  getProbabilityEstimatesByKCId, getResponseKCMap, processPackageUpload,
+  getProbabilityEstimatesByKCId, getResponseKCMap, processPackageUpload, getLastTDFAccessed,
 
   insertHistory, getHistoryByTDFID, getUserRecentTDFs, clearCurUnitProgress, tdfUpdateConfirmed,
 
