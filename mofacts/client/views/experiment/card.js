@@ -1890,7 +1890,6 @@ async function afterFeedbackCallback(trialEndTimeStamp, trialStartTimeStamp, isT
   Session.set('dialogueHistory', undefined);
   const newExperimentState = {
     lastAction: answerLogAction,
-    lastActionTimeStamp: Date.now(),
   };
 
   newExperimentState.overallOutcomeHistory = Session.get('overallOutcomeHistory');
@@ -2316,7 +2315,6 @@ async function revisitUnit(unitNumber) {
     currentUnitNumber: newUnitNum,
     currentTdfUnit: curTdfUnit,
     lastAction: 'unit-revisit',
-    lastActionTimeStamp: Date.now(),
   };
 
   //update the experiment state
@@ -2411,7 +2409,6 @@ async function unitIsFinished(reason) {
     currentUnitNumber: newUnitNum,
     currentTdfUnit: curTdfUnit,
     lastAction: 'unit-end',
-    lastActionTimeStamp: Date.now(),
   };
 
   if (curTdfUnit && curTdfUnit.learningsession) {
@@ -3152,13 +3149,13 @@ async function getExperimentState() {
 
 async function updateExperimentState(newState, codeCallLocation, unitEngineOverride = {}) {
   let curExperimentState = Session.get('currentExperimentState') || await getExperimentState();
+  newState.lastActionTimeStamp = Date.now();
   console.log('currentExperimentState:', curExperimentState);
   if (unitEngineOverride && Object.keys(unitEngineOverride).length > 0)
     curExperimentState = unitEngineOverride;
   if (curExperimentState.currentTdfId === undefined || newState.currentTdfId === undefined) {
     newState.currentTdfId = Session.get('currentRootTdfId')
   }
-  newState.lastActionTimeStamp = Date.now();
   if(Object.keys(curExperimentState).length === 0){
     curExperimentState = Object.assign(JSON.parse(JSON.stringify(curExperimentState)), newState);
     Meteor.call('createExperimentState', curExperimentState);

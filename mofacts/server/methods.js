@@ -1245,8 +1245,8 @@ async function insertHistory(historyRecord) {
 }
 
 async function getLastTDFAccessed(userId) {
-  const lastHistoryItem = Histories.findOne({userId: userId}, {sort: {eventId: -1}});
-  const lastTDFId = lastHistoryItem.TDFId;
+  const lastExperimentStateUpdated = GlobalExperimentStates.findOne({userId: userId}, {sort: {"experimentState.lastActionTimeStamp": -1}, limit: 1});;
+  const lastTDFId = lastExperimentStateUpdated.TDFId;
   return lastTDFId;
 }
 

@@ -2128,7 +2128,6 @@ function scheduleUnitEngine() {
         whichStim: questInfo.whichStim,
         testType: questInfo.testType,
         lastAction: 'question',
-        lastActionTimeStamp: Date.now(),
       };
 
       // Set current Q/A info, type of test (drill, test, study), and then
