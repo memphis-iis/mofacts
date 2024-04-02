@@ -1170,11 +1170,24 @@ async function getTdfNamesByAccessorId(accessorId) {
   }
 }
 
+async function cleanExperimentStateDupes(experimentStates, idToKeep) {
+  for(const eS of experimentStates){
+    if(eS._id !== idToKeep)
+      GlobalExperimentStates.remove({_id: eS._id});
+  }
+}
 
 async function getExperimentState(userId, TDFId) { // by currentRootTDFId, not currentTdfId
-  const experimentStateRet = GlobalExperimentStates.findOne({userId: userId, TDFId: TDFId});
-  const experimentState = experimentStateRet ? experimentStateRet.experimentState : {};
-  experimentState.id = experimentStateRet ? experimentStateRet._id : null;
+  const experimentStateRet = GlobalExperimentStates.find({userId: userId, TDFId: TDFId}).fetch();
+  const mergedExperimentState = {};
+  //merge experiment states
+  for(const experimentState of experimentStateRet){
+    mergedExperimentState.experimentState = Object.assign({}, mergedExperimentState.experimentState, experimentState.experimentState);
+  }
+  const experimentState = mergedExperimentState ? mergedExperimentState.experimentState : {};
+  experimentState.id = experimentStateRet ? experimentStateRet[0]._id : null;
+  //cleans up duplicates that occured due to a bug until next db wipe
+  await cleanExperimentStateDupes(experimentStateRet, experimentState.id);
   return experimentState;
 }
 
