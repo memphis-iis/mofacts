@@ -3150,20 +3150,21 @@ async function getExperimentState() {
   return curExperimentState || {};
 }
 
-function updateExperimentState(newState, codeCallLocation, unitEngineOverride = {}) {
-  let curExperimentState = Session.get('currentExperimentState') || {};
+async function updateExperimentState(newState, codeCallLocation, unitEngineOverride = {}) {
+  let curExperimentState = Session.get('currentExperimentState') || await getExperimentState();
   console.log('currentExperimentState:', curExperimentState);
   if (unitEngineOverride && Object.keys(unitEngineOverride).length > 0)
     curExperimentState = unitEngineOverride;
   if (curExperimentState.currentTdfId === undefined || newState.currentTdfId === undefined) {
     newState.currentTdfId = Session.get('currentRootTdfId')
   }
+  newState.lastActionTimeStamp = Date.now();
   if(Object.keys(curExperimentState).length === 0){
     curExperimentState = Object.assign(JSON.parse(JSON.stringify(curExperimentState)), newState);
-    Meteor.call('createExperimentState', curExperimentState, curExperimentState.currentTdfId);
+    Meteor.call('createExperimentState', curExperimentState);
   } else {
     curExperimentState = Object.assign(JSON.parse(JSON.stringify(curExperimentState)), newState);
-    Meteor.call('updateExperimentState', curExperimentState, curExperimentState.currentTdfId);
+    Meteor.call('updateExperimentState', curExperimentState, curExperimentState.id);
   }
   console.log('updateExperimentState', codeCallLocation, '\nnew:', curExperimentState);
   Session.set('currentExperimentState', curExperimentState);

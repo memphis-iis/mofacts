@@ -1174,18 +1174,19 @@ async function getTdfNamesByAccessorId(accessorId) {
 async function getExperimentState(userId, TDFId) { // by currentRootTDFId, not currentTdfId
   const experimentStateRet = GlobalExperimentStates.findOne({userId: userId, TDFId: TDFId});
   const experimentState = experimentStateRet ? experimentStateRet.experimentState : {};
+  experimentState.id = experimentStateRet ? experimentStateRet._id : null;
   return experimentState;
 }
 
 // UPSERT not INSERT
-async function setExperimentState(userId, TDFId, newExperimentState, where) { // by currentRootTDFId, not currentTdfId
+async function setExperimentState(userId, TDFId, experimentStateId, newExperimentState, where) { // by currentRootTDFId, not currentTdfId
   serverConsole('setExperimentState:', where, userId, TDFId, newExperimentState);
-  const experimentStateRet = GlobalExperimentStates.findOne({userId: userId, TDFId: TDFId});
+  const experimentStateRet = GlobalExperimentStates.findOne({_id: experimentStateId})
   serverConsole(experimentStateRet)
   serverConsole(newExperimentState)
   if (experimentStateRet != null) {
     const updatedExperimentState = Object.assign(experimentStateRet.experimentState, newExperimentState);
-    GlobalExperimentStates.update({userId: userId, TDFId: TDFId}, {$set: {experimentState: updatedExperimentState}})
+    GlobalExperimentStates.update({_id: experimentStateId}, {$set: {experimentState: updatedExperimentState}})
     return updatedExperimentState;
   }
   GlobalExperimentStates.insert({userId: userId, TDFId: TDFId, experimentState: newExperimentState});
@@ -2411,9 +2412,9 @@ const methods = {
     Meteor.users.update({_id: Meteor.userId()}, {$set: {audioInputMode: audioInputMode}});
   },
 
-  updateExperimentState: function(curExperimentState) {
+  updateExperimentState: function(curExperimentState, experimentId) {
     serverConsole('updateExperimentState', curExperimentState, curExperimentState.currentTdfId);
-    GlobalExperimentStates.update({userId: Meteor.userId(), TDFId: curExperimentState.currentTdfId}, {$set: {experimentState: curExperimentState}});
+    GlobalExperimentStates.update({_id: experimentId}, {$set: {experimentState: curExperimentState}});
   },
 
   createExperimentState: function(curExperimentState) {
