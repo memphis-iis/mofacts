@@ -652,8 +652,30 @@ Router.route('/card', {
     if(!Session.get('currentTdfId')){
       const userId = Meteor.userId();
       Session.set('currentTdfId', await meteorCallAsync('getLastTDFAccessed', userId));
+      const tdf = await meteorCallAsync('getTdfById', Session.get('currentTdfId'));
+      if(tdf) {
+        const setspec = tdf.content.tdfs.tutor.setspec ? tdf.content.tdfs.tutor.setspec : null;
+        const ignoreOutOfGrammarResponses = setspec.speechIgnoreOutOfGrammarResponses ?
+        setspec.speechIgnoreOutOfGrammarResponses.toLowerCase() == 'true' : false;
+        const speechOutOfGrammarFeedback = setspec.speechOutOfGrammarFeedback ?
+        setspec.speechOutOfGrammarFeedback : 'Response not in answer set';
+        await selectTdf(
+          tdf._id,
+          setspec.lessonname,
+          tdf.stimuliSetId,
+          ignoreOutOfGrammarResponses,
+          speechOutOfGrammarFeedback,
+          'User button click',
+          tdf.content.isMultiTdf,
+          false,
+          setspec, 
+          false,
+          true);
+        this.next();
+      }
+    } else {
+      this.next();
     }
-    this.next();
   },
   action: function() {
     this.subscribe('files.assets.all').wait();

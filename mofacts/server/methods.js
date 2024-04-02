@@ -3135,7 +3135,7 @@ const asyncMethods = {
 
   loadStimsAndTdfsFromPrivate, getListOfStimTags, getUserLastFeedbackTypeFromHistory,
 
-  checkForUserException, 
+  checkForUserException, getTdfById,
 
   getUsersByExperimentId: async function(experimentId){
     const messages = ScheduledTurkMessages.find({experiment: experimentId}).fetch();
