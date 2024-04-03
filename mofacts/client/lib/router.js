@@ -648,11 +648,11 @@ Router.route('/classes/:_teacher/:_class', {
 
 Router.route('/card', {
   name: 'client.card',
-  onBeforeAction: async function() {
+  action: async function() {
     if(!Session.get('currentTdfId')){
       const userId = Meteor.userId();
-      Session.set('currentTdfId', await meteorCallAsync('getLastTDFAccessed', userId));
-      const tdf = await meteorCallAsync('getTdfById', Session.get('currentTdfId'));
+      const tdfId =  await meteorCallAsync('getLastTDFAccessed', userId);
+      const tdf = await meteorCallAsync('getTdfById', tdfId);
       if(tdf) {
         const setspec = tdf.content.tdfs.tutor.setspec ? tdf.content.tdfs.tutor.setspec : null;
         const ignoreOutOfGrammarResponses = setspec.speechIgnoreOutOfGrammarResponses ?
@@ -660,7 +660,7 @@ Router.route('/card', {
         const speechOutOfGrammarFeedback = setspec.speechOutOfGrammarFeedback ?
         setspec.speechOutOfGrammarFeedback : 'Response not in answer set';
         await selectTdf(
-          tdf._id,
+          tdfId,
           setspec.lessonname,
           tdf.stimuliSetId,
           ignoreOutOfGrammarResponses,
@@ -671,23 +671,19 @@ Router.route('/card', {
           setspec, 
           false,
           true);
-        this.next();
       }
     } else {
-      this.next();
-    }
-  },
-  action: function() {
-    this.subscribe('files.assets.all').wait();
-    this.subscribe('userComponentStates', Session.get('currentTdfId')).wait();
-    this.subscribe('currentTdf', Session.get('currentTdfId')).wait();
-    this.subscribe('tdfByExperimentTarget', Session.get('experimentTarget'), Session.get('experimentConditions')).wait();
-    if(this.ready()){
-      if (Meteor.user()) {
-        Session.set('curModule', 'card');
-        this.render('card');
-      } else {
-        this.redirect('/');
+      this.subscribe('files.assets.all').wait();
+      this.subscribe('userComponentStates', Session.get('currentTdfId')).wait();
+      this.subscribe('currentTdf', Session.get('currentTdfId')).wait();
+      this.subscribe('tdfByExperimentTarget', Session.get('experimentTarget'), Session.get('experimentConditions')).wait();
+      if(this.ready()){
+        if (Meteor.user()) {
+          Session.set('curModule', 'card');
+          this.render('card');
+        } else {
+          this.redirect('/');
+        }
       }
     }
   },
