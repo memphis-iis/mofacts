@@ -332,7 +332,6 @@ function instructContinue() {
       instructionClientStart: instructionClientStart,
       feedbackText: feedbackText,
       lastAction: 'instructions',
-      lastActionTimeStamp: Date.now(),
     };
 
     const res = await updateExperimentState(newExperimentState, 'instructions.instructContinue');

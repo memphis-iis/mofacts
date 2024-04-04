@@ -1170,22 +1170,36 @@ async function getTdfNamesByAccessorId(accessorId) {
   }
 }
 
+async function cleanExperimentStateDupes(experimentStates, idToKeep) {
+  for(const eS of experimentStates){
+    if(eS._id !== idToKeep)
+      GlobalExperimentStates.remove({_id: eS._id});
+  }
+}
 
 async function getExperimentState(userId, TDFId) { // by currentRootTDFId, not currentTdfId
-  const experimentStateRet = GlobalExperimentStates.findOne({userId: userId, TDFId: TDFId});
-  const experimentState = experimentStateRet ? experimentStateRet.experimentState : {};
+  const experimentStateRet = GlobalExperimentStates.find({userId: userId, TDFId: TDFId}).fetch();
+  const mergedExperimentState = {};
+  //merge experiment states
+  for(const experimentState of experimentStateRet){
+    mergedExperimentState.experimentState = Object.assign({}, mergedExperimentState.experimentState, experimentState.experimentState);
+  }
+  const experimentState = mergedExperimentState ? mergedExperimentState.experimentState : {};
+  experimentState.id = experimentStateRet ? experimentStateRet[0]._id : null;
+  //cleans up duplicates that occured due to a bug until next db wipe
+  await cleanExperimentStateDupes(experimentStateRet, experimentState.id);
   return experimentState;
 }
 
 // UPSERT not INSERT
-async function setExperimentState(userId, TDFId, newExperimentState, where) { // by currentRootTDFId, not currentTdfId
+async function setExperimentState(userId, TDFId, experimentStateId, newExperimentState, where) { // by currentRootTDFId, not currentTdfId
   serverConsole('setExperimentState:', where, userId, TDFId, newExperimentState);
-  const experimentStateRet = GlobalExperimentStates.findOne({userId: userId, TDFId: TDFId});
+  const experimentStateRet = GlobalExperimentStates.findOne({_id: experimentStateId})
   serverConsole(experimentStateRet)
   serverConsole(newExperimentState)
   if (experimentStateRet != null) {
     const updatedExperimentState = Object.assign(experimentStateRet.experimentState, newExperimentState);
-    GlobalExperimentStates.update({userId: userId, TDFId: TDFId}, {$set: {experimentState: updatedExperimentState}})
+    GlobalExperimentStates.update({_id: experimentStateId}, {$set: {experimentState: updatedExperimentState}})
     return updatedExperimentState;
   }
   GlobalExperimentStates.insert({userId: userId, TDFId: TDFId, experimentState: newExperimentState});
@@ -1228,6 +1242,12 @@ async function insertHistory(historyRecord) {
   historyRecord.recordedServerTime = (new Date()).getTime();
   serverConsole('insertHistory', historyRecord);
   Histories.insert(historyRecord)
+}
+
+async function getLastTDFAccessed(userId) {
+  const lastExperimentStateUpdated = GlobalExperimentStates.findOne({userId: userId}, {sort: {"experimentState.lastActionTimeStamp": -1}, limit: 1});;
+  const lastTDFId = lastExperimentStateUpdated.TDFId;
+  return lastTDFId;
 }
 
 async function getHistoryByTDFID(TDFId) {
@@ -2405,9 +2425,9 @@ const methods = {
     Meteor.users.update({_id: Meteor.userId()}, {$set: {audioInputMode: audioInputMode}});
   },
 
-  updateExperimentState: function(curExperimentState) {
+  updateExperimentState: function(curExperimentState, experimentId) {
     serverConsole('updateExperimentState', curExperimentState, curExperimentState.currentTdfId);
-    GlobalExperimentStates.update({userId: Meteor.userId(), TDFId: curExperimentState.currentTdfId}, {$set: {experimentState: curExperimentState}});
+    GlobalExperimentStates.update({_id: experimentId}, {$set: {experimentState: curExperimentState}});
   },
 
   createExperimentState: function(curExperimentState) {
@@ -3123,13 +3143,13 @@ const asyncMethods = {
 
   getExperimentState, setExperimentState, getStimuliSetByFileName, getMaxResponseKC,
 
-  getProbabilityEstimatesByKCId, getResponseKCMap, processPackageUpload,
+  getProbabilityEstimatesByKCId, getResponseKCMap, processPackageUpload, getLastTDFAccessed,
 
   insertHistory, getHistoryByTDFID, getUserRecentTDFs, clearCurUnitProgress, tdfUpdateConfirmed,
 
   loadStimsAndTdfsFromPrivate, getListOfStimTags, getUserLastFeedbackTypeFromHistory,
 
-  checkForUserException, 
+  checkForUserException, getTdfById,
 
   getUsersByExperimentId: async function(experimentId){
     const messages = ScheduledTurkMessages.find({experiment: experimentId}).fetch();
