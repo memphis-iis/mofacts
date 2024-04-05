@@ -384,9 +384,8 @@ async function doFileUpload(fileArray) {
       alert('There were ' + errorStack.length + ' errors uploading files: ' + errorStack.join('\n'));
     }
 
-    //update the stimDisplayTypeMap
-    const stimDisplayTypeMap = await meteorCallAsync('getStimDisplayTypeMap');
-    Session.set('stimDisplayTypeMap', stimDisplayTypeMap);
+    //force the stimDisplayTypeMap to refresh on next card load
+    Session.set('stimDisplayTypeMap', undefined);
 
     //clear the file upload fields
     $('#upload-file').val('');

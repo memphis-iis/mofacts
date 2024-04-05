@@ -63,6 +63,7 @@ const syllableURL = Meteor.settings.syllableURL ? Meteor.settings.syllableURL : 
 let highestStimuliSetId;
 let nextStimuliSetId;
 let nextEventId = 1;
+let stimDisplayTypeMap = {};
 
 // How large the distance between two words can be to be considered a match. Larger values result in a slower search. Defualt is 2.
 const maxEditDistance = Meteor.settings.SymSpell.maxEditDistance ? parseInt(Meteor.settings.SymSpell.maxEditDistance) : 2;
@@ -523,6 +524,8 @@ async function processPackageUpload(fileObj, owner, zipLink, emailToggle){
         }
         serverConsole('1 processPackageUpload ERROR,', path, ',', e + ' on file: ' + filePath);
         reject(new Meteor.Error('package upload failed: ' + e + ' on file: ' + filePath))
+      } finally {
+        updateStimDisplayTypeMap()
       }
     });
   
@@ -1320,49 +1323,48 @@ async function addUserToTeachersClass(userId, teacherID, sectionId) {
   return true;
 }
 
-async function getStimDisplayTypeMap() {
-  try {
-    serverConsole('getStimDisplayTypeMap');
-    const tdfs = await Tdfs.find().fetch();
-    const items = tdfs.map((tdf) => tdf.stimuli).flat();
-    let map = {};
-    for(let item of items){
-      if(!item) continue;
-      if(!map[item.stimuliSetId]){
-        map[item.stimuliSetId] = {
-          hasCloze: false,
-          hasText: false,
-          hasAudio: false,
-          hasImage: false,
-          hasVideo: false
-        }
-      }
-      else if(map[item.stimuliSetId].hasCloze && map[item.stimuliSetId].hasText && map[item.stimuliSetId].hasAudio &&
-              map[item.stimuliSetId].hasImage && map[item.stimuliSetId].hasVideo){
-        continue;
-      }
-      if(!map[item.stimuliSetId].hasCloze && item.clozeStimulus){
-        map[item.stimuliSetId].hasCloze = true;
-      }
-      if(!map[item.stimuliSetId].hasText && item.textStimulus){
-        map[item.stimuliSetId].hasText = true;
-      }
-      if(!map[item.stimuliSetId].hasAudio && item.audioStimulus){
-        map[item.stimuliSetId].hasAudio = true;
-      }
-      if(!map[item.stimuliSetId].hasImage && item.imageStimulus){
-        map[item.stimuliSetId].hasImage = true;
-      }
-      if(!map[item.stimuliSetId].hasVideo && item.videoStimulus){
-        map[item.stimuliSetId].hasVideo = true;
+async function updateStimDisplayTypeMap(){
+  serverConsole('getStimDisplayTypeMap');
+  const tdfs = await Tdfs.find().fetch();
+  const items = tdfs.map((tdf) => tdf.stimuli).flat();
+  let map = {};
+  for(let item of items){
+    if(!item) continue;
+    if(!map[item.stimuliSetId]){
+      map[item.stimuliSetId] = {
+        hasCloze: false,
+        hasText: false,
+        hasAudio: false,
+        hasImage: false,
+        hasVideo: false
       }
     }
-    serverConsole('getStimDisplayTypeMap', map);
-    return map;
-  } catch (e) {
-    serverConsole('getStimDisplayTypeMap ERROR,', e);
-    return null;
+    else if(map[item.stimuliSetId].hasCloze && map[item.stimuliSetId].hasText && map[item.stimuliSetId].hasAudio &&
+            map[item.stimuliSetId].hasImage && map[item.stimuliSetId].hasVideo){
+      continue;
+    }
+    if(!map[item.stimuliSetId].hasCloze && item.clozeStimulus){
+      map[item.stimuliSetId].hasCloze = true;
+    }
+    if(!map[item.stimuliSetId].hasText && item.textStimulus){
+      map[item.stimuliSetId].hasText = true;
+    }
+    if(!map[item.stimuliSetId].hasAudio && item.audioStimulus){
+      map[item.stimuliSetId].hasAudio = true;
+    }
+    if(!map[item.stimuliSetId].hasImage && item.imageStimulus){
+      map[item.stimuliSetId].hasImage = true;
+    }
+    if(!map[item.stimuliSetId].hasVideo && item.videoStimulus){
+      map[item.stimuliSetId].hasVideo = true;
+    }
   }
+  serverConsole('getStimDisplayTypeMap', map);
+  stimDisplayTypeMap = map;
+}
+
+async function getStimDisplayTypeMap() {
+  return stimDisplayTypeMap;
 }
 
 function getClassPerformanceByTDF(classId, tdfId, date=false) {
@@ -3614,7 +3616,7 @@ Meteor.startup(async function() {
   allEmails = allEmails.filter((v, i, a) => a.indexOf(v) === i);
   console.log("Sending startup email to: ", allEmails);
   
-
+  updateStimDisplayTypeMap();
 
   //email admin that the server has restarted
   for (const emailaddr of allEmails){
