@@ -16,6 +16,7 @@ import {MODEL_UNIT, SCHEDULE_UNIT} from '../../../common/Definitions';
 import {meteorCallAsync, clientConsole} from '../../index';
 import {displayify} from '../../../common/globalHelpers';
 import {Answers} from './answerAssess';
+import { AdaptiveQuestionLogic } from './adaptiveQuestionLogic';
 
 export {createScheduleUnit, createModelUnit, createEmptyUnit};
 
@@ -403,6 +404,15 @@ function modelUnitEngine() {
   // creation, so if they leave in the middle of practice and come back to
   // the unit we'll start all over.
   const unitStartTimestamp = Date.now();
+
+  //check if the unit is adaptive
+  const curUnit = Session.get('currentTdfUnit');
+  const isAdaptive = curUnit.adaptiveSchedule;
+  if(isAdaptive){
+    const aql = new AdaptiveQuestionLogic();
+    const adaptiveSchedule = aql.schedule;
+  }
+
 
   function getStimParameterArray(clusterIndex, whichStim) {
     return getStimCluster(clusterIndex).stims[whichStim].params.split(',').map((x) => _.floatval(x));

@@ -23,8 +23,6 @@ import {Answers} from './answerAssess';
 import {sessionCleanUp} from '../../lib/sessionUtils';
 import {checkUserSession} from '../../index'
 import {instructContinue, unitHasLockout, checkForFileImage} from './instructions';
-import { is } from 'bluebird';
-
 
 export {
   speakMessageIfAudioPromptFeedbackEnabled,
@@ -3618,7 +3616,7 @@ async function processUserTimesLog() {
     const curTdf = Session.get('currentTdfFile');
     const curTdfUnit = curTdf.tdfs.tutor.unit[Session.get('currentUnitNumber')];
     await setStudentPerformance(curUser._id, curUser.username, currentTdfId);
-
+    
     if(Session.get('isVideoSession')){
       let indices = Session.get('engineIndices');
       if(!indices){

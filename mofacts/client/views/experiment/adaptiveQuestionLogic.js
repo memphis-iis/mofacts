@@ -1,24 +1,29 @@
-// Adaptive Translator for Logic to Javascript
 
+export class AdaptiveQuestionLogic {  
+    schedule = [];
+    curUnit = Session.get('currentTdfUnit');
+    tdfId = Session.get('currentTdfId');
+    userId = Meteor.userId();
 
+    constructor(){
+        this.schedule = [{
+            clusterIndex: 0,
+            stimIndex: 0,
+        }];
+    }
+    
 
-export default class AdaptiveQuestionLogic{    
     //translate the logic to javascript code
-    evaluate(logicString, currentUnit, history){
+    async evaluate(logicString){
         //logic string is a string that contains the logic to be evaluated using IF THEN logic, 
         //currentUnit is the current unit that the logic is being evaluated for
-        //history is an object that contains a boolean value for each question in each unit
-        //example: {U1: {Q1: true, Q2: false}, U2: {Q1: true, Q2: true}}
 
         // you may use logic operators AND, OR, NOT, and the following variables:
-        // Questions (aka Q1), Units (aka U1), and combinations of the two (U1Q1)
-        // You may also use numbers, and PEMDAS operators (using double == for equality)
-        // Example: IF Q1 AND Q2 THEN (U1Q1, U2Q2)
-        // This would evaluate to true if Q1 and Q2 are true in the history dictionary, and would return a schedule of U1Q1 and U2Q2
-        // Example: IF (Q1 AND Q2) OR Q3 THEN (U1Q1, U2Q2, U3Q3)
-        // This would evaluate to true if Q1 and Q2 are true or Q3 is true in the history dictionary, and would return a schedule of U1Q1, U2Q2, and U3Q3
-        // Example: IF Q1 AND NOT Q2 THEN (U1Q1, U2Q2)
-        // This would evaluate to true if Q1 is true and Q2 is false in the history dictionary, and would return a schedule of U1Q1 and U2Q2
+        // KC<cluster index>S<stimulus index> - this is a stimulus that the student has seen before
+        // true - this is a boolean value
+        // false - this is a boolean value
+        // numbers - these are numbers
+        // math operators + - * / % ( ) = - these are math operators
 
         //This returns an object with the following properties:
         // condition: the original condition string
@@ -26,6 +31,8 @@ export default class AdaptiveQuestionLogic{
         // actions: the original action string
         // conditionResult: the result of the condition evaluation
         // schedule: an array of objects with the unit and question to schedule
+
+        //we have to get the student performance history
 
 
 
@@ -50,8 +57,6 @@ export default class AdaptiveQuestionLogic{
         let conditionTokens = condition.split(" ");
 
 
-
-
         //translate the condition
         let conditionExpression = "";
         // Allowed math operators
@@ -60,20 +65,26 @@ export default class AdaptiveQuestionLogic{
         for(const token of conditionTokens){
             if(operators[token]){
                 conditionExpression += operators[token];
-            } else if (token.startsWith("Q")){
-                conditionExpression += `history[currentUnit].${token}`;
             } else if (token.toLowerCase() === "true"){
                 conditionExpression += "true";
             } else if (token.toLowerCase() === "false"){
                 conditionExpression += "false";
-            } else if (Number.isInteger(parseInt(token)) || token.startsWith("U") || token.startsWith("Q")){
+            } else if (token.startsWith("KC")){
+                //the format for this is KC<cluster index>S<stimulus index>
+                let parts = token.split("KC")[1].split("S");
+                let clusterIndex = parseInt(parts[0]);
+                let stimulusIndex = parseInt(parts[1]);
+                //get the performance for this cluster and stimulus
+                let lastOutcome = await Meteor.call('getStudentPerformanceByStimulus', this.userId, this.tdfId, clusterIndex, stimulusIndex);
+                //if the outcome is string "correct", it is true, otherwise false
+                conditionExpression += lastOutcome === "correct";
+            } else if (Number.isInteger(parseInt(token))){
                 conditionExpression += token;
             } else {
                 //loop through each character in the token, if it is a math operator, add it to the expression. Otherwise, throw an error
                 for(const char of token){
                     if(mathOperators.includes(char)){
-                        conditionExpression += char;
-                    } else {
+                        conditionExpression += char;conditionExpression += lastOutcome === 1;
                         //check if a number
                         if(Number.isInteger(parseInt(char))){
                             conditionExpression += char;
@@ -112,53 +123,45 @@ export default class AdaptiveQuestionLogic{
             let actionsString = actions.substring(startIndex + 1, endIndex);
             //add each action to the schedule
             for(const action of actionsString.split(",")){
-                if(action.startsWith("Q")){
+                //the format is KC<cluster index>S<stimulus index>, we add these to the schedule 
+                if(action.startsWith("KC")){
+                    let parts = action.split("KC")[1].split("S");
+                    let KCI = parseInt(parts[0]);
+                    let stimulusIndex = parseInt(parts[1]);
+                    //get the performance for this cluster and stimulus
+                    let lastOutcome = await Meteor.call('getStudentPerformanceByStimulus', this.userId, this.tdfId, clusterIndex, stimulusIndex);
+                    //if the outcome is string "correct", it is true, otherwise false
                     schedule.push({
-                        unit: currentUnit,
-                        question: parseInt(action.split("Q")[1] || 0)
-                    });
-                }
-                if(action.startsWith("U")){
-                    //if it has a Q it has a defined question, otherwise it is just a unit and the question is 0
-                    if(action.includes("Q")){
-                        let parts = action.split("Q");
-                        schedule.push({
-                            unit: parseInt(parts[0].split("U")[1]),
-                            question: parseInt(parts[1])
-                        });
-                    } else {
-                        schedule.push({
-                            unit: parseInt(action.split("U")[1]),
-                            question: 0
-                        });
-                    }
-                }                
-            }
-        } else {
-            //if no parenthesis, it is a single action. We check if it is a unit and question or just a unit
-            if(actions.startsWith("Q")){
-                schedule.push({
-                    unit: currentUnit,
-                    question: parseInt(actions.split("Q")[1] || 0)
-                });
-            }
-            if(actions.startsWith("U")){
-                //if it has a Q it has a defined question, otherwise it is just a unit and the question is 0
-                if(actions.includes("Q")){
-                    let parts = actions.split("Q");
-                    schedule.push({
-                        unit: parseInt(parts[0].split("U")[1]),
-                        question: parseInt(parts[1])
+                        clusterIndex: KCI,
+                        stimIndex: stimulusIndex,
+                        outcome: lastOutcome === "correct"
                     });
                 } else {
-                    schedule.push({
-                        unit: parseInt(actions.split("U")[1]),
-                        question: 0
-                    });
+                    //throw an error if the action is not a valid action
+                    throw new Error(`Invalid action: ${action}`);
                 }
-            } 
+            }
+        } else {
+            //the action is a single action
+            if(actions.startsWith("KC")){
+                let parts = actions.split("KC")[1].split("S");
+                let clusterIndex = parseInt(parts[0]);
+                let stimulusIndex = parseInt(parts[1]);
+                //get the performance for this cluster and stimulus
+                let lastOutcome = await Meteor.call('getStudentPerformanceByStimulus', this.userId, this.tdfId, clusterIndex, stimulusIndex);
+                //if the outcome is string "correct", it is true, otherwise false
+                schedule.push({
+                    cluster: clusterIndex,
+                    stimulus: stimulusIndex,
+                    outcome: lastOutcome === "correct"
+                });
+            } else {
+                //throw an error if the action is not a valid action
+                throw new Error(`Invalid action: ${actions}`);
+            }
         }
         return {condition: condition, conditionExpression: conditionExpression, actions: actions, conditionResult: conditionResult, schedule: schedule};
     }
 }
+
 

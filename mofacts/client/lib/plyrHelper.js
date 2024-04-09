@@ -1,5 +1,5 @@
 import Plyr from 'plyr';
-import { newQuestionHandler } from '../views/experiment/card.js'
+import { newQuestionHandler } from '../views/experiment/card.js';
 
 let lastVolume = 0;
 let lastSpeed = 0;
