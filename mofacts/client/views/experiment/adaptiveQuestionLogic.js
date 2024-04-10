@@ -14,7 +14,7 @@ export class AdaptiveQuestionLogic {
     }
     
 
-    //translate the logic to javascript code
+    //translate the logic to javascript code    
     async evaluate(logicString){
         //logic string is a string that contains the logic to be evaluated using IF THEN logic, 
         //currentUnit is the current unit that the logic is being evaluated for
@@ -45,6 +45,7 @@ export class AdaptiveQuestionLogic {
         };
 
         //remove the IF prefix and split on keyword THEN. Before then is the condition, after then is the action
+        //if parts
         let parts = logicString.replace("IF", "").split("THEN");
         let condition = parts[0].trim();
         let actions = parts[1].trim();
@@ -76,12 +77,13 @@ export class AdaptiveQuestionLogic {
                 let clusterIndex = parseInt(parts[0]);
                 let stimulusIndex = parseInt(parts[1]);
                 //get the performance for this cluster and stimulus
+                this.componentStates = ComponentStates.findOne({userId: this.userId, TDFId: this.tdfId})
                 if(this.componentStates?.stimStates[stimulusIndex]){
                     console.log('getting component state for cluster:', clusterIndex, 'stimulus:', stimulusIndex, this.componentStates.stimStates[stimulusIndex]);
                     let outcome = this.componentStates.stimStates[stimulusIndex]?.outcomeStack[0] === 1;
                     //if the outcome is 1, lastOutcome is true, otherwise false
                     console.log('lastOutcome for ' + token + ':', outcome);
-                    conditionExpression += outcome === 1;
+                    conditionExpression += outcome;
                     return false;
                 } else {
                     console.log('no component state found for stimulus:', stimulusIndex);
