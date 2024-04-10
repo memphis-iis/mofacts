@@ -229,7 +229,6 @@ export async function initializePlyr() {
 }
 
 export async function playNextCard() {
-  Session.set('displayReady',false)
   let curTdfUnit = Session.get('currentTdfUnit');
   curTdfUnit.videosession.adaptiveLogic ? logic = curTdfUnit.videosession.adaptiveLogic[lastTimeIndex] : logic = '';
   if(engine.adaptiveQuestionLogic && logic != '' && logic != undefined){
