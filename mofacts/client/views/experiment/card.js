@@ -12,6 +12,7 @@ import {
 import { 
   initializePlyr,
   playVideo,
+  playNextCard
 } from '../../lib/plyrHelper.js'
 import {meteorCallAsync, redoCardImage} from '../../index';
 import {DialogueUtils, dialogueContinue, dialogueLoop, initiateDialogue} from './dialogueUtils';
@@ -2380,7 +2381,7 @@ async function prepareCard() {
       Session.set('engineIndices', indices);
       initializePlyr();
     } else {
-      playVideo();
+      playNextCard();
     }
   } else {
     await engine.selectNextCard(Session.get('engineIndices'), Session.get('currentExperimentState'));

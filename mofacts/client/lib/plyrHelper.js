@@ -4,20 +4,17 @@ import { newQuestionHandler } from '../views/experiment/card.js';
 let lastVolume = 0;
 let lastSpeed = 0;
 let loggingSeek = false;
+let lastTimeIndex = 0;
+let nextTime = 0;
 let seekStart = 0;
 let player;
+let times = [];
 
 function initVideoCards(player) {
-  const times = Session.get('currentTdfUnit')?.videosession?.questiontimes;
-  loggingSeek = false;
-  if(!times){
-    return
-  }
-  let timesCopy = times.slice(); 
-  timesCopy.sort((a, b) => a - b);
+  times.sort((a, b) => a - b);
   let nextTimeIndex = 0;
-  let nextTime = timesCopy[nextTimeIndex];
-  let lastTimeIndex = 0;
+  let nextTime = times[nextTimeIndex];
+  lastTimeIndex = 0;
   lastVolume = player.volume;
   lastSpeed = player.speed;
 
@@ -27,7 +24,7 @@ function initVideoCards(player) {
     //get the difference between the current time and the next time
     const timeDiff = nextTime - instance.currentTime;
     //get the difference between the next time and the previous time
-    const lastTime = nextTimeIndex == 0 ? 0: timesCopy[lastTimeIndex];
+    const lastTime = nextTimeIndex == 0 ? 0: times[lastTimeIndex];
     const totalTimeDiff =  nextTime - lastTime;
     //get the percentage of the progress bar that should be filled
     const percentage = (timeDiff / totalTimeDiff) * 100;
@@ -53,9 +50,9 @@ function initVideoCards(player) {
     //running here ensures that player pauses before being hidden
     if(instance.currentTime >= nextTime){
       lastTimeIndex = nextTimeIndex;
-      nextTimeIndex++;
-      if(nextTimeIndex < timesCopy.length){
-        nextTime = timesCopy[nextTimeIndex];
+      if(nextTimeIndex < times.length){
+        nextTimeIndex++;
+        nextTime = times[nextTimeIndex];
         let nextQuestion = times.indexOf(nextTime);
         Session.set('engineIndices', {stimIndex: 0, clusterIndex: nextQuestion});
         Session.set('displayReady', true);
@@ -82,8 +79,8 @@ function initVideoCards(player) {
         logPlyrAction('seek', player, player.currentTime, seekStart);
         loggingSeek = false; 
         if (seekStart > player.currentTime){
-          nextTimeIndex = getIndex(timesCopy, player.currentTime); //allow user to see old questions
-          nextTime = timesCopy[nextTimeIndex];
+          nextTimeIndex = getIndex(times, player.currentTime); //allow user to see old questions
+          nextTime = times[nextTimeIndex];
           let nextQuestion = times.indexOf(nextTime);
           Session.set('engineIndices', {stimIndex: 0, clusterIndex: nextQuestion});
           await engine.selectNextCard(Session.get('engineIndices'), Session.get('currentExperimentState'));
@@ -92,8 +89,8 @@ function initVideoCards(player) {
           player.pause();
           lastTimeIndex = nextTimeIndex;
           nextTimeIndex++;
-          if(nextTimeIndex < timesCopy.length){
-            nextTime = timesCopy[nextTimeIndex];
+          if(nextTimeIndex < times.length){
+            nextTime = times[nextTimeIndex];
             let nextQuestion = times.indexOf(nextTime);
             Session.set('engineIndices', {stimIndex: 0, clusterIndex: nextQuestion});
             Session.set('displayReady', true);
@@ -211,8 +208,14 @@ function logPlyrAction(action, player, currentTime = null, seekStart = null){
 
 export async function initializePlyr() {
   Session.set('trialStartTimestamp', Date.now());
-  const points = [];
-  const times = Session.get('currentTdfUnit')?.videosession?.questiontimes;
+  const questions = Session.get('currentTdfUnit')?.videosession?.questions;
+  for (let i = 0; i < questions.length; i++){
+    times.push(Session.get('currentTdfUnit').videosession.questiontimes[i]);
+  }
+  //sort times
+  times.sort((a, b) => a - b);
+  loggingSeek = false;
+  points = [];
   if(times){
     times.forEach(time => {
       points.push({time: Math.floor(time), label: 'Question ' + (times.indexOf(time) + 1)});
@@ -225,10 +228,36 @@ export async function initializePlyr() {
   playVideo();
 }
 
+export async function playNextCard() {
+  Session.set('displayReady',false)
+  let curTdfUnit = Session.get('currentTdfUnit');
+  curTdfUnit.videosession.adaptiveLogic ? logic = curTdfUnit.videosession.adaptiveLogic[lastTimeIndex] : logic = '';
+  if(engine.adaptiveQuestionLogic && logic != '' && logic != undefined){
+    console.log('adaptive schedule', engine.adaptiveQuestionLogic.schedule);
+    engine.adaptiveQuestionLogic.schedule.shift();
+    //evaluate the last question
+    nextIndices = engine.adaptiveQuestionLogic.schedule[0] ;
+    await engine.adaptiveQuestionLogic.evaluate(logic);
+    newschedule = engine.adaptiveQuestionLogic.schedule;
+    let points = []
+    times = [];
+    for (let i = 0; i < newschedule.length; i++){
+      times.push(curTdfUnit.videosession.questiontimes[newschedule[i].clusterIndex]);
+      points.push({time: Math.floor(curTdfUnit.videosession.questiontimes[newschedule[i].clusterIndex]), label: 'Question ' + (newschedule[i].clusterIndex + 1)});
+    }
+    player.config.markers.points = points;
+  }
+  engine.selectNextCard(nextIndices, Session.get('currentExperimentState'));
+  Session.set('engineIndices', nextIndices);
+  initVideoCards(player);
+  playVideo();
+}
+
 export async function playVideo() {
+  let indices = Session.get('engineIndices');
+
   $("#videoUnitContainer").show();
   player.play();
-  let indices = Session.get('engineIndices');
   await engine.selectNextCard(indices, Session.get('currentExperimentState'));
   Session.set('engineIndices', indices);
   newQuestionHandler();

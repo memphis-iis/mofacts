@@ -63,6 +63,9 @@ function defaultUnitEngine(curExperimentData) {
   const engine = {
     // Things actual engines must supply
     unitType: 'DEFAULT',
+      //check if the unit is adaptive
+    
+    adaptiveQuestionLogic: new AdaptiveQuestionLogic(),
     selectNextCard: function() {
       throw new Error('Missing Implementation');
     },
@@ -405,13 +408,6 @@ function modelUnitEngine() {
   // the unit we'll start all over.
   const unitStartTimestamp = Date.now();
 
-  //check if the unit is adaptive
-  const curUnit = Session.get('currentTdfUnit');
-  const isAdaptive = curUnit.adaptiveSchedule;
-  if(isAdaptive){
-    const aql = new AdaptiveQuestionLogic();
-    const adaptiveSchedule = aql.schedule;
-  }
 
 
   function getStimParameterArray(clusterIndex, whichStim) {
@@ -950,7 +946,7 @@ function modelUnitEngine() {
           // TODO: shouldn't need both
           if(isVideoSession) {
             if (this.curUnit && this.curUnit.videosession && this.curUnit.videosession.questions)
-              unitClusterList = this.curUnit.videosession.questions.trim()
+              unitClusterList = this.curUnit.videosession.questions;
           }
           else {
             if(this.curUnit && this.curUnit.learningsession && this.curUnit.learningsession.clusterlist)

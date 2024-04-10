@@ -1,15 +1,16 @@
-
 export class AdaptiveQuestionLogic {  
-    schedule = [];
-    curUnit = Session.get('currentTdfUnit');
-    tdfId = Session.get('currentTdfId');
-    userId = Meteor.userId();
+
 
     constructor(){
         this.schedule = [{
             clusterIndex: 0,
             stimIndex: 0,
         }];
+        this.curUnit = Session.get('currentTdfUnit');
+        this.tdfId = Session.get('currentTdfId');
+        this.userId = Meteor.userId();
+        this.componentStates = ComponentStates.findOne({userId: this.userId, TDFId: this.tdfId})
+        console.log('adaptive - componentStates:', this.componentStates, this.userId, this.tdfId);
     }
     
 
@@ -19,7 +20,7 @@ export class AdaptiveQuestionLogic {
         //currentUnit is the current unit that the logic is being evaluated for
 
         // you may use logic operators AND, OR, NOT, and the following variables:
-        // KC<cluster index>S<stimulus index> - this is a stimulus that the student has seen before
+        // C<cluster index>S<stimulus index> - this is a stimulus that the student has seen before
         // true - this is a boolean value
         // false - this is a boolean value
         // numbers - these are numbers
@@ -69,15 +70,23 @@ export class AdaptiveQuestionLogic {
                 conditionExpression += "true";
             } else if (token.toLowerCase() === "false"){
                 conditionExpression += "false";
-            } else if (token.startsWith("KC")){
-                //the format for this is KC<cluster index>S<stimulus index>
-                let parts = token.split("KC")[1].split("S");
+            } else if (token.startsWith("C")){
+                //the format for this is C<cluster index>S<stimulus index>
+                let parts = token.split("C")[1].split("S");
                 let clusterIndex = parseInt(parts[0]);
                 let stimulusIndex = parseInt(parts[1]);
                 //get the performance for this cluster and stimulus
-                let lastOutcome = await Meteor.call('getStudentPerformanceByStimulus', this.userId, this.tdfId, clusterIndex, stimulusIndex);
-                //if the outcome is string "correct", it is true, otherwise false
-                conditionExpression += lastOutcome === "correct";
+                if(this.componentStates?.stimStates[stimulusIndex]){
+                    console.log('getting component state for cluster:', clusterIndex, 'stimulus:', stimulusIndex, this.componentStates.stimStates[stimulusIndex]);
+                    let outcome = this.componentStates.stimStates[stimulusIndex]?.outcomeStack[0] === 1;
+                    //if the outcome is 1, lastOutcome is true, otherwise false
+                    console.log('lastOutcome for ' + token + ':', outcome);
+                    conditionExpression += outcome === 1;
+                    return false;
+                } else {
+                    console.log('no component state found for stimulus:', stimulusIndex);
+                    conditionExpression += false;
+                }
             } else if (Number.isInteger(parseInt(token))){
                 conditionExpression += token;
             } else {
@@ -95,6 +104,8 @@ export class AdaptiveQuestionLogic {
                 }
             }
         }
+
+        console.log('conditionExpression:', conditionExpression);
 
 
         //build a new function that will be called to evaluate the condition
@@ -114,7 +125,9 @@ export class AdaptiveQuestionLogic {
         //the action can be either a single action as a string or an array of actions. To check, we will find if parenthesis are present
         console.log('action:', actions);
 
-        let schedule = [];
+        let addToschedule = [];
+
+        let outcomes = [];
         
         ///check if there are parenthesis, if so interpret as an array of actions
         if(actions.includes("(")){
@@ -123,19 +136,17 @@ export class AdaptiveQuestionLogic {
             let actionsString = actions.substring(startIndex + 1, endIndex);
             //add each action to the schedule
             for(const action of actionsString.split(",")){
-                //the format is KC<cluster index>S<stimulus index>, we add these to the schedule 
-                if(action.startsWith("KC")){
-                    let parts = action.split("KC")[1].split("S");
+                //the format is C<cluster index>S<stimulus index>, we add these to the schedule 
+                if(action.startsWith("C")){
+                    let parts = action.split("C")[1].split("S");
                     let KCI = parseInt(parts[0]);
                     let stimulusIndex = parseInt(parts[1]);
-                    //get the performance for this cluster and stimulus
-                    let lastOutcome = await Meteor.call('getStudentPerformanceByStimulus', this.userId, this.tdfId, clusterIndex, stimulusIndex);
                     //if the outcome is string "correct", it is true, otherwise false
-                    schedule.push({
+                    addToschedule.push({
                         clusterIndex: KCI,
                         stimIndex: stimulusIndex,
-                        outcome: lastOutcome === "correct"
                     });
+                    console.log('adding to adaptive schedule:', addToschedule);
                 } else {
                     //throw an error if the action is not a valid action
                     throw new Error(`Invalid action: ${action}`);
@@ -143,24 +154,24 @@ export class AdaptiveQuestionLogic {
             }
         } else {
             //the action is a single action
-            if(actions.startsWith("KC")){
-                let parts = actions.split("KC")[1].split("S");
+            if(actions.startsWith("C")){
+                let parts = actions.split("C")[1].split("S");
                 let clusterIndex = parseInt(parts[0]);
                 let stimulusIndex = parseInt(parts[1]);
-                //get the performance for this cluster and stimulus
-                let lastOutcome = await Meteor.call('getStudentPerformanceByStimulus', this.userId, this.tdfId, clusterIndex, stimulusIndex);
                 //if the outcome is string "correct", it is true, otherwise false
-                schedule.push({
-                    cluster: clusterIndex,
+                addToschedule.push({
+                    clusterIndex: clusterIndex,
                     stimulus: stimulusIndex,
-                    outcome: lastOutcome === "correct"
                 });
+                console.log('adding to adaptive schedule:', addToschedule);
             } else {
                 //throw an error if the action is not a valid action
                 throw new Error(`Invalid action: ${actions}`);
             }
+            //append to the schedule
+            this.schedule.push(...addToschedule);
         }
-        return {condition: condition, conditionExpression: conditionExpression, actions: actions, conditionResult: conditionResult, schedule: schedule};
+        return {condition: condition, conditionExpression: conditionExpression, actions: actions, conditionResult: conditionResult, schedule: addToschedule};
     }
 }
 
