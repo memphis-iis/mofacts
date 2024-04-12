@@ -1187,7 +1187,7 @@ async function getExperimentState(userId, TDFId) { // by currentRootTDFId, not c
   for(const experimentState of experimentStateRet){
     mergedExperimentState.experimentState = Object.assign({}, mergedExperimentState.experimentState, experimentState.experimentState);
   }
-  const experimentState = mergedExperimentState ? mergedExperimentState.experimentState : {};
+  const experimentState = mergedExperimentState && mergedExperimentState.experimentState ? mergedExperimentState.experimentState : {};
   experimentState.id = experimentStateRet && experimentStateRet[0] ? experimentStateRet[0]._id : null;
   //cleans up duplicates that occured due to a bug until next db wipe
   await cleanExperimentStateDupes(experimentStateRet, experimentState.id);
