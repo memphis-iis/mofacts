@@ -2230,10 +2230,20 @@ async function unitIsFinished(reason) {
   clearCardTimeout();
 
   const curTdf = Session.get('currentTdfFile');
-  const curUnitNum = Session.get('currentUnitNumber');
-  const newUnitNum = curUnitNum + 1;
-  const curTdfUnit = curTdf.tdfs.tutor.unit[newUnitNum];
-  const countCompletion = curTdf.tdfs.tutor.unit[curUnitNum].countcompletion
+  const adaptive = curTdf.tdfs.tutor.unit[Session.get('currentUnitNumber')].adaptive
+  //if the last unit was adaptive, we need to build the next unit
+  if(adaptive == curUnitNum){
+    const curUnitNum = Session.get('currentUnitNumber')
+    const newUnitNum = curUnitNum;
+    const adaptiveTemplate = curTdf.tdfs.tutor.unit[curUnitNum].adaptiveUnitTemplate
+    const curTdfUnit = engine.adaptiveQuestionLogic.unitBuilder(adaptiveTemplate);
+    const countCompletion = curTdf.tdfs.tutor.unit[curUnitNum].countcompletion
+  } else {
+    const curUnitNum = Session.get('currentUnitNumber');
+    const newUnitNum = curUnitNum + 1;
+    const curTdfUnit = curTdf.tdfs.tutor.unit[newUnitNum];
+    const countCompletion = curTdf.tdfs.tutor.unit[curUnitNum].countcompletion
+  }
 
   Session.set('questionIndex', 0);
   Session.set('clusterIndex', undefined);

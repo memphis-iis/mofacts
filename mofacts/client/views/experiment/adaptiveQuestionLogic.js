@@ -6,6 +6,7 @@ export class AdaptiveQuestionLogic {
             clusterIndex: 0,
             stimIndex: 0,
         }];
+        this.when = Session.get('currentTdfUnit').adaptive;
         this.curUnit = Session.get('currentTdfUnit');
         this.tdfId = Session.get('currentTdfId');
         this.userId = Meteor.userId();
@@ -84,7 +85,6 @@ export class AdaptiveQuestionLogic {
                     //if the outcome is 1, lastOutcome is true, otherwise false
                     console.log('lastOutcome for ' + token + ':', outcome);
                     conditionExpression += outcome;
-                    return false;
                 } else {
                     console.log('no component state found for stimulus:', stimulusIndex);
                     conditionExpression += false;
@@ -174,6 +174,23 @@ export class AdaptiveQuestionLogic {
             this.schedule.push(...addToschedule);
         }
         return {condition: condition, conditionExpression: conditionExpression, actions: actions, conditionResult: conditionResult, schedule: addToschedule};
+    }
+    unitBuilder(templateUnitNumber){
+        //build the unit based on the base unit and the schedule
+        let newUnit = Session.get('currentTdfFile').tdfs.tutor.unitTemplate[templateUnitNumber];
+        //if newunit is not defined, throw an error
+        if(!newUnit){
+            alert(`There was an error building the unit. Please contact the administrator`);
+            throw new Error(`Unit template ${templateUnitNumber} not found`);
+        }
+        newUnit.assessmentsession.clusterlist = ""
+        for(const item of this.schedule){
+            let cluster = newUnit.assessmentsession.clusterlist[item.clusterIndex];
+            newUnit.assessmentsession.clusterlist += cluster + " ";
+        }
+        newUnit.assessmentsession.clusterlist = newUnit.assessmentsession.clusterlist.trim();
+        //injected the new unit into the session
+        Session.set('currentTdfUnit', newUnit);
     }
 }
 
