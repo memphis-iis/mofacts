@@ -2218,7 +2218,7 @@ function gatherAnswerLogRecord(trialEndTimeStamp, trialStartTimeStamp, source, u
     'dialogueHistory': dialogueHistory || null,
     'instructionQuestionResult': Session.get('instructionQuestionResult') || false,
     'hintLevel': whichHintLevel,
-    'entryPoint': Meteor.user().profile.entryPoint
+    'entryPoint': Meteor.user().loginParams.entryPoint
   };
   return answerLogRecord;
 }
