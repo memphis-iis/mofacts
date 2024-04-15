@@ -3131,7 +3131,7 @@ const methods = {
 const asyncMethods = {
   getAllTdfs, getTdfByFileName, getTdfByExperimentTarget, getTdfIDsAndDisplaysAttemptedByUserId,
 
-  getStimDisplayTypeMap, getStimuliSetById, getSourceSentences,
+  getStimDisplayTypeMap, getStimuliSetById, getSourceSentences, updateStimDisplayTypeMap,
 
   getAllCourses, getAllCourseSections, getAllCoursesForInstructor, getAllCourseAssignmentsForInstructor,
 

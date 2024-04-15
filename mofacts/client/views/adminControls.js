@@ -117,6 +117,15 @@ Template.adminControls.events({
             });
         });
         Session.set('curTheme', getCurrentTheme());
+    },
+    'click #updateStimDisplayTypeMap': function(event) {
+        Meteor.call('updateStimDisplayTypeMap', function(err, res) {
+            if (err) {
+                alert("Error clearing stim display type map: " + err);
+            } else {
+                console.log("Cleared stim display type map: " + res);
+            }
+        });
     }
 });
   
