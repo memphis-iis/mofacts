@@ -2301,13 +2301,13 @@ function tdfUpdateConfirmed(updateObj, resetShuffleClusters = false){
 
 function setUserLoginData(entryPoint, loginMode, curTeacher = undefined, curClass = undefined, assignedTdfs = undefined){
   serverConsole('setUserLoginData', entryPoint, loginMode, curTeacher, curClass, assignedTdfs);
-  let profile = Meteor.user().profile;
-  profile.entryPoint = entryPoint;
-  profile.curTeacher = curTeacher;
-  profile.curClass = curClass;
-  profile.loginMode = loginMode;
-  profile.assignedTdfs = assignedTdfs;
-  Meteor.users.update({_id: Meteor.userId()}, {$set: {profile: profile}});
+  let loginParams = Meteor.user().loginParams || {};
+  loginParams.entryPoint = entryPoint;
+  loginParams.curTeacher = curTeacher;
+  loginParams.curClass = curClass;
+  loginParams.loginMode = loginMode;
+  loginParams.assignedTdfs = assignedTdfs;
+  Meteor.users.update({_id: Meteor.userId()}, {$set: {loginParams: loginParams}});
 }
 
 async function loadStimsAndTdfsFromPrivate(adminUserId) {
@@ -2759,12 +2759,12 @@ const methods = {
   },
 
   clearLoginData: function(){
-    let profile = Meteor.user().profile;
-    profile.entryPoint = null;
-    profile.curTeacher = null;
-    profile.curClass = null;
-    profile.loginMode = null;
-    Meteor.users.update({_id: Meteor.userId()}, {$set: {profile: profile}});
+    let loginParams = Meteor.user().loginParams;
+    loginParams.entryPoint = null;
+    loginParams.curTeacher = null;
+    loginParams.curClass = null;
+    loginParams.loginMode = null;
+    Meteor.users.update({_id: Meteor.userId()}, {$set: {loginParams: loginParams}});
   },
 
   clearImpersonation: function(){
