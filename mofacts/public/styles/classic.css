@@ -618,14 +618,6 @@ input[type="range"]::-webkit-slider-runnable-track {
   }
 
 
-  #userLowerInteractionContainer {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    background-color:var(--background-color); /* Set the background color as needed */
-    z-index: 999; /* Set a high z-index to ensure it's on top of other content */
-  }
 
   #progressBarContainer{
     background-color: rgba(0,0,0,0.0);

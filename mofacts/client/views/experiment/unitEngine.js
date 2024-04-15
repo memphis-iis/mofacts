@@ -9,7 +9,8 @@ import {
   randomChoice,
   createStimClusterMapping,
   updateCurStudentPerformance,
-  getAllCurrentStimAnswers
+  getAllCurrentStimAnswers,
+  updateCurStudedentPracticeTime
 } from '../../lib/currentTestingHelpers';
 import {updateExperimentState, unitIsFinished} from './card';
 import {MODEL_UNIT, SCHEDULE_UNIT} from '../../../common/Definitions';
@@ -1612,6 +1613,14 @@ function modelUnitEngine() {
       }
     },
 
+    updatePracticeTime: function(practiceTime) {
+      const card = cardProbabilities.cards[Session.get('clusterIndex')];
+      const stim = card.stims[currentCardInfo.whichStim];
+      card.totalPracticeDuration += practiceTime;
+      stim.totalPracticeDuration += practiceTime;
+      updateCurStudedentPracticeTime(practiceTime);
+    },
+
     cardAnswered: async function(wasCorrect, practiceTime) {
       // Get info we need for updates and logic below
       const cards = cardProbabilities.cards;
@@ -2125,7 +2134,6 @@ function scheduleUnitEngine() {
         whichStim: questInfo.whichStim,
         testType: questInfo.testType,
         lastAction: 'question',
-        lastActionTimeStamp: Date.now(),
       };
 
       // Set current Q/A info, type of test (drill, test, study), and then
@@ -2152,6 +2160,9 @@ function scheduleUnitEngine() {
       // info, so we need to use -1 for this info
       const questionIndex = Math.max(Session.get('questionIndex')-1, 0);
       return this.getSchedule().q[questionIndex];
+    },
+
+    updatePracticeTime: function() {
     },
 
     cardAnswered: async function() {

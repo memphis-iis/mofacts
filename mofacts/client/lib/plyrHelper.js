@@ -1,5 +1,5 @@
 import Plyr from 'plyr';
-import { newQuestionHandler } from '../views/experiment/card.js';
+import { newQuestionHandler, unitIsFinished } from '../views/experiment/card.js'
 
 let lastVolume = 0;
 let lastSpeed = 0;
@@ -28,6 +28,11 @@ function initVideoCards(player) {
   player.off('volumechange');
   player.off('ratechange');
   
+  //if this is not the furthest unit the student has reached, display the continue button
+  if(Session.get('currentUnitNumber') < Session.get('currentExperimentState').lastUnitStarted){
+    $("#continueBar").removeAttr('hidden');
+    $('#continueButton').prop('disabled', false);
+  }
 
   //add event listeners to pause video playback
   //onready, set the time to the last time the video was paused
@@ -51,7 +56,16 @@ function initVideoCards(player) {
 
   player.on('timeupdate', async function(event){
     const instance = event.detail.plyr;
+    if(timesCopy.length == 0) {
+      thisNextTime = instance.duration;
+      thisLastTime = 0;
+      timeIsEndTime = true;
+    } else {
+      thisNextTime = timesCopy[nextTimeIndex];
+      thisLastTime = nextTimeIndex == 0 ? 0: timesCopy[lastTimeIndex];
+    }
     //get the difference between the current time and the next time
+
     const timeDiff = nextTime - instance.currentTime;
     //if times[nextTimeIndex] is undefined, we set it to the end of the video
     if(nextTime == undefined){
@@ -67,13 +81,22 @@ function initVideoCards(player) {
     //add class
     $('#progressbar').addClass('progress-bar');
     //set the width of the progress bar
-    document.getElementById('progressbar').style.width = percentage + '%';
-    //set the CountdownTimerText to the time remaining
-    document.getElementById('CountdownTimerText').innerHTML = Math.round(timeDiff) + ' seconds until next question.';
-    if(instance.currentTime >= nextTime){
-      instance.pause();
-      //reset progress bar
-      document.getElementById('progressbar').style.width = '0%';
+    if(timesCopy.length != 0 || Session.get('curTdfUISettings').displayReviewTimeoutAsBarOrText == "bar" || Session.get('curTdfUISettings').displayEndOfVideoCountdown){
+      if(Session.get('curTdfUISettings').displayReviewTimeoutAsBarOrText == "text" || Session.get('curTdfUISettings').displayReviewTimeoutAsBarOrText == "both"){                
+        document.getElementById("CountdownTimerText").innerHTML = 'Continuing in: ' + Math.floor(timeDiff) + ' seconds';
+      } else {
+        document.getElementById("CountdownTimerText").innerHTML = '';
+      }
+      if(Session.get('curTdfUISettings').displayReviewTimeoutAsBarOrText == "bar" || Session.get('curTdfUISettings').displayCardTimeoutAsBarOrText == "both"){
+        //add the progress bar class
+        $('#progressbar').addClass('progress-bar');
+        document.getElementById("progressbar").style.width = percentage + "%";
+      } else {
+        //set width to 0% 
+        document.getElementById("progressbar").style.width = 0 + "%";
+        //remove progress bar class
+        $('#progressbar').removeClass('progress-bar');
+      }
     }
   });
 
@@ -128,7 +151,18 @@ function initVideoCards(player) {
             nextTime = times[nextTimeIndex];
             let nextQuestion = questions[nextTimeIndex];
             Session.set('engineIndices', {stimIndex: 0, clusterIndex: nextQuestion});
-            Session.set('displayReady', true);
+            await engine.selectNextCard(Session.get('engineIndices'), Session.get('currentExperimentState'));
+            newQuestionHandler();
+          } else if(player.currentTime >= nextTime) {
+            player.pause();
+            lastTimeIndex = nextTimeIndex;
+            nextTimeIndex++;
+            if(nextTimeIndex < timesCopy.length){
+              nextTime = timesCopy[nextTimeIndex];
+              let nextQuestion = times.indexOf(nextTime);
+              Session.set('engineIndices', {stimIndex: 0, clusterIndex: nextQuestion});
+              Session.set('displayReady', true);
+            }
           }
         }
       }
@@ -149,6 +183,14 @@ function initVideoCards(player) {
     const instance = event.detail.plyr;
     console.log('playback speed changed to ', instance.speed, "from ", lastSpeed);
     logPlyrAction('playbackSpeedChange', instance);
+  });
+
+  player.on('ended', async function(event){
+    const instance = event.detail.plyr;
+    console.log('video ended');
+    logPlyrAction('end', instance);
+    $("#continueBar").removeAttr('hidden');
+    $('#continueButton').prop('disabled', false);
   });
   
 }
@@ -260,11 +302,44 @@ export async function initializePlyr() {
       points.push({time: Math.floor(time), label: 'Question ' + (times.indexOf(time) + 1)});
     });
   }
-  player = new Plyr('#videoUnitPlayer', {
-    markers: { enabled: true, points: points }
-  });
-  Session.set('engineIndices', {stimIndex: 0, clusterIndex: questions[0]});
-  initVideoCards(player)
+  if(!player){
+    player = new Plyr('#videoUnitPlayer', {
+      markers: { enabled: times.length > 0 , points: points }
+    });
+  }
+  //set the source of the video to the new video
+  source = Session.get('currentTdfUnit').videosession.videosource;
+  //check if its a youtube or shortened youtube link
+  if(source.includes('youtu')){
+    //check if youtube link is shortened
+    if(source.includes('youtu.be')){
+      source = source.split('youtu.be/')[1];
+    } else {
+      source = source.split('v=')[1]
+      source = source.split('&')[0];
+    }   
+    player.source = {
+      type: 'video',
+      sources: [
+        {
+          src: 'https://www.youtube.com/watch?v=' + source,
+          provider: 'youtube',
+        },
+      ],
+    };
+  } else {
+    //html5 video
+    player.source = {
+      type: 'video',
+      sources: [
+        {
+          src: source,
+          type: 'video/mp4',
+        },
+      ],
+    };
+  }
+  initVideoCards(player);
   playVideo();
 }
 
@@ -317,6 +392,10 @@ export async function playVideo() {
   await engine.selectNextCard(indices, Session.get('currentExperimentState'));
   Session.set('engineIndices', indices);
   newQuestionHandler();
+}
+export async function destroyPlyr() {
+  player.destroy();
+  player = null;
 }
 
 function waitForElm(selector) {

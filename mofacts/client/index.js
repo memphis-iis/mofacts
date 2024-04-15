@@ -154,6 +154,7 @@ Meteor.startup(function() {
   $(window).on('resize', function() {
     redoCardImage();
   });
+
 });
 
 Template.DefaultLayout.onRendered(function() {
@@ -245,6 +246,11 @@ Template.DefaultLayout.events({
     event.preventDefault();
     console.log('save error reporting button pressed');
     const errorDescription = $('#errorDescription').val();
+    //if error description is empty, alert the user to enter a description
+    if (errorDescription === '') {
+      alert('Please enter a description of the error');
+      return;
+    }
     const curUser = Meteor.userId();
     const curPage = document.location.pathname;
     const sessionVars = Session.all();
