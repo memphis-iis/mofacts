@@ -141,6 +141,8 @@ let cachedSyllables = null;
 let speechTranscriptionTimeoutsSeen = 0;
 let timeoutsSeen = 0; // Reset to zero on resume or non-timeout
 let trialStartTimestamp = 0;
+let trialEndTimeStamp = 0;
+let afterFeedbackCallbackBind = null;
 Session.set('trialStartTimestamp', trialStartTimestamp);
 let firstKeypressTimestamp = 0;
 let currentSound = null; // See later in this file for sound functions
@@ -567,7 +569,11 @@ Template.card.events({
 
   'click #continueStudy': function(event) {
     event.preventDefault();
-    handleUserInput(event, 'buttonClick');
+    const timeout = Session.get('CurTimeoutId')
+    Session.set('CurTimeoutId', undefined)
+    Meteor.clearTimeout(timeout)
+    afterFeedbackCallbackBind()
+    engine.updatePracticeTime(Date.now() - trialEndTimeStamp)
   },
 
   'click .instructModalDismiss': function(event) {
@@ -1388,7 +1394,7 @@ function handleUserInput(e, source, simAnswerCorrect) {
     }
   } 
 
-  const trialEndTimeStamp = Date.now();
+  trialEndTimeStamp = Date.now();
   const afterAnswerFeedbackCallbackWithEndTime = afterAnswerFeedbackCallback.bind(null,
     trialEndTimeStamp, trialStartTimestamp, source, userAnswer);
 
@@ -1850,7 +1856,7 @@ async function afterAnswerFeedbackCallback(trialEndTimeStamp, trialStartTimeStam
   Session.set('feedbackTimeoutBegins', Date.now())
   const answerLogRecord = gatherAnswerLogRecord(trialEndTimeStamp, trialStartTimeStamp, source, userAnswer, isCorrect,
       testType, deliveryParams, dialogueHistory, wasReportedForRemoval);
-  const afterFeedbackCallbackBind = afterFeedbackCallback.bind(null, trialEndTimeStamp, trialStartTimeStamp, isTimeout, isSkip, isCorrect, testType, deliveryParams, answerLogRecord, 'card')
+  afterFeedbackCallbackBind = afterFeedbackCallback.bind(null, trialEndTimeStamp, trialStartTimeStamp, isTimeout, isSkip, isCorrect, testType, deliveryParams, answerLogRecord, 'card')
   const timeout = Meteor.setTimeout(async function() {
     afterFeedbackCallbackBind()
     engine.updatePracticeTime(Date.now() - trialEndTimeStamp)
@@ -1871,6 +1877,7 @@ async function afterAnswerFeedbackCallback(trialEndTimeStamp, trialStartTimeStam
 }
 
 async function afterFeedbackCallback(trialEndTimeStamp, trialStartTimeStamp, isTimeout, isSkip, isCorrect, testType, deliveryParams, answerLogRecord, callLocation) {
+  afterFeedbackCallbackBind = undefined;
   Session.set('CurTimeoutId', null)
   const userLeavingTrial = callLocation != 'card';
   let reviewEnd = Date.now();
