@@ -277,7 +277,7 @@ export async function playNextCard() {
       console.log('adaptive schedule', engine.adaptiveQuestionLogic.schedule);   
       await engine.adaptiveQuestionLogic.evaluate(logic);
     }
-    if(engine.adaptiveQuestionLogic.whem = "now"){
+    if(engine.adaptiveQuestionLogic.when == "now"){
       //remove the first question from the schedule
       engine.adaptiveQuestionLogic.schedule.shift();
       newschedule = engine.adaptiveQuestionLogic.schedule;

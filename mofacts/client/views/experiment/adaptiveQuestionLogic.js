@@ -185,12 +185,12 @@ export class AdaptiveQuestionLogic {
         }
         newUnit.assessmentsession.clusterlist = ""
         for(const item of this.schedule){
-            let cluster = newUnit.assessmentsession.clusterlist[item.clusterIndex];
+            let cluster = item.clusterIndex;
             newUnit.assessmentsession.clusterlist += cluster + " ";
         }
         newUnit.assessmentsession.clusterlist = newUnit.assessmentsession.clusterlist.trim();
         //injected the new unit into the session
-        Session.set('currentTdfUnit', newUnit);
+        return newUnit;
     }
 }
 

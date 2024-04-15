@@ -2232,18 +2232,20 @@ async function unitIsFinished(reason) {
   const curTdf = Session.get('currentTdfFile');
   const adaptive = curTdf.tdfs.tutor.unit[Session.get('currentUnitNumber')].adaptive
   //if the last unit was adaptive, we need to build the next unit
+  let curUnitNum = Session.get('currentUnitNumber');
+  let newUnitNum = curUnitNum + 1;
+  let curTdfUnit = curTdf.tdfs.tutor.unit[newUnitNum];
+  let countCompletion = curTdf.tdfs.tutor.unit[curUnitNum].countcompletion
   if(adaptive == curUnitNum){
-    const curUnitNum = Session.get('currentUnitNumber')
-    const newUnitNum = curUnitNum;
-    const adaptiveTemplate = curTdf.tdfs.tutor.unit[curUnitNum].adaptiveUnitTemplate
-    const curTdfUnit = engine.adaptiveQuestionLogic.unitBuilder(adaptiveTemplate);
-    const countCompletion = curTdf.tdfs.tutor.unit[curUnitNum].countcompletion
-  } else {
-    const curUnitNum = Session.get('currentUnitNumber');
-    const newUnitNum = curUnitNum + 1;
-    const curTdfUnit = curTdf.tdfs.tutor.unit[newUnitNum];
-    const countCompletion = curTdf.tdfs.tutor.unit[curUnitNum].countcompletion
+    curUnitNum = Session.get('currentUnitNumber')
+    adaptiveTemplate = curTdf.tdfs.tutor.unit[curUnitNum].adaptiveUnitTemplate
+    curTdfUnit = engine.adaptiveQuestionLogic.unitBuilder(adaptiveTemplate);
+    countCompletion = curTdf.tdfs.tutor.unit[curUnitNum].countcompletion
+    //append the new unit to the tdf
+    curTdf.tdfs.tutor.unit.splice(newUnitNum, 0, curTdfUnit);
+    Session.set('currentTdfFile', curTdf);
   }
+  
 
   Session.set('questionIndex', 0);
   Session.set('clusterIndex', undefined);
@@ -3225,11 +3227,14 @@ async function resumeFromComponentState() {
     Session.set('currentStimuliSetId', curTdf.stimuliSetId);
     console.log('condition stimuliSetId', curTdf);
   } else {
-    Session.set('currentTdfFile', rootTDF);
-    Session.set('currentTdfName', rootTDF.fileName);
-    Session.set('currentTdfId', Session.get('currentRootTdfId'));
-    Session.set('currentStimuliSetId', rootTDFBoxed.stimuliSetId);
-
+    //if currentTdfFile is not set, we are resuming from a previous state and need to set it
+    if(!Session.get('currentTdfFile')){
+      Session.set('currentTdfFile', rootTDF);
+      Session.set('currentTdfName', rootTDF.fileName);
+      Session.set('currentTdfId', Session.get('currentRootTdfId'));
+      Session.set('currentStimuliSetId', rootTDFBoxed.stimuliSetId);
+    } 
+    
     // Just notify that we're skipping
     console.log('No Experimental condition is required: continuing', rootTDFBoxed);
   }
