@@ -2413,7 +2413,7 @@ const methods = {
     serverConsole('removeTurkById', turkId, experimentId)
     ScheduledTurkMessages.remove({workerUserId: turkId, experiment: experimentId});
     let profile = Meteor.user().profile;
-    profile.lockoiuts[experimentId].lockoutMinutes = Number.MAX_SAFE_INTEGER;
+    profile.lockouts[experimentId].lockoutMinutes = Number.MAX_SAFE_INTEGER;
     Meteor.users.update({_id: Meteor.userId()}, {$set: {profile: profile}});
   },
 

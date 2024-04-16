@@ -579,7 +579,7 @@ Template.card.events({
   'click .instructModalDismiss': function(event) {
     event.preventDefault();
     $('#finalInstructionsDlg').modal('hide');
-    if (Meteor.user().profile.loginMode === 'experiment') {
+    if (Meteor.user().loginParams.loginMode === 'experiment') {
       // Experiment user - no where to go?
       leavePage(routeToSignin);
     } else {
@@ -612,11 +612,11 @@ Template.card.events({
 });
 
 Template.card.helpers({
-  'isExperiment': () => Meteor.user().profile.loginMode === 'experiment',
+  'isExperiment': () => Meteor.user().loginParams.loginMode === 'experiment',
 
   'experimentLoginText': () => curTdfUISettings.experimentLoginText || "Amazon Turk ID",
 
-  'isNormal': () => Meteor.user().profile.loginMode !== 'experiment',
+  'isNormal': () => Meteor.user().loginParams.loginMode !== 'experiment',
 
   'isNotInDialogueLoopStageIntroOrExit': () => Session.get('dialogueLoopStage') != 'intro' && Session.get('dialogueLoopStage') != 'exit',
 
@@ -2178,8 +2178,8 @@ function gatherAnswerLogRecord(trialEndTimeStamp, trialStartTimeStamp, source, u
     'conditionNameD': 'how answered',
     'conditionTypeD': _.trim(source),
     'conditionNameE': 'section',
-    'conditionTypeE': Meteor.user().profile.entryPoint && 
-        Meteor.user().profile.entryPoint !== 'direct' ? Meteor.user().profile.entryPoint : null,
+    'conditionTypeE': Meteor.user().loginParams.entryPoint && 
+        Meteor.user().loginParams.entryPoint !== 'direct' ? Meteor.user().loginParams.entryPoint : null,
 
     'responseDuration': null,
 
@@ -3715,7 +3715,7 @@ async function processUserTimesLog() {
   if (moduleCompleted) {
     // They are DONE!afterAnswerAssessmentCb
     console.log('TDF already completed - leaving for profile page.');
-    if (Meteor.user().profile.loginMode === 'experiment') {
+    if (Meteor.user().loginParams.loginMode === 'experiment') {
       // Experiment users don't *have* a normal page
       leavePage(routeToSignin);
     } else {

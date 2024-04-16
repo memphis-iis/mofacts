@@ -200,7 +200,7 @@ function lockoutPeriodicCheck() {
     // we only need to call it once
     if (serverNotify === null) {
       serverNotify = function() {
-        if (Meteor.user().profile.loginMode !== 'experiment') {
+        if (Meteor.user().loginParams.loginMode !== 'experiment') {
           return; // Nothing to do
         }
 
@@ -349,11 +349,11 @@ function instructContinue() {
 
 Template.instructions.helpers({
   isExperiment: function() {
-    return Meteor.user().profile.loginMode === 'experiment';
+    return Meteor.user().loginParams.loginMode === 'experiment';
   },
 
   isNormal: function() {
-    return Meteor.user().profile.loginMode !== 'experiment';
+    return Meteor.user().loginParams.loginMode !== 'experiment';
   },
 
   backgroundImage: function() {
@@ -398,7 +398,7 @@ Template.instructions.helpers({
   allowcontinue: function() {
     // If we're in experiment mode, they can only continue if there are
     // units left.
-    if (Meteor.user().profile.loginMode === 'experiment') {
+    if (Meteor.user().loginParams.loginMode === 'experiment') {
       return getUnitsRemaining() > 0;
     } else {
       return true;
@@ -459,8 +459,8 @@ function gatherInstructionLogRecord(trialEndTimeStamp, trialStartTimeStamp,
     'conditionNameB': 'xcondition',
     'conditionTypeB': Session.get('experimentXCond') || null,
     'conditionNameE': 'section',
-    'conditionTypeE': Meteor.user().profile.entryPoint && 
-        Meteor.user().profile.entryPoint !== 'direct' ? Meteor.user().profile.entryPoint : null,
+    'conditionTypeE': Meteor.user().loginParams.entryPoint && 
+        Meteor.user().loginParams.entryPoint !== 'direct' ? Meteor.user().loginParams.entryPoint : null,
     'responseDuration': null,
     'levelUnit': Session.get('currentUnitNumber'),
     'levelUnitType': "Instruction",
@@ -468,7 +468,7 @@ function gatherInstructionLogRecord(trialEndTimeStamp, trialStartTimeStamp,
     'CFAudioInputEnabled': Meteor.user().audioInputMode,
     'CFAudioOutputEnabled': Session.get('enableAudioPromptAndFeedback'),
     'CFResponseTime': trialEndTimeStamp,
-    'entryPoint': Meteor.user().profile.entryPoint
+    'entryPoint': Meteor.user().loginParams.entryPoint
   };
   return instructionLog;
 }

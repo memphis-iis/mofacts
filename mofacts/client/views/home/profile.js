@@ -397,7 +397,7 @@ Template.profile.rendered = async function() {
   const isAdmin = Roles.userIsInRole(Meteor.user(), ['admin']);
 
   //Get all course tdfs
-  const courseId = Meteor.user().profile.curClass ? Meteor.user().profile.curClass.courseId : null;
+  const courseId = Meteor.user().loginParams.curClass ? Meteor.user().loginParams.curClass.courseId : null;
   const courseTdfs = Assignments.find({courseId: courseId}).fetch()
   console.log('courseTdfs', courseTdfs, courseId);
 
