@@ -2426,13 +2426,13 @@ const methods = {
     serverConsole('saveAudioInputMode', audioInputMode);
     Meteor.users.update({_id: Meteor.userId()}, {$set: {audioInputMode: audioInputMode}});
   },
-  
+
   updateExperimentState: function(curExperimentState, experimentId) {
     serverConsole('updateExperimentState', curExperimentState, curExperimentState.currentTdfId);
     if(experimentId) {
-      GlobalExperimentStates.upsert({_id: experimentId}, {$set: {experimentState: curExperimentState}});
+      GlobalExperimentStates.update({_id: experimentId}, {$set: {experimentState: curExperimentState}});
     } else {
-      GlobalExperimentStates.upsert({userId: Meteor.userId(), TDFId: curExperimentState.currentTdfId}, {$set: {experimentState: curExperimentState}});
+      createExperimentState(curExperimentState);
     }
   },
 
