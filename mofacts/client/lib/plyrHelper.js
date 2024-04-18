@@ -37,23 +37,15 @@ function initVideoCards(player) {
 
   //add event listeners to pause video playback
   //onready, set the time to the last time the video was paused
-  player.once('canplay', event => {
-    player.currentTime = lastTimeDestroy;
-    player.play();
-  });
-  player.once('ready', event => {
-    player.currentTime = lastTimeDestroy;
-    player.play();
-  });
+  // player.once('canplay', event => {
+  //   player.currentTime = lastTimeDestroy;
+  //   player.play();
+  // });
 
-  player.on('ended', async function(event){
-    //set indecies to -1
-    Session.set('engineIndices', {stimIndex: -1, clusterIndex: -1});
-    engine.selectNextCard(Session.get('engineIndices'), Session.get('currentExperimentState'));
-    $("#videoUnitContainer").hide();
-  });
-
-
+  // player.once('ready', event => {
+  //   player.currentTime = lastTimeDestroy;
+  //   player.play();
+  // });
 
   player.on('timeupdate', async function(event){
     const instance = event.detail.plyr;
@@ -193,6 +185,10 @@ function initVideoCards(player) {
     const instance = event.detail.plyr;
     console.log('video ended');
     logPlyrAction('end', instance);
+    //set indecies to -1
+    Session.set('engineIndices', {stimIndex: -1, clusterIndex: -1});
+    engine.selectNextCard(Session.get('engineIndices'), Session.get('currentExperimentState'));
+    $("#videoUnitContainer").hide();
     $("#continueBar").removeAttr('hidden');
     $('#continueButton').prop('disabled', false);
   });
@@ -356,6 +352,7 @@ export async function playNextCard() {
       console.log('adaptive schedule', engine.adaptiveQuestionLogic.schedule);   
       await engine.adaptiveQuestionLogic.evaluate(logic);
     }
+    //add new question to current unit
     if(engine.adaptiveQuestionLogic.when == Session.get("currentUnitNumber")){
       //remove the first question from the schedule
       newschedule = engine.adaptiveQuestionLogic.schedule;
@@ -369,18 +366,28 @@ export async function playNextCard() {
       }
       //filter out all old questions
       let newPoints = points.filter(x => !player.config.markers.points.some(y => y.time == x.time))
+      //create markers for new points
       for(let i = 0; i < newPoints.length; i++){
-        //create markers for new points
         $(".plyr__progress").append(`<span class="plyr__progress__marker" style="left: ${newPoints[i].time/player.duration*100}%;"></span>`)
       }
-      //push the end of the video to the times array
-      nextTimeIndex = 0;
-      nextTime = times[nextTimeIndex];
-      lastTimeDestroy = player.currentTime;
+      //check if next time needs to be set to new question
+      for(let i = 0; i < times.length; i++){
+        if(player.currentTime < times[i]){
+          nextTimeIndex = i;
+          nextTime = times[nextTimeIndex];
+          let nextQuestion = questions[nextTimeIndex];
+          Session.set('engineIndices', {stimIndex: 0, clusterIndex: nextQuestion});
+          Session.set('displayReady', true);
+          break;
+        } else {
+          //push the end of the video to the times array
+          nextTimeIndex = 0;
+          nextTime = times[nextTimeIndex];
+          lastTimeDestroy = player.currentTime;
+        }
+      }
       //set the markers
       player.config.markers.points = points
-      indecies = {stimIndex: 0, clusterIndex: questions[0]};
-      Session.set('engineIndices', indecies);
     }
   }
   playVideo();
@@ -402,21 +409,21 @@ export async function destroyPlyr() {
 
 function waitForElm(selector) {
   return new Promise(resolve => {
+    if (document.querySelector(selector)) {
+      return resolve(document.querySelector(selector));
+    }
+
+    const observer = new MutationObserver(mutations => {
       if (document.querySelector(selector)) {
-          return resolve(document.querySelector(selector));
+        observer.disconnect();
+        resolve(document.querySelector(selector));
       }
+    });
 
-      const observer = new MutationObserver(mutations => {
-          if (document.querySelector(selector)) {
-              observer.disconnect();
-              resolve(document.querySelector(selector));
-          }
-      });
-
-      // If you get "parameter 1 is not of type 'Node'" error, see https://stackoverflow.com/a/77855838/492336
-      observer.observe(document.body, {
-          childList: true,
-          subtree: true
-      });
+    // If you get "parameter 1 is not of type 'Node'" error, see https://stackoverflow.com/a/77855838/492336
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true
+    });
   });
 }
