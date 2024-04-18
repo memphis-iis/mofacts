@@ -2347,14 +2347,16 @@ async function unitIsFinished(reason) {
   let newUnitNum = curUnitNum + 1;
   let curTdfUnit = curTdf.tdfs.tutor.unit[newUnitNum];
   let countCompletion = curTdf.tdfs.tutor.unit[curUnitNum].countcompletion
-  if(adaptive == curUnitNum){
-    curUnitNum = Session.get('currentUnitNumber')
+  if(adaptive == newUnitNum){
+    const curExperimentState = await getExperimentState();
     adaptiveTemplate = curTdf.tdfs.tutor.unit[curUnitNum].adaptiveUnitTemplate
     curTdfUnit = engine.adaptiveQuestionLogic.unitBuilder(adaptiveTemplate);
     countCompletion = curTdf.tdfs.tutor.unit[curUnitNum].countcompletion
     //append the new unit to the tdf
     curTdf.tdfs.tutor.unit.splice(newUnitNum, 0, curTdfUnit);
     Session.set('currentTdfFile', curTdf);
+    curExperimentState.currentTdfFile = curTdf;
+    await updateExperimentState(curExperimentState, 'card.unitIsFinished');
   }
   
 
@@ -3349,6 +3351,21 @@ async function resumeFromComponentState() {
     
     // Just notify that we're skipping
     console.log('No Experimental condition is required: continuing', rootTDFBoxed);
+  }
+
+  if(curTdf.content.tdfs.tutor.unitTemplate){
+    //tdf has dynamic units. need to check component state for current unit
+    if(curExperimentState.currentTdfFile){
+      curTdf.content = curExpState.currentTdfFile;
+      //found dynamic tdf units
+      Session.set('currentTdfFile', curTdf.content);
+      Session.set('currentTdfName', curTdf.content.fileName);
+
+      // Also need to read new stimulus file (and note that we allow an exception
+      // to kill us if the current tdf is broken and has no stimulus file)
+      Session.set('currentStimuliSetId', curTdf.stimuliSetId);
+      console.log('condition stimuliSetId', curTdf);
+    }
   }
 
   const stimuliSet = curTdf.stimuli

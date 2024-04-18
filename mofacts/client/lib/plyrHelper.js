@@ -354,43 +354,47 @@ export async function playNextCard() {
     }
     //add new question to current unit
     if(engine.adaptiveQuestionLogic.when == Session.get("currentUnitNumber")){
-      //remove the first question from the schedule
-      newschedule = engine.adaptiveQuestionLogic.schedule;
-      let points = []
-      questions = [];
-      times = [];
-      for (let i = 0; i < newschedule.length; i++){
-        times.push(curTdfUnit.videosession.questiontimes[newschedule[i].clusterIndex]);
-        questions.push(newschedule[i].clusterIndex);
-        points.push({time: Math.floor(curTdfUnit.videosession.questiontimes[newschedule[i].clusterIndex]), label: 'Question ' + (i + 1)});
-      }
-      //filter out all old questions
-      let newPoints = points.filter(x => !player.config.markers.points.some(y => y.time == x.time))
-      //create markers for new points
-      for(let i = 0; i < newPoints.length; i++){
-        $(".plyr__progress").append(`<span class="plyr__progress__marker" style="left: ${newPoints[i].time/player.duration*100}%;"></span>`)
-      }
-      //check if next time needs to be set to new question
-      for(let i = 0; i < times.length; i++){
-        if(player.currentTime < times[i]){
-          nextTimeIndex = i;
-          nextTime = times[nextTimeIndex];
-          let nextQuestion = questions[nextTimeIndex];
-          Session.set('engineIndices', {stimIndex: 0, clusterIndex: nextQuestion});
-          Session.set('displayReady', true);
-          break;
-        } else {
-          //push the end of the video to the times array
-          nextTimeIndex = 0;
-          nextTime = times[nextTimeIndex];
-          lastTimeDestroy = player.currentTime;
-        }
-      }
-      //set the markers
-      player.config.markers.points = points
+      addStimToSchedule();
     }
   }
   playVideo();
+}
+
+async function addStimToSchedule(){
+  //remove the first question from the schedule
+  newschedule = engine.adaptiveQuestionLogic.schedule;
+  let points = []
+  questions = [];
+  times = [];
+  for (let i = 0; i < newschedule.length; i++){
+    times.push(curTdfUnit.videosession.questiontimes[newschedule[i].clusterIndex]);
+    questions.push(newschedule[i].clusterIndex);
+    points.push({time: Math.floor(curTdfUnit.videosession.questiontimes[newschedule[i].clusterIndex]), label: 'Question ' + (i + 1)});
+  }
+  //filter out all old questions
+  let newPoints = points.filter(x => !player.config.markers.points.some(y => y.time == x.time))
+  //create markers for new points
+  for(let i = 0; i < newPoints.length; i++){
+    $(".plyr__progress").append(`<span class="plyr__progress__marker" style="left: ${newPoints[i].time/player.duration*100}%;"></span>`)
+  }
+  //check if next time needs to be set to new question
+  for(let i = 0; i < times.length; i++){
+    if(player.currentTime < times[i]){
+      nextTimeIndex = i;
+      nextTime = times[nextTimeIndex];
+      let nextQuestion = questions[nextTimeIndex];
+      Session.set('engineIndices', {stimIndex: 0, clusterIndex: nextQuestion});
+      Session.set('displayReady', true);
+      break;
+    } else {
+      //push the end of the video to the times array
+      nextTimeIndex = 0;
+      nextTime = times[nextTimeIndex];
+      lastTimeDestroy = player.currentTime;
+    }
+  }
+  //set the markers
+  player.config.markers.points = points
 }
 
 export async function playVideo() {
