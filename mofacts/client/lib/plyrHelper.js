@@ -1,6 +1,8 @@
 import Plyr from 'plyr';
 import { newQuestionHandler, unitIsFinished } from '../views/experiment/card.js'
 
+export let player;
+
 let lastVolume = 0;
 let lastSpeed = 0;
 let loggingSeek = false;
@@ -8,7 +10,6 @@ let lastTimeIndex = 0;
 let nextTimeIndex = 0;
 let nextTime = 0;
 let seekStart = 0;
-let player;
 let times = [];
 let questions = [];
 let lastlogicIndex = 0;
@@ -56,13 +57,13 @@ function initVideoCards(player) {
 
   player.on('timeupdate', async function(event){
     const instance = event.detail.plyr;
-    if(timesCopy.length == 0) {
-      thisNextTime = instance.duration;
+    if(times.length == 0) {
+      nextTime = instance.duration;
       thisLastTime = 0;
       timeIsEndTime = true;
     } else {
-      thisNextTime = timesCopy[nextTimeIndex];
-      thisLastTime = nextTimeIndex == 0 ? 0: timesCopy[lastTimeIndex];
+      nextTime = times[nextTimeIndex];
+      thisLastTime = nextTimeIndex == 0 ? 0: times[lastTimeIndex];
     }
     //get the difference between the current time and the next time
 
@@ -81,7 +82,7 @@ function initVideoCards(player) {
     //add class
     $('#progressbar').addClass('progress-bar');
     //set the width of the progress bar
-    if(timesCopy.length != 0 || Session.get('curTdfUISettings').displayReviewTimeoutAsBarOrText == "bar" || Session.get('curTdfUISettings').displayEndOfVideoCountdown){
+    if(times.length != 0 || Session.get('curTdfUISettings').displayReviewTimeoutAsBarOrText == "bar" || Session.get('curTdfUISettings').displayEndOfVideoCountdown){
       if(Session.get('curTdfUISettings').displayReviewTimeoutAsBarOrText == "text" || Session.get('curTdfUISettings').displayReviewTimeoutAsBarOrText == "both"){                
         document.getElementById("CountdownTimerText").innerHTML = 'Continuing in: ' + Math.floor(timeDiff) + ' seconds';
       } else {
@@ -97,6 +98,9 @@ function initVideoCards(player) {
         //remove progress bar class
         $('#progressbar').removeClass('progress-bar');
       }
+    }
+    if(timeDiff < 0){
+      player.pause();
     }
   });
 
@@ -157,8 +161,8 @@ function initVideoCards(player) {
             player.pause();
             lastTimeIndex = nextTimeIndex;
             nextTimeIndex++;
-            if(nextTimeIndex < timesCopy.length){
-              nextTime = timesCopy[nextTimeIndex];
+            if(nextTimeIndex < times.length){
+              nextTime = times[nextTimeIndex];
               let nextQuestion = times.indexOf(nextTime);
               Session.set('engineIndices', {stimIndex: 0, clusterIndex: nextQuestion});
               Session.set('displayReady', true);
@@ -352,9 +356,8 @@ export async function playNextCard() {
       console.log('adaptive schedule', engine.adaptiveQuestionLogic.schedule);   
       await engine.adaptiveQuestionLogic.evaluate(logic);
     }
-    if(engine.adaptiveQuestionLogic.when == "now"){
+    if(engine.adaptiveQuestionLogic.when == Session.get("currentUnitNumber")){
       //remove the first question from the schedule
-      engine.adaptiveQuestionLogic.schedule.shift();
       newschedule = engine.adaptiveQuestionLogic.schedule;
       let points = []
       questions = [];
@@ -364,24 +367,23 @@ export async function playNextCard() {
         questions.push(newschedule[i].clusterIndex);
         points.push({time: Math.floor(curTdfUnit.videosession.questiontimes[newschedule[i].clusterIndex]), label: 'Question ' + (i + 1)});
       }
+      //filter out all old questions
+      let newPoints = points.filter(x => !player.config.markers.points.some(y => y.time == x.time))
+      for(let i = 0; i < newPoints.length; i++){
+        //create markers for new points
+        $(".plyr__progress").append(`<span class="plyr__progress__marker" style="left: ${newPoints[i].time/player.duration*100}%;"></span>`)
+      }
       //push the end of the video to the times array
       nextTimeIndex = 0;
       nextTime = times[nextTimeIndex];
       lastTimeDestroy = player.currentTime;
-      player.destroy();
-      //initialize the player
-      player = new Plyr('#videoUnitPlayer', {
-        markers: { enabled: true, points: points }
-      });
+      //set the markers
+      player.config.markers.points = points
       indecies = {stimIndex: 0, clusterIndex: questions[0]};
       Session.set('engineIndices', indecies);
-      initVideoCards(player);
-    } else {
-      playVideo();
     }
-  } else {
-    playVideo();
   }
+  playVideo();
 }
 
 export async function playVideo() {
