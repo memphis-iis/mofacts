@@ -2429,7 +2429,11 @@ const methods = {
 
   updateExperimentState: function(curExperimentState, experimentId) {
     serverConsole('updateExperimentState', curExperimentState, curExperimentState.currentTdfId);
-    GlobalExperimentStates.update({_id: experimentId}, {$set: {experimentState: curExperimentState}});
+    if(experimentId) {
+      GlobalExperimentStates.update({_id: experimentId}, {$set: {experimentState: curExperimentState}});
+    } else {
+      createExperimentState(curExperimentState);
+    }
   },
 
   createExperimentState: function(curExperimentState) {
