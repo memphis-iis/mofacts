@@ -3356,7 +3356,7 @@ async function resumeFromComponentState() {
   if(curTdf.content.tdfs.tutor.unitTemplate){
     //tdf has dynamic units. need to check component state for current unit
     if(curExperimentState.currentTdfFile){
-      curTdf.content = curExpState.currentTdfFile;
+      curTdf.content = curExperimentState.currentTdfFile;
       //found dynamic tdf units
       Session.set('currentTdfFile', curTdf.content);
       Session.set('currentTdfName', curTdf.content.fileName);

@@ -183,12 +183,26 @@ export class AdaptiveQuestionLogic {
             alert(`There was an error building the unit. Please contact the administrator`);
             throw new Error(`Unit template ${templateUnitNumber} not found`);
         }
-        newUnit.assessmentsession.clusterlist = ""
-        for(const item of this.schedule){
-            let cluster = item.clusterIndex;
-            newUnit.assessmentsession.clusterlist += cluster + " ";
+        if(newUnit.assessmentsession){
+            newUnit.assessmentsession.clusterlist = ""
+            for(const item of this.schedule){
+                let cluster = item.clusterIndex;
+                newUnit.assessmentsession.clusterlist += cluster + " ";
+            }
+            newUnit.assessmentsession.clusterlist = newUnit.assessmentsession.clusterlist.trim();
+        } else if (newUnit.videosession) {
+            if(!newUnit.videosession.questions){
+                newUnit.videosession.questions = [];
+            }
+            for(const item of this.schedule){
+                newUnit.videosession.questions.push(item.clusterIndex)
+            }
+            const questionTimes = newUnit.videosession.questiontimes;
+            newUnit.videosession.questiontimes = [];
+            for(const item of newUnit.videosession.questions){
+                newUnit.videosession.questiontimes.push(questionTimes[item])
+            }
         }
-        newUnit.assessmentsession.clusterlist = newUnit.assessmentsession.clusterlist.trim();
         //injected the new unit into the session
         return newUnit;
     }
