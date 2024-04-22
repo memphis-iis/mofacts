@@ -584,6 +584,9 @@ Template.card.events({
   'click #continueButton': function(event) {
     event.preventDefault();
     //hide the continue button
+    if($("#videoUnitContainer").length){
+      destroyPlyr();
+    }
     $("#continueBar").attr("hidden", true);
     $('#continueButton').prop('disabled', true);
     unitIsFinished('Continue Button Pressed');

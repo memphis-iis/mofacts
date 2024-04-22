@@ -21,6 +21,9 @@ function initVideoCards(player) {
   nextTime = times[nextTimeIndex];
   lastVolume = player.volume;
   lastSpeed = player.speed;
+  let nextQuestion = questions[nextTimeIndex];
+  let indices = {stimIndex: 0, clusterIndex: nextQuestion}
+  engine.selectNextCard(indices, Session.get('currentExperimentState'));
 
   //if the player already has event listeners, remove them
   player.off('timeupdate');
@@ -185,10 +188,7 @@ function initVideoCards(player) {
     const instance = event.detail.plyr;
     console.log('video ended');
     logPlyrAction('end', instance);
-    //set indecies to -1
-    Session.set('engineIndices', {stimIndex: -1, clusterIndex: -1});
-    engine.selectNextCard(Session.get('engineIndices'), Session.get('currentExperimentState'));
-    $("#videoUnitContainer").hide();
+    Session.set('engineIndices', undefined);
     $("#continueBar").removeAttr('hidden');
     $('#continueButton').prop('disabled', false);
   });
@@ -407,6 +407,17 @@ export async function playVideo() {
   newQuestionHandler();
 }
 export async function destroyPlyr() {
+  lastVolume = 0;
+  lastSpeed = 0;
+  loggingSeek = false;
+  lastTimeIndex = 0;
+  nextTimeIndex = 0;
+  nextTime = 0;
+  seekStart = 0;
+  times = [];
+  questions = [];
+  lastlogicIndex = 0;
+  lastTimeDestroy = 0;
   player.destroy();
   player = null;
 }
