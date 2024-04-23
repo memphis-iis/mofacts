@@ -1404,7 +1404,7 @@ async function userAnswerFeedback(userAnswer, isSkip, isTimeout, simCorrect) {
     correctAndText = await Answers.answerIsCorrect(userAnswerWithTimeout, Session.get('currentExperimentState').currentAnswer, Session.get('currentExperimentState').originalAnswer,
     displayAnswer,setspec); 
   }
-  afterAnswerAssessmentCb(userAnswer, isSkip, isCorrectAccumulator, feedbackForAnswer, correctAndText);
+  determineUserFeedback(userAnswer, isSkip, isCorrectAccumulator, feedbackForAnswer, correctAndText);
 }
 
 async function writeCurrentToScrollList(userAnswer, isTimeout, simCorrect, justAdded) {
@@ -1494,7 +1494,7 @@ function clearScrollList() {
 }
 
 
-function afterAnswerAssessmentCb(userAnswer, isSkip, isCorrect, feedbackForAnswer, correctAndText) {
+function determineUserFeedback(userAnswer, isSkip, isCorrect, feedbackForAnswer, correctAndText) {
   Session.set('isRefutation', undefined);
   if (isCorrect == null && correctAndText != null) {
     isCorrect = correctAndText.isCorrect;
@@ -1516,17 +1516,14 @@ function afterAnswerAssessmentCb(userAnswer, isSkip, isCorrect, feedbackForAnswe
   const testType = getTestType();
   const isDrill = (testType === 'd' || testType === 'm' || testType === 'n');
   if (isDrill) {
-    const showUserFeedbackBound = function() {
-      if (feedbackForAnswer == null && correctAndText != null) {
-        feedbackForAnswer = correctAndText.matchText;
-      }
-      showUserFeedback(isCorrect, feedbackForAnswer, userAnswer.includes('[timeout]'), isSkip);
-    };
+    if (feedbackForAnswer == null && correctAndText != null) {
+      feedbackForAnswer = correctAndText.matchText;
+    }
     if (currentDeliveryParams.feedbackType == 'dialogue' && !isCorrect) {
       speechTranscriptionTimeoutsSeen = 0;
-      initiateDialogue(userAnswer, afterAnswAerFeedbackCbBound, Session.get('currentExperimentState'), showUserFeedbackBound);
+      initiateDialogue(userAnswer, afterAnswAerFeedbackCbBound, Session.get('currentExperimentState'), showUserFeedback(isCorrect, feedbackForAnswer, userAnswer.includes('[timeout]'), isSkip));
     } else {
-      showUserFeedbackBound();
+      showUserFeedback(isCorrect, feedbackForAnswer, userAnswer.includes('[timeout]'), isSkip)();
     }
   } else {
     userFeedbackStart = null;
@@ -3595,7 +3592,7 @@ async function processUserTimesLog() {
   }
 
   if (moduleCompleted) {
-    // They are DONE!afterAnswerAssessmentCb
+    // They are DONE!determineUserFeedback
     console.log('TDF already completed - leaving for profile page.');
     if (Meteor.user().profile.loginMode === 'experiment') {
       // Experiment users don't *have* a normal page
