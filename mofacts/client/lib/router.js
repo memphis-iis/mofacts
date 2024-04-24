@@ -155,6 +155,7 @@ Router.route('/experiment/:target?/:xcond?', {
       const experimentPasswordRequired = tdf.content.tdfs.tutor.setspec.experimentPasswordRequired ?
           eval(tdf.content.tdfs.tutor.setspec.experimentPasswordRequired) : false;
       Session.set('experimentPasswordRequired', experimentPasswordRequired);
+      Session.set('loginPrompt',tdf.content.tdfs.tutor.setspec.uiSettings?.experimentLoginText || "Amazon Turk ID");
       console.log('experimentPasswordRequired:' + experimentPasswordRequired);
 
       console.log('EXPERIMENT target:', target, 'xcond', xcond);
@@ -320,7 +321,7 @@ Router.route('/studentReporting', {
 Router.route('/', {
   name: 'client.index',
   action: function() {
-    if(Meteor.user() && Meteor.user().profile.loginMode != 'experiment'){
+    if(Meteor.user() && Meteor.user().loginParams.loginMode != 'experiment'){
       this.redirect('/profile');
     } else {
       // If they are navigating to "/" then we clear the (possible) cookie
@@ -381,14 +382,14 @@ Router.route('/profile', {
   name: 'client.profile',
   waitOn: function() {
     let assignedTdfs =  'undefined';
-    if(Meteor.user() && Meteor.user().profile && Meteor.user().profile.assignedTdfs){
-      assignedTdfs = Meteor.user()?.profile?.assignedTdfs
+    if(Meteor.user() && Meteor.user().loginParams && Meteor.user().loginParams.assignedTdfs){
+      assignedTdfs = Meteor.user()?.loginParams?.assignedTdfs
     }
     let experimentTarget = 'undefined'
     if (Session.get('experimentTarget')) {
       assignedTdfs = 'undefined'
     }
-    let curCourseId = Meteor.user()?.profile?.curClass?.courseId || 'undefined'
+    let curCourseId = Meteor.user()?.loginParams?.curClass?.courseId || 'undefined';
     let allSubscriptions = [
       Meteor.subscribe('allUserExperimentState', assignedTdfs)];
     if (curCourseId == 'undefined' || curCourseId == undefined)
@@ -409,7 +410,7 @@ Router.route('/profile', {
   },
   action: function() {
     if (Meteor.user()) {
-      const loginMode = Meteor.user().profile.loginMode;
+      const loginMode = Meteor.user().loginParams.loginMode;
       console.log('loginMode: ' + loginMode);
 
       if (loginMode === 'southwest') {
@@ -436,8 +437,8 @@ Router.route('/profile', {
 Router.route('/lessonSelect', {
   name: 'client.lessonSelect',
   waitOn: function() {
-    let assignedTdfs = Meteor.user()?.profile?.assignedTdfs;
-    let curCourseId = Meteor.user()?.profile?.curClass?.courseId || 'undefined'
+    let assignedTdfs = Meteor.user()?.loginParams?.assignedTdfs;
+    let curCourseId = Meteor.user()?.loginParams?.curClass?.courseId || 'undefined'
     let allSubscriptions = [
       Meteor.subscribe('allUserExperimentState', assignedTdfs)
     ];
@@ -647,20 +648,43 @@ Router.route('/classes/:_teacher/:_class', {
 
 Router.route('/card', {
   name: 'client.card',
-  waitOn: function() {
-    return [ 
-      Meteor.subscribe('files.assets.all'),
-      Meteor.subscribe('userComponentStates', Session.get('currentTdfId')),
-      Meteor.subscribe('currentTdf', Session.get('currentTdfId')),
-      Meteor.subscribe('tdfByExperimentTarget', Session.get('experimentTarget'), Session.get('experimentConditions'))
-    ]
-  },
-  action: function() {
-    if (Meteor.user()) {
-      Session.set('curModule', 'card');
-      this.render('card');
+  action: async function() {
+    if(!Session.get('currentTdfId')){
+      const userId = Meteor.userId();
+      const tdfId =  await meteorCallAsync('getLastTDFAccessed', userId);
+      const tdf = await meteorCallAsync('getTdfById', tdfId);
+      if(tdf) {
+        const setspec = tdf.content.tdfs.tutor.setspec ? tdf.content.tdfs.tutor.setspec : null;
+        const ignoreOutOfGrammarResponses = setspec.speechIgnoreOutOfGrammarResponses ?
+        setspec.speechIgnoreOutOfGrammarResponses.toLowerCase() == 'true' : false;
+        const speechOutOfGrammarFeedback = setspec.speechOutOfGrammarFeedback ?
+        setspec.speechOutOfGrammarFeedback : 'Response not in answer set';
+        await selectTdf(
+          tdfId,
+          setspec.lessonname,
+          tdf.stimuliSetId,
+          ignoreOutOfGrammarResponses,
+          speechOutOfGrammarFeedback,
+          'User button click',
+          tdf.content.isMultiTdf,
+          false,
+          setspec, 
+          false,
+          true);
+      }
     } else {
-      this.redirect('/');
+      this.subscribe('files.assets.all').wait();
+      this.subscribe('userComponentStates', Session.get('currentTdfId')).wait();
+      this.subscribe('currentTdf', Session.get('currentTdfId')).wait();
+      this.subscribe('tdfByExperimentTarget', Session.get('experimentTarget'), Session.get('experimentConditions')).wait();
+      if(this.ready()){
+        if (Meteor.user()) {
+          Session.set('curModule', 'card');
+          this.render('card');
+        } else {
+          this.redirect('/');
+        }
+      }
     }
   },
 });

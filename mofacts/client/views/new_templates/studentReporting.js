@@ -90,7 +90,7 @@ let donutOptionsMasteredItems = {
 Template.studentReporting.helpers({
   studentReportingTdfs: () => Session.get('studentReportingTdfs'),
   curClassPerformance: () => Session.get('curClassPerformance'),
-  curClass: () => Meteor.user().profile.curClass,
+  curClass: () => Meteor.user().loginParams.curClass,
   selectedTdfDueDate: () => Session.get('selectedTdfDueDate'),
   curTotalAttempts: () => Session.get('curTotalAttempts') || 0,
   curStudentPerformance: () => Session.get('curStudentPerformance'),
@@ -135,7 +135,7 @@ Template.studentReporting.rendered = async function() {
   Session.set('practiceDuration', 0);
   window.onpopstate = function(event) {
     console.log('window popstate student reporting');
-    if (document.location.pathname == '/studentReporting' && Meteor.user().profile.loginMode === 'southwest') {
+    if (document.location.pathname == '/studentReporting' && Meteor.user().loginParams.loginMode === 'southwest') {
       Router.go('/profileSouthwest');
     } else {
       Router.go('/profile');

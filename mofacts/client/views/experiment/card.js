@@ -12,6 +12,7 @@ import {
 import { 
   initializePlyr,
   playVideo,
+  destroyPlyr,
 } from '../../lib/plyrHelper.js'
 import {meteorCallAsync, redoCardImage} from '../../index';
 import {DialogueUtils, dialogueContinue, dialogueLoop, initiateDialogue} from './dialogueUtils';
@@ -36,6 +37,7 @@ export {
   getCurrentClusterAndStimIndices,
   initCard,
   unitIsFinished,
+  revisitUnit,
   gatherAnswerLogRecord,
   newQuestionHandler,
 };
@@ -139,6 +141,8 @@ let cachedSyllables = null;
 let speechTranscriptionTimeoutsSeen = 0;
 let timeoutsSeen = 0; // Reset to zero on resume or non-timeout
 let trialStartTimestamp = 0;
+let trialEndTimeStamp = 0;
+let afterFeedbackCallbackBind = null;
 Session.set('trialStartTimestamp', trialStartTimestamp);
 let firstKeypressTimestamp = 0;
 let currentSound = null; // See later in this file for sound functions
@@ -565,13 +569,17 @@ Template.card.events({
 
   'click #continueStudy': function(event) {
     event.preventDefault();
-    handleUserInput(event, 'buttonClick');
+    const timeout = Session.get('CurTimeoutId')
+    Session.set('CurTimeoutId', undefined)
+    Meteor.clearTimeout(timeout)
+    afterFeedbackCallbackBind()
+    engine.updatePracticeTime(Date.now() - trialEndTimeStamp)
   },
 
   'click .instructModalDismiss': function(event) {
     event.preventDefault();
     $('#finalInstructionsDlg').modal('hide');
-    if (Meteor.user().profile.loginMode === 'experiment') {
+    if (Meteor.user().loginParams.loginMode === 'experiment') {
       // Experiment user - no where to go?
       leavePage(routeToSignin);
     } else {
@@ -582,14 +590,33 @@ Template.card.events({
 
   'click #continueButton': function(event) {
     event.preventDefault();
+    //hide the continue button
+    $("#continueBar").attr("hidden", true);
+    $('#continueButton').prop('disabled', true);
     unitIsFinished('Continue Button Pressed');
+  },
+
+  'click #stepBackButton': function(event) {
+    event.preventDefault();
+    //check if the current unit has instructions and if so, show them
+    if(Session.get('currentTdfUnit').unitinstructions){
+      leaveTarget = '/instructions';
+      Router.go('/instructions');
+    } else {
+      //get the current unit number and decrement it by 1
+      let curUnit = Session.get('currentUnitNumber');
+      let newUnitNumber = curUnit - 1;
+      revisitUnit(newUnitNumber);
+    }
   },
 });
 
 Template.card.helpers({
-  'isExperiment': () => Meteor.user().profile.loginMode === 'experiment',
+  'isExperiment': () => Meteor.user().loginParams.loginMode === 'experiment',
 
-  'isNormal': () => Meteor.user().profile.loginMode !== 'experiment',
+  'experimentLoginText': () => curTdfUISettings.experimentLoginText || "Amazon Turk ID",
+
+  'isNormal': () => Meteor.user().loginParams.loginMode !== 'experiment',
 
   'isNotInDialogueLoopStageIntroOrExit': () => Session.get('dialogueLoopStage') != 'intro' && Session.get('dialogueLoopStage') != 'exit',
 
@@ -662,8 +689,13 @@ Template.card.helpers({
   },
 
   'text': function() {
-    const text = Session.get('currentDisplay') ? Session.get('currentDisplay').text : undefined;
-    return text;
+      const text = Session.get('currentDisplay') ? Session.get('currentDisplay').text : undefined;
+      return text;
+  },
+
+  'videoUnitDisplayText': function() {
+    const curUnit = Session.get('currentTdfUnit');
+    return curUnit.videosession.displayText;
   },
 
   'dialogueText': function() {
@@ -893,7 +925,23 @@ Template.card.helpers({
     console.log("probability parms input",probParms);
     return probParms;
   },
-  'UIsettings': () => Session.get('curTdfUISettings')
+  'UIsettings': () => Session.get('curTdfUISettings'),
+
+  'allowGoBack': function() {
+    //check if this is allowed
+    if(Session.get('currentDeliveryParams').allowRevistUnit || Session.get('currentTdfFile').tdfs.tutor.setspec.allowRevistUnit){
+      //get the current unit number and decrement it by 1, and see if it exists
+      let curUnitNumber = Session.get('currentUnitNumber');
+      let newUnitNumber = curUnitNumber - 1;
+      if(newUnitNumber >= 0 && Session.get('currentTdfFile').tdfs.tutor.unit.length >= newUnitNumber){
+        return true;
+      } else {
+        return false;
+      }
+    } else {
+      return false;
+    }
+  },
 });
 
 function getResponseType() {
@@ -1814,9 +1862,10 @@ async function afterAnswerFeedbackCallback(trialEndTimeStamp, trialStartTimeStam
   Session.set('feedbackTimeoutBegins', Date.now())
   const answerLogRecord = gatherAnswerLogRecord(trialEndTimeStamp, trialStartTimeStamp, source, userAnswer, isCorrect,
       testType, deliveryParams, dialogueHistory, wasReportedForRemoval);
-  const afterFeedbackCallbackBind = afterFeedbackCallback.bind(null, trialEndTimeStamp, trialStartTimeStamp, isTimeout, isSkip, isCorrect, testType, deliveryParams, answerLogRecord, 'card')
+  afterFeedbackCallbackBind = afterFeedbackCallback.bind(null, trialEndTimeStamp, trialStartTimeStamp, isTimeout, isSkip, isCorrect, testType, deliveryParams, answerLogRecord, 'card')
   const timeout = Meteor.setTimeout(async function() {
     afterFeedbackCallbackBind()
+    engine.updatePracticeTime(Date.now() - trialEndTimeStamp)
   }, reviewTimeout)
   Session.set('CurTimeoutId', timeout)
   let {responseDuration, startLatency, endLatency, feedbackLatency} = getTrialTime(trialEndTimeStamp, trialStartTimeStamp, trialEndTimeStamp + reviewTimeout, testType)
@@ -1833,6 +1882,7 @@ async function afterAnswerFeedbackCallback(trialEndTimeStamp, trialStartTimeStam
 }
 
 async function afterFeedbackCallback(trialEndTimeStamp, trialStartTimeStamp, isTimeout, isSkip, isCorrect, testType, deliveryParams, answerLogRecord, callLocation) {
+  afterFeedbackCallbackBind = undefined;
   Session.set('CurTimeoutId', null)
   const userLeavingTrial = callLocation != 'card';
   let reviewEnd = Date.now();
@@ -1852,7 +1902,6 @@ async function afterFeedbackCallback(trialEndTimeStamp, trialStartTimeStamp, isT
   Session.set('dialogueHistory', undefined);
   const newExperimentState = {
     lastAction: answerLogAction,
-    lastActionTimeStamp: Date.now(),
   };
 
   newExperimentState.overallOutcomeHistory = Session.get('overallOutcomeHistory');
@@ -2134,8 +2183,8 @@ function gatherAnswerLogRecord(trialEndTimeStamp, trialStartTimeStamp, source, u
     'conditionNameD': 'how answered',
     'conditionTypeD': _.trim(source),
     'conditionNameE': 'section',
-    'conditionTypeE': Meteor.user().profile.entryPoint && 
-        Meteor.user().profile.entryPoint !== 'direct' ? Meteor.user().profile.entryPoint : null,
+    'conditionTypeE': Meteor.user().loginParams.entryPoint && 
+        Meteor.user().loginParams.entryPoint !== 'direct' ? Meteor.user().loginParams.entryPoint : null,
 
     'responseDuration': null,
 
@@ -2181,7 +2230,7 @@ function gatherAnswerLogRecord(trialEndTimeStamp, trialStartTimeStamp, source, u
     'dialogueHistory': dialogueHistory || null,
     'instructionQuestionResult': Session.get('instructionQuestionResult') || false,
     'hintLevel': whichHintLevel,
-    'entryPoint': Meteor.user().profile.entryPoint
+    'entryPoint': Meteor.user().loginParams.entryPoint
   };
   return answerLogRecord;
 }
@@ -2227,6 +2276,75 @@ function hideUserFeedback() {
   $('#userForceCorrect').val(''); // text box - see inputF.html
   $('#forceCorrectionEntry').hide(); // Container
   $('#removeQuestion').hide();
+}
+
+
+//Called to revisit a previous unit in the current session. 
+async function revisitUnit(unitNumber) {
+  console.log('REVIST UNIT: ', unitNumber);
+  clearCardTimeout();
+  destroyPlyr();
+
+  const curTdf = Session.get('currentTdfFile');
+  const curUnitNum = Session.get('currentUnitNumber');
+  //check if the curUnitNum is the furthest unit the student has reached
+  let furthestUnit = Session.get('furthestUnit') || 0;
+  if(curUnitNum > furthestUnit){
+    furthestUnit = curUnitNum;
+  } 
+  Session.set('furthestUnit', furthestUnit);
+  const newUnitNum = parseInt(unitNumber)
+  const curTdfUnit = curTdf.tdfs.tutor.unit[newUnitNum];
+
+  //if the current page is not instructions, then we need to log the revisitUnit action
+  if(document.location.pathname != '/instructions'){
+      logRecord = gatherAnswerLogRecord(Date.now(), Session.get('currentUnitStartTime'), 'revisitUnit', '', true, 'r', Session.get('currentDeliveryParams'), undefined, false);
+      Meteor.call('insertHistory', logRecord);
+  }
+  Session.set('questionIndex', 0);
+  Session.set('clusterIndex', undefined);
+  Session.set('currentUnitNumber', newUnitNum);
+  Session.set('currentTdfUnit', curTdfUnit);
+  Session.set('resetSchedule', true);
+  Session.set('currentDeliveryParams', getCurrentDeliveryParams());
+  Session.set('currentUnitStartTime', Date.now());
+  Session.set('feedbackUnset', true);
+  Session.set('feedbackTypeFromHistory', undefined);
+  Session.set('curUnitInstructionsSeen', false);
+
+  //get the old experiment state
+  const oldExperimentState = Session.get('currentExperimentState');
+
+  //update the experiment state
+  const newExperimentState = {
+    questionIndex: 0,
+    clusterIndex: 0,
+    shufIndex: 0,
+    whichHintLevel: 0,
+    whichStim: 0,
+    lastUnitCompleted: oldExperimentState.lastUnitCompleted,
+    lastUnitStarted: oldExperimentState.lastUnitStarted,
+    currentUnitNumber: newUnitNum,
+    currentTdfUnit: curTdfUnit,
+    lastAction: 'unit-revisit',
+  };
+
+  //update the experiment state
+  updateExperimentState(newExperimentState, 'revisitUnit');
+
+
+  let leaveTarget;
+  if (newUnitNum < curTdf.tdfs.tutor.unit.length || curTdf.tdfs.tutor.unit[newUnitNum] > 0) {
+    // Revisiting a Unit, we need to restart with instructions
+    // Check if the unit has a learning session, assess
+    console.log('REVISIT UNIT: show instructions for unit', newUnitNum);
+      const rootTDFBoxed = Tdfs.findOne({_id: Session.get('currentRootTdfId')});
+      const rootTDF = rootTDFBoxed.content;
+      const setspec = rootTDF.tdfs.tutor.setspec;
+    leaveTarget = '/instructions';
+    Router.go(leaveTarget);
+  }
+
 }
 
 // Called when the current unit is done. This should be either unit-defined (see
@@ -2303,7 +2421,6 @@ async function unitIsFinished(reason) {
     currentUnitNumber: newUnitNum,
     currentTdfUnit: curTdfUnit,
     lastAction: 'unit-end',
-    lastActionTimeStamp: Date.now(),
   };
 
   if (curTdfUnit && curTdfUnit.learningsession) {
@@ -2329,7 +2446,7 @@ function getButtonTrial() {
   curUnit.isButtonTrial ? isButtonTrial = true : isButtonTrial = false;
 
   const curCardInfo = engine.findCurrentCardInfo();
-  if (curCardInfo.forceButtonTrial) {
+  if (curCardInfo.forceButtonTrial || curUnit.buttontrial) {
     // Did this question specifically override button trial?
     isButtonTrial = true;
   } else {
@@ -3042,8 +3159,9 @@ async function getExperimentState() {
   return curExperimentState || {};
 }
 
-function updateExperimentState(newState, codeCallLocation, unitEngineOverride = {}) {
-  let curExperimentState = Session.get('currentExperimentState') || {};
+async function updateExperimentState(newState, codeCallLocation, unitEngineOverride = {}) {
+  let curExperimentState = Session.get('currentExperimentState') || await getExperimentState();
+  newState.lastActionTimeStamp = Date.now();
   console.log('currentExperimentState:', curExperimentState);
   if (unitEngineOverride && Object.keys(unitEngineOverride).length > 0)
     curExperimentState = unitEngineOverride;
@@ -3052,10 +3170,10 @@ function updateExperimentState(newState, codeCallLocation, unitEngineOverride = 
   }
   if(Object.keys(curExperimentState).length === 0){
     curExperimentState = Object.assign(JSON.parse(JSON.stringify(curExperimentState)), newState);
-    Meteor.call('createExperimentState', curExperimentState, curExperimentState.currentTdfId);
+    Meteor.call('createExperimentState', curExperimentState);
   } else {
     curExperimentState = Object.assign(JSON.parse(JSON.stringify(curExperimentState)), newState);
-    Meteor.call('updateExperimentState', curExperimentState, curExperimentState.currentTdfId);
+    Meteor.call('updateExperimentState', curExperimentState, curExperimentState.id);
   }
   console.log('updateExperimentState', codeCallLocation, '\nnew:', curExperimentState);
   Session.set('currentExperimentState', curExperimentState);
@@ -3096,6 +3214,7 @@ async function resumeFromComponentState() {
   // currentTdfId and currentStimuliSetId based on experimental conditions
   // (if necessary)
   let rootTDFBoxed = Tdfs.findOne({_id: Session.get('currentRootTdfId')});
+  let curTdf = rootTDFBoxed;
   let rootTDF = rootTDFBoxed.content;
   if (!rootTDF) {
     console.log('PANIC: Unable to load the root TDF for learning', Session.get('currentRootTdfId'));
@@ -3212,7 +3331,7 @@ async function resumeFromComponentState() {
     // Now we have a different current TDF (but root stays the same)
     Session.set('currentTdfId', conditionTdfId);
 
-    const curTdf = Tdfs.findOne({_id: conditionTdfId});
+    curTdf = Tdfs.findOne({_id: conditionTdfId});
     Session.set('currentTdfFile', curTdf.content);
     Session.set('currentTdfName', curTdf.content.fileName);
 
@@ -3230,7 +3349,7 @@ async function resumeFromComponentState() {
     console.log('No Experimental condition is required: continuing', rootTDFBoxed);
   }
 
-  const stimuliSet = Tdfs.findOne({_id: Session.get('currentRootTdfId')}).stimuli
+  const stimuliSet = curTdf.stimuli
 
   Session.set('currentStimuliSet', stimuliSet);
   Session.set('feedbackUnset', Session.get('fromInstructions') || Session.get('feedbackUnset'));
@@ -3306,12 +3425,12 @@ async function resumeFromComponentState() {
   }
 
   //if this unit number is greater than the number of units in the tdf, we need to send the user to the profile page
-  if(curExperimentState.currentUnitNumber > Session.get('currentTdfFile').tdfs.tutor.unit.length - 1){
+  if(curExperimentState.currentUnitNumber > curTdf.content.tdfs.tutor.unit.length - 1){
     alert('You have completed all the units in this lesson.');
     leavePage('/profile');
   }
 
-  const curTdfUnit = Session.get('currentTdfFile').tdfs.tutor.unit[Session.get('currentUnitNumber')];
+  const curTdfUnit = curTdf.content.tdfs.tutor.unit[Session.get('currentUnitNumber')];
   if (curTdfUnit.videosession) { 
     Session.set('isVideoSession', true)
     console.log('video type questions detected, pre-loading video');
@@ -3328,12 +3447,7 @@ async function resumeFromComponentState() {
     newExperimentState.questionIndex = 0;
   }
   
-updateExperimentState(newExperimentState, 'card.resumeFromComponentState');  
-
-const componentStates = ComponentStates.find().fetch();
-  const curUnitNum = Session.get('currentUnitNumber');
-  const curQuestionIndex = curExperimentState.questionIndex
-  const curQuestion = curTdfUnit.question ? curTdfUnit.question[curQuestionIndex] : false;
+  updateExperimentState(newExperimentState, 'card.resumeFromComponentState');
 
   //custom settings for user interface
   //we get the current settings from the tdf file's setspec
@@ -3368,7 +3482,8 @@ const componentStates = ComponentStates.find().fetch();
       "choiceButtonCols": 1,
       "onlyShowSimpleFeedback": "onCorrect",
       "incorrectColor": "darkorange",
-      "correctColor": "green"
+      "correctColor": "green",
+      'instructionsTitleDisplay': "headerOnly",
     },
   }
   //here we interprit the stimulus and input position settings to set the colum widths. There are 4 possible combinations.
@@ -3453,6 +3568,18 @@ const componentStates = ComponentStates.find().fetch();
   } else if(!UIsettings.displayUserAnswerInFeedback || UIsettings.displayUserAnswerInFeedback == "false"){
     UIsettings.displayUserAnswerInCorrectFeedback = false;
     UIsettings.displayUserAnswerInIncorrectFeedback = false;
+  }
+
+  //switch for displayInstructionsTitle
+  if(UIsettings.instructionsTitleDisplay == "headerOnly"){
+    UIsettings.displayInstructionsTitle = true;
+    UIsettings.displayUnitNameInInstructions = false;
+  } else if(UIsettings.instructionsTitleDisplay == true) {
+    UIsettings.displayInstructionsTitle = true;
+    UIsettings.displayUnitNameInInstructions = true;
+  } else if(UIsettings.instructionsTitleDisplay == false){
+    UIsettings.displayInstructionsTitle = false;
+    UIsettings.displayUnitNameInInstructions = false;
   }
 
   Session.set('curTdfUISettings', UIsettings);
@@ -3593,7 +3720,7 @@ async function processUserTimesLog() {
   if (moduleCompleted) {
     // They are DONE!determineUserFeedback
     console.log('TDF already completed - leaving for profile page.');
-    if (Meteor.user().profile.loginMode === 'experiment') {
+    if (Meteor.user().loginParams.loginMode === 'experiment') {
       // Experiment users don't *have* a normal page
       leavePage(routeToSignin);
     } else {

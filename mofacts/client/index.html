@@ -37,26 +37,7 @@
   {{/if}}
   <!-- main page content -->
   {{> yield}}
-  <!-- card lower feedback-->
-  {{#if isInTrial}}
-    {{#if isInInstructions}}
-    {{else}}
-      <div id="userLowerInteractionContainer">
-        <div class="row text-center">
-            <div class="col-sm-12 col-xs-12 col-md-6 col-lg-6 mx-auto" style="margin-bottom: 30px;">
-                <br>
-                <div id="userLowerInteraction">
-                </div>
-                <div id="CountdownTimerText">
-                </div>
-                <div id="progressBarContainer" class="progress">
-                    <div id="progressbar" class="bg-warning progress-bar-striped" role="progressbar" aria-label="Basic example" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100" style="width:0%;"></div>
-                </div>
-            </div>
-        </div>
-    </div>
-    {{/if}}
-  {{/if}}
+  
 
 <!-- Error Modal -->
 <div class="modal fade" id="errorReportingModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">

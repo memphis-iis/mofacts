@@ -397,7 +397,7 @@ Template.profile.rendered = async function() {
   const isAdmin = Roles.userIsInRole(Meteor.user(), ['admin']);
 
   //Get all course tdfs
-  const courseId = Meteor.user().profile.curClass ? Meteor.user().profile.curClass.courseId : null;
+  const courseId = Meteor.user().loginParams.curClass ? Meteor.user().loginParams.curClass.courseId : null;
   const courseTdfs = Assignments.find({courseId: courseId}).fetch()
   console.log('courseTdfs', courseTdfs, courseId);
 
@@ -595,7 +595,7 @@ Template.profile.rendered = async function() {
 // Actual logic for selecting and starting a TDF
 // eslint-disable-next-line max-len
 async function selectTdf(currentTdfId, lessonName, currentStimuliSetId, ignoreOutOfGrammarResponses, 
-  speechOutOfGrammarFeedback, how, isMultiTdf, fromSouthwest, setspec, isExperiment = false) {
+  speechOutOfGrammarFeedback, how, isMultiTdf, fromSouthwest, setspec, isExperiment = false, isRefresh = false) {
   console.log('Starting Lesson', lessonName, currentTdfId,
       'currentStimuliSetId:', currentStimuliSetId, 'isMultiTdf:', isMultiTdf);
 
@@ -612,7 +612,7 @@ async function selectTdf(currentTdfId, lessonName, currentStimuliSetId, ignoreOu
   Session.set('currentTdfId', currentTdfId);
   let globalExperimentState = GlobalExperimentStates.findOne({userId: Meteor.userId(), TDFId: currentTdfId}) || {};
   globalExperimentState ? Session.set('currentExperimentState', globalExperimentState.experimentState) : Session.set('currentExperimentState', {});
-  const tdfResponse = Tdfs.findOne({_id: currentTdfId});
+  const tdfResponse = Tdfs.findOne({_id: currentTdfId}) ? Tdfs.findOne({_id: currentTdfId}) : await meteorCallAsync('getTdfById', currentTdfId);
   const curTdfContent = tdfResponse.content;
   Session.set('currentTdfFile', curTdfContent);
   Session.set('currentTdfName', curTdfContent.fileName);
@@ -755,10 +755,12 @@ async function selectTdf(currentTdfId, lessonName, currentStimuliSetId, ignoreOu
     updateExperimentState(newExperimentState, 'profile.selectTdf');
 
     Session.set('inResume', true);
-    if (isMultiTdf) {
-      navigateForMultiTdf();
-    } else {
-      Router.go('/card');
+    if (!isRefresh) {
+      if (isMultiTdf) {
+        navigateForMultiTdf();
+      } else {
+        Router.go('/card');
+      }
     }
   }
 }
