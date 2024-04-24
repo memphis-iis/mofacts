@@ -572,8 +572,8 @@ Template.card.events({
     const timeout = Session.get('CurTimeoutId')
     Session.set('CurTimeoutId', undefined)
     Meteor.clearTimeout(timeout)
-    afterFeedbackCallbackBind()
-    engine.updatePracticeTime(Date.now() - trialEndTimeStamp)
+    afterFeedbackCallbackBind();
+    engine.updatePracticeTime(Date.now() - Session.get('trialEndTimeStamp'))
   },
 
   'click .instructModalDismiss': function(event) {
