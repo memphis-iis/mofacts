@@ -166,6 +166,15 @@ function getMatchingDialogueCacheWordsForAnswer(answer) {
   }
 }
 
+function createExperimentState(curExperimentState) {
+  serverConsole('createExperimentState', curExperimentState, curExperimentState.currentTdfId);
+  GlobalExperimentStates.insert({
+    userId: Meteor.userId(),
+    TDFId: curExperimentState.currentTdfId,
+    experimentState: curExperimentState
+  });
+}
+
 // Published to all clients (even without subscription calls)
 Meteor.publish(null, function() {
   // Only valid way to get the user ID for publications
@@ -2370,7 +2379,7 @@ function getSyllablesForWord(word) {
 const methods = {
   getMatchingDialogueCacheWordsForAnswer, getAllTeachers, getUserIdforUsername, getClassPerformanceByTDF, 
 
-  removeUserDueDateException, insertHiddenItem, setUserLoginData, addUserDueDateException, 
+  removeUserDueDateException, insertHiddenItem, setUserLoginData, addUserDueDateException, createExperimentState,
     
   getMeteorSettingsPublic: function(settings) {
     //passes back current public settings
@@ -2435,16 +2444,6 @@ const methods = {
       createExperimentState(curExperimentState);
     }
   },
-
-  createExperimentState: function(curExperimentState) {
-    serverConsole('createExperimentState', curExperimentState, curExperimentState.currentTdfId);
-    GlobalExperimentStates.insert({
-      userId: Meteor.userId(),
-      TDFId: curExperimentState.currentTdfId,
-      experimentState: curExperimentState
-    });
-  },
-
 
   getAltServerUrl: function() {
     return altServerUrl;

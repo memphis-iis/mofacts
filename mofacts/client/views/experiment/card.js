@@ -1863,7 +1863,10 @@ async function afterAnswerFeedbackCallback(trialEndTimeStamp, trialStartTimeStam
   }, reviewTimeout)
   Session.set('CurTimeoutId', timeout)
   let {responseDuration, startLatency, endLatency, feedbackLatency} = getTrialTime(trialEndTimeStamp, trialStartTimeStamp, trialEndTimeStamp + reviewTimeout, testType)
-  const practiceTime = endLatency;
+  let practiceTime = endLatency;
+  if (testType === 's') {
+    practiceTime = feedbackLatency;
+  }
   engine.cardAnswered(isCorrect, practiceTime);
 
   if(!Session.get('isVideoSession')){
