@@ -631,7 +631,7 @@ Template.card.helpers({
     
   }, 
   'isImpersonating': function(){
-    return Meteor.user() && Meteor.user().profile ? Meteor.user().profile.impersonating : false;
+    return Meteor.user() ? Meteor.user().profile.impersonating : false;
   },
 
   'voiceTranscriptionPromptMsg': function() {
@@ -1904,7 +1904,7 @@ async function afterFeedbackCallback(trialEndTimeStamp, trialStartTimeStamp, isT
 
   newExperimentState.overallOutcomeHistory = Session.get('overallOutcomeHistory');
   console.log('writing answerLogRecord to history:', answerLogRecord);
-  if(Meteor.user().profile === undefined || !Meteor.user().profile.impersonating){
+  if(Meteor.user() === undefined || !Meteor.user().impersonating){
     try {
       answerLogRecord.responseDuration = responseDuration;
       answerLogRecord.CFStartLatency = startLatency;
