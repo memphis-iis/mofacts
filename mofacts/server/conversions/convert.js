@@ -57,7 +57,7 @@ function removeNonAscii(str) {
   else
     str = str.toString();
 
-  return str.replace(/[^\x20-\x7E]/g, '');
+  return str.replace(/[\u0080-\u00FF]/g, "")
 }
 
 const localResponseKCMap = {};
@@ -107,8 +107,8 @@ function getNewItemFormat(stimFile, stimulusFileName, stimuliSetId, responseKCMa
         incorrectResponses: removeNonAscii(incorrectResponses),
         itemResponseType: cluster.responseType || 'text',
         speechHintExclusionList: stim.speechHintExclusionList,
-        clozeStimulus: removeNonAscii(stim.display.clozeText || stim.display.clozeStimulus),
-        textStimulus: removeNonAscii(stim.display.text || stim.display.textStimulus || ""),
+        clozeStimulus: stim.display.clozeText || stim.display.clozeStimulus,
+        textStimulus: stim.display.text || stim.display.textStimulus || "",
         audioStimulus: stim.display.audioSrc || stim.display.audioStimulus,
         imageStimulus: stim.display.imgSrc || stim.display.imageStimulus,
         videoStimulus: stim.display.videoSrc || stim.display.videoStimulus,
