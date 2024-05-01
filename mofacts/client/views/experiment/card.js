@@ -2107,16 +2107,17 @@ function gatherAnswerLogRecord(trialEndTimeStamp, trialStartTimeStamp, source, u
   // state.stepNameSeen[stepName] = stepCount;
   // stepName = stepCount + " " + stepName;
   const isStudy = testType === 's';
-  let shufIndex;
+  let shufIndex = clusterIndex;
+  let stimFileIndex = clusterIndex;
   let schedCondition = 'N/A';
   if (engine.unitType == SCHEDULE_UNIT) {
     const sched = Session.get('schedule');
     if (sched && sched.q && sched.q.length) {
       const schedItemIndex = Session.get('questionIndex') - 1;
-      clusterIndex = schedItemIndex;
+      shufIndex = schedItemIndex;
       if (schedItemIndex >= 0 && schedItemIndex < sched.q.length) {
         schedCondition = parseSchedItemCondition(sched.q[schedItemIndex].condition);
-        shufIndex = sched.q[schedItemIndex].clusterIndex;
+        stimFileIndex = sched.q[schedItemIndex].clusterIndex;
       }
     }
   } else {
@@ -2205,8 +2206,8 @@ function gatherAnswerLogRecord(trialEndTimeStamp, trialStartTimeStamp, source, u
     'CFAudioInputEnabled': Meteor.user().audioInputMode,
     'CFAudioOutputEnabled': Session.get('enableAudioPromptAndFeedback'),
     'CFDisplayOrder': Session.get('questionIndex'),
-    'CFStimFileIndex': clusterIndex,
-    'CFSetShuffledIndex': shufIndex || clusterIndex,
+    'CFStimFileIndex': stimFileIndex,
+    'CFSetShuffledIndex': shufIndex,
     'CFAlternateDisplayIndex': Session.get('alternateDisplayIndex') || null,
     'CFStimulusVersion': whichStim,
     'CFCorrectAnswer': correctAnswer,
