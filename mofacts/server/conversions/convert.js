@@ -51,7 +51,7 @@ if (false) {// switch to true to run via node
   generateTdfs(tdfsJson);
 }
 
-function removeNonAscii(str) {
+function removeInvisibleUnicode(str) {
   if ((str===null) || (str===''))
     return str;
   else
@@ -103,8 +103,8 @@ function getNewItemFormat(stimFile, stimulusFileName, stimuliSetId, responseKCMa
         responseKC: responseKC,
         params: stim.parameter || STIM_PARAMETER,
         optimalProb: stim.optimalProb,
-        correctResponse: removeNonAscii(stim.response.correctResponse),
-        incorrectResponses: removeNonAscii(incorrectResponses),
+        correctResponse: removeInvisibleUnicode(stim.response.correctResponse),
+        incorrectResponses: removeInvisibleUnicode(incorrectResponses),
         itemResponseType: cluster.responseType || 'text',
         speechHintExclusionList: stim.speechHintExclusionList,
         clozeStimulus: stim.display.clozeText || stim.display.clozeStimulus,
