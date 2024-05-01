@@ -78,7 +78,17 @@ Template.turkWorkflow.helpers({
     const experiments = Tdfs.find({"ownerId": Meteor.userId(), "content.tdfs.tutor.setspec.experimentTarget": {$ne: null}}).fetch()
     return experiments
   },
+  use_sandbox: function() {
+    return getProfileField('use_sandbox') ? 'checked' : false;
+  },
 
+  have_aws_id: function() {
+    return getProfileField('have_aws_id');
+  },
+
+  have_aws_secret: function() {
+    return getProfileField('have_aws_secret');
+  },
   turkIds: () => Session.get('turkIds')
 });
 
@@ -89,6 +99,11 @@ Template.turkWorkflow.helpers({
 Template.turkWorkflow.rendered = async function() {
   // Init the modal dialogs
   $('#turkModal').modal({
+    'backdrop': 'static',
+    'keyboard': false,
+    'show': false,
+  });
+  $('#profileWorkModal').modal({
     'backdrop': 'static',
     'keyboard': false,
     'show': false,
@@ -156,6 +171,35 @@ Template.turkWorkflow.events({
     });
   },
 
+  'click #saveProfile': function(event) {
+    event.preventDefault();
+
+    const data = {
+      aws_id: $('#profileAWSID').val(),
+      aws_secret_key: $('#profileAWSSecret').val(),
+      use_sandbox: $('#profileUseSandbox').prop('checked'),
+    };
+
+    $('#profileWorkModal').modal('show');
+
+    Meteor.call('saveUserProfileData', data, function(error, serverReturn) {
+      $('#profileWorkModal').modal('hide');
+      console.log(serverReturn);
+
+      if (error) {
+        console.log('Error saving user profile', error);
+        alert('Your changes were not saved! ' + error);
+      } else if (!serverReturn || !serverReturn.result) {
+        console.log('Server failure while saving profile', serverReturn);
+        alert('Your changes were not saved! The server said: ' + JSON.stringify(serverReturn, null, 2));
+      } else {
+        console.log('Profile saved:', serverReturn);
+        // Clear any controls that shouldn't be kept around
+        $('.clearOnSave').val('');
+        alert('Your profile changes have been saved: save details follow\n\n' + JSON.stringify(serverReturn, null, 2));
+      }
+    });
+  },
   'change #experiment-select': async function(event) {
     event.preventDefault()
     const TDFId = $("#experiment-select").val()
@@ -372,3 +416,11 @@ Template.turkWorkflow.events({
     $('#detailsModal').modal('show');
   },
 });
+
+function getProfileField(field) {
+  const prof = UserProfileData.findOne({_id: Meteor.userId()});
+  if (!prof || typeof prof[field] === undefined) {
+    return null;
+  }
+  return prof[field];
+}
