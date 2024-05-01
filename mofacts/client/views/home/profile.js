@@ -39,7 +39,7 @@ Template.profile.helpers({
   },
 
   class: function(){
-    thisClass = Meteor.user().profile.class;
+    thisClass = Meteor.user().class;
     console.log('class: ', thisClass);
     if(thisClass.courseName){
       return thisClass;
@@ -85,7 +85,7 @@ Template.profile.helpers({
     return Template.instance().tdfOwnersMap.get()[ownerId];
   },
   isImpersonating: function(){
-    return Meteor.user() && Meteor.user().profile ? Meteor.user().profile.impersonating : false;
+    return Meteor.user() ? Meteor.user().impersonating : false;
   },
 });
 

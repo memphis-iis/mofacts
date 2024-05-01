@@ -27,8 +27,8 @@ getCurrentTheme();
 
 async function checkUserSession(){
   const currentSessionId = Meteor.default_connection._lastSessionId;
-  const lastSessionId = Meteor.user().profile.lastSessionId;
-  const lastSessionIdTimestampServer = Meteor.user().profile.lastSessionIdTimestamp;
+  const lastSessionId = Meteor.user().lastSessionId;
+  const lastSessionIdTimestampServer = Meteor.user().lastSessionIdTimestamp;
   const lastSessionIdTimestampClient = Session.get('lastSessionIdTimestamp');
   if(lastSessionIdTimestampClient){
     //user previously logged in this session

@@ -2421,7 +2421,7 @@ const methods = {
   removeTurkById: function(turkId, experimentId){
     serverConsole('removeTurkById', turkId, experimentId)
     ScheduledTurkMessages.remove({workerUserId: turkId, experiment: experimentId});
-    let profile = Meteor.user().profile;
+    let profile = Meteor.user();
     profile.lockouts[experimentId].lockoutMinutes = Number.MAX_SAFE_INTEGER;
     Meteor.users.update({_id: Meteor.userId()}, {$set: {profile: profile}});
   },
@@ -2755,7 +2755,7 @@ const methods = {
     if (!Meteor.users.findOne(userId)) {
       throw new Meteor.Error(404, 'User not found');
     }
-    let profile = Meteor.user().profile;
+    let profile = Meteor.user();
     profile.impersonating = userId;
     Meteor.users.update({_id: Meteor.userId()}, {$set: {profile: profile}});
     this.setUserId(userId);
@@ -2771,7 +2771,7 @@ const methods = {
   },
 
   clearImpersonation: function(){
-    let profile = Meteor.user().profile;
+    let profile = Meteor.user();
     profile.impersonating = false;
     Meteor.users.update({_id: Meteor.userId()}, {$set: {profile: profile}});
     return;
