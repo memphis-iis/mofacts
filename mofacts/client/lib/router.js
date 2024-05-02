@@ -161,38 +161,11 @@ Router.route('/experiment/:target?/:xcond?', {
       console.log('EXPERIMENT target:', target, 'xcond', xcond);
 
       Session.set('clusterMapping', '');
-      //if the user is not logged in, redirect to the signin page
-      if (!Meteor.user()) {
-        this.render('signIn');
-      } else {
-        sessionCleanUp();
-        Session.set('experimentPasswordRequired', true);
       
-        let experimentTarget = Session.get('experimentTarget');
-        if (experimentTarget) experimentTarget = experimentTarget.toLowerCase();
-        let foundExpTarget = await meteorCallAsync('getTdfByExperimentTarget', experimentTarget);
-        const setspec = foundExpTarget.content.tdfs.tutor.setspec ? foundExpTarget.content.tdfs.tutor.setspec : null;
-        const ignoreOutOfGrammarResponses = setspec.speechIgnoreOutOfGrammarResponses ?
-        setspec.speechIgnoreOutOfGrammarResponses.toLowerCase() == 'true' : false;
-        const speechOutOfGrammarFeedback = setspec.speechOutOfGrammarFeedback ?
-        setspec.speechOutOfGrammarFeedback : 'Response not in answer set';
-
-        if (foundExpTarget) {
-          selectTdf(
-              foundExpTarget._id,
-              setspec.lessonname,
-              foundExpTarget.stimuliSetId,
-              ignoreOutOfGrammarResponses,
-              speechOutOfGrammarFeedback,
-              'Auto-selected by experiment target ' + experimentTarget,
-              foundExpTarget.content.isMultiTdf,
-              false,
-              setspec,
-              true
-          );
-        }
-        await meteorCallAsync('setUserLoginData', 'direct', Session.get('loginMode'));
-      }
+      // Log out the user to make sure we start clean and to avoid any double logins
+      Meteor.logout();
+      this.render('signIn');
+      
     } else {
       console.log('tdf not found');
       alert('The experiment you are trying to access does not exist.');
