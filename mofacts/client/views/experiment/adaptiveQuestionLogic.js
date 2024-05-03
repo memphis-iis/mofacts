@@ -2,10 +2,7 @@ export class AdaptiveQuestionLogic {
 
 
     constructor(){
-        this.schedule = [{
-            clusterIndex: 0,
-            stimIndex: 0,
-        }];
+        this.schedule = [];
         this.when = Session.get('currentTdfUnit').adaptive;
         this.curUnit = Session.get('currentTdfUnit');
         this.tdfId = Session.get('currentTdfId');
@@ -13,8 +10,11 @@ export class AdaptiveQuestionLogic {
         this.componentStates = ComponentStates.findOne({userId: this.userId, TDFId: this.tdfId})
         console.log('adaptive - componentStates:', this.componentStates, this.userId, this.tdfId);
     }
-    
 
+    async setSchedule(schedule){
+        this.schedule = schedule
+    }
+    
     //translate the logic to javascript code    
     async evaluate(logicString){
         //logic string is a string that contains the logic to be evaluated using IF THEN logic, 
@@ -191,14 +191,18 @@ export class AdaptiveQuestionLogic {
             }
             newUnit.assessmentsession.clusterlist = newUnit.assessmentsession.clusterlist.trim();
         } else if (newUnit.videosession) {
+            const questionTimes = newUnit.videosession.questiontimes;
+            const sortedSchedule = this.schedule.sort((a, b) => questionTimes[a.clusterIndex] - questionTimes[b.clusterIndex]);
+
             if(!newUnit.videosession.questions){
                 newUnit.videosession.questions = [];
             }
-            for(const item of this.schedule){
+            if(!newUnit.videosession.questiontimes){
+                newUnit.videosession.questiontimes = [];
+            }
+            for(const item of sortedSchedule){
                 newUnit.videosession.questions.push(item.clusterIndex)
             }
-            const questionTimes = newUnit.videosession.questiontimes;
-            newUnit.videosession.questiontimes = [];
             for(const item of newUnit.videosession.questions){
                 newUnit.videosession.questiontimes.push(questionTimes[item])
             }
