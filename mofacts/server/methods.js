@@ -2389,7 +2389,9 @@ const methods = {
 
   generateContent: function( percentage, stringArrayJsonOption, inputText ) {
     if(Meteor.user() && Meteor.user().emails[0] || Meteor.isDevelopment){
+      serverConsole('generateContent', percentage, stringArrayJsonOption, inputText);
       ClozeAPI.GetSelectClozePercentage(percentage, stringArrayJsonOption, null, inputText).then((result) => {
+        serverConsole('result', result);
         let message;
         let subject;
         let file;
@@ -2405,12 +2407,13 @@ const methods = {
             contentType: 'application/json'
           }
         }
+        file ? files = [file] : files = [];
         Email.send({
           to: Meteor.user().emails[0].address,
           from: Meteor.settings.owner,
           subject: subject,
           text: message,
-          attachments: [file]
+          attachments: files
         });
       }).catch((err) => {
         serverConsole('err', err);
