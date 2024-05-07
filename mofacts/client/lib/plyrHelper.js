@@ -374,7 +374,7 @@ async function addStimToSchedule(curTdfUnit){
   }
   //sort markers based on time
   markers.sort((a, b) => a.time - b.time);
-  for(let i in markers){
+  for(let i = 0; i < markers.length; i++){
     markers[i].label = 'Question ' + (i + 1);
   }
   //create markers for new markers
