@@ -30,7 +30,7 @@ var _Option = require("./fable-library.2.10.2/Option");
 
 var _Seq = require("./fable-library.2.10.2/Seq");
 
-const paraphraseEndpoint = "https://paraphrase:8004/api/";
+const paraphraseEndpoint = "https://paraphrase:8000/api/";
 exports.paraphraseEndpoint = paraphraseEndpoint;
 
 function getParaphrases(sentence) {
