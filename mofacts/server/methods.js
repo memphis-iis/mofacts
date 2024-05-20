@@ -166,6 +166,15 @@ function getMatchingDialogueCacheWordsForAnswer(answer) {
   }
 }
 
+function createExperimentState(curExperimentState) {
+  serverConsole('createExperimentState', curExperimentState, curExperimentState.currentTdfId);
+  GlobalExperimentStates.insert({
+    userId: Meteor.userId(),
+    TDFId: curExperimentState.currentTdfId,
+    experimentState: curExperimentState
+  });
+}
+
 // Published to all clients (even without subscription calls)
 Meteor.publish(null, function() {
   // Only valid way to get the user ID for publications
@@ -1385,7 +1394,7 @@ function getClassPerformanceByTDF(classId, tdfId, date=false) {
       outcome = 1;
     }
     var exception = false;
-    var exceptions = Meteor.users.findOne({_id: history.userId}).profile.dueDateExceptions || [];
+    var exceptions = Meteor.users.findOne({_id: history.userId}).dueDateExceptions || [];
     var exceptionRawDate = false;
     if(exceptions.findIndex((item) => item.tdfId == tdfId && item.classId == classId) !== -1){
       var exceptionRaw = exceptions.find((item) => item.tdfId == tdfId && item.classId == classId).date;
@@ -1439,11 +1448,11 @@ function addUserDueDateException(userId, tdfId, classId, date){
     date: date,
   }
   user = Meteor.users.findOne({_id: userId});
-  if(user.profile.dueDateExceptions){
-    user.profile.dueDateExceptions.push(exception);
+  if(user.dueDateExceptions){
+    user.dueDateExceptions.push(exception);
   }
   else{
-    user.profile.dueDateExceptions = [exception];
+    user.dueDateExceptions = [exception];
   }
   Meteor.users.update({_id: userId}, user);
 }
@@ -1451,8 +1460,8 @@ function addUserDueDateException(userId, tdfId, classId, date){
 async function checkForUserException(userId, tdfId){
   serverConsole('checkForUserException', userId, tdfId);
   user = Meteor.users.findOne({_id: userId});
-  if(user.profile.dueDateExceptions){
-    var exceptions = user.profile.dueDateExceptions;
+  if(user.dueDateExceptions){
+    var exceptions = user.dueDateExceptions;
     var exception = exceptions.find((item) => item.tdfId == tdfId);
     if(exception){
       exceptionDate = new Date(exception.date);
@@ -1466,10 +1475,10 @@ async function checkForUserException(userId, tdfId){
 function removeUserDueDateException(userId, tdfId){
   serverConsole('removeUserDueDateException', userId, tdfId);
   user = Meteor.users.findOne({_id: userId});
-  if(user.profile.dueDateExceptions){
-    exceptionIndex = user.profile.dueDateExceptions.findIndex((item) => item.tdfId == tdfId);
+  if(user.dueDateExceptions){
+    exceptionIndex = user.dueDateExceptions.findIndex((item) => item.tdfId == tdfId);
     if(exceptionIndex > -1){
-      user.profile.dueDateExceptions.splice(exceptionIndex, 1);
+      user.dueDateExceptions.splice(exceptionIndex, 1);
     } else {
       serverConsole('removeUserDueDateException ERROR, no exception found', userId, tdfId);
     }
@@ -2370,7 +2379,7 @@ function getSyllablesForWord(word) {
 const methods = {
   getMatchingDialogueCacheWordsForAnswer, getAllTeachers, getUserIdforUsername, getClassPerformanceByTDF, 
 
-  removeUserDueDateException, insertHiddenItem, setUserLoginData, addUserDueDateException, 
+  removeUserDueDateException, insertHiddenItem, setUserLoginData, addUserDueDateException, createExperimentState,
     
   getMeteorSettingsPublic: function(settings) {
     //passes back current public settings
@@ -2412,9 +2421,9 @@ const methods = {
   removeTurkById: function(turkId, experimentId){
     serverConsole('removeTurkById', turkId, experimentId)
     ScheduledTurkMessages.remove({workerUserId: turkId, experiment: experimentId});
-    let profile = Meteor.user().profile;
-    profile.lockouts[experimentId].lockoutMinutes = Number.MAX_SAFE_INTEGER;
-    Meteor.users.update({_id: Meteor.userId()}, {$set: {profile: profile}});
+    let lockout = meteor.user().lockouts;
+    lockout[experimentId].lockoutMinutes = Number.MAX_SAFE_INTEGER;
+    Meteor.users.update({_id: Meteor.userId()}, {$set: {lockout: lockout}});
   },
 
   saveAudioPromptMode: function(audioPromptMode){
@@ -2435,16 +2444,6 @@ const methods = {
       createExperimentState(curExperimentState);
     }
   },
-
-  createExperimentState: function(curExperimentState) {
-    serverConsole('createExperimentState', curExperimentState, curExperimentState.currentTdfId);
-    GlobalExperimentStates.insert({
-      userId: Meteor.userId(),
-      TDFId: curExperimentState.currentTdfId,
-      experimentState: curExperimentState
-    });
-  },
-
 
   getAltServerUrl: function() {
     return altServerUrl;
@@ -2756,9 +2755,7 @@ const methods = {
     if (!Meteor.users.findOne(userId)) {
       throw new Meteor.Error(404, 'User not found');
     }
-    let profile = Meteor.user().profile;
-    profile.impersonating = userId;
-    Meteor.users.update({_id: Meteor.userId()}, {$set: {profile: profile}});
+    Meteor.users.update({_id: Meteor.userId()}, {$set: {impersonating: userId}});
     this.setUserId(userId);
   },
 
@@ -2772,9 +2769,7 @@ const methods = {
   },
 
   clearImpersonation: function(){
-    let profile = Meteor.user().profile;
-    profile.impersonating = false;
-    Meteor.users.update({_id: Meteor.userId()}, {$set: {profile: profile}});
+    Meteor.users.update({_id: Meteor.userId()}, {$set: {impersonating: false}});
     return;
   },
 
@@ -2821,13 +2816,8 @@ const methods = {
   },
 
   setUserSessionId: function(sessionId, sessionIdTimestamp) {
-    let profile = Meteor.users.findOne({_id: Meteor.userId()}).profile;
     serverConsole('setUserSessionId', sessionId, sessionIdTimestamp)
-    serverConsole('profile', profile)
-    profile.lastSessionId = sessionId;
-    profile.lastSessionIdTimestamp = sessionIdTimestamp;
-    serverConsole('profile2', profile)
-    Meteor.users.update({_id: Meteor.userId()}, {$set: {profile: profile}});
+    Meteor.users.update({_id: Meteor.userId()}, {$set: {lastSessionId: sessionId, lastSessionIdTimestamp: sessionIdTimestamp}});
   },
 
   deleteUserSpeechAPIKey: function() {

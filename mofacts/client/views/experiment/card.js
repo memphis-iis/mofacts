@@ -631,7 +631,7 @@ Template.card.helpers({
     
   }, 
   'isImpersonating': function(){
-    return Meteor.user() && Meteor.user().profile ? Meteor.user().profile.impersonating : false;
+    return Meteor.user() ? Meteor.user().profile.impersonating : false;
   },
 
   'voiceTranscriptionPromptMsg': function() {
@@ -1869,7 +1869,11 @@ async function afterAnswerFeedbackCallback(trialEndTimeStamp, trialStartTimeStam
   }, reviewTimeout)
   Session.set('CurTimeoutId', timeout)
   let {responseDuration, startLatency, endLatency, feedbackLatency} = getTrialTime(trialEndTimeStamp, trialStartTimeStamp, trialEndTimeStamp + reviewTimeout, testType)
-  engine.cardAnswered(isCorrect, endLatency);
+  let practiceTime = endLatency;
+  if (testType === 's') {
+    practiceTime = feedbackLatency;
+  }
+  engine.cardAnswered(isCorrect, practiceTime);
 
   if(!Session.get('isVideoSession')){
     if(Session.get('unitType') == "model")
@@ -1906,7 +1910,7 @@ async function afterFeedbackCallback(trialEndTimeStamp, trialStartTimeStamp, isT
 
   newExperimentState.overallOutcomeHistory = Session.get('overallOutcomeHistory');
   console.log('writing answerLogRecord to history:', answerLogRecord);
-  if(Meteor.user().profile === undefined || !Meteor.user().profile.impersonating){
+  if(Meteor.user() === undefined || !Meteor.user().impersonating){
     try {
       answerLogRecord.responseDuration = responseDuration;
       answerLogRecord.CFStartLatency = startLatency;
@@ -2109,16 +2113,17 @@ function gatherAnswerLogRecord(trialEndTimeStamp, trialStartTimeStamp, source, u
   // state.stepNameSeen[stepName] = stepCount;
   // stepName = stepCount + " " + stepName;
   const isStudy = testType === 's';
-  let shufIndex;
+  let shufIndex = clusterIndex;
+  let stimFileIndex = clusterIndex;
   let schedCondition = 'N/A';
   if (engine.unitType == SCHEDULE_UNIT) {
     const sched = Session.get('schedule');
     if (sched && sched.q && sched.q.length) {
       const schedItemIndex = Session.get('questionIndex') - 1;
-      clusterIndex = schedItemIndex;
+      shufIndex = schedItemIndex;
       if (schedItemIndex >= 0 && schedItemIndex < sched.q.length) {
         schedCondition = parseSchedItemCondition(sched.q[schedItemIndex].condition);
-        shufIndex = sched.q[schedItemIndex].clusterIndex;
+        stimFileIndex = sched.q[schedItemIndex].clusterIndex;
       }
     }
   } else {
@@ -2207,8 +2212,8 @@ function gatherAnswerLogRecord(trialEndTimeStamp, trialStartTimeStamp, source, u
     'CFAudioInputEnabled': Meteor.user().audioInputMode,
     'CFAudioOutputEnabled': Session.get('enableAudioPromptAndFeedback'),
     'CFDisplayOrder': Session.get('questionIndex'),
-    'CFStimFileIndex': clusterIndex,
-    'CFSetShuffledIndex': shufIndex || clusterIndex,
+    'CFStimFileIndex': stimFileIndex,
+    'CFSetShuffledIndex': shufIndex,
     'CFAlternateDisplayIndex': Session.get('alternateDisplayIndex') || null,
     'CFStimulusVersion': whichStim,
     'CFCorrectAnswer': correctAnswer,

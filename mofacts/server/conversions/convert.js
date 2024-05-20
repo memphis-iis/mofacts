@@ -51,6 +51,15 @@ if (false) {// switch to true to run via node
   generateTdfs(tdfsJson);
 }
 
+function removeInvisibleUnicode(str) {
+  if ((str===null) || (str===''))
+    return str;
+  else
+    str = str.toString();
+
+  return str.replace(/[\u0080-\u00FF]/g, "")
+}
+
 const localResponseKCMap = {};
 let curResponseKCCtr = 1;
 function getNewItemFormat(stimFile, stimulusFileName, stimuliSetId, responseKCMap) {
@@ -94,8 +103,8 @@ function getNewItemFormat(stimFile, stimulusFileName, stimuliSetId, responseKCMa
         responseKC: responseKC,
         params: stim.parameter || STIM_PARAMETER,
         optimalProb: stim.optimalProb,
-        correctResponse: stim.response.correctResponse,
-        incorrectResponses: incorrectResponses,
+        correctResponse: removeInvisibleUnicode(stim.response.correctResponse),
+        incorrectResponses: removeInvisibleUnicode(incorrectResponses),
         itemResponseType: cluster.responseType || 'text',
         speechHintExclusionList: stim.speechHintExclusionList,
         clozeStimulus: stim.display.clozeText || stim.display.clozeStimulus,
