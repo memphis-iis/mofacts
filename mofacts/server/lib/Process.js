@@ -282,7 +282,7 @@ function TextRequest$reflection() {
   return (0, _Reflection.record)("Process.TextRequest", [], TextRequest, () => [["text", _Reflection.string], ["model", _Reflection.string]]);
 }
 
-const endpoints = new Endpoints("https://allennlp:8002/predict/semantic-role-labeling", "https://allennlp:8002/predict/coreference-resolution", "https://allennlp:8002/predict/dependency-parsing", "https://spacy:8001/sents", "https://allennlp:8002/predict/textual-entailment");
+const endpoints = new Endpoints("https://allennlp:8000/predict/semantic-role-labeling", "https://allennlp:8000/predict/coreference-resolution", "https://allennlp:8000/predict/dependency-parsing", "https://spacy:80/sents", "https://allennlp:8000/predict/textual-entailment");
 exports.endpoints = endpoints;
 
 
