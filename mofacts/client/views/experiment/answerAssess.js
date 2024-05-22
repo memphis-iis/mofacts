@@ -359,7 +359,7 @@ const Answers = {
 
   // Return [isCorrect, matchText] if userInput correctly matches answer -
   // taking into account both branching answers and edit distance
-  answerIsCorrect: async function(userInput, answer, originalAnswer, displayedAnswer, setspec, callback) {
+  answerIsCorrect: async function(userInput, answer, originalAnswer, displayedAnswer, setspec) {
     // Note that a missing or invalid lfparameter will result in a null value
     const lfparameter = parseFloat(setspec ? setspec.lfparameter || 0 : 0);
     const deliveryParams = Session.get('currentDeliveryParams');
@@ -386,15 +386,15 @@ const Answers = {
             if (typeof(err) == 'undefined' && res != 'default feedback') {
               fullTextIsCorrect.matchText = res;
             }
-            callback(fullTextIsCorrect);
+            return fullTextIsCorrect;
           });
           break;
         case 'dialogue':
         default:
-          callback(fullTextIsCorrect);
+          return fullTextIsCorrect;
       }
     } else {
-      callback(fullTextIsCorrect);
+      return fullTextIsCorrect;
     }
   },
 };

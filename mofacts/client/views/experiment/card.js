@@ -39,7 +39,7 @@ export {
   unitIsFinished,
   revisitUnit,
   gatherAnswerLogRecord,
-  newQuestionHandler
+  newQuestionHandler,
 };
 
 /*
@@ -572,8 +572,8 @@ Template.card.events({
     const timeout = Session.get('CurTimeoutId')
     Session.set('CurTimeoutId', undefined)
     Meteor.clearTimeout(timeout)
-    afterFeedbackCallbackBind()
-    engine.updatePracticeTime(Date.now() - trialEndTimeStamp)
+    afterFeedbackCallbackBind();
+    engine.updatePracticeTime(Date.now() - Session.get('trialEndTimeStamp'))
   },
 
   'click .instructModalDismiss': function(event) {
@@ -1394,19 +1394,21 @@ function handleUserInput(e, source, simAnswerCorrect) {
     }
   } 
 
-  trialEndTimeStamp = Date.now();
-  const afterAnswerFeedbackCallbackWithEndTime = afterAnswerFeedbackCallback.bind(null,
-    trialEndTimeStamp, trialStartTimestamp, source, userAnswer);
+  const trialEndTimeStamp = Date.now();
+  Session.set('trialEndTimeStamp', trialEndTimeStamp);
+  Session.set('trialStartTimestamp', trialStartTimestamp);
+  Session.set('source', source);
+  Session.set('userAnswer', userAnswer);
 
   // Show user feedback and find out if they answered correctly
   // Note that userAnswerFeedback will display text and/or media - it is
   // our responsbility to decide when to hide it and move on
-  userAnswerFeedback(userAnswer, isTimeout, isSkip, simAnswerCorrect, afterAnswerFeedbackCallbackWithEndTime);
+  userAnswerFeedback(userAnswer, isTimeout, isSkip, simAnswerCorrect);
 }
 
 // Take care of user feedback - simCorrect will usually be undefined/null BUT if
 // it is true or false we know this is part of a simulation call
-async function userAnswerFeedback(userAnswer, isTimeout, isSkip, simCorrect, afterAnswerFeedbackCb) {
+async function userAnswerFeedback(userAnswer, isSkip, isTimeout, simCorrect) {
   const isButtonTrial = getButtonTrial();
   const setspec = !isButtonTrial ? Session.get('currentTdfFile').tdfs.tutor.setspec : undefined;
   let isCorrectAccumulator = null;
@@ -1433,12 +1435,13 @@ async function userAnswerFeedback(userAnswer, isTimeout, isSkip, simCorrect, aft
 
   // Make sure to record what they just did (and set justAdded)
   await writeCurrentToScrollList(userAnswer, isTimeout, simCorrect, 1);
-  
-  const afterAnswerFeedbackCbWithTimeout = afterAnswerFeedbackCb.bind(null, isTimeout, isSkip);
-  const afterAnswerAssessmentCbWithArgs = afterAnswerAssessmentCb.bind(null,
-      userAnswer, isSkip, isCorrectAccumulator, feedbackForAnswer, afterAnswerFeedbackCbWithTimeout);
+  Session.set('isTimeout', isTimeout);
+  Session.set('userAnswer', userAnswer);
+  Session.set('isCorrectAccumulator', isCorrectAccumulator);
+  Session.set('feedbackForAnswer', feedbackForAnswer);
 
   // Answer assessment ->
+  let correctAndText = null;
   if (userAnswerWithTimeout != null) {
     displayAnswer = "";
     if(Session.get('hintLevel') && Session.get('currentExperimentState').currentAnswerSyllables){
@@ -1446,11 +1449,10 @@ async function userAnswerFeedback(userAnswer, isTimeout, isSkip, simCorrect, aft
       answerSyllables = Session.get('currentExperimentState').currentAnswerSyllables.syllableArray || "";
       displayAnswer = answerSyllables.slice(0, displayedHintLevel).join("");
     }
-    Answers.answerIsCorrect(userAnswerWithTimeout, Session.get('currentExperimentState').currentAnswer, Session.get('currentExperimentState').originalAnswer,
-    displayAnswer,setspec, afterAnswerAssessmentCbWithArgs);
-  } else {
-    afterAnswerAssessmentCbWithArgs(null);
+    correctAndText = await Answers.answerIsCorrect(userAnswerWithTimeout, Session.get('currentExperimentState').currentAnswer, Session.get('currentExperimentState').originalAnswer,
+    displayAnswer,setspec); 
   }
+  determineUserFeedback(userAnswer, isSkip, isCorrectAccumulator, feedbackForAnswer, correctAndText);
 }
 
 async function writeCurrentToScrollList(userAnswer, isTimeout, simCorrect, justAdded) {
@@ -1526,8 +1528,9 @@ async function writeCurrentToScrollList(userAnswer, isTimeout, simCorrect, justA
   };
 
   if (userAnswerWithTimeout != null) {
-    Answers.answerIsCorrect(userAnswerWithTimeout, Session.get('currentExperimentState').currentAnswer, Session.get('currentExperimentState').originalAnswer,
+    const correctAndText = await Answers.answerIsCorrect(userAnswerWithTimeout, Session.get('currentExperimentState').currentAnswer, Session.get('currentExperimentState').originalAnswer,
     "",setspec, afterAnswerAssessment);
+    afterAnswerAssessment(correctAndText);
   } else {
     afterAnswerAssessment(null);
   }
@@ -1539,7 +1542,7 @@ function clearScrollList() {
 }
 
 
-function afterAnswerAssessmentCb(userAnswer, isSkip, isCorrect, feedbackForAnswer, afterAnswerFeedbackCb, correctAndText) {
+function determineUserFeedback(userAnswer, isSkip, isCorrect, feedbackForAnswer, correctAndText) {
   Session.set('isRefutation', undefined);
   if (isCorrect == null && correctAndText != null) {
     isCorrect = correctAndText.isCorrect;
@@ -1547,8 +1550,6 @@ function afterAnswerAssessmentCb(userAnswer, isSkip, isCorrect, feedbackForAnswe
       Session.set('isRefutation', true);
     }
   }
-
-  const afterAnswerFeedbackCbBound = afterAnswerFeedbackCb.bind(null, isCorrect);
 
   const currentDeliveryParams = Session.get('currentDeliveryParams')
   if (currentDeliveryParams.scoringEnabled) {
@@ -1563,29 +1564,31 @@ function afterAnswerAssessmentCb(userAnswer, isSkip, isCorrect, feedbackForAnswe
   const testType = getTestType();
   const isDrill = (testType === 'd' || testType === 'm' || testType === 'n');
   if (isDrill) {
-    const showUserFeedbackBound = function() {
-      if (feedbackForAnswer == null && correctAndText != null) {
-        feedbackForAnswer = correctAndText.matchText;
-      }
-      showUserFeedback(isCorrect, feedbackForAnswer, afterAnswerFeedbackCbBound, userAnswer.includes('[timeout]'), isSkip);
-    };
+    if (feedbackForAnswer == null && correctAndText != null) {
+      feedbackForAnswer = correctAndText.matchText;
+    }
     if (currentDeliveryParams.feedbackType == 'dialogue' && !isCorrect) {
       speechTranscriptionTimeoutsSeen = 0;
-      initiateDialogue(userAnswer, afterAnswAerFeedbackCbBound, Session.get('currentExperimentState'), showUserFeedbackBound);
+      initiateDialogue(userAnswer, afterAnswAerFeedbackCbBound, Session.get('currentExperimentState'), showUserFeedback(isCorrect, feedbackForAnswer, userAnswer.includes('[timeout]'), isSkip));
     } else {
-      showUserFeedbackBound();
+      showUserFeedback(isCorrect, feedbackForAnswer, userAnswer.includes('[timeout]'), isSkip)();
     }
   } else {
     userFeedbackStart = null;
-    afterAnswerFeedbackCbBound();
+    let trialEndTimeStamp = Session.get('trialEndTimeStamp');
+    let trialStartTimeStamp = Session.get('trialStartTimestamp');
+    let source = Session.get('source');
+    let isTimeout = Session.get('isTimeout');
+    afterAnswerFeedbackCallback(trialEndTimeStamp, trialStartTimeStamp, source, userAnswer, isTimeout,  isCorrect);
   }
 }
 
-async function showUserFeedback(isCorrect, feedbackMessage, afterAnswerFeedbackCbBound, isTimeout, isSkip) {
-  console.log('showUserFeedback')
+async function showUserFeedback(isCorrect, feedbackMessage, isTimeout, isSkip) {
+  console.log('showUserFeedback');
   if(!isSkip){
     userFeedbackStart = Date.now();
   }
+  userFeedbackStart = Date.now();
   const isButtonTrial = getButtonTrial();
   feedbackDisplayPosition = Session.get('curTdfUISettings').feedbackDisplayPosition;
   // For button trials with images where they get the answer wrong, assume incorrect feedback is an image path
@@ -1769,13 +1772,16 @@ async function showUserFeedback(isCorrect, feedbackMessage, afterAnswerFeedbackC
   const isForceCorrectTrial = getTestType() === 'm' || getTestType() === 'n';
   const doForceCorrect = (!isCorrect && !Session.get('runSimulation') &&
     (Session.get('currentDeliveryParams').forceCorrection || isForceCorrectTrial));
-  const doClearForceCorrectBound = doClearForceCorrect.bind(null, doForceCorrect, afterAnswerFeedbackCbBound);
+  let trialEndTimeStamp = Session.get('trialEndTimeStamp');
+  let trialStartTimeStamp = Session.get('trialStartTimestamp');
+  let source = Session.get('source');
+  const doClearForceCorrectBound = doClearForceCorrect.bind(null, doForceCorrect, trialEndTimeStamp, trialStartTimeStamp, source, userAnswer, isTimeout,  isCorrect);
   Tracker.afterFlush(doClearForceCorrectBound);
 }
 
 // Note the execution thread will finish in the keypress event above for userForceCorrect
 let afterUserFeedbackForceCorrectCb = undefined;
-function doClearForceCorrect(doForceCorrect, afterAnswerFeedbackCbBound) {
+function doClearForceCorrect(doForceCorrect, trialEndTimeStamp, trialStartTimeStamp, source, userAnswer, isTimeout,  isCorrect) {
   if (doForceCorrect) {
     $('#forceCorrectionEntry').show().attr("hidden",false);
 
@@ -1785,13 +1791,13 @@ function doClearForceCorrect(doForceCorrect, afterAnswerFeedbackCbBound) {
       speakMessageIfAudioPromptFeedbackEnabled(prompt, 'feedback');
 
       const forcecorrecttimeout = Session.get('currentDeliveryParams').forcecorrecttimeout;
-      beginMainCardTimeout(forcecorrecttimeout, afterAnswerFeedbackCbBound);
+      beginMainCardTimeout(forcecorrecttimeout, afterAnswerFeedbackCallback(trialEndTimeStamp, trialStartTimeStamp, source, userAnswer, isTimeout,  isCorrect));
     } else {
       const prompt = 'Please enter the correct answer to continue';
       $('#forceCorrectGuidance').text(prompt);
       speakMessageIfAudioPromptFeedbackEnabled(prompt, 'feedback');
 
-      afterUserFeedbackForceCorrectCb = afterAnswerFeedbackCbBound;
+      afterUserFeedbackForceCorrectCb = afterAnswerFeedbackCallback(trialEndTimeStamp, trialStartTimeStamp, source, userAnswer, isTimeout,  isCorrect);
     }
 
     $('#userForceCorrect').prop('disabled', false);
@@ -1801,7 +1807,7 @@ function doClearForceCorrect(doForceCorrect, afterAnswerFeedbackCbBound) {
     $('#forceCorrectGuidance').text('');
     $('#userForceCorrect').prop('disabled', true);
     $('#userForceCorrect').val('');
-    afterAnswerFeedbackCbBound();
+    afterAnswerFeedbackCallback(trialEndTimeStamp, trialStartTimeStamp, source, userAnswer, isTimeout,  isCorrect);
   }
 }
 
@@ -3717,7 +3723,7 @@ async function processUserTimesLog() {
   }
 
   if (moduleCompleted) {
-    // They are DONE!afterAnswerAssessmentCb
+    // They are DONE!determineUserFeedback
     console.log('TDF already completed - leaving for profile page.');
     if (Meteor.user().loginParams.loginMode === 'experiment') {
       // Experiment users don't *have* a normal page
