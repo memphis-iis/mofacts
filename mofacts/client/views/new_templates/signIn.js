@@ -207,6 +207,11 @@ Template.signIn.events({
       Router.go('/profile');
     });
   },
+  'click #experimentSignin': function(event) {
+    event.preventDefault();
+    userPasswordCheck();
+  },
+
 
   'click #testSignInButton': function(event) {
     $('#testSignInButton').prop('disabled', true);

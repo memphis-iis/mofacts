@@ -172,7 +172,7 @@ Router.route('/experiment/:target?/:xcond?', {
       if (Meteor.user()) {
         Meteor.logout();
       }
-      this.redirect('/');
+      window.location.href = '/';
     }
   },
 });
