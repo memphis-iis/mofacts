@@ -57,7 +57,10 @@
                 </div>
             {{/if}}
         </div>
+        {{#if isVideoSession}}
+        {{else}}
         <div class="vh-100"></div>
+        {{/if}}
         {{/if}}
         <br>
         {{#if isImpersonating}}
@@ -100,7 +103,7 @@
                 {{/each}}
                 {{/if}}
             </div>
-            <div class="row{{UIsettings.reverseStimuliAndInputColumns}} position-absolute z-1 mx-auto w-100">
+            <div class="row{{UIsettings.reverseStimuliAndInputColumns}} position-absolute z-1 mx-auto w-100 top-0 {{#if isVideoSession}}questionContainer{{/if}}">
                 {{#if trial}}
                 <div class="{{UIsettings.displayColWidth}} mx-auto" id="displayContainer">
                     {{#if anythingButAudioCard}}

@@ -684,3 +684,16 @@ input[type="range"]::-webkit-slider-thumb {
     width: 100%;
     background-size: contain;
 }
+
+/*video unit question backgroun */
+.questionContainer{
+    height: 50vh;
+    border-radius: 35px;
+    padding: 10px;
+    background: var(--background-color);
+    /*blurred border*/
+    border: 1px solid var(--accent-color);
+    box-shadow: 0 0 10px var(--accent-color);
+    margin-top: 15vh;
+}
+
