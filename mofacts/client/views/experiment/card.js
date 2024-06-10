@@ -596,6 +596,11 @@ Template.card.events({
     unitIsFinished('Continue Button Pressed');
   },
 
+  'click #lastUnitModalDismiss': function(event) {
+    $("#lastUnitModal").modal('show')
+    initializePlyr();
+  },
+
   'click #stepBackButton': function(event) {
     event.preventDefault();
     //check if the current unit has instructions and if so, show them
@@ -2507,7 +2512,12 @@ async function prepareCard() {
         'stimIndex': 0
       }
       Session.set('engineIndices', indices);
-      initializePlyr();
+      if(Session.get("currentUnitNumber") + 1 == Session.get("currentTdfFile").tdfs.tutor.unit.length){
+        $('#lastUnitModal').modal('show');
+        return;
+      } else {
+        initializePlyr();
+      }
     } else {
       playVideo();
     }
@@ -3765,7 +3775,12 @@ async function processUserTimesLog() {
         }
       }
       Session.set('engineIndices', indices);
-      initializePlyr();
+      if(Session.get("currentUnitNumber") + 1 == Session.get("currentTdfFile").tdfs.tutor.unit.length){
+        $('#lastUnitModal').modal('show');
+        return;
+      } else {
+        initializePlyr();
+      }
     } else if (resumeToQuestion) {
       // Question outstanding: force question display and let them give an answer
       console.log('RESUME FINISHED: displaying current question');

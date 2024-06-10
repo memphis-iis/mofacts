@@ -941,7 +941,7 @@ function modelUnitEngine() {
           // TODO: shouldn't need both
           if(isVideoSession) {
             if (this.curUnit && this.curUnit.videosession && this.curUnit.videosession.questions)
-              unitClusterList = this.curUnit.videosession.questions.trim()
+              unitClusterList = this.curUnit.videosession.questions.toString()
           }
           else {
             if(this.curUnit && this.curUnit.learningsession && this.curUnit.learningsession.clusterlist)
