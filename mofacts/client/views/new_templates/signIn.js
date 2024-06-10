@@ -17,7 +17,7 @@ Template.signIn.onRendered(async function() {
     console.log('got teachers');
     Session.set('teachers', verifiedTeachers);
   }
-  if(Meteor.userId() && Meteor.user().profile.loginMode !== 'experiment'){
+  if(Meteor.userId() && Meteor.user().loginParams.loginMode !== 'experiment'){
     console.log("already logged in")
     Router.go("/profile");
   }
@@ -207,6 +207,11 @@ Template.signIn.events({
       Router.go('/profile');
     });
   },
+  'click #experimentSignin': function(event) {
+    event.preventDefault();
+    userPasswordCheck();
+  },
+
 
   'click #testSignInButton': function(event) {
     $('#testSignInButton').prop('disabled', true);

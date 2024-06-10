@@ -161,45 +161,18 @@ Router.route('/experiment/:target?/:xcond?', {
       console.log('EXPERIMENT target:', target, 'xcond', xcond);
 
       Session.set('clusterMapping', '');
-      //if the user is not logged in, redirect to the signin page
-      if (!Meteor.user()) {
-        this.render('signIn');
-      } else {
-        sessionCleanUp();
-        Session.set('experimentPasswordRequired', true);
       
-        let experimentTarget = Session.get('experimentTarget');
-        if (experimentTarget) experimentTarget = experimentTarget.toLowerCase();
-        let foundExpTarget = await meteorCallAsync('getTdfByExperimentTarget', experimentTarget);
-        const setspec = foundExpTarget.content.tdfs.tutor.setspec ? foundExpTarget.content.tdfs.tutor.setspec : null;
-        const ignoreOutOfGrammarResponses = setspec.speechIgnoreOutOfGrammarResponses ?
-        setspec.speechIgnoreOutOfGrammarResponses.toLowerCase() == 'true' : false;
-        const speechOutOfGrammarFeedback = setspec.speechOutOfGrammarFeedback ?
-        setspec.speechOutOfGrammarFeedback : 'Response not in answer set';
-
-        if (foundExpTarget) {
-          selectTdf(
-              foundExpTarget._id,
-              setspec.lessonname,
-              foundExpTarget.stimuliSetId,
-              ignoreOutOfGrammarResponses,
-              speechOutOfGrammarFeedback,
-              'Auto-selected by experiment target ' + experimentTarget,
-              foundExpTarget.content.isMultiTdf,
-              false,
-              setspec,
-              true
-          );
-        }
-        await meteorCallAsync('setUserLoginData', 'direct', Session.get('loginMode'));
-      }
+      // Log out the user to make sure we start clean and to avoid any double logins
+      Meteor.logout();
+      this.render('signIn');
+      
     } else {
       console.log('tdf not found');
       alert('The experiment you are trying to access does not exist.');
       if (Meteor.user()) {
         Meteor.logout();
       }
-      this.redirect('/');
+      window.location.href = '/';
     }
   },
 });
@@ -321,7 +294,7 @@ Router.route('/studentReporting', {
 Router.route('/', {
   name: 'client.index',
   action: function() {
-    if(Meteor.user() && Meteor.user().profile.loginMode != 'experiment'){
+    if(Meteor.user() && Meteor.user().loginParams.loginMode != 'experiment'){
       this.redirect('/profile');
     } else {
       // If they are navigating to "/" then we clear the (possible) cookie
@@ -382,14 +355,14 @@ Router.route('/profile', {
   name: 'client.profile',
   waitOn: function() {
     let assignedTdfs =  'undefined';
-    if(Meteor.user() && Meteor.user().profile && Meteor.user().profile.assignedTdfs){
-      assignedTdfs = Meteor.user()?.profile?.assignedTdfs
+    if(Meteor.user() && Meteor.user().loginParams && Meteor.user().loginParams.assignedTdfs){
+      assignedTdfs = Meteor.user()?.loginParams?.assignedTdfs
     }
     let experimentTarget = 'undefined'
     if (Session.get('experimentTarget')) {
       assignedTdfs = 'undefined'
     }
-    let curCourseId = Meteor.user()?.profile?.curClass?.courseId || 'undefined'
+    let curCourseId = Meteor.user()?.loginParams?.curClass?.courseId || 'undefined';
     let allSubscriptions = [
       Meteor.subscribe('allUserExperimentState', assignedTdfs)];
     if (curCourseId == 'undefined' || curCourseId == undefined)
@@ -410,7 +383,7 @@ Router.route('/profile', {
   },
   action: function() {
     if (Meteor.user()) {
-      const loginMode = Meteor.user().profile.loginMode;
+      const loginMode = Meteor.user().loginParams.loginMode;
       console.log('loginMode: ' + loginMode);
 
       if (loginMode === 'southwest') {
@@ -437,8 +410,8 @@ Router.route('/profile', {
 Router.route('/lessonSelect', {
   name: 'client.lessonSelect',
   waitOn: function() {
-    let assignedTdfs = Meteor.user()?.profile?.assignedTdfs;
-    let curCourseId = Meteor.user()?.profile?.curClass?.courseId || 'undefined'
+    let assignedTdfs = Meteor.user()?.loginParams?.assignedTdfs;
+    let curCourseId = Meteor.user()?.loginParams?.curClass?.courseId || 'undefined'
     let allSubscriptions = [
       Meteor.subscribe('allUserExperimentState', assignedTdfs)
     ];

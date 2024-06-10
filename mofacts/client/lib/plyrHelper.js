@@ -226,8 +226,8 @@ function logPlyrAction(action, player, currentTime = null, seekStart = null){
     'conditionNameD': 'how answered',
     'conditionTypeD': _.trim(action),
     'conditionNameE': 'section',
-    'conditionTypeE': Meteor.user().profile.entryPoint && 
-        Meteor.user().profile.entryPoint !== 'direct' ? Meteor.user().profile.entryPoint : null,
+    'conditionTypeE': Meteor.user().loginParams.entryPoint && 
+        Meteor.user().loginParams.entryPoint !== 'direct' ? Meteor.user().loginParams.entryPoint : null,
 
     'responseDuration': null,
 
@@ -263,7 +263,7 @@ function logPlyrAction(action, player, currentTime = null, seekStart = null){
     'dialogueHistory': "N/A",
     'instructionQuestionResult': Session.get('instructionQuestionResult') || false,
     'hintLevel': 0,
-    'entryPoint': Meteor.user().profile.entryPoint
+    'entryPoint': Meteor.user().loginParams.entryPoint
   };
   Meteor.call('insertHistory', answerLogRecord);
 }
