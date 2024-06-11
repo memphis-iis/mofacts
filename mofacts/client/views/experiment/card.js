@@ -2361,19 +2361,28 @@ async function unitIsFinished(reason) {
   clearCardTimeout();
 
   const curTdf = Session.get('currentTdfFile');
+  const prevUnit = curTdf.tdfs.tutor.unit[curUnitNum];
   const adaptive = curTdf.tdfs.tutor.unit[Session.get('currentUnitNumber')].adaptive
+  const adaptiveLogic = curTdf.tdfs.tutor.unit[Session.get('currentUnitNumber')].adaptiveLogic
   //if the last unit was adaptive, we need to build the next unit
   let curUnitNum = Session.get('currentUnitNumber');
   let newUnitNum = curUnitNum + 1;
   let curTdfUnit = curTdf.tdfs.tutor.unit[newUnitNum];
-  let countCompletion = curTdf.tdfs.tutor.unit[curUnitNum].countcompletion
-  if(adaptive == newUnitNum){
+  let countCompletion = prevUnit.countcompletion
+  if(adaptive){
     const curExperimentState = await getExperimentState();
-    adaptiveTemplate = curTdf.tdfs.tutor.unit[curUnitNum].adaptiveUnitTemplate
-    curTdfUnit = engine.adaptiveQuestionLogic.unitBuilder(adaptiveTemplate);
-    countCompletion = curTdf.tdfs.tutor.unit[curUnitNum].countcompletion
-    //append the new unit to the tdf
-    curTdf.tdfs.tutor.unit.splice(newUnitNum, 0, curTdfUnit);
+
+    if(curTdfUnit && adaptiveLogic[newUnitNum]){
+      //modify the new unit according to adaptiveLogic
+      curTdfUnit = engine.adaptiveQuestionLogic.modifyUnit(adaptiveLogic[newUnitNum]);
+      curTdf.tdfs.tutor.unit[newUnitNum] = curTdfUnit;
+    } else if(!curTdfUnit && adaptiveLogic[newUnitNum]) {
+      adaptiveTemplate = prevUnit.adaptiveUnitTemplate
+      curTdfUnit = engine.adaptiveQuestionLogic.unitBuilder(adaptiveTemplate);
+      countCompletion = prevUnit.countcompletion
+      //append the new unit to the tdf
+      curTdf.tdfs.tutor.unit.splice(newUnitNum, 0, curTdfUnit);
+    }
     Session.set('currentTdfFile', curTdf);
     curExperimentState.currentTdfFile = curTdf;
     await updateExperimentState(curExperimentState, 'card.unitIsFinished');

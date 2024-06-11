@@ -175,6 +175,9 @@ export class AdaptiveQuestionLogic {
         }
         return {condition: condition, conditionExpression: conditionExpression, actions: actions, conditionResult: conditionResult, schedule: addToschedule};
     }
+    modifyUnit(unitNumber){
+        // modify the unit based on the existing unit and the adaptive logic
+    }
     unitBuilder(templateUnitNumber){
         //build the unit based on the base unit and the schedule
         let newUnit = Session.get('currentTdfFile').tdfs.tutor.unitTemplate[templateUnitNumber];
