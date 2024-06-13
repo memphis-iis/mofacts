@@ -47,7 +47,8 @@ export class AdaptiveQuestionLogic {
 
         //remove the IF prefix and split on keyword THEN. Before then is the condition, after then is the action
         //if parts
-        let parts = logicString.replace("IF", "").split("THEN");
+        let when = logicString.includes("AT") ? logicString.split("AT")[1].trim() : null;
+        let parts = logicString.replace("IF", "").replace("AT", "").split("THEN");
         let condition = parts[0].trim();
         let actions = parts[1].trim();
 
@@ -173,10 +174,17 @@ export class AdaptiveQuestionLogic {
             //append to the schedule
             this.schedule.push(...addToschedule);
         }
-        return {condition: condition, conditionExpression: conditionExpression, actions: actions, conditionResult: conditionResult, schedule: addToschedule};
+        return {condition: condition, conditionExpression: conditionExpression, actions: actions, conditionResult: conditionResult, schedule: addToschedule, when: when};
     }
-    modifyUnit(unitNumber){
+    async modifyUnit(adaptiveLogic, curTdfUnit){
         // modify the unit based on the existing unit and the adaptive logic
+        for(let logic of adaptiveLogic){
+            condition, conditionExpression, actions, conditionResult, schedule, when = await this.evaluate(logic);
+            // add questions and their times
+            curTdfUnit.questions.push(...schedule);
+            curTdfUnit.questionTimes.push(...when);
+        }
+        return curTdfUnit;
     }
     unitBuilder(templateUnitNumber){
         //build the unit based on the base unit and the schedule

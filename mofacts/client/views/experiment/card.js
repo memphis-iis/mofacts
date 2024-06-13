@@ -1219,6 +1219,8 @@ function getCurrentFalseResponses() {
     typeof(cluster.stims[curStimIndex].incorrectResponses) == 'undefined') {
     return []; // No false responses
   } else {
+    if(typeof(cluster.stims[curStimIndex].incorrectResponses) == 'string')
+      return cluster.stims[curStimIndex].incorrectResponses.split(',');
     return cluster.stims[curStimIndex].incorrectResponses;
   }
 }
@@ -2361,27 +2363,28 @@ async function unitIsFinished(reason) {
   clearCardTimeout();
 
   const curTdf = Session.get('currentTdfFile');
-  const prevUnit = curTdf.tdfs.tutor.unit[curUnitNum];
   const adaptive = curTdf.tdfs.tutor.unit[Session.get('currentUnitNumber')].adaptive
   const adaptiveLogic = curTdf.tdfs.tutor.unit[Session.get('currentUnitNumber')].adaptiveLogic
-  //if the last unit was adaptive, we need to build the next unit
   let curUnitNum = Session.get('currentUnitNumber');
+  const prevUnit = curTdf.tdfs.tutor.unit[curUnitNum];
   let newUnitNum = curUnitNum + 1;
   let curTdfUnit = curTdf.tdfs.tutor.unit[newUnitNum];
   let countCompletion = prevUnit.countcompletion
+  // if the last unit was adaptive, we may need to update future units
   if(adaptive){
     const curExperimentState = await getExperimentState();
-
-    if(curTdfUnit && adaptiveLogic[newUnitNum]){
-      //modify the new unit according to adaptiveLogic
-      curTdfUnit = engine.adaptiveQuestionLogic.modifyUnit(adaptiveLogic[newUnitNum]);
-      curTdf.tdfs.tutor.unit[newUnitNum] = curTdfUnit;
-    } else if(!curTdfUnit && adaptiveLogic[newUnitNum]) {
-      adaptiveTemplate = prevUnit.adaptiveUnitTemplate
-      curTdfUnit = engine.adaptiveQuestionLogic.unitBuilder(adaptiveTemplate);
-      countCompletion = prevUnit.countcompletion
-      //append the new unit to the tdf
-      curTdf.tdfs.tutor.unit.splice(newUnitNum, 0, curTdfUnit);
+    for(let unitNum of Object.keys(adaptiveLogic)){
+      unit = curTdf.tdfs.tutor.unit[unitNum];
+      if(unit) {
+        unit = await engine.adaptiveQuestionLogic.modifyUnit(adaptiveLogic[unitNum], unit);
+        curTdf.tdfs.tutor.unit[unitNum] = unit;
+      } else {
+        // use template
+        adaptiveTemplate = prevUnit.adaptiveUnitTemplate
+        unit = engine.adaptiveQuestionLogic.unitBuilder(adaptiveTemplate);
+        countCompletion = prevUnit.countcompletion
+        curTdf.tdfs.tutor.unit[unitNum] = unit;
+      }
     }
     Session.set('currentTdfFile', curTdf);
     curExperimentState.currentTdfFile = curTdf;
@@ -2751,11 +2754,11 @@ function beginQuestionAndInitiateUserInput(delayMs, deliveryParams) {
     }
     if(!Session.get('isVideoSession')) {
       allowUserInput();
-      beginMainCardTimeout(delayMs, function() {
-        console.log('stopping input after ' + delayMs + ' ms');
-        stopUserInput();
-        handleUserInput({}, 'timeout');
-      });
+      // beginMainCardTimeout(delayMs, function() {
+      //   console.log('stopping input after ' + delayMs + ' ms');
+      //   stopUserInput();
+      //   handleUserInput({}, 'timeout');
+      // });
     }
   }
 }
