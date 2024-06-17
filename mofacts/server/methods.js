@@ -1677,6 +1677,15 @@ async function getStudentPerformanceByIdAndTDFIdFromHistory(userId, TDFId, retur
   return studentPerformance[0];
 }
 
+//get most recent history record for a student given a tdfid, cluster index, and stimulus index. All we want is the outcome
+async function getStudentPerformanceByStimulus(userId, TDFId, clusterIndex, stimulusIndex) {
+  serverConsole('getStudentPerformanceByStimulus', userId, TDFId, clusterIndex, stimulusIndex);
+  const history = Histories.findOne({userId: userId, TDFId: TDFId, clusterIndex: clusterIndex, stimulusIndex: stimulusIndex}, {sort: {time: -1}});
+  return history ? history.outcome : null;
+}
+
+
+
 async function getNumDroppedItemsByUserIDAndTDFId(userId, TDFId){
   //used to grab a limited sample of the student's performance
   serverConsole('getNumDroppedItemsByUserIDAndTDFId', userId, TDFId);
@@ -2444,8 +2453,17 @@ const methods = {
     if(experimentId) {
       GlobalExperimentStates.update({_id: experimentId}, {$set: {experimentState: curExperimentState}});
     } else {
-      createExperimentState(curExperimentState);
+      createExperimentState(curExperimentState)
     }
+  },
+
+  createExperimentState: function(curExperimentState) {
+    serverConsole('createExperimentState', curExperimentState, curExperimentState.currentTdfId);
+    GlobalExperimentStates.insert({
+      userId: Meteor.userId(),
+      TDFId: curExperimentState.currentTdfId,
+      experimentState: curExperimentState
+    });
   },
 
   getAltServerUrl: function() {

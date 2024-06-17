@@ -3,6 +3,7 @@ import {haveMeteorUser} from '../../lib/currentTestingHelpers';
 import {updateExperimentState, initCard} from './card';
 import {routeToSignin} from '../../lib/router';
 import { meteorCallAsync } from '../../index';
+import { _ } from 'core-js';
 import { revisitUnit } from './card';
 
 export {instructContinue, unitHasLockout, checkForFileImage};
@@ -444,7 +445,7 @@ function gatherInstructionLogRecord(trialEndTimeStamp, trialStartTimeStamp,
 
   // Figure out button trial entries
   const curTdf = Session.get('currentTdfFile');
-  const unitName = _.trim(curTdf.tdfs.tutor.unit[Session.get('currentUnitNumber')].unitname);
+  const unitName = Session.get('currentTdfUnit').unitname;
 
   const instructionLog = {
     'userId': Meteor.userId(),
