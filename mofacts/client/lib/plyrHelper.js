@@ -339,7 +339,10 @@ export async function initializePlyr() {
 
 export async function playNextCard() {
   let curTdfUnit = Session.get('currentTdfUnit');
-  curTdfUnit.videosession.adaptiveLogic[lastlogicIndex] ? logic = curTdfUnit.videosession.adaptiveLogic[lastlogicIndex] : logic = '';
+  if( curTdfUnit.videosession.adaptiveLogic && curTdfUnit.videosession.adaptiveLogic[lastlogicIndex])
+    logic = curTdfUnit.videosession.adaptiveLogic[lastlogicIndex];
+  else
+    logic = '';
   lastlogicIndex++;
   if(engine.adaptiveQuestionLogic){
     if(logic != '' && logic != undefined){

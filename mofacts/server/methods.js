@@ -3168,6 +3168,30 @@ const asyncMethods = {
 
   checkForUserException, getTdfById,
 
+  getOutcomesForAdaptiveLearning: async function(userId, TDFId) {
+    const history = Histories.find({userId: userId, TDFId: TDFId}, {fields: {KCId: 1, outcome: 1}, $sort: { recordedServerTime: -1 }}).fetch();
+    let outcomes = {};
+    for(let h of history){
+      if(h.KCId)
+        outcomes[h.KCId % 1000] = h.outcome == 'correct'
+    }
+    // need to convert to cluster stim set
+    const tdf = Tdfs.findOne({_id: TDFId});
+    const stimSet = tdf.stimuli;
+    const clusterStimSet = {};
+    for(const stim of stimSet){
+      clusterStimSet[stim.clusterKC % 1000] = stim;
+    }
+
+    for(const cluster in clusterStimSet){
+      if(!outcomes[cluster]){
+        outcomes[cluster] = false;
+      }
+    }
+
+    return outcomes;
+  },
+
   getUsersByExperimentId: async function(experimentId){
     const messages = ScheduledTurkMessages.find({experiment: experimentId}).fetch();
     const userIds = messages.map(x => x.workerUserId);
