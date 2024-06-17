@@ -1,3 +1,5 @@
+import { meteorCallAsync } from "../../index";
+
 export class AdaptiveQuestionLogic {  
 
 
@@ -7,8 +9,7 @@ export class AdaptiveQuestionLogic {
         this.curUnit = Session.get('currentTdfUnit');
         this.tdfId = Session.get('currentTdfId');
         this.userId = Meteor.userId();
-        this.componentStates = ComponentStates.findOne({userId: this.userId, TDFId: this.tdfId})
-        console.log('adaptive - componentStates:', this.componentStates, this.userId, this.tdfId);
+        console.log('adaptive - componentStates:', this.userId, this.tdfId);
     }
 
     async setSchedule(schedule){
@@ -47,7 +48,8 @@ export class AdaptiveQuestionLogic {
 
         //remove the IF prefix and split on keyword THEN. Before then is the condition, after then is the action
         //if parts
-        let parts = logicString.replace("IF", "").split("THEN");
+        let when = logicString.includes("AT") ? parseInt(logicString.split("AT")[1].trim()) : null;
+        let parts = logicString.replace("IF", "").replace("AT", "").split("THEN");
         let condition = parts[0].trim();
         let actions = parts[1].trim();
 
@@ -65,6 +67,8 @@ export class AdaptiveQuestionLogic {
         // Allowed math operators
         const mathOperators = "+-*/%()=";
 
+        let history = await meteorCallAsync('getOutcomesForAdaptiveLearning', this.userId, this.tdfId)
+
         for(const token of conditionTokens){
             if(operators[token]){
                 conditionExpression += operators[token];
@@ -78,17 +82,11 @@ export class AdaptiveQuestionLogic {
                 let clusterIndex = parseInt(parts[0]);
                 let stimulusIndex = parseInt(parts[1]);
                 //get the performance for this cluster and stimulus
-                this.componentStates = ComponentStates.findOne({userId: this.userId, TDFId: this.tdfId})
-                if(this.componentStates?.stimStates[stimulusIndex]){
-                    console.log('getting component state for cluster:', clusterIndex, 'stimulus:', stimulusIndex, this.componentStates.stimStates[stimulusIndex]);
-                    let outcome = this.componentStates.stimStates[stimulusIndex]?.outcomeStack[0] === 1;
-                    //if the outcome is 1, lastOutcome is true, otherwise false
-                    console.log('lastOutcome for ' + token + ':', outcome);
-                    conditionExpression += outcome;
-                } else {
-                    console.log('no component state found for stimulus:', stimulusIndex);
-                    conditionExpression += false;
-                }
+                console.log('getting component state for cluster:', clusterIndex, 'stimulus:', stimulusIndex, history[stimulusIndex]);
+                let outcome = history[stimulusIndex];
+                //if the outcome is 1, lastOutcome is true, otherwise false
+                console.log('lastOutcome for ' + token + ':', outcome);
+                conditionExpression += outcome;
             } else if (Number.isInteger(parseInt(token))){
                 conditionExpression += token;
             } else {
@@ -128,7 +126,7 @@ export class AdaptiveQuestionLogic {
         console.log('action:', actions);
 
         let addToschedule = [];
-
+        let questions = [];
         let outcomes = [];
         
         ///check if there are parenthesis, if so interpret as an array of actions
@@ -148,6 +146,7 @@ export class AdaptiveQuestionLogic {
                         clusterIndex: KCI,
                         stimIndex: stimulusIndex,
                     });
+                    questions.push(KCI);
                     console.log('adding to adaptive schedule:', addToschedule);
                 } else {
                     //throw an error if the action is not a valid action
@@ -165,6 +164,7 @@ export class AdaptiveQuestionLogic {
                     clusterIndex: clusterIndex,
                     stimulus: stimulusIndex,
                 });
+                questions.push(clusterIndex);
                 console.log('adding to adaptive schedule:', addToschedule);
             } else {
                 //throw an error if the action is not a valid action
@@ -173,9 +173,19 @@ export class AdaptiveQuestionLogic {
             //append to the schedule
             this.schedule.push(...addToschedule);
         }
-        return {condition: condition, conditionExpression: conditionExpression, actions: actions, conditionResult: conditionResult, schedule: addToschedule};
+        return {condition: condition, conditionExpression: conditionExpression, actions: actions, conditionResult: conditionResult, questions: questions, schedule: addToschedule, when: when};
     }
-    unitBuilder(templateUnitNumber){
+    async modifyUnit(adaptiveLogic, curTdfUnit){
+        // modify the unit based on the existing unit and the adaptive logic
+        for(let logic of adaptiveLogic){
+            condition, conditionExpression, actions, conditionResult, schedule, when = await this.evaluate(logic);
+            // add questions and their times
+            curTdfUnit.questions.push(...schedule);
+            curTdfUnit.questionTimes.push(...when);
+        }
+        return curTdfUnit;
+    }
+    unitBuilder(templateUnitNumber, adaptiveQuestionTimes, adaptiveQuestions){
         //build the unit based on the base unit and the schedule
         let newUnit = Session.get('currentTdfFile').tdfs.tutor.unitTemplate[templateUnitNumber];
         //if newunit is not defined, throw an error
@@ -200,12 +210,15 @@ export class AdaptiveQuestionLogic {
             if(!newUnit.videosession.questiontimes){
                 newUnit.videosession.questiontimes = [];
             }
-            for(const item of sortedSchedule){
-                newUnit.videosession.questions.push(item.clusterIndex)
+            if(adaptiveQuestions){
+                newUnit.videosession.questions.push(...adaptiveQuestions);
             }
-            for(const item of newUnit.videosession.questions){
-                newUnit.videosession.questiontimes.push(questionTimes[item])
+            else {
+                for(const item of sortedSchedule){
+                    newUnit.videosession.questions.push(item.clusterIndex)
+                }
             }
+            newUnit.videosession.questiontimes.push(...adaptiveQuestionTimes)
         }
         //injected the new unit into the session
         return newUnit;

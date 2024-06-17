@@ -14,6 +14,7 @@ import {
   playVideo,
   playNextCard,
   destroyPlyr,
+  addStimToSchedule
 } from '../../lib/plyrHelper.js'
 import {meteorCallAsync, redoCardImage} from '../../index';
 import {DialogueUtils, dialogueContinue, dialogueLoop, initiateDialogue} from './dialogueUtils';
@@ -154,6 +155,7 @@ let timeoutFunc = null;
 let timeoutDelay = null;
 let simTimeoutName = null;
 let userAnswer = null;
+let lastlogicIndex = 0;
 
 // Helper - return elapsed seconds since unit started. Note that this is
 // technically seconds since unit RESUME began (when we set currentUnitStartTime)
@@ -398,7 +400,7 @@ function leavePage(dest) {
       console.log('NOT closing audio context');
     }
   } else if (dest === '/instructions') {
-    const unit = Session.get('currentTdfUnit');
+    const unit = Session.get('currentTdfUnit') ? Session.get('currentTdfUnit') : getExperimentState().currentTdfFile[Session.get('currentUnitNumber')];;
     const lockout = unitHasLockout() > 0;
     const txt = unit.unitinstructions ? unit.unitinstructions.trim() : undefined;
     const pic = unit.picture ? unit.picture.trim() : undefined;
@@ -1219,6 +1221,8 @@ function getCurrentFalseResponses() {
     typeof(cluster.stims[curStimIndex].incorrectResponses) == 'undefined') {
     return []; // No false responses
   } else {
+    if(typeof(cluster.stims[curStimIndex].incorrectResponses) == 'string')
+      return cluster.stims[curStimIndex].incorrectResponses.split(',');
     return cluster.stims[curStimIndex].incorrectResponses;
   }
 }
@@ -1573,7 +1577,7 @@ function determineUserFeedback(userAnswer, isSkip, isCorrect, feedbackForAnswer,
       speechTranscriptionTimeoutsSeen = 0;
       initiateDialogue(userAnswer, afterAnswAerFeedbackCbBound, Session.get('currentExperimentState'), showUserFeedback(isCorrect, feedbackForAnswer, userAnswer.includes('[timeout]'), isSkip));
     } else {
-      showUserFeedback(isCorrect, feedbackForAnswer, userAnswer.includes('[timeout]'), isSkip)();
+      showUserFeedback(isCorrect, feedbackForAnswer, userAnswer.includes('[timeout]'), isSkip);
     }
   } else {
     userFeedbackStart = null;
@@ -1581,7 +1585,7 @@ function determineUserFeedback(userAnswer, isSkip, isCorrect, feedbackForAnswer,
     let trialStartTimeStamp = Session.get('trialStartTimestamp');
     let source = Session.get('source');
     let isTimeout = Session.get('isTimeout');
-    afterAnswerFeedbackCallback(trialEndTimeStamp, trialStartTimeStamp, source, userAnswer, isTimeout,  isCorrect);
+    afterAnswerFeedbackCallback(trialEndTimeStamp, trialStartTimeStamp, source, userAnswer, isTimeout, isSkip, isCorrect);
   }
 }
 
@@ -1777,13 +1781,13 @@ async function showUserFeedback(isCorrect, feedbackMessage, isTimeout, isSkip) {
   let trialEndTimeStamp = Session.get('trialEndTimeStamp');
   let trialStartTimeStamp = Session.get('trialStartTimestamp');
   let source = Session.get('source');
-  const doClearForceCorrectBound = doClearForceCorrect.bind(null, doForceCorrect, trialEndTimeStamp, trialStartTimeStamp, source, userAnswer, isTimeout,  isCorrect);
+  const doClearForceCorrectBound = doClearForceCorrect.bind(null, doForceCorrect, trialEndTimeStamp, trialStartTimeStamp, source, userAnswer, isTimeout, isCorrect, isSkip);
   Tracker.afterFlush(doClearForceCorrectBound);
 }
 
 // Note the execution thread will finish in the keypress event above for userForceCorrect
 let afterUserFeedbackForceCorrectCb = undefined;
-function doClearForceCorrect(doForceCorrect, trialEndTimeStamp, trialStartTimeStamp, source, userAnswer, isTimeout,  isCorrect) {
+function doClearForceCorrect(doForceCorrect, trialEndTimeStamp, trialStartTimeStamp, source, userAnswer, isTimeout, isCorrect, isSkip) {
   if (doForceCorrect) {
     $('#forceCorrectionEntry').show().attr("hidden",false);
 
@@ -1793,13 +1797,13 @@ function doClearForceCorrect(doForceCorrect, trialEndTimeStamp, trialStartTimeSt
       speakMessageIfAudioPromptFeedbackEnabled(prompt, 'feedback');
 
       const forcecorrecttimeout = Session.get('currentDeliveryParams').forcecorrecttimeout;
-      beginMainCardTimeout(forcecorrecttimeout, afterAnswerFeedbackCallback(trialEndTimeStamp, trialStartTimeStamp, source, userAnswer, isTimeout,  isCorrect));
+      beginMainCardTimeout(forcecorrecttimeout, afterAnswerFeedbackCallback(trialEndTimeStamp, trialStartTimeStamp, source, userAnswer, isTimeout, false, isCorrect));
     } else {
       const prompt = 'Please enter the correct answer to continue';
       $('#forceCorrectGuidance').text(prompt);
       speakMessageIfAudioPromptFeedbackEnabled(prompt, 'feedback');
 
-      afterUserFeedbackForceCorrectCb = afterAnswerFeedbackCallback(trialEndTimeStamp, trialStartTimeStamp, source, userAnswer, isTimeout,  isCorrect);
+      afterUserFeedbackForceCorrectCb = afterAnswerFeedbackCallback(trialEndTimeStamp, trialStartTimeStamp, source, userAnswer, isTimeout, false, isCorrect);
     }
 
     $('#userForceCorrect').prop('disabled', false);
@@ -1809,7 +1813,7 @@ function doClearForceCorrect(doForceCorrect, trialEndTimeStamp, trialStartTimeSt
     $('#forceCorrectGuidance').text('');
     $('#userForceCorrect').prop('disabled', true);
     $('#userForceCorrect').val('');
-    afterAnswerFeedbackCallback(trialEndTimeStamp, trialStartTimeStamp, source, userAnswer, isTimeout,  isCorrect);
+    afterAnswerFeedbackCallback(trialEndTimeStamp, trialStartTimeStamp, source, userAnswer, isTimeout, isSkip, isCorrect);
   }
 }
 
@@ -2362,18 +2366,49 @@ async function unitIsFinished(reason) {
 
   const curTdf = Session.get('currentTdfFile');
   const adaptive = curTdf.tdfs.tutor.unit[Session.get('currentUnitNumber')].adaptive
-  //if the last unit was adaptive, we need to build the next unit
+  const adaptiveLogic = curTdf.tdfs.tutor.unit[Session.get('currentUnitNumber')].adaptiveLogic
   let curUnitNum = Session.get('currentUnitNumber');
+  const prevUnit = curTdf.tdfs.tutor.unit[curUnitNum];
   let newUnitNum = curUnitNum + 1;
   let curTdfUnit = curTdf.tdfs.tutor.unit[newUnitNum];
-  let countCompletion = curTdf.tdfs.tutor.unit[curUnitNum].countcompletion
-  if(adaptive == newUnitNum){
-    const curExperimentState = await getExperimentState();
-    adaptiveTemplate = curTdf.tdfs.tutor.unit[curUnitNum].adaptiveUnitTemplate
-    curTdfUnit = engine.adaptiveQuestionLogic.unitBuilder(adaptiveTemplate);
-    countCompletion = curTdf.tdfs.tutor.unit[curUnitNum].countcompletion
-    //append the new unit to the tdf
-    curTdf.tdfs.tutor.unit.splice(newUnitNum, 0, curTdfUnit);
+  let countCompletion = prevUnit.countcompletion
+  const curExperimentState = await getExperimentState();
+  // if the last unit was adaptive, we may need to update future units
+  if(adaptive){
+    if(engine.adaptiveQuestionLogic){
+      let curTdfUnit = Session.get('currentTdfUnit');
+      logic = engine.adaptiveQuestionLogic.curUnit.adaptiveLogic;
+      if(logic != '' && logic != undefined){
+        console.log('adaptive schedule', engine.adaptiveQuestionLogic.schedule);
+        for(let unitIndex in Object.keys(adaptiveLogic)){
+          let unitToModify = Object.keys(adaptiveLogic)[unitIndex];
+          let unit = curTdf.tdfs.tutor.unit[unitToModify];
+          let adaptiveQuestionTimes = []
+          let adaptiveQuestions = []
+          for(let logic of adaptiveLogic[unitToModify]){
+            let logicOutput = await engine.adaptiveQuestionLogic.evaluate(logic);
+            if(logicOutput){
+              adaptiveQuestionTimes.push(logicOutput.when)
+              adaptiveQuestions.push(...logicOutput.questions)
+            }
+          }
+          if(unit) {
+            unit = await engine.adaptiveQuestionLogic.modifyUnit(adaptiveLogic[unitToModify], unit);
+            curTdf.tdfs.tutor.unit[unitToModify] = unit;
+          } else {
+            // use template
+            adaptiveTemplate = prevUnit.adaptiveUnitTemplate[unitIndex]
+            unit = engine.adaptiveQuestionLogic.unitBuilder(adaptiveTemplate, adaptiveQuestionTimes, adaptiveQuestions);
+            countCompletion = prevUnit.countcompletion
+            curTdf.tdfs.tutor.unit[unitToModify] = unit;
+          }
+        }
+      }
+      //add new question to current unit
+      if(engine.adaptiveQuestionLogic.when == Session.get("currentUnitNumber")){
+        addStimToSchedule(curTdfUnit);
+      }
+    }
     Session.set('currentTdfFile', curTdf);
     curExperimentState.currentTdfFile = curTdf;
     await updateExperimentState(curExperimentState, 'card.unitIsFinished');

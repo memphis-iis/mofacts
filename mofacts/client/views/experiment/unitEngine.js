@@ -1955,6 +1955,7 @@ function scheduleUnitEngine() {
       clusterNumbers: [],
       ranChoices: [],
       isButtonTrial: false,
+      adaptiveLogic: {},
     };
 
     if (!unit || !unit.assessmentsession) {
@@ -2072,6 +2073,9 @@ function scheduleUnitEngine() {
         settings.clusterNumbers.push(_.intval(nums[j]));
       }
     }
+
+    // Adaptive logic
+    settings.adaptiveLogic = assess.adaptiveLogic || {};
 
     return settings;
   }
