@@ -1136,7 +1136,9 @@ function getCurrentFalseResponses() {
   if (typeof(cluster) == 'undefined' || !cluster.stims || cluster.stims.length == 0 ||
     typeof(cluster.stims[curStimIndex].incorrectResponses) == 'undefined') {
     return []; // No false responses
-  } else {
+  } else {    
+    if(typeof(cluster.stims[curStimIndex].incorrectResponses) == 'string')
+      return cluster.stims[curStimIndex].incorrectResponses.split(',');
     return cluster.stims[curStimIndex].incorrectResponses;
   }
 }
