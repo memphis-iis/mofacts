@@ -84,6 +84,9 @@ function getNewItemFormat(stimFile, stimulusFileName, stimuliSetId, responseKCMa
       if (typeof incorrectResponses === 'string') {
         incorrectResponses = incorrectResponses.split(',');
       }
+      if (incorrectResponses) {
+        incorrectResponses = incorrectResponses.map((ir) => removeInvisibleUnicode(ir));
+      }
 
       let responseKC;
       const answerText = getDisplayAnswerText(stim.response.correctResponse);
@@ -104,7 +107,7 @@ function getNewItemFormat(stimFile, stimulusFileName, stimuliSetId, responseKCMa
         params: stim.parameter || STIM_PARAMETER,
         optimalProb: stim.optimalProb,
         correctResponse: removeInvisibleUnicode(stim.response.correctResponse),
-        incorrectResponses: removeInvisibleUnicode(incorrectResponses),
+        incorrectResponses: incorrectResponses,
         itemResponseType: cluster.responseType || 'text',
         speechHintExclusionList: stim.speechHintExclusionList,
         clozeStimulus: stim.display.clozeText || stim.display.clozeStimulus,
