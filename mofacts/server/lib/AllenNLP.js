@@ -259,6 +259,7 @@ console.log("clozeAPIEndpoints", clozeAPIEndpoints);
 //format the endpoints
 //const endpoints = new Endpoints("https://allennlp:8000/predict/semantic-role-labeling", "https://allennlp:8000/predict/coreference-resolution", "https://allennlp:8000/predict/dependency-parsing", "https://spacy:80/sents", "https://allennlp:8000/predict/textual-entailment");
 const endpoints = new Endpoints("http://" + clozeAPIEndpoints.allenNLP + "/predict/semantic-role-labeling", "http://" + clozeAPIEndpoints.allenNLP + "/predict/coreference-resolution", "http://" + clozeAPIEndpoints.allenNLP + "/predict/dependency-parsing", "http://" + clozeAPIEndpoints.spacy + "/sents", "http://" + clozeAPIEndpoints.allenNLP + "/predict/textual-entailment");
+exports.endpoints = endpoints;
 
 
 
