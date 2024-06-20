@@ -246,8 +246,8 @@ function EntailmentRequest$reflection() {
 }
 
 const clozeAPIEndpoints = {
-  allenNLP: 'allenNLP:8002',
-  spacy: 'spacy:8001'
+  allenNLP: 'allenNLP:8000',
+  spacy: 'spacy:80'
 };
 //overwrite them with settings.json if they exist
 if(Meteor.settings.clozeAPIEndpoints){
