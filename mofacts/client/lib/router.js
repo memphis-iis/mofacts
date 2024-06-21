@@ -138,7 +138,7 @@ Router.route('/experiment/:target?/:xcond?', {
     Cookie.set('experimentTarget', target, 21);
     Cookie.set('experimentXCond', xcond, 21);
 
-    let tdf = Tdfs.findOne();
+    let tdf = Tdfs.findOne({"content.tdfs.tutor.setspec.experimentTarget": target});
 
     if(!tdf) tdf = await meteorCallAsync('getTdfByExperimentTarget', target);
 
