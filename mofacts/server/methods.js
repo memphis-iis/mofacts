@@ -305,6 +305,7 @@ async function getTdfByFileName(filename) {
 
 
 async function getTdfByExperimentTarget(experimentTarget) {
+  experimentTarget = experimentTarget.toLowerCase();
   try {
     serverConsole('getTdfByExperimentTarget:'+experimentTarget);
     tdf = Tdfs.findOne({"content.tdfs.tutor.setspec.experimentTarget": experimentTarget});
