@@ -305,9 +305,10 @@ async function getTdfByFileName(filename) {
 
 
 async function getTdfByExperimentTarget(experimentTarget) {
+  experimentTarget = experimentTarget.toLowerCase();
   try {
     serverConsole('getTdfByExperimentTarget:'+experimentTarget);
-    tdf = Tdfs.findOne({"content.tdfs.tutor.setspec.experimentTarget": {$regex: experimentTarget, $options: 'i'}});
+    tdf = Tdfs.findOne({"content.tdfs.tutor.setspec.experimentTarget": experimentTarget});
     return tdf;
   } catch (e) {
     serverConsole('getTdfByExperimentTarget ERROR,', experimentTarget, ',', e);
@@ -705,6 +706,8 @@ async function combineAndSaveContentFile(tdf, stim, owner) {
   try {
     const jsonContents = typeof tdf.contents == 'string' ? JSON.parse(tdf.contents) : tdf.contents;
     const jsonPackageFile = tdf.packageFile;
+    if (jsonContents.tutor.setspec.experimentTarget)
+      jsonContents.tutor.setspec.experimentTarget = jsonContents.tutor.setspec.experimentTarget.toLowerCase();
     const json = {tutor: jsonContents.tutor};
     const lessonName = _.trim(jsonContents.tutor.setspec.lessonname);
     if (lessonName.length < 1) {
