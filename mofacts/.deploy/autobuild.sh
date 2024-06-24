@@ -39,6 +39,8 @@ echo "  - JSON Data: $JSON_DATA"
 
 # Save the JSON data to the file
 echo "** Saving JSON data to file..."
+#create the private directory if it doesn't exist
+mkdir -p ../private
 echo "$JSON_DATA" > ../private/versionInfo.json
 
 # Make a Session.set command with the json data in ../client/views/versionInfo.js

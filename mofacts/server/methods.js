@@ -2332,9 +2332,13 @@ async function loadStimsAndTdfsFromPrivate(adminUserId) {
   if (!isProd) {
     serverConsole('loading stims and tdfs from asset dir');
     serverConsole('start stims');
-    const stimFilenames = _.filter(fs.readdirSync('./assets/app/stims/'), (fn) => {
-      return fn.indexOf('.json') >= 0;
-    });
+    //check if assets stim directory exists
+    var stimFilenames = [];
+    if (fs.existsSync('./assets/app/stims/')) {
+      stimFilenames = _.filter(fs.readdirSync('./assets/app/stims/'), (fn) => {
+        return fn.indexOf('.json') >= 0;
+      });
+    }
     for (const filename of stimFilenames) {
       const data = Assets.getText('stims/' + filename);
       const json = JSON.parse(data);
@@ -2342,9 +2346,12 @@ async function loadStimsAndTdfsFromPrivate(adminUserId) {
     }
     setTimeout(async () => {
       serverConsole('start tdfs');
-      const tdfFilenames = _.filter(fs.readdirSync('./assets/app/tdf/'), (fn) => {
-        return fn.indexOf('.json') >= 0;
-      });
+      let tdfFilenames = [];
+      if (fs.existsSync('./assets/app/tdf/')) {
+        tdfFilenames = _.filter(fs.readdirSync('./assets/app/tdf/'), (fn) => {
+          return fn.indexOf('.json') >= 0;
+        });
+      }
       for (let filename of tdfFilenames) {
         const data = Assets.getText('tdf/' + filename);
         const json = JSON.parse(data);
@@ -2416,13 +2423,12 @@ const methods = {
             contentType: 'application/json'
           }
         }
-        file ? files = [file] : files = [];
         Email.send({
           to: Meteor.user().emails[0].address,
           from: Meteor.settings.owner,
           subject: subject,
           text: message,
-          attachments: files
+          attachments: file
         });
       }).catch((err) => {
         serverConsole('err', err);
@@ -3657,15 +3663,20 @@ Meteor.startup(async function() {
   
   updateStimDisplayTypeMap();
 
-  //email admin that the server has restarted
+  //email admin that the server has restarted if versionInfo.json exists
   for (const emailaddr of allEmails){
-    const versionFile = Assets.getText('versionInfo.json');
-    const version = JSON.parse(versionFile);
-    server = Meteor.absoluteUrl().split('//')[1];
-    server = server.substring(0, server.length - 1);
-    subject = `MoFaCTs Deployed on ${server}`;
-    text = `The server has restarted.\nServer: ${server}\nVersion: ${JSON.stringify(version, null, 2)}`;
-    sendEmail(emailaddr, ownerEmail, subject, text)
+    Assets.getText('versionInfo.json', (err, data) => {
+      if (err) {
+        console.log(err);
+      } else {
+        const version = JSON.parse(data);
+        server = Meteor.absoluteUrl().split('//')[1];
+        server = server.substring(0, server.length - 1);
+        subject = `MoFaCTs Deployed on ${server}`;
+        text = `The server has restarted.\nServer: ${server}\nVersion: ${JSON.stringify(version, null, 2)}`;
+        sendEmail(emailaddr, ownerEmail, subject, text)
+      }
+    });
   }
   
 });

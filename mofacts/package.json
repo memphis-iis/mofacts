@@ -19,6 +19,7 @@
     "hark": "^1.2.3",
     "http": "0.0.1-security",
     "isomorphic-fetch": "^3.0.0",
+    "meteor-node-stubs": "^1.2.9",
     "node-symspell": "^0.1.0",
     "passport": "^0.6.0",
     "pg-promise": "^10.11.1",

@@ -282,8 +282,22 @@ function TextRequest$reflection() {
   return (0, _Reflection.record)("Process.TextRequest", [], TextRequest, () => [["text", _Reflection.string], ["model", _Reflection.string]]);
 }
 
-const endpoints = new Endpoints("https://allennlp:8000/predict/semantic-role-labeling", "https://allennlp:8000/predict/coreference-resolution", "https://allennlp:8000/predict/dependency-parsing", "https://spacy:80/sents", "https://allennlp:8000/predict/textual-entailment");
+const clozeAPIEndpoints = {
+  allenNLP: 'localhost:8002',
+  spacy: 'localhost:8001'
+};
+//overwrite them with settings.json if they exist
+if(Meteor.settings.clozeAPIEndpoints){
+  for(const key in Meteor.settings.clozeAPIEndpoints){
+    clozeAPIEndpoints[key] = Meteor.settings.clozeAPIEndpoints[key];
+  }
+}
+console.log("clozeAPIEndpoints", clozeAPIEndpoints);
+//format the endpoints
+//const endpoints = new Endpoints("http://allennlp:8000/predict/semantic-role-labeling", "http://allennlp:8000/predict/coreference-resolution", "http://allennlp:8000/predict/dependency-parsing", "http://spacy:80/sents", "http://allennlp:8000/predict/textual-entailment");
+const endpoints = new Endpoints("http://" + clozeAPIEndpoints['allenNLP'] + "/predict/semantic-role-labeling", "http://" + clozeAPIEndpoints['allenNLP'] + "/predict/coreference-resolution", "http://" + clozeAPIEndpoints['allenNLP'] + "/predict/dependency-parsing", "http://" + clozeAPIEndpoints['spacy'] + "/sents", "http://" + clozeAPIEndpoints['allenNLP'] + "/predict/textual-entailment");
 exports.endpoints = endpoints;
+
 
 
 function PostAPI(input$$1, endpoint) {

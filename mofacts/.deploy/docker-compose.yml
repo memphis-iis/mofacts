@@ -2,7 +2,7 @@ version: '3.2'
 
 services:
   mofacts:
-    image: iisdevs/mofacts-mini:main
+    image: iisdevs/mofacts-mini:staging
     volumes:
       - type: bind
         source: /mofactsAssets
