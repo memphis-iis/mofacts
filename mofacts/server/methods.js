@@ -61,6 +61,7 @@ const syllableURL = Meteor.settings.syllableURL ? Meteor.settings.syllableURL : 
 
 
 let highestStimuliSetId;
+let contentGenerationAvailable = false;
 let nextStimuliSetId;
 let nextEventId = 1;
 let stimDisplayTypeMap = {};
@@ -294,6 +295,15 @@ function createAwsHmac(secretKey, dataString) {
 async function getTdfById(TDFId) {
   const tdf = Tdfs.findOne({_id: TDFId});
   return tdf;
+}
+
+async function checkCongentGenerationAvailable() {
+  try {
+    const response = await fetch('http://spacy:80');
+    return true
+  } catch (error) {
+    return false;
+  }
 }
 
 async function getTdfTTSAPIKey(TDFId) {
@@ -3224,6 +3234,10 @@ const asyncMethods = {
       return response.audioContent;
     });
   },
+
+  getContentGenerationAvailable: async function(){
+    return contentGenerationAvailable;
+  },
   
   setLockoutTimeStamp: async function(lockoutTimeStamp, lockoutMinutes, currentUnitNumber, TDFId) {
     serverConsole('setLockoutTimeStamp', lockoutTimeStamp, lockoutMinutes, currentUnitNumber, TDFId);
@@ -3492,6 +3506,10 @@ Meteor.startup(async function() {
     serverConsole('ADMIN USER is MISSING: a restart might be required');
     serverConsole('Make sure you have a valid siteConfig');
     serverConsole('***IMPORTANT*** There will be no owner for system TDF\'s');
+  }
+
+  if(await checkCongentGenerationAvailable()){
+    contentGenerationAvailable = true;
   }
 
   // Get user in roles and make sure they are added
