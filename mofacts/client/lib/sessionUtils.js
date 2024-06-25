@@ -60,7 +60,7 @@ function sessionCleanUp() {
   Session.set('audioPromptVoice', undefined);
   Session.set('audioPromptFeedbackVoice', undefined);
   Session.set('buttonTrial', false);
-
+  Session.set('showPageNumbers', false);
   Session.set('schedule', undefined);
 
   Session.set('wasReportedForRemoval', false);
