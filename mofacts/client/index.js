@@ -372,6 +372,19 @@ Template.registerHelper('showPerformanceDetails', function() {
   if(type == "t" && !uiSettings.displayPerformanceDuringTrial) return false;
   return ((Session.get('curModule') == 'card' || Session.get('curModule') !== 'instructions') && Session.get('scoringEnabled') && Session.get('unitType') != 'schedule');
 });
+Template.registerHelper('showPageNumbers', function() {
+  return Session.get('showPageNumbers');
+})
+Template.registerHelper('currentUnitNumber', function() {
+  if(Session.get('currentUnitNumber'))
+    return parseInt(Session.get('currentUnitNumber')) + 1;
+  return 0;
+})
+Template.registerHelper('lastUnitNumber', function() {
+  if(Session.get('currentTdfFile'))
+    return Session.get('currentTdfFile').tdfs.tutor.unit.length + 1;
+  return 0;
+})
 Template.registerHelper('currentScore', function() {
   return Session.get('currentScore');
 });
