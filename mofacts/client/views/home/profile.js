@@ -619,6 +619,8 @@ async function selectTdf(currentTdfId, lessonName, currentStimuliSetId, ignoreOu
   Session.set('currentStimuliSetId', currentStimuliSetId);
   Session.set('ignoreOutOfGrammarResponses', ignoreOutOfGrammarResponses);
   Session.set('speechOutOfGrammarFeedback', speechOutOfGrammarFeedback);
+  Session.set('showPageNumbers', setspec.showPageNumbers ? setspec.showPageNumbers : false);
+    
 
   // Record state to restore when we return to this page
   let audioPromptMode;
