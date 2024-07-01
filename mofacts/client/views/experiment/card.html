@@ -103,7 +103,7 @@
                 {{/each}}
                 {{/if}}
             </div>
-            <div class="row{{UIsettings.reverseStimuliAndInputColumns}} position-absolute z-1 mx-auto w-100 top-0 {{#if isVideoSession}}questionContainer{{/if}}">
+            <div class="row{{UIsettings.reverseStimuliAndInputColumns}} mx-auto w-100 top-0 {{#if isVideoSession}}questionContainer position-absolute z-1{{/if}}">
                 {{#if trial}}
                 <div class="{{UIsettings.displayColWidth}} mx-auto" id="displayContainer">
                     {{#if anythingButAudioCard}}
@@ -362,7 +362,7 @@
   {{#if isInTrial}}
   {{#if isInInstructions}}
   {{else}}
-    <div id="userLowerInteractionContainer">
+  <div id="userLowerInteractionContainer">
       <div class="row text-center">
           <div class="col-sm-12 col-xs-12 col-md-6 col-lg-6 mx-auto" style="margin-bottom: 30px;">
               <br>

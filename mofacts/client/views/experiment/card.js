@@ -1591,9 +1591,6 @@ function determineUserFeedback(userAnswer, isSkip, isCorrect, feedbackForAnswer,
 
 async function showUserFeedback(isCorrect, feedbackMessage, isTimeout, isSkip) {
   console.log('showUserFeedback');
-  if(!isSkip){
-    userFeedbackStart = Date.now();
-  }
   userFeedbackStart = Date.now();
   const isButtonTrial = getButtonTrial();
   feedbackDisplayPosition = Session.get('curTdfUISettings').feedbackDisplayPosition;
