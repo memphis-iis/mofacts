@@ -385,7 +385,7 @@ function varLenDisplayTimeout() {
 }
 
 // Clean up things if we navigate away from this page
-function leavePage(dest) {
+async function leavePage(dest) {
   console.log('leaving page for dest: ' + dest);
   if (dest != '/card' && dest != '/instructions' && document.location.pathname != '/instructions') {
     Session.set('currentExperimentState', undefined);
@@ -400,7 +400,11 @@ function leavePage(dest) {
       console.log('NOT closing audio context');
     }
   } else if (dest === '/instructions') {
-    const unit = Session.get('currentTdfUnit') ? Session.get('currentTdfUnit') : getExperimentState().currentTdfFile[Session.get('currentUnitNumber')];;
+    let unit = Session.get('currentTdfUnit');
+    if(!unit){
+      let experimentState = await getExperimentState()
+      unit = experimentState.currentTdfFile.tdfs.tutor.unit[Session.get('currentUnitNumber')];
+    }
     const lockout = unitHasLockout() > 0;
     const txt = unit.unitinstructions ? unit.unitinstructions.trim() : undefined;
     const pic = unit.picture ? unit.picture.trim() : undefined;
