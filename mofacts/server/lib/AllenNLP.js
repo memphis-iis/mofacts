@@ -257,8 +257,8 @@ if(Meteor.settings.clozeAPIEndpoints){
 }
 console.log("clozeAPIEndpoints", clozeAPIEndpoints);
 //format the endpoints
-//const endpoints = new Endpoints("https://allennlp:8000/predict/semantic-role-labeling", "https://allennlp:8000/predict/coreference-resolution", "https://allennlp:8000/predict/dependency-parsing", "https://spacy:80/sents", "https://allennlp:8000/predict/textual-entailment");
-const endpoints = new Endpoints("https://allennlp:8000/predict/semantic-role-labeling", "https://allennlp:8000/predict/coreference-resolution", "https://allennlp:8000/predict/dependency-parsing", "https://spacy:80/sents", "https://allennlp:8000/predict/textual-entailment");
+//const endpoints = new Endpoints("http://allennlp:8000/predict/semantic-role-labeling", "http://allennlp:8000/predict/coreference-resolution", "http://allennlp:8000/predict/dependency-parsing", "http://spacy:80/sents", "http://allennlp:8000/predict/textual-entailment");
+const endpoints = new Endpoints("http://allennlp:8000/predict/semantic-role-labeling", "http://allennlp:8000/predict/coreference-resolution", "http://allennlp:8000/predict/dependency-parsing", "http://spacy:80/sents", "http://allennlp:8000/predict/textual-entailment");
 exports.endpoints = endpoints;
 
 
