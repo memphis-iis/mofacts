@@ -43,7 +43,10 @@ echo "$JSON_DATA" > ../private/versionInfo.json
 
 # Make a Session.set command with the json data in ../client/views/versionInfo.js
 echo "** Making a Session.set command with the JSON data..."
-echo "Session.set('versionInfo', $JSON_DATA);" > ../client/views/versionInfo.js
+echo "versionInfo = $JSON_DATA" > ../client/views/versionInfo.js
+echo "versionInfo.serverURL = Meteor.absoluteUrl();" >> ../client/views/versionInfo.js
+echo "Session.set('versionInfo', versionInfo);" >> ../client/views/versionInfo.js
+
 echo "  - Session.set command created"
 
 # Update the docker-compose.yml tag

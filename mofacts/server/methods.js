@@ -3677,8 +3677,9 @@ Meteor.startup(async function() {
 
   //email admin that the server has restarted
   for (const emailaddr of allEmails){
-    const versionFile = Assets.getText('versionInfo.json');
+    const versionFile = Assets.getText('versionInfo.json')
     const version = JSON.parse(versionFile);
+    const rootUrl = Meteor.settings.ROOT_URL;
     server = Meteor.absoluteUrl().split('//')[1];
     server = server.substring(0, server.length - 1);
     subject = `MoFaCTs Deployed on ${server}`;
