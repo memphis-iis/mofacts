@@ -127,7 +127,7 @@ function sessionCleanUp() {
   Session.set('selectedTdfDueDate', undefined);
   Session.set('currentStimProbFunctionParameters', undefined);
   Session.set('furthestUnit', undefined);
-  player = undefined;
+  if(player) player.destroy();
 
   if (window.currentAudioObj) {
     window.currentAudioObj.pause();

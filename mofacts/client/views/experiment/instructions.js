@@ -4,7 +4,7 @@ import {updateExperimentState, initCard} from './card';
 import {routeToSignin} from '../../lib/router';
 import { meteorCallAsync } from '../../index';
 import { _ } from 'core-js';
-import { revisitUnit } from './card';
+import { revisitUnit, getExperimentState } from './card';
 
 export {instructContinue, unitHasLockout, checkForFileImage};
 // //////////////////////////////////////////////////////////////////////////
@@ -309,8 +309,12 @@ function getUnitsRemaining() {
 // SUPER-IMPORTANT: note that this can be called outside this template, so it
 // must only reference visible from anywhere on the client AND we take great
 // pains to not modify anything reactive until this function has returned
-function instructContinue() {
-  const curUnit = Session.get('currentTdfUnit');
+async function instructContinue() {
+  let curUnit = Session.get('currentTdfUnit');
+  if(!curUnit){
+    let experimentState = await getExperimentState()
+    curUnit = experimentState.currentTdfFile.tdfs.tutor.unit[Session.get('currentUnitNumber')];
+  }
 
   let feedbackText = curUnit.unitinstructions && curUnit.unitinstructions.length > 0 ?
     curUnit.unitinstructions.trim() : '';
