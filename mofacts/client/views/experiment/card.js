@@ -2292,7 +2292,7 @@ function getButtonTrial() {
   curUnit.isButtonTrial ? isButtonTrial = true : isButtonTrial = false;
 
   const curCardInfo = engine.findCurrentCardInfo();
-  if (curCardInfo.forceButtonTrial) {
+  if (curCardInfo.forceButtonTrial || curUnit.buttontrial) {
     // Did this question specifically override button trial?
     isButtonTrial = true;
   } else {
