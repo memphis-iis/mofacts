@@ -17,7 +17,12 @@ Template.contentUpload.helpers({
     const files = DynamicAssets.find({userId: userId}).fetch();
     sortedFiles = [];
     //get all tdfs
-    allTDfs = Tdfs.find({ownerId: Meteor.userId()}).fetch();
+    toggleOnlyOwnedTDFs = Template.instance().toggleOnlyOwnedTDFs.get();
+    if(toggleOnlyOwnedTDFs){
+      allTDfs = Tdfs.find({ownerId: Meteor.userId()}).fetch();
+    } else {
+      allTDfs = Tdfs.find().fetch();
+    }
     console.log('allTdfs:', allTDfs);
     //iterate through allTdfs and get all stimuli
     tdfSummaries = [];    for (const tdf of allTDfs) {
@@ -32,6 +37,7 @@ Template.contentUpload.helpers({
       thisTdf.stimFileInfo = [];
       thisTdf.stimFilesCount = 0;
       thisTdf.fileName = tdf.content.fileName;
+      thisTdf.owner = Meteor.users.findOne({_id: tdf.ownerId}).username;
       checkIfConditional = allTDfs.some(function(tdf){
         conditions = tdf.content.tdfs.tutor.setspec.condition;
         //check if condition contains the TDF filename
@@ -108,12 +114,16 @@ Template.contentUpload.helpers({
     });
     console.log('packages:', packages);
     return packages;
+  },
+  'displayUnownedTDFs': function(){
+    return !Template.instance().toggleOnlyOwnedTDFs.get();
   }
 });
 
 Template.contentUpload.onCreated(function() {
   this.currentUpload = new ReactiveVar(false);
   this.curFilesToUpload = new ReactiveVar([]);
+  this.toggleOnlyOwnedTDFs = new ReactiveVar(true);
 });
 
 Template.contentUpload.rendered = function() {
@@ -295,6 +305,10 @@ Template.contentUpload.events({
       }
     });
   },
+  'click #showAllAssets': function(event){
+    showAllAssets = Template.instance().toggleOnlyOwnedTDFs.get();
+    Template.instance().toggleOnlyOwnedTDFs.set(!showAllAssets);
+  }
 });
 
 
