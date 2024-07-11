@@ -567,10 +567,42 @@ Template.card.events({
   'click .multipleChoiceButton': function(event) {
     event.preventDefault();
     if(!Session.get('submmissionLock')){
-      Session.set('submmissionLock', true);
-      handleUserInput(event, 'buttonClick');
+      if(!Session.get('UISettings').displayConfirmButton){
+        Session.set('submmissionLock', true);
+        handleUserInput(event, 'buttonClick');
+      } else {
+        //for all multipleChoiceButtons, make the selected one have class btn-selected, remove btn-selected from all others
+        const selectedButton = event.currentTarget;
+        const buttonList = document.getElementsByClassName('multipleChoiceButton');
+        for (let i = 0; i < buttonList.length; i++) {
+          if(buttonList[i] == selectedButton){
+            buttonList[i].classList.add('btn-selected');
+          } else {
+            buttonList[i].classList.remove('btn-selected');
+          }
+        }
+      }
     }
   },
+  '.click .displayConfirmButton': function(event) {
+    event.preventDefault();``
+    if(!Session.get('submmissionLock')){
+      if(Session.get('buttonTrial')){
+        const selectedButton = document.getElementsByClassName('btn-selected')[0];
+        //change this event to a buttonClick event for that button
+        event.currentTarget = selectedButton;
+        handleUserInput(event, 'buttonClick');
+      } else {
+        //get user answer target element
+        const userAnswer = document.getElementById('userAnswer');
+        event.currentTarget = userAnswer;
+        event.keyCode = ENTER_KEY;
+        handleUserInput(event, 'buttonClick');
+      }
+    }
+
+  },
+  
 
   'click #continueStudy': function(event) {
     event.preventDefault();
@@ -3559,6 +3591,7 @@ async function resumeFromComponentState() {
       "incorrectColor": "darkorange",
       "correctColor": "green",
       'instructionsTitleDisplay': "headerOnly",
+      'displayConfirmButton': false,
     },
   }
   //here we interprit the stimulus and input position settings to set the colum widths. There are 4 possible combinations.

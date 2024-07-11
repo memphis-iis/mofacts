@@ -66,6 +66,15 @@ p{
     margin-left: auto;
     margin-right: auto;
 }
+/*primary button selected*/
+.btn-selected{
+    background-color: var(--accent-color) !important;
+    border-color: var(--accent-color) !important;
+    color: var(--primary-button-text-color);
+    /* center button */
+    margin-left: auto;
+    margin-right: auto;
+}
 .btn-secondary{
     background-color: var(--secondary-color) !important;
     color: var(--secondary-text-color);
