@@ -566,11 +566,48 @@ Template.card.events({
 
   'click .multipleChoiceButton': function(event) {
     event.preventDefault();
+    console.log("multipleChoiceButton clicked");
     if(!Session.get('submmissionLock')){
-      Session.set('submmissionLock', true);
-      handleUserInput(event, 'buttonClick');
+      if(!Session.get('curTdfUISettings').displayConfirmButton){
+        Session.set('submmissionLock', true);
+        handleUserInput(event, 'buttonClick');
+      } else {
+        console.log("multipleChoiceButton clicked (waiting for confirm)");
+        //for all multipleChoiceButtons, make the selected one have class btn-selected, remove btn-selected from all others
+        const selectedButton = event.currentTarget;
+        console.log("selectedButton", selectedButton, "event.currentTarget", event.currentTarget);
+        $('.multipleChoiceButton').each(function(){
+          $(this).removeClass('btn-secondary').addClass('btn-primary');
+        });
+        $(selectedButton).addClass('btn-secondary');
+        //enable confirmButton
+        $('#confirmButton').prop('disabled', false);
+      }
     }
   },
+  'click #confirmButton': function(event) {
+    event.preventDefault();``
+    console.log("displayConfirmButton clicked");
+    $('#confirmButton').hide();
+    if(!Session.get('submmissionLock')){
+      if(Session.get('buttonTrial')){
+        const selectedButton = $('.btn-secondary, .multipleChoiceButton');
+        //change this event to a buttonClick event for that button
+        event.currentTarget = selectedButton;
+        console.log("selectedButton", selectedButton, "event.currentTarget", event.currentTarget);
+        handleUserInput(event, 'confirmButton');
+      } else {
+        //get user answer target element
+        const userAnswer = document.getElementById('userAnswer');
+        event.currentTarget = userAnswer;
+        event.keyCode = ENTER_KEY;
+        console.log("userAnswer", userAnswer, "event.currentTarget", event.currentTarget);
+        handleUserInput(event, 'confirmButton');
+      }
+    }
+
+  },
+  
 
   'click #continueStudy': function(event) {
     event.preventDefault();
@@ -1345,7 +1382,7 @@ function handleUserInput(e, source, simAnswerCorrect) {
     if (!firstKeypressTimestamp) {
       firstKeypressTimestamp = Date.now();
     }
-  } else if (source === 'buttonClick' || source === 'simulation' || source === 'voice') {
+  } else if (source === 'buttonClick' || source === 'simulation' || source === 'voice' || source === 'confirmButton') {
     // to save space we will just go ahead and act like it was a key press.
     key = ENTER_KEY;
     Session.set('userAnswerSubmitTimestamp', Date.now());
@@ -1393,6 +1430,8 @@ function handleUserInput(e, source, simAnswerCorrect) {
     } else {
       userAnswer = e.currentTarget.name;
     }
+  } else if (source="confirmButton"){
+    userAnswer = $('.btn-secondary')[0].name;
   } else if (source === 'simulation') {
     userAnswer = simAnswerCorrect ? 'SIM: Correct Answer' : 'SIM: Wrong Answer';
   } else if (source === 'voice') {
@@ -2789,6 +2828,7 @@ function beginQuestionAndInitiateUserInput(delayMs, deliveryParams) {
 
 function allowUserInput() {
   console.log('allow user input');
+  $('#confirmButton').show();
   inputDisabled = false;
   startRecording();
 
@@ -3559,6 +3599,7 @@ async function resumeFromComponentState() {
       "incorrectColor": "darkorange",
       "correctColor": "green",
       'instructionsTitleDisplay': "headerOnly",
+      'displayConfirmButton': false,
     },
   }
   //here we interprit the stimulus and input position settings to set the colum widths. There are 4 possible combinations.

@@ -213,7 +213,7 @@
                     {{/if}}
                 {{/if}}
             
-                <div id="multipleChoiceContainer" class="{{UIsettings.choiceColWidth}}">
+                <div id="multipleChoiceContainer" class="{{UIsettings.choiceColWidth}} {{#if isVideoSession}} max-vh-30 overflow-scroll {{/if}}">
                     <!-- will contain multiple choice buttons which are dynamically added. -->
                     {{#if buttonTrial}}
                     <div id="multipleChoiceTable" class="row gy-3 choice text-center row-cols-{{UIsettings.choiceButtonCols}} align-items-start">
@@ -251,6 +251,14 @@
                     </div>
                     {{/if}}
                 <br>
+            </div>
+            {{/if}}
+
+            {{#if UIsettings.displayConfirmButton}}
+            <div class="col-12 text-center">
+                <button type='button' id='confirmButton' name='confirmButton' class='btn btn-block btn-responsive' disabled>
+                    Continue
+                </button>
             </div>
             {{/if}}
 
