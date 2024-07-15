@@ -140,10 +140,6 @@ sudo chmod 666 /var/run/docker.sock
 #start docker on boot
 sudo systemctl enable docker
 
-
-
-
-
 # Spit out some messages for the user - to do this we'll need to create a message
 # of the day (motd) file, and change the sshd_config file
 cat << EOF | sudo tee /etc/motd

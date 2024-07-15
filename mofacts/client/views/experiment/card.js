@@ -12,7 +12,9 @@ import {
 import { 
   initializePlyr,
   playVideo,
+  playNextCard,
   destroyPlyr,
+  addStimToSchedule
 } from '../../lib/plyrHelper.js'
 import {meteorCallAsync, redoCardImage} from '../../index';
 import {DialogueUtils, dialogueContinue, dialogueLoop, initiateDialogue} from './dialogueUtils';
@@ -24,8 +26,6 @@ import {Answers} from './answerAssess';
 import {sessionCleanUp} from '../../lib/sessionUtils';
 import {checkUserSession} from '../../index'
 import {instructContinue, unitHasLockout, checkForFileImage} from './instructions';
-import { is } from 'bluebird';
-
 
 export {
   speakMessageIfAudioPromptFeedbackEnabled,
@@ -155,6 +155,7 @@ let timeoutFunc = null;
 let timeoutDelay = null;
 let simTimeoutName = null;
 let userAnswer = null;
+let lastlogicIndex = 0;
 
 // Helper - return elapsed seconds since unit started. Note that this is
 // technically seconds since unit RESUME began (when we set currentUnitStartTime)
@@ -384,7 +385,7 @@ function varLenDisplayTimeout() {
 }
 
 // Clean up things if we navigate away from this page
-function leavePage(dest) {
+async function leavePage(dest) {
   console.log('leaving page for dest: ' + dest);
   if (dest != '/card' && dest != '/instructions' && document.location.pathname != '/instructions') {
     Session.set('currentExperimentState', undefined);
@@ -399,7 +400,11 @@ function leavePage(dest) {
       console.log('NOT closing audio context');
     }
   } else if (dest === '/instructions') {
-    const unit = Session.get('currentTdfUnit');
+    let unit = Session.get('currentTdfUnit');
+    if(!unit){
+      let experimentState = await getExperimentState()
+      unit = experimentState.currentTdfFile.tdfs.tutor.unit[Session.get('currentUnitNumber')];
+    }
     const lockout = unitHasLockout() > 0;
     const txt = unit.unitinstructions ? unit.unitinstructions.trim() : undefined;
     const pic = unit.picture ? unit.picture.trim() : undefined;
@@ -561,11 +566,48 @@ Template.card.events({
 
   'click .multipleChoiceButton': function(event) {
     event.preventDefault();
+    console.log("multipleChoiceButton clicked");
     if(!Session.get('submmissionLock')){
-      Session.set('submmissionLock', true);
-      handleUserInput(event, 'buttonClick');
+      if(!Session.get('curTdfUISettings').displayConfirmButton){
+        Session.set('submmissionLock', true);
+        handleUserInput(event, 'buttonClick');
+      } else {
+        console.log("multipleChoiceButton clicked (waiting for confirm)");
+        //for all multipleChoiceButtons, make the selected one have class btn-selected, remove btn-selected from all others
+        const selectedButton = event.currentTarget;
+        console.log("selectedButton", selectedButton, "event.currentTarget", event.currentTarget);
+        $('.multipleChoiceButton').each(function(){
+          $(this).removeClass('btn-secondary').addClass('btn-primary');
+        });
+        $(selectedButton).addClass('btn-secondary');
+        //enable confirmButton
+        $('#confirmButton').prop('disabled', false);
+      }
     }
   },
+  'click #confirmButton': function(event) {
+    event.preventDefault();``
+    console.log("displayConfirmButton clicked");
+    $('#confirmButton').hide();
+    if(!Session.get('submmissionLock')){
+      if(Session.get('buttonTrial')){
+        const selectedButton = $('.btn-secondary, .multipleChoiceButton');
+        //change this event to a buttonClick event for that button
+        event.currentTarget = selectedButton;
+        console.log("selectedButton", selectedButton, "event.currentTarget", event.currentTarget);
+        handleUserInput(event, 'confirmButton');
+      } else {
+        //get user answer target element
+        const userAnswer = document.getElementById('userAnswer');
+        event.currentTarget = userAnswer;
+        event.keyCode = ENTER_KEY;
+        console.log("userAnswer", userAnswer, "event.currentTarget", event.currentTarget);
+        handleUserInput(event, 'confirmButton');
+      }
+    }
+
+  },
+  
 
   'click #continueStudy': function(event) {
     event.preventDefault();
@@ -591,6 +633,9 @@ Template.card.events({
   'click #continueButton': function(event) {
     event.preventDefault();
     //hide the continue button
+    if($("#videoUnitContainer").length){
+      destroyPlyr();
+    }
     $("#continueBar").attr("hidden", true);
     $('#continueButton').prop('disabled', true);
     unitIsFinished('Continue Button Pressed');
@@ -1222,6 +1267,8 @@ function getCurrentFalseResponses() {
     typeof(cluster.stims[curStimIndex].incorrectResponses) == 'undefined') {
     return []; // No false responses
   } else {
+    if(typeof(cluster.stims[curStimIndex].incorrectResponses) == 'string')
+      return cluster.stims[curStimIndex].incorrectResponses.split(',');
     return cluster.stims[curStimIndex].incorrectResponses;
   }
 }
@@ -1340,7 +1387,7 @@ function handleUserInput(e, source, simAnswerCorrect) {
     if (!firstKeypressTimestamp) {
       firstKeypressTimestamp = Date.now();
     }
-  } else if (source === 'buttonClick' || source === 'simulation' || source === 'voice') {
+  } else if (source === 'buttonClick' || source === 'simulation' || source === 'voice' || source === 'confirmButton') {
     // to save space we will just go ahead and act like it was a key press.
     key = ENTER_KEY;
     Session.set('userAnswerSubmitTimestamp', Date.now());
@@ -1388,6 +1435,8 @@ function handleUserInput(e, source, simAnswerCorrect) {
     } else {
       userAnswer = e.currentTarget.name;
     }
+  } else if (source="confirmButton"){
+    userAnswer = $('.btn-secondary')[0].name;
   } else if (source === 'simulation') {
     userAnswer = simAnswerCorrect ? 'SIM: Correct Answer' : 'SIM: Wrong Answer';
   } else if (source === 'voice') {
@@ -1576,7 +1625,7 @@ function determineUserFeedback(userAnswer, isSkip, isCorrect, feedbackForAnswer,
       speechTranscriptionTimeoutsSeen = 0;
       initiateDialogue(userAnswer, afterAnswAerFeedbackCbBound, Session.get('currentExperimentState'), showUserFeedback(isCorrect, feedbackForAnswer, userAnswer.includes('[timeout]'), isSkip));
     } else {
-      showUserFeedback(isCorrect, feedbackForAnswer, userAnswer.includes('[timeout]'), isSkip)();
+      showUserFeedback(isCorrect, feedbackForAnswer, userAnswer.includes('[timeout]'), isSkip);
     }
   } else {
     userFeedbackStart = null;
@@ -1584,15 +1633,12 @@ function determineUserFeedback(userAnswer, isSkip, isCorrect, feedbackForAnswer,
     let trialStartTimeStamp = Session.get('trialStartTimestamp');
     let source = Session.get('source');
     let isTimeout = Session.get('isTimeout');
-    afterAnswerFeedbackCallback(trialEndTimeStamp, trialStartTimeStamp, source, userAnswer, isTimeout,  isCorrect);
+    afterAnswerFeedbackCallback(trialEndTimeStamp, trialStartTimeStamp, source, userAnswer, isTimeout, isSkip, isCorrect);
   }
 }
 
 async function showUserFeedback(isCorrect, feedbackMessage, isTimeout, isSkip) {
   console.log('showUserFeedback');
-  if(!isSkip){
-    userFeedbackStart = Date.now();
-  }
   userFeedbackStart = Date.now();
   const isButtonTrial = getButtonTrial();
   feedbackDisplayPosition = Session.get('curTdfUISettings').feedbackDisplayPosition;
@@ -1780,13 +1826,13 @@ async function showUserFeedback(isCorrect, feedbackMessage, isTimeout, isSkip) {
   let trialEndTimeStamp = Session.get('trialEndTimeStamp');
   let trialStartTimeStamp = Session.get('trialStartTimestamp');
   let source = Session.get('source');
-  const doClearForceCorrectBound = doClearForceCorrect.bind(null, doForceCorrect, trialEndTimeStamp, trialStartTimeStamp, source, userAnswer, isTimeout,  isCorrect);
+  const doClearForceCorrectBound = doClearForceCorrect.bind(null, doForceCorrect, trialEndTimeStamp, trialStartTimeStamp, source, userAnswer, isTimeout, isCorrect, isSkip);
   Tracker.afterFlush(doClearForceCorrectBound);
 }
 
 // Note the execution thread will finish in the keypress event above for userForceCorrect
 let afterUserFeedbackForceCorrectCb = undefined;
-function doClearForceCorrect(doForceCorrect, trialEndTimeStamp, trialStartTimeStamp, source, userAnswer, isTimeout,  isCorrect) {
+function doClearForceCorrect(doForceCorrect, trialEndTimeStamp, trialStartTimeStamp, source, userAnswer, isTimeout, isCorrect, isSkip) {
   if (doForceCorrect) {
     $('#forceCorrectionEntry').show().attr("hidden",false);
 
@@ -1796,13 +1842,13 @@ function doClearForceCorrect(doForceCorrect, trialEndTimeStamp, trialStartTimeSt
       speakMessageIfAudioPromptFeedbackEnabled(prompt, 'feedback');
 
       const forcecorrecttimeout = Session.get('currentDeliveryParams').forcecorrecttimeout;
-      beginMainCardTimeout(forcecorrecttimeout, afterAnswerFeedbackCallback(trialEndTimeStamp, trialStartTimeStamp, source, userAnswer, isTimeout,  isCorrect));
+      beginMainCardTimeout(forcecorrecttimeout, afterAnswerFeedbackCallback(trialEndTimeStamp, trialStartTimeStamp, source, userAnswer, isTimeout, false, isCorrect));
     } else {
       const prompt = 'Please enter the correct answer to continue';
       $('#forceCorrectGuidance').text(prompt);
       speakMessageIfAudioPromptFeedbackEnabled(prompt, 'feedback');
 
-      afterUserFeedbackForceCorrectCb = afterAnswerFeedbackCallback(trialEndTimeStamp, trialStartTimeStamp, source, userAnswer, isTimeout,  isCorrect);
+      afterUserFeedbackForceCorrectCb = afterAnswerFeedbackCallback(trialEndTimeStamp, trialStartTimeStamp, source, userAnswer, isTimeout, false, isCorrect);
     }
 
     $('#userForceCorrect').prop('disabled', false);
@@ -1812,7 +1858,7 @@ function doClearForceCorrect(doForceCorrect, trialEndTimeStamp, trialStartTimeSt
     $('#forceCorrectGuidance').text('');
     $('#userForceCorrect').prop('disabled', true);
     $('#userForceCorrect').val('');
-    afterAnswerFeedbackCallback(trialEndTimeStamp, trialStartTimeStamp, source, userAnswer, isTimeout,  isCorrect);
+    afterAnswerFeedbackCallback(trialEndTimeStamp, trialStartTimeStamp, source, userAnswer, isTimeout, isSkip, isCorrect);
   }
 }
 
@@ -2364,10 +2410,55 @@ async function unitIsFinished(reason) {
   clearCardTimeout();
 
   const curTdf = Session.get('currentTdfFile');
-  const curUnitNum = Session.get('currentUnitNumber');
-  const newUnitNum = curUnitNum + 1;
-  const curTdfUnit = curTdf.tdfs.tutor.unit[newUnitNum];
-  const countCompletion = curTdf.tdfs.tutor.unit[curUnitNum].countcompletion
+  const adaptive = curTdf.tdfs.tutor.unit[Session.get('currentUnitNumber')].adaptive
+  const adaptiveLogic = curTdf.tdfs.tutor.unit[Session.get('currentUnitNumber')].adaptiveLogic
+  let curUnitNum = Session.get('currentUnitNumber');
+  const prevUnit = curTdf.tdfs.tutor.unit[curUnitNum];
+  let newUnitNum = curUnitNum + 1;
+  let curTdfUnit = curTdf.tdfs.tutor.unit[newUnitNum];
+  let countCompletion = prevUnit.countcompletion
+  const curExperimentState = await getExperimentState();
+  // if the last unit was adaptive, we may need to update future units
+  if(adaptive){
+    if(engine.adaptiveQuestionLogic){
+      let curTdfUnit = Session.get('currentTdfUnit');
+      logic = engine.adaptiveQuestionLogic.curUnit.adaptiveLogic;
+      if(logic != '' && logic != undefined){
+        console.log('adaptive schedule', engine.adaptiveQuestionLogic.schedule);
+        for(let unitIndex in Object.keys(adaptiveLogic)){
+          let unitToModify = Object.keys(adaptiveLogic)[unitIndex];
+          let unit = curTdf.tdfs.tutor.unit[unitToModify];
+          let adaptiveQuestionTimes = []
+          let adaptiveQuestions = []
+          for(let logic of adaptiveLogic[unitToModify]){
+            let logicOutput = await engine.adaptiveQuestionLogic.evaluate(logic);
+            if(logicOutput){
+              adaptiveQuestionTimes.push(logicOutput.when)
+              adaptiveQuestions.push(...logicOutput.questions)
+            }
+          }
+          if(unit) {
+            unit = await engine.adaptiveQuestionLogic.modifyUnit(adaptiveLogic[unitToModify], unit);
+            curTdf.tdfs.tutor.unit[unitToModify] = unit;
+          } else {
+            // use template
+            adaptiveTemplate = prevUnit.adaptiveUnitTemplate[unitIndex]
+            unit = engine.adaptiveQuestionLogic.unitBuilder(adaptiveTemplate, adaptiveQuestionTimes, adaptiveQuestions);
+            countCompletion = prevUnit.countcompletion
+            curTdf.tdfs.tutor.unit[unitToModify] = unit;
+          }
+        }
+      }
+      //add new question to current unit
+      if(engine.adaptiveQuestionLogic.when == Session.get("currentUnitNumber")){
+        addStimToSchedule(curTdfUnit);
+      }
+    }
+    Session.set('currentTdfFile', curTdf);
+    curExperimentState.currentTdfFile = curTdf;
+    await updateExperimentState(curExperimentState, 'card.unitIsFinished');
+  }
+  
 
   Session.set('questionIndex', 0);
   Session.set('clusterIndex', undefined);
@@ -2519,7 +2610,7 @@ async function prepareCard() {
         initializePlyr();
       }
     } else {
-      playVideo();
+      playNextCard();
     }
   } else {
     await engine.selectNextCard(Session.get('engineIndices'), Session.get('currentExperimentState'));
@@ -2747,6 +2838,7 @@ function beginQuestionAndInitiateUserInput(delayMs, deliveryParams) {
 
 function allowUserInput() {
   console.log('allow user input');
+  $('#confirmButton').show();
   inputDisabled = false;
   startRecording();
 
@@ -3355,13 +3447,31 @@ async function resumeFromComponentState() {
     Session.set('currentStimuliSetId', curTdf.stimuliSetId);
     console.log('condition stimuliSetId', curTdf);
   } else {
-    Session.set('currentTdfFile', rootTDF);
-    Session.set('currentTdfName', rootTDF.fileName);
-    Session.set('currentTdfId', Session.get('currentRootTdfId'));
-    Session.set('currentStimuliSetId', rootTDFBoxed.stimuliSetId);
-
+    //if currentTdfFile is not set, we are resuming from a previous state and need to set it
+    if(!Session.get('currentTdfFile')){
+      Session.set('currentTdfFile', rootTDF);
+      Session.set('currentTdfName', rootTDF.fileName);
+      Session.set('currentTdfId', Session.get('currentRootTdfId'));
+      Session.set('currentStimuliSetId', rootTDFBoxed.stimuliSetId);
+    } 
+    
     // Just notify that we're skipping
     console.log('No Experimental condition is required: continuing', rootTDFBoxed);
+  }
+
+  if(curTdf.content.tdfs.tutor.unitTemplate){
+    //tdf has dynamic units. need to check component state for current unit
+    if(curExperimentState.currentTdfFile){
+      curTdf.content = curExperimentState.currentTdfFile;
+      //found dynamic tdf units
+      Session.set('currentTdfFile', curTdf.content);
+      Session.set('currentTdfName', curTdf.content.fileName);
+
+      // Also need to read new stimulus file (and note that we allow an exception
+      // to kill us if the current tdf is broken and has no stimulus file)
+      Session.set('currentStimuliSetId', curTdf.stimuliSetId);
+      console.log('condition stimuliSetId', curTdf);
+    }
   }
 
   const stimuliSet = curTdf.stimuli
@@ -3499,6 +3609,7 @@ async function resumeFromComponentState() {
       "incorrectColor": "darkorange",
       "correctColor": "green",
       'instructionsTitleDisplay': "headerOnly",
+      'displayConfirmButton': false,
     },
   }
   //here we interprit the stimulus and input position settings to set the colum widths. There are 4 possible combinations.
@@ -3765,7 +3876,7 @@ async function processUserTimesLog() {
     const curTdf = Session.get('currentTdfFile');
     const curTdfUnit = curTdf.tdfs.tutor.unit[Session.get('currentUnitNumber')];
     await setStudentPerformance(curUser._id, curUser.username, currentTdfId);
-
+    
     if(Session.get('isVideoSession')){
       let indices = Session.get('engineIndices');
       if(!indices){

@@ -57,7 +57,10 @@
                 </div>
             {{/if}}
         </div>
+        {{#if isVideoSession}}
+        {{else}}
         <div class="vh-100"></div>
+        {{/if}}
         {{/if}}
         <br>
         {{#if isImpersonating}}
@@ -100,7 +103,7 @@
                 {{/each}}
                 {{/if}}
             </div>
-            <div class="row{{UIsettings.reverseStimuliAndInputColumns}} position-absolute z-1 mx-auto w-100">
+            <div class="row{{UIsettings.reverseStimuliAndInputColumns}} mx-auto w-100 top-0 {{#if isVideoSession}}questionContainer position-absolute z-1{{/if}}">
                 {{#if trial}}
                 <div class="{{UIsettings.displayColWidth}} mx-auto" id="displayContainer">
                     {{#if anythingButAudioCard}}
@@ -210,7 +213,7 @@
                     {{/if}}
                 {{/if}}
             
-                <div id="multipleChoiceContainer" class="{{UIsettings.choiceColWidth}}">
+                <div id="multipleChoiceContainer" class="{{UIsettings.choiceColWidth}} {{#if isVideoSession}} max-vh-30 overflow-scroll {{/if}}">
                     <!-- will contain multiple choice buttons which are dynamically added. -->
                     {{#if buttonTrial}}
                     <div id="multipleChoiceTable" class="row gy-3 choice text-center row-cols-{{UIsettings.choiceButtonCols}} align-items-start">
@@ -248,6 +251,14 @@
                     </div>
                     {{/if}}
                 <br>
+            </div>
+            {{/if}}
+
+            {{#if UIsettings.displayConfirmButton}}
+            <div class="col-12 text-center">
+                <button type='button' id='confirmButton' name='confirmButton' class='btn btn-block btn-responsive' disabled>
+                    Continue
+                </button>
             </div>
             {{/if}}
 
@@ -374,7 +385,7 @@
   {{#if isInTrial}}
   {{#if isInInstructions}}
   {{else}}
-    <div id="userLowerInteractionContainer">
+  <div id="userLowerInteractionContainer">
       <div class="row text-center">
           <div class="col-sm-12 col-xs-12 col-md-6 col-lg-6 mx-auto" style="margin-bottom: 30px;">
               <br>

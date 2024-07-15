@@ -73,10 +73,11 @@
                 </div>
      
        
-    
-                <div class=" col-lg-3 col-md-3  col-xs-12">
-                    <button type="button" id="contentGenerationButton" class="btn width-100-percent height-100-percent">Content Generation</button><br>
-                </div>
+                {{#if contentGenerationAvailable}}
+                    <div class=" col-lg-3 col-md-3  col-xs-12">
+                        <button type="button" id="contentGenerationButton" class="btn width-100-percent height-100-percent">Content Generation</button><br>
+                    </div>
+                {{/if}}
                 
             </div>
         {{/if}}

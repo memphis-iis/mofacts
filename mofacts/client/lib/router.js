@@ -383,7 +383,7 @@ Router.route('/profile', {
   },
   action: function() {
     if (Meteor.user()) {
-      const loginMode = Meteor.user().loginParams.loginMode;
+      const loginMode = Meteor.user().loginParams?.loginMode || 'normal';
       console.log('loginMode: ' + loginMode);
 
       if (loginMode === 'southwest') {

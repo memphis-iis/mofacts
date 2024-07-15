@@ -61,6 +61,7 @@ const syllableURL = Meteor.settings.syllableURL ? Meteor.settings.syllableURL : 
 
 
 let highestStimuliSetId;
+let contentGenerationAvailable = false;
 let nextStimuliSetId;
 let nextEventId = 1;
 let stimDisplayTypeMap = {};
@@ -294,6 +295,15 @@ function createAwsHmac(secretKey, dataString) {
 async function getTdfById(TDFId) {
   const tdf = Tdfs.findOne({_id: TDFId});
   return tdf;
+}
+
+async function checkCongentGenerationAvailable() {
+  try {
+    const response = await fetch('http://spacy:80');
+    return true
+  } catch (error) {
+    return false;
+  }
 }
 
 async function getTdfTTSAPIKey(TDFId) {
@@ -1677,6 +1687,15 @@ async function getStudentPerformanceByIdAndTDFIdFromHistory(userId, TDFId, retur
   return studentPerformance[0];
 }
 
+//get most recent history record for a student given a tdfid, cluster index, and stimulus index. All we want is the outcome
+async function getStudentPerformanceByStimulus(userId, TDFId, clusterIndex, stimulusIndex) {
+  serverConsole('getStudentPerformanceByStimulus', userId, TDFId, clusterIndex, stimulusIndex);
+  const history = Histories.findOne({userId: userId, TDFId: TDFId, clusterIndex: clusterIndex, stimulusIndex: stimulusIndex}, {sort: {time: -1}});
+  return history ? history.outcome : null;
+}
+
+
+
 async function getNumDroppedItemsByUserIDAndTDFId(userId, TDFId){
   //used to grab a limited sample of the student's performance
   serverConsole('getNumDroppedItemsByUserIDAndTDFId', userId, TDFId);
@@ -2444,8 +2463,17 @@ const methods = {
     if(experimentId) {
       GlobalExperimentStates.update({_id: experimentId}, {$set: {experimentState: curExperimentState}});
     } else {
-      createExperimentState(curExperimentState);
+      createExperimentState(curExperimentState)
     }
+  },
+
+  createExperimentState: function(curExperimentState) {
+    serverConsole('createExperimentState', curExperimentState, curExperimentState.currentTdfId);
+    GlobalExperimentStates.insert({
+      userId: Meteor.userId(),
+      TDFId: curExperimentState.currentTdfId,
+      experimentState: curExperimentState
+    });
   },
 
   getAltServerUrl: function() {
@@ -3150,6 +3178,30 @@ const asyncMethods = {
 
   checkForUserException, getTdfById,
 
+  getOutcomesForAdaptiveLearning: async function(userId, TDFId) {
+    const history = Histories.find({userId: userId, TDFId: TDFId}, {fields: {KCId: 1, outcome: 1}, $sort: { recordedServerTime: -1 }}).fetch();
+    let outcomes = {};
+    for(let h of history){
+      if(h.KCId)
+        outcomes[h.KCId % 1000] = h.outcome == 'correct'
+    }
+    // need to convert to cluster stim set
+    const tdf = Tdfs.findOne({_id: TDFId});
+    const stimSet = tdf.stimuli;
+    const clusterStimSet = {};
+    for(const stim of stimSet){
+      clusterStimSet[stim.clusterKC % 1000] = stim;
+    }
+
+    for(const cluster in clusterStimSet){
+      if(!outcomes[cluster]){
+        outcomes[cluster] = false;
+      }
+    }
+
+    return outcomes;
+  },
+
   getUsersByExperimentId: async function(experimentId){
     const messages = ScheduledTurkMessages.find({experiment: experimentId}).fetch();
     const userIds = messages.map(x => x.workerUserId);
@@ -3181,6 +3233,10 @@ const asyncMethods = {
       response = JSON.parse(data.toString('utf-8'))
       return response.audioContent;
     });
+  },
+
+  getContentGenerationAvailable: async function(){
+    return contentGenerationAvailable;
   },
   
   setLockoutTimeStamp: async function(lockoutTimeStamp, lockoutMinutes, currentUnitNumber, TDFId) {
@@ -3452,6 +3508,10 @@ Meteor.startup(async function() {
     serverConsole('***IMPORTANT*** There will be no owner for system TDF\'s');
   }
 
+  if(await checkCongentGenerationAvailable()){
+    contentGenerationAvailable = true;
+  }
+
   // Get user in roles and make sure they are added
   const roles = getConfigProperty('initRoles');
   const roleAdd = function(memberName, roleName) {
@@ -3617,8 +3677,9 @@ Meteor.startup(async function() {
 
   //email admin that the server has restarted
   for (const emailaddr of allEmails){
-    const versionFile = Assets.getText('versionInfo.json');
+    const versionFile = Assets.getText('versionInfo.json')
     const version = JSON.parse(versionFile);
+    const rootUrl = Meteor.settings.ROOT_URL;
     server = Meteor.absoluteUrl().split('//')[1];
     server = server.substring(0, server.length - 1);
     subject = `MoFaCTs Deployed on ${server}`;

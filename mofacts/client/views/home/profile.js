@@ -68,6 +68,10 @@ Template.profile.helpers({
     return Template.instance().recentTdfs.get();
   },
 
+  contentGenerationAvailable: () => {
+    return Session.get('contentGenerationAvailable');
+  },
+
   tdfTags: () => {
     return Template.instance().tdfTags.get();
   },
@@ -385,6 +389,14 @@ Template.profile.rendered = async function() {
 
   $('#expDataDownloadContainer').html('');
 
+  Meteor.call('getContentGenerationAvailable', function(err, res) {
+    if (err) {
+      console.log(err);
+    } else {
+      Session.set('contentGenerationAvailable', res);
+    }
+  });
+
   // In experiment mode, they may be forced to a single tdf
   let experimentTarget = null;
 
@@ -619,6 +631,8 @@ async function selectTdf(currentTdfId, lessonName, currentStimuliSetId, ignoreOu
   Session.set('currentStimuliSetId', currentStimuliSetId);
   Session.set('ignoreOutOfGrammarResponses', ignoreOutOfGrammarResponses);
   Session.set('speechOutOfGrammarFeedback', speechOutOfGrammarFeedback);
+  Session.set('showPageNumbers', setspec.showPageNumbers ? setspec.showPageNumbers : false);
+    
 
   // Record state to restore when we return to this page
   let audioPromptMode;

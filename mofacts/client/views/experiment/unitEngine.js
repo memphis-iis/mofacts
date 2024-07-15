@@ -17,6 +17,7 @@ import {MODEL_UNIT, SCHEDULE_UNIT} from '../../../common/Definitions';
 import {meteorCallAsync, clientConsole} from '../../index';
 import {displayify} from '../../../common/globalHelpers';
 import {Answers} from './answerAssess';
+import { AdaptiveQuestionLogic } from './adaptiveQuestionLogic';
 
 export {createScheduleUnit, createModelUnit, createEmptyUnit};
 
@@ -63,6 +64,9 @@ function defaultUnitEngine(curExperimentData) {
   const engine = {
     // Things actual engines must supply
     unitType: 'DEFAULT',
+      //check if the unit is adaptive
+    
+    adaptiveQuestionLogic: new AdaptiveQuestionLogic(),
     selectNextCard: function() {
       throw new Error('Missing Implementation');
     },
@@ -404,6 +408,8 @@ function modelUnitEngine() {
   // creation, so if they leave in the middle of practice and come back to
   // the unit we'll start all over.
   const unitStartTimestamp = Date.now();
+
+
 
   function getStimParameterArray(clusterIndex, whichStim) {
     return getStimCluster(clusterIndex).stims[whichStim].params.split(',').map((x) => _.floatval(x));
@@ -941,7 +947,7 @@ function modelUnitEngine() {
           // TODO: shouldn't need both
           if(isVideoSession) {
             if (this.curUnit && this.curUnit.videosession && this.curUnit.videosession.questions)
-              unitClusterList = this.curUnit.videosession.questions.toString()
+              unitClusterList = this.curUnit.videosession.questions;
           }
           else {
             if(this.curUnit && this.curUnit.learningsession && this.curUnit.learningsession.clusterlist)
@@ -1949,6 +1955,7 @@ function scheduleUnitEngine() {
       clusterNumbers: [],
       ranChoices: [],
       isButtonTrial: false,
+      adaptiveLogic: {},
     };
 
     if (!unit || !unit.assessmentsession) {
@@ -2066,6 +2073,9 @@ function scheduleUnitEngine() {
         settings.clusterNumbers.push(_.intval(nums[j]));
       }
     }
+
+    // Adaptive logic
+    settings.adaptiveLogic = assess.adaptiveLogic || {};
 
     return settings;
   }
