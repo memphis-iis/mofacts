@@ -2,14 +2,13 @@ version: '3.2'
 
 services:
   mofacts:
-    image: iisdevs/mofacts-mini:iss1514
+    image: iisdevs/mofacts-mini:main
     volumes:
       - type: bind
         source: /mofactsAssets
         target: /mofactsAssets
         bind:
           propagation: shared
-          create_host_path: true
     build:
       context: ../../
       dockerfile: Dockerfile

@@ -1,0 +1,9 @@
+{
+  "commitID": "b02b633322be7ccfa1874e0011e3a8d4ebc9e2f0",
+  "buildTimestamp": "Friday 2024-07-12",
+  "buildersUsername": "",
+  "branch": "staging",
+  "repoURL": "https://github.com/memphis-iis/mofacts-ies.git",
+  "last5commitMessages": "Merge pull request #1519 from memphis-iis/iss1518 secondary fixes inital commit Merge pull request #1517 from memphis-iis/iss1513 restrict to admin",
+  "releaseName": "v2024-07-12-14-09-41-staging-autobuild"
+}
