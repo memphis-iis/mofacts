@@ -80,7 +80,7 @@ function initVideoCards(player) {
       }
     }
     if(timeDiff < 0){
-      player.pause();
+      showQuestion();
     }
   });
 
@@ -88,18 +88,6 @@ function initVideoCards(player) {
     const instance = event.detail.plyr;
     console.log('playback paused at ', instance.currentTime);
     logPlyrAction('pause', instance);
-    //running here ensures that player pauses before being hidden
-    if(instance.currentTime >= nextTime){
-      lastTimeIndex = nextTimeIndex;
-      if(nextTimeIndex < times.length){
-        nextTimeIndex++;
-        nextTime = times[nextTimeIndex];
-        let nextQuestion = questions[nextTimeIndex];
-        Session.set('engineIndices', {stimIndex: 0, clusterIndex: nextQuestion});
-        Session.set('displayReady', true);
-      }
-    }
-
   });
 
   player.on('play', async function(event){
@@ -120,34 +108,8 @@ function initVideoCards(player) {
         console.log('seeked to ', player.currentTime, ' from ', seekStart);
         logPlyrAction('seek', player, player.currentTime, seekStart);
         loggingSeek = false; 
-        if (seekStart > player.currentTime){
-          nextTimeIndex = getIndex(times, player.currentTime); //allow user to see old questions
-          nextTime = times[nextTimeIndex];
-          let nextQuestion = questions[nextTimeIndex];
-          Session.set('engineIndices', {stimIndex: 0, clusterIndex: nextQuestion});
-          await engine.selectNextCard(Session.get('engineIndices'), Session.get('currentExperimentState'));
-          newQuestionHandler();
-        } else if(player.currentTime >= nextTime) {
-          player.pause();
-          lastTimeIndex = nextTimeIndex;
-          nextTimeIndex++;
-          if(nextTimeIndex < times.length){
-            nextTime = times[nextTimeIndex];
-            let nextQuestion = questions[nextTimeIndex];
-            Session.set('engineIndices', {stimIndex: 0, clusterIndex: nextQuestion});
-            await engine.selectNextCard(Session.get('engineIndices'), Session.get('currentExperimentState'));
-            newQuestionHandler();
-          } else if(player.currentTime >= nextTime) {
-            player.pause();
-            lastTimeIndex = nextTimeIndex;
-            nextTimeIndex++;
-            if(nextTimeIndex < times.length){
-              nextTime = times[nextTimeIndex];
-              let nextQuestion = times.indexOf(nextTime);
-              Session.set('engineIndices', {stimIndex: 0, clusterIndex: nextQuestion});
-              Session.set('displayReady', true);
-            }
-          }
+        if(player.currentTime >= nextTime) {
+            showQuestion();
         }
       }
     });
@@ -178,6 +140,27 @@ function initVideoCards(player) {
     $('#continueButton').prop('disabled', false);
   });
   
+}
+
+function showQuestion(){
+  Session.set('fullscreenUser', player.fullscreen.active);
+  player.pause();
+  if(player.fullscreen.active) player.fullscreen.exit();
+  Session.set('displayReady', true);
+
+  console.log('playback paused at ', player.currentTime);
+  logPlyrAction('pause', player);
+  //running here ensures that player pauses before being hidden
+  if(player.currentTime >= nextTime){
+    lastTimeIndex = nextTimeIndex;
+    if(nextTimeIndex < times.length){
+      nextTimeIndex++;
+      nextTime = times[nextTimeIndex];
+      let nextQuestion = questions[nextTimeIndex];
+      Session.set('engineIndices', {stimIndex: 0, clusterIndex: nextQuestion});
+      $('#userAnswer, #multipleChoiceContainer button').prop('disabled', false);
+    }
+  }
 }
 
 function getIndex(arr, num) {
@@ -413,6 +396,9 @@ function addNewMarkers(player, markers){
 export async function playVideo() {
   let indices = Session.get('engineIndices');
 
+  if(Session.get('fullscreenUser')){
+    player.fullscreen.enter();
+  }
   $("#videoUnitContainer").show();
   player.play();
   await engine.selectNextCard(indices, Session.get('currentExperimentState'));
