@@ -12,7 +12,7 @@ Vagrant.configure(2) do |config|
   config.vm.box = "ubuntu/bionic64"
   config.vm.network "forwarded_port", guest: 2701, host: 30017, host_ip: "127.0.0.1"
   config.vm.network "forwarded_port", guest: 5432, host: 65432
-  config.vm.network "forwarded_port", guest: 3000, host: 3001, host_ip: "0.0.0.0"
+  config.vm.network "forwarded_port", guest: 3000, host: 3000, host_ip: "0.0.0.0"
   config.vm.synced_folder "db/", "/vagrant/db", owner: "vagrant", group: mofacts_gid, mount_options: ["dmode=775,fmode=775"]
   config.vm.provider "virtualbox" do |vb|
     vb.gui = false
