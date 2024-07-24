@@ -187,7 +187,7 @@ export class AdaptiveQuestionLogic {
     }
     unitBuilder(templateUnitNumber, adaptiveQuestionTimes, adaptiveQuestions){
         //build the unit based on the base unit and the schedule
-        let newUnit = Session.get('currentTdfFile').tdfs.tutor.unitTemplate[templateUnitNumber];
+        let newUnit = Session.get('currentTdfFile').tdfs.tutor.setspec.unitTemplate[templateUnitNumber];
         //if newunit is not defined, throw an error
         if(!newUnit){
             alert(`There was an error building the unit. Please contact the administrator`);
