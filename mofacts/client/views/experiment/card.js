@@ -2425,27 +2425,26 @@ async function unitIsFinished(reason) {
       logic = engine.adaptiveQuestionLogic.curUnit.adaptiveLogic;
       if(logic != '' && logic != undefined){
         console.log('adaptive schedule', engine.adaptiveQuestionLogic.schedule);
-        for(let unitIndex in Object.keys(adaptiveLogic)){
-          let unitToModify = Object.keys(adaptiveLogic)[unitIndex];
-          let unit = curTdf.tdfs.tutor.unit[unitToModify];
+        for(let adaptiveUnitIndex in adaptive){
+          let newUnitIndex = adaptive[adaptiveUnitIndex].split(',')[0];
+          let isTemplate = adaptive[adaptiveUnitIndex].split(',')[1] == 't';
           let adaptiveQuestionTimes = []
           let adaptiveQuestions = []
-          for(let logic of adaptiveLogic[unitToModify]){
+          for(let logic of adaptiveLogic[newUnitIndex]){
             let logicOutput = await engine.adaptiveQuestionLogic.evaluate(logic);
             if(logicOutput){
               adaptiveQuestionTimes.push(logicOutput.when)
               adaptiveQuestions.push(...logicOutput.questions)
             }
           }
-          if(unit) {
-            unit = await engine.adaptiveQuestionLogic.modifyUnit(adaptiveLogic[unitToModify], unit);
-            curTdf.tdfs.tutor.unit[unitToModify] = unit;
-          } else {
-            // use template
-            adaptiveTemplate = prevUnit.adaptiveUnitTemplate[unitIndex]
-            unit = engine.adaptiveQuestionLogic.unitBuilder(adaptiveTemplate, adaptiveQuestionTimes, adaptiveQuestions);
+          if(isTemplate) {
+            adaptiveTemplate = curTdfUnit.tdfs.tutor.setspec.unitTemplate[adaptiveUnitIndex]
+            let unit = engine.adaptiveQuestionLogic.unitBuilder(adaptiveTemplate, adaptiveQuestionTimes, adaptiveQuestions);
             countCompletion = prevUnit.countcompletion
-            curTdf.tdfs.tutor.unit[unitToModify] = unit;
+            curTdf.tdfs.tutor.unit.splice(newUnitIndex, 0, unit);
+          } else {
+            let unit = await engine.adaptiveQuestionLogic.modifyUnit(adaptiveLogic[adaptiveUnitIndex], unit);
+            curTdf.tdfs.tutor.unit[newUnitIndex] = unit;
           }
         }
       }
@@ -3459,7 +3458,7 @@ async function resumeFromComponentState() {
     console.log('No Experimental condition is required: continuing', rootTDFBoxed);
   }
 
-  if(curTdf.content.tdfs.tutor.unitTemplate){
+  if(curTdf.content.tdfs.tutor.setspec.unitTemplate){
     //tdf has dynamic units. need to check component state for current unit
     if(curExperimentState.currentTdfFile){
       curTdf.content = curExperimentState.currentTdfFile;

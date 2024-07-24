@@ -10,7 +10,7 @@ mofacts_gid=1002
 Vagrant.configure(2) do |config|
   config.vm.provision :shell, :inline => "sudo rm /etc/localtime && sudo ln -s /usr/share/zoneinfo/America/Chicago /etc/localtime", run: "always"
   config.vm.box = "ubuntu/bionic64"
-  config.vm.network "forwarded_port", guest: 2701, host: 30017, host_ip: "127.0.0.1"
+  config.vm.network "forwarded_port", guest: 27017, host: 30017, host_ip: "127.0.0.1"
   config.vm.network "forwarded_port", guest: 5432, host: 65432
   config.vm.network "forwarded_port", guest: 3000, host: 3001, host_ip: "0.0.0.0"
   config.vm.synced_folder "db/", "/vagrant/db", owner: "vagrant", group: mofacts_gid, mount_options: ["dmode=775,fmode=775"]
