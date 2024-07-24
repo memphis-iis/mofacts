@@ -2434,6 +2434,8 @@ const methods = {
           text: message,
           attachments: files
         });
+        //print the generated json to the console
+        serverConsole('result', JSON.stringify(result.fields[0], null, 4));
       }).catch((err) => {
         serverConsole('err', err);
       });
