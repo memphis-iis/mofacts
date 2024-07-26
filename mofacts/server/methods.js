@@ -3508,9 +3508,7 @@ Meteor.startup(async function() {
     serverConsole('***IMPORTANT*** There will be no owner for system TDF\'s');
   }
 
-  if(await checkCongentGenerationAvailable()){
-    contentGenerationAvailable = true;
-  }
+  contentGenerationAvailable = Meteor.settings.contentGenerationEnabled || false;
 
   // Get user in roles and make sure they are added
   const roles = getConfigProperty('initRoles');
