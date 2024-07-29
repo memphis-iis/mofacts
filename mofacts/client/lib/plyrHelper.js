@@ -14,6 +14,7 @@ class PlayerController {
   nextTime = 0;
   seekStart;
   loggingSeek = false;
+  fullscreenUser = false;
 
   times = [];
   questions = [];
@@ -60,6 +61,14 @@ class PlayerController {
 
     this.playVideo();
   }
+  async setNextTime(time, index){
+    this.nextTime = time;
+    this.nextTimeIndex = index;
+    const nextQuestion = this.questions[index];
+    Session.set('engineIndices', {stimIndex: 0, clusterIndex: nextQuestion});
+    await engine.selectNextCard(Session.get('engineIndices'), Session.get('currentExperimentState'));
+    newQuestionHandler();
+  }
 
   timeUpdate(){
     if(this.times.length == 0 || this.nextTimeIndex == -1) {
@@ -77,7 +86,7 @@ class PlayerController {
       this.nextTime = this.player.duration;
     }
     //get the difference between the next time and the previous time
-    const lastTime = this.nextTimeIndex == 0 ? 0: this.times[lastTimeIndex];
+    const lastTime = this.nextTimeIndex == 0 ? 0: this.times[this.lastTimeIndex];
     const totalTimeDiff =  this.nextTime - lastTime;
     //get the percentage of the progress bar that should be filled
     const percentage = (timeDiff / totalTimeDiff) * 100;
@@ -200,7 +209,7 @@ class PlayerController {
   async playVideo() {
     let indices = Session.get('engineIndices');
   
-    if(Session.get('fullscreenUser')){
+    if(this.fullscreenUser){
       this.player.fullscreen.enter();
     }
     $("#videoUnitContainer").show();
@@ -212,23 +221,20 @@ class PlayerController {
 
 
   showQuestion(){
-    Session.set('fullscreenUser', this.player.fullscreen.active);
+    this.fullscreenUser = this.player.fullscreen.active;
     this.player.pause();
     if(this.player.fullscreen.active) this.player.fullscreen.exit();
     Session.set('displayReady', true);
 
     console.log('playback paused at ', this.player.currentTime);
     this.logPlyrAction('pause', this.player);
-    //running here ensures that player pauses before being hidden
-    if(this.player.currentTime >= this.nextTime){
-      this.lastTimeIndex = this.nextTimeIndex;
-      if(this.nextTimeIndex < this.times.length){
-        this.nextTimeIndex++;
-        this.nextTime = this.times[this.nextTimeIndex];
-        let nextQuestion = this.questions[this.nextTimeIndex];
-        Session.set('engineIndices', {stimIndex: 0, clusterIndex: nextQuestion});
-        $('#userAnswer, #multipleChoiceContainer button').prop('disabled', false);
-      }
+    this.lastTimeIndex = this.nextTimeIndex;
+    if(this.nextTimeIndex < this.times.length){
+      this.nextTimeIndex++;
+      this.nextTime = this.times[this.nextTimeIndex];
+      let nextQuestion = this.questions[this.nextTimeIndex];
+      Session.set('engineIndices', {stimIndex: 0, clusterIndex: nextQuestion});
+      $('#userAnswer, #multipleChoiceContainer button').prop('disabled', false);
     }
   }
 
@@ -306,17 +312,23 @@ class PlayerController {
   }
 }
 
-function stopSeeking(){
+async function stopSeeking(){
   if(playerController.loggingSeek) {
     const currentTime = playerController.player.currentTime;
     const seekStart = playerController.seekStart;
     const nextTime = playerController.nextTime;
+    const prevTimeIndex = playerController.nextTimeIndex - 1;
+    let prevTime = playerController.times[0];
+    if(prevTimeIndex >= 0) prevTime = playerController.times[prevTimeIndex];
 
     console.log('seeked to ', currentTime, ' from ', seekStart);
     playerController.logPlyrAction('seek');
     playerController.loggingSeek = false; 
     if(currentTime >= nextTime) {
       playerController.showQuestion();
+    } else if(currentTime < prevTime){
+      let nextTimeIndex = getIndex(playerController.times, currentTime);
+      await playerController.setNextTime(playerController.times[nextTimeIndex], nextTimeIndex);
     }
   }
 }
