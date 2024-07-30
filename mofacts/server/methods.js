@@ -3776,9 +3776,12 @@ Router.route('data-by-teacher', {
     //combine the two arrays
     const tdfNames = assignedTdfs.concat(ownedTdfs).concat(accessorTdfs);
 
+    //remove duplicates
+    const uniqueTdfs = tdfNames.filter((v, i, a) => a.indexOf(v) === i);
+
     console.log(userId, uid, tdfNames)
 
-    if (!tdfNames.length > 0) {
+    if (!uniqueTdfs.length > 0) {
       response.writeHead(404);
       response.end('No tdfs found for any classes');
       return;
@@ -3796,10 +3799,10 @@ Router.route('data-by-teacher', {
       'File-Name': fileName
     });
 
-    serverConsole(tdfNames);
-    response.write(await createExperimentExport(tdfNames, uid));
+    serverConsole(uniqueTdfs);
+    response.write(await createExperimentExport(uniqueTdfs, uid));
 
-    tdfNames.forEach(function(tdf) {
+    uniqueTdfs.forEach(function(tdf) {
       serverConsole('Sent all  data for', tdf, 'as file', fileName);
     });
     console.timeEnd('data-by-teacher')
