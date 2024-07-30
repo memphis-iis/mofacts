@@ -2438,7 +2438,7 @@ async function unitIsFinished(reason) {
             }
           }
           if(isTemplate) {
-            adaptiveTemplate = curTdfUnit.tdfs.tutor.setspec.unitTemplate[adaptiveUnitIndex]
+            adaptiveTemplate = curTdf.tdfs.tutor.setspec.unitTemplate[adaptiveUnitIndex]
             let unit = engine.adaptiveQuestionLogic.unitBuilder(adaptiveTemplate, adaptiveQuestionTimes, adaptiveQuestions);
             countCompletion = prevUnit.countcompletion
             curTdf.tdfs.tutor.unit.splice(newUnitIndex, 0, unit);
