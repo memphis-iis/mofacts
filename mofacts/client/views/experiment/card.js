@@ -1391,7 +1391,7 @@ function handleUserInput(e, source, simAnswerCorrect) {
     // to save space we will just go ahead and act like it was a key press.
     key = ENTER_KEY;
     Session.set('userAnswerSubmitTimestamp', Date.now());
-  } 
+  }
   if (e.currentTarget ? e.currentTarget.id === 'continueStudy' : false) {
     key = ENTER_KEY;
     isSkip = true;
@@ -1457,7 +1457,7 @@ function handleUserInput(e, source, simAnswerCorrect) {
   // Show user feedback and find out if they answered correctly
   // Note that userAnswerFeedback will display text and/or media - it is
   // our responsbility to decide when to hide it and move on
-  userAnswerFeedback(userAnswer, isTimeout, isSkip, simAnswerCorrect);
+  userAnswerFeedback(userAnswer, isSkip , isTimeout, simAnswerCorrect);
 }
 
 // Take care of user feedback - simCorrect will usually be undefined/null BUT if
