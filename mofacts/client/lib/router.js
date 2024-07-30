@@ -329,7 +329,7 @@ Router.route('/FileManagement', {
 Router.route('/contentUpload', {
   name: 'client.contentUpload',
   waitOn: function() {
-    return [Meteor.subscribe('ownedFiles'), Meteor.subscribe('files.assets.all')];
+    return [Meteor.subscribe('ownedFiles'), Meteor.subscribe('files.assets.all'), Meteor.subscribe('allTdfs')];
   },
   action: function() {
     if(Meteor.user()){
