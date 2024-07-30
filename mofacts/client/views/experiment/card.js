@@ -1391,12 +1391,11 @@ function handleUserInput(e, source, simAnswerCorrect) {
     // to save space we will just go ahead and act like it was a key press.
     key = ENTER_KEY;
     Session.set('userAnswerSubmitTimestamp', Date.now());
-  } 
-  
+  }
   if (e.currentTarget ? e.currentTarget.id === 'continueStudy' : false) {
-      key = ENTER_KEY;
-      isSkip = true;
-      console.log('skipped study');
+    key = ENTER_KEY;
+    isSkip = true;
+    console.log('skipped study');
   }
 
   // If we haven't seen the correct keypress, then we want to reset our
