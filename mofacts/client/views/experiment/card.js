@@ -1392,10 +1392,12 @@ function handleUserInput(e, source, simAnswerCorrect) {
     key = ENTER_KEY;
     Session.set('userAnswerSubmitTimestamp', Date.now());
   } 
-  if (e.currentTarget ? e.currentTarget.id === 'continueStudy' : false) {
-    key = ENTER_KEY;
-    isSkip = true;
-    console.log('skipped study');
+  if(source != 'timeout'){
+    if (e.currentTarget ? e.currentTarget.id === 'continueStudy' : false) {
+      key = ENTER_KEY;
+      isSkip = true;
+      console.log('skipped study');
+    }
   }
 
   // If we haven't seen the correct keypress, then we want to reset our
@@ -1457,7 +1459,7 @@ function handleUserInput(e, source, simAnswerCorrect) {
   // Show user feedback and find out if they answered correctly
   // Note that userAnswerFeedback will display text and/or media - it is
   // our responsbility to decide when to hide it and move on
-  userAnswerFeedback(userAnswer, isTimeout, isSkip, simAnswerCorrect);
+  userAnswerFeedback(userAnswer, isSkip , isTimeout, simAnswerCorrect);
 }
 
 // Take care of user feedback - simCorrect will usually be undefined/null BUT if
