@@ -2813,14 +2813,12 @@ function beginQuestionAndInitiateUserInput(delayMs, deliveryParams) {
       }
       speakMessageIfAudioPromptFeedbackEnabled(questionToSpeak + buttonsToSpeak, 'question');
     }
-    if(!Session.get('isVideoSession')) {
-      allowUserInput();
-      beginMainCardTimeout(delayMs, function() {
-        console.log('stopping input after ' + delayMs + ' ms');
-        stopUserInput();
-        handleUserInput({}, 'timeout');
-      });
-    }
+    allowUserInput();
+    beginMainCardTimeout(delayMs, function() {
+      console.log('stopping input after ' + delayMs + ' ms');
+      stopUserInput();
+      handleUserInput({}, 'timeout');
+    });
   }
 }
 
