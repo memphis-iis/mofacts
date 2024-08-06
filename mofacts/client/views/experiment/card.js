@@ -2415,13 +2415,11 @@ async function unitIsFinished(reason) {
   let curUnitNum = Session.get('currentUnitNumber');
   const prevUnit = curTdf.tdfs.tutor.unit[curUnitNum];
   let newUnitNum = curUnitNum + 1;
-  let curTdfUnit = curTdf.tdfs.tutor.unit[newUnitNum];
   let countCompletion = prevUnit.countcompletion
   const curExperimentState = await getExperimentState();
   // if the last unit was adaptive, we may need to update future units
   if(adaptive){
     if(engine.adaptiveQuestionLogic){
-      let curTdfUnit = Session.get('currentTdfUnit');
       logic = engine.adaptiveQuestionLogic.curUnit.adaptiveLogic;
       if(logic != '' && logic != undefined){
         console.log('adaptive schedule', engine.adaptiveQuestionLogic.schedule);
@@ -2441,7 +2439,7 @@ async function unitIsFinished(reason) {
             adaptiveTemplate = curTdf.tdfs.tutor.setspec.unitTemplate[adaptiveUnitIndex]
             let unit = engine.adaptiveQuestionLogic.unitBuilder(adaptiveTemplate, adaptiveQuestionTimes, adaptiveQuestions);
             countCompletion = prevUnit.countcompletion
-            curTdf.tdfs.tutor.unit.splice(newUnitIndex, 0, unit);
+            curTdf.tdfs.tutor.unit.splice(newUnitIndex - 1, 0, unit);
           } else {
             let unit = await engine.adaptiveQuestionLogic.modifyUnit(adaptiveLogic[adaptiveUnitIndex], unit);
             curTdf.tdfs.tutor.unit[newUnitIndex] = unit;
@@ -2457,6 +2455,7 @@ async function unitIsFinished(reason) {
     curExperimentState.currentTdfFile = curTdf;
     await updateExperimentState(curExperimentState, 'card.unitIsFinished');
   }
+  let curTdfUnit = curTdf.tdfs.tutor.unit[newUnitNum];
   
 
   Session.set('questionIndex', 0);
