@@ -214,8 +214,6 @@ class PlayerController {
     }
     $("#videoUnitContainer").show();
     this.player.play();
-    await engine.selectNextCard(indices, Session.get('currentExperimentState'));
-    Session.set('engineIndices', indices);
     newQuestionHandler();
   }
 
