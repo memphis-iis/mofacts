@@ -178,16 +178,14 @@ export class AdaptiveQuestionLogic {
     async modifyUnit(adaptiveLogic, curTdfUnit){
         // modify the unit based on the existing unit and the adaptive logic
         for(let logic of adaptiveLogic){
-            condition, conditionExpression, actions, conditionResult, schedule, when = await this.evaluate(logic);
+            let ret = await this.evaluate(logic);
             // add questions and their times
-            curTdfUnit.questions.push(...schedule);
-            curTdfUnit.questionTimes.push(...when);
+            curTdfUnit.questions.push(...ret.schedule);
+            curTdfUnit.questionTimes.push(...ret.when);
         }
         return curTdfUnit;
     }
-    unitBuilder(templateUnitNumber, adaptiveQuestionTimes, adaptiveQuestions){
-        //build the unit based on the base unit and the schedule
-        let newUnit = Session.get('currentTdfFile').tdfs.tutor.unitTemplate[templateUnitNumber];
+    unitBuilder(newUnit, adaptiveQuestionTimes, adaptiveQuestions){
         //if newunit is not defined, throw an error
         if(!newUnit){
             alert(`There was an error building the unit. Please contact the administrator`);

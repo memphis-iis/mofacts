@@ -639,6 +639,11 @@ Template.card.events({
     unitIsFinished('Continue Button Pressed');
   },
 
+  'click #lastUnitModalDismiss': function(event) {
+    $("#lastUnitModal").modal('show')
+    initializePlyr();
+  },
+
   'click #stepBackButton': function(event) {
     event.preventDefault();
     //check if the current unit has instructions and if so, show them
@@ -1384,7 +1389,7 @@ function handleUserInput(e, source, simAnswerCorrect) {
     // to save space we will just go ahead and act like it was a key press.
     key = ENTER_KEY;
     Session.set('userAnswerSubmitTimestamp', Date.now());
-  } 
+  }
   if (e.currentTarget ? e.currentTarget.id === 'continueStudy' : false) {
     key = ENTER_KEY;
     isSkip = true;
@@ -1450,7 +1455,7 @@ function handleUserInput(e, source, simAnswerCorrect) {
   // Show user feedback and find out if they answered correctly
   // Note that userAnswerFeedback will display text and/or media - it is
   // our responsbility to decide when to hide it and move on
-  userAnswerFeedback(userAnswer, isTimeout, isSkip, simAnswerCorrect);
+  userAnswerFeedback(userAnswer, isSkip , isTimeout, simAnswerCorrect);
 }
 
 // Take care of user feedback - simCorrect will usually be undefined/null BUT if
@@ -2408,37 +2413,34 @@ async function unitIsFinished(reason) {
   let curUnitNum = Session.get('currentUnitNumber');
   const prevUnit = curTdf.tdfs.tutor.unit[curUnitNum];
   let newUnitNum = curUnitNum + 1;
-  let curTdfUnit = curTdf.tdfs.tutor.unit[newUnitNum];
   let countCompletion = prevUnit.countcompletion
   const curExperimentState = await getExperimentState();
   // if the last unit was adaptive, we may need to update future units
   if(adaptive){
     if(engine.adaptiveQuestionLogic){
-      let curTdfUnit = Session.get('currentTdfUnit');
       logic = engine.adaptiveQuestionLogic.curUnit.adaptiveLogic;
       if(logic != '' && logic != undefined){
         console.log('adaptive schedule', engine.adaptiveQuestionLogic.schedule);
-        for(let unitIndex in Object.keys(adaptiveLogic)){
-          let unitToModify = Object.keys(adaptiveLogic)[unitIndex];
-          let unit = curTdf.tdfs.tutor.unit[unitToModify];
+        for(let adaptiveUnitIndex in adaptive){
+          let newUnitIndex = adaptive[adaptiveUnitIndex].split(',')[0];
+          let isTemplate = adaptive[adaptiveUnitIndex].split(',')[1] == 't';
           let adaptiveQuestionTimes = []
           let adaptiveQuestions = []
-          for(let logic of adaptiveLogic[unitToModify]){
+          for(let logic of adaptiveLogic[newUnitIndex]){
             let logicOutput = await engine.adaptiveQuestionLogic.evaluate(logic);
             if(logicOutput){
               adaptiveQuestionTimes.push(logicOutput.when)
               adaptiveQuestions.push(...logicOutput.questions)
             }
           }
-          if(unit) {
-            unit = await engine.adaptiveQuestionLogic.modifyUnit(adaptiveLogic[unitToModify], unit);
-            curTdf.tdfs.tutor.unit[unitToModify] = unit;
-          } else {
-            // use template
-            adaptiveTemplate = prevUnit.adaptiveUnitTemplate[unitIndex]
-            unit = engine.adaptiveQuestionLogic.unitBuilder(adaptiveTemplate, adaptiveQuestionTimes, adaptiveQuestions);
+          if(isTemplate) {
+            adaptiveTemplate = curTdf.tdfs.tutor.setspec.unitTemplate[adaptiveUnitIndex]
+            let unit = engine.adaptiveQuestionLogic.unitBuilder(adaptiveTemplate, adaptiveQuestionTimes, adaptiveQuestions);
             countCompletion = prevUnit.countcompletion
-            curTdf.tdfs.tutor.unit[unitToModify] = unit;
+            curTdf.tdfs.tutor.unit.splice(newUnitIndex - 1, 0, unit);
+          } else {
+            let unit = await engine.adaptiveQuestionLogic.modifyUnit(adaptiveLogic[adaptiveUnitIndex], unit);
+            curTdf.tdfs.tutor.unit[newUnitIndex] = unit;
           }
         }
       }
@@ -2451,6 +2453,7 @@ async function unitIsFinished(reason) {
     curExperimentState.currentTdfFile = curTdf;
     await updateExperimentState(curExperimentState, 'card.unitIsFinished');
   }
+  let curTdfUnit = curTdf.tdfs.tutor.unit[newUnitNum];
   
 
   Session.set('questionIndex', 0);
@@ -2596,7 +2599,12 @@ async function prepareCard() {
         'stimIndex': 0
       }
       Session.set('engineIndices', indices);
-      initializePlyr();
+      if(Session.get("currentUnitNumber") + 1 == Session.get("currentTdfFile").tdfs.tutor.unit.length){
+        $('#lastUnitModal').modal('show');
+        return;
+      } else {
+        initializePlyr();
+      }
     } else {
       playerController.playNextCard();
     }
@@ -3445,7 +3453,7 @@ async function resumeFromComponentState() {
     console.log('No Experimental condition is required: continuing', rootTDFBoxed);
   }
 
-  if(curTdf.content.tdfs.tutor.unitTemplate){
+  if(curTdf.content.tdfs.tutor.setspec.unitTemplate){
     //tdf has dynamic units. need to check component state for current unit
     if(curExperimentState.currentTdfFile){
       curTdf.content = curExperimentState.currentTdfFile;
@@ -3872,7 +3880,12 @@ async function processUserTimesLog() {
         }
       }
       Session.set('engineIndices', indices);
-      initializePlyr();
+      if(Session.get("currentUnitNumber") + 1 == Session.get("currentTdfFile").tdfs.tutor.unit.length){
+        $('#lastUnitModal').modal('show');
+        return;
+      } else {
+        initializePlyr();
+      }
     } else if (resumeToQuestion) {
       // Question outstanding: force question display and let them give an answer
       console.log('RESUME FINISHED: displaying current question');
