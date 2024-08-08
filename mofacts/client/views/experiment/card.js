@@ -11,10 +11,8 @@ import {
 } from '../../lib/currentTestingHelpers';
 import { 
   initializePlyr,
-  playVideo,
-  playNextCard,
-  destroyPlyr,
-  addStimToSchedule
+  playerController,
+  destroyPlyr
 } from '../../lib/plyrHelper.js'
 import {meteorCallAsync, redoCardImage} from '../../index';
 import {DialogueUtils, dialogueContinue, dialogueLoop, initiateDialogue} from './dialogueUtils';
@@ -2448,7 +2446,7 @@ async function unitIsFinished(reason) {
       }
       //add new question to current unit
       if(engine.adaptiveQuestionLogic.when == Session.get("currentUnitNumber")){
-        addStimToSchedule(curTdfUnit);
+        playerController.addStimToSchedule(curTdfUnit);
       }
     }
     Session.set('currentTdfFile', curTdf);
@@ -2608,7 +2606,7 @@ async function prepareCard() {
         initializePlyr();
       }
     } else {
-      playNextCard();
+      playerController.playNextCard();
     }
   } else {
     await engine.selectNextCard(Session.get('engineIndices'), Session.get('currentExperimentState'));
@@ -2823,14 +2821,12 @@ function beginQuestionAndInitiateUserInput(delayMs, deliveryParams) {
       }
       speakMessageIfAudioPromptFeedbackEnabled(questionToSpeak + buttonsToSpeak, 'question');
     }
-    if(!Session.get('isVideoSession')) {
-      allowUserInput();
-      beginMainCardTimeout(delayMs, function() {
-        console.log('stopping input after ' + delayMs + ' ms');
-        stopUserInput();
-        handleUserInput({}, 'timeout');
-      });
-    }
+    allowUserInput();
+    beginMainCardTimeout(delayMs, function() {
+      console.log('stopping input after ' + delayMs + ' ms');
+      stopUserInput();
+      handleUserInput({}, 'timeout');
+    });
   }
 }
 
