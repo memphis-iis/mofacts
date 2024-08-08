@@ -29,14 +29,15 @@ class PlayerController {
     this.lastSpeed = this.player.speed;
   }
 
-  initVideoCards() {
+  async initVideoCards() {
     this.questions = Session.get('currentTdfUnit').videosession.questions;
     this.times.sort((a, b) => a - b);
     this.nextTime = this.times[this.nextTimeIndex];
     let nextQuestion = this.questions[this.nextTimeIndex];
     let indices = {stimIndex: 0, clusterIndex: nextQuestion}
-    engine.selectNextCard(indices, Session.get('currentExperimentState'));
-    
+    await engine.selectNextCard(indices, Session.get('currentExperimentState'));
+    newQuestionHandler();
+
     //if this is not the furthest unit the student has reached, display the continue button
     if(Session.get('currentUnitNumber') < Session.get('currentExperimentState').lastUnitStarted){
       $("#continueBar").removeAttr('hidden');
@@ -252,6 +253,10 @@ class PlayerController {
         this.addStimToSchedule(curTdfUnit);
       }
     }
+    const nextQuestion = this.questions[this.nextTimeIndex];
+    Session.set('engineIndices', {stimIndex: 0, clusterIndex: nextQuestion});
+    await engine.selectNextCard(Session.get('engineIndices'), Session.get('currentExperimentState'));
+    newQuestionHandler();
     this.playVideo();
   }
 
