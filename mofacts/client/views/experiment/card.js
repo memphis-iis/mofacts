@@ -2428,7 +2428,7 @@ async function unitIsFinished(reason) {
           let adaptiveQuestions = []
           for(let logic of adaptiveLogic[newUnitIndex]){
             let logicOutput = await engine.adaptiveQuestionLogic.evaluate(logic);
-            if(logicOutput){
+            if(logicOutput?.conditionResult){
               adaptiveQuestionTimes.push(logicOutput.when)
               adaptiveQuestions.push(...logicOutput.questions)
             }

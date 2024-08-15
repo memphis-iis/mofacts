@@ -83,7 +83,7 @@ export class AdaptiveQuestionLogic {
                 let stimulusIndex = parseInt(parts[1]);
                 //get the performance for this cluster and stimulus
                 console.log('getting component state for cluster:', clusterIndex, 'stimulus:', stimulusIndex, history[stimulusIndex]);
-                let outcome = history[stimulusIndex];
+                let outcome = history[clusterIndex];
                 //if the outcome is 1, lastOutcome is true, otherwise false
                 console.log('lastOutcome for ' + token + ':', outcome);
                 conditionExpression += outcome;

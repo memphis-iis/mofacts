@@ -295,8 +295,7 @@ class PlayerController {
   
     
     //default nextTime to end of player
-    this.nextTimeIndex = -1;
-    this.nextTime = this.player.duration + 1;
+    this.nextTime = this.player.duration;
     //check if next time needs to be set to new question
     for(let i in times){
       if(this.player.currentTime < this.times[i]){
