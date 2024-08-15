@@ -33,11 +33,13 @@ class PlayerController {
   async initVideoCards() {
     this.questions = Session.get('currentTdfUnit').videosession.questions;
     this.times.sort((a, b) => a - b);
-    this.nextTime = this.times[this.nextTimeIndex];
-    let nextQuestion = this.questions[this.nextTimeIndex];
-    let indices = {stimIndex: 0, clusterIndex: nextQuestion}
-    await engine.selectNextCard(indices, Session.get('currentExperimentState'));
-    await newQuestionHandler();
+    if(this.nextTimeIndex < this.times.length){
+      this.nextTime = this.times[this.nextTimeIndex];
+      let nextQuestion = this.questions[this.nextTimeIndex];
+      let indices = {stimIndex: 0, clusterIndex: nextQuestion}
+      await engine.selectNextCard(indices, Session.get('currentExperimentState'));
+      await newQuestionHandler();
+    }
 
     //if this is not the furthest unit the student has reached, display the continue button
     if(Session.get('currentUnitNumber') < Session.get('currentExperimentState').lastUnitStarted){
@@ -75,7 +77,7 @@ class PlayerController {
   timeUpdate(){
     if(this.times.length == 0 || this.nextTimeIndex == -1) {
       this.nextTime = this.player.duration;
-      timeIsEndTime = true;
+      this.questioningComplete = true;
     } else {
       this.nextTime = this.times[this.nextTimeIndex];
     }
