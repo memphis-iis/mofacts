@@ -15,6 +15,7 @@ class PlayerController {
   seekStart;
   loggingSeek = false;
   fullscreenUser = false;
+  questioningComplete = false;
 
   times = [];
   questions = [];
@@ -36,7 +37,7 @@ class PlayerController {
     let nextQuestion = this.questions[this.nextTimeIndex];
     let indices = {stimIndex: 0, clusterIndex: nextQuestion}
     await engine.selectNextCard(indices, Session.get('currentExperimentState'));
-    newQuestionHandler();
+    await newQuestionHandler();
 
     //if this is not the furthest unit the student has reached, display the continue button
     if(Session.get('currentUnitNumber') < Session.get('currentExperimentState').lastUnitStarted){
@@ -68,7 +69,7 @@ class PlayerController {
     const nextQuestion = this.questions[index];
     Session.set('engineIndices', {stimIndex: 0, clusterIndex: nextQuestion});
     await engine.selectNextCard(Session.get('engineIndices'), Session.get('currentExperimentState'));
-    newQuestionHandler();
+    await newQuestionHandler();
   }
 
   timeUpdate(){
@@ -83,6 +84,7 @@ class PlayerController {
     const timeDiff = this.nextTime - this.player.currentTime;
     //if this.times[this.nextTimeIndex] is undefined, we set it to the end of the video
     if(this.nextTime == undefined){
+      this.questioningComplete = true;
       this.times.push(this.player.duration);
       this.nextTime = this.player.duration;
     }
@@ -112,7 +114,7 @@ class PlayerController {
         $('#progressbar').removeClass('progress-bar');
       }
     }
-    if(timeDiff < 0){
+    if(timeDiff < 0 && !this.questioningComplete){
       this.showQuestion();
     }
   }
@@ -226,7 +228,6 @@ class PlayerController {
     Session.set('displayReady', true);
 
     console.log('playback paused at ', this.player.currentTime);
-    this.logPlyrAction('pause', this.player);
     this.lastTimeIndex = this.nextTimeIndex;
     if(this.nextTimeIndex < this.times.length){
       this.nextTimeIndex++;
@@ -253,10 +254,13 @@ class PlayerController {
         this.addStimToSchedule(curTdfUnit);
       }
     }
-    const nextQuestion = this.questions[this.nextTimeIndex];
-    Session.set('engineIndices', {stimIndex: 0, clusterIndex: nextQuestion});
-    await engine.selectNextCard(Session.get('engineIndices'), Session.get('currentExperimentState'));
-    newQuestionHandler();
+    if(this.nextTimeIndex < this.questions.length){
+      const nextQuestion = this.questions[this.nextTimeIndex];
+      Session.set('engineIndices', {stimIndex: 0, clusterIndex: nextQuestion});
+      console.log(nextQuestion, this.questions)
+      await engine.selectNextCard(Session.get('engineIndices'), Session.get('currentExperimentState'));
+      await newQuestionHandler();
+    }
     this.playVideo();
   }
 
@@ -330,6 +334,7 @@ async function stopSeeking(){
     if(currentTime >= nextTime) {
       playerController.showQuestion();
     } else if(currentTime < prevTime){
+      playerController.questioningComplete = false;
       let nextTimeIndex = getIndex(playerController.times, currentTime);
       await playerController.setNextTime(playerController.times[nextTimeIndex], nextTimeIndex);
     }

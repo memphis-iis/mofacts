@@ -639,9 +639,9 @@ Template.card.events({
     unitIsFinished('Continue Button Pressed');
   },
 
-  'click #lastUnitModalDismiss': function(event) {
+  'click #lastUnitModalDismiss': async function(event) {
     $("#lastUnitModal").modal('show')
-    initializePlyr();
+    await initializePlyr();
   },
 
   'click #stepBackButton': function(event) {
@@ -2603,7 +2603,7 @@ async function prepareCard() {
         $('#lastUnitModal').modal('show');
         return;
       } else {
-        initializePlyr();
+        await initializePlyr();
       }
     } else {
       playerController.playNextCard();
@@ -3884,7 +3884,7 @@ async function processUserTimesLog() {
         $('#lastUnitModal').modal('show');
         return;
       } else {
-        initializePlyr();
+        await initializePlyr();
       }
     } else if (resumeToQuestion) {
       // Question outstanding: force question display and let them give an answer
