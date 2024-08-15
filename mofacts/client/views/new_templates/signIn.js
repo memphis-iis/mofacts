@@ -115,32 +115,32 @@ Template.signIn.events({
     Session.set('useEmbeddedAPIKeys', false);
   },
   'click #signInWithMicrosoftSSO': function(event) {
-      //login with the Accounts service office365
-      event.preventDefault();
-      console.log('Microsoft Login Proceeding');
-      //set the login mode to microsoft
-      Session.set('loginMode', 'microsoft');
-      Meteor.loginWithOffice365({
-        loginStyle: 'popup',
-        requestOfflineToken: true,
-        requestPermissions: ['User.Read', 'offline_access', 'openid', 'profile', 'email'],
-      }, async function(err) {
-        //if we are not in a class and we log in, we need to disable embedded API keys.
-        if(!Session.get('curClass')){
-          Session.set('useEmbeddedAPIKeys', false);
-        }
-        if (err) {
-          // error handling
-          console.log('Could not log in with Microsoft', err);
-          $('#signInButton').prop('disabled', false);
-          return;
-        } else {
-          //redirect to profile edit page, since we don't have a profile yet
-          signInNotify();
-          Router.go('/profile');
-        }
-      });
-    },
+    //login with the Accounts service office365
+    event.preventDefault();
+    console.log('Microsoft Login Proceeding');
+    //set the login mode to microsoft
+    Session.set('loginMode', 'microsoft');
+    Meteor.loginWithOffice365({
+      loginStyle: 'popup',
+      requestOfflineToken: true,
+      requestPermissions: ['User.Read', 'offline_access', 'openid', 'profile', 'email'],
+    }, async function(err) {
+      //if we are not in a class and we log in, we need to disable embedded API keys.
+      if(!Session.get('curClass')){
+        Session.set('useEmbeddedAPIKeys', false);
+      }
+      if (err) {
+        // error handling
+        console.log('Could not log in with Microsoft', err);
+        $('#signInButton').prop('disabled', false);
+        return;
+      } else {
+        //redirect to profile edit page, since we don't have a profile yet
+        signInNotify();
+        Router.go('/profile');
+      }
+    });
+  },
   'click #courseLink': function(event) {
     event.preventDefault();
     const sectionId = event.target.getAttribute('section-id');
@@ -259,7 +259,7 @@ Template.signIn.helpers({
 // Implementation functions
 
 // Called after we have signed in
-function signinNotify(landingPage = '/profile') {
+function signInNotify(landingPage = '/profile') {
   const curClass = Session.get('curClass');
   const curTeacher = Session.get('curTeacher');
   if(curTeacher && curClass){
@@ -285,7 +285,7 @@ function signinNotify(landingPage = '/profile') {
     const currentUser = Meteor.users.findOne({_id: Meteor.userId()}).username;
     console.log(currentUser + ' was logged in successfully! Current route is ', Router.current().route.getName());
     Meteor.call('debugLog', 'Sign in was successful');
-    Meteor.call('updatePerformanceData', 'login', 'signin.signinNotify', Meteor.userId());
+    Meteor.call('updatePerformanceData', 'login', 'signin.signInNotify', Meteor.userId());
     Meteor.call('logUserAgentAndLoginTime', Meteor.userId(), navigator.userAgent);
   }
   Meteor.logoutOtherClients();
@@ -343,7 +343,7 @@ function userPasswordCheck() {
                 true
             );
           }
-          signinNotify(false);
+          signInNotify(false);
           await meteorCallAsync('setUserLoginData', 'direct', Session.get('loginMode'));
         }
       });
@@ -407,7 +407,7 @@ function userPasswordCheck() {
                   true
               );
             }
-            signinNotify(false);
+            signInNotify(false);
             await meteorCallAsync('setUserLoginData', 'direct', Session.get('loginMode'));
           }
         });
@@ -440,7 +440,7 @@ function userPasswordCheck() {
         $('#signInButton').prop('disabled', false);
         return;
       }
-      signinNotify();
+      signInNotify();
       await meteorCallAsync('setUserLoginData', 'direct', Session.get('loginMode'));
     }
   });
