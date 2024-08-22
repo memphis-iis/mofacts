@@ -1397,7 +1397,7 @@ function getClassPerformanceByTDF(classId, tdfId, date=false) {
     curDate = new Date();
     date = curDate.getTime();
   }
-  const res1 = Histories.find({userId: {$in: userIds}, TDFId: tdfId}).fetch();
+  const res1 = Histories.find({userId: {$in: userIds}, TDFId: tdfId, levelUnitType: {$ne: "Instruction"}}).fetch();
   for(let history of res1){
     var outcome = 0;
     if(history.outcome === "correct"){
