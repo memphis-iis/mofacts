@@ -166,7 +166,10 @@ Template.studentReporting.rendered = async function() {
       
     });
   }
-  updateDashboard(Session.get('currentTdfId'));
+  // check that the currentTdfId has data
+  const allowUpdate = await meteorCallAsync('checkForTDFData', Session.get('currentTdfId'));
+  if(allowUpdate)
+    updateDashboard(Session.get('currentTdfId'));
 };
 
 Template.studentReporting.events({
