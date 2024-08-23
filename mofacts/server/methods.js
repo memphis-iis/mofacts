@@ -1467,6 +1467,16 @@ function addUserDueDateException(userId, tdfId, classId, date){
   Meteor.users.update({_id: userId}, user);
 }
 
+async function checkForTDFData(tdfId){
+  const userId = Meteor.userId();
+  serverConsole('checkForTDFData', tdfId, userId);
+  tdf = history.findOne({TDFId: tdfId, userId: userId, $and: [ {levelUnitType: {$ne: "schedule"}}, {levelUnitType: {$ne: "Instruction"}} ] });
+  if(tdf){
+    return true;
+  }
+  return false;
+}
+
 async function checkForUserException(userId, tdfId){
   serverConsole('checkForUserException', userId, tdfId);
   user = Meteor.users.findOne({_id: userId});
@@ -3176,7 +3186,7 @@ const asyncMethods = {
 
   loadStimsAndTdfsFromPrivate, getListOfStimTags, getUserLastFeedbackTypeFromHistory,
 
-  checkForUserException, getTdfById,
+  checkForUserException, getTdfById, checkForTDFData,
 
   getOutcomesForAdaptiveLearning: async function(userId, TDFId) {
     const history = Histories.find({userId: userId, TDFId: TDFId}, {fields: {KCId: 1, outcome: 1}, $sort: { recordedServerTime: -1 }}).fetch();
