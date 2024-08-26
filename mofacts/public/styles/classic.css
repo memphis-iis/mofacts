@@ -3,7 +3,10 @@
     --background-color: #F2F2F2;
     --text-color: #000000;
     --accent-color: #7ed957;
+    --button-color: #7ed957;
+    --primary-button-text-color: #000000;
     --secondary-color: #d9d9d9;
+    --secondary-text-color: #000000;
     --audio-alert-color: #06723e;
     --success-color: #00cc00;
     --alert-color: #ff0000;
@@ -17,6 +20,19 @@ body{
     color: var(--text-color);
 }
 
+#feedbackOverrideContainer{
+    background-color: var(--background-color);
+}
+
+#cardContainer{
+    background-color: var(--background-color);
+}
+
+.videoOverlay{
+    /* make very faintly transparent */
+    background-color: rgba(255,255,255,0.5);
+}
+
 h3{
     /* League Spartan */
     font-family: 'League Spartan';
@@ -25,7 +41,7 @@ h3{
 }
 
 a{
-    color: var(--success-color)
+    color: var(--accent-color)
 }
 h5{
     /* League Spartan */
@@ -43,16 +59,25 @@ p{
 }
 
 .btn, .btn-icon{
+    background-color: var(--button-color) !important;
+    border-color: var(--accent-color) !important;
+    color: var(--primary-button-text-color);
+    /* center button */
+    margin-left: auto;
+    margin-right: auto;
+}
+/*primary button selected*/
+.btn-selected{
     background-color: var(--accent-color) !important;
     border-color: var(--accent-color) !important;
-    color: var(--text-color);
+    color: var(--primary-button-text-color);
     /* center button */
     margin-left: auto;
     margin-right: auto;
 }
 .btn-secondary{
     background-color: var(--secondary-color) !important;
-    color: var(--text-color);
+    color: var(--secondary-text-color);
     /* center button */
     margin-left: auto;
     margin-right: auto;
@@ -65,6 +90,7 @@ p{
 }
 .modal-dialog, .modal-content{
     background-color: var(--secondary-color);
+    color: var(--secondary-text-color);
     display: flex;
 }
 
@@ -80,7 +106,7 @@ p{
 }
 .full-menu-content, .active-menu-button{
     background-color: var(--secondary-color) !important;
-    color: var(--text-color);
+    color: var(--secondary-text-color);
     /* slide in from right */
     animation: slideInRight 0.5s;
     -webkit-animation: slideInRight 0.5s;
@@ -601,14 +627,6 @@ input[type="range"]::-webkit-slider-runnable-track {
   }
 
 
-  #userLowerInteractionContainer {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    background-color:var(--background-color); /* Set the background color as needed */
-    z-index: 999; /* Set a high z-index to ensure it's on top of other content */
-  }
 
   #progressBarContainer{
     background-color: rgba(0,0,0,0.0);
@@ -675,3 +693,16 @@ input[type="range"]::-webkit-slider-thumb {
     width: 100%;
     background-size: contain;
 }
+
+/*video unit question backgroun */
+.questionContainer{
+    height: 65vh;
+    border-radius: 35px;
+    padding: 10px;
+    background: var(--background-color);
+    /*blurred border*/
+    border: 1px solid var(--accent-color);
+    box-shadow: 0 0 10px var(--accent-color);
+    margin-top: 10vh;
+}
+

@@ -37,7 +37,7 @@ DynamicAssets = new FilesCollection({
   allowClientCode: true, // Disallow remove files from Client
   onBeforeUpload(file) {
     // Allow upload files under 10MB, and only in zip formats
-    if (file.size <= 10485760 && /zip/i.test(file.extension)) {
+    if (file.size <= 104857600 && /zip/i.test(file.extension)) {
       return true;
     }
     return 'Please upload image, audio, or video fi with size equal or less than 10MB';

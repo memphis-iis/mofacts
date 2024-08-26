@@ -1,5 +1,6 @@
 export {sessionCleanUp};
 import {curExperimentState} from "../views/experiment/card.js";
+import {playerController, destroyPlyr} from "../lib/plyrHelper.js";
 
 /* *****************************************************************
  * All of our currently known session variables
@@ -59,7 +60,7 @@ function sessionCleanUp() {
   Session.set('audioPromptVoice', undefined);
   Session.set('audioPromptFeedbackVoice', undefined);
   Session.set('buttonTrial', false);
-
+  Session.set('showPageNumbers', false);
   Session.set('schedule', undefined);
 
   Session.set('wasReportedForRemoval', false);
@@ -125,6 +126,11 @@ function sessionCleanUp() {
   Session.set('recordingLocked', false);
   Session.set('selectedTdfDueDate', undefined);
   Session.set('currentStimProbFunctionParameters', undefined);
+  Session.set('furthestUnit', undefined);
+  if(playerController) {
+    destroyPlyr();
+  }
+
   if (window.currentAudioObj) {
     window.currentAudioObj.pause();
     window.currentAudioObj = null;

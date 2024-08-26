@@ -13,7 +13,7 @@ Template.profileSouthwest.helpers({
     }
   },
   class: function(){
-    thisClass = Meteor.user().profile.curClass;
+    thisClass = Meteor.user().loginParams.curClass;
     if(thisClass.coursename){
       return thisClass;
     } else {

@@ -9,6 +9,11 @@ import {
   getAllCurrentStimAnswers,
   getTestType,
 } from '../../lib/currentTestingHelpers';
+import { 
+  initializePlyr,
+  playerController,
+  destroyPlyr
+} from '../../lib/plyrHelper.js'
 import {meteorCallAsync, redoCardImage} from '../../index';
 import {DialogueUtils, dialogueContinue, dialogueLoop, initiateDialogue} from './dialogueUtils';
 import {SCHEDULE_UNIT, ENTER_KEY} from '../../../common/Definitions';
@@ -19,7 +24,6 @@ import {Answers} from './answerAssess';
 import {sessionCleanUp} from '../../lib/sessionUtils';
 import {checkUserSession} from '../../index'
 import {instructContinue, unitHasLockout, checkForFileImage} from './instructions';
-import { is } from 'bluebird';
 
 export {
   speakMessageIfAudioPromptFeedbackEnabled,
@@ -30,7 +34,10 @@ export {
   restartMainCardTimeoutIfNecessary,
   getCurrentClusterAndStimIndices,
   initCard,
-  unitIsFinished
+  unitIsFinished,
+  revisitUnit,
+  gatherAnswerLogRecord,
+  newQuestionHandler,
 };
 
 /*
@@ -132,10 +139,13 @@ let cachedSyllables = null;
 let speechTranscriptionTimeoutsSeen = 0;
 let timeoutsSeen = 0; // Reset to zero on resume or non-timeout
 let trialStartTimestamp = 0;
+let trialEndTimeStamp = 0;
+let afterFeedbackCallbackBind = null;
+Session.set('trialStartTimestamp', trialStartTimestamp);
 let firstKeypressTimestamp = 0;
 let currentSound = null; // See later in this file for sound functions
 let userFeedbackStart = null;
-let afterFeedbackCallbackBind = null;
+let player = null;
 // We need to track the name/ID for clear and reset. We need the function and
 // delay used for reset
 let timeoutName = null;
@@ -143,6 +153,7 @@ let timeoutFunc = null;
 let timeoutDelay = null;
 let simTimeoutName = null;
 let userAnswer = null;
+let lastlogicIndex = 0;
 
 // Helper - return elapsed seconds since unit started. Note that this is
 // technically seconds since unit RESUME began (when we set currentUnitStartTime)
@@ -372,7 +383,7 @@ function varLenDisplayTimeout() {
 }
 
 // Clean up things if we navigate away from this page
-function leavePage(dest) {
+async function leavePage(dest) {
   console.log('leaving page for dest: ' + dest);
   if (dest != '/card' && dest != '/instructions' && document.location.pathname != '/instructions') {
     Session.set('currentExperimentState', undefined);
@@ -387,7 +398,11 @@ function leavePage(dest) {
       console.log('NOT closing audio context');
     }
   } else if (dest === '/instructions') {
-    const unit = Session.get('currentTdfUnit');
+    let unit = Session.get('currentTdfUnit');
+    if(!unit){
+      let experimentState = await getExperimentState()
+      unit = experimentState.currentTdfFile.tdfs.tutor.unit[Session.get('currentUnitNumber')];
+    }
     const lockout = unitHasLockout() > 0;
     const txt = unit.unitinstructions ? unit.unitinstructions.trim() : undefined;
     const pic = unit.picture ? unit.picture.trim() : undefined;
@@ -549,29 +564,62 @@ Template.card.events({
 
   'click .multipleChoiceButton': function(event) {
     event.preventDefault();
+    console.log("multipleChoiceButton clicked");
     if(!Session.get('submmissionLock')){
-      Session.set('submmissionLock', true);
-      handleUserInput(event, 'buttonClick');
+      if(!Session.get('curTdfUISettings').displayConfirmButton){
+        Session.set('submmissionLock', true);
+        handleUserInput(event, 'buttonClick');
+      } else {
+        console.log("multipleChoiceButton clicked (waiting for confirm)");
+        //for all multipleChoiceButtons, make the selected one have class btn-selected, remove btn-selected from all others
+        const selectedButton = event.currentTarget;
+        console.log("selectedButton", selectedButton, "event.currentTarget", event.currentTarget);
+        $('.multipleChoiceButton').each(function(){
+          $(this).removeClass('btn-secondary').addClass('btn-primary');
+        });
+        $(selectedButton).addClass('btn-secondary');
+        //enable confirmButton
+        $('#confirmButton').prop('disabled', false);
+      }
     }
   },
+  'click #confirmButton': function(event) {
+    event.preventDefault();``
+    console.log("displayConfirmButton clicked");
+    $('#confirmButton').hide();
+    if(!Session.get('submmissionLock')){
+      if(Session.get('buttonTrial')){
+        const selectedButton = $('.btn-secondary, .multipleChoiceButton');
+        //change this event to a buttonClick event for that button
+        event.currentTarget = selectedButton;
+        console.log("selectedButton", selectedButton, "event.currentTarget", event.currentTarget);
+        handleUserInput(event, 'confirmButton');
+      } else {
+        //get user answer target element
+        const userAnswer = document.getElementById('userAnswer');
+        event.currentTarget = userAnswer;
+        event.keyCode = ENTER_KEY;
+        console.log("userAnswer", userAnswer, "event.currentTarget", event.currentTarget);
+        handleUserInput(event, 'confirmButton');
+      }
+    }
+
+  },
+  
 
   'click #continueStudy': function(event) {
     event.preventDefault();
-    if (afterFeedbackCallbackBind != null) {
-      // allow user to skip after answering
-      const timeout = Session.get('CurTimeoutId')
-      Meteor.clearTimeout(timeout);
-      afterFeedbackCallbackBind();
-    } else {
-      // allow user to skip before answering
-      handleUserInput(event, 'buttonClick');
-    }
+    const timeout = Session.get('CurTimeoutId')
+    Session.set('CurTimeoutId', undefined)
+    Meteor.clearTimeout(timeout)
+    afterFeedbackCallbackBind();
+    engine.updatePracticeTime(Date.now() - Session.get('trialEndTimeStamp'))
   },
 
   'click .instructModalDismiss': function(event) {
     event.preventDefault();
     $('#finalInstructionsDlg').modal('hide');
-    if (Meteor.user().profile.loginMode === 'experiment') {
+    if (Meteor.user().loginParams.loginMode === 'experiment') {
       // Experiment user - no where to go?
       leavePage(routeToSignin);
     } else {
@@ -582,14 +630,41 @@ Template.card.events({
 
   'click #continueButton': function(event) {
     event.preventDefault();
+    //hide the continue button
+    if($("#videoUnitContainer").length){
+      destroyPlyr();
+    }
+    $("#continueBar").attr("hidden", true);
+    $('#continueButton').prop('disabled', true);
     unitIsFinished('Continue Button Pressed');
+  },
+
+  'click #lastUnitModalDismiss': async function(event) {
+    $("#lastUnitModal").modal('show')
+    await initializePlyr();
+  },
+
+  'click #stepBackButton': function(event) {
+    event.preventDefault();
+    //check if the current unit has instructions and if so, show them
+    if(Session.get('currentTdfUnit').unitinstructions){
+      leaveTarget = '/instructions';
+      Router.go('/instructions');
+    } else {
+      //get the current unit number and decrement it by 1
+      let curUnit = Session.get('currentUnitNumber');
+      let newUnitNumber = curUnit - 1;
+      revisitUnit(newUnitNumber);
+    }
   },
 });
 
 Template.card.helpers({
-  'isExperiment': () => Meteor.user().profile.loginMode === 'experiment',
+  'isExperiment': () => Meteor.user().loginParams.loginMode === 'experiment',
 
-  'isNormal': () => Meteor.user().profile.loginMode !== 'experiment',
+  'experimentLoginText': () => curTdfUISettings.experimentLoginText || "Amazon Turk ID",
+
+  'isNormal': () => Meteor.user().loginParams.loginMode !== 'experiment',
 
   'isNotInDialogueLoopStageIntroOrExit': () => Session.get('dialogueLoopStage') != 'intro' && Session.get('dialogueLoopStage') != 'exit',
 
@@ -604,7 +679,7 @@ Template.card.helpers({
     
   }, 
   'isImpersonating': function(){
-    return Meteor.user() && Meteor.user().profile ? Meteor.user().profile.impersonating : false;
+    return Meteor.user() ? Meteor.user().profile.impersonating : false;
   },
 
   'voiceTranscriptionPromptMsg': function() {
@@ -662,8 +737,13 @@ Template.card.helpers({
   },
 
   'text': function() {
-    const text = Session.get('currentDisplay') ? Session.get('currentDisplay').text : undefined;
-    return text;
+      const text = Session.get('currentDisplay') ? Session.get('currentDisplay').text : undefined;
+      return text;
+  },
+
+  'videoUnitDisplayText': function() {
+    const curUnit = Session.get('currentTdfUnit');
+    return curUnit.videosession.displayText;
   },
 
   'dialogueText': function() {
@@ -754,6 +834,26 @@ Template.card.helpers({
   'imageResponse': function() {
     const rt = getResponseType();
     return rt === 'image';
+  },
+
+  'isVideoSession': () => Session.get('isVideoSession'),
+
+  'isYoutubeVideo': function() {
+    return (Session.get('isVideoSession') && Session.get('videoSource') && Session.get('videoSource').includes('http'))
+  },
+
+  'videoId': function() {
+    if(Session.get('isVideoSession') && Session.get('videoSource')){
+      if(Session.get('videoSource').includes('youtu.be'))
+        return Session.get('videoSource').split('youtu.be/')[1].split('?')[0];
+      else if(Session.get('videoSource').includes('youtube'))
+        return Session.get('videoSource').split('v=')[1].split('&')[0];
+    }
+  },
+
+  'videoSource': function() {
+    if(Session.get('isVideoSession') && Session.get('videoSource'))
+      return Session.get('videoSource')
   },
 
   'test': function() {
@@ -873,7 +973,23 @@ Template.card.helpers({
     console.log("probability parms input",probParms);
     return probParms;
   },
-  'UIsettings': () => Session.get('curTdfUISettings')
+  'UIsettings': () => Session.get('curTdfUISettings'),
+
+  'allowGoBack': function() {
+    //check if this is allowed
+    if(Session.get('currentDeliveryParams').allowRevistUnit || Session.get('currentTdfFile').tdfs.tutor.setspec.allowRevistUnit){
+      //get the current unit number and decrement it by 1, and see if it exists
+      let curUnitNumber = Session.get('currentUnitNumber');
+      let newUnitNumber = curUnitNumber - 1;
+      if(newUnitNumber >= 0 && Session.get('currentTdfFile').tdfs.tutor.unit.length >= newUnitNumber){
+        return true;
+      } else {
+        return false;
+      }
+    } else {
+      return false;
+    }
+  },
 });
 
 function getResponseType() {
@@ -964,6 +1080,18 @@ function initializeAudio() {
         });
   } catch (e) {
     console.log('Error initializing Web Audio browser');
+  }
+}
+
+function preloadVideos() {
+  if (Session.get('currentTdfUnit') && 
+  Session.get('currentTdfUnit').videosession &&
+  Session.get('currentTdfUnit').videosession.videosource) {
+    if(Session.get('currentTdfUnit').videosession.videosource.includes('http')){
+      Session.set('videoSource', Session.get('currentTdfUnit').videosession.videosource);
+    } else {
+      Session.set('videoSource', DynamicAssets.findOne({name: Session.get('currentTdfUnit').videosession.videosource}).link());
+    }
   }
 }
 
@@ -1136,7 +1264,7 @@ function getCurrentFalseResponses() {
   if (typeof(cluster) == 'undefined' || !cluster.stims || cluster.stims.length == 0 ||
     typeof(cluster.stims[curStimIndex].incorrectResponses) == 'undefined') {
     return []; // No false responses
-  } else {    
+  } else {
     if(typeof(cluster.stims[curStimIndex].incorrectResponses) == 'string')
       return cluster.stims[curStimIndex].incorrectResponses.split(',');
     return cluster.stims[curStimIndex].incorrectResponses;
@@ -1246,6 +1374,7 @@ function handleUserForceCorrectInput(e, source) {
 
 function handleUserInput(e, source, simAnswerCorrect) {
   let isTimeout = false;
+  let isSkip = false;
   Session.set('isSkip', false);
   let key;
   if (source === 'timeout') {
@@ -1257,14 +1386,15 @@ function handleUserInput(e, source, simAnswerCorrect) {
     if (!firstKeypressTimestamp) {
       firstKeypressTimestamp = Date.now();
     }
-  } else if (source === 'buttonClick' || source === 'simulation' || source === 'voice') {
+  } else if (source === 'buttonClick' || source === 'simulation' || source === 'voice' || source === 'confirmButton') {
     // to save space we will just go ahead and act like it was a key press.
     key = ENTER_KEY;
     Session.set('userAnswerSubmitTimestamp', Date.now());
-  } 
+  }
   if (e.currentTarget ? e.currentTarget.id === 'continueStudy' : false) {
     key = ENTER_KEY;
     Session.set('isSkip', true);
+    isSkip = true;
     console.log('skipped study');
   }
   // If we haven't seen the correct keypress, then we want to reset our
@@ -1298,7 +1428,14 @@ function handleUserInput(e, source, simAnswerCorrect) {
   } else if (source === 'keypress') {
     userAnswer = _.trim($('#userAnswer').val()).toLowerCase();
   } else if (source === 'buttonClick') {
-    userAnswer = e.currentTarget.name;
+    //if the source was the button name continueStudy, get the last answer from the experiment state
+    if(e.currentTarget ? e.currentTarget.name === 'continueStudy' : false){
+      userAnswer = Session.get('currentExperimentState').currentAnswer;
+    } else {
+      userAnswer = e.currentTarget.name;
+    }
+  } else if (source="confirmButton"){
+    userAnswer = $('.btn-secondary')[0].name;
   } else if (source === 'simulation') {
     userAnswer = simAnswerCorrect ? 'SIM: Correct Answer' : 'SIM: Wrong Answer';
   } else if (source === 'voice') {
@@ -1308,21 +1445,23 @@ function handleUserInput(e, source, simAnswerCorrect) {
     } else {
       userAnswer = _.trim($('#userAnswer').val()).toLowerCase();
     }
-  }
+  } 
 
   const trialEndTimeStamp = Date.now();
-  const afterAnswerFeedbackCallbackWithEndTime = afterAnswerFeedbackCallback.bind(null,
-    trialEndTimeStamp, trialStartTimestamp, source, userAnswer);
+  Session.set('trialEndTimeStamp', trialEndTimeStamp);
+  Session.set('trialStartTimestamp', trialStartTimestamp);
+  Session.set('source', source);
+  Session.set('userAnswer', userAnswer);
 
   // Show user feedback and find out if they answered correctly
   // Note that userAnswerFeedback will display text and/or media - it is
   // our responsbility to decide when to hide it and move on
-  userAnswerFeedback(userAnswer, isTimeout, simAnswerCorrect, afterAnswerFeedbackCallbackWithEndTime);
+  userAnswerFeedback(userAnswer, isSkip, isTimeout, simAnswerCorrect);
 }
 
 // Take care of user feedback - simCorrect will usually be undefined/null BUT if
 // it is true or false we know this is part of a simulation call
-async function userAnswerFeedback(userAnswer, isTimeout, simCorrect, afterAnswerFeedbackCb) {
+async function userAnswerFeedback(userAnswer, isSkip, isTimeout, simCorrect) {
   const isButtonTrial = getButtonTrial();
   const setspec = !isButtonTrial ? Session.get('currentTdfFile').tdfs.tutor.setspec : undefined;
   let isCorrectAccumulator = null;
@@ -1349,12 +1488,13 @@ async function userAnswerFeedback(userAnswer, isTimeout, simCorrect, afterAnswer
 
   // Make sure to record what they just did (and set justAdded)
   await writeCurrentToScrollList(userAnswer, isTimeout, simCorrect, 1);
-  
-  const afterAnswerFeedbackCbWithTimeout = afterAnswerFeedbackCb.bind(null, isTimeout);
-  const afterAnswerAssessmentCbWithArgs = afterAnswerAssessmentCb.bind(null,
-      userAnswer, isCorrectAccumulator, feedbackForAnswer, afterAnswerFeedbackCbWithTimeout);
+  Session.set('isTimeout', isTimeout);
+  Session.set('userAnswer', userAnswer);
+  Session.set('isCorrectAccumulator', isCorrectAccumulator);
+  Session.set('feedbackForAnswer', feedbackForAnswer);
 
   // Answer assessment ->
+  let correctAndText = null;
   if (userAnswerWithTimeout != null) {
     displayAnswer = "";
     if(Session.get('hintLevel') && Session.get('currentExperimentState').currentAnswerSyllables){
@@ -1362,11 +1502,10 @@ async function userAnswerFeedback(userAnswer, isTimeout, simCorrect, afterAnswer
       answerSyllables = Session.get('currentExperimentState').currentAnswerSyllables.syllableArray || "";
       displayAnswer = answerSyllables.slice(0, displayedHintLevel).join("");
     }
-    Answers.answerIsCorrect(userAnswerWithTimeout, Session.get('currentExperimentState').currentAnswer, Session.get('currentExperimentState').originalAnswer,
-    displayAnswer,setspec, afterAnswerAssessmentCbWithArgs);
-  } else {
-    afterAnswerAssessmentCbWithArgs(null);
+    correctAndText = await Answers.answerIsCorrect(userAnswerWithTimeout, Session.get('currentExperimentState').currentAnswer, Session.get('currentExperimentState').originalAnswer,
+    displayAnswer,setspec); 
   }
+  determineUserFeedback(userAnswer, isSkip, isCorrectAccumulator, feedbackForAnswer, correctAndText);
 }
 
 async function writeCurrentToScrollList(userAnswer, isTimeout, simCorrect, justAdded) {
@@ -1442,8 +1581,9 @@ async function writeCurrentToScrollList(userAnswer, isTimeout, simCorrect, justA
   };
 
   if (userAnswerWithTimeout != null) {
-    Answers.answerIsCorrect(userAnswerWithTimeout, Session.get('currentExperimentState').currentAnswer, Session.get('currentExperimentState').originalAnswer,
+    const correctAndText = await Answers.answerIsCorrect(userAnswerWithTimeout, Session.get('currentExperimentState').currentAnswer, Session.get('currentExperimentState').originalAnswer,
     "",setspec, afterAnswerAssessment);
+    afterAnswerAssessment(correctAndText);
   } else {
     afterAnswerAssessment(null);
   }
@@ -1455,7 +1595,7 @@ function clearScrollList() {
 }
 
 
-function afterAnswerAssessmentCb(userAnswer, isCorrect, feedbackForAnswer, afterAnswerFeedbackCb, correctAndText) {
+function determineUserFeedback(userAnswer, isSkip, isCorrect, feedbackForAnswer, correctAndText) {
   Session.set('isRefutation', undefined);
   if (isCorrect == null && correctAndText != null) {
     isCorrect = correctAndText.isCorrect;
@@ -1463,8 +1603,6 @@ function afterAnswerAssessmentCb(userAnswer, isCorrect, feedbackForAnswer, after
       Session.set('isRefutation', true);
     }
   }
-
-  const afterAnswerFeedbackCbBound = afterAnswerFeedbackCb.bind(null, isCorrect);
 
   const currentDeliveryParams = Session.get('currentDeliveryParams')
   if (currentDeliveryParams.scoringEnabled) {
@@ -1479,25 +1617,26 @@ function afterAnswerAssessmentCb(userAnswer, isCorrect, feedbackForAnswer, after
   const testType = getTestType();
   const isDrill = (testType === 'd' || testType === 'm' || testType === 'n');
   if (isDrill) {
-    const showUserFeedbackBound = function() {
-      if (feedbackForAnswer == null && correctAndText != null) {
-        feedbackForAnswer = correctAndText.matchText;
-      }
-      showUserFeedback(isCorrect, feedbackForAnswer, afterAnswerFeedbackCbBound, userAnswer.includes('[timeout]'), userAnswer.includes('[skip]'));
-    };
+    if (feedbackForAnswer == null && correctAndText != null) {
+      feedbackForAnswer = correctAndText.matchText;
+    }
     if (currentDeliveryParams.feedbackType == 'dialogue' && !isCorrect) {
       speechTranscriptionTimeoutsSeen = 0;
-      initiateDialogue(userAnswer, afterAnswAerFeedbackCbBound, Session.get('currentExperimentState'), showUserFeedbackBound);
+      initiateDialogue(userAnswer, afterAnswAerFeedbackCbBound, Session.get('currentExperimentState'), showUserFeedback(isCorrect, feedbackForAnswer, userAnswer.includes('[timeout]'), isSkip));
     } else {
-      showUserFeedbackBound();
+      showUserFeedback(isCorrect, feedbackForAnswer, userAnswer.includes('[timeout]'), isSkip);
     }
   } else {
     userFeedbackStart = null;
-    afterAnswerFeedbackCbBound();
+    let trialEndTimeStamp = Session.get('trialEndTimeStamp');
+    let trialStartTimeStamp = Session.get('trialStartTimestamp');
+    let source = Session.get('source');
+    let isTimeout = Session.get('isTimeout');
+    afterAnswerFeedbackCallback(trialEndTimeStamp, trialStartTimeStamp, source, userAnswer, isTimeout, isSkip, isCorrect);
   }
 }
 
-async function showUserFeedback(isCorrect, feedbackMessage, afterAnswerFeedbackCbBound, isTimeout, isSkip) {
+async function showUserFeedback(isCorrect, feedbackMessage, isTimeout, isSkip) {
   console.log('showUserFeedback');
   userFeedbackStart = Date.now();
   const isButtonTrial = getButtonTrial();
@@ -1523,12 +1662,11 @@ async function showUserFeedback(isCorrect, feedbackMessage, afterAnswerFeedbackC
         feedbackMessage = feedbackMessage.replace("Incorrect.", "<br><b style='color:" + uiIncorrectColor + ";'>Incorrect.</b><br>");
         feedbackMessage = feedbackMessage.replace("Correct.", "<br><b style='color:" + uiCorrectColor + ";'>Correct.</b><br>");
       }
-      if (Session.get('curTdfUISettings').onlyShowSimpleFeedback) {
-        isCorrect ? feedbackMessage = "<b style='color:" + uiCorrectColor + ";'>Correct.</b>" : feedbackMessage = "<b style='color:" + uiIncorrectColor + ";'>Incorrect.</b>";
-      } else {
-        if (!feedbackMessage.includes(" is ")) {
-          feedbackMessage += " The correct answer is " + Session.get('currentExperimentState').originalAnswer;
-        }
+      if(Session.get('curTdfUISettings').simplefeedbackOnCorrect && isCorrect){
+        feedbackMessage = "<b style='color:" + uiCorrectColor + ";'>Correct.</b>";
+      }
+      if(Session.get('curTdfUISettings').simplefeedbackOnIncorrect && !isCorrect){
+        feedbackMessage = "<b style='color:" + uiIncorrectColor + ";'>Incorrect.</b>";
       }
     $('.hints').hide();
     const hSize = Session.get('currentDeliveryParams') ? Session.get('currentDeliveryParams').fontsize.toString() : 2;
@@ -1541,14 +1679,14 @@ async function showUserFeedback(isCorrect, feedbackMessage, afterAnswerFeedbackC
         feedbackMessage = "<b style='color:" + uiIncorrectColor + ";'>Incorrect.</b><br>" + feedbackMessage;
       }
     }
-    if(Session.get('curTdfUISettings').displayUserAnswerInFeedback){
-        //prepend the user answer to the feedback message
-      
-      if(singleLineFeedback){
-        feedbackMessage =  "Your answer: " + userAnswer + '. ' + feedbackMessage;
-      } else {  
-        feedbackMessage = "<br>Your answer: " + userAnswer + '. ' + feedbackMessage;
-      }
+    const displayCorrectFeedback = Session.get('curTdfUISettings').displayUserAnswerInCorrectFeedback && isCorrect;
+    const displayIncorrectFeedback = Session.get('curTdfUISettings').displayUserAnswerInIncorrectFeedback && !isCorrect;
+    if(displayCorrectFeedback || displayIncorrectFeedback){
+      //prepend the user answer to the feedback message
+      feedbackMessage =  "Your answer: " + userAnswer + '. ' + feedbackMessage;
+    }
+    if(!singleLineFeedback){
+      feedbackMessage = "<br>" + feedbackMessage;
     }
     //we have several options for displaying the feedback, we can display it in the top (#userInteraction), bottom (#userLowerInteraction). We write a case for this
     switch(feedbackDisplayPosition){
@@ -1684,13 +1822,16 @@ async function showUserFeedback(isCorrect, feedbackMessage, afterAnswerFeedbackC
   const isForceCorrectTrial = getTestType() === 'm' || getTestType() === 'n';
   const doForceCorrect = (!isCorrect && !Session.get('runSimulation') &&
     (Session.get('currentDeliveryParams').forceCorrection || isForceCorrectTrial));
-  const doClearForceCorrectBound = doClearForceCorrect.bind(null, doForceCorrect, afterAnswerFeedbackCbBound);
+  let trialEndTimeStamp = Session.get('trialEndTimeStamp');
+  let trialStartTimeStamp = Session.get('trialStartTimestamp');
+  let source = Session.get('source');
+  const doClearForceCorrectBound = doClearForceCorrect.bind(null, doForceCorrect, trialEndTimeStamp, trialStartTimeStamp, source, userAnswer, isTimeout, isCorrect, isSkip);
   Tracker.afterFlush(doClearForceCorrectBound);
 }
 
 // Note the execution thread will finish in the keypress event above for userForceCorrect
 let afterUserFeedbackForceCorrectCb = undefined;
-function doClearForceCorrect(doForceCorrect, afterAnswerFeedbackCbBound) {
+function doClearForceCorrect(doForceCorrect, trialEndTimeStamp, trialStartTimeStamp, source, userAnswer, isTimeout, isCorrect, isSkip) {
   if (doForceCorrect) {
     $('#forceCorrectionEntry').show().attr("hidden",false);
 
@@ -1700,13 +1841,13 @@ function doClearForceCorrect(doForceCorrect, afterAnswerFeedbackCbBound) {
       speakMessageIfAudioPromptFeedbackEnabled(prompt, 'feedback');
 
       const forcecorrecttimeout = Session.get('currentDeliveryParams').forcecorrecttimeout;
-      beginMainCardTimeout(forcecorrecttimeout, afterAnswerFeedbackCbBound);
+      beginMainCardTimeout(forcecorrecttimeout, afterAnswerFeedbackCallback(trialEndTimeStamp, trialStartTimeStamp, source, userAnswer, isTimeout, false, isCorrect));
     } else {
       const prompt = 'Please enter the correct answer to continue';
       $('#forceCorrectGuidance').text(prompt);
       speakMessageIfAudioPromptFeedbackEnabled(prompt, 'feedback');
 
-      afterUserFeedbackForceCorrectCb = afterAnswerFeedbackCbBound;
+      afterUserFeedbackForceCorrectCb = afterAnswerFeedbackCallback(trialEndTimeStamp, trialStartTimeStamp, source, userAnswer, isTimeout, false, isCorrect);
     }
 
     $('#userForceCorrect').prop('disabled', false);
@@ -1716,7 +1857,7 @@ function doClearForceCorrect(doForceCorrect, afterAnswerFeedbackCbBound) {
     $('#forceCorrectGuidance').text('');
     $('#userForceCorrect').prop('disabled', true);
     $('#userForceCorrect').val('');
-    afterAnswerFeedbackCbBound();
+    afterAnswerFeedbackCallback(trialEndTimeStamp, trialStartTimeStamp, source, userAnswer, isTimeout, isSkip, isCorrect);
   }
 }
 
@@ -1736,11 +1877,10 @@ async function giveWrongAnswer(){
   }
 }
 
-async function afterAnswerFeedbackCallback(trialEndTimeStamp, trialStartTimeStamp, source, userAnswer, isTimeout,  isCorrect) {
+async function afterAnswerFeedbackCallback(trialEndTimeStamp, trialStartTimeStamp, source, userAnswer, isTimeout, isSkip, isCorrect) {
   Session.set('showDialogueText', false);
   //if the user presses the removal button after answering we need to shortcut the timeout
   const wasReportedForRemoval = source == 'removal'
-  isSkip = Session.get('isSkip');
 
   const testType = getTestType();
   const deliveryParams = Session.get('currentDeliveryParams')
@@ -1772,22 +1912,31 @@ async function afterAnswerFeedbackCallback(trialEndTimeStamp, trialStartTimeStam
   Session.set('feedbackTimeoutBegins', Date.now())
   const answerLogRecord = gatherAnswerLogRecord(trialEndTimeStamp, trialStartTimeStamp, source, userAnswer, isCorrect,
       testType, deliveryParams, dialogueHistory, wasReportedForRemoval);
-  afterFeedbackCallbackBind = afterFeedbackCallback.bind(null, trialEndTimeStamp, trialStartTimeStamp, isTimeout, isCorrect, testType, deliveryParams, answerLogRecord, 'card')
+  afterFeedbackCallbackBind = afterFeedbackCallback.bind(null, trialEndTimeStamp, trialStartTimeStamp, isTimeout, isSkip, isCorrect, testType, deliveryParams, answerLogRecord, 'card')
   const timeout = Meteor.setTimeout(async function() {
     afterFeedbackCallbackBind()
+    engine.updatePracticeTime(Date.now() - trialEndTimeStamp)
   }, reviewTimeout)
   Session.set('CurTimeoutId', timeout)
+  let {responseDuration, startLatency, endLatency, feedbackLatency} = getTrialTime(trialEndTimeStamp, trialStartTimeStamp, trialEndTimeStamp + reviewTimeout, testType)
+  let practiceTime = endLatency;
+  if (testType === 's') {
+    practiceTime = feedbackLatency;
+  }
+  engine.cardAnswered(isCorrect, practiceTime);
 
-  if(Session.get('unitType') == "model")
+  if(!Session.get('isVideoSession')){
+    if(Session.get('unitType') == "model")
     engine.calculateIndices().then(function(res, err) {
       Session.set('engineIndices', res );
     })
-  else
-    Session.set('engineIndices', undefined);
+    else
+      Session.set('engineIndices', undefined);
+  }
 }
 
-async function afterFeedbackCallback(trialEndTimeStamp, trialStartTimeStamp, isTimeout, isCorrect, testType, deliveryParams, answerLogRecord, callLocation) {
-  afterFeedbackCallbackBind = null;
+async function afterFeedbackCallback(trialEndTimeStamp, trialStartTimeStamp, isTimeout, isSkip, isCorrect, testType, deliveryParams, answerLogRecord, callLocation) {
+  afterFeedbackCallbackBind = undefined;
   Session.set('CurTimeoutId', null)
   const userLeavingTrial = callLocation != 'card';
   let reviewEnd = Date.now();
@@ -1797,7 +1946,7 @@ async function afterFeedbackCallback(trialEndTimeStamp, trialStartTimeStamp, isT
   //answerLogAction can be 'answer', 'timeout', or 'skip' depending on userAnswer, isTimeout, and isSkip
   if(isTimeout){
     answerLogAction = '[timeout]';
-  } else if (Session.get('isSkip')) {
+  } else if (isSkip) {
     answerLogAction = '[skip]';
   } else {
     answerLogAction = '[answer]';
@@ -1807,20 +1956,11 @@ async function afterFeedbackCallback(trialEndTimeStamp, trialStartTimeStamp, isT
   Session.set('dialogueHistory', undefined);
   const newExperimentState = {
     lastAction: answerLogAction,
-    lastActionTimeStamp: Date.now(),
   };
 
   newExperimentState.overallOutcomeHistory = Session.get('overallOutcomeHistory');
-
-  // Give unit engine a chance to update any necessary stats
-  const practiceTime = endLatency + feedbackLatency;
-  if(userLeavingTrial){
-    engine.cardAnswered(isCorrect, practiceTime);
-  } else {
-    await engine.cardAnswered(isCorrect, practiceTime);
-  }
   console.log('writing answerLogRecord to history:', answerLogRecord);
-  if(Meteor.user().profile === undefined || !Meteor.user().profile.impersonating){
+  if(Meteor.user() === undefined || !Meteor.user().impersonating){
     try {
       answerLogRecord.responseDuration = responseDuration;
       answerLogRecord.CFStartLatency = startLatency;
@@ -2023,16 +2163,17 @@ function gatherAnswerLogRecord(trialEndTimeStamp, trialStartTimeStamp, source, u
   // state.stepNameSeen[stepName] = stepCount;
   // stepName = stepCount + " " + stepName;
   const isStudy = testType === 's';
-  let shufIndex;
+  let shufIndex = clusterIndex;
+  let stimFileIndex = clusterIndex;
   let schedCondition = 'N/A';
   if (engine.unitType == SCHEDULE_UNIT) {
     const sched = Session.get('schedule');
     if (sched && sched.q && sched.q.length) {
       const schedItemIndex = Session.get('questionIndex') - 1;
-      clusterIndex = schedItemIndex;
+      shufIndex = schedItemIndex;
       if (schedItemIndex >= 0 && schedItemIndex < sched.q.length) {
         schedCondition = parseSchedItemCondition(sched.q[schedItemIndex].condition);
-        shufIndex = sched.q[schedItemIndex].clusterIndex;
+        stimFileIndex = sched.q[schedItemIndex].clusterIndex;
       }
     }
   } else {
@@ -2097,8 +2238,8 @@ function gatherAnswerLogRecord(trialEndTimeStamp, trialStartTimeStamp, source, u
     'conditionNameD': 'how answered',
     'conditionTypeD': _.trim(source),
     'conditionNameE': 'section',
-    'conditionTypeE': Meteor.user().profile.entryPoint && 
-        Meteor.user().profile.entryPoint !== 'direct' ? Meteor.user().profile.entryPoint : null,
+    'conditionTypeE': Meteor.user().loginParams.entryPoint && 
+        Meteor.user().loginParams.entryPoint !== 'direct' ? Meteor.user().loginParams.entryPoint : null,
 
     'responseDuration': null,
 
@@ -2121,8 +2262,8 @@ function gatherAnswerLogRecord(trialEndTimeStamp, trialStartTimeStamp, source, u
     'CFAudioInputEnabled': Meteor.user().audioInputMode,
     'CFAudioOutputEnabled': Session.get('enableAudioPromptAndFeedback'),
     'CFDisplayOrder': Session.get('questionIndex'),
-    'CFStimFileIndex': clusterIndex,
-    'CFSetShuffledIndex': shufIndex || clusterIndex,
+    'CFStimFileIndex': stimFileIndex,
+    'CFSetShuffledIndex': shufIndex,
     'CFAlternateDisplayIndex': Session.get('alternateDisplayIndex') || null,
     'CFStimulusVersion': whichStim,
     'CFCorrectAnswer': correctAnswer,
@@ -2144,7 +2285,7 @@ function gatherAnswerLogRecord(trialEndTimeStamp, trialStartTimeStamp, source, u
     'dialogueHistory': dialogueHistory || null,
     'instructionQuestionResult': Session.get('instructionQuestionResult') || false,
     'hintLevel': whichHintLevel,
-    'entryPoint': Meteor.user().profile.entryPoint
+    'entryPoint': Meteor.user().loginParams.entryPoint
   };
   return answerLogRecord;
 }
@@ -2192,6 +2333,75 @@ function hideUserFeedback() {
   $('#removeQuestion').hide();
 }
 
+
+//Called to revisit a previous unit in the current session. 
+async function revisitUnit(unitNumber) {
+  console.log('REVIST UNIT: ', unitNumber);
+  clearCardTimeout();
+  destroyPlyr();
+
+  const curTdf = Session.get('currentTdfFile');
+  const curUnitNum = Session.get('currentUnitNumber');
+  //check if the curUnitNum is the furthest unit the student has reached
+  let furthestUnit = Session.get('furthestUnit') || 0;
+  if(curUnitNum > furthestUnit){
+    furthestUnit = curUnitNum;
+  } 
+  Session.set('furthestUnit', furthestUnit);
+  const newUnitNum = parseInt(unitNumber)
+  const curTdfUnit = curTdf.tdfs.tutor.unit[newUnitNum];
+
+  //if the current page is not instructions, then we need to log the revisitUnit action
+  if(document.location.pathname != '/instructions'){
+      logRecord = gatherAnswerLogRecord(Date.now(), Session.get('currentUnitStartTime'), 'revisitUnit', '', true, 'r', Session.get('currentDeliveryParams'), undefined, false);
+      Meteor.call('insertHistory', logRecord);
+  }
+  Session.set('questionIndex', 0);
+  Session.set('clusterIndex', undefined);
+  Session.set('currentUnitNumber', newUnitNum);
+  Session.set('currentTdfUnit', curTdfUnit);
+  Session.set('resetSchedule', true);
+  Session.set('currentDeliveryParams', getCurrentDeliveryParams());
+  Session.set('currentUnitStartTime', Date.now());
+  Session.set('feedbackUnset', true);
+  Session.set('feedbackTypeFromHistory', undefined);
+  Session.set('curUnitInstructionsSeen', false);
+
+  //get the old experiment state
+  const oldExperimentState = Session.get('currentExperimentState');
+
+  //update the experiment state
+  const newExperimentState = {
+    questionIndex: 0,
+    clusterIndex: 0,
+    shufIndex: 0,
+    whichHintLevel: 0,
+    whichStim: 0,
+    lastUnitCompleted: oldExperimentState.lastUnitCompleted,
+    lastUnitStarted: oldExperimentState.lastUnitStarted,
+    currentUnitNumber: newUnitNum,
+    currentTdfUnit: curTdfUnit,
+    lastAction: 'unit-revisit',
+  };
+
+  //update the experiment state
+  updateExperimentState(newExperimentState, 'revisitUnit');
+
+
+  let leaveTarget;
+  if (newUnitNum < curTdf.tdfs.tutor.unit.length || curTdf.tdfs.tutor.unit[newUnitNum] > 0) {
+    // Revisiting a Unit, we need to restart with instructions
+    // Check if the unit has a learning session, assess
+    console.log('REVISIT UNIT: show instructions for unit', newUnitNum);
+      const rootTDFBoxed = Tdfs.findOne({_id: Session.get('currentRootTdfId')});
+      const rootTDF = rootTDFBoxed.content;
+      const setspec = rootTDF.tdfs.tutor.setspec;
+    leaveTarget = '/instructions';
+    Router.go(leaveTarget);
+  }
+
+}
+
 // Called when the current unit is done. This should be either unit-defined (see
 // prepareCard) or user-initiated (see the continue button event and the var
 // len display timeout function)
@@ -2199,15 +2409,59 @@ async function unitIsFinished(reason) {
   clearCardTimeout();
 
   const curTdf = Session.get('currentTdfFile');
-  const curUnitNum = Session.get('currentUnitNumber');
-  const newUnitNum = curUnitNum + 1;
-  const curTdfUnit = curTdf.tdfs.tutor.unit[newUnitNum];
-  const countCompletion = curTdf.tdfs.tutor.unit[curUnitNum].countCompletion
+  const adaptive = curTdf.tdfs.tutor.unit[Session.get('currentUnitNumber')].adaptive
+  const adaptiveLogic = curTdf.tdfs.tutor.unit[Session.get('currentUnitNumber')].adaptiveLogic
+  let curUnitNum = Session.get('currentUnitNumber');
+  const prevUnit = curTdf.tdfs.tutor.unit[curUnitNum];
+  let newUnitNum = curUnitNum + 1;
+  let countCompletion = prevUnit.countcompletion
+  const curExperimentState = await getExperimentState();
+  // if the last unit was adaptive, we may need to update future units
+  if(adaptive){
+    if(engine.adaptiveQuestionLogic){
+      logic = engine.adaptiveQuestionLogic.curUnit.adaptiveLogic;
+      if(logic != '' && logic != undefined){
+        console.log('adaptive schedule', engine.adaptiveQuestionLogic.schedule);
+        for(let adaptiveUnitIndex in adaptive){
+          let newUnitIndex = adaptive[adaptiveUnitIndex].split(',')[0];
+          let isTemplate = adaptive[adaptiveUnitIndex].split(',')[1] == 't';
+          let adaptiveQuestionTimes = []
+          let adaptiveQuestions = []
+          for(let logic of adaptiveLogic[newUnitIndex]){
+            let logicOutput = await engine.adaptiveQuestionLogic.evaluate(logic);
+            if(logicOutput?.conditionResult){
+              adaptiveQuestionTimes.push(logicOutput.when)
+              adaptiveQuestions.push(...logicOutput.questions)
+            }
+          }
+          if(isTemplate) {
+            adaptiveTemplate = curTdf.tdfs.tutor.setspec.unitTemplate[adaptiveUnitIndex]
+            let unit = engine.adaptiveQuestionLogic.unitBuilder(adaptiveTemplate, adaptiveQuestionTimes, adaptiveQuestions);
+            countCompletion = prevUnit.countcompletion
+            curTdf.tdfs.tutor.unit.splice(newUnitIndex - 1, 0, unit);
+          } else {
+            let unit = await engine.adaptiveQuestionLogic.modifyUnit(adaptiveLogic[adaptiveUnitIndex], unit);
+            curTdf.tdfs.tutor.unit[newUnitIndex] = unit;
+          }
+        }
+      }
+      //add new question to current unit
+      if(engine.adaptiveQuestionLogic.when == Session.get("currentUnitNumber")){
+        playerController.addStimToSchedule(curTdfUnit);
+      }
+    }
+    Session.set('currentTdfFile', curTdf);
+    curExperimentState.currentTdfFile = curTdf;
+    await updateExperimentState(curExperimentState, 'card.unitIsFinished');
+  }
+  let curTdfUnit = curTdf.tdfs.tutor.unit[newUnitNum];
+  
 
   Session.set('questionIndex', 0);
   Session.set('clusterIndex', undefined);
   Session.set('currentUnitNumber', newUnitNum);
   Session.set('currentTdfUnit', curTdfUnit);
+  Session.set('resetSchedule', true);
   Session.set('currentDeliveryParams', getCurrentDeliveryParams());
   Session.set('currentUnitStartTime', Date.now());
   Session.set('feedbackUnset', true);
@@ -2219,18 +2473,19 @@ async function unitIsFinished(reason) {
   if (newUnitNum < curTdf.tdfs.tutor.unit.length) {
     // Just hit a new unit - we need to restart with instructions
     console.log('UNIT FINISHED: show instructions for next unit', newUnitNum);
-    const rootTDFBoxed = Tdfs.findOne({_id: Session.get('currentRootTdfId')});
-    const rootTDF = rootTDFBoxed.content;
-    const setspec = rootTDF.tdfs.tutor.setspec;
-    if((setspec.loadbalancing && setspec.countcompletion == newUnitNum) || (setspec.loadbalancing && countCompletion && !setspec.countcompletion)){
-      const curConditionFileName = Session.get('currentTdfFile');
-      //get the condition number from the rootTDF
-      const curConditionNumber = setspec.condition.indexOf(curConditionFileName);
-      //increment the completion count for the current condition
-      rootTDF.loadbalancing.completionCount[curConditionNumber] = rootTDF.loadbalancing.completionCount[curConditionNumber] + 1;
-      //update the rootTDF
-      Meteor.call('updateTdfConditionCounts', Session.get('currentRootTdfId'), conditionCounts);
-    }
+      const rootTDFBoxed = Tdfs.findOne({_id: Session.get('currentRootTdfId')});
+      const rootTDF = rootTDFBoxed.content;
+      const setspec = rootTDF.tdfs.tutor.setspec;
+      if((setspec.loadbalancing && setspec.countcompletion == newUnitNum) || (setspec.loadbalancing && countCompletion && !setspec.countcompletion)){
+        const curConditionFileName = Session.get('currentTdfFile').fileName;
+        //get the condition number from the rootTDF
+        const curConditionNumber = setspec.condition.indexOf(curConditionFileName);
+        //increment the completion count for the current condition
+        rootTDFBoxed.conditionCounts[curConditionNumber] = rootTDFBoxed.conditionCounts[curConditionNumber] + 1;
+        conditionCounts = rootTDFBoxed.conditionCounts;
+        //update the rootTDF
+        Meteor.call('updateTdfConditionCounts', Session.get('currentRootTdfId'), conditionCounts);
+      }
     leaveTarget = '/instructions';
   } else {
     // We have run out of units - return home for now
@@ -2239,16 +2494,14 @@ async function unitIsFinished(reason) {
     const rootTDFBoxed = Tdfs.findOne({_id: Session.get('currentRootTdfId')});
     const rootTDF = rootTDFBoxed.content;
     const setspec = rootTDF.tdfs.tutor.setspec;
-    if(setspec.loadbalancing && setspec.countcompletion){
-      if(setspec.countcompletion == "end"){ 
-        const curConditionFileName = Session.get('currentTdfFile');
+    if(setspec.countcompletion == "end" && setspec.loadbalancing || (setspec.loadbalancing && countCompletion && !setspec.countcompletion)){
+        const curConditionFileName = Session.get('currentTdfFile').fileName;
         //get the condition number from the rootTDF
         const curConditionNumber = setspec.condition.indexOf(curConditionFileName);
-        //increment the completion count for the current condition
-        rootTDF.loadbalancing.completionCount[curConditionNumber] = rootTDF.loadbalancing.completionCount[curConditionNumber] + 1;
+        rootTDFBoxed.conditionCounts[curConditionNumber] = rootTDFBoxed.conditionCounts[curConditionNumber] + 1;
+        conditionCounts = rootTDFBoxes.completionCount;
         //update the rootTDF
         Meteor.call('updateTdfConditionCounts', Session.get('currentRootTdfId'), conditionCounts);
-      }
     }
 
     leaveTarget = '/profile';
@@ -2266,7 +2519,6 @@ async function unitIsFinished(reason) {
     currentUnitNumber: newUnitNum,
     currentTdfUnit: curTdfUnit,
     lastAction: 'unit-end',
-    lastActionTimeStamp: Date.now(),
   };
 
   if (curTdfUnit && curTdfUnit.learningsession) {
@@ -2340,6 +2592,23 @@ async function prepareCard() {
   $('#helpButton').prop("disabled",false);
   if (engine.unitFinished()) {
     unitIsFinished('Unit Engine');
+  } else if (Session.get('isVideoSession')) {
+    let indices = Session.get('engineIndices');
+    if(!indices){
+      indices = {
+        'clusterIndex': 0,
+        'stimIndex': 0
+      }
+      Session.set('engineIndices', indices);
+      if(Session.get("currentUnitNumber") + 1 == Session.get("currentTdfFile").tdfs.tutor.unit.length){
+        $('#lastUnitModal').modal('show');
+        return;
+      } else {
+        await initializePlyr();
+      }
+    } else {
+      playerController.playNextCard();
+    }
   } else {
     await engine.selectNextCard(Session.get('engineIndices'), Session.get('currentExperimentState'));
     await newQuestionHandler();
@@ -2431,6 +2700,7 @@ function startQuestionTimeout() {
     readyPromptTimeout = Session.get('currentDeliveryParams').readyPromptStringDisplayTime
   }
   trialStartTimestamp = Date.now();
+  Session.set('trialStartTimestamp', trialStartTimestamp);
   Meteor.setTimeout(() => {
     const beginQuestionAndInitiateUserInputBound = beginQuestionAndInitiateUserInput.bind(null, delayMs, deliveryParams);
     const pipeline = checkAndDisplayTwoPartQuestion.bind(null,
@@ -2473,7 +2743,8 @@ function checkAndDisplayPrestimulus(deliveryParams, nextStageCb) {
     const prestimulusDisplayWrapper = {'text': prestimulusDisplay};
     console.log('prestimulusDisplay detected, displaying', prestimulusDisplayWrapper);
     Session.set('currentDisplay', prestimulusDisplayWrapper);
-    Session.set('displayReady', true);
+    const isVideoSession = Session.get('isVideoSession')
+    Session.set('displayReady', isVideoSession ? false : true); //displayReady handled by video session if video unit
     const prestimulusdisplaytime = deliveryParams.prestimulusdisplaytime;
     console.log('delaying for ' + prestimulusdisplaytime + ' ms then starting question', new Date());
     setTimeout(function() {
@@ -2488,10 +2759,11 @@ function checkAndDisplayPrestimulus(deliveryParams, nextStageCb) {
 
 function checkAndDisplayTwoPartQuestion(deliveryParams, currentDisplayEngine, closeQuestionParts, nextStageCb) {
   // In either case we want to set up the current display now
+  const isVideoSession = Session.get('isVideoSession')
   Session.set('displayReady', false);
   Session.set('currentDisplay', currentDisplayEngine);
   Session.get('currentExperimentState').clozeQuestionParts = closeQuestionParts;
-  Session.set('displayReady', true);
+  Session.set('displayReady', isVideoSession ? false : true);
   console.log('checking for two part questions');
   // Handle two part questions
   const currentQuestionPart2 = Session.get('currentExperimentState').currentQuestionPart2;
@@ -2504,7 +2776,7 @@ function checkAndDisplayTwoPartQuestion(deliveryParams, currentDisplayEngine, cl
       console.log('after timeout, displaying question part two', new Date());
       Session.set('displayReady', false);
       Session.set('currentDisplay', twoPartQuestionWrapper);
-      Session.set('displayReady', true);
+      Session.set('displayReady', isVideoSession ? false : true);
       console.log('displayReadyTrue, checkAndDisplayTwoPartQuestion');
       Session.get('currentExperimentState').currentQuestionPart2 = undefined;
       redoCardImage();
@@ -2561,6 +2833,7 @@ function beginQuestionAndInitiateUserInput(delayMs, deliveryParams) {
 
 function allowUserInput() {
   console.log('allow user input');
+  $('#confirmButton').show();
   inputDisabled = false;
   startRecording();
 
@@ -2988,8 +3261,9 @@ async function getExperimentState() {
   return curExperimentState || {};
 }
 
-function updateExperimentState(newState, codeCallLocation, unitEngineOverride = {}) {
-  let curExperimentState = Session.get('currentExperimentState') || {};
+async function updateExperimentState(newState, codeCallLocation, unitEngineOverride = {}) {
+  let curExperimentState = Session.get('currentExperimentState') || await getExperimentState();
+  newState.lastActionTimeStamp = Date.now();
   console.log('currentExperimentState:', curExperimentState);
   if (unitEngineOverride && Object.keys(unitEngineOverride).length > 0)
     curExperimentState = unitEngineOverride;
@@ -2998,10 +3272,10 @@ function updateExperimentState(newState, codeCallLocation, unitEngineOverride = 
   }
   if(Object.keys(curExperimentState).length === 0){
     curExperimentState = Object.assign(JSON.parse(JSON.stringify(curExperimentState)), newState);
-    Meteor.call('createExperimentState', curExperimentState, curExperimentState.currentTdfId);
+    Meteor.call('createExperimentState', curExperimentState);
   } else {
     curExperimentState = Object.assign(JSON.parse(JSON.stringify(curExperimentState)), newState);
-    Meteor.call('updateExperimentState', curExperimentState, curExperimentState.currentTdfId);
+    Meteor.call('updateExperimentState', curExperimentState, curExperimentState.id);
   }
   console.log('updateExperimentState', codeCallLocation, '\nnew:', curExperimentState);
   Session.set('currentExperimentState', curExperimentState);
@@ -3028,6 +3302,7 @@ async function resumeFromComponentState() {
   timeoutsSeen = 0;
   firstKeypressTimestamp = 0;
   trialStartTimestamp = 0;
+  Session.set('trialStartTimestamp', trialStartTimestamp);
   clearScrollList();
   clearCardTimeout();
 
@@ -3041,6 +3316,7 @@ async function resumeFromComponentState() {
   // currentTdfId and currentStimuliSetId based on experimental conditions
   // (if necessary)
   let rootTDFBoxed = Tdfs.findOne({_id: Session.get('currentRootTdfId')});
+  let curTdf = rootTDFBoxed;
   let rootTDF = rootTDFBoxed.content;
   if (!rootTDF) {
     console.log('PANIC: Unable to load the root TDF for learning', Session.get('currentRootTdfId'));
@@ -3157,7 +3433,7 @@ async function resumeFromComponentState() {
     // Now we have a different current TDF (but root stays the same)
     Session.set('currentTdfId', conditionTdfId);
 
-    const curTdf = Tdfs.findOne({_id: conditionTdfId});
+    curTdf = Tdfs.findOne({_id: conditionTdfId});
     Session.set('currentTdfFile', curTdf.content);
     Session.set('currentTdfName', curTdf.content.fileName);
 
@@ -3166,16 +3442,34 @@ async function resumeFromComponentState() {
     Session.set('currentStimuliSetId', curTdf.stimuliSetId);
     console.log('condition stimuliSetId', curTdf);
   } else {
-    Session.set('currentTdfFile', rootTDF);
-    Session.set('currentTdfName', rootTDF.fileName);
-    Session.set('currentTdfId', Session.get('currentRootTdfId'));
-    Session.set('currentStimuliSetId', rootTDFBoxed.stimuliSetId);
-
+    //if currentTdfFile is not set, we are resuming from a previous state and need to set it
+    if(!Session.get('currentTdfFile')){
+      Session.set('currentTdfFile', rootTDF);
+      Session.set('currentTdfName', rootTDF.fileName);
+      Session.set('currentTdfId', Session.get('currentRootTdfId'));
+      Session.set('currentStimuliSetId', rootTDFBoxed.stimuliSetId);
+    } 
+    
     // Just notify that we're skipping
     console.log('No Experimental condition is required: continuing', rootTDFBoxed);
   }
 
-  const stimuliSet = Tdfs.findOne({_id: Session.get('currentRootTdfId')}).stimuli
+  if(curTdf.content.tdfs.tutor.setspec.unitTemplate){
+    //tdf has dynamic units. need to check component state for current unit
+    if(curExperimentState.currentTdfFile){
+      curTdf.content = curExperimentState.currentTdfFile;
+      //found dynamic tdf units
+      Session.set('currentTdfFile', curTdf.content);
+      Session.set('currentTdfName', curTdf.content.fileName);
+
+      // Also need to read new stimulus file (and note that we allow an exception
+      // to kill us if the current tdf is broken and has no stimulus file)
+      Session.set('currentStimuliSetId', curTdf.stimuliSetId);
+      console.log('condition stimuliSetId', curTdf);
+    }
+  }
+
+  const stimuliSet = curTdf.stimuli
 
   Session.set('currentStimuliSet', stimuliSet);
   Session.set('feedbackUnset', Session.get('fromInstructions') || Session.get('feedbackUnset'));
@@ -3247,10 +3541,22 @@ async function resumeFromComponentState() {
   } else {
     Session.set('currentUnitNumber', 0);
     newExperimentState.currentUnitNumber = 0;
-    newExperimentState.lastUnitStarted = 0;
+    newExperimentState.lastUnitStarted = 0; 
   }
 
-  const curTdfUnit = Session.get('currentTdfFile').tdfs.tutor.unit[Session.get('currentUnitNumber')];
+  //if this unit number is greater than the number of units in the tdf, we need to send the user to the profile page
+  if(curExperimentState.currentUnitNumber > curTdf.content.tdfs.tutor.unit.length - 1){
+    alert('You have completed all the units in this lesson.');
+    leavePage('/profile');
+  }
+
+  const curTdfUnit = curTdf.content.tdfs.tutor.unit[Session.get('currentUnitNumber')];
+  if (curTdfUnit.videosession) { 
+    Session.set('isVideoSession', true)
+    console.log('video type questions detected, pre-loading video');
+    preloadVideos();
+  } else
+    Session.set('isVideoSession', false)
   Session.set('currentTdfUnit', curTdfUnit);
   console.log('resume, currentTdfUnit:', curTdfUnit);
 
@@ -3260,13 +3566,8 @@ async function resumeFromComponentState() {
     Session.set('questionIndex', 0);
     newExperimentState.questionIndex = 0;
   }
-
+  
   updateExperimentState(newExperimentState, 'card.resumeFromComponentState');
-
-  const componentStates = ComponentStates.find().fetch();
-  const curUnitNum = Session.get('currentUnitNumber');
-  const curQuestionIndex = curExperimentState.questionIndex
-  const curQuestion = curTdfUnit.question ? curTdfUnit.question[curQuestionIndex] : false;
 
   //custom settings for user interface
   //we get the current settings from the tdf file's setspec
@@ -3291,7 +3592,7 @@ async function resumeFromComponentState() {
       "displayReadyPromptTimeoutAsBarOrText": "both",
       "displayCardTimeoutAsBarOrText": "both",
       "displayTimeOutDuringStudy": true,
-      "displayUserAnswerInFeedback": true,
+      "displayUserAnswerInFeedback": "onIncorrect",
       "displayPerformanceDuringStudy": false,
       "displayPerformanceDuringTrial": true,
       "displayCorrectAnswerInCenter": false,
@@ -3299,9 +3600,11 @@ async function resumeFromComponentState() {
       "feedbackDisplayPosition" : "middle",
       "stimuliPosition" : "top",
       "choiceButtonCols": 1,
-      "onlyShowSimpleFeedback": false,
+      "onlyShowSimpleFeedback": "onCorrect",
       "incorrectColor": "darkorange",
-      "correctColor": "green"
+      "correctColor": "green",
+      'instructionsTitleDisplay': "headerOnly",
+      'displayConfirmButton': false,
     },
   }
   //here we interprit the stimulus and input position settings to set the colum widths. There are 4 possible combinations.
@@ -3344,6 +3647,61 @@ async function resumeFromComponentState() {
       UIsettings.textInputDisplay = "justify-content-end";
       UIsettings.textInputDisplay2 = "justify-content-start";
   }
+  //convert UIsettings.simplefeedbackOnCorrect to string
+  if(UIsettings.simplefeedbackOnCorrect){
+    UIsettings.simplefeedbackOnCorrect = "true";
+  } else {
+    UIsettings.simplefeedbackOnCorrect = "false";
+  }
+  
+  //convert UIsettings.simplefeedbackOnIncorrect to string
+  if(UIsettings.simplefeedbackOnIncorrect){
+    UIsettings.simplefeedbackOnIncorrect = "true";
+  } else {
+    UIsettings.simplefeedbackOnIncorrect = "false";
+  }
+
+  //switch for simple feedback
+  if(UIsettings.onlyShowSimpleFeedback == "onCorrect"){
+    UIsettings.simplefeedbackOnCorrect = true;
+    UIsettings.simplefeedbackOnIncorrect = false;
+  } else if(UIsettings.onlyShowSimpleFeedback == "onIncorrect"){
+    UIsettings.simplefeedbackOnCorrect = false;
+    UIsettings.simplefeedbackOnIncorrect = true;
+  } else if(UIsettings.onlyShowSimpleFeedback || UIsettings.onlyShowSimpleFeedback == "true"){
+    UIsettings.simplefeedbackOnCorrect = true;
+    UIsettings.simplefeedbackOnIncorrect = true;
+  } else if(!UIsettings.onlyShowSimpleFeedback || UIsettings.onlyShowSimpleFeedback == "false"){
+    UIsettings.simplefeedbackOnCorrect = false;
+    UIsettings.simplefeedbackOnIncorrect = false;
+  }
+
+  //switch for displayUserAnswerInFeedback
+  if(UIsettings.displayUserAnswerInFeedback == "onCorrect"){
+    UIsettings.displayUserAnswerInCorrectFeedback = true;
+    UIsettings.displayUserAnswerInIncorrectFeedback = false;
+  } else if(UIsettings.displayUserAnswerInFeedback == "onIncorrect"){
+    UIsettings.displayUserAnswerInCorrectFeedback = false;
+    UIsettings.displayUserAnswerInIncorrectFeedback = true;
+  } else if(UIsettings.displayUserAnswerInFeedback || UIsettings.displayUserAnswerInFeedback == "true"){
+    UIsettings.displayUserAnswerInCorrectFeedback = true;
+    UIsettings.displayUserAnswerInIncorrectFeedback = true;
+  } else if(!UIsettings.displayUserAnswerInFeedback || UIsettings.displayUserAnswerInFeedback == "false"){
+    UIsettings.displayUserAnswerInCorrectFeedback = false;
+    UIsettings.displayUserAnswerInIncorrectFeedback = false;
+  }
+
+  //switch for displayInstructionsTitle
+  if(UIsettings.instructionsTitleDisplay == "headerOnly"){
+    UIsettings.displayInstructionsTitle = true;
+    UIsettings.displayUnitNameInInstructions = false;
+  } else if(UIsettings.instructionsTitleDisplay == true) {
+    UIsettings.displayInstructionsTitle = true;
+    UIsettings.displayUnitNameInInstructions = true;
+  } else if(UIsettings.instructionsTitleDisplay == false){
+    UIsettings.displayInstructionsTitle = false;
+    UIsettings.displayUnitNameInInstructions = false;
+  }
 
   Session.set('curTdfUISettings', UIsettings);
 
@@ -3369,23 +3727,6 @@ async function getFeedbackParameters(){
     Session.set('displayFeedback',true);
   } 
 }
-
-// cached syllables depreciated by mongo migration
-// async function checkSyllableCacheForCurrentStimFile(cb) {
-//   const currentStimuliSetId = Session.get('currentStimuliSetId');
-//   cachedSyllables = StimSyllables.findOne({filename: currentStimuliSetId});
-//   console.log('cachedSyllables start: ', cachedSyllables);
-//   if (!cachedSyllables) {
-//     console.log('no cached syllables for this stim, calling server method to create them');
-//     Meteor.call('updateStimSyllables', currentStimuliSetId, function() {
-//       // cachedSyllables = StimSyllables.findOne({filename: currentStimuliSetId});
-//       // console.log('new cachedSyllables: ', cachedSyllables);
-//       cb();
-//     });
-//   } else {
-//     cb();
-//   }
-// }
 
 async function removeCardByUser() {
   Meteor.clearTimeout(Session.get('CurTimeoutId'));
@@ -3453,10 +3794,13 @@ async function processUserTimesLog() {
 
     if (tdfFile.tdfs.tutor.unit[curUnitNum].assessmentsession) {
       engine = await createScheduleUnit(curExperimentData);
-    } else if (tdfFile.tdfs.tutor.unit[curUnitNum].learningsession) {
+      Session.set('unitType', 'schedule')
+    } else if (tdfFile.tdfs.tutor.unit[curUnitNum].learningsession || tdfFile.tdfs.tutor.unit[curUnitNum].videosession) {
       engine = await createModelUnit(curExperimentData);
+      Session.set('unitType', 'model')
     } else {
       engine = await createEmptyUnit(curExperimentData); // used for instructional units
+      Session.set('unitType', undefined)
     }
     window.engine = engine;
   }
@@ -3492,14 +3836,12 @@ async function processUserTimesLog() {
       // resumeToQuestion = true;//TODO: may want true here
       // writeCurrentToScrollList(entry.answer, action === "[timeout]", simCorrect, 0);//TODO restore all scroll list state
       break;
-    case '[skip]':
-      break;
   }
 
   if (moduleCompleted) {
-    // They are DONE!
+    // They are DONE!determineUserFeedback
     console.log('TDF already completed - leaving for profile page.');
-    if (Meteor.user().profile.loginMode === 'experiment') {
+    if (Meteor.user().loginParams.loginMode === 'experiment') {
       // Experiment users don't *have* a normal page
       leavePage(routeToSignin);
     } else {
@@ -3529,8 +3871,23 @@ async function processUserTimesLog() {
     const curTdf = Session.get('currentTdfFile');
     const curTdfUnit = curTdf.tdfs.tutor.unit[Session.get('currentUnitNumber')];
     await setStudentPerformance(curUser._id, curUser.username, currentTdfId);
-
-    if (resumeToQuestion) {
+    
+    if(Session.get('isVideoSession')){
+      let indices = Session.get('engineIndices');
+      if(!indices){
+        indices = {
+          'clusterIndex': 0,
+          'stimIndex': 0
+        }
+      }
+      Session.set('engineIndices', indices);
+      if(Session.get("currentUnitNumber") + 1 == Session.get("currentTdfFile").tdfs.tutor.unit.length){
+        $('#lastUnitModal').modal('show');
+        return;
+      } else {
+        await initializePlyr();
+      }
+    } else if (resumeToQuestion) {
       // Question outstanding: force question display and let them give an answer
       console.log('RESUME FINISHED: displaying current question');
       await newQuestionHandler();
@@ -3544,12 +3901,14 @@ async function processUserTimesLog() {
       // lockout period hasn't finished (which prepareCard won't handle)
       if (engine.unitFinished()) {
         let lockoutMins = Session.get('currentDeliveryParams').lockoutminutes;
-        if (lockoutMins > 0) {
+        user = Meteor.user();
+        isAdmin = Roles.userIsInRole(user, 'admin');
+        if (lockoutMins > 0 &&  !isAdmin) {
           let unitStartTimestamp = Session.get('currentUnitStartTime');
-          if(Meteor.user().profile?.lockouts && Meteor.user().profile.lockouts[Session.get('currentTdfId')] && 
-          Meteor.user().profile.lockouts[Session.get('currentTdfId')].currentLockoutUnit == Session.get('currentUnitNumber')){
-            unitStartTimestamp = Meteor.user().profile.lockouts[Session.get('currentTdfId')].lockoutTimeStamp;
-            lockoutMins = Meteor.user().profile.lockouts[Session.get('currentTdfId')].lockoutMinutes;
+          if(Meteor.user().lockouts && Meteor.user().lockouts[Session.get('currentTdfId')] && 
+          Meteor.user().lockouts[Session.get('currentTdfId')].currentLockoutUnit == Session.get('currentUnitNumber')){
+            unitStartTimestamp = Meteor.user().lockouts[Session.get('currentTdfId')].lockoutTimeStamp;
+            lockoutMins = Meteor.user().lockouts[Session.get('currentTdfId')].lockoutMinutes;
           }
           lockoutFreeTime = unitStartTimestamp + (lockoutMins * (60 * 1000)); // minutes to ms
           if (Date.now() < lockoutFreeTime && (typeof curTdfUnit.unitinstructions !== 'undefined') ){

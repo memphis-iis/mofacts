@@ -2,6 +2,9 @@ import {secsIntervalString} from '../../../common/globalHelpers';
 import {haveMeteorUser} from '../../lib/currentTestingHelpers';
 import {updateExperimentState, initCard} from './card';
 import {routeToSignin} from '../../lib/router';
+import { meteorCallAsync } from '../../index';
+import { _ } from 'core-js';
+import { revisitUnit, getExperimentState } from './card';
 
 export {instructContinue, unitHasLockout, checkForFileImage};
 // //////////////////////////////////////////////////////////////////////////
@@ -14,11 +17,10 @@ let lockoutHandled = false;
 let serverNotify = null;
 // Will get set on first periodic check and cleared when we leave the page
 let displayTimeStart = null;
+let timeRendered = 0
 
 function startLockoutInterval() {
   clearLockoutInterval();
-  // See below for lockoutPeriodicCheck - notice that we also do an immediate
-  // check and then start the interval
   lockoutPeriodicCheck();
   lockoutInterval = Meteor.setInterval(lockoutPeriodicCheck, 250);
 }
@@ -61,29 +63,19 @@ const logLockout = _.throttle(
 );
 
 // Return current TDF unit's lockout minutes (or 0 if none-specified)
-function currLockOutMinutes() {
-  if(Meteor.user() && Meteor.user().profile.lockouts && Meteor.user().profile.lockouts[Session.get('currentTdfId')] &&
-  Meteor.user().profile.lockouts[Session.get('currentTdfId')].currentLockoutUnit == Session.get('currentUnitNumber')){
+function currLockOut() {
+  if(Meteor.user() && Meteor.user().lockouts && Meteor.user().lockouts[Session.get('currentTdfId')] &&
+  Meteor.user().lockouts[Session.get('currentTdfId')].currentLockoutUnit == Session.get('currentUnitNumber')){
     // user has started the lockout previously
-    const userLockout = Meteor.user().profile.lockouts[Session.get('currentTdfId')];
+    const userLockout = Meteor.user().lockouts[Session.get('currentTdfId')];
     const lockoutTimeStamp = userLockout.lockoutTimeStamp;
     const lockoutMinutes = userLockout.lockoutMinutes;
     const lockoutTime = lockoutTimeStamp + lockoutMinutes*60*1000;
-    const currTime = new Date().getTime();
-    if(currTime < lockoutTime){
-      // lockout is still in effect
-      const newLockoutMinutes = Math.ceil((lockoutTime - currTime)/(60*1000));
-      logLockout(newLockoutMinutes);
-      return newLockoutMinutes;
-    }
+    const currTime = Date.now();
+    const newLockout = lockoutTime - currTime;
+    return newLockout;
   } else {
-    // user has not started the lockout previously
-    const lockoutminutes = parseInt(Session.get('currentDeliveryParams').lockoutminutes || 0);
-    if(lockoutminutes > 0){
-      Meteor.call('setLockoutTimeStamp', new Date().getTime(), lockoutminutes, Session.get('currentUnitNumber'), Session.get('currentTdfId'));
-    }
-    logLockout(lockoutminutes);
-    return lockoutminutes;
+    return 0;
   }
 }
 
@@ -101,9 +93,9 @@ function checkForFileImage(string) {
 }
 
 function unitHasLockout() {
-  if(Meteor.user() && Meteor.user().profile.lockouts && Meteor.user().profile.lockouts[Session.get('currentTdfId')] &&
-  Meteor.user().profile.lockouts[Session.get('currentTdfId')].currentLockoutUnit == Session.get('currentUnitNumber')){
-    const userLockout = Meteor.user().profile.lockouts[Session.get('currentTdfId')];
+  if(Meteor.user() && Meteor.user().lockouts && Meteor.user().lockouts[Session.get('currentTdfId')] &&
+  Meteor.user().lockouts[Session.get('currentTdfId')].currentLockoutUnit == Session.get('currentUnitNumber')){
+    const userLockout = Meteor.user().lockouts[Session.get('currentTdfId')];
     const lockoutTimeStamp = userLockout.lockoutTimeStamp;
     const lockoutMinutes = userLockout.lockoutMinutes;
     const lockoutTime = lockoutTimeStamp + lockoutMinutes*60*1000;
@@ -118,16 +110,34 @@ function unitHasLockout() {
   }
 }
 
-function lockoutKick() {
+async function lockoutKick() {
   const display = getDisplayTimeouts();
+  //if an existing lockout is not in place, we will set one if the current unit has a lockout
+  const lockoutminutes = parseInt(Session.get('currentDeliveryParams').lockoutminutes || 0);
+  if(lockoutminutes > 0 && !checkForExistingLockout()){
+    await meteorCallAsync('setLockoutTimeStamp', new Date().getTime(), lockoutminutes, Session.get('currentUnitNumber'), Session.get('currentTdfId'));
+    startLockoutInterval();
+    return
+  }
+  logLockout(lockoutminutes);
   const doDisplay = (display.minSecs > 0 || display.maxSecs > 0);
-  const doLockout = (!lockoutInterval && currLockOutMinutes() > 0);
+  const doLockout = (!lockoutInterval && currLockOut() > 0);
   if (doDisplay || doLockout) {
     console.log('interval kicked');
     startLockoutInterval();
   }
 }
 
+
+function checkForExistingLockout() {
+  if(Meteor.user() && Meteor.user().lockouts && Meteor.user().lockouts[Session.get('currentTdfId')] &&
+  Meteor.user().lockouts[Session.get('currentTdfId')].currentLockoutUnit == Session.get('currentUnitNumber')){
+    return true;
+  } else {
+    return false;
+  }
+}
+  
 // Min and Max display seconds: if these are enabled, they determine
 // potential messages, the continue button functionality, and may even move
 // the screen forward. HOWEVER, the lockout functionality currently overrides
@@ -152,14 +162,17 @@ function setDispTimeoutText(txt) {
 function lockoutPeriodicCheck() {
   if (!lockoutFreeTime) {
     const unitStartTimestamp = Session.get('currentUnitStartTime');
-    const lockoutMins = currLockOutMinutes();
+    const lockoutMins = currLockOut();
     if (lockoutMins) {
-      lockoutFreeTime = unitStartTimestamp + lockoutMins * (60 * 1000); // Minutes to millisecs
+      lockoutFreeTime = unitStartTimestamp + lockoutMins;
     }
   }
 
   // Lockout handling
-  if (Date.now() >= lockoutFreeTime) {
+  //if the user is an admin, we will allow them to continue
+  user = Meteor.user();
+  isAnAdmin = Roles.userIsInRole(user, 'admin');
+  if (Date.now() >= lockoutFreeTime || isAnAdmin) {
     // All done - clear out time remaining, hide the display, enable the
     // continue button, and stop the lockout timer
     if (!lockoutHandled) {
@@ -188,7 +201,7 @@ function lockoutPeriodicCheck() {
     // we only need to call it once
     if (serverNotify === null) {
       serverNotify = function() {
-        if (Meteor.user().profile.loginMode !== 'experiment') {
+        if (Meteor.user().loginParams.loginMode !== 'experiment') {
           return; // Nothing to do
         }
 
@@ -296,8 +309,12 @@ function getUnitsRemaining() {
 // SUPER-IMPORTANT: note that this can be called outside this template, so it
 // must only reference visible from anywhere on the client AND we take great
 // pains to not modify anything reactive until this function has returned
-function instructContinue() {
-  const curUnit = Session.get('currentTdfUnit');
+async function instructContinue() {
+  let curUnit = Session.get('currentTdfUnit');
+  if(!curUnit){
+    let experimentState = await getExperimentState()
+    curUnit = experimentState.currentTdfFile.tdfs.tutor.unit[Session.get('currentUnitNumber')];
+  }
 
   let feedbackText = curUnit.unitinstructions && curUnit.unitinstructions.length > 0 ?
     curUnit.unitinstructions.trim() : '';
@@ -320,7 +337,6 @@ function instructContinue() {
       instructionClientStart: instructionClientStart,
       feedbackText: feedbackText,
       lastAction: 'instructions',
-      lastActionTimeStamp: Date.now(),
     };
 
     const res = await updateExperimentState(newExperimentState, 'instructions.instructContinue');
@@ -338,11 +354,11 @@ function instructContinue() {
 
 Template.instructions.helpers({
   isExperiment: function() {
-    return Meteor.user().profile.loginMode === 'experiment';
+    return Meteor.user().loginParams.loginMode === 'experiment';
   },
 
   isNormal: function() {
-    return Meteor.user().profile.loginMode !== 'experiment';
+    return Meteor.user().loginParams.loginMode !== 'experiment';
   },
 
   backgroundImage: function() {
@@ -365,11 +381,11 @@ Template.instructions.helpers({
   },
 
   islockout: function() {
-    return currLockOutMinutes() > 0;
+    return currLockOut() > 0;
   },
 
   lockoutminutes: function() {
-    return currLockOutMinutes();
+    return currLockOut();
   },
 
   username: function() {
@@ -380,10 +396,14 @@ Template.instructions.helpers({
     }
   },
 
+  UISettings: function() {
+    return Session.get('currentUISettings');
+  },
+
   allowcontinue: function() {
     // If we're in experiment mode, they can only continue if there are
     // units left.
-    if (Meteor.user().profile.loginMode === 'experiment') {
+    if (Meteor.user().loginParams.loginMode === 'experiment') {
       return getUnitsRemaining() > 0;
     } else {
       return true;
@@ -393,21 +413,70 @@ Template.instructions.helpers({
     lessonname = Session.get('currentTdfFile').tdfs.tutor.setspec.lessonname;
     console.log("lessonname",lessonname);
     return lessonname;
-  }
+  },
+  'allowGoBack': function() {
+    //check if this is allowed
+    if(Session.get('currentDeliveryParams').allowRevistUnit || Session.get('currentTdfFile').tdfs.tutor.setspec.allowRevistUnit){
+      //get the current unit number and decrement it by 1, and see if it exists
+      let curUnitNumber = Session.get('currentUnitNumber');
+      let newUnitNumber = curUnitNumber - 1;
+      if(newUnitNumber >= 0 && Session.get('currentTdfFile').tdfs.tutor.unit.length >= newUnitNumber){
+        return true;
+      } else {
+        return false;
+      }
+    } else {
+      return false;
+    }
+  },
 });
 
 Template.instructions.rendered = function() {
   // Make sure lockout interval timer is running
   lockoutKick();
+  timeRendered = Date.now();
   const unitInstructionsExist = typeof Session.get('currentTdfFile').tdfs.tutor.unit[Session.get('currentUnitNumber')].unitinstructions !== "undefined";
   const instructionQuestionExists = typeof Session.get('instructionQuestionResults') === "undefined";
   const unitInstructionsQuestionExists = typeof Session.get('currentTdfFile').tdfs.tutor.unit[Session.get('currentUnitNumber')].unitinstructionsquestion !== "undefined";
   const displayContinueBotton = unitInstructionsExist || instructionQuestionExists || unitInstructionsQuestionExists;
-  const lockout = currLockOutMinutes() > 0;
-  if(!lockout && displayContinueBotton){
-    $('#continueBar').show();
-  }
 };
+
+
+// instructionlog 
+
+function gatherInstructionLogRecord(trialEndTimeStamp, trialStartTimeStamp,  
+  deliveryParams) {
+
+  // Figure out button trial entries
+  const curTdf = Session.get('currentTdfFile');
+  const unitName = Session.get('currentTdfUnit').unitname;
+
+  const instructionLog = {
+    'userId': Meteor.userId(),
+    'TDFId': Session.get('currentTdfId'),
+    'sectionId': Session.get('curSectionId'),
+    'teacherId': Session.get('curTeacher')?._id,
+    'anonStudentId': Meteor.user().username,
+    'sessionID': Meteor.default_connection._lastSessionId,
+    'conditionNameA': 'tdf file',
+    // Note: we use this to enrich the history record server side, change both places if at all
+    'conditionTypeA': Session.get('currentTdfName'),
+    'conditionNameB': 'xcondition',
+    'conditionTypeB': Session.get('experimentXCond') || null,
+    'conditionNameE': 'section',
+    'conditionTypeE': Meteor.user().loginParams.entryPoint && 
+        Meteor.user().loginParams.entryPoint !== 'direct' ? Meteor.user().loginParams.entryPoint : null,
+    'responseDuration': null,
+    'levelUnit': Session.get('currentUnitNumber'),
+    'levelUnitType': "Instruction",
+    'time': trialStartTimeStamp,
+    'CFAudioInputEnabled': Meteor.user().audioInputMode,
+    'CFAudioOutputEnabled': Session.get('enableAudioPromptAndFeedback'),
+    'CFResponseTime': trialEndTimeStamp,
+    'entryPoint': Meteor.user().loginParams.entryPoint
+  };
+  return instructionLog;
+}
 
 // //////////////////////////////////////////////////////////////////////////
 // Template Events
@@ -415,7 +484,32 @@ Template.instructions.rendered = function() {
 Template.instructions.events({
   'click #continueButton': function(event) {
     event.preventDefault();
+    //record the unit instructions if the unit setspec has the recordInstructions tag set to true
+    // OR if the tdf setspec has the recordInstructions tag set to true
+    // OR if the tdf setspec has the recordInstructions has an array of unit numbers that includes the current unit number
+    const curUnit = Session.get('currentUnitNumber');
+    const curTdf = Session.get('currentTdfFile');
+    if(typeof curUnit.recordInstructions === "undefined"){
+      curUnit.recordInstructions = true;
+    } 
+    if(typeof curTdf.tdfs.tutor.setspec.recordInstructions === "undefined"){
+      curTdf.tdfs.tutor.setspec.recordInstructions = true;
+    }
+    typeof curTdf.tdfs.tutor.setspec.recordInstructions === "array" ? recordInstructionsIncludesUnit = curTdf.tdfs.tutor.setspec.recordInstructions.includes(curUnit) : recordInstructionsIncludesUnit = false;
+    const recordInstructions = curUnit.recordInstructions || recordInstructionsIncludesUnit|| curTdf.tdfs.tutor.setspec.recordInstructions === true || curTdf.tdfs.tutor.setspec.recordInstructions === "true";
+    if(recordInstructions){
+      const instructionLog = gatherInstructionLogRecord(Date.now(), timeRendered, Session.get('currentDeliveryParams'));
+      console.log('instructionLog', instructionLog);
+      Meteor.call('insertHistory', instructionLog)
+    }
     instructContinue();
+  },
+  'click #stepBackButton': function(event) {
+    event.preventDefault();
+    //get the current unit number and decrement it by 1
+    let curUnit = Session.get('currentUnitNumber');
+    let newUnitNumber = curUnit - 1;
+    revisitUnit(newUnitNumber);
   },
   'click #instructionQuestionAffrimative': function() {
     Session.set('instructionQuestionResults',true);

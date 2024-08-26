@@ -11,6 +11,7 @@ import {sendScheduledTurkMessages} from './turk_methods';
 import {getItem, getCourse} from './orm';
 import {result} from 'underscore';
 import { _ } from 'core-js';
+import { all } from 'bluebird';
 
 
 export {
@@ -60,8 +61,10 @@ const syllableURL = Meteor.settings.syllableURL ? Meteor.settings.syllableURL : 
 
 
 let highestStimuliSetId;
+let contentGenerationAvailable = false;
 let nextStimuliSetId;
 let nextEventId = 1;
+let stimDisplayTypeMap = {};
 
 // How large the distance between two words can be to be considered a match. Larger values result in a slower search. Defualt is 2.
 const maxEditDistance = Meteor.settings.SymSpell.maxEditDistance ? parseInt(Meteor.settings.SymSpell.maxEditDistance) : 2;
@@ -162,6 +165,15 @@ function getMatchingDialogueCacheWordsForAnswer(answer) {
   } else {
     return [];
   }
+}
+
+function createExperimentState(curExperimentState) {
+  serverConsole('createExperimentState', curExperimentState, curExperimentState.currentTdfId);
+  GlobalExperimentStates.insert({
+    userId: Meteor.userId(),
+    TDFId: curExperimentState.currentTdfId,
+    experimentState: curExperimentState
+  });
 }
 
 // Published to all clients (even without subscription calls)
@@ -283,6 +295,15 @@ function createAwsHmac(secretKey, dataString) {
 async function getTdfById(TDFId) {
   const tdf = Tdfs.findOne({_id: TDFId});
   return tdf;
+}
+
+async function checkCongentGenerationAvailable() {
+  try {
+    const response = await fetch('http://spacy:80');
+    return true
+  } catch (error) {
+    return false;
+  }
 }
 
 async function getTdfTTSAPIKey(TDFId) {
@@ -500,29 +521,37 @@ async function processPackageUpload(fileObj, owner, zipLink, emailToggle){
     }
     serverConsole('unzippedFiles', unzippedFiles);
     const stimFileName = unzippedFiles.filter(f => f.type == 'stim')[0].name;
+    const results = await new Promise(async (resolve, reject) => {
+      res = [];
+      try {
+        for(const tdf of unzippedFiles.filter(f => f.type == 'tdf')){
+          const stim = unzippedFiles.find(f => f.name == tdf.contents.tutor.setspec.stimulusfile);
+          serverConsole('stim', stim, 'stimFileName', stimFileName, tdf.contents.tutor.setspec.stimulusfile);
+          tdf.packageFile = packageFile;
+          const packageResult = await combineAndSaveContentFile(tdf, stim, owner);
+          res.push(packageResult);
+          serverConsole('packageResult', packageResult);
+        }
+        resolve(res)
+      } catch(e) {
+        if(emailToggle){
+          sendEmail(
+            Meteor.user().emails[0].address,
+            Meteor.settings.owner,
+            "Package Upload Failed",
+            "Package upload failed: " + e + " on file: " + filePath
+          )
+        }
+        serverConsole('1 processPackageUpload ERROR,', path, ',', e + ' on file: ' + filePath);
+        reject(new Meteor.Error('package upload failed: ' + e + ' on file: ' + filePath))
+      } finally {
+        updateStimDisplayTypeMap()
+      }
+    });
+  
     let stimSetId;
-    try {
-      for(const tdf of unzippedFiles.filter(f => f.type == 'tdf')){
-        const stim = unzippedFiles.find(f => f.name == tdf.contents.tutor.setspec.stimulusfile);
-        serverConsole('stim', stim, 'stimFileName', stimFileName, tdf.contents.tutor.setspec.stimulusfile);
-        const packageResult = await combineAndSaveContentFile(tdf, stim, owner);
-        results.push(packageResult);
-        serverConsole('packageResult', packageResult);
-        if(packageResult.data && packageResult.data.TDF && packageResult.data.TDF.stimuliSetId)
-          stimSetId = packageResult.data.TDF.stimuliSetId;
-      }
-    } catch(e) {
-      if(emailToggle){
-        sendEmail(
-          Meteor.user().emails[0].address,
-          Meteor.settings.owner,
-          "Package Upload Failed",
-          "Package upload failed: " + e + " on file: " + filePath
-        )
-      }
-      serverConsole('1 processPackageUpload ERROR,', path, ',', e + ' on file: ' + filePath);
-      throw new Meteor.Error("Package upload failed: " + e + " on file: " + filePath)
-    }
+    if(results && results[0] && results[0].data && results[0].data.stimuliSetId)
+      stimSetId = results[0].data.stimuliSetId;
     if (!stimSetId) stimSetId = await getStimuliSetIdByFilename(stimFileName);
     try {
       for(const media of unzippedFiles.filter(f => f.type == 'media')){
@@ -560,7 +589,7 @@ async function processPackageUpload(fileObj, owner, zipLink, emailToggle){
         )
       }
     serverConsole('3 processPackageUpload ERROR,', path, ',', e + ' on file: ' + filePath);
-    console.error(e);
+    throw new Meteor.Error('package upload failed at initialization: ' + e + ' on file: ' + filePath)
   }
 }
 
@@ -642,12 +671,13 @@ async function saveContentFile(type, filename, filecontents, owner, packagePath 
           results.errmsg = 'Please upload stimulus file before uploading a TDF: ' + stimFileName;
         } else {
           try {
-            const rec = {'fileName': filename, 'tdfs': json, 'ownerId': ownerId, 'source': 'upload'};
+            const rec = {'fileName': filename, 'tdfs': json, 'ownerId': ownerId, 'source': 'upload', 'packageFile': filecontents.packageFile};
             const ret = await upsertTDFFile(filename, rec, ownerId);
             if(ret && ret.res == 'awaitClientTDF'){
               serverConsole('awaitClientTDF', ret)
               results.result = false;
               results.data = ret;
+              return results;
             } else {
               results.result = true;
             }
@@ -677,7 +707,7 @@ async function saveContentFile(type, filename, filecontents, owner, packagePath 
 }
 
 async function combineAndSaveContentFile(tdf, stim, owner) {
-  serverConsole('saveContentFile', tdf, stim, owner);
+  serverConsole('combineAndSaveContentFile', tdf, stim, owner);
   const results = {
     'result': null,
     'errmsg': 'No action taken?',
@@ -723,10 +753,10 @@ async function combineAndSaveContentFile(tdf, stim, owner) {
       if(ret && ret.res == 'awaitClientTDF'){
         serverConsole('awaitClientTDF', ret)
         results.result = false;
-        results.data = ret;
       } else {
         results.result = true;
       }
+      results.data = ret;
     } catch (err) {
       results.result=false;
       results.errmsg=err.toString();
@@ -1165,22 +1195,36 @@ async function getTdfNamesByAccessorId(accessorId) {
   }
 }
 
+async function cleanExperimentStateDupes(experimentStates, idToKeep) {
+  for(const eS of experimentStates){
+    if(eS._id !== idToKeep)
+      GlobalExperimentStates.remove({_id: eS._id});
+  }
+}
 
 async function getExperimentState(userId, TDFId) { // by currentRootTDFId, not currentTdfId
-  const experimentStateRet = GlobalExperimentStates.findOne({userId: userId, TDFId: TDFId});
-  const experimentState = experimentStateRet ? experimentStateRet.experimentState : {};
+  const experimentStateRet = GlobalExperimentStates.find({userId: userId, TDFId: TDFId}).fetch();
+  const mergedExperimentState = {};
+  //merge experiment states
+  for(const experimentState of experimentStateRet){
+    mergedExperimentState.experimentState = Object.assign({}, mergedExperimentState.experimentState, experimentState.experimentState);
+  }
+  const experimentState = mergedExperimentState && mergedExperimentState.experimentState ? mergedExperimentState.experimentState : {};
+  experimentState.id = experimentStateRet && experimentStateRet[0] ? experimentStateRet[0]._id : null;
+  //cleans up duplicates that occured due to a bug until next db wipe
+  await cleanExperimentStateDupes(experimentStateRet, experimentState.id);
   return experimentState;
 }
 
 // UPSERT not INSERT
-async function setExperimentState(userId, TDFId, newExperimentState, where) { // by currentRootTDFId, not currentTdfId
+async function setExperimentState(userId, TDFId, experimentStateId, newExperimentState, where) { // by currentRootTDFId, not currentTdfId
   serverConsole('setExperimentState:', where, userId, TDFId, newExperimentState);
-  const experimentStateRet = GlobalExperimentStates.findOne({userId: userId, TDFId: TDFId});
+  const experimentStateRet = GlobalExperimentStates.findOne({_id: experimentStateId})
   serverConsole(experimentStateRet)
   serverConsole(newExperimentState)
   if (experimentStateRet != null) {
     const updatedExperimentState = Object.assign(experimentStateRet.experimentState, newExperimentState);
-    GlobalExperimentStates.update({userId: userId, TDFId: TDFId}, {$set: {experimentState: updatedExperimentState}})
+    GlobalExperimentStates.update({_id: experimentStateId}, {$set: {experimentState: updatedExperimentState}})
     return updatedExperimentState;
   }
   GlobalExperimentStates.insert({userId: userId, TDFId: TDFId, experimentState: newExperimentState});
@@ -1223,6 +1267,12 @@ async function insertHistory(historyRecord) {
   historyRecord.recordedServerTime = (new Date()).getTime();
   serverConsole('insertHistory', historyRecord);
   Histories.insert(historyRecord)
+}
+
+async function getLastTDFAccessed(userId) {
+  const lastExperimentStateUpdated = GlobalExperimentStates.findOne({userId: userId}, {sort: {"experimentState.lastActionTimeStamp": -1}, limit: 1});;
+  const lastTDFId = lastExperimentStateUpdated.TDFId;
+  return lastTDFId;
 }
 
 async function getHistoryByTDFID(TDFId) {
@@ -1295,49 +1345,48 @@ async function addUserToTeachersClass(userId, teacherID, sectionId) {
   return true;
 }
 
-async function getStimDisplayTypeMap() {
-  try {
-    serverConsole('getStimDisplayTypeMap');
-    const tdfs = await Tdfs.find().fetch();
-    const items = tdfs.map((tdf) => tdf.stimuli).flat();
-    let map = {};
-    for(let item of items){
-      if(!item) continue;
-      if(!map[item.stimuliSetId]){
-        map[item.stimuliSetId] = {
-          hasCloze: false,
-          hasText: false,
-          hasAudio: false,
-          hasImage: false,
-          hasVideo: false
-        }
-      }
-      else if(map[item.stimuliSetId].hasCloze && map[item.stimuliSetId].hasText && map[item.stimuliSetId].hasAudio &&
-              map[item.stimuliSetId].hasImage && map[item.stimuliSetId].hasVideo){
-        continue;
-      }
-      if(!map[item.stimuliSetId].hasCloze && item.clozeStimulus){
-        map[item.stimuliSetId].hasCloze = true;
-      }
-      if(!map[item.stimuliSetId].hasText && item.textStimulus){
-        map[item.stimuliSetId].hasText = true;
-      }
-      if(!map[item.stimuliSetId].hasAudio && item.audioStimulus){
-        map[item.stimuliSetId].hasAudio = true;
-      }
-      if(!map[item.stimuliSetId].hasImage && item.imageStimulus){
-        map[item.stimuliSetId].hasImage = true;
-      }
-      if(!map[item.stimuliSetId].hasVideo && item.videoStimulus){
-        map[item.stimuliSetId].hasVideo = true;
+async function updateStimDisplayTypeMap(){
+  serverConsole('getStimDisplayTypeMap');
+  const tdfs = await Tdfs.find().fetch();
+  const items = tdfs.map((tdf) => tdf.stimuli).flat();
+  let map = {};
+  for(let item of items){
+    if(!item) continue;
+    if(!map[item.stimuliSetId]){
+      map[item.stimuliSetId] = {
+        hasCloze: false,
+        hasText: false,
+        hasAudio: false,
+        hasImage: false,
+        hasVideo: false
       }
     }
-    serverConsole('getStimDisplayTypeMap', map);
-    return map;
-  } catch (e) {
-    serverConsole('getStimDisplayTypeMap ERROR,', e);
-    return null;
+    else if(map[item.stimuliSetId].hasCloze && map[item.stimuliSetId].hasText && map[item.stimuliSetId].hasAudio &&
+            map[item.stimuliSetId].hasImage && map[item.stimuliSetId].hasVideo){
+      continue;
+    }
+    if(!map[item.stimuliSetId].hasCloze && item.clozeStimulus){
+      map[item.stimuliSetId].hasCloze = true;
+    }
+    if(!map[item.stimuliSetId].hasText && item.textStimulus){
+      map[item.stimuliSetId].hasText = true;
+    }
+    if(!map[item.stimuliSetId].hasAudio && item.audioStimulus){
+      map[item.stimuliSetId].hasAudio = true;
+    }
+    if(!map[item.stimuliSetId].hasImage && item.imageStimulus){
+      map[item.stimuliSetId].hasImage = true;
+    }
+    if(!map[item.stimuliSetId].hasVideo && item.videoStimulus){
+      map[item.stimuliSetId].hasVideo = true;
+    }
   }
+  serverConsole('getStimDisplayTypeMap', map);
+  stimDisplayTypeMap = map;
+}
+
+async function getStimDisplayTypeMap() {
+  return stimDisplayTypeMap;
 }
 
 function getClassPerformanceByTDF(classId, tdfId, date=false) {
@@ -1351,14 +1400,14 @@ function getClassPerformanceByTDF(classId, tdfId, date=false) {
     curDate = new Date();
     date = curDate.getTime();
   }
-  const res1 = Histories.find({userId: {$in: userIds}, TDFId: tdfId}).fetch();
+  const res1 = Histories.find({userId: {$in: userIds}, TDFId: tdfId, levelUnitType: {$ne: "Instruction"}}).fetch();
   for(let history of res1){
     var outcome = 0;
     if(history.outcome === "correct"){
       outcome = 1;
     }
     var exception = false;
-    var exceptions = Meteor.users.findOne({_id: history.userId}).profile.dueDateExceptions || [];
+    var exceptions = Meteor.users.findOne({_id: history.userId}).dueDateExceptions || [];
     var exceptionRawDate = false;
     if(exceptions.findIndex((item) => item.tdfId == tdfId && item.classId == classId) !== -1){
       var exceptionRaw = exceptions.find((item) => item.tdfId == tdfId && item.classId == classId).date;
@@ -1412,20 +1461,30 @@ function addUserDueDateException(userId, tdfId, classId, date){
     date: date,
   }
   user = Meteor.users.findOne({_id: userId});
-  if(user.profile.dueDateExceptions){
-    user.profile.dueDateExceptions.push(exception);
+  if(user.dueDateExceptions){
+    user.dueDateExceptions.push(exception);
   }
   else{
-    user.profile.dueDateExceptions = [exception];
+    user.dueDateExceptions = [exception];
   }
   Meteor.users.update({_id: userId}, user);
+}
+
+async function checkForTDFData(tdfId){
+  const userId = Meteor.userId();
+  serverConsole('checkForTDFData', tdfId, userId);
+  tdf = history.findOne({TDFId: tdfId, userId: userId, $and: [ {levelUnitType: {$ne: "schedule"}}, {levelUnitType: {$ne: "Instruction"}} ] });
+  if(tdf){
+    return true;
+  }
+  return false;
 }
 
 async function checkForUserException(userId, tdfId){
   serverConsole('checkForUserException', userId, tdfId);
   user = Meteor.users.findOne({_id: userId});
-  if(user.profile.dueDateExceptions){
-    var exceptions = user.profile.dueDateExceptions;
+  if(user.dueDateExceptions){
+    var exceptions = user.dueDateExceptions;
     var exception = exceptions.find((item) => item.tdfId == tdfId);
     if(exception){
       exceptionDate = new Date(exception.date);
@@ -1439,10 +1498,10 @@ async function checkForUserException(userId, tdfId){
 function removeUserDueDateException(userId, tdfId){
   serverConsole('removeUserDueDateException', userId, tdfId);
   user = Meteor.users.findOne({_id: userId});
-  if(user.profile.dueDateExceptions){
-    exceptionIndex = user.profile.dueDateExceptions.findIndex((item) => item.tdfId == tdfId);
+  if(user.dueDateExceptions){
+    exceptionIndex = user.dueDateExceptions.findIndex((item) => item.tdfId == tdfId);
     if(exceptionIndex > -1){
-      user.profile.dueDateExceptions.splice(exceptionIndex, 1);
+      user.dueDateExceptions.splice(exceptionIndex, 1);
     } else {
       serverConsole('removeUserDueDateException ERROR, no exception found', userId, tdfId);
     }
@@ -1640,6 +1699,15 @@ async function getStudentPerformanceByIdAndTDFIdFromHistory(userId, TDFId, retur
   studentPerformance[0].totalStimCount = await ComponentStates.find({userId: userId, TDFId: TDFId, componentType: 'stimulus'}).count();
   return studentPerformance[0];
 }
+
+//get most recent history record for a student given a tdfid, cluster index, and stimulus index. All we want is the outcome
+async function getStudentPerformanceByStimulus(userId, TDFId, clusterIndex, stimulusIndex) {
+  serverConsole('getStudentPerformanceByStimulus', userId, TDFId, clusterIndex, stimulusIndex);
+  const history = Histories.findOne({userId: userId, TDFId: TDFId, clusterIndex: clusterIndex, stimulusIndex: stimulusIndex}, {sort: {time: -1}});
+  return history ? history.outcome : null;
+}
+
+
 
 async function getNumDroppedItemsByUserIDAndTDFId(userId, TDFId){
   //used to grab a limited sample of the student's performance
@@ -1900,29 +1968,24 @@ function sendErrorReportSummaries() {
 //function to check drive space and send email if it is low
 function checkDriveSpace() {
   serverConsole('checkDriveSpace');
-  fs = Npm.require('fs');
-  const driveSpace = fs.statSync('/').size;
-  //get total drive space
-  const driveSpaceTotal = fs.statSync('/').blksize * fs.statSync('/').blocks;
-  //get drive space used
-  const driveSpaceUsed = driveSpaceTotal - driveSpace;
-  //get drive space used as a percentage
-  const driveSpaceUsedPercent = (driveSpaceUsed / driveSpaceTotal) * 100;
-  //if drive space used is greater than 90%, send email
-  if (driveSpaceUsedPercent > 90) {
-    const from = ownerEmail;
-    const subject = 'Drive Space Warning - ' + thisServerUrl;
-    const text = 'Drive space is ' + driveSpaceUsedPercent + '% full. ' +
-                  'Please check the server and delete any unnecessary files. ';
-    // send email to admins
-    for (const index in adminUsers) {
-      const admin = adminUsers[index];
-      try {
-        sendEmail(admin, from, subject, text);
-      } catch (err) {
-        serverConsole(err);
-      }
+  diskusage = Npm.require('diskusage');
+  const path = "/"
+  try{
+    let info = diskusage.checkSync(path);
+    let freeSpace = info.free;
+    let totalSpace = info.total;
+    let percentFree = (freeSpace / totalSpace) * 100;
+    serverConsole('freeSpace: ' + freeSpace + ', totalSpace: ' + totalSpace + ', percentFree: ' + percentFree);
+    if(percentFree < 10){
+      serverConsole('Low disk space: ' + percentFree + '%');
+      const from = ownerEmail;
+      const subject = 'MoFaCTs Low Disk Space - ' + thisServerUrl;
+      const text = 'Low disk space: ' + percentFree + '%';
+      sendEmail(ownerEmail, from, subject, text);
     }
+  } 
+  catch (err) {
+    serverConsole(err);
   }
 }
 
@@ -1995,7 +2058,8 @@ function findUserByName(username) {
 function sendEmail(to, from, subject, text) {
   serverConsole('sendEmail', to, from, subject, text);
   check([to, from, subject, text], [String]);
-  Email.send({to, from, subject, text});
+  if(Meteor.isProduction)
+    Email.send({to, from, subject, text});
 }
 
 function hasGeneratedTdfs(TDFjson) {
@@ -2138,7 +2202,7 @@ async function upsertTDFFile(tdfFilename, tdfJSON, ownerId, packagePath = null) 
 }
 
 async function upsertPackage(packageJSON, ownerId) {
-  //serverConsole('tdfJSON', packageJSON);
+  serverConsole('upsertPackage', packageJSON);
   const responseKCMap = await getResponseKCMap();
   const stimulusFileName = packageJSON.stimFileName
   const stimJSON = packageJSON.stimuli
@@ -2216,7 +2280,7 @@ async function upsertPackage(packageJSON, ownerId) {
       tdfFileName: packageJSON.fileName,
       content: tdfJSONtoUpsert,
       ownerId: ownerId,
-      packageFileName: packageFile || "No Package File",
+      packageFile: packageFile,
       rawStimuliFile: stimJSON, //raw stimuli
       stimuli: formattedStims, //formatted stimuli for use in the app
       stimuliSetId: stimuliSetId,
@@ -2250,7 +2314,7 @@ async function upsertPackage(packageJSON, ownerId) {
     tdfFileName: packageJSON.fileName,
     content: tdfJSONtoUpsert,
     ownerId: ownerId,
-    packageFileName: packageFile || "No Package File",
+    packageFile: packageFile,
     rawStimuliFile: stimJSON, //raw stimuli
     stimuli: formattedStims, //formatted stimuli for use in the app
     stimuliSetId: stimuliSetId,
@@ -2266,7 +2330,7 @@ async function upsertPackage(packageJSON, ownerId) {
 
 function tdfUpdateConfirmed(updateObj, resetShuffleClusters = false){
   serverConsole('tdfUpdateConfirmed', updateObj);
-  Tdfs.update({_id: updateObj._id},{$set:updateObj});
+  Tdfs.upsert({_id: updateObj._id},{$set:updateObj});
   if(resetShuffleClusters){
     const expStatses = GlobalExperimentStates.find({TDFId: updateObj._id}).fetch();
     for(let expState of expStatses){
@@ -2278,13 +2342,13 @@ function tdfUpdateConfirmed(updateObj, resetShuffleClusters = false){
 
 function setUserLoginData(entryPoint, loginMode, curTeacher = undefined, curClass = undefined, assignedTdfs = undefined){
   serverConsole('setUserLoginData', entryPoint, loginMode, curTeacher, curClass, assignedTdfs);
-  let profile = Meteor.user().profile;
-  profile.entryPoint = entryPoint;
-  profile.curTeacher = curTeacher;
-  profile.curClass = curClass;
-  profile.loginMode = loginMode;
-  profile.assignedTdfs = assignedTdfs;
-  Meteor.users.update({_id: Meteor.userId()}, {$set: {profile: profile}});
+  let loginParams = Meteor.user().loginParams || {};
+  loginParams.entryPoint = entryPoint;
+  loginParams.curTeacher = curTeacher;
+  loginParams.curClass = curClass;
+  loginParams.loginMode = loginMode;
+  loginParams.assignedTdfs = assignedTdfs;
+  Meteor.users.update({_id: Meteor.userId()}, {$set: {loginParams: loginParams}});
 }
 
 async function loadStimsAndTdfsFromPrivate(adminUserId) {
@@ -2347,7 +2411,7 @@ function getSyllablesForWord(word) {
 const methods = {
   getMatchingDialogueCacheWordsForAnswer, getAllTeachers, getUserIdforUsername, getClassPerformanceByTDF, 
 
-  removeUserDueDateException, insertHiddenItem, setUserLoginData, addUserDueDateException, 
+  removeUserDueDateException, insertHiddenItem, setUserLoginData, addUserDueDateException, createExperimentState,
     
   getMeteorSettingsPublic: function(settings) {
     //passes back current public settings
@@ -2357,7 +2421,9 @@ const methods = {
 
   generateContent: function( percentage, stringArrayJsonOption, inputText ) {
     if(Meteor.user() && Meteor.user().emails[0] || Meteor.isDevelopment){
+      serverConsole('generateContent', percentage, stringArrayJsonOption, inputText);
       ClozeAPI.GetSelectClozePercentage(percentage, stringArrayJsonOption, null, inputText).then((result) => {
+        serverConsole('result', result);
         let message;
         let subject;
         let file;
@@ -2373,12 +2439,13 @@ const methods = {
             contentType: 'application/json'
           }
         }
+        file ? files = [file] : files = [];
         Email.send({
           to: Meteor.user().emails[0].address,
           from: Meteor.settings.owner,
           subject: subject,
           text: message,
-          attachments: [file]
+          attachments: files
         });
       }).catch((err) => {
         serverConsole('err', err);
@@ -2389,9 +2456,9 @@ const methods = {
   removeTurkById: function(turkId, experimentId){
     serverConsole('removeTurkById', turkId, experimentId)
     ScheduledTurkMessages.remove({workerUserId: turkId, experiment: experimentId});
-    let profile = Meteor.user().profile;
-    profile.lockoiuts[experimentId].lockoutMinutes = Number.MAX_SAFE_INTEGER;
-    Meteor.users.update({_id: Meteor.userId()}, {$set: {profile: profile}});
+    let lockout = meteor.user().lockouts;
+    lockout[experimentId].lockoutMinutes = Number.MAX_SAFE_INTEGER;
+    Meteor.users.update({_id: Meteor.userId()}, {$set: {lockout: lockout}});
   },
 
   saveAudioPromptMode: function(audioPromptMode){
@@ -2404,9 +2471,13 @@ const methods = {
     Meteor.users.update({_id: Meteor.userId()}, {$set: {audioInputMode: audioInputMode}});
   },
 
-  updateExperimentState: function(curExperimentState) {
+  updateExperimentState: function(curExperimentState, experimentId) {
     serverConsole('updateExperimentState', curExperimentState, curExperimentState.currentTdfId);
-    GlobalExperimentStates.update({userId: Meteor.userId(), TDFId: curExperimentState.currentTdfId}, {$set: {experimentState: curExperimentState}});
+    if(experimentId) {
+      GlobalExperimentStates.update({_id: experimentId}, {$set: {experimentState: curExperimentState}});
+    } else {
+      createExperimentState(curExperimentState)
+    }
   },
 
   createExperimentState: function(curExperimentState) {
@@ -2418,22 +2489,24 @@ const methods = {
     });
   },
 
-
   getAltServerUrl: function() {
     return altServerUrl;
   },
 
   getServerStatus: function() {
-    const driveSpace = fs.statSync('/').size;
-    //get total drive space
-    const driveSpaceTotal = fs.statSync('/').blksize * fs.statSync('/').blocks;
-    //get drive space used
-    const driveSpaceUsed = driveSpaceTotal - driveSpace;
-    //get drive space remaining
-    const remainingSpace = driveSpaceTotal - driveSpaceUsed;
-    //get drive space used as a percentage
-    const driveSpaceUsedPercent = (driveSpaceUsed / driveSpaceTotal) * 100;
-    return {diskSpacePercent: driveSpaceUsedPercent, remainingSpace: remainingSpace, diskSpace: driveSpaceTotal, diskSpaceUsed: driveSpaceUsed};
+    diskusage = Npm.require('diskusage');
+    const path = "/"
+    let info = diskusage.checkSync(path);
+    let diskSpaceTotal = info.total;
+    let diskSpaceUsed = info.total - info.free;
+    let driveSpaceUsedPercent = (diskSpaceUsed / diskSpaceTotal) * 100;
+    let remainingSpace = diskSpaceTotal - diskSpaceUsed;
+    //float percentages to 2 decimal places, and space sizes to GB
+    driveSpaceUsedPercent = driveSpaceUsedPercent.toFixed(2);
+    diskSpaceTotal = (diskSpaceTotal / 1000000000).toFixed(2);
+    diskSpaceUsed = (diskSpaceUsed / 1000000000).toFixed(2);
+    remainingSpace = (remainingSpace / 1000000000).toFixed(2);
+    return {diskSpacePercent: driveSpaceUsedPercent, remainingSpace: remainingSpace, diskSpace: diskSpaceTotal, diskSpaceUsed: diskSpaceUsed};
   },
 
   resetAllSecretKeys: function() {
@@ -2708,9 +2781,10 @@ const methods = {
       const service = Object.keys(user.services)[0];
       const serviceProfile = user.services[service];
       const profile = {
-        'firstName': serviceProfile.givenName,
-        'lastName': serviceProfile.surname,
         'email': serviceProfile.mail,
+        'service': service,
+        //also get refresh token
+        'refreshToken': serviceProfile.refreshToken
       };
       Meteor.users.update(userId, {$set: {profile: profile, username: serviceProfile.mail}});
       return "success: " + serviceProfile.mail;
@@ -2725,25 +2799,21 @@ const methods = {
     if (!Meteor.users.findOne(userId)) {
       throw new Meteor.Error(404, 'User not found');
     }
-    let profile = Meteor.user().profile;
-    profile.impersonating = userId;
-    Meteor.users.update({_id: Meteor.userId()}, {$set: {profile: profile}});
+    Meteor.users.update({_id: Meteor.userId()}, {$set: {impersonating: userId}});
     this.setUserId(userId);
   },
 
   clearLoginData: function(){
-    let profile = Meteor.user().profile;
-    profile.entryPoint = null;
-    profile.curTeacher = null;
-    profile.curClass = null;
-    profile.loginMode = null;
-    Meteor.users.update({_id: Meteor.userId()}, {$set: {profile: profile}});
+    let loginParams = Meteor.user().loginParams;
+    loginParams.entryPoint = null;
+    loginParams.curTeacher = null;
+    loginParams.curClass = null;
+    loginParams.loginMode = null;
+    Meteor.users.update({_id: Meteor.userId()}, {$set: {loginParams: loginParams}});
   },
 
   clearImpersonation: function(){
-    let profile = Meteor.user().profile;
-    profile.impersonating = false;
-    Meteor.users.update({_id: Meteor.userId()}, {$set: {profile: profile}});
+    Meteor.users.update({_id: Meteor.userId()}, {$set: {impersonating: false}});
     return;
   },
 
@@ -2790,13 +2860,8 @@ const methods = {
   },
 
   setUserSessionId: function(sessionId, sessionIdTimestamp) {
-    let profile = Meteor.users.findOne({_id: Meteor.userId()}).profile;
     serverConsole('setUserSessionId', sessionId, sessionIdTimestamp)
-    serverConsole('profile', profile)
-    profile.lastSessionId = sessionId;
-    profile.lastSessionIdTimestamp = sessionIdTimestamp;
-    serverConsole('profile2', profile)
-    Meteor.users.update({_id: Meteor.userId()}, {$set: {profile: profile}});
+    Meteor.users.update({_id: Meteor.userId()}, {$set: {lastSessionId: sessionId, lastSessionIdTimestamp: sessionIdTimestamp}});
   },
 
   deleteUserSpeechAPIKey: function() {
@@ -3035,13 +3100,16 @@ const methods = {
       themeName: themeName,
       background_color: '#F2F2F2',
       text_color: '#000000',
+      button_color: '#7ed957',
+      primary_button_text_color: '#000000',
       accent_color: '#7ed957',
       secondary_color: '#d9d9d9',
+      secondary_text_color: '#000000',
       audio_alert_color: '#06723e',
       success_color: '#00cc00',
-      alert_color: '#ff0000',
       navbar_text_color: '#000000',
       neutral_color: '#ffffff',
+      alert_color: '#ff0000',
       logo_url: ''
     };
     //This inserts the theme into the database, or updates it if it already exists
@@ -3059,10 +3127,15 @@ const methods = {
           themeName: 'MoFaCTS',
           background_color: '#F2F2F2',
           text_color: '#000000',
+          button_color: '#7ed957',
+          primary_button_text_color: '#000000',
           accent_color: '#7ed957',
           secondary_color: '#d9d9d9',
+          secondary_text_color: '#000000',
           audio_alert_color: '#06723e',
           success_color: '#00cc00',
+          navbar_text_color: '#000000',
+          neutral_color: '#ffffff',
           alert_color: '#ff0000',
           logo_url: ''
         }
@@ -3096,7 +3169,7 @@ const methods = {
 const asyncMethods = {
   getAllTdfs, getTdfByFileName, getTdfByExperimentTarget, getTdfIDsAndDisplaysAttemptedByUserId,
 
-  getStimDisplayTypeMap, getStimuliSetById, getSourceSentences,
+  getStimDisplayTypeMap, getStimuliSetById, getSourceSentences, updateStimDisplayTypeMap,
 
   getAllCourses, getAllCourseSections, getAllCoursesForInstructor, getAllCourseAssignmentsForInstructor,
 
@@ -3110,13 +3183,37 @@ const asyncMethods = {
 
   getExperimentState, setExperimentState, getStimuliSetByFileName, getMaxResponseKC,
 
-  getProbabilityEstimatesByKCId, getResponseKCMap, processPackageUpload,
+  getProbabilityEstimatesByKCId, getResponseKCMap, processPackageUpload, getLastTDFAccessed,
 
   insertHistory, getHistoryByTDFID, getUserRecentTDFs, clearCurUnitProgress, tdfUpdateConfirmed,
 
   loadStimsAndTdfsFromPrivate, getListOfStimTags, getUserLastFeedbackTypeFromHistory,
 
-  checkForUserException, 
+  checkForUserException, getTdfById, checkForTDFData,
+
+  getOutcomesForAdaptiveLearning: async function(userId, TDFId) {
+    const history = Histories.find({userId: userId, TDFId: TDFId}, {fields: {KCId: 1, outcome: 1}, $sort: { recordedServerTime: -1 }}).fetch();
+    let outcomes = {};
+    for(let h of history){
+      if(h.KCId)
+        outcomes[h.KCId % 1000] = h.outcome == 'correct'
+    }
+    // need to convert to cluster stim set
+    const tdf = Tdfs.findOne({_id: TDFId});
+    const stimSet = tdf.stimuli;
+    const clusterStimSet = {};
+    for(const stim of stimSet){
+      clusterStimSet[stim.clusterKC % 1000] = stim;
+    }
+
+    for(const cluster in clusterStimSet){
+      if(!outcomes[cluster]){
+        outcomes[cluster] = false;
+      }
+    }
+
+    return outcomes;
+  },
 
   getUsersByExperimentId: async function(experimentId){
     const messages = ScheduledTurkMessages.find({experiment: experimentId}).fetch();
@@ -3150,17 +3247,20 @@ const asyncMethods = {
       return response.audioContent;
     });
   },
+
+  getContentGenerationAvailable: async function(){
+    return contentGenerationAvailable;
+  },
   
   setLockoutTimeStamp: async function(lockoutTimeStamp, lockoutMinutes, currentUnitNumber, TDFId) {
     serverConsole('setLockoutTimeStamp', lockoutTimeStamp, lockoutMinutes, currentUnitNumber, TDFId);
-    let profile = Meteor.user().profile;
-    if(!profile.lockouts) profile.lockouts = {};
-    if(!profile.lockouts[TDFId]) profile.lockouts[TDFId] = {};
-
-    profile.lockouts[TDFId].lockoutTimeStamp = lockoutTimeStamp;
-    profile.lockouts[TDFId].lockoutMinutes = lockoutMinutes;
-    profile.lockouts[TDFId].currentLockoutUnit = currentUnitNumber;
-    Meteor.users.update({_id: Meteor.userId()}, {$set: {profile: profile}});
+    let lockouts = Meteor.user().lockouts
+    if(!lockouts) lockouts = {};
+    if(!lockouts[TDFId]) lockouts[TDFId] = {};
+    lockouts[TDFId].lockoutTimeStamp = lockoutTimeStamp;
+    lockouts[TDFId].lockoutMinutes = lockoutMinutes;
+    lockouts[TDFId].currentLockoutUnit = currentUnitNumber;
+    Meteor.users.update({_id: Meteor.userId()}, {$set: {lockouts: lockouts}});
   },
 
   makeGoogleSpeechAPICall: async function(TDFId, speechAPIKey = '', request, answerGrammar){
@@ -3397,6 +3497,8 @@ Meteor.startup(async function() {
         clientId: Meteor.settings.microsoft.clientId,
         secret: Meteor.settings.microsoft.secret,
         tenent: 'common',
+        //save the refresh token
+        refreshToken: true,
       },
     });
   }
@@ -3418,6 +3520,8 @@ Meteor.startup(async function() {
     serverConsole('Make sure you have a valid siteConfig');
     serverConsole('***IMPORTANT*** There will be no owner for system TDF\'s');
   }
+
+  contentGenerationAvailable = Meteor.settings.contentGenerationEnabled || false;
 
   // Get user in roles and make sure they are added
   const roles = getConfigProperty('initRoles');
@@ -3556,17 +3660,44 @@ Meteor.startup(async function() {
       }
     });
   }
+  //combine owner emails, teacher emails, and admin emails into one array
+  allEmails = [];
+  allEmails.push(ownerEmail);
+  const teacherEmails = roles.teachers;
+  allEmails = allEmails.concat(teacherEmails);
+  const adminEmails = roles.admins;
+  allEmails = allEmails.concat(adminEmails);
+
+  //we also need to get the users in roles admin and teacher and send them an email
+  db_admins = Meteor.users.find({roles: 'admin'}).fetch();
+  db_teachers = Meteor.users.find({roles: 'teacher'}).fetch();
+
+  //the emails are the username of the user
+  for (const admin of db_admins){
+    allEmails.push(admin.username);
+  }
+  for (const teacher of db_teachers){
+    allEmails.push(teacher.username);
+  }
   
+  //remove any duplicates
+  allEmails = allEmails.filter((v, i, a) => a.indexOf(v) === i);
+  console.log("Sending startup email to: ", allEmails);
+  
+  updateStimDisplayTypeMap();
+
   //email admin that the server has restarted
-  if (ownerEmail && Meteor.isProduction) {
-    const versionFile = Assets.getText('versionInfo.json');
+  for (const emailaddr of allEmails){
+    const versionFile = Assets.getText('versionInfo.json')
     const version = JSON.parse(versionFile);
+    const rootUrl = Meteor.settings.ROOT_URL;
     server = Meteor.absoluteUrl().split('//')[1];
     server = server.substring(0, server.length - 1);
     subject = `MoFaCTs Deployed on ${server}`;
     text = `The server has restarted.\nServer: ${server}\nVersion: ${JSON.stringify(version, null, 2)}`;
-    sendEmail(ownerEmail, ownerEmail, subject, text)
+    sendEmail(emailaddr, ownerEmail, subject, text)
   }
+  
 });
 
 Router.route('/dynamic-assets/:tdfid?/:filetype?/:filename?', {
@@ -3658,9 +3789,12 @@ Router.route('data-by-teacher', {
     //combine the two arrays
     const tdfNames = assignedTdfs.concat(ownedTdfs).concat(accessorTdfs);
 
+    //remove duplicates
+    const uniqueTdfs = tdfNames.filter((v, i, a) => a.indexOf(v) === i);
+
     console.log(userId, uid, tdfNames)
 
-    if (!tdfNames.length > 0) {
+    if (!uniqueTdfs.length > 0) {
       response.writeHead(404);
       response.end('No tdfs found for any classes');
       return;
@@ -3678,10 +3812,10 @@ Router.route('data-by-teacher', {
       'File-Name': fileName
     });
 
-    serverConsole(tdfNames);
-    response.write(await createExperimentExport(tdfNames, uid));
+    serverConsole(uniqueTdfs);
+    response.write(await createExperimentExport(uniqueTdfs, uid));
 
-    tdfNames.forEach(function(tdf) {
+    uniqueTdfs.forEach(function(tdf) {
       serverConsole('Sent all  data for', tdf, 'as file', fileName);
     });
     console.timeEnd('data-by-teacher')

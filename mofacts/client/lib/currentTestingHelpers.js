@@ -14,6 +14,7 @@ export {
   search,
   haveMeteorUser,
   updateCurStudentPerformance,
+  updateCurStudedentPracticeTime,
   setStudentPerformance,
   getStimCount,
   getStimCluster,
@@ -151,6 +152,18 @@ function updateCurStudentPerformance(isCorrect, practiceTime, testType) {
   Session.set('curStudentPerformance', curUserPerformance);
 }
 
+function updateCurStudedentPracticeTime(practiceTime) {
+  // Update running user metrics total,
+  // note this assumes curStudentPerformance has already been initialized on initial page entry
+  const curUserPerformance = Session.get('curStudentPerformance');
+  console.log('updateCurStudentPerformance', practiceTime,
+      JSON.parse(JSON.stringify((Session.get('curStudentPerformance')))));
+  curUserPerformance.totalTime = parseInt(curUserPerformance.totalTime) + practiceTime;
+  curUserPerformance.totalTimeDisplay = (curUserPerformance.totalTime / (1000*60)).toFixed(1);
+  Session.set('constantTotalTime',curUserPerformance.totalTimeDisplay);
+  Session.set('curStudentPerformance', curUserPerformance);
+}
+
 async function setStudentPerformance(studentID, studentUsername, tdfId) {
   console.log('setStudentPerformance:', studentID, studentUsername, tdfId);
   let componentState = ComponentStates.findOne({userId: studentID, TDFId: tdfId});
@@ -268,7 +281,7 @@ function performClusterShuffle(stimCount, shuffleclusters, mapping){
   const shuffleRanges = [];
   extractDelimFields(shuffleclusters, shuffleRanges);
 
-  const shuffled = mapping.slice(); // work on a copy
+  let shuffled = mapping.slice(); // work on a copy
 
   _.each(shuffleRanges, function(rng) {
     const targetIndexes = rangeVal(rng);
@@ -500,14 +513,12 @@ function getCurrentDeliveryParams() {
       xcondIndex = 0; // Incorrect index gets 0
     }
 
-    // If found del params, then use any values we find
-    if (sourceDelParams) {
-      for (fieldName in deliveryParams) {
-        const fieldVal = sourceDelParams[fieldName];
-        if (fieldVal) {
-          deliveryParams[fieldName] = fieldVal;
-          modified = true;
-        }
+    // If found del params, then replace the defaults with the values
+    for (fieldName in sourceDelParams) {
+      const srcVal = sourceDelParams[fieldName];
+      if (srcVal !== undefined) {
+        deliveryParams[fieldName] = srcVal;
+        modified = true;
       }
     }
   }
