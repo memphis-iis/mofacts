@@ -17,7 +17,12 @@ Template.contentUpload.helpers({
     const files = DynamicAssets.find({userId: userId}).fetch();
     sortedFiles = [];
     //get all tdfs
-    allTDfs = Tdfs.find({ownerId: Meteor.userId()}).fetch();
+    toggleOnlyOwnedTDFs = Template.instance().toggleOnlyOwnedTDFs.get();
+    if(toggleOnlyOwnedTDFs){
+      allTDfs = Tdfs.find({ownerId: Meteor.userId()}).fetch();
+    } else {
+      allTDfs = Tdfs.find().fetch();
+    }
     console.log('allTdfs:', allTDfs);
     //iterate through allTdfs and get all stimuli
     tdfSummaries = [];    for (const tdf of allTDfs) {
@@ -32,6 +37,7 @@ Template.contentUpload.helpers({
       thisTdf.stimFileInfo = [];
       thisTdf.stimFilesCount = 0;
       thisTdf.fileName = tdf.content.fileName;
+      thisTdf.owner = Meteor.users.findOne({_id: tdf.ownerId}).username;
       checkIfConditional = allTDfs.some(function(tdf){
         conditions = tdf.content.tdfs.tutor.setspec.condition;
         //check if condition contains the TDF filename
@@ -55,7 +61,7 @@ Template.contentUpload.helpers({
         continue;
       }
       //get the original package filename by looking up the assetId in the tdf
-      tdf.packageFileName ? thisTdf.packageAssetId = tdf.packageFileName.split('.')[0] : thisTdf.packageAssetId = false;
+      tdf.packageFile ? thisTdf.packageAssetId = tdf.packageFile.split('/').pop().split('.').shift() : thisTdf.packageAssetId = false;
       if(!thisTdf.packageAssetId){
         thisTdf.errors.push('Package ID not found. This package was uploaded before the new upload system was implemented. Please delete this package and re-upload it.');
         thisTdf.packageFileLink = null;
@@ -108,12 +114,16 @@ Template.contentUpload.helpers({
     });
     console.log('packages:', packages);
     return packages;
+  },
+  'displayUnownedTDFs': function(){
+    return !Template.instance().toggleOnlyOwnedTDFs.get();
   }
 });
 
 Template.contentUpload.onCreated(function() {
   this.currentUpload = new ReactiveVar(false);
   this.curFilesToUpload = new ReactiveVar([]);
+  this.toggleOnlyOwnedTDFs = new ReactiveVar(true);
 });
 
 Template.contentUpload.rendered = function() {
@@ -295,6 +305,10 @@ Template.contentUpload.events({
       }
     });
   },
+  'click #showAllAssets': function(event){
+    showAllAssets = Template.instance().toggleOnlyOwnedTDFs.get();
+    Template.instance().toggleOnlyOwnedTDFs.set(!showAllAssets);
+  }
 });
 
 
@@ -384,9 +398,8 @@ async function doFileUpload(fileArray) {
       alert('There were ' + errorStack.length + ' errors uploading files: ' + errorStack.join('\n'));
     }
 
-    //update the stimDisplayTypeMap
-    const stimDisplayTypeMap = await meteorCallAsync('getStimDisplayTypeMap');
-    Session.set('stimDisplayTypeMap', stimDisplayTypeMap);
+    //force the stimDisplayTypeMap to refresh on next card load
+    Session.set('stimDisplayTypeMap', undefined);
 
     //clear the file upload fields
     $('#upload-file').val('');
@@ -434,6 +447,7 @@ async function doPackageUpload(file, template){
             if(err){
             alert(err);
           } 
+          console.log('result:', result);
           for(res of result.results){
             if (res.data && res.data.res == 'awaitClientTDF') {
               let reason = []

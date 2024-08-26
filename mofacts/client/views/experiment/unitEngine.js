@@ -9,13 +9,15 @@ import {
   randomChoice,
   createStimClusterMapping,
   updateCurStudentPerformance,
-  getAllCurrentStimAnswers
+  getAllCurrentStimAnswers,
+  updateCurStudedentPracticeTime
 } from '../../lib/currentTestingHelpers';
 import {updateExperimentState, unitIsFinished} from './card';
 import {MODEL_UNIT, SCHEDULE_UNIT} from '../../../common/Definitions';
 import {meteorCallAsync, clientConsole} from '../../index';
 import {displayify} from '../../../common/globalHelpers';
 import {Answers} from './answerAssess';
+import { AdaptiveQuestionLogic } from './adaptiveQuestionLogic';
 
 export {createScheduleUnit, createModelUnit, createEmptyUnit};
 
@@ -62,6 +64,9 @@ function defaultUnitEngine(curExperimentData) {
   const engine = {
     // Things actual engines must supply
     unitType: 'DEFAULT',
+      //check if the unit is adaptive
+    
+    adaptiveQuestionLogic: new AdaptiveQuestionLogic(),
     selectNextCard: function() {
       throw new Error('Missing Implementation');
     },
@@ -404,6 +409,8 @@ function modelUnitEngine() {
   // the unit we'll start all over.
   const unitStartTimestamp = Date.now();
 
+
+
   function getStimParameterArray(clusterIndex, whichStim) {
     return getStimCluster(clusterIndex).stims[whichStim].params.split(',').map((x) => _.floatval(x));
   }
@@ -504,6 +511,8 @@ function modelUnitEngine() {
   let probFunction = undefined;
   if (unit.learningsession) 
     probFunction = unit.learningsession.calculateProbability ? unit.learningsession.calculateProbability.trim() : undefined;
+  else if (unit.videosession) 
+    probFunction = unit.videosession.calculateProbability ? unit.videosession.calculateProbability.trim() : undefined;
   const probFunctionHasHintSylls = typeof(probFunction) == 'undefined' ? false : probFunction.indexOf('hintsylls') > -1;
   clientConsole(2, 'probFunctionHasHintSylls: ' + probFunctionHasHintSylls, typeof(probFunction));
   if (probFunction) {
@@ -718,7 +727,11 @@ function modelUnitEngine() {
           tdfDebugLog.push(parms.debugLog);
           
           stim.available = parms.available;
-          if(parms.available === undefined || parms.available){
+          if(typeof stim.available == "string" && (stim.available == "true" || stim.available == "false")){
+            //convert to bool
+            stim.available = stim.available == "true";
+          }
+          if(stim.available || stim.available === undefined){
             stim.canUse = true;
             if((stimCluster.stims[stimIndex].textStimulus || stimCluster.stims[stimIndex].clozeStimulus) && hintLevelIndex > 2){ //hints can't be used if there are fewer than 3 syllables
               for(let hintLevel = 0; hintLevel < 3; hintLevel++){
@@ -906,6 +919,7 @@ function modelUnitEngine() {
     setUpClusterList: function setUpClusterList(cards) {
       const currentTdfFile = Session.get('currentTdfFile');
       const isMultiTdf = currentTdfFile.isMultiTdf;
+      const isVideoSession = Session.get('isVideoSession')
       const clusterList = [];
 
       if (isMultiTdf) {
@@ -931,12 +945,14 @@ function modelUnitEngine() {
           clientConsole(1, 'setupclusterlist:', this.curUnit, sessCurUnit);
           let unitClusterList = "";
           // TODO: shouldn't need both
-          if(this.curUnit && this.curUnit.learningsession && this.curUnit.learningsession.clusterlist){
-            unitClusterList = this.curUnit.learningsession.clusterlist.trim()
+          if(isVideoSession) {
+            if (this.curUnit && this.curUnit.videosession && this.curUnit.videosession.questions)
+              unitClusterList = this.curUnit.videosession.questions;
           }
-          else if (sessCurUnit && sessCurUnit.learningsession && sessCurUnit.learningsession.clusterlist){
-            unitClusterList = sessCurUnit.learningsession.clusterlist.trim();
-        }
+          else {
+            if(this.curUnit && this.curUnit.learningsession && this.curUnit.learningsession.clusterlist)
+              unitClusterList = this.curUnit.learningsession.clusterlist.trim()
+          }
         extractDelimFields(unitClusterList, clusterList);
       }
       clientConsole(2, 'clusterList', clusterList);
@@ -1421,9 +1437,10 @@ function modelUnitEngine() {
     unitMode: (function() {
       const unit = Session.get('currentTdfUnit');
       let unitMode = 'default';
-      if(unit.learningsession && unit.learningsession.unitMode){
+      if(unit.learningsession && unit.learningsession.unitMode)
         unitMode = unit.learningsession.unitMode.trim();
-      }
+      else if (unit.videosession && unit.videosession.unitMode)
+        unitMode = unit.videosession.unitMode.trim();
       clientConsole(1, 'UNIT MODE: ' + unitMode);
       return unitMode;
     })(),
@@ -1596,6 +1613,14 @@ function modelUnitEngine() {
       }
     },
 
+    updatePracticeTime: function(practiceTime) {
+      const card = cardProbabilities.cards[Session.get('clusterIndex')];
+      const stim = card.stims[currentCardInfo.whichStim];
+      card.totalPracticeDuration += practiceTime;
+      stim.totalPracticeDuration += practiceTime;
+      updateCurStudedentPracticeTime(practiceTime);
+    },
+
     cardAnswered: async function(wasCorrect, practiceTime) {
       // Get info we need for updates and logic below
       const cards = cardProbabilities.cards;
@@ -1696,7 +1721,7 @@ function modelUnitEngine() {
     },
 
     unitFinished: function() {
-      const session = this.curUnit.learningsession;
+      const session = this.curUnit.learningsession || this.curUnit.videosession;
       const minSecs = session.displayminseconds || 0;
       const maxSecs = session.displaymaxseconds || 0;
       const maxTrials = parseInt(session.maxTrials || 0);
@@ -1930,6 +1955,7 @@ function scheduleUnitEngine() {
       clusterNumbers: [],
       ranChoices: [],
       isButtonTrial: false,
+      adaptiveLogic: {},
     };
 
     if (!unit || !unit.assessmentsession) {
@@ -2048,6 +2074,9 @@ function scheduleUnitEngine() {
       }
     }
 
+    // Adaptive logic
+    settings.adaptiveLogic = assess.adaptiveLogic || {};
+
     return settings;
   }
 
@@ -2064,7 +2093,12 @@ function scheduleUnitEngine() {
       const currUnit = file.tdfs.tutor.unit[curUnitNum];
 
       clientConsole(2, 'creating schedule with params:', setSpec, curUnitNum, currUnit);
-      schedule = createSchedule(setSpec, curUnitNum, currUnit);
+      //load schedule from experiment state if in resume
+      if (Session.get('currentExperimentState')?.schedule && !Session.get('resetSchedule')) {
+        schedule = Session.get('currentExperimentState').schedule;
+      } else {
+        schedule = createSchedule(setSpec, curUnitNum, currUnit);
+      }
       if (!schedule) {
         alert('There is an issue with the TDF - experiment cannot continue');
         throw new Error('There is an issue with the TDF - experiment cannot continue');
@@ -2104,7 +2138,6 @@ function scheduleUnitEngine() {
         whichStim: questInfo.whichStim,
         testType: questInfo.testType,
         lastAction: 'question',
-        lastActionTimeStamp: Date.now(),
       };
 
       // Set current Q/A info, type of test (drill, test, study), and then
@@ -2131,6 +2164,9 @@ function scheduleUnitEngine() {
       // info, so we need to use -1 for this info
       const questionIndex = Math.max(Session.get('questionIndex')-1, 0);
       return this.getSchedule().q[questionIndex];
+    },
+
+    updatePracticeTime: function() {
     },
 
     cardAnswered: async function() {

@@ -15,9 +15,10 @@ REPO_URL=$(git config --get remote.origin.url)
 echo "  - Repository URL: $REPO_URL"
 
 # Get the last 5 commit messages
-COMMIT_MESSAGES=$(git log --pretty=format:"%s" -n 5 HEAD | tr '\n' ',')
+COMMIT_MESSAGES=$(git log --pretty=format:"%s" -n 5 HEAD | sed 's/\n//g')
 
-COMMIT_MESSAGES=$(echo $COMMIT_MESSAGES | sed 's/,/", "/g')
+#remove newlines from commit messages
+COMMIT_MESSAGES=$(echo $COMMIT_MESSAGES | tr -d '\n')
 
 # Create a release on GitHub with datestamp (vYYYY-MM-DD-HH-MM-SS)
 RELEASE_NAME="v$(date +"%Y-%m-%d-%H-%M-%S")-$CURRENT_BRANCH-autobuild"
@@ -42,7 +43,10 @@ echo "$JSON_DATA" > ../private/versionInfo.json
 
 # Make a Session.set command with the json data in ../client/views/versionInfo.js
 echo "** Making a Session.set command with the JSON data..."
-echo "Session.set('versionInfo', $JSON_DATA);" > ../client/views/versionInfo.js
+echo "versionInfo = $JSON_DATA" > ../client/views/versionInfo.js
+echo "versionInfo.serverURL = Meteor.absoluteUrl();" >> ../client/views/versionInfo.js
+echo "Session.set('versionInfo', versionInfo);" >> ../client/views/versionInfo.js
+
 echo "  - Session.set command created"
 
 # Update the docker-compose.yml tag

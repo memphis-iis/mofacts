@@ -145,7 +145,7 @@ Template.lessonSelect.helpers({
     const isAdmin = Roles.userIsInRole(Meteor.user(), ['admin']);
   
     //Get all course tdfs
-    const courseId = Meteor.user().profile.curClass ? Meteor.user().profile.curClass.courseId : null;
+    const courseId = Meteor.user().loginParams.curClass ? Meteor.user().loginParams.curClass.courseId : null;
     const courseTdfs = Assignments.find({courseId: courseId}).fetch()
     console.log('courseTdfs', courseTdfs, courseId);
 
@@ -280,7 +280,7 @@ Template.lessonSelect.helpers({
       tdfTags.sort((a, b) => a.tag.localeCompare(b.tag, 'en', {numeric: true, sensitivity: 'base'}));
       this.tdfTags.set(tdfTags);
       
-  
+
       if ((tdf.visibility == 'profileOnly' || tdf.visibility == 'enabled') & typeof name != "undefined" & name != "" && setspec.userselect != 'false') {
         enabledTdfs.push(tdfObject);
       } else {

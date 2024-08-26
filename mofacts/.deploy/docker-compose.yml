@@ -9,7 +9,6 @@ services:
         target: /mofactsAssets
         bind:
           propagation: shared
-          create_host_path: true
     build:
       context: ../../
       dockerfile: Dockerfile

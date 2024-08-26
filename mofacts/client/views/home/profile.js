@@ -39,7 +39,7 @@ Template.profile.helpers({
   },
 
   class: function(){
-    thisClass = Meteor.user().profile.class;
+    thisClass = Meteor.user().class;
     console.log('class: ', thisClass);
     if(thisClass.courseName){
       return thisClass;
@@ -68,6 +68,10 @@ Template.profile.helpers({
     return Template.instance().recentTdfs.get();
   },
 
+  contentGenerationAvailable: () => {
+    return Session.get('contentGenerationAvailable');
+  },
+
   tdfTags: () => {
     return Template.instance().tdfTags.get();
   },
@@ -85,7 +89,7 @@ Template.profile.helpers({
     return Template.instance().tdfOwnersMap.get()[ownerId];
   },
   isImpersonating: function(){
-    return Meteor.user() && Meteor.user().profile ? Meteor.user().profile.impersonating : false;
+    return Meteor.user() ? Meteor.user().impersonating : false;
   },
 });
 
@@ -385,6 +389,14 @@ Template.profile.rendered = async function() {
 
   $('#expDataDownloadContainer').html('');
 
+  Meteor.call('getContentGenerationAvailable', function(err, res) {
+    if (err) {
+      console.log(err);
+    } else {
+      Session.set('contentGenerationAvailable', res);
+    }
+  });
+
   // In experiment mode, they may be forced to a single tdf
   let experimentTarget = null;
 
@@ -397,7 +409,7 @@ Template.profile.rendered = async function() {
   const isAdmin = Roles.userIsInRole(Meteor.user(), ['admin']);
 
   //Get all course tdfs
-  const courseId = Meteor.user().profile.curClass ? Meteor.user().profile.curClass.courseId : null;
+  const courseId = Meteor.user().loginParams.curClass ? Meteor.user().loginParams.curClass.courseId : null;
   const courseTdfs = Assignments.find({courseId: courseId}).fetch()
   console.log('courseTdfs', courseTdfs, courseId);
 
@@ -595,7 +607,7 @@ Template.profile.rendered = async function() {
 // Actual logic for selecting and starting a TDF
 // eslint-disable-next-line max-len
 async function selectTdf(currentTdfId, lessonName, currentStimuliSetId, ignoreOutOfGrammarResponses, 
-  speechOutOfGrammarFeedback, how, isMultiTdf, fromSouthwest, setspec, isExperiment = false) {
+  speechOutOfGrammarFeedback, how, isMultiTdf, fromSouthwest, setspec, isExperiment = false, isRefresh = false) {
   console.log('Starting Lesson', lessonName, currentTdfId,
       'currentStimuliSetId:', currentStimuliSetId, 'isMultiTdf:', isMultiTdf);
 
@@ -612,13 +624,15 @@ async function selectTdf(currentTdfId, lessonName, currentStimuliSetId, ignoreOu
   Session.set('currentTdfId', currentTdfId);
   let globalExperimentState = GlobalExperimentStates.findOne({userId: Meteor.userId(), TDFId: currentTdfId}) || {};
   globalExperimentState ? Session.set('currentExperimentState', globalExperimentState.experimentState) : Session.set('currentExperimentState', {});
-  const tdfResponse = Tdfs.findOne({_id: currentTdfId});
+  const tdfResponse = Tdfs.findOne({_id: currentTdfId}) ? Tdfs.findOne({_id: currentTdfId}) : await meteorCallAsync('getTdfById', currentTdfId);
   const curTdfContent = tdfResponse.content;
   Session.set('currentTdfFile', curTdfContent);
   Session.set('currentTdfName', curTdfContent.fileName);
   Session.set('currentStimuliSetId', currentStimuliSetId);
   Session.set('ignoreOutOfGrammarResponses', ignoreOutOfGrammarResponses);
   Session.set('speechOutOfGrammarFeedback', speechOutOfGrammarFeedback);
+  Session.set('showPageNumbers', setspec.showPageNumbers ? setspec.showPageNumbers : false);
+    
 
   // Record state to restore when we return to this page
   let audioPromptMode;
@@ -755,10 +769,12 @@ async function selectTdf(currentTdfId, lessonName, currentStimuliSetId, ignoreOu
     updateExperimentState(newExperimentState, 'profile.selectTdf');
 
     Session.set('inResume', true);
-    if (isMultiTdf) {
-      navigateForMultiTdf();
-    } else {
-      Router.go('/card');
+    if (!isRefresh) {
+      if (isMultiTdf) {
+        navigateForMultiTdf();
+      } else {
+        Router.go('/card');
+      }
     }
   }
 }

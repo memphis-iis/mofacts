@@ -27,8 +27,8 @@ getCurrentTheme();
 
 async function checkUserSession(){
   const currentSessionId = Meteor.default_connection._lastSessionId;
-  const lastSessionId = Meteor.user().profile.lastSessionId;
-  const lastSessionIdTimestampServer = Meteor.user().profile.lastSessionIdTimestamp;
+  const lastSessionId = Meteor.user().lastSessionId;
+  const lastSessionIdTimestampServer = Meteor.user().lastSessionIdTimestamp;
   const lastSessionIdTimestampClient = Session.get('lastSessionIdTimestamp');
   if(lastSessionIdTimestampClient){
     //user previously logged in this session
@@ -154,6 +154,7 @@ Meteor.startup(function() {
   $(window).on('resize', function() {
     redoCardImage();
   });
+
 });
 
 Template.DefaultLayout.onRendered(function() {
@@ -245,6 +246,11 @@ Template.DefaultLayout.events({
     event.preventDefault();
     console.log('save error reporting button pressed');
     const errorDescription = $('#errorDescription').val();
+    //if error description is empty, alert the user to enter a description
+    if (errorDescription === '') {
+      alert('Please enter a description of the error');
+      return;
+    }
     const curUser = Meteor.userId();
     const curPage = document.location.pathname;
     const sessionVars = Session.all();
@@ -361,10 +367,24 @@ Template.registerHelper('showPerformanceDetails', function() {
   if(Session.get('curModule') == 'instructions') return false;
   if(type == "s" && uiSettings.displayPerformanceDuringStudy) return true;
   if(type == "s" && !uiSettings.displayPerformanceDuringStudy) return false;
+  if(Session.get('isVideoSession')) return false;
   if(type == "t" && uiSettings.displayPerformanceDuringTrial) return true;
   if(type == "t" && !uiSettings.displayPerformanceDuringTrial) return false;
   return ((Session.get('curModule') == 'card' || Session.get('curModule') !== 'instructions') && Session.get('scoringEnabled') && Session.get('unitType') != 'schedule');
 });
+Template.registerHelper('showPageNumbers', function() {
+  return Session.get('showPageNumbers');
+})
+Template.registerHelper('currentUnitNumber', function() {
+  if(Session.get('currentUnitNumber'))
+    return parseInt(Session.get('currentUnitNumber')) + 1;
+  return 0;
+})
+Template.registerHelper('lastUnitNumber', function() {
+  if(Session.get('currentTdfFile'))
+    return Session.get('currentTdfFile').tdfs.tutor.unit.length + 1;
+  return 0;
+})
 Template.registerHelper('currentScore', function() {
   return Session.get('currentScore');
 });
