@@ -1473,7 +1473,7 @@ function addUserDueDateException(userId, tdfId, classId, date){
 async function checkForTDFData(tdfId){
   const userId = Meteor.userId();
   serverConsole('checkForTDFData', tdfId, userId);
-  tdf = history.findOne({TDFId: tdfId, userId: userId, $and: [ {levelUnitType: {$ne: "schedule"}}, {levelUnitType: {$ne: "Instruction"}} ] });
+  tdf = Histories.findOne({TDFId: tdfId, userId: userId, $and: [ {levelUnitType: {$ne: "schedule"}}, {levelUnitType: {$ne: "Instruction"}} ] });
   if(tdf){
     return true;
   }
