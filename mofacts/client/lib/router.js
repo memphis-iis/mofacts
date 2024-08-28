@@ -178,7 +178,6 @@ Router.route('/experiment/:target?/:xcond?', {
 });
 
 defaultBehaviorRoutes = [
-  'signIn',
   'signInSouthwest',
   'tabwarning',
   'resetPassword',
@@ -238,10 +237,6 @@ for (const route of defaultBehaviorRoutes) {
     action: getDefaultRouteAction(route),
   });
 }
-
-
-
-
 
 //special routes
 Router.route('/testLogin', {
@@ -481,6 +476,10 @@ Router.route('/classEdit',{
 }});
 //Setup profile routes for direct teacher links
 Router.route('/classes/:_teacher', {
+  onBeforeAction: function() {
+    Meteor.logout();
+    this.next();
+  },
   action: async function(){
     console.log('teacher route' + this.params._teacher);
     Session.set('useEmbeddedAPIKeys', true);
@@ -558,6 +557,10 @@ Router.route('/classes/:_teacher', {
 
 //Setup profile routes for direct class links
 Router.route('/classes/:_teacher/:_class', {
+  onBeforeAction: function() {
+    Meteor.logout();
+    this.next();
+  },
   action: async function(){
     console.log('class route: ' + this.params._teacher + ' ' + this.params._class);
     Session.set('useEmbeddedAPIKeys', true);
