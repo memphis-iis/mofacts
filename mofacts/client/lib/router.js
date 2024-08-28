@@ -238,16 +238,6 @@ for (const route of defaultBehaviorRoutes) {
   });
 }
 
-// //special routes
-// Router.route('/signIn', {
-//   name: 'client.signIn',
-//   action: async function() {
-//     if(Meteor.userId())
-//       Meteor.logout();
-//     this.render('signIn');
-//   }
-// });
-
 //special routes
 Router.route('/testLogin', {
   name: 'client.testLogin',
