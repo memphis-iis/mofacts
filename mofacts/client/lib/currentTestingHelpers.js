@@ -424,6 +424,7 @@ function getCurrentDeliveryParams() {
     'allowstimulusdropping': false,
     'allowPhoneticMatching': false,
     'useSpellingCorrection': false,
+    'branchingEnabled': false,
     'editDistance': 1,
     'optimalThreshold': false,
     'resetStudentPerformance': false,
