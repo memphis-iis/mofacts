@@ -80,7 +80,9 @@ function getEditDistance(a, b) {
  * */
 // Return true if the answer is a "branched answer"
 function answerIsBranched(answer) {
-  return _.trim(answer).indexOf(';') >= 0;
+  const delParams = Session.get("currentDeliveryParams");
+  const branchingEnabled = delParams.branchingEnabled
+  return _.trim(answer).indexOf(';') >= 0 && branchingEnabled;
 }
 
 function checkIfUserAnswerMatchesOtherAnswers(userAnswer, correctAnswer) {
