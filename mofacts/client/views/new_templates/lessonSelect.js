@@ -145,7 +145,7 @@ Template.lessonSelect.helpers({
     const isAdmin = Roles.userIsInRole(Meteor.user(), ['admin']);
   
     //Get all course tdfs
-    const courseId = Meteor.user().loginParams.curClass ? Meteor.user().loginParams.curClass.courseId : null;
+    const courseId = Meteor.user().loginParams?.curClass ? Meteor.user().loginParams.curClass.courseId : null;
     const courseTdfs = Assignments.find({courseId: courseId}).fetch()
     console.log('courseTdfs', courseTdfs, courseId);
 
