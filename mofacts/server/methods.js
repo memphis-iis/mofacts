@@ -1937,7 +1937,7 @@ function sendErrorReportSummaries() {
         //send email to user who reported error and to admin
         try{
           //check if user has an email address
-          if (userWhoReportedError.emails.length > 0 ) {
+          if (userWhoReportedError.emails && userWhoReportedError.emails.length > 0 ) {
             toIndividual = userWhoReportedError.emails[0].address + ', ' + admin;
           subjectIndividual = 'Mofacts Error Report - ' + thisServerUrl;
           sentErrorReports.add(unsentErrorReport._id);
@@ -1947,6 +1947,7 @@ function sendErrorReportSummaries() {
         catch (err) {
           serverConsole(err);
         }
+        ErrorReports.update({_id: unsentErrorReport._id}, {$set: {'emailed': true}});
       }
       try {
         sendEmail(admin, from, subject, text);
@@ -1955,7 +1956,6 @@ function sendErrorReportSummaries() {
       }
     }
     sentErrorReports = Array.from(sentErrorReports);
-    ErrorReports.update({_id: {$in: sentErrorReports}}, {$set: {'emailed': true}}, {multi: true});
     serverConsole('Sent ' + sentErrorReports.length + ' error reports summary');
   } else {
     serverConsole('no unsent error reports to send');
