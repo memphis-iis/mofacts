@@ -1,0 +1,35 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Meteor: Server Tests",
+            "runtimeExecutable": "npm",
+            "runtimeArgs": [
+              "run",
+              "test"
+            ],
+            "cwd": "${workspaceFolder}/mofacts",
+          },
+          {
+            "type": "chrome",
+            "runtimeExecutable": "/snap/bin/chromium",
+            "runtimeArgs": [
+                "--new-window",
+                "--remote-debugging-port=9222",
+                "--disable-background-networking",
+            ],
+            "request": "launch",
+            "name": "Meteor: Client Tests",
+            "url": "http://localhost:3010",
+            "webRoot": "${workspaceFolder}"
+          },
+    ],
+    "compounds": [
+        {
+            "name": "Meteor: All Tests",
+            "configurations": ["Meteor: Server Tests", "Meteor: Client Tests"]
+        },
+    ]
+}

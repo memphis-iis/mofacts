@@ -2405,7 +2405,7 @@ function getSyllablesForWord(word) {
   return syllableArray;
 }
 
-const methods = {
+export const methods = {
   getMatchingDialogueCacheWordsForAnswer, getAllTeachers, getUserIdforUsername, getClassPerformanceByTDF, 
 
   removeUserDueDateException, insertHiddenItem, setUserLoginData, addUserDueDateException, createExperimentState,
