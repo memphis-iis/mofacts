@@ -2939,8 +2939,9 @@ const methods = {
 
   deleteTDFFile: function(tdfId){
     serverConsole("Remove TDF File:", tdfId);
-    let TDF = Tdfs.findOne({_id: tdfId, ownerId: Meteor.userId()});
-    if(TDF){
+    //check if the user is an admin or owner of the TDF
+    let TDF = Tdfs.findOne({_id: tdfId});
+    if(TDF && (Roles.userIsInRole(Meteor.userId(), ['admin']) || TDF.ownerId == Meteor.userId())){
       ComponentStates.remove({TDFId: tdfId});
       Assignments.remove({TDFId: tdfId});
       Histories.remove({TDFId: tdfId});
