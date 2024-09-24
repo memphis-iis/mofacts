@@ -44,7 +44,7 @@
     "node": "^12.22.12"
   },
   "scripts": {
-    "test": "TEST_WATCH=1 meteor test --driver-package=meteortesting:mocha --port 3010 --full-app --settings settings.json"
+    "test": "TEST_WATCH=1 meteor test --driver-package=meteortesting:mocha --port 3010 --settings settings.json"
   },
   "author": "",
   "license": "ISC"
