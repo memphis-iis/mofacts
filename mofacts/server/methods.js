@@ -2796,8 +2796,12 @@ export const methods = {
     if (!Meteor.users.findOne(userId)) {
       throw new Meteor.Error(404, 'User not found');
     }
-    Meteor.users.update({_id: Meteor.userId()}, {$set: {impersonating: userId}});
-    this.setUserId(userId);
+    if (!Roles.userIsInRole(Meteor.userId(), ['admin'])) {
+      throw new Meteor.Error(403, 'You are not authorized to do that');
+    }
+    const newUser = Meteor.users.findOne(userId);
+    newUser.impersonating = true;
+    return newUser
   },
 
   clearLoginData: function(){
