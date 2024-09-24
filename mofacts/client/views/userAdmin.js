@@ -96,8 +96,17 @@ Template.userAdmin.events({
   'click .btn-impersonate' : function(event){
     const btnTarget = $(event.currentTarget);
     const newUserId = _.trim(btnTarget.data('userid'));
-    Meteor.call('impersonate', newUserId);
-    Router.go('/');
+    Meteor.call('impersonate', newUserId, function(error, result) {
+      if (error) {
+        console.log('Impersonation failed:', error);
+        alert('Impersonation failed:' + error);
+      } else {
+        console.log('Impersonation successful:', result._id);
+        Meteor.userId = function() { return result._id };
+        Meteor.user = function() { return result };
+        Router.go('/');
+      }
+    });
   }
 
 });
