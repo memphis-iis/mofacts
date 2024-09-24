@@ -2405,7 +2405,7 @@ function getSyllablesForWord(word) {
   return syllableArray;
 }
 
-const methods = {
+export const methods = {
   getMatchingDialogueCacheWordsForAnswer, getAllTeachers, getUserIdforUsername, getClassPerformanceByTDF, 
 
   removeUserDueDateException, insertHiddenItem, setUserLoginData, addUserDueDateException, createExperimentState,
@@ -2453,7 +2453,7 @@ const methods = {
   removeTurkById: function(turkId, experimentId){
     serverConsole('removeTurkById', turkId, experimentId)
     ScheduledTurkMessages.remove({workerUserId: turkId, experiment: experimentId});
-    let lockout = meteor.user().lockouts;
+    let lockout = Meteor.user().lockouts;
     lockout[experimentId].lockoutMinutes = Number.MAX_SAFE_INTEGER;
     Meteor.users.update({_id: Meteor.userId()}, {$set: {lockout: lockout}});
   },
