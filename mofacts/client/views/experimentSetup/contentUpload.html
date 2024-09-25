@@ -61,15 +61,6 @@
                                                 <b>Package Asset Id:</b> {{packageAssetId}}
                                             </td>
                                         </tr>
-                                        <!-- if theres an api key, we show a key here and a note that the key will be obfuscated if downloaded -->
-                                        {{#if apiKey}}
-                                        <tr>
-                                            <td>
-                                                <span class="fa fa-key" aria-hidden="true"></span>
-                                                <b>NOTE:</b> The API key will be obfuscated if downloaded.
-                                            </td>
-                                        </tr>
-                                        {{/if}}
                                         {{#if errors}}
                                         <tr>
                                             <b>ERROR:</b>
@@ -124,7 +115,11 @@
                                 </td>
                                 <td>
                                     {{#if packageFileLink}}
+                                        {{#if this.hasAPIKeys}}
+                                        
+                                        {{else}}
                                         <button id="tdf-download-btn" value="{{packageFileLink}}" class="btn-icon"><span class="fa fa-download" aria-hidden="true"></span></button>
+                                        {{/if}}
                                     {{/if}}
                                     <button id="tdf-delete-btn" value="{{_id}}" data-filename="{{fileName}}" class="btn-icon"><span class="fa fa-minus" aria-hidden="true"></span></button>
                                     {{#if conditions}}
@@ -139,7 +134,9 @@
                                     {{#if this.hasAPIKeys}}
                                         <!-- key icon -->
                                         <span class="fa fa-key" aria-hidden="true"></span>
-                                        Transfering ownership of this tdf is not allowed because it has API keys. Please share the tdf file with the new owner and have them upload it.
+                                        Transfering ownership or adding accessors of this lesson is not allowed because it has API keys. Download of this lesson is disabled. 
+                                        Please share the lesson manually with the new owner or accessors.
+                            
                                     {{else}}
                                         Transfer Ownership (not recoverable)
                                         <input type="text" id="transfer-{{_id}}" placeholder="Enter new owner's email">
@@ -148,9 +145,7 @@
                                 </td>
                                 <td>
                                     {{#if this.hasAPIKeys}}
-                                        <!-- key icon -->
-                                        <span class="fa fa-key" aria-hidden="true"></span>
-                                        Adding other users to this tdf is not allowed because it has API keys. Please share the tdf file with the new owner and have them upload it.
+                                    
                                     {{else}}
                                         Add Access
                                         <input type="text" id="add-access-{{_id}}" data-id="{{_id}}" placeholder="Enter new user's email">
