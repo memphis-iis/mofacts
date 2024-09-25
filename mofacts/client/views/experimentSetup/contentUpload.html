@@ -61,6 +61,14 @@
                                                 <b>Package Asset Id:</b> {{packageAssetId}}
                                             </td>
                                         </tr>
+                                        <!-- if theres an api key, we show a key here and a note that the key will be obfuscated if downloaded -->
+                                        {{#if apiKey}}
+                                        <tr>
+                                            <td>
+                                                <span class="fa fa-key" aria-hidden="true"></span>
+                                                <b>NOTE:</b> The API key will be obfuscated if downloaded.
+                                            </td>
+                                        </tr>
                                         {{#if errors}}
                                         <tr>
                                             <b>ERROR:</b>
@@ -138,9 +146,15 @@
                                     {{/if}}
                                 </td>
                                 <td>
-                                    Add Access
-                                    <input type="text" id="add-access-{{_id}}" data-id="{{_id}}" placeholder="Enter new user's email">
-                                    <button id="add-access-btn" value="{{_id}}" class="btn-icon"><span class="fa fa-plus" aria-hidden="true"></span></button>
+                                    {{#if this.hasAPIKeys}}
+                                        <!-- key icon -->
+                                        <span class="fa fa-key" aria-hidden="true"></span>
+                                        Adding other users to this tdf is not allowed because it has API keys. Please share the tdf file with the new owner and have them upload it.
+                                    {{else}}
+                                        Add Access
+                                        <input type="text" id="add-access-{{_id}}" data-id="{{_id}}" placeholder="Enter new user's email">
+                                        <button id="add-access-btn" value="{{_id}}" class="btn-icon"><span class="fa fa-plus" aria-hidden="true"></span></button>
+                                    {{/if}}
                                 </td>
 
                             </tr>
