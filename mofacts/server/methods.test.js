@@ -32,7 +32,6 @@ StubCollections.stub(UserMetrics);
 StubCollections.stub(ElaboratedFeedbackCache);
 StubCollections.stub(DynamicSettings);
 StubCollections.stub(ScheduledTurkMessages);
-StubCollections.stub(GoogleSpeechAPIKeys);
 StubCollections.stub(ClozeEditHistory);
 StubCollections.stub(ErrorReports);
 StubCollections.stub(LoginTimes);
