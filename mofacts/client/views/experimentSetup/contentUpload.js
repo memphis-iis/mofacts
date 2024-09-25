@@ -25,8 +25,9 @@ Template.contentUpload.helpers({
     }
     console.log('allTdfs:', allTDfs);
     //iterate through allTdfs and get all stimuli
-    tdfSummaries = [];    for (const tdf of allTDfs) {
-      thisTdf = {};
+    tdfSummaries = [];    
+    for (const tdf of allTDfs) {
+      var thisTdf = {};
       thisTdf.lessonName = tdf.content.tdfs.tutor.setspec.lessonname;
       thisTdf.stimuliCount = tdf.stimuli.length;
       thisTdf.accessors = tdf.accessors || [];
@@ -38,8 +39,10 @@ Template.contentUpload.helpers({
       thisTdf.stimFilesCount = 0;
       thisTdf.fileName = tdf.content.fileName;
       thisTdf.owner = Meteor.users.findOne({_id: tdf.ownerId}).username;
-      checkIfConditional = allTDfs.some(function(tdf){
-        conditions = tdf.content.tdfs.tutor.setspec.condition;
+      //check if thisTdf has API keys
+      (tdf.content.tdfs.tutor.setspec.textToSpeechAPIKey || tdf.content.tdfs.tutor.setspec.speechAPIKey) ? thisTdf.hasAPIKeys = true : thisTdf.hasAPIKeys = false;
+      var checkIfConditional = allTDfs.some(function(tdf){
+        var conditions = tdf.content.tdfs.tutor.setspec.condition;
         //check if condition contains the TDF filename
         if(conditions && conditions.includes(thisTdf.fileName)){
           return true;

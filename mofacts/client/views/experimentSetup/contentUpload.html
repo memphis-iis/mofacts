@@ -127,9 +127,15 @@
                             <tr>
 
                                 <td>
-                                    Transfer Ownership (not recoverable)
-                                    <input type="text" id="transfer-{{_id}}" placeholder="Enter new owner's email">
-                                    <button id="transfer-btn" value="{{_id}}" class="btn-icon"><span class="fa fa-exchange" aria-hidden="true"></span></button>
+                                    {{#if this.hasAPIKeys}}
+                                        <!-- key icon -->
+                                        <span class="fa fa-key" aria-hidden="true"></span>
+                                        Transfering ownership of this tdf is not allowed because it has API keys. Please share the tdf file with the new owner and have them upload it.
+                                    {{else}}
+                                        Transfer Ownership (not recoverable)
+                                        <input type="text" id="transfer-{{_id}}" placeholder="Enter new owner's email">
+                                        <button id="transfer-btn" value="{{_id}}" class="btn-icon"><span class="fa fa-exchange" aria-hidden="true"></span></button>
+                                    {{/if}}
                                 </td>
                                 <td>
                                     Add Access

@@ -2,6 +2,7 @@
 import { Meteor } from 'meteor/meteor';
 import { Accounts } from 'meteor/accounts-base';
 import {  methods } from './methods.js';
+import { decryptData, encryptData } from './methods.js';
 import { sinon } from 'meteor/practicalmeteor:sinon';
 import StubCollections from 'meteor/hwillson:stub-collections';
 import { Random } from 'meteor/random';
@@ -148,11 +149,6 @@ describe('user related configuration methods', function() {
     });
 
     //should be able to impersonate a user
-    //TODO this is broken
-    it('should impersonate a user', function() {
-        methods.impersonate(testUser._id);
-        expect(Meteor.userId()).to.equal(adminUser._id);
-    });
     it('should clear login data', function() {
         //mock up the login data
         var loginParams = {
@@ -242,6 +238,20 @@ describe('Content related methods', function() {
         await Meteor.call('processPackageUpload', fileObj, Meteor.userId(), zipLink, false);
         expect(Tdfs.find().count()).to.equal(2);
     });
+    //inject an API key into the TDF
+    var TdfTTSAPIKey = "1241515124";
+    var TdfAPIKey = "124124124";
+    Meteor.settings.encryptionKey = Random.id();
+    it('should return a decrypted TTS API key', async function() {
+        var TdfId = Tdfs.findOne({packageFile: "testPackage.zip"})._id;
+        var decryptedAPIKey = methods.getTdfTTSAPIKey(TdfId);
+        expect(decryptedAPIKey).to.equal(TdfTTSAPIKey);
+    });
+    it('should return a decrypted Speech API key', async function() {
+        var TdfId = Tdfs.findOne({packageFile: "testPackage.zip"})._id;
+        var decryptedAPIKey = methods.getTdfSpeechAPIKey(TdfId);
+        expect(decryptedAPIKey).to.equal(TdfAPIKey);
+    });
     var tdfs = [];
     var tdfId = "";
     var testTdfInCollection = {};
@@ -312,6 +322,11 @@ describe('admin related methods', function() {
         Meteor.users.update({_id: testUser._id}, {$set: {secretKey: Random.id()}});
         methods.resetAllSecretKeys();
         expect(Meteor.users.findOne({_id: testUser._id}).secretKey).to.not.equal(testUser.secretKey);
+    });
+    //TODO this is broken
+    it('should impersonate a user', function() {
+        methods.impersonate(testUser._id);
+        expect(Meteor.userId()).to.equal(adminUser._id);
     });
 });
 
