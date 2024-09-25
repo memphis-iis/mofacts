@@ -322,10 +322,9 @@ describe('admin related methods', function() {
         methods.resetAllSecretKeys();
         expect(Meteor.users.findOne({_id: testUser._id}).secretKey).to.not.equal(testUser.secretKey);
     });
-    //TODO this is broken
     it('should impersonate a user', function() {
-        methods.impersonate(testUser._id);
-        expect(Meteor.userId()).to.equal(adminUser._id);
+        var newUser = methods.impersonate(testUser._id);
+        expect(newUser._id).to.equal(testUser._id);
     });
 });
 
