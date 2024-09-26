@@ -239,11 +239,6 @@ Template.profile.events({
     Router.go('/contentGeneration');
   },
 
-  'click #FileManagementButton': function(event) {
-    event.preventDefault();
-    Router.go('/FileManagement');
-  },
-
   'click #tdfPracticeBtn': function(event, instance) {
     const showTdfs = instance.showTdfs.get();
     instance.showTdfs.set(!showTdfs);

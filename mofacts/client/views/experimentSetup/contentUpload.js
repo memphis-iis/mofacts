@@ -6,9 +6,6 @@ Template.contentUpload.helpers({
   TdfFiles: function() {
     return Tdfs.find();
   },
-  StimFiles: function() {
-    return Stims.find();
-  },
   currentUpload() {
     return Template.instance().currentUpload.get();
   },
@@ -203,10 +200,11 @@ Template.contentUpload.events({
   'click #stim-download-btn': async function(event){
     event.preventDefault();
     const stimSetId = parseInt(event.currentTarget.getAttribute('value'));
-    const stimFile = Stims.findOne({'stimuliSetId': stimSetId})
+    const tdf = Tdfs.findOne({'stimuliSetId': stimSetId})
+    const stimFile = tdf.rawStimuliFile;
     let blob = new Blob([JSON.stringify(stimFile.stimuli,null,2)], { type: 'application/json' });
     let url = window.URL.createObjectURL(blob);
-    let downloadFileName = stimFile.fileName.trim();
+    let downloadFileName = tdf.stimuli[0].stimulusFileName.trim();
     var a = document.createElement("a");
     document.body.appendChild(a);
     a.style = "display: none";

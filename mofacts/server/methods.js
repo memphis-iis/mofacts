@@ -2085,7 +2085,6 @@ async function upsertStimFile(stimulusFileName, stimJSON, ownerId, packagePath =
     'owner': ownerId,
     'source': 'repo',
   };
-  await Items.remove({stimuliSetId: stimuliSetId})
   const newStims = getNewItemFormat(oldStimFormat, stimulusFileName, stimuliSetId, responseKCMap);
   let maxStimulusKC = 0;
   serverConsole('!!!newStims:', newStims);
@@ -3023,7 +3022,8 @@ export const methods = {
   downloadStimFile: function(stimuliSetId) {
     serverConsole('downloadStimFile: ' + stimuliSetId);
     stimuliSetId = parseInt(stimuliSetId);
-    let stims = Stims.find({'stimuliSetId': stimuliSetId}).fetch();
+    let tdf = Tdfs.find({'stimuliSetId': stimuliSetId}).fetch();
+    let stims = tdf.rawStimuliFile;
     return stims;
   },
 
@@ -3083,7 +3083,8 @@ export const methods = {
 
   getStimsByOwnerId: (ownerId) => {
     serverConsole('getStimsByOwnerId: ' + ownerId);
-    const stims = Stims.find({'owner': ownerId}).fetch();
+    const tdfs = Tdfs.find({'ownerId': ownerId}).fetch();
+    const stims = tdfs.stimuli;
     for(let stim of stims) {
       let lessonName = Tdfs.findOne({stimuliSetId: stim.stimuliSetId}).content.tdfs.tutor.setspec.lessonname
       stim.lessonName = lessonName
@@ -3442,9 +3443,8 @@ const asyncMethods = {
   },
   deleteStimFile: async function(stimSetId) {
     stimSetId = parseInt(stimSetId);
-    let stim = Stims.findOne({stimuliSetId: stimSetId, owner: Meteor.userId()})
-    if(stim){
-      let tdfs = Tdfs.find({stimuliSetId: stimSetId}).fetch();
+    let tdfs = Tdfs.find({stimuliSetId: stimSetId, owner: Meteor.userId()}).fetch();
+    if(tdfs){
       serverConsole(tdfs);
       for(let tdf of tdfs) {
         tdfId = tdf._id;
@@ -3453,9 +3453,7 @@ const asyncMethods = {
         Assignments.remove({TDFId: tdfId});
         Histories.remove({TDFId: tdfId});
       }
-      Items.remove({stimuliSetId: stimSetId});
       Tdfs.remove({stimuliSetId: stimSetId});
-      Stims.remove({stimuliSetId: stimSetId});
       res = "Stim and related TDFS deleted.";
       return res;
     } else {

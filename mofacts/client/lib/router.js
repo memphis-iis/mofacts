@@ -305,22 +305,6 @@ Router.route('/', {
   },
 });
 
-Router.route('/FileManagement', {
-  name: 'client.FileManagement',
-  waitOn: function() {
-    return Meteor.subscribe('ownedFiles');
-  },
-  action: function() {
-    if(this.ready()){
-      if(Meteor.user()) {
-        this.render('FileManagement');
-      } else {
-        this.redirect('/');
-      }
-    }
-  }
-})
-
 Router.route('/contentUpload', {
   name: 'client.contentUpload',
   waitOn: function() {
