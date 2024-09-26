@@ -32,6 +32,7 @@ Template.contentUpload.helpers({
       thisTdf.stimuliCount = tdf.stimuli.length;
       thisTdf.accessors = tdf.accessors || [];
       thisTdf.accessorsCount = thisTdf.accessors.length;
+      thisTdf.packageFile = tdf.packageFile;
       thisTdf.assets = [];
       thisTdf._id = tdf._id;
       thisTdf.errors = [];
@@ -39,8 +40,20 @@ Template.contentUpload.helpers({
       thisTdf.stimFilesCount = 0;
       thisTdf.fileName = tdf.content.fileName;
       thisTdf.owner = Meteor.users.findOne({_id: tdf.ownerId}).username;
-      //check if thisTdf has API keys
-      (tdf.content.tdfs.tutor.setspec.textToSpeechAPIKey || tdf.content.tdfs.tutor.setspec.speechAPIKey) ? thisTdf.hasAPIKeys = true : thisTdf.hasAPIKeys = false;
+      //get all tdfs with the same packgeFile
+      var sisterTdfs = allTDfs.filter(function(tdf){
+        return tdf.packageFile == thisTdf.packageFile;
+      });
+      console.log('sisterTdfs:', sisterTdfs);
+      thisTdf.hasAPIKeys = false;
+      //check if any syter tdf has API keys at 
+      //check if thisTdf has API keys at tdf.content.tdfs.tutor.setspec.textToSpeechAPIKey or  tdf.content.tdfs.tutor.setspec.speechAPIKey
+      var checkIfAPI = sisterTdfs.some(function(tdf){
+        return tdf.content.tdfs.tutor.setspec.textToSpeechAPIKey || tdf.content.tdfs.tutor.setspec.speechAPIKey;
+      });
+      if(checkIfAPI){
+        thisTdf.hasAPIKeys = true;
+      }
       var checkIfConditional = allTDfs.some(function(tdf){
         var conditions = tdf.content.tdfs.tutor.setspec.condition;
         //check if condition contains the TDF filename
