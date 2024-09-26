@@ -202,9 +202,9 @@ Template.contentUpload.events({
       event.preventDefault();
       window.open(event.currentTarget.getAttribute('value'));
     },
-  'click #tdf-delete-btn': function(event){
-    const tdfId = event.currentTarget.getAttribute('value')
-    Meteor.call('deleteTDFFile',tdfId);
+  'click #package-delete-btn': function(event){
+    const packageId = event.currentTarget.getAttribute('value')
+    Meteor.call('deletePackageFile',packageId);
   },
   'click #reset-conditions-btn': function(event){
     const tdfId = event.currentTarget.getAttribute('value')

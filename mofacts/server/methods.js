@@ -2961,36 +2961,40 @@ export const methods = {
     return allErrors;
   },
 
-  deleteTDFFile: function(tdfId){
-    serverConsole("Remove TDF File:", tdfId);
+  deletePackageFile: function(packageId){
+    serverConsole("Remove package:", packageId);
     //check if the user is an admin or owner of the TDF
-    let TDF = Tdfs.findOne({_id: tdfId});
-    if(TDF && (Roles.userIsInRole(Meteor.userId(), ['admin']) || TDF.ownerId == Meteor.userId())){
-      ComponentStates.remove({TDFId: tdfId});
-      Assignments.remove({TDFId: tdfId});
-      Histories.remove({TDFId: tdfId});
-      GlobalExperimentStates.remove({TDFId: tdfId});
-      Tdfs.remove({_id: tdfId});
-      //iterate through TDF.stimuli
-      for (const stim of TDF.stimuli) {
-        asset = stim.imageStimulus || stim.audioStimulus || stim.videoStimulus || false;
-        if (asset) {
-          //remove asset
-          DynamicAssets.remove({"name": asset}, function(err, result){
-            if(err){
-              serverConsole(err);
-            } else {
-              serverConsole("Asset removed: ", asset);
+    try{
+      Tdfs.find({"packageFile": packageId}).fetch().forEach((TDF) => {
+        console.log("TDF", TDF, "is to be removed");
+        if(TDF && (Roles.userIsInRole(Meteor.userId(), ['admin']) || TDF.ownerId == Meteor.userId())){
+          tdfId = TDF._id;
+          ComponentStates.remove({TDFId: tdfId});
+          Assignments.remove({TDFId: tdfId});
+          Histories.remove({TDFId: tdfId});
+          GlobalExperimentStates.remove({TDFId: tdfId});
+          Tdfs.remove({_id: tdfId});
+          //iterate through TDF.stimuli
+          for (const stim of TDF.stimuli) {
+            asset = stim.imageStimulus || stim.audioStimulus || stim.videoStimulus || false;
+            if (asset) {
+              //remove asset
+              DynamicAssets.remove({"name": asset}, function(err, result){
+                if(err){
+                  serverConsole(err);
+                } else {
+                  serverConsole("Asset removed: ", asset);
+                }
+              });
             }
-          });
+          }
         }
-      }
-    } else {
-      result = 'No matching tdf file found';
-      return result;
+      });
+      return "Package removed";
+    } catch (e) {
+      serverConsole(e);
+      return "There was an error deleting the package";
     }
-    result = "TDF deleted";
-    return result;
   },
 
   updatePerformanceData: function(type, codeLocation, userId) {
