@@ -1,3 +1,4 @@
+// @ts-nocheck
 import {DynamicTdfGenerator} from '../common/DynamicTdfGenerator';
 import {curSemester, ALL_TDFS, KC_MULTIPLE} from '../common/Definitions';
 import * as TutorialDialogue from '../server/lib/TutorialDialogue';
@@ -2918,8 +2919,8 @@ export const methods = {
     };
   },
 
-  saveUsersFile: function(filename, filecontents) {
-    serverConsole('saveUsersFile: ' + filename);
+  insertNewUsers: function(filename, filecontents) {
+    serverConsole('insertNewUsers: ' + filename);
     const allErrors = [];
     let rows = Papa.parse(filecontents).data;
     serverConsole(rows);
