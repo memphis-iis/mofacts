@@ -74,10 +74,12 @@
                                             <td>
                                                 Stimuli Count: {{stimuliCount}} <a id="show_stimuli" data-file="{{this._id}}">(click to toggle view of {{stimFilesCount}})</a>
                                                 <p hidden id="stimuli-{{this._id}}">
-                                                {{#each stimFileInfo}}
-                                                    <a id="#stim-download-btn" value="{{this.stimuliSetId}}">{{this.fileName}}</a>
+                                                {{#each this.stimFileInfo}}
+                                                    <button id="stim-download-btn" value="{{this.stimuliSetId}}" class="btn-icon"><span class="fa fa-download" aria-hidden="true"></span> {{this.fileName}} </button>
                                                 {{/each}}
                                                 </p>
+                                            </td>
+                                            <td>
                                             </td>
                                         </tr>
                                         <tr>

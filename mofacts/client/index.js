@@ -342,11 +342,6 @@ Template.DefaultLayout.events({
     Router.go('/contentGeneration');
   },
 
-  'click #FileManagementButton': function(event) {
-    event.preventDefault();
-    Router.go('/FileManagement');
-  },
-
 });
 // Global template helpers
 Template.registerHelper('currentTheme', function() {
