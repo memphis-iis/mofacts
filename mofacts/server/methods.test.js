@@ -169,6 +169,13 @@ describe('user related configuration methods', function() {
         expect(Meteor.users.findOne({_id: testUser._id}).loginParams.curClass).to.equal(null);
         expect(Meteor.users.findOne({_id: testUser._id}).loginParams.loginMode).to.equal(null);
     });
+    it('should set user session Id', function() {
+        //mock up the session id and a timestamp
+        var timestamp = new Date();
+        var session = Random.id();
+        methods.setUserSessionId(session, timestamp);
+        expect(Meteor.users.findOne({_id: testUser._id}).lastSessionId).to.equal(session);
+    });
 });
 
 //Mechanical Turk Related methods
@@ -242,21 +249,21 @@ describe('Content related methods', function() {
         await Meteor.call('processPackageUpload', fileObj, Meteor.userId(), zipLink, false);
         expect(Tdfs.find().count()).to.equal(2);
     });
-    var tdfs = [];
+    var alltdfs = [];
     var tdfId = "";
     var testTdfInCollection = {};
     //check if tdfs getAllTdfs returns a list of tdfs
     it('should get all Tdfs', async function() {
-        tdfs = await Meteor.call('getAllTdfs');
-        console.log(tdfs);
-        expect(tdfs).to.be.a('array');
+        alltdfs = await Meteor.call('getAllTdfs');
+        console.log(alltdfs);
+        expect(alltdfs).to.be.a('array');
         //should match Tdfs.find().fetch()
-        expect(tdfs).to.deep.equal(Tdfs.find().fetch());
+        expect(alltdfs).to.deep.equal(Tdfs.find().fetch());
     });
     var testTdfOutsideCollection = {};
     //get the tdf by packageFile
     it('should get Tdf by packageFile', async function() {
-        testTdfOutsideCollection = tdfs.find(tdf => tdf.packageFile === "testPackage.zip");
+        testTdfOutsideCollection = alltdfs.find(tdf => tdf.packageFile === "testPackage.zip");
         console.log("Test TDF Outside Collection: " + testTdfOutsideCollection);
         expect(testTdfOutsideCollection).to.not.be.undefined;
     });
@@ -312,6 +319,19 @@ describe('admin related methods', function() {
         Meteor.users.update({_id: testUser._id}, {$set: {secretKey: Random.id()}});
         methods.resetAllSecretKeys();
         expect(Meteor.users.findOne({_id: testUser._id}).secretKey).to.not.equal(testUser.secretKey);
+    });
+    it('should injest users from a csv file', function() {
+        var users = "test1,password1\ntest2,password2";
+        methods.saveUsersFile("testFile.csv", users);
+        //check if test1 and test2 are in the database
+        users = Meteor.users.find().fetch();
+        expect(users.find(user => user.username === "test2")).to.not.be.undefined;
+    });
+    it('should delete a TDF by id', async function() {
+        var tdfs = await Meteor.call('getAllTdfs');
+        var tdfId = tdfs.find(tdf => tdf.packageFile === "testPackage.zip")._id;
+        methods.deleteTDFFile(tdfId);
+        expect(Tdfs.find({_id: tdfId}).count()).to.equal(0);
     });
 });
 
