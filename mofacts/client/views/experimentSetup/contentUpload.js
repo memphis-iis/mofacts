@@ -202,7 +202,7 @@ Template.contentUpload.events({
     const stimSetId = parseInt(event.currentTarget.getAttribute('value'));
     const tdf = Tdfs.findOne({'stimuliSetId': stimSetId})
     const stimFile = tdf.rawStimuliFile;
-    let blob = new Blob([JSON.stringify(stimFile.stimuli,null,2)], { type: 'application/json' });
+    let blob = new Blob([JSON.stringify(stimFile,null,2)], { type: 'application/json' });
     let url = window.URL.createObjectURL(blob);
     let downloadFileName = tdf.stimuli[0].stimulusFileName.trim();
     var a = document.createElement("a");
