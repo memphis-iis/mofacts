@@ -123,7 +123,7 @@ function doFileUpload(fileElementSelector, fileDescrip) {
     fileReader.onload = function() {
       console.log('Upload attempted for', name);
 
-      Meteor.call('saveUsersFile', name, fileReader.result, function(error, result) {
+      Meteor.call('insertNewUsers', name, fileReader.result, function(error, result) {
         console.log('result:' + JSON.stringify(result));
         if (error) {
           console.log('Critical failure saving ' + fileDescrip, error);
