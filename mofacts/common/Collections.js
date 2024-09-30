@@ -25,6 +25,7 @@ GoogleSpeechAPIKeys = new Mongo.Collection('googleSpeechAPIKeys');
 ClozeEditHistory = new Mongo.Collection('clozeEditHistory');
 ErrorReports = new Mongo.Collection('errorReports');
 DynamicConfig = new Mongo.Collection('dynamicConfig');
+UserProfileData = new Mongo.Collection('userProfileData');
 ProbabilityEstimates = new Meteor.Collection('probabilityEstimates');
 
 //Init DynamicAssets Collection

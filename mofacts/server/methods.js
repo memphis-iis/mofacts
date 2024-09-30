@@ -1994,7 +1994,7 @@ function userProfileSave(id, profile) {
     UserProfileData.update({_id: id}, {'$set': {'preUpdate': true}}, {upsert: true});
   } catch (e) {
     serverConsole('Ignoring user profile upsert ', e);
-  }  
+  }
   const numUpdated = UserProfileData.update({_id: id}, profile);
   if (numUpdated == 1) {
     return 'Save succeeed';
@@ -3051,7 +3051,8 @@ export const methods = {
 
   getStimsByOwnerId: (ownerId) => {
     serverConsole('getStimsByOwnerId: ' + ownerId);
-    const stims = Stims.find({'owner': ownerId}).fetch();
+    const tdfs = Tdfs.find({'ownerId': ownerId}).fetch();
+    const stims = tdfs.stimuli;
     for(let stim of stims) {
       let lessonName = Tdfs.findOne({stimuliSetId: stim.stimuliSetId}).content.tdfs.tutor.setspec.lessonname
       stim.lessonName = lessonName
@@ -3370,7 +3371,7 @@ const asyncMethods = {
       // We test by reading the profile back and checking their
       // account balance
       const res = await turk.getAccountBalance(
-        UserProfileData.findOne({_id: Meteor.user()._id}),
+       UserProfileData.findOne({_id: Meteor.user()._id}),
       );
 
       if (!res) {
@@ -3411,7 +3412,7 @@ const asyncMethods = {
   deleteStimFile: async function(stimSetId) {
     stimSetId = parseInt(stimSetId);
     let tdfs = Tdfs.find({stimuliSetId: stimSetId, owner: Meteor.userId()}).fetch();
-      if(tdfs){
+    if(tdfs){
       serverConsole(tdfs);
       for(let tdf of tdfs) {
         tdfId = tdf._id;
