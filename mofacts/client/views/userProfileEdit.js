@@ -1,6 +1,6 @@
 function getProfileField(field) {
-  const prof = UserProfileData.findOne({_id: Meteor.userId()});
-  if (!prof || typeof prof[field] === undefined) {
+  const prof = Meteor.user();
+  if (!prof || !prof.aws || typeof prof.aws[field] === undefined) {
     return null;
   }
   return prof[field];

@@ -187,11 +187,6 @@ Meteor.publish(null, function() {
   // user data (user times log and user record) for them
   const defaultData = [
     Meteor.users.find({_id: userId}),
-    UserProfileData.find({_id: userId}, {fields: {
-      have_aws_id: 1,
-      have_aws_secret: 1,
-      use_sandbox: 1,
-    }}),
   ];
 
   return defaultData;
@@ -1987,16 +1982,12 @@ function checkDriveSpace() {
   }
 }
 
-
 // Save the given user profile via "upsert" logic
-function userProfileSave(id, profile) {
-  try {
-    // Insure record matching ID is present while working around MongoDB 2.4 bug
-    UserProfileData.update({_id: id}, {'$set': {'preUpdate': true}}, {upsert: true});
-  } catch (e) {
-    serverConsole('Ignoring user profile upsert ', e);
-  }
-  const numUpdated = UserProfileData.update({_id: id}, profile);
+function userProfileSave(id, awsProfile) {
+  serverConsole('userProfileSave', id, awsProfile);
+  const user = Meteor.users.findOne({_id: id});
+  user.aws = awsProfile;
+  const numUpdated = Meteor.users.update({_id: id}, user);
   if (numUpdated == 1) {
     return 'Save succeeed';
   }
@@ -3404,7 +3395,7 @@ const asyncMethods = {
       // We test by reading the profile back and checking their
       // account balance
       const res = await turk.getAccountBalance(
-          UserProfileData.findOne({_id: Meteor.user()._id}),
+          Meteor.users.findOne({_id: Meteor.userId()}),
       );
 
       if (!res) {
@@ -3414,17 +3405,17 @@ const asyncMethods = {
       result = true;
       acctBal = res.AvailableBalance;
       errmsg = '';
-      return {
-        'result': result,
-        'saveResult': saveResult,
-        'acctBal': acctBal,
-        'error': errmsg,
-      };
     } catch (e) {
       result = false;
-      serverConsole(e);
+      serverConsole('here', e);
       errmsg = e;
     }
+    return {
+      'result': result,
+      'saveResult': saveResult,
+      'acctBal': acctBal,
+      'error': errmsg,
+    };
   },
 
   //handle file deletions

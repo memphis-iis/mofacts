@@ -238,14 +238,21 @@
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h4 class="modal-title" id="profileWorkModalLabel">Please Wait</h4>
+                    <div>
+                        <img src="/styles/mofacts_waiting.gif" class="img-responsive pull-left"/>
+                        <h4 class="modal-title" id="profileWorkModalLabel">Please Wait</h4>
+                    </div>
                 </div>
                 <div class="modal-body">
                     <div class="clearfix">
-                        <img src="/styles/mofacts_waiting.gif" class="img-responsive pull-left"/>
-                        <p class="pull-right">Please wait while we save your information and contact Mechanical Turk.</p>
+                        <p class="pull-right" id="profileWorkModalMessage">{{profileWorkModalMessage}}</p>
                     </div>
                 </div>
+                {{#if saveComplete}}
+                    <div class="modal-footer">
+                        <button id="profileWorkModalDissmiss" type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    </div>
+                {{/if}}
             </div>
         </div>
     </div>
