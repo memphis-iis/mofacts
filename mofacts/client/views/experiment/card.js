@@ -3005,7 +3005,7 @@ async function processLINEAR16(data) {
     }
     let tdfSpeechAPIKey;
     if(Session.get('useEmbeddedAPIKeys')){
-      tdfSpeechAPIKey = Session.get('currentTdfFile').tdfs.tutor.setspec.speechAPIKey;
+      tdfSpeechAPIKey = await meteorCallAsync('getTdfSpeechAPIKey', Session.get('currentTdfId'));
     } else {
       tdfSpeechAPIKey = '';
     }

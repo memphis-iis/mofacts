@@ -21,7 +21,6 @@ UserMetrics = new Meteor.Collection('userMetrics');
 ElaboratedFeedbackCache = new Meteor.Collection('elaborated_feedback_cache');
 DynamicSettings = new Meteor.Collection('dynaminc_settings');
 ScheduledTurkMessages = new Mongo.Collection('scheduledTurkMessages');
-GoogleSpeechAPIKeys = new Mongo.Collection('googleSpeechAPIKeys');
 ClozeEditHistory = new Mongo.Collection('clozeEditHistory');
 ErrorReports = new Mongo.Collection('errorReports');
 LoginTimes = new Mongo.Collection('loginTimes');

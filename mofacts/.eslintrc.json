@@ -24,7 +24,6 @@
         "Roles": "readonly",
         "StimSyllables": "readonly",
         "ScheduledTurkMessages": "readonly",
-        "GoogleSpeechAPIKeys": "readonly",
         "ClozeEditHistory": "readonly",
         "ErrorReports": "readonly",
         "LoginTimes": "readonly",

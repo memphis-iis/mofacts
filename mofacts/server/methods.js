@@ -9,7 +9,7 @@ import {displayify, isEmpty, stringifyIfExists} from '../common/globalHelpers';
 import {createExperimentExport} from './experiment_times';
 import {getNewItemFormat} from './conversions/convert';
 import {sendScheduledTurkMessages} from './turk_methods';
-import {getItem, getCourse} from './orm';
+import {getItem, getCourse, getTdf} from './orm';
 import {result} from 'underscore';
 import { _ } from 'core-js';
 import { all } from 'bluebird';
@@ -24,7 +24,8 @@ export {
   getStimuliSetById,
   getDisplayAnswerText,
   serverConsole,
-  decryptUserData,
+  decryptData,
+  encryptData,
   createAwsHmac,
   getTdfByExperimentTarget
 };
@@ -274,16 +275,22 @@ const crypto = Npm.require('crypto');
 // Parameters
 const algo = 'aes256';
 
-function encryptUserData(data) {
-  const key = getConfigProperty('protectionKey');
-  const cipher = crypto.createCipher(algo, key);
-  return cipher.update(data, 'utf8', 'hex') + cipher.final('hex');
+function encryptData(data) {
+  //encrypt using crypto
+  const cipher = crypto.createCipher(algo, Meteor.settings.encryptionKey);
+  let crypted
+  crypted = cipher.update(data, 'utf8', 'hex');
+  crypted += cipher.final('hex');
+  return crypted;
 }
 
-function decryptUserData(data) {
-  const key = getConfigProperty('protectionKey');
-  const decipher = crypto.createDecipher(algo, key);
-  return decipher.update(data, 'hex', 'utf8') + decipher.final('utf8');
+function decryptData(data) {
+  //decrypt using crypto
+  const decipher = crypto.createDecipher(algo, Meteor.settings.encryptionKey);
+  let dec
+  dec = decipher.update(data, 'hex', 'utf8');
+  dec += decipher.final('utf8');
+  return dec;
 }
 
 function createAwsHmac(secretKey, dataString) {
@@ -309,7 +316,8 @@ async function checkCongentGenerationAvailable() {
 
 async function getTdfTTSAPIKey(TDFId) {
   const textToSpeechAPIKey = Tdfs.findOne({_id: TDFId}).content.tdfs.tutor.setspec.textToSpeechAPIKey;
-  return textToSpeechAPIKey;
+  var key = decryptData(textToSpeechAPIKey);
+  return key;
 }
 
 async function getTdfByFileName(filename) {
@@ -528,6 +536,14 @@ async function processPackageUpload(fileObj, owner, zipLink, emailToggle){
           const stim = unzippedFiles.find(f => f.name == tdf.contents.tutor.setspec.stimulusfile);
           serverConsole('stim', stim, 'stimFileName', stimFileName, tdf.contents.tutor.setspec.stimulusfile);
           tdf.packageFile = packageFile;
+          //search for google TTS  api key and encrypt it
+          if(tdf.contents.tutor.setspec.textToSpeechAPIKey){
+            tdf.contents.tutor.setspec.textToSpeechAPIKey = encryptData(tdf.contents.tutor.setspec.textToSpeechAPIKey);
+          }
+          //search for google speech to text api key and encrypt it
+          if(tdf.contents.tutor.setspec.speechAPIKey){
+            tdf.contents.tutor.setspec.speechAPIKey = encryptData(tdf.contents.tutor.setspec.speechAPIKey);
+          }
           const packageResult = await combineAndSaveContentFile(tdf, stim, owner);
           res.push(packageResult);
           serverConsole('packageResult', packageResult);
@@ -2819,46 +2835,50 @@ export const methods = {
   },
 
   getUserSpeechAPIKey: function() {
-    const speechAPIKey = GoogleSpeechAPIKeys.findOne({_id: Meteor.userId()});
+    const speechAPIKey = Meteor.user().speechAPIKey;
     if (speechAPIKey) {
-      return decryptUserData(speechAPIKey['key']);
+      return decryptData(speechAPIKey);
     } else {
       return null;
     }
   },
 
   isUserSpeechAPIKeySetup: function() {
-    const speechAPIKey = GoogleSpeechAPIKeys.findOne({_id: Meteor.userId()});
+    const speechAPIKey = Meteor.user().speechAPIKey;
     return !!speechAPIKey;
   },
 
   saveUserSpeechAPIKey: function(key) {
-    key = encryptUserData(key);
+    key = encryptData(key);
     let result = true;
     let error = '';
-    const userID = Meteor.userId();
-    try {
-      // Insure record matching ID is present while working around MongoDB 2.4 bug
-      GoogleSpeechAPIKeys.update({_id: userID}, {'$set': {'preUpdate': true}}, {upsert: true});
-    } catch (e) {
-      serverConsole('Ignoring user speech api key upsert ', e);
-    }
-    const numUpdated = GoogleSpeechAPIKeys.update({_id: userID}, {key: key});
-
-    // WHOOOPS! If we're still here something has gone horribly wrong
-    if (numUpdated < 1) {
+    const user = Meteor.userId();
+    if (!user) {
       result = false;
-      error = 'No records updated by save';
-    } else if (numUpdated > 1) {
-      result = false;
-      error = 'More than one record updated?! ' + _.display(numUpdated);
+      error = 'User not found';
+    } else {
+      Meteor.users.upsert({_id: user}, {$set: {speechAPIKey: key}});
     }
-
-    return {
-      'result': result,
-      'error': error,
-    };
   },
+
+  getTdfTTSAPIKey: function(tdfId){
+    const tdf = Tdfs.findOne({_id: tdfId});
+    if(tdf){
+      return decryptData(tdf.content.tdfs.tutor.setspec.textToSpeechAPIKey);
+    } else {
+      return '';
+    }
+  },
+
+  getTdfSpeechAPIKey: function(tdfId){
+    const tdf = Tdfs.findOne({_id: tdfId});
+    if(tdf){
+      return decryptData(tdf.content.tdfs.tutor.setspec.speechAPIKey);
+    } else {
+      return '';
+    }
+  },
+
 
   setUserSessionId: function(sessionId, sessionIdTimestamp) {
     serverConsole('setUserSessionId', sessionId, sessionIdTimestamp)
@@ -2867,7 +2887,7 @@ export const methods = {
 
   deleteUserSpeechAPIKey: function() {
     const userID = Meteor.userId();
-    GoogleSpeechAPIKeys.remove(userID);
+    Meteor.users.update({_id: userID}, {$unset: {speechAPIKey: ''}});
   },
 
   // ONLY FOR ADMINS: for the given targetUserId, perform roleAction (add
@@ -2941,36 +2961,40 @@ export const methods = {
     return allErrors;
   },
 
-  deleteTDFFile: function(tdfId){
-    serverConsole("Remove TDF File:", tdfId);
+  deletePackageFile: function(packageId){
+    serverConsole("Remove package:", packageId);
     //check if the user is an admin or owner of the TDF
-    let TDF = Tdfs.findOne({_id: tdfId});
-    if(TDF && (Roles.userIsInRole(Meteor.userId(), ['admin']) || TDF.ownerId == Meteor.userId())){
-      ComponentStates.remove({TDFId: tdfId});
-      Assignments.remove({TDFId: tdfId});
-      Histories.remove({TDFId: tdfId});
-      GlobalExperimentStates.remove({TDFId: tdfId});
-      Tdfs.remove({_id: tdfId});
-      //iterate through TDF.stimuli
-      for (const stim of TDF.stimuli) {
-        asset = stim.imageStimulus || stim.audioStimulus || stim.videoStimulus || false;
-        if (asset) {
-          //remove asset
-          DynamicAssets.remove({"name": asset}, function(err, result){
-            if(err){
-              serverConsole(err);
-            } else {
-              serverConsole("Asset removed: ", asset);
+    try{
+      Tdfs.find({"packageFile": packageId}).fetch().forEach((TDF) => {
+        console.log("TDF", TDF, "is to be removed");
+        if(TDF && (Roles.userIsInRole(Meteor.userId(), ['admin']) || TDF.ownerId == Meteor.userId())){
+          tdfId = TDF._id;
+          ComponentStates.remove({TDFId: tdfId});
+          Assignments.remove({TDFId: tdfId});
+          Histories.remove({TDFId: tdfId});
+          GlobalExperimentStates.remove({TDFId: tdfId});
+          Tdfs.remove({_id: tdfId});
+          //iterate through TDF.stimuli
+          for (const stim of TDF.stimuli) {
+            asset = stim.imageStimulus || stim.audioStimulus || stim.videoStimulus || false;
+            if (asset) {
+              //remove asset
+              DynamicAssets.remove({"name": asset}, function(err, result){
+                if(err){
+                  serverConsole(err);
+                } else {
+                  serverConsole("Asset removed: ", asset);
+                }
+              });
             }
-          });
+          }
         }
-      }
-    } else {
-      result = 'No matching tdf file found';
-      return result;
+      });
+      return "Package removed";
+    } catch (e) {
+      serverConsole(e);
+      return "There was an error deleting the package";
     }
-    result = "TDF deleted";
-    return result;
   },
 
   updatePerformanceData: function(type, codeLocation, userId) {
@@ -3396,8 +3420,8 @@ const asyncMethods = {
       data.have_aws_id = data.aws_id.length > 0;
       data.have_aws_secret = data.aws_secret_key.length > 0;
 
-      data.aws_id = encryptUserData(data.aws_id);
-      data.aws_secret_key = encryptUserData(data.aws_secret_key);
+      data.aws_id = encryptData(data.aws_id);
+      data.aws_secret_key = encryptData(data.aws_secret_key);
 
       saveResult = userProfileSave(Meteor.userId(), data);
 

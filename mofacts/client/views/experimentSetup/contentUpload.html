@@ -117,9 +117,13 @@
                                 </td>
                                 <td>
                                     {{#if packageFileLink}}
+                                        {{#if this.hasAPIKeys}}
+                                        
+                                        {{else}}
                                         <button id="tdf-download-btn" value="{{packageFileLink}}" class="btn-icon"><span class="fa fa-download" aria-hidden="true"></span></button>
+                                        {{/if}}
                                     {{/if}}
-                                    <button id="tdf-delete-btn" value="{{_id}}" data-filename="{{fileName}}" class="btn-icon"><span class="fa fa-minus" aria-hidden="true"></span></button>
+                                    <button id="package-delete-btn" value="{{packageFile}}" data-filename="{{fileName}}" class="btn-icon"><span class="fa fa-minus" aria-hidden="true"></span></button>
                                     {{#if conditions}}
                                         <button id="reset-conditions-btn" value="{{_id}}" class="btn-icon"><span class="fa fa-refresh" aria-hidden="true"></span></button>
                                     {{/if}}
@@ -129,14 +133,26 @@
                             <tr>
 
                                 <td>
-                                    Transfer Ownership (not recoverable)
-                                    <input type="text" id="transfer-{{_id}}" placeholder="Enter new owner's email">
-                                    <button id="transfer-btn" value="{{_id}}" class="btn-icon"><span class="fa fa-exchange" aria-hidden="true"></span></button>
+                                    {{#if this.hasAPIKeys}}
+                                        <!-- key icon -->
+                                        <span class="fa fa-key" aria-hidden="true"></span>
+                                        Transfering ownership or adding accessors of this lesson is not allowed because it has API keys. Download of this lesson is disabled. 
+                                        Please share the lesson manually with the new owner or accessors.
+                            
+                                    {{else}}
+                                        Transfer Ownership (not recoverable)
+                                        <input type="text" id="transfer-{{_id}}" placeholder="Enter new owner's email">
+                                        <button id="transfer-btn" value="{{_id}}" class="btn-icon"><span class="fa fa-exchange" aria-hidden="true"></span></button>
+                                    {{/if}}
                                 </td>
                                 <td>
-                                    Add Access
-                                    <input type="text" id="add-access-{{_id}}" data-id="{{_id}}" placeholder="Enter new user's email">
-                                    <button id="add-access-btn" value="{{_id}}" class="btn-icon"><span class="fa fa-plus" aria-hidden="true"></span></button>
+                                    {{#if this.hasAPIKeys}}
+                                    
+                                    {{else}}
+                                        Add Access
+                                        <input type="text" id="add-access-{{_id}}" data-id="{{_id}}" placeholder="Enter new user's email">
+                                        <button id="add-access-btn" value="{{_id}}" class="btn-icon"><span class="fa fa-plus" aria-hidden="true"></span></button>
+                                    {{/if}}
                                 </td>
 
                             </tr>
