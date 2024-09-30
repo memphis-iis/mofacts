@@ -1,4 +1,3 @@
-// @ts-nocheck
 import {DynamicTdfGenerator} from '../common/DynamicTdfGenerator';
 import {curSemester, ALL_TDFS, KC_MULTIPLE} from '../common/Definitions';
 import * as TutorialDialogue from '../server/lib/TutorialDialogue';
@@ -1995,7 +1994,7 @@ function userProfileSave(id, profile) {
     UserProfileData.update({_id: id}, {'$set': {'preUpdate': true}}, {upsert: true});
   } catch (e) {
     serverConsole('Ignoring user profile upsert ', e);
-  }
+  }  
   const numUpdated = UserProfileData.update({_id: id}, profile);
   if (numUpdated == 1) {
     return 'Save succeeed';
@@ -2976,55 +2975,22 @@ export const methods = {
   updatePerformanceData: function(type, codeLocation, userId) {
     const timestamp = new Date();
     const record = {userId, timestamp, codeLocation};
+    const user = Meteor.users.findOne(userId);
     switch (type) {
       case 'login':
-        LoginTimes.insert(record);
+        user.loginTimes = user.loginTimes || [record];
         break;
       case 'utlQuery':
-        UtlQueryTimes.insert(record);
+        user.utlQueries = user.utlQueries || [record];
         break;
     }
-  },
-
-  isSystemDown: function() {
-    const curConfig = DynamicConfig.findOne({});
-    return curConfig.isSystemDown;
-  },
-
-  isCurrentServerLoadTooHigh: function() {
-    const last50Logins = LoginTimes.find({}, {sort: {$natural: -1}, limit: 50});
-    const last50UtlQueries = UtlQueryTimes.find({}, {sort: {$natural: -1}, limit: 50}).fetch();
-    const curConfig = DynamicConfig.findOne({});
-    const {loginsWithinAHalfHourLimit, utlQueriesWithinFifteenMinLimit} = curConfig.serverLoadConstants;// 10,8
-
-    const loginsWithinAHalfHour = new Set();
-    let utlQueriesWithinFifteenMin = [];
-    const now = new Date();
-    const thirtyMinAgo = new Date(now - (30*60*1000)); // Down from an hour to 30 min
-    const fifteenMinAgo = new Date(now - (15*60*1000)); // Up from 5 min to 15 min
-
-    for (const loginData of last50Logins) {
-      if (loginData.timestamp > thirtyMinAgo) {
-        loginsWithinAHalfHour.add(loginData.userId);
-      }
-    }
-
-    utlQueriesWithinFifteenMin = last50UtlQueries.filter((x) => x.timestamp > fifteenMinAgo);
-    const currentServerLoadIsTooHigh = (loginsWithinAHalfHour.size > loginsWithinAHalfHourLimit ||
-          utlQueriesWithinFifteenMin.length > utlQueriesWithinFifteenMinLimit);
-
-    serverConsole('isCurrentServerLoadTooHigh:' + currentServerLoadIsTooHigh + ', loginsWithinAHalfHour:' +
-        loginsWithinAHalfHour.size + '/' + loginsWithinAHalfHourLimit + ', utlQueriesWithinFifteenMin:' +
-        utlQueriesWithinFifteenMin.length + '/' + utlQueriesWithinFifteenMinLimit);
-
-    return currentServerLoadIsTooHigh;
+    Meteor.users.update({_id: userId}, {$set: user});
   },
 
   downloadStimFile: function(stimuliSetId) {
     serverConsole('downloadStimFile: ' + stimuliSetId);
     stimuliSetId = parseInt(stimuliSetId);
-    let tdf = Tdfs.find({'stimuliSetId': stimuliSetId}).fetch();
-    let stims = tdf.rawStimuliFile;
+    let stims = Stims.find({'stimuliSetId': stimuliSetId}).fetch();
     return stims;
   },
 
@@ -3084,8 +3050,7 @@ export const methods = {
 
   getStimsByOwnerId: (ownerId) => {
     serverConsole('getStimsByOwnerId: ' + ownerId);
-    const tdfs = Tdfs.find({'ownerId': ownerId}).fetch();
-    const stims = tdfs.stimuli;
+    const stims = Stims.find({'owner': ownerId}).fetch();
     for(let stim of stims) {
       let lessonName = Tdfs.findOne({stimuliSetId: stim.stimuliSetId}).content.tdfs.tutor.setspec.lessonname
       stim.lessonName = lessonName
@@ -3385,8 +3350,8 @@ const asyncMethods = {
   // We provide a separate server method for user profile info - this is
   // mainly since we don't want some of this data just flowing around
   // between client and server
-  saveUserProfileData: async function(profileData) {
-    serverConsole('saveUserProfileData', displayify(profileData));
+  saveUserAWSProfileData: async function(profileData) {
+    serverConsole('saveAWSUserProfileData', displayify(profileData));
 
     let saveResult; let result; let errmsg; let acctBal;
     try {
@@ -3404,7 +3369,7 @@ const asyncMethods = {
       // We test by reading the profile back and checking their
       // account balance
       const res = await turk.getAccountBalance(
-          UserProfileData.findOne({_id: Meteor.user()._id}),
+          Meteor.user().awsProfile
       );
 
       if (!res) {
@@ -3444,8 +3409,9 @@ const asyncMethods = {
   },
   deleteStimFile: async function(stimSetId) {
     stimSetId = parseInt(stimSetId);
-    let tdfs = Tdfs.find({stimuliSetId: stimSetId, owner: Meteor.userId()}).fetch();
-    if(tdfs){
+    let stim = Stims.findOne({stimuliSetId: stimSetId, owner: Meteor.userId()})
+    if(stim){
+      let tdfs = Tdfs.find({stimuliSetId: stimSetId}).fetch();
       serverConsole(tdfs);
       for(let tdf of tdfs) {
         tdfId = tdf._id;
@@ -3454,7 +3420,9 @@ const asyncMethods = {
         Assignments.remove({TDFId: tdfId});
         Histories.remove({TDFId: tdfId});
       }
+      Items.remove({stimuliSetId: stimSetId});
       Tdfs.remove({stimuliSetId: stimSetId});
+      Stims.remove({stimuliSetId: stimSetId});
       res = "Stim and related TDFS deleted.";
       return res;
     } else {
