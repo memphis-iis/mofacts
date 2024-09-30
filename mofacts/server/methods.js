@@ -2990,7 +2990,8 @@ export const methods = {
   downloadStimFile: function(stimuliSetId) {
     serverConsole('downloadStimFile: ' + stimuliSetId);
     stimuliSetId = parseInt(stimuliSetId);
-    let stims = Stims.find({'stimuliSetId': stimuliSetId}).fetch();
+    let tdf = Tdfs.find({'stimuliSetId': stimuliSetId}).fetch();
+    let stims = tdf.rawStimuliFile;
     return stims;
   },
 
@@ -3350,8 +3351,8 @@ const asyncMethods = {
   // We provide a separate server method for user profile info - this is
   // mainly since we don't want some of this data just flowing around
   // between client and server
-  saveUserAWSProfileData: async function(profileData) {
-    serverConsole('saveAWSUserProfileData', displayify(profileData));
+  saveUserProfileData: async function(profileData) {
+    serverConsole('saveUserProfileData', displayify(profileData));
 
     let saveResult; let result; let errmsg; let acctBal;
     try {
@@ -3369,7 +3370,7 @@ const asyncMethods = {
       // We test by reading the profile back and checking their
       // account balance
       const res = await turk.getAccountBalance(
-          Meteor.user().awsProfile
+        UserProfileData.findOne({_id: Meteor.user()._id}),
       );
 
       if (!res) {
@@ -3409,9 +3410,8 @@ const asyncMethods = {
   },
   deleteStimFile: async function(stimSetId) {
     stimSetId = parseInt(stimSetId);
-    let stim = Stims.findOne({stimuliSetId: stimSetId, owner: Meteor.userId()})
-    if(stim){
-      let tdfs = Tdfs.find({stimuliSetId: stimSetId}).fetch();
+    let tdfs = Tdfs.find({stimuliSetId: stimSetId, owner: Meteor.userId()}).fetch();
+      if(tdfs){
       serverConsole(tdfs);
       for(let tdf of tdfs) {
         tdfId = tdf._id;
@@ -3420,9 +3420,7 @@ const asyncMethods = {
         Assignments.remove({TDFId: tdfId});
         Histories.remove({TDFId: tdfId});
       }
-      Items.remove({stimuliSetId: stimSetId});
       Tdfs.remove({stimuliSetId: stimSetId});
-      Stims.remove({stimuliSetId: stimSetId});
       res = "Stim and related TDFS deleted.";
       return res;
     } else {
