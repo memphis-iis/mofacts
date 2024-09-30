@@ -229,7 +229,7 @@ Template.contentUpload.events({
     a.click();
     window.URL.revokeObjectURL(url);
   },
-
+  
   'click #stim-delete-btn': function(event){
     const stimuliSetId = event.currentTarget.getAttribute('value')
     Meteor.call('deleteStimFile',stimuliSetId);

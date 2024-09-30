@@ -307,11 +307,6 @@ Template.DefaultLayout.events({
     Router.go('/dataDownload');
   },
 
-  'click #userProfileEditButton': function(event) {
-    event.preventDefault();
-    Router.go('/userProfileEdit');
-  },
-
   'click #userAdminButton': function(event) {
     event.preventDefault();
     Router.go('/userAdmin');

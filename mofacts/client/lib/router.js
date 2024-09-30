@@ -187,7 +187,6 @@ defaultBehaviorRoutes = [
 const restrictedRoutes = [
   'multiTdfSelect',
   'dataDownload',
-  'userProfileEdit',
   'profileEdit',
   'userAdmin',
   'contentGeneration',

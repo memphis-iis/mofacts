@@ -26,7 +26,6 @@ ErrorReports = new Mongo.Collection('errorReports');
 LoginTimes = new Mongo.Collection('loginTimes');
 UtlQueryTimes = new Mongo.Collection('utlQueryTimes');
 DynamicConfig = new Mongo.Collection('dynamicConfig');
-UserProfileData = new Mongo.Collection('userProfileData');
 ProbabilityEstimates = new Meteor.Collection('probabilityEstimates');
 
 //Init DynamicAssets Collection
