@@ -194,7 +194,7 @@ Template.turkWorkflow.events({
 
     $('#profileWorkModal').modal('show');
 
-    const {error, saveResult} = await meteorCallAsync('saveUserProfileData', data);
+    const {error, saveResult} = await meteorCallAsync('saveUserAWSData', data);
     console.log(saveResult);
 
     if (error) {

@@ -42,7 +42,7 @@ Template.userProfileEdit.events({
 
     $('#profileWorkModal').modal('show');
 
-    Meteor.call('saveUserProfileData', data, function(error, serverReturn) {
+    Meteor.call('saveUserAWSData', data, function(error, serverReturn) {
       $('#profileWorkModal').modal('hide');
       console.log(serverReturn);
 

@@ -3376,8 +3376,8 @@ const asyncMethods = {
   // We provide a separate server method for user profile info - this is
   // mainly since we don't want some of this data just flowing around
   // between client and server
-  saveUserProfileData: async function(profileData) {
-    serverConsole('saveUserProfileData', displayify(profileData));
+  saveUserAWSData: async function(profileData) {
+    serverConsole('saveUserAWSData', displayify(profileData));
 
     let saveResult; let result; let errmsg; let acctBal;
     try {
