@@ -34,8 +34,6 @@ StubCollections.stub(DynamicSettings);
 StubCollections.stub(ScheduledTurkMessages);
 StubCollections.stub(ClozeEditHistory);
 StubCollections.stub(ErrorReports);
-StubCollections.stub(LoginTimes);
-StubCollections.stub(UtlQueryTimes);
 StubCollections.stub(DynamicConfig);
 StubCollections.stub(ProbabilityEstimates);
 StubCollections.stub(ScheduledTurkMessages);

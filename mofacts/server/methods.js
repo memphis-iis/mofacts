@@ -548,7 +548,7 @@ async function processPackageUpload(fileObj, owner, zipLink, emailToggle){
         if(emailToggle){
           sendEmail(
             Meteor.user().emails[0].address,
-            Meteor.settings.owner,
+            ownerEmail,
             "Package Upload Failed",
             "Package upload failed: " + e + " on file: " + filePath
           )
@@ -572,7 +572,7 @@ async function processPackageUpload(fileObj, owner, zipLink, emailToggle){
       if(emailToggle){
         sendEmail(
           Meteor.user().emails[0].address,
-          Meteor.settings.owner,
+          ownerEmail,
           "Package Upload Failed",
           "Package upload failed at media upload: " + e + " on file: " + filePath
         )
@@ -584,7 +584,7 @@ async function processPackageUpload(fileObj, owner, zipLink, emailToggle){
     if(emailToggle){
       sendEmail(
         Meteor.user().emails[0].address,
-        Meteor.settings.owner,
+        ownerEmail,
         "Package Upload Successful",
         "Package upload successful: " + fileName
       )
@@ -594,7 +594,7 @@ async function processPackageUpload(fileObj, owner, zipLink, emailToggle){
       if(emailToggle){
         sendEmail(
           Meteor.user().emails[0].address,
-          Meteor.settings.owner,
+          ownerEmail,
           "Package Upload Failed",
           "Package upload failed at initialization: " + e + " on file: " + filePath
         )
@@ -1999,12 +1999,13 @@ function checkDriveSpace() {
 }
 
 // Save the given user profile via "upsert" logic
-function userProfileSave(id, awsProfile) {
-  serverConsole('userProfileSave', id, awsProfile);
-  const user = Meteor.users.findOne({_id: id});
+function userProfileSave(user, awsProfile) {
+  serverConsole('userProfileSave', user._id, awsProfile);
   user.aws = awsProfile;
-  const numUpdated = Meteor.users.update({_id: id}, user);
+  const numUpdated = Meteor.users.upsert({_id: user._id}, user);
+  serverConsole('numUpdated', numUpdated);
   if (numUpdated == 1) {
+    serverConsole('Save succeeded');
     return 'Save succeeed';
   }
 
@@ -2446,7 +2447,7 @@ export const methods = {
         file ? files = [file] : files = [];
         Email.send({
           to: Meteor.user().emails[0].address,
-          from: Meteor.settings.owner,
+          from: ownerEmail,
           subject: subject,
           text: message,
           attachments: files
@@ -2603,7 +2604,7 @@ export const methods = {
     });
     
     //Setup email variables
-    const ownerEmail = Meteor.settings.owner;
+    const ownerEmail = ownerEmail;
     const from = ownerEmail;
     const subject = 'MoFaCTs Password Reset';
     let text = 'Your password reset secret is: <b>' + secret + "</b>.<br>If this email was sent in error, please contact your MoFaCTs administrator.";
@@ -2771,7 +2772,8 @@ export const methods = {
     }
 
     // Now we need to create a default user profile record
-    userProfileSave(createdId, defaultUserProfile());
+    const user = Meteor.users.findOne({_id: createdId});
+    userProfileSave(user, defaultUserProfile());
 
     // Remember we return a LIST of errors, so this is success
     return createdId;
@@ -2988,17 +2990,13 @@ export const methods = {
     }
   },
 
-  updatePerformanceData: function(type, codeLocation, userId) {
+  updatePerformanceData: function(codeLocation) {
     const timestamp = new Date();
-    const record = {userId, timestamp, codeLocation};
-    switch (type) {
-      case 'login':
-        LoginTimes.insert(record);
-        break;
-      case 'utlQuery':
-        UtlQueryTimes.insert(record);
-        break;
-    }
+    const user = Meteor.user();
+    const userId = user._id;
+    user.lastActionTimestamp = timestamp;
+    user.timestampLocation = codeLocation;
+    Meteor.users.update({_id: userId}, user);
   },
 
   isSystemDown: function() {
@@ -3007,30 +3005,29 @@ export const methods = {
   },
 
   isCurrentServerLoadTooHigh: function() {
-    const last50Logins = LoginTimes.find({}, {sort: {$natural: -1}, limit: 50});
-    const last50UtlQueries = UtlQueryTimes.find({}, {sort: {$natural: -1}, limit: 50}).fetch();
+    const last50Timestamps = Meteor.users.find({}, {limit: 50}).sort({lastActionTimestamp: 1}).fetch();
     const curConfig = DynamicConfig.findOne({});
     const {loginsWithinAHalfHourLimit, utlQueriesWithinFifteenMinLimit} = curConfig.serverLoadConstants;// 10,8
 
     const loginsWithinAHalfHour = new Set();
     let utlQueriesWithinFifteenMin = [];
     const now = new Date();
-    const thirtyMinAgo = new Date(now - (30*60*1000)); // Down from an hour to 30 min
-    const fifteenMinAgo = new Date(now - (15*60*1000)); // Up from 5 min to 15 min
+    const thirtyMinAgo = new Date(now - (30*60*1000));
+    const fifteenMinAgo = new Date(now - (15*60*1000));
 
-    for (const loginData of last50Logins) {
+    for (const loginData of last50Timestamps) {
       if (loginData.timestamp > thirtyMinAgo) {
         loginsWithinAHalfHour.add(loginData.userId);
       }
     }
 
-    utlQueriesWithinFifteenMin = last50UtlQueries.filter((x) => x.timestamp > fifteenMinAgo);
+    loginsWithinFifteenMin = last50Timestamps.filter((x) => x.timestamp > fifteenMinAgo);
     const currentServerLoadIsTooHigh = (loginsWithinAHalfHour.size > loginsWithinAHalfHourLimit ||
-          utlQueriesWithinFifteenMin.length > utlQueriesWithinFifteenMinLimit);
+          loginsWithinFifteenMin.length > utlQueriesWithinFifteenMinLimit);
 
     serverConsole('isCurrentServerLoadTooHigh:' + currentServerLoadIsTooHigh + ', loginsWithinAHalfHour:' +
-        loginsWithinAHalfHour.size + '/' + loginsWithinAHalfHourLimit + ', utlQueriesWithinFifteenMin:' +
-        utlQueriesWithinFifteenMin.length + '/' + utlQueriesWithinFifteenMinLimit);
+        loginsWithinAHalfHour.size + '/' + loginsWithinAHalfHourLimit + ', loginsWithinFifteenMin:' +
+        loginsWithinFifteenMin.length + '/' + utlQueriesWithinFifteenMinLimit);
 
     return currentServerLoadIsTooHigh;
   },
@@ -3414,7 +3411,7 @@ const asyncMethods = {
       data.aws_id = encryptData(data.aws_id);
       data.aws_secret_key = encryptData(data.aws_secret_key);
 
-      saveResult = userProfileSave(Meteor.userId(), data);
+      saveResult = userProfileSave(Meteor.user(), data);
 
       // We test by reading the profile back and checking their
       // account balance
@@ -3575,7 +3572,7 @@ Meteor.startup(async function() {
     };
 
     // Default profile save
-    userProfileSave(user._id, defaultUserProfile());
+    userProfileSave(user, defaultUserProfile());
 
     // Default hook's behavior
     if (options.profile) {

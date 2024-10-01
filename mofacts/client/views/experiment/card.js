@@ -3255,7 +3255,7 @@ function stopRecording() {
 async function getExperimentState() {
   let curExperimentState = await meteorCallAsync('getExperimentState', Meteor.userId(), Session.get('currentRootTdfId'));
   console.log('getExperimentState:', curExperimentState);
-  Meteor.call('updatePerformanceData', 'utlQuery', 'card.getExperimentState', Meteor.userId());
+  Meteor.call('updatePerformanceData', 'card.getExperimentState');
   Session.set('currentExperimentState', curExperimentState);
   return curExperimentState || {};
 }
