@@ -23,8 +23,6 @@ DynamicSettings = new Meteor.Collection('dynaminc_settings');
 ScheduledTurkMessages = new Mongo.Collection('scheduledTurkMessages');
 ClozeEditHistory = new Mongo.Collection('clozeEditHistory');
 ErrorReports = new Mongo.Collection('errorReports');
-LoginTimes = new Mongo.Collection('loginTimes');
-UtlQueryTimes = new Mongo.Collection('utlQueryTimes');
 DynamicConfig = new Mongo.Collection('dynamicConfig');
 ProbabilityEstimates = new Meteor.Collection('probabilityEstimates');
 

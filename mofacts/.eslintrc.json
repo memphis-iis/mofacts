@@ -26,8 +26,6 @@
         "ScheduledTurkMessages": "readonly",
         "ClozeEditHistory": "readonly",
         "ErrorReports": "readonly",
-        "LoginTimes": "readonly",
-        "UtlQueryTimes": "readonly",
         "DynamicConfig": "readonly",
         "UserProfileData": "readonly",
         "SyncedCron": "readonly",

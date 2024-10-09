@@ -122,7 +122,7 @@ async function createExperimentExport(expName, requestingUserId) {
 
   record += await delimitedRecord(header, listOfDynamicStimTags, true);
 
-  Meteor.call('updatePerformanceData', 'utlQuery', 'experiment_times.createExperimentExport', 'SERVER_REPORT');
+  Meteor.call('updatePerformanceData', 'experiment_times.createExperimentExport', 'SERVER_REPORT');
   for(expName of expNames){
     const tdf = await getTdfByFileName(expName);
     const stimuliSetId = tdf.stimuliSetId;

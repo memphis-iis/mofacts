@@ -102,7 +102,7 @@ function signinNotify(landingPage = '/profile') {
     const currentUser = Meteor.users.findOne({_id: Meteor.userId()}).username;
     console.log(currentUser + ' was logged in successfully! Current route is ', Router.current().route.getName());
     Meteor.call('debugLog', 'Sign in was successful');
-    Meteor.call('updatePerformanceData', 'login', 'signin.signinNotify', Meteor.userId());
+    Meteor.call('updatePerformanceData', 'signin.signinNotify');
     Meteor.call('logUserAgentAndLoginTime', Meteor.userId(), navigator.userAgent);
   }
   Meteor.logoutOtherClients();
@@ -160,7 +160,7 @@ function testLogin() {
           Meteor.call('debugLog', 'TEST Sign in was successful - YOU SHOULD NOT SEE THIS IN PRODUCTION');
         }
         Meteor.call('logUserAgentAndLoginTime', Meteor.userId(), navigator.userAgent);
-        Meteor.call('updatePerformanceData', 'login', 'signinOauth.testLogin', Meteor.userId());
+        Meteor.call('updatePerformanceData', 'signinOauth.testLogin');
         await meteorCallAsync('setUserLoginData', 'direct', Session.get('loginMode'));
         Meteor.logoutOtherClients();
         Router.go('/profile');
