@@ -2540,10 +2540,16 @@ async function unitIsFinished(reason) {
 function getButtonTrial() {
   const curUnit = Session.get('currentTdfUnit');
   // Default to value given in the unit
-  curUnit.isButtonTrial ? isButtonTrial = true : isButtonTrial = false;
+
+  let isButtonTrial
+
+  if (typeof curUnit.isButtonTrial === 'string' || typeof curUnit.buttonTrial === 'string') 
+    isButtonTrial = (curUnit.isButtonTrial === 'true' || curUnit.buttontrial === 'true');
+  else
+    isButtonTrial = (curUnit.isButtonTrial || curUnit.buttonTrial);
 
   const curCardInfo = engine.findCurrentCardInfo();
-  if (curCardInfo.forceButtonTrial || curUnit.buttontrial) {
+  if (curCardInfo.forceButtonTrial) {
     // Did this question specifically override button trial?
     isButtonTrial = true;
   } else {
