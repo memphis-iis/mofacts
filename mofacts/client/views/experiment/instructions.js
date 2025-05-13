@@ -353,6 +353,10 @@ async function instructContinue() {
 
 
 Template.instructions.helpers({
+  continueButtonText: function() {
+    const unit = Session.get('currentTdfUnit');
+    return unit && unit.continuebuttontext ? unit.continuebuttontext : 'Continue';
+  },
   isExperiment: function() {
     return Meteor.user().loginParams.loginMode === 'experiment';
   },
