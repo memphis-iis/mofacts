@@ -3604,6 +3604,8 @@ async function resumeFromComponentState() {
       "correctColor": "green",
       'instructionsTitleDisplay': "headerOnly",
       'displayConfirmButton': false,
+      'continueButtonText': "Continue",
+      'skipStudyButtonText': "Skip",
     },
   }
   //here we interprit the stimulus and input position settings to set the colum widths. There are 4 possible combinations.
