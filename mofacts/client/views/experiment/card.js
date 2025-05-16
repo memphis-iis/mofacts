@@ -2544,7 +2544,9 @@ function getButtonTrial() {
   let isButtonTrial
 
   if (typeof curUnit.isButtonTrial === 'string' || typeof curUnit.buttonTrial === 'string') 
-    isButtonTrial = (curUnit.isButtonTrial === 'true' || curUnit.buttontrial === 'true');
+    isButtonTrial = (curUnit.isButtonTrial === 'true' || curUnit.buttonTrial === 'true');
+  if (typeof curUnit.isButtonTrial === 'undefined' || typeof curUnit.buttonTrial === 'undefined') 
+    isButtonTrial = false;
   else
     isButtonTrial = (curUnit.isButtonTrial || curUnit.buttonTrial);
 
