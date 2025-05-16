@@ -1637,6 +1637,10 @@ function determineUserFeedback(userAnswer, isSkip, isCorrect, feedbackForAnswer,
 
 async function showUserFeedback(isCorrect, feedbackMessage, isTimeout, isSkip) {
   console.log('showUserFeedback');
+  if (Session.get('curTdfUISettings').suppressFeedbackDisplay) {
+    // Do not display any feedback
+    return;
+  }
   userFeedbackStart = Date.now();
   const isButtonTrial = getButtonTrial();
   feedbackDisplayPosition = Session.get('curTdfUISettings').feedbackDisplayPosition;
@@ -3600,6 +3604,7 @@ async function resumeFromComponentState() {
       "stimuliPosition" : "top",
       "choiceButtonCols": 1,
       "onlyShowSimpleFeedback": "onCorrect",
+      "suppressFeedbackDisplay": false,
       "incorrectColor": "darkorange",
       "correctColor": "green",
       'instructionsTitleDisplay': "headerOnly",
