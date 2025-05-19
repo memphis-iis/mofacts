@@ -627,6 +627,97 @@ async function saveMediaFile(media, owner, stimSetId){
   });
 }
 
+// Content Validation
+function validateStimAndTdf(tdfJson, stimJson, tdfFileName, stimFileName) {
+  // Check stimulus file structure
+  if (!stimJson || !stimJson.setspec || !Array.isArray(stimJson.setspec.clusters)) {
+    return { result: false, errmsg: `Stimulus file "${stimFileName}" missing clusters array.` };
+  }
+  const clusters = stimJson.setspec.clusters;
+  if (!clusters.length) {
+    return { result: false, errmsg: `Stimulus file "${stimFileName}" has no clusters.` };
+  }
+  // Check each cluster and stim
+  for (const [clusterIdx, cluster] of clusters.entries()) {
+    if (!cluster || !Array.isArray(cluster.stims) || !cluster.stims.length) {
+      return { result: false, errmsg: `Cluster ${clusterIdx} in "${stimFileName}" missing or empty stims array.` };
+    }
+    // Check for duplicate correctResponses in cluster
+    const corrects = cluster.stims.map(s => s.response && s.response.correctResponse).filter(Boolean);
+    if (new Set(corrects).size !== corrects.length) {
+      return { result: false, errmsg: `Duplicate correctResponse values in cluster ${clusterIdx} of "${stimFileName}".` };
+    }
+    for (const [stimIdx, stim] of cluster.stims.entries()) {
+      if (!stim || typeof stim !== 'object') {
+        return { result: false, errmsg: `Stim ${stimIdx} in cluster ${clusterIdx} is not an object.` };
+      }
+      if (!stim.response || typeof stim.response !== 'object' || !stim.response.hasOwnProperty('correctResponse')) {
+        return { result: false, errmsg: `Stim ${stimIdx} in cluster ${clusterIdx} missing correctResponse.` };
+      }
+      // Display fields should be strings if present
+      if (stim.display) {
+        ['text', 'audioSrc', 'imgSrc', 'videoSrc'].forEach(field => {
+          if (stim.display[field] && typeof stim.display[field] !== 'string') {
+            return { result: false, errmsg: `Stim ${stimIdx} in cluster ${clusterIdx} has non-string display.${field}.` };
+          }
+        });
+        //validate that audioSrc, imgSrc, and videoSrc are valid URLs or in DynamicAssets
+        ['audioSrc', 'imgSrc', 'videoSrc'].forEach(field => {
+          if (stim.display[field]) {
+            const url = stim.display[field];
+            if (!url.startsWith('http') && !DynamicAssets.collection.findOne({name: url})) {
+              return { result: false, errmsg: `Stim ${stimIdx} in cluster ${clusterIdx} has invalid display.${field}: ${url}.` };
+            }
+          }
+        });
+      }
+    }
+  }
+  // TDF checks
+  if (!tdfJson.tutor || !tdfJson.tutor.setspec) {
+    return { result: false, errmsg: `TDF "${tdfFileName}" missing tutor.setspec.` };
+  }
+  if (!tdfJson.tutor.setspec.lessonname || typeof tdfJson.tutor.setspec.lessonname !== 'string') {
+    return { result: false, errmsg: `TDF "${tdfFileName}" missing or invalid lessonname.` };
+  }
+  if (!tdfJson.tutor.setspec.stimulusfile || typeof tdfJson.tutor.setspec.stimulusfile !== 'string') {
+    return { result: false, errmsg: `TDF "${tdfFileName}" missing or invalid stimulusfile.` };
+  }
+  // Check all cluster indices referenced in TDF exist in stim file
+  function extractClusterIndicesFromTDF(tdf) {
+    let indices = new Set();
+    const units = [
+      ...(tdf.tutor.unit || []),
+      ...(tdf.tutor.unitTemplate || [])
+    ];
+    for (const [unitIdx, unit] of units.entries()) {
+      if (unit.hasOwnProperty('clusterIndex')) {
+        indices.add(Number(unit.clusterIndex));
+      }
+      if (unit.assessmentsession && unit.assessmentsession.clusterlist) {
+        const cl = unit.assessmentsession.clusterlist;
+        if (typeof cl === "string") {
+          cl.split(',').forEach(part => {
+            if (part.includes('-')) {
+              const [start, end] = part.split('-').map(Number);
+              for (let i = start; i <= end; i++) indices.add(i);
+            } else {
+              indices.add(Number(part));
+            }
+          });
+        }
+      }
+    }
+    return Array.from(indices);
+  }
+  const tdfClusterRefs = extractClusterIndicesFromTDF(tdfJson);
+  for (const idx of tdfClusterRefs) {
+    if (isNaN(idx) || idx < 0 || idx >= clusters.length) {
+      return { result: false, errmsg: `TDF "${tdfFileName}" references cluster index ${idx}, but stimulus file "${stimFileName}" only has ${clusters.length} clusters.` };
+    }
+  }
+  return { result: true };
+}
 
 // Allow file uploaded with name and contents. The type of file must be
 // specified - current allowed types are: 'stimuli', 'tdf'
@@ -655,90 +746,17 @@ async function saveContentFile(type, filename, filecontents, owner, packagePath 
         results.errmsg = `Error parsing JSON in file "${filename}": ${e.message}`;
         return results;
       }
-      const json = {tutor: jsonContents.tutor};
-      const lessonName = _.trim(jsonContents.tutor.setspec.lessonname || '');
-      if (lessonName.length < 1) {
-        results.result = false;
-        results.errmsg = `TDF "${filename}" has no lessonname - it cannot be valid`;
-        return results;
-      }
-      const stimFileName = json.tutor.setspec.stimulusfile ? json.tutor.setspec.stimulusfile : 'INVALID';
-      if (stimFileName == 'INVALID') {
-        results.result = false;
-        results.errmsg = `TDF "${filename}" references no stimulus file. Please upload stimulus file before uploading this TDF.`;
-        return results;
-      }
-      // Defensive: check for stimulus file existence and structure
+      const stimFileName = jsonContents.tutor.setspec.stimulusfile;
       const stimTdf = Tdfs.findOne({stimulusFileName: stimFileName});
-      if (!stimTdf || !stimTdf.rawStimuliFile || !stimTdf.rawStimuliFile.setspec || !Array.isArray(stimTdf.rawStimuliFile.setspec.clusters)) {
+      const stimJson = stimTdf ? stimTdf.rawStimuliFile : null;
+      const validation = validateStimAndTdf(jsonContents, stimJson, filename, stimFileName);
+      if (!validation.result) {
         results.result = false;
-        results.errmsg = `TDF "${filename}" references stimulus file "${stimFileName}" which is not found, not fully processed, or missing clusters.`;
+        results.errmsg = validation.errmsg;
         return results;
       }
-      const clusters = stimTdf.rawStimuliFile.setspec.clusters;
-      if (!clusters || !Array.isArray(clusters) || clusters.length === 0) {
-        results.result = false;
-        results.errmsg = `Stimulus file "${stimFileName}" (referenced by "${filename}") has no clusters or clusters is not an array.`;
-        return results;
-      }
-
-      // Extract all cluster indices referenced by the TDF
-      function extractClusterIndicesFromTDF(tdf) {
-        let indices = new Set();
-        const units = [
-          ...(tdf.tutor.unit || []),
-          ...(tdf.tutor.unitTemplate || [])
-        ];
-        for (const [unitIdx, unit] of units.entries()) {
-          // Check for clusterIndex property
-          if (unit.hasOwnProperty('clusterIndex')) {
-            indices.add({idx: Number(unit.clusterIndex), unitIdx});
-          }
-          // Check for clusterlist property (string like "0-2,4,6-8")
-          if (unit.assessmentsession && unit.assessmentsession.clusterlist) {
-            const cl = unit.assessmentsession.clusterlist;
-            if (typeof cl === "string") {
-              cl.split(',').forEach(part => {
-                if (part.includes('-')) {
-                  const [start, end] = part.split('-').map(Number);
-                  for (let i = start; i <= end; i++) indices.add({idx: i, unitIdx});
-                } else {
-                  indices.add({idx: Number(part), unitIdx});
-                }
-              });
-            }
-          }
-        }
-        return Array.from(indices);
-      }
-
-      // Check for out-of-bounds cluster/stim references
-      let outOfBoundsErrors = [];
-      const tdfClusterRefs = extractClusterIndicesFromTDF(json.tutor);
-      tdfClusterRefs.forEach(ref => {
-        const idx = ref.idx;
-        const unitIdx = ref.unitIdx;
-        if (isNaN(idx) || idx < 0 || idx >= clusters.length) {
-          outOfBoundsErrors.push(`TDF "${filename}" unit ${unitIdx} references cluster index ${idx}, but stimulus file "${stimFileName}" only has ${clusters.length} clusters.`);
-        } else if (!clusters[idx].stims || !Array.isArray(clusters[idx].stims) || clusters[idx].stims.length === 0) {
-          outOfBoundsErrors.push(`TDF "${filename}" unit ${unitIdx} references cluster index ${idx}, but cluster ${idx} in stimulus file "${stimFileName}" has no stims.`);
-        } else if (!clusters[idx].stims[0]) {
-          outOfBoundsErrors.push(`TDF "${filename}" unit ${unitIdx} references cluster index ${idx}, but stim 0 in cluster ${idx} is undefined.`);
-        }
-      });
-      if (outOfBoundsErrors.length > 0) {
-        results.result = false;
-        results.errmsg = `TDF/Stimulus file mismatch in "${filename}":\n` + outOfBoundsErrors.join('\n');
-        return results;
-      }
-
-      if (clusterErrors.length > 0) {
-        results.result = false;
-        results.errmsg = `Stimulus file "${stimFileName}" (referenced by "${filename}") has the following issues:\n` + clusterErrors.join('\n');
-        return results;
-      }
-
       // Continue with normal upsert logic...
+      await upsertTDFFile(filename, {fileName: filename, tdfs: jsonContents, ownerId: ownerId, source: 'upload'}, ownerId, packagePath);
       results.result = true;
       results.errmsg = '';
       return results;
