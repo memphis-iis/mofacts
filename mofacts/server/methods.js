@@ -732,21 +732,6 @@ async function saveContentFile(type, filename, filecontents, owner, packagePath 
         return results;
       }
 
-      // Check all stims for missing incorrectResponses
-      let clusterErrors = [];
-      clusters.forEach((cluster, cIdx) => {
-        if (!cluster.stims || !Array.isArray(cluster.stims) || cluster.stims.length === 0) {
-          clusterErrors.push(`File "${stimFileName}": Cluster ${cIdx} has no stims.`);
-        } else {
-          cluster.stims.forEach((stim, sIdx) => {
-            if (!stim || typeof stim !== 'object') {
-              clusterErrors.push(`File "${stimFileName}": Cluster ${cIdx}, Stim ${sIdx} is undefined or not an object.`);
-            } else if (!stim.hasOwnProperty('incorrectResponses')) {
-              clusterErrors.push(`File "${stimFileName}": Cluster ${cIdx}, Stim ${sIdx} missing 'incorrectResponses'.`);
-            }
-          });
-        }
-      });
       if (clusterErrors.length > 0) {
         results.result = false;
         results.errmsg = `Stimulus file "${stimFileName}" (referenced by "${filename}") has the following issues:\n` + clusterErrors.join('\n');

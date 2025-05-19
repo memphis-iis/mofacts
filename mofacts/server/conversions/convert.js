@@ -95,21 +95,18 @@ function getNewItemFormat(stimFile, stimulusFileName, stimuliSetId, responseKCMa
       if (!stim.response || typeof stim.response !== 'object') {
         throw new Error(`Stim ${stimIdx} in cluster ${clusterIdx} of "${stimulusFileName}" missing 'response' property.`);
       }
-      if (!stim.response.hasOwnProperty('incorrectResponses')) {
-        throw new Error(`Stim ${stimIdx} in cluster ${clusterIdx} of "${stimulusFileName}" missing 'incorrectResponses' property in 'response'.`);
-      }
       if (!stim.response.hasOwnProperty('correctResponse')) {
         throw new Error(`Stim ${stimIdx} in cluster ${clusterIdx} of "${stimulusFileName}" missing 'correctResponse' property in 'response'.`);
       }
 
       let incorrectResponses = stim.response.incorrectResponses;
-      if (typeof incorrectResponses === 'string') {
-        incorrectResponses = incorrectResponses.split(',');
-      }
-      if (incorrectResponses) {
+      if (incorrectResponses){
+        if (typeof incorrectResponses === 'string') {
+          incorrectResponses = incorrectResponses.split(',');
+        }
         incorrectResponses = incorrectResponses.map((ir) => removeInvisibleUnicode(ir));
       }
-
+      
       let responseKC;
       const answerText = getDisplayAnswerText(stim.response.correctResponse);
 
