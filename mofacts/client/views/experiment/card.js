@@ -1181,6 +1181,7 @@ function setUpButtonTrial() {
   let buttonChoices = [];
   const buttonOrder = currUnit.buttonorder ? currUnit.buttonorder.trim().toLowerCase() : "";
   const buttonOptions = currUnit.buttonOptions ? currUnit.buttonOptions.trim() : "";
+  let correctButtonPopulated = null;
 
   if (buttonOptions) {
     if(typeof buttonOptions == "object"){
@@ -1189,14 +1190,22 @@ function setUpButtonTrial() {
     else{
       buttonChoices = buttonOptions.split(',');
     }
+    correctButtonPopulated = true;
+    console.log('buttonChoices==buttonOptions', buttonChoices);
   } else {
     const currentFalseResponses = getCurrentFalseResponses();
+
     for (const falseResponse of currentFalseResponses) {
       buttonChoices.push(falseResponse);
+
     }
+    correctButtonPopulated = false;
     console.log('buttonChoices==falseresponses and correct answer', buttonChoices);
   }
-
+  if (correctButtonPopulated === null) {
+    console.log('No correct button');
+    throw new Error('Bad TDF/Stim file - no buttonOptions and no false responses');
+  }
 
   const currentAnswer = Session.get('currentExperimentState').originalAnswer;
   const correctAnswer = Answers.getDisplayAnswerText(currentAnswer);
