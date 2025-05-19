@@ -429,6 +429,9 @@ Template.instructions.helpers({
       return false;
     }
   },
+  'UIsettings': function() {
+    return Session.get('curTdfUISettings');
+  },
 });
 
 Template.instructions.rendered = function() {

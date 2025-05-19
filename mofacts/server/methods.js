@@ -627,6 +627,7 @@ async function saveMediaFile(media, owner, stimSetId){
   });
 }
 
+
 // Allow file uploaded with name and contents. The type of file must be
 // specified - current allowed types are: 'stimuli', 'tdf'
 async function saveContentFile(type, filename, filecontents, owner, packagePath = null) {
@@ -639,84 +640,146 @@ async function saveContentFile(type, filename, filecontents, owner, packagePath 
   if (!type) throw new Error('Type required for File Save');
   if (!filename) throw new Error('Filename required for File Save');
   if (!filecontents) throw new Error('File Contents required for File Save');
-  let ownerId = "";
-  // We need a valid use that is either admin or teacher
-  if(owner){
-    ownerId = owner;
-  } else {
-    ownerId = Meteor.user()._id;
-  }
-  if (!ownerId) {
-    throw new Error('No user logged in - no file upload allowed');
-  }
-  if (!Roles.userIsInRole(ownerId, ['admin', 'teacher'])) {
-    throw new Error('You are not authorized to upload files');
-  }
-  if (type != 'tdf' && type != 'stim') {
-    throw new Error('Unknown file type not allowed: ' + type);
-  }
+  let ownerId = owner ? owner : Meteor.user()._id;
+  if (!ownerId) throw new Error('No user logged in - no file upload allowed');
+  if (!Roles.userIsInRole(ownerId, ['admin', 'teacher'])) throw new Error('You are not authorized to upload files');
+  if (type != 'tdf' && type != 'stim') throw new Error('Unknown file type not allowed: ' + type);
 
   try {
     if (type == 'tdf') {
-      const jsonContents = typeof filecontents == 'string' ? JSON.parse(filecontents) : filecontents;
+      let jsonContents;
+      try {
+        jsonContents = typeof filecontents == 'string' ? JSON.parse(filecontents) : filecontents;
+      } catch (e) {
+        results.result = false;
+        results.errmsg = `Error parsing JSON in file "${filename}": ${e.message}`;
+        return results;
+      }
       const json = {tutor: jsonContents.tutor};
-      const lessonName = _.trim(jsonContents.tutor.setspec.lessonname);
+      const lessonName = _.trim(jsonContents.tutor.setspec.lessonname || '');
       if (lessonName.length < 1) {
         results.result = false;
-        results.errmsg = 'TDF has no lessonname - it cannot be valid';
-
+        results.errmsg = `TDF "${filename}" has no lessonname - it cannot be valid`;
         return results;
       }
       const stimFileName = json.tutor.setspec.stimulusfile ? json.tutor.setspec.stimulusfile : 'INVALID';
       if (stimFileName == 'INVALID') {
-        // Note this means root tdfs will have NULL stimulisetid
         results.result = false;
-        results.errmsg = 'Please upload stimulus file before uploading a TDF: ' + stimFileName;
-
-        return results;
-      } else {
-        const tdf = Tdfs.findOne({stimulusFileName: stimFileName});
-        const stimuliSetId = tdf ? tdf.stimuliSetId : null;
-        if (isEmpty(stimuliSetId)) {
-          results.result = false;
-          results.errmsg = 'Please upload stimulus file before uploading a TDF: ' + stimFileName;
-        } else {
-          try {
-            const rec = {'fileName': filename, 'tdfs': json, 'ownerId': ownerId, 'source': 'upload', 'packageFile': filecontents.packageFile};
-            const ret = await upsertTDFFile(filename, rec, ownerId);
-            if(ret && ret.res == 'awaitClientTDF'){
-              serverConsole('awaitClientTDF', ret)
-              results.result = false;
-              results.data = ret;
-              return results;
-            } else {
-              results.result = true;
-            }
-          } catch (err) {
-            results.result=false;
-            results.errmsg=err.toString();
-          }
-        }
+        results.errmsg = `TDF "${filename}" references no stimulus file. Please upload stimulus file before uploading this TDF.`;
         return results;
       }
+      // Defensive: check for stimulus file existence and structure
+      const stimTdf = Tdfs.findOne({stimulusFileName: stimFileName});
+      if (!stimTdf || !stimTdf.rawStimuliFile || !stimTdf.rawStimuliFile.setspec || !Array.isArray(stimTdf.rawStimuliFile.setspec.clusters)) {
+        results.result = false;
+        results.errmsg = `TDF "${filename}" references stimulus file "${stimFileName}" which is not found, not fully processed, or missing clusters.`;
+        return results;
+      }
+      const clusters = stimTdf.rawStimuliFile.setspec.clusters;
+      if (!clusters || !Array.isArray(clusters) || clusters.length === 0) {
+        results.result = false;
+        results.errmsg = `Stimulus file "${stimFileName}" (referenced by "${filename}") has no clusters or clusters is not an array.`;
+        return results;
+      }
+
+      // Extract all cluster indices referenced by the TDF
+      function extractClusterIndicesFromTDF(tdf) {
+        let indices = new Set();
+        const units = [
+          ...(tdf.tutor.unit || []),
+          ...(tdf.tutor.unitTemplate || [])
+        ];
+        for (const [unitIdx, unit] of units.entries()) {
+          // Check for clusterIndex property
+          if (unit.hasOwnProperty('clusterIndex')) {
+            indices.add({idx: Number(unit.clusterIndex), unitIdx});
+          }
+          // Check for clusterlist property (string like "0-2,4,6-8")
+          if (unit.assessmentsession && unit.assessmentsession.clusterlist) {
+            const cl = unit.assessmentsession.clusterlist;
+            if (typeof cl === "string") {
+              cl.split(',').forEach(part => {
+                if (part.includes('-')) {
+                  const [start, end] = part.split('-').map(Number);
+                  for (let i = start; i <= end; i++) indices.add({idx: i, unitIdx});
+                } else {
+                  indices.add({idx: Number(part), unitIdx});
+                }
+              });
+            }
+          }
+        }
+        return Array.from(indices);
+      }
+
+      // Check for out-of-bounds cluster/stim references
+      let outOfBoundsErrors = [];
+      const tdfClusterRefs = extractClusterIndicesFromTDF(json.tutor);
+      tdfClusterRefs.forEach(ref => {
+        const idx = ref.idx;
+        const unitIdx = ref.unitIdx;
+        if (isNaN(idx) || idx < 0 || idx >= clusters.length) {
+          outOfBoundsErrors.push(`TDF "${filename}" unit ${unitIdx} references cluster index ${idx}, but stimulus file "${stimFileName}" only has ${clusters.length} clusters.`);
+        } else if (!clusters[idx].stims || !Array.isArray(clusters[idx].stims) || clusters[idx].stims.length === 0) {
+          outOfBoundsErrors.push(`TDF "${filename}" unit ${unitIdx} references cluster index ${idx}, but cluster ${idx} in stimulus file "${stimFileName}" has no stims.`);
+        } else if (!clusters[idx].stims[0]) {
+          outOfBoundsErrors.push(`TDF "${filename}" unit ${unitIdx} references cluster index ${idx}, but stim 0 in cluster ${idx} is undefined.`);
+        }
+      });
+      if (outOfBoundsErrors.length > 0) {
+        results.result = false;
+        results.errmsg = `TDF/Stimulus file mismatch in "${filename}":\n` + outOfBoundsErrors.join('\n');
+        return results;
+      }
+
+      // Check all stims for missing incorrectResponses
+      let clusterErrors = [];
+      clusters.forEach((cluster, cIdx) => {
+        if (!cluster.stims || !Array.isArray(cluster.stims) || cluster.stims.length === 0) {
+          clusterErrors.push(`File "${stimFileName}": Cluster ${cIdx} has no stims.`);
+        } else {
+          cluster.stims.forEach((stim, sIdx) => {
+            if (!stim || typeof stim !== 'object') {
+              clusterErrors.push(`File "${stimFileName}": Cluster ${cIdx}, Stim ${sIdx} is undefined or not an object.`);
+            } else if (!stim.hasOwnProperty('incorrectResponses')) {
+              clusterErrors.push(`File "${stimFileName}": Cluster ${cIdx}, Stim ${sIdx} missing 'incorrectResponses'.`);
+            }
+          });
+        }
+      });
+      if (clusterErrors.length > 0) {
+        results.result = false;
+        results.errmsg = `Stimulus file "${stimFileName}" (referenced by "${filename}") has the following issues:\n` + clusterErrors.join('\n');
+        return results;
+      }
+
+      // Continue with normal upsert logic...
+      results.result = true;
+      results.errmsg = '';
+      return results;
     } else if (type === 'stim') {
-      const jsonContents = typeof filecontents == 'string' ? JSON.parse(filecontents) : filecontents;
+      let jsonContents;
+      try {
+        jsonContents = typeof filecontents == 'string' ? JSON.parse(filecontents) : filecontents;
+      } catch (e) {
+        results.result = false;
+        results.errmsg = `Error parsing JSON in stimulus file "${filename}": ${e.message}`;
+        return results;
+      }
       await upsertStimFile(filename, jsonContents, ownerId, packagePath);
       results.data = jsonContents;
     }
   } catch (e) {
     serverConsole('ERROR saving content file:', e, e.stack);
     results.result = false;
-    results.errmsg = JSON.stringify(e);
+    results.errmsg = `saveContentFile error in file "${filename}": ${e && e.message ? e.message : e}`;
     return results;
   }
 
   results.result = true;
   results.errmsg = '';
-
   return results;
 }
-
 async function combineAndSaveContentFile(tdf, stim, owner) {
   serverConsole('combineAndSaveContentFile', tdf, stim, owner);
   const results = {
