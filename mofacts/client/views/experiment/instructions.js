@@ -397,7 +397,7 @@ Template.instructions.helpers({
   },
 
   UISettings: function() {
-    return Session.get('currentUISettings');
+    return Session.get('curTdfUISettings') ;
   },
 
   allowcontinue: function() {
