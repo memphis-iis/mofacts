@@ -16,6 +16,9 @@ Template.inputF.helpers({
   'dialogueIntroExit': function() {
     return DialogueUtils.isUserInDialogueIntroExit();
   },
+  'UISettings': function() {
+    return Session.get('curTdfUISettings');
+  }
 });
 
 Template.inputForceCorrect.rendered = function() {

@@ -3643,6 +3643,7 @@ async function resumeFromComponentState() {
       'displayConfirmButton': false,
       'continueButtonText': "Continue",
       'skipStudyButtonText': "Skip",
+      'inputPlaceholderText': "Type your answer here...",
     },
   }
   //here we interprit the stimulus and input position settings to set the colum widths. There are 4 possible combinations.
