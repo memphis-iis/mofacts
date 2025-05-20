@@ -1662,7 +1662,14 @@ function determineUserFeedback(userAnswer, isSkip, isCorrect, feedbackForAnswer,
 async function showUserFeedback(isCorrect, feedbackMessage, isTimeout, isSkip) {
   console.log('showUserFeedback');
   if (Session.get('curTdfUISettings').suppressFeedbackDisplay) {
-    // Do not display any feedback
+    // Do not display any feedback, but still advance the schedule
+    let trialEndTimeStamp = Session.get('trialEndTimeStamp');
+    let trialStartTimeStamp = Session.get('trialStartTimestamp');
+    let source = Session.get('source');
+    let isCorrectVal = isCorrect;
+    let isSkipVal = isSkip;
+    let isTimeoutVal = isTimeout;
+    afterAnswerFeedbackCallback(trialEndTimeStamp, trialStartTimeStamp, source, Session.get('userAnswer'), isTimeoutVal, isSkipVal, isCorrectVal);
     return;
   }
   userFeedbackStart = Date.now();
