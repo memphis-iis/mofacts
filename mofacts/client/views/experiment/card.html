@@ -242,7 +242,7 @@
                                 {{/if}}
                             
                                 <button verbalChoice='{{verbalChoice}}' type='button' name='{{buttonName}}' class='multipleChoiceButton btn btn-primary'>
-                                {{buttonValue}}
+                                {{{buttonValue}}}
                                 </button>
                             
                             </div>
@@ -257,7 +257,7 @@
             {{#if UIsettings.displayConfirmButton}}
             <div class="col-12 text-center">
                 <button type='button' id='confirmButton' name='confirmButton' class='btn btn-block btn-responsive' disabled>
-                    Continue
+                    {{UIsettings.continueButtonText}}
                 </button>
             </div>
             {{/if}}

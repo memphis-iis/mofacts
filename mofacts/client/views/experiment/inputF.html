@@ -6,12 +6,12 @@
             </button>
         {{else}}
             <div class="text-center w-80">
-                <input id="dialogueUserAnswer" style="display:table-cell;width:100%;" placeholder="type response here...">
+                <input id="dialogueUserAnswer" style="display:table-cell;width:100%;" placeholder="{{UISettings.inputPlaceholder}}">
             </div>
         {{/if}}
     {{else}}
         <div class="text-center w-80">
-            <input type="text" id="userAnswer" style="display:table-cell;width:100%;" autocomplete="off" placeholder="type response here...">
+            <input type="text" id="userAnswer" style="display:table-cell;width:100%;" autocomplete="off" placeholder="{{UISettings.inputPlaceholder}}">
         </div>
     {{/if}}
 
