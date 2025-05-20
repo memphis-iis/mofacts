@@ -3642,6 +3642,7 @@ async function resumeFromComponentState() {
       'instructionsTitleDisplay': "headerOnly",
       'displayConfirmButton': false,
       'continueButtonText': "Continue",
+      'lastVideoModalText': "This is the last video, do not progress unless finished with this lesson.",
       'skipStudyButtonText': "Skip",
       'inputPlaceholderText': "Type your answer here...",
     },
