@@ -2586,10 +2586,14 @@ function getButtonTrial() {
     isButtonTrial = (curUnit.isButtonTrial || curUnit.buttonTrial);
 
   const curCardInfo = engine.findCurrentCardInfo();
+  const curStimulus = Session.get('currentStimuliSet')[engine.findCurrentCardInfo().clusterIndex]
   if (curCardInfo.forceButtonTrial) {
     // Did this question specifically override button trial?
     isButtonTrial = true;
-  } else {
+  } else if (curStimulus && curStimulus.incorrectResponses && curStimulus.incorrectResponses.length > 0) {
+    isButtonTrial = true;
+  }
+  else {
     // An entire schedule can override a button trial
     const schedButtonTrial = Session.get('schedule') ? Session.get('schedule').isButtonTrial : false;
     if (schedButtonTrial) {
