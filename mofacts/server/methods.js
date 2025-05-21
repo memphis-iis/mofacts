@@ -2069,8 +2069,18 @@ function userProfileSave(user, awsProfile) {
   serverConsole('userProfileSave', user._id, awsProfile);
   user.aws = awsProfile;
   const numUpdated = Meteor.users.upsert({_id: user._id}, user);
-  serverConsole('Save succeeded');
-  return 'Save succeeed';
+  serverConsole('numUpdated', numUpdated);
+  if (numUpdated == 1) {
+    serverConsole('Save succeeded');
+    return 'Save succeeed';
+  }
+
+  // WHOOOPS! If we're still here something has gone horribly wrong
+  if (numUpdated < 1) {
+    throw new Meteor.Error('user-profile-save', 'No records updated by save');
+  } else {
+    throw new Meteor.Error('user-profile-save', 'More than one record updated?! ' + _.display(numUpdated));
+  }
 }
 
 // used to generate teacher/admin secret keys for api calls
@@ -2790,39 +2800,42 @@ export const methods = {
 
     if (!newUserName) {
       throw new Error('Blank user names aren\'t allowed');
-    } else {
-      const prevUser = Accounts.findUserByUsername(newUserName);
-      if (prevUser) {
-        if (previousOK) {
-          // Older accounts from turk users are having problems with
-          // passwords - so when we detect them, we automatically
-          // change the password
-          Accounts.setPassword(prevUser._id, newUserPassword);
-          return prevUser._id; // User has already been created - nothing to do
-        } else {
-          throw new Error('User is already in use');
-        }
-      }
     }
 
     if (!newUserPassword || newUserPassword.length < 6) {
       throw new Error('Passwords must be at least 6 characters long');
     }
-    
 
-    // Now we can actually create the user
-    // Note that on the server we just get back the ID and have nothing
-    // to do right now. Also note that this method is called for creating
-    // NON-google user accounts (which should generally just be experiment
-    // participants) - so we make sure to set an initial profile
-    const createdId = Accounts.createUser({
-      'email': newUserName,
-      'username': newUserName,
-      'password': newUserPassword,
-      'profile': {
-        'experiment': !!previousOK,
-      },
-    });
+    // Try to create the user, but handle duplicate key error gracefully
+    let createdId;
+    try {
+      createdId = Accounts.createUser({
+        'email': newUserName,
+        'username': newUserName,
+        'password': newUserPassword,
+        'profile': {
+          'experiment': !!previousOK,
+        },
+      });
+    } catch (e) {
+      // If duplicate key error, fetch the existing user
+      if (e.error === 403 && /E11000 duplicate key error/.test(e.reason)) {
+        const prevUser = Accounts.findUserByUsername(newUserName);
+        if (prevUser) {
+          if (previousOK) {
+            Accounts.setPassword(prevUser._id, newUserPassword);
+            return prevUser._id;
+          } else {
+            throw new Error('User is already in use');
+          }
+        } else {
+          throw new Error('Duplicate key error but user not found');
+        }
+      } else {
+        throw e;
+      }
+    }
+
     if (!createdId) {
       throw new Error('Unknown failure creating user account');
     }
@@ -2831,7 +2844,6 @@ export const methods = {
     const user = Meteor.users.findOne({_id: createdId});
     userProfileSave(user, defaultUserProfile());
 
-    // Remember we return a LIST of errors, so this is success
     return createdId;
   },
 
@@ -3531,526 +3543,3 @@ const asyncMethods = {
     }
   },
 }
-
-// Server-side startup logic
-Meteor.methods(functionTimerWrapper(methods, asyncMethods));
-
-Meteor.startup(async function() {
-  highestStimuliSetId = Tdfs.findOne({}, {sort: {stimuliSetId: -1}, limit: 1 });
-  nextEventId = Histories.findOne({}, {limit: 1, sort: {eventId: -1}})?.eventId + 1 || 1;
-  nextStimuliSetId = highestStimuliSetId && highestStimuliSetId.stimuliSetId ? parseInt(highestStimuliSetId.stimuliSetId) + 1 : 1;
-  DynamicSettings.upsert({key: 'clientVerbosityLevel'}, {$set: {value: 1}});
-  DynamicSettings.upsert({key: 'testLoginsEnabled'}, {$set: {value: false}});
-
-
-  // Let anyone looking know what config is in effect
-  serverConsole('Log Notice (from siteConfig):', getConfigProperty('logNotice'));
-
-  // Force our OAuth settings to be current
-  ServiceConfiguration.configurations.remove({'service': 'google'});
-  serverConsole('Removed Google service config - rewriting now');
-
-  const google = getConfigProperty('google');
-  ServiceConfiguration.configurations.insert({
-    'service': 'google',
-    'clientId': _.prop(google, 'clientId'),
-    'secret': _.prop(google, 'secret'),
-  });
-  serverConsole('Rewrote Google service config');
-
-  if(Meteor.settings.microsoft) {
-    //add microsoft service config
-    ServiceConfiguration.configurations.upsert({service: 'office365'}, {
-      $set: {
-        loginStyle: 'popup',
-        clientId: Meteor.settings.microsoft.clientId,
-        secret: Meteor.settings.microsoft.secret,
-        tenent: 'common',
-        //save the refresh token
-        refreshToken: true,
-      },
-    });
-  }
-
-  // Figure out the "prime admin" (owner of repo TDF/stim files)
-  // Note that we accept username or email and then find the ID
-  const adminUser = findUserByName(getConfigProperty('owner'));
-
-
-  // Used below for ownership
-  const adminUserId = _.prop(adminUser, '_id') || '';
-  // adminUser should be in an admin role
-  if (adminUserId) {
-    Roles.addUsersToRoles(adminUserId, 'admin');
-    serverConsole('Admin User Found ID:', adminUserId, 'with obj:', _.pick(adminUser, '_id', 'username', 'email'));
-  } else {
-    serverConsole('Admin user ID could not be found. adminUser=', displayify(adminUser || 'null'));
-    serverConsole('ADMIN USER is MISSING: a restart might be required');
-    serverConsole('Make sure you have a valid siteConfig');
-    serverConsole('***IMPORTANT*** There will be no owner for system TDF\'s');
-  }
-
-  contentGenerationAvailable = Meteor.settings.contentGenerationEnabled || false;
-
-  // Get user in roles and make sure they are added
-  const roles = getConfigProperty('initRoles');
-  const roleAdd = function(memberName, roleName) {
-    const requested = _.prop(roles, memberName) || [];
-    serverConsole('Role', roleName, '- found', _.prop(requested, 'length'));
-
-    _.each(requested, function(username) {
-      const user = findUserByName(username);
-      if (!user) {
-        serverConsole('Warning: user', username, 'role', roleName, 'request, but user not found');
-        return;
-      }
-      Roles.addUsersToRoles(user._id, roleName);
-      //if the role name is admin or teacher, create a secret key for the user
-      if(roleName == 'admin' || roleName == 'teacher'){
-        createUserSecretKey(user._id);
-      }
-      serverConsole('Added user', username, 'to role', roleName);
-    });
-  };
-
-  roleAdd('admins', 'admin');
-  roleAdd('teachers', 'teacher');
-  const ret = Tdfs.find().count();
-  if (ret == 0) loadStimsAndTdfsFromPrivate(adminUserId);
-
-  // Make sure we create a default user profile record when a new Google user
-  // shows up. We still want the default hook's 'profile' behavior, AND we want
-  // our custom user profile collection to have a default record
-  Accounts.onCreateUser(function(options, user) {
-    // Little display helper
-    const dispUsr = function(u) {
-      return _.pick(u, '_id', 'username', 'emails', 'profile');
-    };
-
-    // Default profile save
-    userProfileSave(user, defaultUserProfile());
-
-    // Default hook's behavior
-    if (options.profile) {
-      user.profile = _.extend(user.profile || {}, options.profile);
-    }
-
-    if (_.prop(user.profile, 'experiment')) {
-      serverConsole('Experiment participant user created:', dispUsr(user));
-      return user;
-    }
-
-    // Set username and an email address from the google service info
-    // We use the lowercase email for both username and email
-    const email = _.chain(user)
-        .prop('services')
-        .prop('google')
-        .prop('email').trim()
-        .value().toLowerCase();
-    if (!email) {
-      // throw new Meteor.Error("No email found for your Google account");
-    }
-
-    if (email) {
-      user.username = email;
-      user.emails = [{
-        'address': email,
-        'verified': true,
-      }];
-    }
-
-    serverConsole('Creating new Google user:', dispUsr(user));
-
-    // If the user is initRoles, go ahead and add them to the roles.
-    // Unfortunately, the user hasn't been created... so we need to actually
-    // cheat a little and manipulate the user record as if we were the roles
-    // code. IMPORTANT: a new version of alanning:roles could break this.
-    user.roles = [];
-    const roles = getConfigProperty('initRoles');
-    const addIfInit = function(initName, roleName) {
-      const initList = _.prop(roles, initName) || [];
-      if (_.contains(initList, user.username)) {
-        serverConsole('Adding', user.username, 'to', roleName);
-        user.roles.push(roleName);
-      }
-    };
-
-    addIfInit('admins', 'admin');
-    addIfInit('teachers', 'teacher');
-
-    userIdToUsernames[user._id] = user.username;
-    usernameToUserIds[user.username] = user._id;
-
-    return user;
-  });
-
-  // Set the global logout time for all users
-  Accounts.config({
-    loginExpirationInDays: 90
-  })
-
-  // Create any helpful indexes for queries we run
-  ScheduledTurkMessages._ensureIndex({'sent': 1, 'scheduled': 1});
-
-  // Start up synched cron background jobs
-  SyncedCron.start();
-
-  // Now check for messages to send every 5 minutes
-  
-  if (true) { //Meteor.isProduction) {
-    SyncedCron.add({
-      name: 'Period Email Sent Check',
-      schedule: function(parser) {
-        return parser.text('every 1 minutes');
-      },
-      job: function() {
-        return sendScheduledTurkMessages();
-      },
-    });
-
-    SyncedCron.add({
-      name: 'Send Error Report Summaries',
-      schedule: function(parser) {
-        return parser.text('at 3:00 pm');
-      },
-      job: function() {
-        return sendErrorReportSummaries();
-      },
-    });
-
-    //add sync cron job to send email to admin if the server is running low on physical memory
-    SyncedCron.add({
-      name: 'Check Drive Space Remaining',
-      schedule: function(parser) {
-        return parser.text('at 3:00 pm');
-      },
-      job: function() {
-        return checkDriveSpace();
-      }
-    });
-  }
-  //combine owner emails, teacher emails, and admin emails into one array
-  allEmails = [];
-  allEmails.push(ownerEmail);
-  const teacherEmails = roles.teachers;
-  allEmails = allEmails.concat(teacherEmails);
-  const adminEmails = roles.admins;
-  allEmails = allEmails.concat(adminEmails);
-
-  //we also need to get the users in roles admin and teacher and send them an email
-  db_admins = Meteor.users.find({roles: 'admin'}).fetch();
-  db_teachers = Meteor.users.find({roles: 'teacher'}).fetch();
-
-  //the emails are the username of the user
-  for (const admin of db_admins){
-    allEmails.push(admin.username);
-  }
-  for (const teacher of db_teachers){
-    allEmails.push(teacher.username);
-  }
-  
-  //remove any duplicates
-  allEmails = allEmails.filter((v, i, a) => a.indexOf(v) === i);
-  console.log("Sending startup email to: ", allEmails);
-  
-  updateStimDisplayTypeMap();
-
-  //email admin that the server has restarted
-  for (const emailaddr of allEmails){
-    const versionFile = Assets.getText('versionInfo.json')
-    const version = JSON.parse(versionFile);
-    const rootUrl = Meteor.settings.ROOT_URL;
-    server = Meteor.absoluteUrl().split('//')[1];
-    server = server.substring(0, server.length - 1);
-    subject = `MoFaCTs Deployed on ${server}`;
-    text = `The server has restarted.\nServer: ${server}\nVersion: ${JSON.stringify(version, null, 2)}`;
-    sendEmail(emailaddr, ownerEmail, subject, text)
-  }
-  
-});
-
-Router.route('/dynamic-assets/:tdfid?/:filetype?/:filename?', {
-  name: 'dynamic-asset',
-  where: 'server',
-  action: function() {
-    let filename = this.params.filename;
-    let filetype = this.params.filetype; //should only be image or audio
-    let path = this.url;
-    let extension = filename.split('.')[1];
-
-    if (this.url.includes('..')){ //user is trying to do some naughty stuff
-      this.response.writeHead('404');
-      this.response.end();
-      return;
-    }
-
-    this.response.writeHeader('200', {
-      'Content-Type': `${filetype}/${extension}`
-    })
-    let content;
-
-    if (filetype == 'image'){
-      if(isProd){
-        serverConsole(`loading image from ${process.env.HOME + path}`)
-        content = fs.readFileSync(process.env.HOME + path)
-      }
-      else{
-        serverConsole(`loading image from ${process.env.PWD + '/..' + path}`)
-        try{
-          content = fs.readFileSync(process.env.PWD + '/..' + path)
-        }
-        catch(e){
-          serverConsole(e);
-        }
-      }
-    }
-    else if (filetype == 'audio'){
-      if(isProd){
-        serverConsole(`loading audio from ${process.env.HOME + path}`)
-        content = fs.readFileSync(process.env.HOME + path)
-      }
-      else{
-        serverConsole(`loading audio from ${process.env.PWD + '/..' + path}`)
-        try{
-          content = fs.readFileSync(process.env.PWD + '/..' + path)
-        }
-        catch(e){
-          serverConsole(e);
-        }
-      }
-    }
-    this.response.write(content);
-    this.response.end();
-  }
-});
-// Serves data file containing all TDF data for single teacher
-Router.route('data-by-teacher', {
-  name: 'server.teacherData',
-  where: 'server',
-  path: '/data-by-teacher/:uid',
-  action: async function() {
-    console.time('data-by-teacher')
-    const userId = this.request.headers['x-user-id'];
-    const loginToken = this.request.headers['x-auth-token'];
-    const uid = this.params.uid;
-    const response = this.response;
-    
-    if(!userId || !loginToken){
-      response.writeHead(403);
-      response.end('Unauthorized');
-      return;
-    }
-    else if (!uid) {
-      response.writeHead(404);
-      response.end('No user ID specified');
-      return;
-    }
-
-    //get all tdfs assigned to the user
-    const assignedTdfs = await getTdfNamesAssignedByInstructor(uid);
-
-    //append tdfs that are owned by the user
-    const ownedTdfs = await getTdfNamesByOwnerId(uid);
-
-    //append all tdfs that the user is an accessor for
-    const accessorTdfs = await getTdfNamesByAccessorId(uid);
-
-    //combine the two arrays
-    const tdfNames = assignedTdfs.concat(ownedTdfs).concat(accessorTdfs);
-
-    //remove duplicates
-    const uniqueTdfs = tdfNames.filter((v, i, a) => a.indexOf(v) === i);
-
-    console.log(userId, uid, tdfNames)
-
-    if (!uniqueTdfs.length > 0) {
-      response.writeHead(404);
-      response.end('No tdfs found for any classes');
-      return;
-    }
-
-    const user = Meteor.users.findOne({'_id': uid});
-    let userName = user.username;
-    // eslint-disable-next-line no-useless-escape
-    userName = userName.replace('/[/\\?%*:|"<>\s]/g', '_');
-
-    const fileName = 'mofacts_' + userName + '_all_tdf_data.txt';
-
-    response.writeHead(200, {
-      'Content-Type': 'text/tab-separated-values',
-      'File-Name': fileName
-    });
-
-    serverConsole(uniqueTdfs);
-    response.write(await createExperimentExport(uniqueTdfs, uid));
-
-    uniqueTdfs.forEach(function(tdf) {
-      serverConsole('Sent all  data for', tdf, 'as file', fileName);
-    });
-    console.timeEnd('data-by-teacher')
-    response.end('');
-  },
-});
-
-// Serves data file containing all TDF data for all classes for a teacher
-Router.route('data-by-class', {
-  name: 'server.classData',
-  where: 'server',
-  path: '/data-by-class/:classid/',
-  action: async function() {
-    const userId = this.request.headers['x-user-id'];
-    const loginToken = this.request.headers['x-auth-token'];
-    const classId = this.params.classid;
-    const response = this.response;
-    
-    if(!userId || !loginToken){
-      response.writeHead(403);
-      response.end('Unauthorized');
-      return;
-    }
-    else if (Meteor.users.findOne({_id: userId}).secretKey != loginToken){
-      response.writeHead(403);
-      response.end('Unauthorized');
-      return;
-    }
-    else if (!classId) {
-      response.writeHead(404);
-      response.end('No class ID specified');
-      return;
-    }
-    else if (!classId) {
-      throw new Meteor.Error('No class ID specified');
-    }
-
-    const foundClass = await getCourseById(classId);
-
-    if (!foundClass) {
-      response.writeHead(404);
-      response.end('No classes found for the specified class ID');
-      return;
-    }
-
-    const tdfFileNames = await getTdfAssignmentsByCourseIdMap(classId);
-
-    if (!tdfFileNames || tdfFileNames.length == 0) {
-      response.writeHead(404);
-      response.end('No tdfs found for any classes');
-      return;
-    }
-
-    // eslint-disable-next-line no-useless-escape
-    const className = foundClass.coursename.replace('/[/\\?%*:|"<>\s]/g', '_');
-    const fileName = 'mofacts_' + className + '_all_class_data.txt';
-
-    response.writeHead(200, {
-      'Content-Type': 'text/tab-separated-values',
-      'File-Name': fileName
-    });
-
-    response.write(await createExperimentExport(tdfFileNames, userId));
-
-    tdfFileNames.forEach(function(tdf) {
-      serverConsole('Sent all  data for', tdf, 'as file', fileName, 'with record-count:', recCount);
-    });
-
-    response.end('');
-  },
-});
-
-// We use a special server-side route for our experimental data download
-Router.route('data-by-file', {
-  name: 'server.data',
-  where: 'server',
-  path: '/data-by-file/:exp',
-  action: async function() {
-    const userId = this.request.headers['x-user-id'];
-    const loginToken = this.request.headers['x-auth-token'];
-    const exp = this.params.exp;
-    const response = this.response;
-    let path = this.url;
-    
-    if(!userId || !loginToken){
-      response.writeHead('403');
-      response.end();
-    }
-    else if (Meteor.users.findOne({_id: userId}).secretKey != loginToken){
-      response.writeHead(403);
-      response.end('Unauthorized');
-      return;
-    }
-    else if (path.includes('..')){ //user is trying to do some naughty stuff
-      response.writeHead('404');
-      response.end();
-      return;
-    }
-    else if (!exp) {
-      response.writeHead(404);
-      response.end('No experiment specified');
-      return;
-    }
-
-    const fileName = exp.split('.json')[0] + '-data.txt';
-
-    response.writeHead(200, {
-      'Content-Type': 'text/tab-separated-values',
-      'File-Name': fileName
-    });
-
-    const tdf = Tdfs.findOne({"content.fileName": exp});
-
-    if (tdf && tdf.content.tdfs.tutor.setspec.condition) {
-      const experiments = tdf.content.tdfs.tutor.setspec.condition;
-      experiments.unshift(exp);
-      response.write(await createExperimentExport(experiments, userId));
-    } else {
-      response.write(await createExperimentExport(exp, userId));
-    }
-
-    response.end('');
-
-    serverConsole('Sent all  data for', exp, 'as file', fileName);
-  }
-});
-
-Router.route('clozeEditHistory', {
-  name: 'server.clozeData',
-  where: 'server',
-  path: '/clozeEditHistory/:uid',
-  action: function() {
-    const userId = this.request.headers['x-user-id'];
-    const loginToken = this.request.headers['x-auth-token'];
-    const uid = this.params.uid;
-    const response = this.response;
-    
-    if(!userId || !loginToken){
-      response.writeHead('403');
-      response.end();
-    }
-    else if (Meteor.users.findOne({_id: userId}).secretKey != loginToken){
-      response.writeHead(403);
-      response.end('Unauthorized');
-      return;
-    }
-    else if (!uid) {
-      response.writeHead(404);
-      response.end('No user id specified');
-      return;
-    }
-    const filename = uid + '-clozeEditHistory.json';
-
-    response.writeHead(200, {
-      'Content-Type': 'application/json',
-      'File-Name': filename
-    });
-
-    let recCount = 0;
-    ClozeEditHistory.find({'user': uid}).forEach(function(record) {
-      recCount += 1;
-      response.write(JSON.stringify(record));
-      response.write('\r\n');
-    });
-    response.end('');
-
-    serverConsole('Sent all  data for', uid, 'as file', filename, 'with record-count:', recCount);
-  },
-});
