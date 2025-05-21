@@ -2069,18 +2069,8 @@ function userProfileSave(user, awsProfile) {
   serverConsole('userProfileSave', user._id, awsProfile);
   user.aws = awsProfile;
   const numUpdated = Meteor.users.upsert({_id: user._id}, user);
-  serverConsole('numUpdated', numUpdated);
-  if (numUpdated == 1) {
-    serverConsole('Save succeeded');
-    return 'Save succeeed';
-  }
-
-  // WHOOOPS! If we're still here something has gone horribly wrong
-  if (numUpdated < 1) {
-    throw new Meteor.Error('user-profile-save', 'No records updated by save');
-  } else {
-    throw new Meteor.Error('user-profile-save', 'More than one record updated?! ' + _.display(numUpdated));
-  }
+  serverConsole('Save succeeded');
+  return 'Save succeeed';
 }
 
 // used to generate teacher/admin secret keys for api calls
