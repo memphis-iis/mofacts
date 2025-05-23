@@ -41,6 +41,9 @@ const https = require('https')
 const { randomBytes } = require('crypto')
 let verbosityLevel = 0; //0 = only output serverConsole logs, 1 = only output function times, 2 = output serverConsole and function times
 
+// Signup locks
+const signUpLocks = {};
+
 console.log('Starting server');
 if (process.env.METEOR_SETTINGS_WORKAROUND) {
   console.log('METEOR_SETTINGS_WORKAROUND is set to ' + process.env.METEOR_SETTINGS_WORKAROUND);
@@ -2064,11 +2067,17 @@ function checkDriveSpace() {
   }
 }
 
+
 // Save the given user profile via "upsert" logic
 function userProfileSave(user, awsProfile) {
   serverConsole('userProfileSave', user._id, awsProfile);
   user.aws = awsProfile;
-  const numUpdated = Meteor.users.upsert({_id: user._id}, user);
+  const numUpdated = Meteor.users.update(
+    { _id: user._id },
+    { $set: { aws: user.aws } },
+    { multi: false }
+  );
+  // serverConsole('numUpdated', numUpdated);
   serverConsole('numUpdated', numUpdated);
   if (numUpdated.numberAffected === 1) {
     serverConsole('Save succeeded');
@@ -2791,66 +2800,87 @@ export const methods = {
     }
   },
 
+  
+
   // Functionality to create a new user ID: return null on success. Return
   // an array of error messages on failure. If previous OK is true, then
   // we silently skip duplicate users (this is mainly for experimental
   // participants who are created on the fly)
+
+
+
   signUpUser: function(newUserName, newUserPassword, previousOK) {
-  serverConsole('signUpUser', newUserName, 'previousOK == ', previousOK);
+    serverConsole('signUpUser', newUserName, 'previousOK == ', previousOK);
 
-  if (!newUserName) {
-    throw new Error('Blank user names aren\'t allowed');
-  }
+  if (!newUserName) throw new Error('Blank user names aren\'t allowed');
+  if (!newUserPassword || newUserPassword.length < 6) throw new Error('Passwords must be at least 6 characters long');
 
-  if (!newUserPassword || newUserPassword.length < 6) {
-    throw new Error('Passwords must be at least 6 characters long');
+  // Simple mutex: block if another signup is in progress for this username
+  while (signUpLocks[newUserName]) {
+    Meteor._sleepForMs(50);
   }
+  signUpLocks[newUserName] = true;
 
   try {
-    const createdId = Accounts.createUser({
-      'email': newUserName,
-      'username': newUserName,
-      'password': newUserPassword,
-      'profile': {
-        'experiment': !!previousOK,
-      },
-    });
-    const user = Meteor.users.findOne({_id: createdId});
-    userProfileSave(user, defaultUserProfile());
-    return { userExists: false, userId: createdId };
-  } catch (e) {
-    // If duplicate key error, fetch the existing user
-    if (e.error === 403 && /Username already exists/.test(e.reason)) {
-      const prevUser = Accounts.findUserByUsername(newUserName);
-      if (prevUser) {
-        if (previousOK) {
-          Accounts.setPassword(prevUser._id, newUserPassword);
-          return { userExists: true, userId: prevUser._id };
-        } else {
-          throw new Error('User is already in use');
-        }
+    let prevUser = Accounts.findUserByUsername(newUserName) || Accounts.findUserByEmail(newUserName);
+    if (prevUser) {
+      if (previousOK) {
+        Accounts.setPassword(prevUser._id, newUserPassword);
+        return { userExists: true, userId: prevUser._id };
       } else {
-        throw new Error('Duplicate key error but user not found');
+        throw new Error('User is already in use');
       }
-    } else if (e.error === 403 && /E11000 duplicate key error/.test(e.reason)) {
-      // fallback for Mongo duplicate key error
-      const prevUser = Accounts.findUserByUsername(newUserName);
-      if (prevUser) {
-        if (previousOK) {
-          Accounts.setPassword(prevUser._id, newUserPassword);
-          return { userExists: true, userId: prevUser._id };
-        } else {
-          throw new Error('User is already in use');
-        }
-      } else {
-        throw new Error('Duplicate key error but user not found');
-      }
-    } else {
-      throw e;
     }
+
+    try {
+      //get the default user profile
+      const createdId = Accounts.createUser({
+        email: newUserName,
+        username: newUserName,
+        password: newUserPassword,
+        profile: { experiment: !!previousOK },
+        aws: {
+              have_aws_id: false,
+              have_aws_secret: false,
+              aws_id: '',
+              aws_secret_key: '',
+              use_sandbox: true,
+        }
+        
+      });
+
+      // Wait for user to be available in the DB before proceeding
+      let user = null, attempts = 0;
+      while (!user && attempts < 10) {
+        user = Meteor.users.findOne({ _id: createdId });
+        if (!user) {
+          Meteor._sleepForMs(50);
+          attempts++;
+        }
+      }
+      if (!user) throw new Error('User creation race condition: user not found after createUser');
+      // userProfileSave(user, defaultUserProfile()); // Not needed if onCreateUser does this
+      return { userExists: false, userId: createdId };
+    } catch (e) {
+      if (e.error === 403 && (/Username already exists|E11000 duplicate key error/.test(e.reason))) {
+        prevUser = Accounts.findUserByUsername(newUserName) || Accounts.findUserByEmail(newUserName);
+        if (prevUser) {
+          if (previousOK) {
+            Accounts.setPassword(prevUser._id, newUserPassword);
+            return { userExists: true, userId: prevUser._id };
+          } else {
+            throw new Error('User is already in use');
+          }
+        }
+        throw new Error('Duplicate key error but user not found');
+      } else {
+        throw e;
+      }
+    }
+  } finally {
+    delete signUpLocks[newUserName];
   }
 },
-
   populateSSOProfile: function(userId){
     //check if the user has a service profile
     const user = Meteor.users.findOne(userId);
@@ -3644,7 +3674,7 @@ Meteor.startup(async function() {
     };
 
     // Default profile save
-    userProfileSave(user, defaultUserProfile());
+    //userProfileSave(user, defaultUserProfile());
 
     // Default hook's behavior
     if (options.profile) {
