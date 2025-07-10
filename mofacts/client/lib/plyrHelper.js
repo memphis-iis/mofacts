@@ -21,15 +21,114 @@ class PlayerController {
   questions = [];
 
   constructor(playerElement, times, questions, points) {
-    this.player = new Plyr(playerElement, {
-      markers: { enabled: times.length > 0 , points: points }
-    });
+    const videoSession = Session.get('currentTdfUnit').videosession;
+    this.preventScrubbing = videoSession.preventScrubbing || false;
+    this.rewindOnIncorrect = videoSession.rewindOnIncorrect || false;
+    this.checkpointBehavior = videoSession.checkpointBehavior || 'none'
+    const plyrConfig = {
+      markers: { enabled: times.length > 0, points: points }
+    };
+    // If scrubbing is prevented, modify controls
+    if (this.preventScrubbing) {
+      plyrConfig.controls = [
+        'play-large', 
+        'play', 
+        'current-time', 
+        'mute', 
+        'volume', 
+        'fullscreen'
+      ];
+      // Disable seeking and keyboard controls
+      plyrConfig.seekTime = 0;
+      plyrConfig.keyboard = { focused: false, global: false };
+      plyrConfig.clickToPlay = false;
+    }
+    this.player = new Plyr(playerElement, plyrConfig);
     this.times = times;
     this.questions = questions;
     this.lastVolume = this.player.volume;
     this.lastSpeed = this.player.speed;
+
+    this.initializeCheckpoints();
   }
 
+  //Checkpoint Helper
+  initializeCheckpoints() {
+    this.checkpoints = [0]; // Always start with time 0
+    this.currentCheckpointIndex = 0;
+    this.maxAllowedTime = 0;
+    this.allowSeeking = false;
+    
+    if (this.checkpointBehavior === "question" && this.times.length > 0) {
+      this.checkpoints = [0, ...this.times.sort((a, b) => a - b)];
+    }
+  }
+
+
+    rewindToPreviousCheckpoint() {
+      if (!this.rewindOnIncorrect) return;
+      
+      if (this.currentCheckpointIndex > 0) {
+        this.currentCheckpointIndex--;
+      }
+      
+      const checkpointTime = this.checkpoints[this.currentCheckpointIndex];
+      this.maxAllowedTime = checkpointTime;
+      
+      // Temporarily allow seeking for rewind
+      this.allowSeeking = true;
+      this.player.currentTime = checkpointTime;
+      this.allowSeeking = false;
+      
+      // Reset question state for dynamic scheduling
+      this.questioningComplete = false;
+      for(let i = 0; i < this.times.length; i++){
+        if(this.times[i] > checkpointTime){
+          this.nextTimeIndex = i;
+          this.nextTime = this.times[i];
+          break;
+        }
+      }
+      
+      console.log(`Rewound to checkpoint ${this.currentCheckpointIndex} at time ${checkpointTime}`);
+      this.logPlyrAction('rewind_to_checkpoint');
+    }
+    
+    advanceToNextCheckpoint() {
+      if (this.currentCheckpointIndex < this.checkpoints.length - 1) {
+        this.currentCheckpointIndex++;
+        this.maxAllowedTime = Math.max(this.maxAllowedTime, this.player.currentTime);
+      }
+      
+      console.log(`Advanced to checkpoint ${this.currentCheckpointIndex}`);
+      this.logPlyrAction('advance_checkpoint');
+    }
+
+    handleQuestionResponse(isCorrect) {
+        if (isCorrect) {
+          this.handleCorrectAnswer();
+        } else {
+          this.handleIncorrectAnswer();
+        }
+    } 
+    
+    handleIncorrectAnswer() {
+      if (this.rewindOnIncorrect) {
+        this.rewindToPreviousCheckpoint();
+
+        // Brief pause before auto-replay
+        setTimeout(() => {
+          if (!this.player.playing) {
+            this.player.play();
+          }
+        }, 1500);
+      }
+    }
+
+    handleCorrectAnswer() {
+      this.advanceToNextCheckpoint();
+  }
+  // Initialize video cards and set up event listeners
   async initVideoCards() {
     this.questions = Session.get('currentTdfUnit').videosession.questions;
     this.times.sort((a, b) => a - b);
@@ -58,6 +157,19 @@ class PlayerController {
     this.player.on('ratechange', () => this.logPlyrAction('ratechange'));
   
     this.player.on('ended', () => this.endPlayback());
+
+    if (this.preventScrubbing) {
+      this.player.on('seeking', (event) => {
+        if (!this.allowSeeking) {
+          const targetTime = this.player.currentTime;
+          if (targetTime > this.maxAllowedTime) {
+            event.preventDefault();
+            this.player.currentTime = this.maxAllowedTime;
+            this.logPlyrAction('seek_blocked');
+          }
+        }
+      });
+    }
   
     waitForElm("[id*='plyr-seek']").then((elm) => elm.addEventListener("mouseup", stopSeeking));
   
@@ -65,6 +177,7 @@ class PlayerController {
 
     this.playVideo();
   }
+
   async setNextTime(time, index){
     this.nextTime = time;
     this.nextTimeIndex = index;
@@ -75,6 +188,20 @@ class PlayerController {
   }
 
   timeUpdate(){
+    let currentTime = this.player.currentTime;
+    
+    // Prevent scrubbing ahead if enabled
+    if (this.preventScrubbing && currentTime > this.maxAllowedTime + 1) {
+      this.player.currentTime = this.maxAllowedTime;
+      return;
+    }
+    
+    // Update max allowed time as video progresses naturally
+    if (!this.preventScrubbing || currentTime <= this.maxAllowedTime + 1) {
+      this.maxAllowedTime = Math.max(this.maxAllowedTime, currentTime);
+    }
+
+    // If no times are set or nextTimeIndex is -1, set nextTime to end of video
     if(this.times.length == 0 || this.nextTimeIndex == -1) {
       this.nextTime = this.player.duration;
       this.questioningComplete = true;
@@ -115,7 +242,7 @@ class PlayerController {
         //remove progress bar class
         $('#progressbar').removeClass('progress-bar');
       }
-    }
+   }
     if(timeDiff < 0 && !this.questioningComplete){
       this.showQuestion();
     }
@@ -292,12 +419,16 @@ class PlayerController {
     }
     //create markers for new markers
     this.addNewMarkers(markers);
+
+    // Update max allowed time if we're not preventing scrubbing
+    if (!this.preventScrubbing) {
+      this.maxAllowedTime = Math.max(this.maxAllowedTime, this.player.currentTime);
+    }
   
-    
     //default nextTime to end of player
     this.nextTime = this.player.duration;
     //check if next time needs to be set to new question
-    for(let i in times){
+    for(let i in this.times){
       if(this.player.currentTime < this.times[i]){
         this.nextTimeIndex = i;
         this.nextTime = this.times[this.nextTimeIndex];
@@ -314,6 +445,11 @@ class PlayerController {
     let newMarkers = markers.filter(x => !this.player.config.markers.points.some(y => y.time == x.time))
   
     this.player.config.markers.points = markers
+
+    //Updatge checkpoints when markers change
+    if(this.checkpointBehavior === "question"){
+      this.checkpoints = [0, ...this.times.sort((a, b) => a - b)];
+    }
     for(let i = 0; i < newMarkers.length; i++){
       $(".plyr__progress").append(`<span class="plyr__progress__marker" style="left: ${newMarkers[i].time/this.player.duration*100}%;"></span>`)
     }
@@ -324,6 +460,15 @@ async function stopSeeking(){
   if(playerController.loggingSeek) {
     const currentTime = playerController.player.currentTime;
     const seekStart = playerController.seekStart;
+
+    // Check if seeking is allowed
+    if (playerController.preventScrubbing && currentTime > playerController.maxAllowedTime) {
+      playerController.player.currentTime = playerController.maxAllowedTime;
+      playerController.logPlyrAction('seek_blocked');
+      playerController.loggingSeek = false;
+      return;
+    }
+
     const nextTime = playerController.nextTime;
     const prevTimeIndex = playerController.nextTimeIndex - 1;
     let prevTime = playerController.times[0];

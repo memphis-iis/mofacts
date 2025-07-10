@@ -1627,6 +1627,16 @@ function determineUserFeedback(userAnswer, isSkip, isCorrect, feedbackForAnswer,
     }
   }
 
+  // Add video session checkpoint handling here
+  if (Session.get('isVideoSession') && playerController) {
+    playerController.handleQuestionResponse(isCorrect);
+  }
+
+  // Add video session checkpoint handling here
+  if (Session.get('isVideoSession') && playerController) {
+    playerController.handleQuestionResponse(isCorrect);
+  }
+
   const currentDeliveryParams = Session.get('currentDeliveryParams')
   if (currentDeliveryParams.scoringEnabled) {
     // Note that we track the score in the user progress object, but we
