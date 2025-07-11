@@ -1627,12 +1627,7 @@ function determineUserFeedback(userAnswer, isSkip, isCorrect, feedbackForAnswer,
     }
   }
 
-  // Add video session checkpoint handling here
-  if (Session.get('isVideoSession') && playerController) {
-    playerController.handleQuestionResponse(isCorrect);
-  }
-
-  // Add video session checkpoint handling here
+  // Handle video session checkpoint logic
   if (Session.get('isVideoSession') && playerController) {
     playerController.handleQuestionResponse(isCorrect);
   }
