@@ -1,13 +1,14 @@
 import Plyr from 'plyr';
 import { newQuestionHandler } from '../views/experiment/card.js'
+import { Session } from 'meteor/session';
 
 export let playerController;
 
 class PlayerController {
   player;
-  currentCheckpointIndex = 0;  // Add missing property
-  maxAllowedTime = 0;          // Add missing property
-  allowSeeking = false;        // Add missing property
+  currentCheckpointIndex = 0;  
+  maxAllowedTime = 0;         
+  allowSeeking = false;       
 
   lastVolume;
   lastSpeed;
@@ -137,7 +138,7 @@ class PlayerController {
       if (checkpoint.time < currentTime) {
         previousCheckpoint = checkpoint;
       } else {
-        break; // Checkpoints should be sorted by time
+        break; 
       }
     }
     
