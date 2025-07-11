@@ -27,6 +27,7 @@ export class AdaptiveQuestionLogic {
         // false - this is a boolean value
         // numbers - these are numbers
         // math operators + - * / % ( ) = - these are math operators
+        // CHECKPOINT - marks a question as a checkpoint for video sessions
 
         //This returns an object with the following properties:
         // condition: the original condition string
@@ -34,6 +35,7 @@ export class AdaptiveQuestionLogic {
         // actions: the original action string
         // conditionResult: the result of the condition evaluation
         // schedule: an array of objects with the unit and question to schedule
+        // checkpoints: an array of checkpoint information for questions marked with CHECKPOINT
 
         //we have to get the student performance history
 
@@ -49,7 +51,8 @@ export class AdaptiveQuestionLogic {
         //remove the IF prefix and split on keyword THEN. Before then is the condition, after then is the action
         //if parts
         let when = logicString.includes("AT") ? parseInt(logicString.split("AT")[1].trim()) : null;
-        let parts = logicString.replace("IF", "").replace("AT", "").split("THEN");
+        let isCheckpoint = logicString.includes("CHECKPOINT");
+        let parts = logicString.replace("IF", "").replace("AT", "").replace("CHECKPOINT", "").split("THEN");
         let condition = parts[0].trim();
         let actions = parts[1].trim();
 
@@ -128,6 +131,7 @@ export class AdaptiveQuestionLogic {
         let addToschedule = [];
         let questions = [];
         let outcomes = [];
+        let checkpoints = [];
         
         ///check if there are parenthesis, if so interpret as an array of actions
         if(actions.includes("(")){
@@ -145,8 +149,16 @@ export class AdaptiveQuestionLogic {
                     addToschedule.push({
                         clusterIndex: KCI,
                         stimIndex: stimulusIndex,
+                        isCheckpoint: isCheckpoint
                     });
                     questions.push(KCI);
+                    if (isCheckpoint && when !== null) {
+                        checkpoints.push({
+                            clusterIndex: KCI,
+                            stimIndex: stimulusIndex,
+                            time: when
+                        });
+                    }
                     console.log('adding to adaptive schedule:', addToschedule);
                 } else {
                     //throw an error if the action is not a valid action
@@ -163,8 +175,16 @@ export class AdaptiveQuestionLogic {
                 addToschedule.push({
                     clusterIndex: clusterIndex,
                     stimulus: stimulusIndex,
+                    isCheckpoint: isCheckpoint
                 });
                 questions.push(clusterIndex);
+                if (isCheckpoint && when !== null) {
+                    checkpoints.push({
+                        clusterIndex: clusterIndex,
+                        stimIndex: stimulusIndex,
+                        time: when
+                    });
+                }
                 console.log('adding to adaptive schedule:', addToschedule);
             } else {
                 //throw an error if the action is not a valid action
@@ -173,19 +193,41 @@ export class AdaptiveQuestionLogic {
             //append to the schedule
             this.schedule.push(...addToschedule);
         }
-        return {condition: condition, conditionExpression: conditionExpression, actions: actions, conditionResult: conditionResult, questions: questions, schedule: addToschedule, when: when};
+        return {condition: condition, conditionExpression: conditionExpression, actions: actions, conditionResult: conditionResult, questions: questions, schedule: addToschedule, when: when, checkpoints: checkpoints};
     }
     async modifyUnit(adaptiveLogic, curTdfUnit){
         // modify the unit based on the existing unit and the adaptive logic
+        let allCheckpoints = [];
         for(let logic of adaptiveLogic){
             let ret = await this.evaluate(logic);
             // add questions and their times
             curTdfUnit.questions.push(...ret.schedule);
             curTdfUnit.questionTimes.push(...ret.when);
+            // collect checkpoints if any
+            if(ret.checkpoints && ret.checkpoints.length > 0){
+                allCheckpoints.push(...ret.checkpoints);
+            }
+        }
+        // add checkpoints to unit if we have a video session and checkpointBehavior is adaptive
+        if(curTdfUnit.videosession && curTdfUnit.videosession.checkpointBehavior === 'adaptive' && allCheckpoints.length > 0){
+            if(!curTdfUnit.videosession.checkpoints){
+                curTdfUnit.videosession.checkpoints = [];
+            }
+            // merge with existing checkpoints, avoiding duplicates
+            for(const checkpoint of allCheckpoints){
+                const exists = curTdfUnit.videosession.checkpoints.some(existing => 
+                    existing.time === checkpoint.time
+                );
+                if(!exists){
+                    curTdfUnit.videosession.checkpoints.push({time: checkpoint.time});
+                }
+            }
+            // sort checkpoints by time
+            curTdfUnit.videosession.checkpoints.sort((a, b) => a.time - b.time);
         }
         return curTdfUnit;
     }
-    unitBuilder(newUnit, adaptiveQuestionTimes, adaptiveQuestions){
+    unitBuilder(newUnit, adaptiveQuestionTimes, adaptiveQuestions, adaptiveCheckpoints){
         //if newunit is not defined, throw an error
         if(!newUnit){
             alert(`There was an error building the unit. Please contact the administrator`);
@@ -217,6 +259,24 @@ export class AdaptiveQuestionLogic {
                 }
             }
             newUnit.videosession.questiontimes.push(...adaptiveQuestionTimes)
+            
+            // Handle adaptive checkpoints if checkpointBehavior is adaptive
+            if(newUnit.videosession.checkpointBehavior === 'adaptive' && adaptiveCheckpoints && adaptiveCheckpoints.length > 0){
+                if(!newUnit.videosession.checkpoints){
+                    newUnit.videosession.checkpoints = [];
+                }
+                // merge with existing checkpoints, avoiding duplicates
+                for(const checkpoint of adaptiveCheckpoints){
+                    const exists = newUnit.videosession.checkpoints.some(existing => 
+                        existing.time === checkpoint.time
+                    );
+                    if(!exists){
+                        newUnit.videosession.checkpoints.push({time: checkpoint.time});
+                    }
+                }
+                // sort checkpoints by time
+                newUnit.videosession.checkpoints.sort((a, b) => a.time - b.time);
+            }
         }
         //injected the new unit into the session
         return newUnit;
