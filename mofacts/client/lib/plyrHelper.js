@@ -242,14 +242,17 @@ class PlayerController {
     const previousCheckpoint = this.findPreviousCheckpoint(currentTime);
     
     if (previousCheckpoint) {
-      console.log(`Rewinding to previous checkpoint at ${previousCheckpoint.time} seconds`);
+      // Add a small offset (0.1 seconds) to avoid repeating the checkpoint question itself
+      const rewindTime = previousCheckpoint.time + 0.1;
+      console.log(`Rewinding to previous checkpoint at ${previousCheckpoint.time} seconds (adjusted to ${rewindTime} to skip checkpoint question)`);
       
       // If repeatQuestionsSinceCheckpoint is enabled, mark questions for repetition
+      // Use the original checkpoint time for marking questions, but exclude the checkpoint question itself
       if (this.repeatQuestionsSinceCheckpoint) {
-        this.markQuestionsForRepetition(previousCheckpoint.time, currentTime);
+        this.markQuestionsForRepetition(rewindTime, currentTime);
       }
       
-      this.player.currentTime = previousCheckpoint.time;
+      this.player.currentTime = rewindTime;
       // Auto-play after rewind
       if (this.player.paused) {
         this.player.play();
@@ -259,10 +262,10 @@ class PlayerController {
       
       // If repeatQuestionsSinceCheckpoint is enabled, mark all questions for repetition
       if (this.repeatQuestionsSinceCheckpoint) {
-        this.markQuestionsForRepetition(0, currentTime);
+        this.markQuestionsForRepetition(0.1, currentTime); // Small offset from beginning too
       }
       
-      this.player.currentTime = 0;
+      this.player.currentTime = 0.1; // Small offset from beginning to avoid any question at time 0
       if (this.player.paused) {
         this.player.play();
       }
@@ -277,24 +280,26 @@ class PlayerController {
       }
       
       const checkpointTime = this.checkpoints[this.currentCheckpointIndex];
-      this.maxAllowedTime = checkpointTime;
+      // Add small offset to avoid repeating the checkpoint question
+      const rewindTime = checkpointTime + 0.1;
+      this.maxAllowedTime = rewindTime;
       
       // Temporarily allow seeking for rewind
       this.allowSeeking = true;
-      this.player.currentTime = checkpointTime;
+      this.player.currentTime = rewindTime;
       this.allowSeeking = false;
       
       // Reset question state for dynamic scheduling
       this.questioningComplete = false;
       for(let i = 0; i < this.times.length; i++){
-        if(this.times[i] > checkpointTime){
+        if(this.times[i] > rewindTime){
           this.nextTimeIndex = i;
           this.nextTime = this.times[i];
           break;
         }
       }
       
-      console.log(`Rewound to checkpoint ${this.currentCheckpointIndex} at time ${checkpointTime}`);
+      console.log(`Rewound to checkpoint ${this.currentCheckpointIndex} at time ${checkpointTime} (adjusted to ${rewindTime} to skip checkpoint question)`);
       this.logPlyrAction('rewind_to_checkpoint');
     }
     
