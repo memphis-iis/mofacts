@@ -1,10 +1,14 @@
 import Plyr from 'plyr';
 import { newQuestionHandler } from '../views/experiment/card.js'
+import { Session } from 'meteor/session';
 
 export let playerController;
 
 class PlayerController {
   player;
+  currentCheckpointIndex = 0;  
+  maxAllowedTime = 0;         
+  allowSeeking = false;       
 
   lastVolume;
   lastSpeed;
@@ -17,6 +21,15 @@ class PlayerController {
   fullscreenUser = false;
   questioningComplete = false;
 
+  // Checkpoint-related properties
+  preventScrubbing = false;
+  rewindOnIncorrect = false;
+  checkpointBehavior = 'none';
+  repeatQuestionsSinceCheckpoint = false;
+  checkpoints = [];
+  completedQuestions = new Set();
+  questionsToRepeat = [];
+
   times = [];
   questions = [];
 
@@ -25,6 +38,32 @@ class PlayerController {
     this.preventScrubbing = videoSession.preventScrubbing || false;
     this.rewindOnIncorrect = videoSession.rewindOnIncorrect || false;
     this.checkpointBehavior = videoSession.checkpointBehavior || 'none'
+    this.repeatQuestionsSinceCheckpoint = videoSession.repeatQuestionsSinceCheckpoint || false;
+    
+    // Initialize checkpoints based on behavior
+    this.checkpoints = [];
+    this.questionTimes = times || [];
+    this.questions = questions || [];
+    this.currentQuestionIndex = 0;
+    this.completedQuestions = new Set(); // Track which questions have been answered correctly
+    this.questionsToRepeat = []; // Track questions that need to be repeated after rewind
+    
+    if (this.checkpointBehavior === 'all') {
+      // Use all question times as checkpoints
+      this.checkpoints = times.map(time => ({ time }));
+    } else if (this.checkpointBehavior === 'some') {
+      // Use question times where stim has checkpoint:true
+      this.checkpoints = this.buildSelectiveCheckpoints(times, questions);
+    } else if (this.checkpointBehavior === 'adaptive' && videoSession.checkpoints) {
+      // Use adaptively generated checkpoints
+      this.checkpoints = videoSession.checkpoints.slice();
+    }
+    
+    // Always add time 0 as the first checkpoint (beginning of video)
+    if (this.checkpoints.length > 0 && this.checkpoints[0].time !== 0) {
+      this.checkpoints.unshift({ time: 0 });
+    }
+    
     const plyrConfig = {
       markers: { enabled: times.length > 0, points: points }
     };
@@ -48,24 +87,192 @@ class PlayerController {
     this.questions = questions;
     this.lastVolume = this.player.volume;
     this.lastSpeed = this.player.speed;
-
-    this.initializeCheckpoints();
+    this.currentProgressTime = 0;
+    this.startTime = Date.now();
+    this.checkingPoint = false;
+    this.isPlaying = false;
+    this.hasSetSpeed = false;
+    this.totalTime = 0;
+    this.currentQuestionIndex = 0;
   }
 
-  //Checkpoint Helper
-  initializeCheckpoints() {
-    this.checkpoints = [0]; // Always start with time 0
-    this.currentCheckpointIndex = 0;
-    this.maxAllowedTime = 0;
-    this.allowSeeking = false;
+  // Build checkpoints for selective behavior (checkpointBehavior: "some")
+  buildSelectiveCheckpoints(times, questions) {
+    const checkpoints = [];
+    const videoSession = Session.get('currentTdfUnit').videosession;
     
-    if (this.checkpointBehavior === "question" && this.times.length > 0) {
-      this.checkpoints = [0, ...this.times.sort((a, b) => a - b)];
+    // New approach: Use checkpointQuestions array if available
+    if (videoSession.checkpointQuestions && Array.isArray(videoSession.checkpointQuestions)) {
+      videoSession.checkpointQuestions.forEach(questionIndex => {
+        // Convert 1-based question index to 0-based array index
+        const arrayIndex = questionIndex - 1;
+        if (arrayIndex >= 0 && arrayIndex < times.length) {
+          checkpoints.push({ time: times[arrayIndex] });
+        }
+      });
+    } else {
+      // Fallback: Use legacy stims array approach
+      const currentStimuliSet = Session.get('currentStimuliSet') || [];
+      
+      // Check each question time to see if corresponding stim has checkpoint:true
+      times.forEach((time, index) => {
+        if (index < currentStimuliSet.length) {
+          const stim = currentStimuliSet[index];
+          if (stim && stim.checkpoint === true) {
+            checkpoints.push({ time });
+          }
+        }
+      });
+    }
+    
+    return checkpoints;
+  }
+
+  // Find the previous checkpoint before the current time
+  findPreviousCheckpoint(currentTime) {
+    if (this.checkpoints.length === 0) return null;
+    
+    // Find the checkpoint that comes before the current time
+    let previousCheckpoint = null;
+    for (const checkpoint of this.checkpoints) {
+      if (checkpoint.time < currentTime) {
+        previousCheckpoint = checkpoint;
+      } else {
+        break; 
+      }
+    }
+    
+    return previousCheckpoint;
+  }
+
+  // Get the current question index based on time
+  getCurrentQuestionIndex(currentTime) {
+    for (let i = 0; i < this.questionTimes.length; i++) {
+      if (Math.abs(this.questionTimes[i] - currentTime) < 5) { // 5 second tolerance
+        return i;
+      }
+    }
+    return -1; // Not at a question time
+  }
+
+  // Mark questions between checkpoint and current time for repetition
+  markQuestionsForRepetition(checkpointTime, currentTime) {
+    if (!this.repeatQuestionsSinceCheckpoint) return;
+    
+    // Find all questions between checkpoint time and current time
+    const questionsToRepeat = [];
+    for (let i = 0; i < this.questionTimes.length; i++) {
+      const questionTime = this.questionTimes[i];
+      if (questionTime >= checkpointTime && questionTime <= currentTime) {
+        // Only add questions that haven't been completed correctly
+        if (!this.completedQuestions.has(i)) {
+          questionsToRepeat.push({
+            index: i,
+            time: questionTime,
+            question: this.questions[i]
+          });
+        }
+      }
+    }
+    
+    this.questionsToRepeat = questionsToRepeat;
+    console.log(`Marked ${questionsToRepeat.length} questions for repetition:`, questionsToRepeat);
+    
+    // Optionally, schedule these questions to be repeated after the video segment
+    if (questionsToRepeat.length > 0) {
+      this.scheduleQuestionRepetition(questionsToRepeat);
     }
   }
 
+  // Schedule repeated questions (this would integrate with the MoFaCTS question engine)
+  scheduleQuestionRepetition(questionsToRepeat) {
+    // This is a placeholder for integration with the MoFaCTS scheduling system
+    // In practice, this would need to interact with the experiment engine
+    console.log('Scheduling questions for repetition:', questionsToRepeat);
+    
+    // Store the questions to repeat in session for later processing
+    Session.set('questionsToRepeat', questionsToRepeat);
+    
+    // Optionally, show a notification to the user
+    this.showRepetitionNotification(questionsToRepeat.length);
+  }
 
-    rewindToPreviousCheckpoint() {
+  // Show notification about question repetition
+  showRepetitionNotification(count) {
+    console.log(`${count} questions will be repeated after this video segment`);
+    // This could show a UI notification to inform the student
+  }
+
+  // Check if there are questions pending repetition
+  hasPendingRepetitions() {
+    return this.questionsToRepeat && this.questionsToRepeat.length > 0;
+  }
+
+  // Get the next question to repeat
+  getNextRepetitionQuestion() {
+    if (this.questionsToRepeat && this.questionsToRepeat.length > 0) {
+      return this.questionsToRepeat.shift();
+    }
+    return null;
+  }
+
+  // Clear completed repetitions
+  clearCompletedRepetition(questionIndex) {
+    this.completedQuestions.add(questionIndex);
+    console.log(`Question ${questionIndex} completed during repetition`);
+  }
+
+  // Handle question response with enhanced checkpoint logic
+  handleQuestionResponse(isCorrect) {
+    const currentTime = this.player.currentTime;
+    const currentQuestionIndex = this.getCurrentQuestionIndex(currentTime);
+    
+    if (isCorrect) {
+      // Mark this question as completed correctly
+      if (currentQuestionIndex !== -1) {
+        this.completedQuestions.add(currentQuestionIndex);
+      }
+      return; // No rewind needed
+    }
+
+    if (!this.rewindOnIncorrect) {
+      return; // Rewind is disabled
+    }
+
+    const previousCheckpoint = this.findPreviousCheckpoint(currentTime);
+    
+    if (previousCheckpoint) {
+      // Add a small offset (0.1 seconds) to avoid repeating the checkpoint question itself
+      const rewindTime = previousCheckpoint.time + 0.1;
+      console.log(`Rewinding to previous checkpoint at ${previousCheckpoint.time} seconds (adjusted to ${rewindTime} to skip checkpoint question)`);
+      
+      // If repeatQuestionsSinceCheckpoint is enabled, mark questions for repetition
+      // Use the original checkpoint time for marking questions, but exclude the checkpoint question itself
+      if (this.repeatQuestionsSinceCheckpoint) {
+        this.markQuestionsForRepetition(rewindTime, currentTime);
+      }
+      
+      this.player.currentTime = rewindTime;
+      // Auto-play after rewind
+      if (this.player.paused) {
+        this.player.play();
+      }
+    } else {
+      console.log('No previous checkpoint found, rewinding to beginning');
+      
+      // If repeatQuestionsSinceCheckpoint is enabled, mark all questions for repetition
+      if (this.repeatQuestionsSinceCheckpoint) {
+        this.markQuestionsForRepetition(0.1, currentTime); // Small offset from beginning too
+      }
+      
+      this.player.currentTime = 0.1; // Small offset from beginning to avoid any question at time 0
+      if (this.player.paused) {
+        this.player.play();
+      }
+    }
+  } 
+  
+  rewindToPreviousCheckpoint() {
       if (!this.rewindOnIncorrect) return;
       
       if (this.currentCheckpointIndex > 0) {
@@ -73,24 +280,26 @@ class PlayerController {
       }
       
       const checkpointTime = this.checkpoints[this.currentCheckpointIndex];
-      this.maxAllowedTime = checkpointTime;
+      // Add small offset to avoid repeating the checkpoint question
+      const rewindTime = checkpointTime + 0.1;
+      this.maxAllowedTime = rewindTime;
       
       // Temporarily allow seeking for rewind
       this.allowSeeking = true;
-      this.player.currentTime = checkpointTime;
+      this.player.currentTime = rewindTime;
       this.allowSeeking = false;
       
       // Reset question state for dynamic scheduling
       this.questioningComplete = false;
       for(let i = 0; i < this.times.length; i++){
-        if(this.times[i] > checkpointTime){
+        if(this.times[i] > rewindTime){
           this.nextTimeIndex = i;
           this.nextTime = this.times[i];
           break;
         }
       }
       
-      console.log(`Rewound to checkpoint ${this.currentCheckpointIndex} at time ${checkpointTime}`);
+      console.log(`Rewound to checkpoint ${this.currentCheckpointIndex} at time ${checkpointTime} (adjusted to ${rewindTime} to skip checkpoint question)`);
       this.logPlyrAction('rewind_to_checkpoint');
     }
     
@@ -102,27 +311,6 @@ class PlayerController {
       
       console.log(`Advanced to checkpoint ${this.currentCheckpointIndex}`);
       this.logPlyrAction('advance_checkpoint');
-    }
-
-    handleQuestionResponse(isCorrect) {
-        if (isCorrect) {
-          this.handleCorrectAnswer();
-        } else {
-          this.handleIncorrectAnswer();
-        }
-    } 
-    
-    handleIncorrectAnswer() {
-      if (this.rewindOnIncorrect) {
-        this.rewindToPreviousCheckpoint();
-
-        // Brief pause before auto-replay
-        setTimeout(() => {
-          if (!this.player.playing) {
-            this.player.play();
-          }
-        }, 1500);
-      }
     }
 
     handleCorrectAnswer() {
