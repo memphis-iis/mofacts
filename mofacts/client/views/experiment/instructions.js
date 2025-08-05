@@ -6,7 +6,7 @@ import { meteorCallAsync } from '../../index';
 import { _ } from 'core-js';
 import { revisitUnit, getExperimentState } from './card';
 
-export {instructContinue, unitHasLockout, checkForFileImage};
+export {instructContinue, unitHasLockout, checkForFileImage, setupInlineAudioHandlers};
 // //////////////////////////////////////////////////////////////////////////
 // Instruction timer and leaving this page - we don't want to leave a
 // timer running!
