@@ -890,6 +890,14 @@ Template.card.helpers({
     return 'h' + hSize;
   },
 
+  'getFontSizeStyle': function() {
+    const fontsize = Session.get('currentDeliveryParams') && Session.get('currentDeliveryParams').fontsize;
+    if (fontsize) {
+      return 'font-size: ' + fontsize + 'px;';
+    }
+    return '';
+  },
+
   'skipstudy': function() {
     let parms = Session.get('currentDeliveryParams').skipstudy
     if(parms){
