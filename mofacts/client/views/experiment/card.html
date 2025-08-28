@@ -108,7 +108,7 @@
                 <div class="{{UIsettings.displayColWidth}} mx-auto" id="displayContainer">
                     {{#if anythingButAudioCard}}
                         <div class="{{fontSizeClass}} {{#if study}} {{UIsettings.textInputDisplay}} {{/if}} alert alert-bg" id="displaySubContainer">
-                            <p>
+                            <p style="{{getFontSizeStyle}}">
                             {{#if ifClozeDisplayTextExists}}
                                 {{#if textOrClozeCard}}
                                     {{#if subWordClozeCurrentQuestionExists}}
@@ -177,7 +177,7 @@
             {{#if study}}
                 <div class="alert {{UIsettings.displayColWidth}} {{fontSizeClass}} {{UIsettings.textInputDisplay2}} ">
                     {{#if hideResponse}}
-                        <p id="answerLabel" class="answer-display-trial text-center">{{displayAnswer}}</p>
+                        <p id="answerLabel" class="answer-display-trial text-center" style="{{getFontSizeStyle}}">{{displayAnswer}}</p>
                     {{/if}}
                 </div>  <!-- close column -->
             {{/if}}
