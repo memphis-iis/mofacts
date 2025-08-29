@@ -7,184 +7,66 @@
 MoFaCTS is a Meteor.js driven, responsive implementation of the FaCT System
 designed for use by mobile participants.
 - [Documentation Wiki](https://github.com/memphis-iis/mofacts/wiki)
-- [Prerequisites](#prerequisites)
-- [Qucik Start](#quickstart)
-- [License](#license)
+- [Development Setup](#one-time-setup-for-mofacts)
+- [Docker Deployment](#deploying-using-docker)
 
 Please see the docs subdirectory for a complete description of deployment and
 production setup.
 
-Please note - if you are using Windows or you're not comfortable installing,
-maintaining, and using the tools required for meteor development, you can skip
-to the "Using Vagrant" section below
+# One-Time Setup for MoFaCTS
 
-If your development workstation is running Linux or Mac OSX, then you can
-develop and test this application "natively". Just be sure that you've
-installed meteor (see [https://www.meteor.com/](https://www.meteor.com/)).
-You'll probably want to install  MongoDB; that way you can use the handy
-`run_meteor` script in the meteor directory. Assuming that you've accomplished
-the above, setting up and running the application is as simple as opening a
-terminal and running:
+Follow these instructions to get a local copy of Mofacts up and running on your machine.
 
-````
-$ git clone https://github.com/memphis-iis/mofacts.git
-$ cd mofacts/mofacts
-$ ./run_meteor
-````
-# Deploying Using Meteor Up
+### Prerequisites
 
-Meteor Up (mup) can be used as a deployment solution for postgres based MoFACTs. To implement this,
-use the following workflow.
+Before you begin, you will need the following installed:
+* **Node.js**: Version `12.x`
+* **npm**: Version `6.x`
+* **Meteor.js**: Version `1.12`
 
-Open your vagrant development enviorment using the most recent MoFACTs release
-and run the following workflow in the project folder.
+We strongly recommend using **[nvm](https://github.com/nvm-sh/nvm)** (Node Version Manager) to manage your Node.js and npm versions to avoid conflicts.
 
-If you have installed mofacts development enviorment recently, it should already be installed.
+---
 
-## 1 Use an editor to configure MUP
-/.deploy/mup.js
-Edit the host, username, pem authentication path, server feedback location (where the elaborated feedback
-is located on the server, and target IP address.
+### Installation
 
-/.depoloy/settings.json
-Edit the clientId, secrent, owner, admins, teachers, and the feedbackfile (don't change the /feedback/*)
+1.  **Clone the Repository**
+    Clone this repository to your local machine.
+    ```bash
+    git clone https://github.com/memphis-iis/mofacts.git
+    cd mofacts/mofacts/
+    ```
 
-## 2 Install Meteor Up (should be installed after new vagrant enviorments)
-$ npm install -g mup
+2.  **Set Up Node.js Environment**
+    If you are using `nvm`, run the following commands to install and use the correct Node.js version specified in the project's `.nvmrc` file.
+    ```bash
+    nvm install 12
+    nvm use 12
+    ```
 
+3.  **Install Meteor.js**
+    Install the specific version of Meteor required for this project.
+    ```bash
+    curl https://install.meteor.com/\?release\=1.12 | sh
+    ```
 
-## 3 Setup server enviorment
-$ cd .deploy
-$ mup setup
+4.  **Create Configuration File**
+    Create your own settings file by copying the example file. You will need to edit **settings.json** with your local configuration details (e.g., admin/teacher emails, symspell settings, feedback cache locations).
+    ```bash
+    cp example.settings.json settings.json
+    ```
 
-## 4 Deploy to server
-$ mup deploy --verbose
+5.  **Install Dependencies**
+    Install all of the required npm packages.
+    ```bash
+    npm install
+    ```
 
-# Using Vagrant
-
-We maintain a Vagrantfile so that you can use vagrant to run this application
-in a virtual machine. The virtual machine abstracts away the setup steps you
-need to get a testable version of MoFaCTS running, and it allows you to
-continue to use whatever code editors and other tools you like in your current
-operating system. We'll cover the one-time steps you need to perform so that
-you can use vagrant, a one-time setup for this project, and the common
-development activities that you'll want to know about
-
-
-## One-Time Setup for Vagrant
-
-* Install git if you haven't already
-* Install VirtualBox if you haven't already:
-  [https://www.virtualbox.org/wiki/Downloads](https://www.virtualbox.org/wiki/Downloads)
-* Install vagrant if you havent' already:
-  [https://www.vagrantup.com/downloads.html](https://www.vagrantup.com/downloads.html)
-
-
-## One-Time Setup for MoFaCTS
-
-Now that you have vagrant and virtual box installed, you need to get MoFaCTS
-set up for development. If you haven't already, you need to clone the code
-repository. From your command prompt, clone the repository and then enter the
-new directory:
-
-````
-$ git clone https://github.com/memphis-iis/mofacts.git
-$ cd mofacts
-````
-
-Now you're ready to use vagrant to set up your development environment. First,
-we'll ask vagrant to download a "box"; this is a "base" image that we use as a
-starting point. Assuming that you're in the mofacts directory that we cloned
-above:
-
-````
-$ vagrant box add ubuntu/bionic64
-````
-
-This will download a virtual machine image. ***WARNING:*** this may take a
-while if you haven't already downloaded the machine image. If for
-some reason it should fail (which may happen if you have an intermittent
-internet connection), you can just repeat the command.
-
-***Note:*** this is an optional step. If you skip it, the `vagrant up` command
-we describe below will automatically download the machine image.
-
-Now we will have vagrant configure and start the virtual machine. Again, from
-the directory you created above:
-
-````
-$ vagrant up
-````
-
-This will start the virtual machine. Since this is the first time you've
-actually started it, a provisioning scripting will run. This script will take
-some time since it will doing a variety of things, including downloading and
-installing software. If this step fails, the safest way to restart is to
-delete the virtual machine and start over:
-
-````
-$ vagrant destroy
-$ vagrant up
-````
-
-Note that you can also re-initialize your virtual machine to it "original"
-state this way if you want to discard any changes you've made to the virtual
-machine's environment.
-
-You're ready to begin development after the command completes.
-
-## Typical Startup for MoFaCTS Development
-
-Typically, you want to change files inside the MoFaCTS project, then run the
-application and test your changes. When using vagrant, you first open a command
-prompt (or terminal), navigate to the mofacts directory, and use vagrant to
-run your virtual machine:
-
-````
-$ cd mofacts
-$ vagrant up
-````
-
-***HINT:*** This should look familiar - `vagrant up` was the final setup step
-we used in our one-time setup above. It should run much faster now since
-you've already created and provisioned the virtual machine.
-
-Once the virtual machine starts up, you can connect to it and run code.
-Assuming that you're still in the same command prompt that you opened above:
-
-````
-$ vagrant ssh
-````
-
-If you have a problem (on Windows), you might need to add ssh to path
-manually. In that case, you should be able to find a copy of ssh in your
-git/bin directory.
-
-The command prompt should look different now: you are at a shell prompt in the
-virtual machine. Since vagrant shares the mofacts repository with the VM, you
-can just `cd` into it to start the application. We've provided a handy script
-to force the application to use the "real" MongoDB server in the VM (and
-perform some other changes that make development on a Windows machine easier):
-
-````
-$ cd mofacts/mofacts
-$ ./run_meteor
-````
-
-Ports for the application and MongoDB are already shared. Once meteor reports
-that your application is running (after you've run `./run_meteor` as above),
-you can connect from your native operating system at
-[http://localhost:3000/](http://localhost:3000/)
-
-You can also connect to the MongoDB instance with your tool of choice (for
-instance, Robomongo) on your native operating system connecting to `localhost`
-at port `30017`. Note that inside the virtual machine, the port for MongoDB is
-the default `27017`.
-
-As implied above, the general idea is that you edit source code, look at data,
-test the application, commit code to the repository, etc. in your native
-operating system. The vagrant-controlled virtual machine is where you run
-the project in a suitable environment for testing.
+6.  **Run the Application**
+    You can now start the Meteor development server.
+    ```bash
+    meteor run --settings settings.json
+    ```
 
 ## Testing
 To run both server and client tests* in Vagrant, use
@@ -284,3 +166,116 @@ Then simply run meteor as normal with
 * MoFaCTs must be built for Linux 64-bit architecture (`os.linux.x86_64`) _without_ Node being installed on the
   vagrant host machine. With Node host conflicts or the wrong architecture specified, a `unexpected token { const pause ...`
   error can be seen at build time.
+
+
+# Deploying Using Docker
+
+You can deploy MoFaCTS and its dependencies easily using Docker Compose.
+
+## 1. Prerequisites
+
+- [Docker](https://docs.docker.com/get-docker/) and [Docker Compose](https://docs.docker.com/compose/) installed on your system.
+- A valid `settings.json` file and any required assets in a directory (e.g., `/mofactsAssets`).
+
+## 2. Configuration
+
+- Place your `settings.json` and any other required files in a directory on your host (e.g., `/mofactsAssets`).
+- Edit the `docker-compose.yml` file if you need to change asset or data locations.
+
+## 3. Start the Services
+
+From the directory containing your `docker-compose.yml` file, run:
+
+```bash
+docker compose up -d
+```
+
+This will start:
+- MoFaCTS (using the prebuilt image `iisdevs/mofacts-mini:main`)
+- MongoDB (data persisted in a Docker volume)
+- Syllables service (using `iisdevs/mofacts-syllables`)
+
+## 4. Access the Application
+
+- The MoFaCTS app will be available at [http://localhost:3000](http://localhost:3000).
+- The syllables service will be available at port 4567 if needed.
+
+## 5. Stopping and Removing the Services
+
+To stop the services:
+
+```bash
+docker compose down
+```
+
+This will stop and remove the containers, but the MongoDB data will persist in the named Docker volume.
+
+## 6. Notes
+
+- The `MONGO_URL` and other environment variables are set automatically in the compose file.
+- For production, you may want to adjust resource limits or use external MongoDB.
+- To update to the latest image, run `docker compose pull` before starting.
+- If you want to use a different image tag (e.g., `staging`), edit the `image:` line in the compose file.
+
+---
+
+### Example `docker-compose.yml`
+
+```yaml
+version: '3.2'
+
+services:
+    mofacts:
+        image: iisdevs/mofacts-mini:main
+        volumes:
+            - type: bind
+                source: /mofactsAssets
+                target: /mofactsAssets
+                bind:
+                    propagation: shared
+        build:
+            context: ../../
+            dockerfile: Dockerfile
+        ports:
+            - '3000:3000'
+        depends_on:
+            - mongo
+            - syllables
+        environment:
+            ROOT_URL: ${APP_ROOT_URL:-http://localhost}
+            MONGO_URL: mongodb://mongo:27017/MoFACT
+            PORT: 3000
+            METEOR_SETTINGS_WORKAROUND: '/mofactsAssets/settings.json'
+        deploy:
+            restart_policy:
+                condition: on-failure
+                delay: 5s
+                max_attempts: 3
+                window: 120s
+            resources:
+                limits:
+                    cpus: '0.5'
+                    memory: 512M
+                reservations:
+                    cpus: '0.25'
+                    memory: 256M
+
+    mongo:
+        image: mongo:latest
+        command:
+            - --storageEngine=wiredTiger
+        volumes:
+            - data:/data/db
+
+    syllables:
+        image: iisdevs/mofacts-syllables
+        build:
+            context: ../../syllables_subsystem
+            dockerfile: Dockerfile
+        ports:
+            - '4567:4567'
+
+
+volumes:
+    data:
+```
