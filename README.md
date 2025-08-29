@@ -1,7 +1,3 @@
-# Latest DOI (IES_Fall_2019 Release)
-
-[![DOI](https://zenodo.org/badge/202790770.svg)](https://zenodo.org/badge/latestdoi/202790770)
-
 # MoFaCTS README
 
 MoFaCTS is a Meteor.js driven, responsive implementation of the FaCT System
@@ -68,15 +64,7 @@ We strongly recommend using **[nvm](https://github.com/nvm-sh/nvm)** (Node Versi
     meteor run --settings settings.json
     ```
 
-## Testing
-To run both server and client tests* in Vagrant, use
-
-```
-TEST_WATCH=1 ./run_meteor test --driver-package meteortesting:mocha --settings ./settings.json --allow-incompatible-update
-```
-*The `--full-app` option may be used for integration testing.
-
-## Deploying Using Docker
+## Deploying Using Docker (Server Deployment)
 
 You can deploy MoFaCTS and its dependencies easily using Docker Compose.
 
@@ -187,3 +175,7 @@ services:
 volumes:
     data:
 ```
+
+### Latest DOI (IES_Fall_2019 Release)
+
+[![DOI](https://zenodo.org/badge/202790770.svg)](https://zenodo.org/badge/latestdoi/202790770)
