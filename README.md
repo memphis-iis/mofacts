@@ -13,7 +13,7 @@ designed for use by mobile participants.
 Please see the docs subdirectory for a complete description of deployment and
 production setup.
 
-# One-Time Setup for MoFaCTS
+## One-Time Setup for MoFaCTS
 
 Follow these instructions to get a local copy of Mofacts up and running on your machine.
 
@@ -76,99 +76,7 @@ TEST_WATCH=1 ./run_meteor test --driver-package meteortesting:mocha --settings .
 ```
 *The `--full-app` option may be used for integration testing.
 
-## When you're done with development
-
-Once you've reached a stopping point, you should shut down your environment
-cleanly. If you still have mofacts running, stop it with CTRL+C. Then you can
-exit the SSH session by entering `exit` at the command prompt in the virtual
-machine. After you exit, you should be back in your native OS environment
-where you originally entered `vagrant ssh`. From here you can stop the virtual
-machine:
-
-````
-$ vagrant halt
-````
-
-This is fine for the end of a development session, but if you want to remove
-the virtual machine from your computer you can delete it:
-
-````
-$ vagrant destroy
-````
-
-This is a low risk activity, since you can always run `vagrant up` to recreate
-the virtual machine for you.
-
-## Notes on Upgrading from Meteor 1.8.3 releases to Meteor 1.12 releases
-
-There are two options to upgrade meteor to fix the issue of expired certificates, depending individual cases.
-
-### Destroy vagrant environment and re-provision and use the latest branch that is compatible with 1.12
-    
-    -vagrant destroy, pull 1.12 branch, vagrant up
-
-### Update your environment to run node 12 and meteor 1.12:
-    
-    -Must install nodejs 12.x
-        curl -sL https://deb.nodesource.com/setup_12.x | sudo bash -
-        sudo apt install -y nodejs        
-    
-    -Must install meteor 1.12
-        curl https://install.meteor.com/?release=1.12 | sh
-
-    -update npm packages and upgrade incompatible package
-        sudo rm -rf package-lock.json node_modules
-        sudo npm cache clean --force
-        sudo npm i --unsafe-perm node-sass
-        NODE_TLS_REJECT_UNAUTHORIZED=0 meteor remove fourseven:scss
-        NODE_TLS_REJECT_UNAUTHORIZED=0 meteor add fourseven:scss@4.12.0
-        
-    -**if using an old branch** manually upgrade mofacts to 1.12 
-        meteor update --release 1.12
-        
-      
-
-## FAQs
-
-### Question
-
-I'm encountering the following error when trying to run meteor:
-````
-vagrant@vagrant-ubuntu-trusty-64:~/mofacts/mofacts$ ./run_meteor
--bash: ./run_meteor: /bin/bash^M: bad interpreter: No such file or directory
-````
-
-### Solution
-
-This is an error due to the run_meteor file's line endings being converted to windows line endings and not linux line endings.  To fix it simply run the following commands inside the vagrant vm:
-
-````
-sudo apt-get install dos2unix
-dos2unix run_meteor
-````
-
-Then simply run meteor as normal with
-
-````
-./run_meteor
-````
-
-## Caveats
-
-* Older versions of Firefox that don't support HTML5 Web Audio are not compatible with MoFaCTs. This incompatibility
-  is usually indicated by a "speechSynthesis is not defined or supported" error in the console.
-
-* Server deployments should be performed as the root user, e.g. `sudo ./deploy.sh`. Failing to do this will cause a build
-  error relating to the _fibers_ package.
-
-* MoFaCTs runs on Node 8.x. Older versions of Node will throw a libstdc++.so.6 at build time.
-
-* MoFaCTs must be built for Linux 64-bit architecture (`os.linux.x86_64`) _without_ Node being installed on the
-  vagrant host machine. With Node host conflicts or the wrong architecture specified, a `unexpected token { const pause ...`
-  error can be seen at build time.
-
-
-# Deploying Using Docker
+## Deploying Using Docker
 
 You can deploy MoFaCTS and its dependencies easily using Docker Compose.
 
