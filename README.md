@@ -4,12 +4,13 @@ MoFaCTS is a Meteor.js driven, responsive implementation of the FaCT System
 designed for use by mobile participants.
 - [Documentation Wiki](https://github.com/memphis-iis/mofacts/wiki)
 - [Development Setup](#one-time-setup-for-mofacts)
-- [Docker Deployment](#deploying-using-docker)
+- [Docker Deployment](#Deploying-Using-Docker)
 
 Please see the docs subdirectory for a complete description of deployment and
 production setup.
 
 ## One-Time Setup for MoFaCTS
+### Development Setup
 
 Follow these instructions to get a local copy of Mofacts up and running on your machine.
 
@@ -64,7 +65,8 @@ We strongly recommend using **[nvm](https://github.com/nvm-sh/nvm)** (Node Versi
     meteor run --settings settings.json
     ```
 
-## Deploying Using Docker (Server Deployment)
+## Deploying Using Docker 
+### Server Deployment
 
 You can deploy MoFaCTS and its dependencies easily using Docker Compose.
 
