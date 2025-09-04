@@ -1465,7 +1465,7 @@ function handleUserInput(e, source, simAnswerCorrect) {
     } else {
       userAnswer = e.currentTarget.name;
     }
-  } else if (source="confirmButton"){
+  } else if (source === "confirmButton"){
     userAnswer = $('.btn-secondary')[0].name;
   } else if (source === 'simulation') {
     userAnswer = simAnswerCorrect ? 'SIM: Correct Answer' : 'SIM: Wrong Answer';
@@ -3182,7 +3182,9 @@ function speechAPICallback(err, data){
       if (inUserForceCorrect) {
         handleUserForceCorrectInput({}, 'voice');
       } else {
-        handleUserInput({}, 'voice');
+        handleUserInput({
+          answer: userAnswer
+        }, 'voice');
       }
     }
   }
