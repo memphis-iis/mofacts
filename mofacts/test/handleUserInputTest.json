@@ -1,0 +1,58 @@
+{
+  "testName": "Stimuli Box Color Test",
+  "description": "Test the stimuliBoxColor functionality with different inputs",
+  "testCases": [
+    {
+      "description": "Bootstrap alert class",
+      "input": {
+        "uiSettings": {
+          "showStimuliBox": true,
+          "stimuliBoxColor": "alert-primary"
+        }
+      },
+      "expectedOutput": {
+        "classes": "alert alert-primary",
+        "style": ""
+      }
+    },
+    {
+      "description": "Custom hex color",
+      "input": {
+        "uiSettings": {
+          "showStimuliBox": true,
+          "stimuliBoxColor": "#ff0000"
+        }
+      },
+      "expectedOutput": {
+        "classes": "alert alert-bg",
+        "style": "background-color: #ff0000 !important;"
+      }
+    },
+    {
+      "description": "Custom color name",
+      "input": {
+        "uiSettings": {
+          "showStimuliBox": true,
+          "stimuliBoxColor": "red"
+        }
+      },
+      "expectedOutput": {
+        "classes": "alert alert-bg",
+        "style": "background-color: red !important;"
+      }
+    },
+    {
+      "description": "Disabled box",
+      "input": {
+        "uiSettings": {
+          "showStimuliBox": false,
+          "stimuliBoxColor": "alert-primary"
+        }
+      },
+      "expectedOutput": {
+        "classes": "alert alert-transparent",
+        "style": ""
+      }
+    }
+  ]
+}

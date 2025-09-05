@@ -540,3 +540,10 @@ p.admin-info-p {
     outline: 2px solid #007bff;
     outline-offset: 1px;
 }
+
+/* Transparent alert for stimuli box when disabled */
+.alert-transparent {
+    background-color: transparent !important;
+    border: none !important;
+    color: inherit !important;
+}
