@@ -114,3 +114,10 @@ input{
     outline: 2px solid #7ed957;
     outline-offset: 1px;
 }
+
+/* Transparent alert for stimuli box when disabled */
+.alert-transparent {
+    background-color: transparent !important;
+    border: none !important;
+    color: inherit !important;
+}

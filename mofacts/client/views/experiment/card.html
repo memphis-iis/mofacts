@@ -107,7 +107,7 @@
                 {{#if trial}}
                 <div class="{{UIsettings.displayColWidth}} mx-auto" id="displayContainer">
                     {{#if anythingButAudioCard}}
-                        <div class="{{fontSizeClass}} {{#if study}} {{UIsettings.textInputDisplay}} {{/if}} alert {{#if UIsettings.showStimuliBox}}{{#if UIsettings.stimuliBoxColor}}{{UIsettings.stimuliBoxColor}}{{else}}alert-bg{{/if}}{{else}}alert-transparent{{/if}}" id="displaySubContainer">
+                        <div class="{{fontSizeClass}} {{#if study}} {{UIsettings.textInputDisplay}} {{/if}} {{stimuliBoxClasses}}" style="{{stimuliBoxStyle}}" id="displaySubContainer">
                             <p style="{{getFontSizeStyle}}">
                             {{#if ifClozeDisplayTextExists}}
                                 {{#if textOrClozeCard}}

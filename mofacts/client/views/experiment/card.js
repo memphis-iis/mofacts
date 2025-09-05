@@ -983,6 +983,37 @@ Template.card.helpers({
   },
   'UIsettings': () => Session.get('curTdfUISettings'),
 
+  'stimuliBoxClasses': function() {
+    const uiSettings = Session.get('curTdfUISettings');
+    if (!uiSettings.showStimuliBox) {
+      return 'alert alert-transparent';
+    }
+    
+    const baseClasses = 'alert';
+    const colorValue = uiSettings.stimuliBoxColor || 'alert-bg';
+    
+    if (colorValue.startsWith('alert-')) {
+      return baseClasses + ' ' + colorValue;
+    } else {
+      return baseClasses + ' alert-bg';
+    }
+  },
+
+  'stimuliBoxStyle': function() {
+    const uiSettings = Session.get('curTdfUISettings');
+    if (!uiSettings.showStimuliBox) {
+      return '';
+    }
+    
+    const colorValue = uiSettings.stimuliBoxColor || 'alert-bg';
+    
+    if (!colorValue.startsWith('alert-')) {
+      return 'background-color: ' + colorValue + ' !important;';
+    }
+    
+    return '';
+  },
+
   'allowGoBack': function() {
     //check if this is allowed
     if(Session.get('currentDeliveryParams').allowRevistUnit || Session.get('currentTdfFile').tdfs.tutor.setspec.allowRevistUnit){
@@ -3670,7 +3701,7 @@ async function resumeFromComponentState() {
       'skipStudyButtonText': "Skip",
       'inputPlaceholderText': "Type your answer here...",
       'showStimuliBox': true,
-      'stimuliBoxColor': 'alert-bg',
+      'stimuliBoxColor': 'alert-bg', // Can be Bootstrap class (alert-primary) or color (#ff0000, red, etc.)
     },
   }
   //here we interprit the stimulus and input position settings to set the colum widths. There are 4 possible combinations.
