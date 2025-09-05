@@ -3669,6 +3669,8 @@ async function resumeFromComponentState() {
       'lastVideoModalText': "This is the last video, do not progress unless finished with this lesson.",
       'skipStudyButtonText': "Skip",
       'inputPlaceholderText': "Type your answer here...",
+      'showStimuliBox': true,
+      'stimuliBoxColor': 'alert-bg',
     },
   }
   //here we interprit the stimulus and input position settings to set the colum widths. There are 4 possible combinations.

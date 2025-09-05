@@ -107,7 +107,7 @@
                 {{#if trial}}
                 <div class="{{UIsettings.displayColWidth}} mx-auto" id="displayContainer">
                     {{#if anythingButAudioCard}}
-                        <div class="{{fontSizeClass}} {{#if study}} {{UIsettings.textInputDisplay}} {{/if}} alert alert-bg" id="displaySubContainer">
+                        <div class="{{fontSizeClass}} {{#if study}} {{UIsettings.textInputDisplay}} {{/if}} alert {{#if UIsettings.showStimuliBox}}{{#if UIsettings.stimuliBoxColor}}{{UIsettings.stimuliBoxColor}}{{else}}alert-bg{{/if}}{{else}}alert-transparent{{/if}}" id="displaySubContainer">
                             <p style="{{getFontSizeStyle}}">
                             {{#if ifClozeDisplayTextExists}}
                                 {{#if textOrClozeCard}}
@@ -120,21 +120,19 @@
                                 {{/if}}
                             {{/if}}
                             </p>
-                        </div> 
-                        {{#if imageCard}}
-                        <div class="h2 vh-50" id="imageDisplay">
-            
-                                <div class="w-100  imgDisplay-container text-center" style="background-image: url({{curImgSrc}}) ;">
+                            {{#if imageCard}}
+                            <div class="h2 vh-50" id="imageDisplay">
+                                <div class="w-100 imgDisplay-container text-center" style="background-image: url({{curImgSrc}}) ;">
                                 </div>
                                 <br>
-                        </div>
-                        {{/if}}
-                        {{#if videoCard}}
-                            <video autoplay="">
-                                <source src="{{curVideoSrc}}">
-                                Your browser does not support the video tag.
-                            </video>
-                        {{/if}}
+                            </div>
+                            {{/if}}
+                            {{#if videoCard}}
+                                <video autoplay="">
+                                    <source src="{{curVideoSrc}}">
+                                    Your browser does not support the video tag.
+                                </video>
+                            {{/if}}
                     {{/if}}
                     {{#if audioCard}}
                         
