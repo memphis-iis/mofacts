@@ -713,40 +713,23 @@ export async function initializePlyr() {
       points.push({time: Math.floor(time), label: 'Question ' + (times.indexOf(time) + 1)});
     });
   }
-  playerController = new PlayerController('#videoUnitPlayer', times, questions, points);
-  //set the source of the video to the new video
-  source = Session.get('currentTdfUnit').videosession.videosource;
-  //check if its a youtube or shortened youtube link
-  if(source.includes('youtu')){
-    //check if youtube link is shortened
-    if(source.includes('youtu.be')){
-      source = source.split('youtu.be/')[1];
-    } else {
-      source = source.split('v=')[1]
-      source = source.split('&')[0];
-    }   
-    playerController.player.source = {
-      type: 'video',
-      sources: [
-        {
-          src: 'https://www.youtube.com/watch?v=' + source,
-          provider: 'youtube',
-        },
-      ],
-    };
-  } else {
-    //html5 video
+  waitForElm('#videoUnitPlayer').then(() => {
+    playerController = new PlayerController('#videoUnitPlayer', times, questions, points);
+
+    //set the source of the video to the new video
+    source = Session.get('currentTdfUnit').videosession.videosource;
     playerController.player.source = {
       type: 'video',
       sources: [
         {
           src: source,
-          type: 'video/mp4',
+          provider: source.includes('youtu') ? 'youtube': 'video/mp4',
         },
       ],
     };
-  }
-  playerController.initVideoCards();
+    
+    playerController.initVideoCards();
+  })
 }
 
 export async function destroyPlyr() {
