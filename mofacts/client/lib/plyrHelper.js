@@ -69,18 +69,9 @@ class PlayerController {
     };
     // If scrubbing is prevented, modify controls
     if (this.preventScrubbing) {
-      plyrConfig.controls = [
-        'play-large', 
-        'play', 
-        'current-time', 
-        'mute', 
-        'volume', 
-        'fullscreen'
-      ];
       // Disable seeking and keyboard controls
       plyrConfig.seekTime = 0;
       plyrConfig.keyboard = { focused: false, global: false };
-      plyrConfig.clickToPlay = false;
     }
     this.player = new Plyr(playerElement, plyrConfig);
     this.times = times;
@@ -340,22 +331,14 @@ class PlayerController {
     
       this.player.on('ended', () => this.endPlayback());
 
-      if (this.preventScrubbing) {
-        this.player.on('seeking', (event) => {
-          if (!this.allowSeeking) {
-            const targetTime = this.player.currentTime;
-            if (targetTime > this.maxAllowedTime) {
-              event.preventDefault();
-              this.player.currentTime = this.maxAllowedTime;
-              this.logPlyrAction('seek_blocked');
-            }
-          }
-        });
-      }
-    
-      waitForElm("[id*='plyr-seek']").then((elm) => elm.addEventListener("mouseup", stopSeeking));
-    
-      waitForElm("[id*='plyr-seek']").then((elm) => elm.addEventListener("mousedown", startSeeking));
+      waitForElm("[id*='plyr-seek']").then((elm) => {
+        if (this.preventScrubbing) {
+          elm.style.setProperty("pointer-events", "none")
+        } else {
+          elm.addEventListener("mouseup", stopSeeking)
+          elm.addEventListener("mousedown", startSeeking)
+        }
+      });
       
       this.playVideo();
     })
