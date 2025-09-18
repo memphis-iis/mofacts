@@ -403,7 +403,7 @@ function getCurrentDeliveryParams() {
     'correctprompt': 0,
     'skipstudy': false,
     'lockoutminutes': 0,
-    'fontsize': 3,
+    'fontsize': 24,
     'numButtonListImageColumns': 2,
     'correctscore': 1,
     'incorrectscore': 0,
