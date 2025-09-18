@@ -7,55 +7,30 @@
             </div>
         </div>
         <div class="container position-relative">
-            {{#if isYoutubeVideo}}
-                <div id="videoUnitContainer" class="z-0 w-100">
-                    <div id="videoUnitPlayer" data-plyr-provider="youtube" data-plyr-embed-id="{{videoId}}"></div>
-                    </div> 
-                    <div class="row">
-                        <dov class="col-6 offset-3">
-                            <div id="continueBar" hidden style="text-align: center; padding: 20px">
-                                <button type="button" id="continueButton" class="btn text-center">
-                                    {{UIsettings.continueButtonText}}
-                                </button>
-                            </div> 
-                        </dov>
-                        {{#if allowGoBack}}
-                        <div class="col-1 offset-2">
-                            <div id="goBackBar" style="text-align: center; padding: 20px">
-                                <button type="button" id="stepBackButton" class="btn text-center">
-                                    <!-- back icon -->
-                                    <i class="fa fa-arrow-left" aria-hidden="true"></i>
-                                </button>
-                            </div> 
-                        </div>
-                        {{/if}}
-                </div>
-            {{else}}
-                <div id="videoUnitContainer" class="position-absolute z-0 w-100">
-                    <video id="videoUnitPlayer" playsinline controls>
-                        <source src="{{videoSource}}" type="video/mp4" />
-                    </video>
-                    <div class="row">
-                        <dov class="col-6 offset-3">
-                            <div id="continueBar" hidden style="text-align: center; padding: 20px">
-                                <button type="button" id="continueButton" class="btn text-center">
-                                    {{UIsettings.continueButtonText}}
-                                </button>
-                            </div> 
-                        </dov>
-                        {{#if allowGoBack}}
-                        <div class="col-1 offset-2">
-                            <div id="goBackBar" style="text-align: center; padding: 20px">
-                                <button type="button" id="stepBackButton" class="btn text-center">
-                                    <!-- back icon -->
-                                    <i class="fa fa-arrow-left" aria-hidden="true"></i>
-                                </button>
-                            </div> 
-                        </div>
-                        {{/if}}
-                    </div> 
-                </div>
-            {{/if}}
+            <div id="videoUnitContainer" class="position-absolute z-0 w-100">
+                <video id="videoUnitPlayer" playsinline controls>
+                    <!-- <source src="{{videoSource}}" type="video/mp4" /> -->
+                </video>
+                <div class="row">
+                    <dov class="col-6 offset-3">
+                        <div id="continueBar" hidden style="text-align: center; padding: 20px">
+                            <button type="button" id="continueButton" class="btn text-center">
+                                {{UIsettings.continueButtonText}}
+                            </button>
+                        </div> 
+                    </dov>
+                    {{#if allowGoBack}}
+                    <div class="col-1 offset-2">
+                        <div id="goBackBar" style="text-align: center; padding: 20px">
+                            <button type="button" id="stepBackButton" class="btn text-center">
+                                <!-- back icon -->
+                                <i class="fa fa-arrow-left" aria-hidden="true"></i>
+                            </button>
+                        </div> 
+                    </div>
+                    {{/if}}
+                </div> 
+            </div>
         </div>
         {{#if isVideoSession}}
         {{else}}

@@ -844,12 +844,10 @@ Template.card.helpers({
 
   'videoId': function() {
     return Session.get('videoSource')
-    }
   },
 
   'videoSource': function() {
-    if(Session.get('isVideoSession') && Session.get('videoSource'))
-      return Session.get('videoSource')
+    return Session.get('isVideoSession') && Session.get('videoSource') ? Session.get('videoSource') : '';
   },
 
   'test': function() {
