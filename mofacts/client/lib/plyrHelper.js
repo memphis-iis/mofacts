@@ -131,11 +131,11 @@ class PlayerController {
   // Find the previous checkpoint before the current time
   findPreviousCheckpoint(currentTime) {
     if (this.checkpoints.length === 0) return null;
-    
+    const currentTimeFloor = Math.floor(currentTime)
     // Find the checkpoint that comes before the current time
     let previousCheckpoint = null;
     for (const checkpoint of this.checkpoints) {
-      if (checkpoint.time < currentTime) {
+      if (checkpoint.time < currentTimeFloor) {
         previousCheckpoint = checkpoint;
       } else {
         break; 
@@ -253,10 +253,6 @@ class PlayerController {
       }
       
       this.player.currentTime = rewindTime;
-      // Auto-play after rewind
-      if (this.player.paused) {
-        this.player.play();
-      }
     } else {
       console.log('No previous checkpoint found, rewinding to beginning');
       
@@ -266,9 +262,6 @@ class PlayerController {
       }
       
       this.player.currentTime = 0.1; // Small offset from beginning to avoid any question at time 0
-      if (this.player.paused) {
-        this.player.play();
-      }
     }
   } 
   
@@ -317,53 +310,55 @@ class PlayerController {
       this.advanceToNextCheckpoint();
   }
   // Initialize video cards and set up event listeners
-  async initVideoCards() {
-    this.questions = Session.get('currentTdfUnit').videosession.questions;
-    this.times.sort((a, b) => a - b);
-    if(this.nextTimeIndex < this.times.length){
-      this.nextTime = this.times[this.nextTimeIndex];
-      let nextQuestion = this.questions[this.nextTimeIndex];
-      let indices = {stimIndex: 0, clusterIndex: nextQuestion}
-      await engine.selectNextCard(indices, Session.get('currentExperimentState'));
-      await newQuestionHandler();
-    }
+  initVideoCards() {
+    this.player.on('ready', async (event) => {
+      this.questions = Session.get('currentTdfUnit').videosession.questions;
+      this.times.sort((a, b) => a - b);
+      if(this.nextTimeIndex < this.times.length){
+        this.nextTime = this.times[this.nextTimeIndex];
+        let nextQuestion = this.questions[this.nextTimeIndex];
+        let indices = {stimIndex: 0, clusterIndex: nextQuestion}
+        await engine.selectNextCard(indices, Session.get('currentExperimentState'));
+        await newQuestionHandler();
+      }
 
-    //if this is not the furthest unit the student has reached, display the continue button
-    if(Session.get('currentUnitNumber') < Session.get('currentExperimentState').lastUnitStarted){
-      $("#continueBar").removeAttr('hidden');
-      $('#continueButton').prop('disabled', false);
-    }
-  
-    this.player.on('timeupdate', () => this.timeUpdate());
-  
-    this.player.on('pause', () => this.logPlyrAction('pause'));
-  
-    this.player.on('play', () => this.logPlyrAction('play'));
-  
-    this.player.on('volumechange', () => this.logPlyrAction('volumechange'));
-  
-    this.player.on('ratechange', () => this.logPlyrAction('ratechange'));
-  
-    this.player.on('ended', () => this.endPlayback());
+      //if this is not the furthest unit the student has reached, display the continue button
+      if(Session.get('currentUnitNumber') < Session.get('currentExperimentState').lastUnitStarted){
+        $("#continueBar").removeAttr('hidden');
+        $('#continueButton').prop('disabled', false);
+      }
+    
+      this.player.on('timeupdate', () => this.timeUpdate());
+    
+      this.player.on('pause', () => this.logPlyrAction('pause'));
+    
+      this.player.on('play', () => this.logPlyrAction('play'));
+    
+      this.player.on('volumechange', () => this.logPlyrAction('volumechange'));
+    
+      this.player.on('ratechange', () => this.logPlyrAction('ratechange'));
+    
+      this.player.on('ended', () => this.endPlayback());
 
-    if (this.preventScrubbing) {
-      this.player.on('seeking', (event) => {
-        if (!this.allowSeeking) {
-          const targetTime = this.player.currentTime;
-          if (targetTime > this.maxAllowedTime) {
-            event.preventDefault();
-            this.player.currentTime = this.maxAllowedTime;
-            this.logPlyrAction('seek_blocked');
+      if (this.preventScrubbing) {
+        this.player.on('seeking', (event) => {
+          if (!this.allowSeeking) {
+            const targetTime = this.player.currentTime;
+            if (targetTime > this.maxAllowedTime) {
+              event.preventDefault();
+              this.player.currentTime = this.maxAllowedTime;
+              this.logPlyrAction('seek_blocked');
+            }
           }
-        }
-      });
-    }
-  
-    waitForElm("[id*='plyr-seek']").then((elm) => elm.addEventListener("mouseup", stopSeeking));
-  
-    waitForElm("[id*='plyr-seek']").then((elm) => elm.addEventListener("mousedown", startSeeking));
-
-    this.playVideo();
+        });
+      }
+    
+      waitForElm("[id*='plyr-seek']").then((elm) => elm.addEventListener("mouseup", stopSeeking));
+    
+      waitForElm("[id*='plyr-seek']").then((elm) => elm.addEventListener("mousedown", startSeeking));
+      
+      this.playVideo();
+    })
   }
 
   async setNextTime(time, index){
@@ -578,7 +573,9 @@ class PlayerController {
       await engine.selectNextCard(Session.get('engineIndices'), Session.get('currentExperimentState'));
       await newQuestionHandler();
     }
-    this.playVideo();
+    waitForElmRemoved("[id*='displayContainer']").then(() => {
+      this.playVideo()
+    });
   }
 
   addStimToSchedule(curTdfUnit){
@@ -713,40 +710,23 @@ export async function initializePlyr() {
       points.push({time: Math.floor(time), label: 'Question ' + (times.indexOf(time) + 1)});
     });
   }
-  playerController = new PlayerController('#videoUnitPlayer', times, questions, points);
-  //set the source of the video to the new video
-  source = Session.get('currentTdfUnit').videosession.videosource;
-  //check if its a youtube or shortened youtube link
-  if(source.includes('youtu')){
-    //check if youtube link is shortened
-    if(source.includes('youtu.be')){
-      source = source.split('youtu.be/')[1];
-    } else {
-      source = source.split('v=')[1]
-      source = source.split('&')[0];
-    }   
-    playerController.player.source = {
-      type: 'video',
-      sources: [
-        {
-          src: 'https://www.youtube.com/watch?v=' + source,
-          provider: 'youtube',
-        },
-      ],
-    };
-  } else {
-    //html5 video
+  waitForElm('#videoUnitPlayer').then(() => {
+    playerController = new PlayerController('#videoUnitPlayer', times, questions, points);
+
+    //set the source of the video to the new video
+    source = Session.get('currentTdfUnit').videosession.videosource;
     playerController.player.source = {
       type: 'video',
       sources: [
         {
           src: source,
-          type: 'video/mp4',
+          provider: source.includes('youtu') ? 'youtube': 'video/mp4',
         },
       ],
     };
-  }
-  playerController.initVideoCards();
+  
+    playerController.initVideoCards();
+  })
 }
 
 export async function destroyPlyr() {
@@ -768,6 +748,26 @@ function waitForElm(selector) {
     });
 
     // If you get "parameter 1 is not of type 'Node'" error, see https://stackoverflow.com/a/77855838/492336
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true
+    });
+  });
+}
+
+function waitForElmRemoved(selector) {
+  return new Promise(resolve => {
+    if (!document.querySelector(selector)) {
+      return resolve();
+    }
+
+    const observer = new MutationObserver(() => {
+      if (!document.querySelector(selector)) {
+        observer.disconnect();
+        resolve();
+      }
+    });
+
     observer.observe(document.body, {
       childList: true,
       subtree: true
