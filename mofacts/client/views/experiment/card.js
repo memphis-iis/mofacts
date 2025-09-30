@@ -885,7 +885,7 @@ Template.card.helpers({
   },
 
   'getFontSizeStyle': function() {
-    const fontsize = Session.get('currentDeliveryParams') && Session.get('currentDeliveryParams').fontsize;
+    const fontsize = Session.get('currentDeliveryParams') && Session.get('currentDeliveryParams').fontsizepx;
     if (fontsize) {
       return 'font-size: ' + fontsize + 'px;';
     }
