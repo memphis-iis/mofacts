@@ -382,16 +382,15 @@ $('#finalInstructionsDlg').on('shown.bs.modal', function() {
 });
 
 // Also attach globally for non-modal instructions and card pages
-const observer = new MutationObserver(() => {
+new MutationObserver(() => {
     attachAudioListeners();
-});
-observer.observe(document.body, { childList: true, subtree: true });
+}).observe(document.body, { childList: true, subtree: true });
 
 function attachAudioListeners() {
     document.querySelectorAll('.play-btn:not([data-listener-attached])').forEach(btn => {
-        const audId = btn.getAttribute('data-audio-id');
+        let audId = btn.getAttribute('data-audio-id');
         if (audId) {
-            const aud = document.getElementById(audId);
+            let aud = document.getElementById(audId);
             if (aud) {
                 btn.addEventListener('click', (e) => {
                     e.preventDefault();
