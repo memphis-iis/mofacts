@@ -404,7 +404,7 @@ function getCurrentDeliveryParams() {
     'skipstudy': false,
     'lockoutminutes': 0,
     'fontsize': 3,
-    'fontsizepx': 24,
+    'fontsizePX': 24,
     'numButtonListImageColumns': 2,
     'correctscore': 1,
     'incorrectscore': 0,
