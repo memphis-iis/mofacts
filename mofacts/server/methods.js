@@ -604,6 +604,16 @@ async function processPackageUpload(fileObj, owner, zipLink, emailToggle){
       }
     serverConsole('3 processPackageUpload ERROR,', path, ',', e + ' on file: ' + filePath);
     throw new Meteor.Error('package upload failed at initialization: ' + e + ' on file: ' + filePath)
+  } finally {
+    for(const tdfFile of unzippedFiles.filter(f => f.type == 'tdf')) {
+      const tdf = await Tdfs.findOne({tdfFileName: tdfFile.name})
+      if (tdf.content.tdfs.tutor.unit) {
+        processAudioFilesForTDF(tdf.content.tdfs).then((t) => {
+          tdf.content.tdfs.tutor.unit = t.tutor.unit
+          Tdfs.upsert({_id: tdf._id}, tdf)
+        })
+      }
+    }
   }
 }
 
@@ -848,6 +858,38 @@ async function combineAndSaveContentFile(tdf, stim, owner) {
     console.error(e);
     return results;
   }
+}
+
+function extractSrcFromHtml(htmlString) {
+  if (!htmlString || typeof htmlString !== 'string') {
+    return [];
+  }
+  
+  const srcValues = [];
+  
+  // Multiple regex patterns to catch different src attribute formats
+  const patterns = [
+    // Standard src="value" (with double quotes)
+    /src\s*=\s*"([^"]+)"/gi,
+    // Single quotes src='value'
+    /src\s*=\s*'([^']+)'/gi,
+    // No quotes src=value (ends at space or >)
+    /src\s*=\s*([^\s>]+)/gi
+  ];
+  
+  patterns.forEach(pattern => {
+    let match;
+    while ((match = pattern.exec(htmlString)) !== null) {
+      let srcValue = match[1].trim();
+      // Remove backslashes and quotes that might be escaped or malformed
+      srcValue = srcValue.replace(/[\\\"]/g, '');
+      if (srcValue && !srcValues.includes(srcValue)) {
+        srcValues.push(srcValue);
+      }
+    }
+  });
+  
+  return srcValues;
 }
 
 function stripSpacesAndLowerCase(input) {
@@ -2420,6 +2462,25 @@ function tdfUpdateConfirmed(updateObj, resetShuffleClusters = false){
   }
 }
 
+async function processAudioFilesForTDF(TDF){
+  for (const unitIdx in TDF.tutor.unit){
+    const unit = TDF.tutor.unit[unitIdx]
+    if (unit && unit.unitinstructions) {
+      const srcValues = extractSrcFromHtml(unit.unitinstructions);
+      if (srcValues.length > 0) {
+        for(const src of srcValues) {
+          if(!src.includes('http')) {
+            const audio = await DynamicAssets.findOne({name: src});
+            const link = audio.link();
+            TDF.tutor.unit[unitIdx].unitinstructions = unit.unitinstructions.replace(src, link)
+          }
+        }
+      }
+    }
+  }
+  return TDF
+}
+
 function setUserLoginData(entryPoint, loginMode, curTeacher = undefined, curClass = undefined, assignedTdfs = undefined){
   serverConsole('setUserLoginData', entryPoint, loginMode, curTeacher, curClass, assignedTdfs);
   let loginParams = Meteor.user().loginParams || {};
@@ -3061,7 +3122,6 @@ export const methods = {
     //check if the user is an admin or owner of the TDF
     try{
       Tdfs.find({"packageFile": packageId}).fetch().forEach((TDF) => {
-        console.log("TDF", TDF, "is to be removed");
         if(TDF && (Roles.userIsInRole(Meteor.userId(), ['admin']) || TDF.ownerId == Meteor.userId())){
           tdfId = TDF._id;
           ComponentStates.remove({TDFId: tdfId});

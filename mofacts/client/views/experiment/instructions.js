@@ -437,12 +437,6 @@ Template.instructions.helpers({
 Template.instructions.rendered = function() {
   // Make sure lockout interval timer is running
   lockoutKick();
-  timeRendered = Date.now();
-  const unitInstructionsExist = typeof Session.get('currentTdfFile').tdfs.tutor.unit[Session.get('currentUnitNumber')].unitinstructions !== "undefined";
-  const instructionQuestionExists = typeof Session.get('instructionQuestionResults') === "undefined";
-  const unitInstructionsQuestionExists = typeof Session.get('currentTdfFile').tdfs.tutor.unit[Session.get('currentUnitNumber')].unitinstructionsquestion !== "undefined";
-  const displayContinueBotton = unitInstructionsExist || instructionQuestionExists || unitInstructionsQuestionExists;
-  
   // Add event handlers for inline audio elements after DOM is ready
   Meteor.defer(() => {
     setupInlineAudioHandlers();
@@ -500,7 +494,6 @@ function setupInlineAudioHandlers() {
     });
   });
 }
-
 
 // instructionlog 
 
