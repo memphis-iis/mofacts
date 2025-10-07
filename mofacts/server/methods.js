@@ -312,12 +312,6 @@ async function checkCongentGenerationAvailable() {
   }
 }
 
-async function getTdfTTSAPIKey(TDFId) {
-  const textToSpeechAPIKey = Tdfs.findOne({_id: TDFId}).content.tdfs.tutor.setspec.textToSpeechAPIKey;
-  var key = decryptData(textToSpeechAPIKey);
-  return key;
-}
-
 async function getTdfByFileName(filename) {
   try {
     const tdf = Tdfs.findOne({"content.fileName": filename});
@@ -3404,7 +3398,7 @@ const asyncMethods = {
   },
   
   makeGoogleTTSApiCall: async function(TDFId, message, audioPromptSpeakingRate, audioVolume, selectedVoice) {
-    const ttsAPIKey = await getTdfTTSAPIKey(TDFId);
+    const ttsAPIKey = await methods.getTdfTTSAPIKey(TDFId);
     const request = JSON.stringify({
       input: {text: message},
       voice: {languageCode: 'en-US', 'name': selectedVoice},
@@ -3441,10 +3435,11 @@ const asyncMethods = {
     Meteor.users.update({_id: Meteor.userId()}, {$set: {lockouts: lockouts}});
   },
 
-  makeGoogleSpeechAPICall: async function(TDFId, speechAPIKey = '', request, answerGrammar){
+  makeGoogleSpeechAPICall: async function(TDFId, speechAPIKey, request, answerGrammar){
     serverConsole('makeGoogleSpeechAPICall', TDFId, speechAPIKey, request, answerGrammar);
-    if(speechAPIKey == ''){
-      speechAPIKey = await getTdfTTSAPIKey(TDFId);
+    const TDFAPIKey = await methods.getTdfSpeechAPIKey(TDFId);
+    if (TDFAPIKey) {
+      speechAPIKey = TDFAPIKey
     }
     const options = {
       hostname: 'speech.googleapis.com',
