@@ -414,7 +414,7 @@ async function leavePage(dest) {
     }
   }
   clearCardTimeout();
-  clearPlayingSound();
+  clearPlayingSound();  
   if (typeof dest === 'function') {
     dest();
   } else {
@@ -487,6 +487,9 @@ async function initCard() {
   } else {
     cardStart();
   }
+
+  // Initialize debug panel for admins
+  initializeDebugPanel();
 };
 
 Template.card.events({
@@ -655,6 +658,71 @@ Template.card.events({
       let curUnit = Session.get('currentUnitNumber');
       let newUnitNumber = curUnit - 1;
       revisitUnit(newUnitNumber);
+    }
+  },
+
+  // Debug Sidebar Events (Admin Only)
+  'click #debugToggle': function(event) {
+    if (Roles.userIsInRole(Meteor.user(), ['admin'])) {
+      const sidebar = document.getElementById('debugSidebar');
+      sidebar.style.display = sidebar.style.display === 'none' ? 'block' : 'none';
+      sidebar.classList.toggle('open');
+    }
+  },
+
+  'click #closeSidebar': function(event) {
+    if (Roles.userIsInRole(Meteor.user(), ['admin'])) {
+      const sidebar = document.getElementById('debugSidebar');
+      sidebar.classList.remove('open');
+      setTimeout(() => {
+        sidebar.style.display = 'none';
+      }, 300);
+    }
+  },
+
+  'click #debugGiveCorrect': function(event) {
+    if (Roles.userIsInRole(Meteor.user(), ['admin'])) {
+      giveAnswer();
+    }
+  },
+
+  'click #debugGiveWrong': function(event) {
+    if (Roles.userIsInRole(Meteor.user(), ['admin'])) {
+      giveWrongAnswer();
+    }
+  },
+
+  'click #debugSkipUnit': function(event) {
+    if (Roles.userIsInRole(Meteor.user(), ['admin'])) {
+      unitIsFinished('Skipped by admin via debug panel');
+    }
+  },
+
+  'click #debugRefreshVars': function(event) {
+    if (Roles.userIsInRole(Meteor.user(), ['admin'])) {
+      updateDebugVariables();
+    }
+  },
+
+  'click #debugSkipToNext': function(event) {
+    if (Roles.userIsInRole(Meteor.user(), ['admin'])) {
+      skipToNextQuestion();
+    }
+  },
+
+  'click .debug-section-header': function(event) {
+    if (Roles.userIsInRole(Meteor.user(), ['admin'])) {
+      const target = $(event.currentTarget).data('target');
+      const content = $('#' + target);
+      const icon = $(event.currentTarget).find('.debug-toggle-icon');
+      
+      if (content.is(':visible')) {
+        content.slideUp(200);
+        icon.removeClass('fa-chevron-down').addClass('fa-chevron-right');
+      } else {
+        content.slideDown(200);
+        icon.removeClass('fa-chevron-right').addClass('fa-chevron-down');
+      }
     }
   },
 });
@@ -1022,6 +1090,33 @@ Template.card.helpers({
     } else {
       return false;
     }
+  },
+
+  // Debug helper functions for admin sidebar
+  'getTestType': function() {
+    return getTestType();
+  },
+
+  'getCurrentUnitNumber': function() {
+    return Session.get('currentUnitNumber');
+  },
+
+  'getCurrentFontSize': function() {
+    const params = Session.get('currentDeliveryParams');
+    return params ? params.fontsize : 'N/A';
+  },
+
+  'getCurrentTimeout': function() {
+    const params = Session.get('currentDeliveryParams');
+    const testType = getTestType();
+    if (!params) return 'N/A';
+    
+    if (testType === 's') {
+      return params.purestudy || 'N/A';
+    } else if (testType === 'd' || testType === 't') {
+      return params.drill || 'N/A';
+    }
+    return 'N/A';
   },
 });
 
@@ -1946,6 +2041,120 @@ async function giveWrongAnswer(){
     $('#userAnswer').val(curAnswer);
     Session.set('skipTimeout', true)
     handleUserInput({keyCode: ENTER_KEY}, 'keypress');
+  }
+}
+
+// Debug helper functions for admin sidebar
+function updateDebugVariables() {
+  if (!Roles.userIsInRole(Meteor.user(), ['admin'])) return;
+  
+  // Update all debug display elements
+  $('#debugQuestionIndex').text(Session.get('questionIndex') || 'N/A');
+  $('#debugTestType').text(getTestType() || 'N/A');
+  $('#debugCurrentAnswer').text(Session.get('currentAnswer') || 'N/A');
+  $('#debugDisplayReady').text(Session.get('displayReady') || 'false');
+  $('#debugUnitNumber').text(Session.get('currentUnitNumber') || 'N/A');
+  $('#debugButtonTrial').text(Session.get('buttonTrial') || 'false');
+  $('#debugAudioEnabled').text(Meteor.user()?.audioInputMode || 'false');
+  $('#debugVideoSession').text(Session.get('isVideoSession') || 'false');
+  
+  // Add next question info for video sessions
+  if (Session.get('isVideoSession') && playerController) {
+    const currentTime = playerController.player ? playerController.player.currentTime : 0;
+    const questionTimes = playerController.times || [];
+    let nextTime = 'End';
+    for (let i = 0; i < questionTimes.length; i++) {
+      if (questionTimes[i] > currentTime + 1) {
+        nextTime = questionTimes[i] + 's';
+        break;
+      }
+    }
+    $('#debugNextQuestion').text(nextTime);
+  } else {
+    $('#debugNextQuestion').text('N/A');
+  }
+  
+  const params = Session.get('currentDeliveryParams');
+  $('#debugFontSize').text(params?.fontsize || 'N/A');
+  
+  // Update timeout based on test type
+  const testType = getTestType();
+  let timeoutValue = 'N/A';
+  if (params) {
+    if (testType === 's') {
+      timeoutValue = params.purestudy || 'N/A';
+    } else if (testType === 'd' || testType === 't') {
+      timeoutValue = params.drill || 'N/A';
+    }
+  }
+  $('#debugTimeout').text(timeoutValue);
+}
+
+function initializeDebugPanel() {
+  if (!Roles.userIsInRole(Meteor.user(), ['admin'])) return;
+  
+  // Show the debug toggle button
+  $('#debugToggle').show();
+  
+  // Set up auto-refresh of variables every 2 seconds
+  Meteor.setInterval(function() {
+    if ($('#debugSidebar').hasClass('open')) {
+      updateDebugVariables();
+    }
+  }, 2000);
+}
+
+// Debug function to skip to next question timestamp
+function skipToNextQuestion() {
+  if (!Roles.userIsInRole(Meteor.user(), ['admin'])) return;
+  
+  console.log('Admin debug: Skipping to next question');
+  
+  // Handle video sessions
+  if (Session.get('isVideoSession') && playerController) {
+    try {
+      // Get current time and find next question time
+      const currentTime = playerController.player.currentTime;
+      const questionTimes = playerController.times || [];
+      
+      // Find the next question time after current time
+      let nextTime = null;
+      for (let i = 0; i < questionTimes.length; i++) {
+        if (questionTimes[i] > currentTime + 1) { // Add 1 second buffer
+          nextTime = questionTimes[i];
+          break;
+        }
+      }
+      
+      if (nextTime !== null) {
+        console.log(`Jumping from ${currentTime}s to ${nextTime}s`);
+        playerController.player.currentTime = nextTime;
+        // Trigger the question immediately
+        setTimeout(() => {
+          playerController.showQuestion();
+        }, 100);
+      } else {
+        console.log('No more questions in this video session');
+        alert('No more question timestamps found in this video session');
+      }
+    } catch (error) {
+      console.error('Error skipping to next question in video:', error);
+      alert('Error: Could not skip to next question in video session');
+    }
+  }
+  // Handle regular question sessions
+  else {
+    try {
+      // Clear current timeouts and force next question
+      clearCardTimeout();
+      
+      // Simulate timeout to move to next question
+      console.log('Forcing timeout to advance to next question');
+      handleUserInput({}, 'timeout');
+    } catch (error) {
+      console.error('Error skipping to next question:', error);
+      alert('Error: Could not skip to next question');
+    }
   }
 }
 

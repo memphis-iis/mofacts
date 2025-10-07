@@ -325,6 +325,91 @@
 
     </div> <!-- close container -->
 
+    <!-- Debug Sidebar for Admins -->
+    {{#if isInRole 'admin'}}
+    <div id="debugSidebar" class="debug-sidebar" style="display: none;">
+        <div class="debug-sidebar-header">
+            <h5>Debug Panel</h5>
+            <button id="closeSidebar" class="btn btn-sm">&times;</button>
+        </div>
+        <div class="debug-sidebar-content">
+            <div class="debug-section">
+                <h6>Quick Actions</h6>
+                <button id="debugGiveCorrect" class="btn btn-sm btn-success">Give Correct Answer</button>
+                <button id="debugGiveWrong" class="btn btn-sm btn-danger">Give Wrong Answer</button>
+                <button id="debugSkipUnit" class="btn btn-sm btn-warning">Skip Unit</button>
+                <button id="debugSkipToNext" class="btn btn-sm btn-info">Skip to Next Question</button>
+            </div>
+            
+            <div class="debug-section">
+                <h6 class="debug-section-header" data-target="currentState">
+                    <i class="fa fa-chevron-right debug-toggle-icon"></i> Current State
+                </h6>
+                <div class="debug-section-content" id="currentState" style="display: none;">
+                    <div class="debug-variable">
+                        <strong>Question Index:</strong> <span id="debugQuestionIndex">{{currentProgress}}</span>
+                    </div>
+                    <div class="debug-variable">
+                        <strong>Test Type:</strong> <span id="debugTestType">{{getTestType}}</span>
+                    </div>
+                    <div class="debug-variable">
+                        <strong>Current Answer:</strong> <span id="debugCurrentAnswer">{{rawAnswer}}</span>
+                    </div>
+                    <div class="debug-variable">
+                        <strong>Display Ready:</strong> <span id="debugDisplayReady">{{displayReady}}</span>
+                    </div>
+                    <div class="debug-variable">
+                        <strong>Next Question:</strong> <span id="debugNextQuestion">N/A</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="debug-section">
+                <h6 class="debug-section-header" data-target="sessionVariables">
+                    <i class="fa fa-chevron-right debug-toggle-icon"></i> Session Variables
+                </h6>
+                <div class="debug-section-content" id="sessionVariables" style="display: none;">
+                    <div class="debug-variable">
+                        <strong>Unit Number:</strong> <span id="debugUnitNumber">{{getCurrentUnitNumber}}</span>
+                    </div>
+                    <div class="debug-variable">
+                        <strong>Button Trial:</strong> <span id="debugButtonTrial">{{buttonTrial}}</span>
+                    </div>
+                    <div class="debug-variable">
+                        <strong>Audio Enabled:</strong> <span id="debugAudioEnabled">{{audioEnabled}}</span>
+                    </div>
+                    <div class="debug-variable">
+                        <strong>Video Session:</strong> <span id="debugVideoSession">{{isVideoSession}}</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="debug-section">
+                <h6 class="debug-section-header" data-target="deliveryParams">
+                    <i class="fa fa-chevron-right debug-toggle-icon"></i> Delivery Params
+                </h6>
+                <div class="debug-section-content" id="deliveryParams" style="display: none;">
+                    <div class="debug-variable">
+                        <strong>Font Size:</strong> <span id="debugFontSize">{{getCurrentFontSize}}</span>
+                    </div>
+                    <div class="debug-variable">
+                        <strong>Timeout (ms):</strong> <span id="debugTimeout">{{getCurrentTimeout}}</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="debug-section">
+                <button id="debugRefreshVars" class="btn btn-sm btn-info">Refresh Variables</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Debug Toggle Button -->
+    <button id="debugToggle" class="debug-toggle" style="display: none;">
+        <i class="fa fa-bug"></i>
+    </button>
+    {{/if}}
+
     <div id="postCardContainer">&nbsp;</div>
 
 
