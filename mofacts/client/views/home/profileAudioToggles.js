@@ -1,4 +1,3 @@
-export {getAudioPromptModeFromPage, getAudioInputFromPage};
 // Set up input sensitivity range to display/hide when audio input is enabled/disabled
 
 const showHideAudioEnabledGroup = function(show) {

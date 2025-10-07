@@ -3333,6 +3333,11 @@ function speechAPICallback(err, data){
     console.log(err);
     transcript = 'I did not get that. Please try again.';
     ignoredOrSilent = true;
+  } else if(response.error) {
+    transcript = `Google API Error ${response.error.code}: ${response.error.message}`
+    alert(transcript)
+    console.log('transcript: ' + transcript)
+    ignoredOrSilent = true;
   } else if (response['results']) {
     transcript = response['results'][0]['alternatives'][0]['transcript'].toLowerCase();
     console.log('transcript: ' + transcript);

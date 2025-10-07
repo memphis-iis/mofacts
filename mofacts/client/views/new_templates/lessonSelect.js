@@ -398,8 +398,8 @@ Template.lessonSelect.helpers({
       audioPromptFeedbackVoice = setspec.audioPromptFeedbackVoice || 'en-US-Standard-A';
     }  
     else {
-      audioPromptMode = getAudioPromptModeFromPage();
-      audioInputEnabled = getAudioInputFromPage();
+      audioPromptMode = Meteor.user().audioPromptMode;
+      audioInputEnabled = Meteor.user().audioInputMode;
       audioPromptFeedbackSpeakingRate = document.getElementById('audioPromptFeedbackSpeakingRate').value;
       audioPromptQuestionSpeakingRate = document.getElementById('audioPromptQuestionSpeakingRate').value;
       audioPromptVoice = document.getElementById('audioPromptVoice').value;
@@ -554,19 +554,3 @@ Template.lessonSelect.helpers({
       Router.go('/multiTdfSelect');
     }
   }
-
-function getAudioInputFromPage() {
-  return $('#audioInputOn').checked;
-}
-
-function getAudioPromptModeFromPage() {
-  if ($('#audioPromptFeedbackOn')[0].checked && $('#audioPromptQuestionOn')[0].checked) {
-    return 'all';
-  } else if ($('#audioPromptFeedbackOn')[0].checked){
-    return 'feedback';
-  } else if ($('#audioPromptQuestionOn')[0].checked) {
-    return 'question';
-  } else {
-    return 'silent';
-  }
-}

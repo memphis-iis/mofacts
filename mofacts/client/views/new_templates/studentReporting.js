@@ -442,8 +442,8 @@ async function selectTdf(currentTdfId, lessonName, currentStimuliSetId, ignoreOu
     audioPromptFeedbackVoice = setspec.audioPromptFeedbackVoice || 'en-US-Standard-A';
   }  
   else {
-    audioPromptMode = getAudioPromptModeFromPage();
-    audioInputEnabled = getAudioInputFromPage();
+    audioPromptMode = Meteor.user().audioPromptMode;
+    audioInputEnabled = Meteor.user().audioInputMode;
     audioPromptFeedbackSpeakingRate = document.getElementById('audioPromptFeedbackSpeakingRate').value;
     audioPromptQuestionSpeakingRate = document.getElementById('audioPromptQuestionSpeakingRate').value;
     audioPromptVoice = document.getElementById('audioPromptVoice').value;
@@ -518,7 +518,7 @@ async function selectTdf(currentTdfId, lessonName, currentStimuliSetId, ignoreOu
 
   let continueToCard = true;
 
-  if (Session.get('audioEnabled')) {
+  if (audioEnabled) {
     // Check if the tdf or user has a speech api key defined, if not show the modal form
     // for them to input one.  If so, actually continue initializing web audio
     // and going to the practice set
@@ -597,20 +597,4 @@ async function navigateForMultiTdf() {
   } else {
     Router.go('/multiTdfSelect');
   }
-}
-
-function getAudioInputFromPage() {
-  return $('#audioInputOn').checked;
-}
-
-function getAudioPromptModeFromPage() {
-if ($('#audioPromptFeedbackOn').checked && $('#audioPromptQuestionOn').checked) {
-  return 'all';
-} else if ($('#audioPromptFeedbackOn').checked){
-  return 'feedback';
-} else if ($('#audioPromptQuestionOn').checked) {
-  return 'question';
-} else {
-  return 'silent';
-}
 }
