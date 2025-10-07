@@ -474,7 +474,7 @@ Template.lessonSelect.helpers({
   
     let continueToCard = true;
   
-    if (Session.get('audioEnabled')) {
+    if (audioEnabled) {
       // Check if the tdf or user has a speech api key defined, if not show the modal form
       // for them to input one.  If so, actually continue initializing web audio
       // and going to the practice set
