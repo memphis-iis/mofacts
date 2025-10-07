@@ -38,6 +38,7 @@ export {
   revisitUnit,
   gatherAnswerLogRecord,
   newQuestionHandler,
+  checkAudioInputMode,
 };
 
 /*
@@ -449,7 +450,7 @@ async function initCard() {
     Session.set('stimDisplayTypeMap', stimDisplayTypeMap);
   }
 
-  const audioInputEnabled = Meteor.user().audioInputMode;
+  const audioInputEnabled = checkAudioInputMode();
   if (audioInputEnabled) {
     if (!Session.get('audioInputSensitivity')) {
       // Default to 20 in case tdf doesn't specify and we're in an experiment
@@ -491,6 +492,7 @@ async function initCard() {
   // Initialize debug panel for admins
   initializeDebugPanel();
 };
+
 
 Template.card.events({
   'focus #userAnswer': function() {
@@ -1015,7 +1017,7 @@ Template.card.helpers({
 
   'userInDiaglogue': () => Session.get('showDialogueText') && Session.get('dialogueDisplay'),
 
-  'audioEnabled': () => Meteor.user().audioInputMode,
+  'audioEnabled': () => checkAudioInputMode(),
 
   'showDialogueHints': function() {
     if(Meteor.isDevelopment){
@@ -1272,7 +1274,7 @@ function preloadStimuliFiles() {
 }
 
 function checkUserAudioConfigCompatability(){
-  const audioPromptMode = Meteor.user().audioPromptMode;
+  const audioPromptMode = checkAudioPromptMode();
   if (curStimHasImageDisplayType() && ((audioPromptMode == 'all' || audioPromptMode == 'question'))) {
     console.log('PANIC: Unable to process TTS for image response', Session.get('currentRootTdfId'));
     alert('Question reading not supported on this TDF. Please disable and try again.');
@@ -2540,7 +2542,7 @@ function gatherAnswerLogRecord(trialEndTimeStamp, trialStartTimeStamp, source, u
     'KCCategoryDefault': '',
     'KCCluster': clusterKC,
     'KCCategoryCluster': '',
-    'CFAudioInputEnabled': Meteor.user().audioInputMode,
+    'CFAudioInputEnabled': checkAudioInputMode(),
     'CFAudioOutputEnabled': Session.get('enableAudioPromptAndFeedback'),
     'CFDisplayOrder': Session.get('questionIndex'),
     'CFStimFileIndex': stimFileIndex,
@@ -3177,7 +3179,7 @@ function stopUserInput() {
 
 // Audio prompt/feedback
 function speakMessageIfAudioPromptFeedbackEnabled(msg, audioPromptSource) {
-  const audioPromptMode = Meteor.user().audioPromptMode;
+  const audioPromptMode = checkAudioPromptMode();
   const enableAudioPromptAndFeedback = audioPromptMode && audioPromptMode != 'silent';
   let synthesis = window.speechSynthesis;
   if (enableAudioPromptAndFeedback) {
@@ -3525,8 +3527,26 @@ function startUserMedia(stream) {
   cardStart();
 }
 
+function checkAudioInputMode(){
+  return Meteor.user().audioInputMode && Session.get('currentTdfFile').tdfs.tutor.setspec.audioInputEnabled
+}
+
+function checkAudioPromptMode(){
+  const tdfPromptMode = Session.get('currentTdfFile').tdfs.tutor.setspec.audioPromptMode
+  const userPromptMode = Meteor.user().audioPromptMode
+  if(userPromptMode && tdfPromptMode) {
+    if (userPromptMode == 'all' || userPromptMode == tdfPromptMode) {
+      return tdfPromptMode
+    }
+    if (tdfPromptMode == 'all') {
+      return userPromptMode
+    }
+  }
+  return 'silent' // if we get here then prompt modes are either silent, do not match, or are not set
+}
+
 function startRecording() {
-  if (recorder && !Session.get('recordingLocked') && Meteor.user().audioInputMode) {
+  if (recorder && !Session.get('recordingLocked') && checkAudioInputMode()) {
     Session.set('recording', true);
     recorder.record();
     console.log('RECORDING START');
