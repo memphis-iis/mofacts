@@ -480,8 +480,7 @@ Template.lessonSelect.helpers({
       // and going to the practice set
       Meteor.call('getUserSpeechAPIKey', function(error, key) {
         Session.set('speechAPIKey', key);
-        const tdfKeyPresent = !!curTdfContent.tdfs.tutor.setspec.speechAPIKey &&
-            !!curTdfContent.tdfs.tutor.setspec.speechAPIKey;
+        const tdfKeyPresent = !!curTdfContent.tdfs.tutor.setspec.speechAPIKey
         if (!key && !tdfKeyPresent) {
           console.log('speech api key not found, showing modal for user to input');
           $('#speechAPIModal').modal('show');
