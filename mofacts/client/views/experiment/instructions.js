@@ -1,6 +1,6 @@
 import {secsIntervalString} from '../../../common/globalHelpers';
 import {haveMeteorUser} from '../../lib/currentTestingHelpers';
-import {updateExperimentState, initCard} from './card';
+import {updateExperimentState, initCard, checkAudioInputMode} from './card';
 import {routeToSignin} from '../../lib/router';
 import { meteorCallAsync } from '../../index';
 import { _ } from 'core-js';
@@ -523,7 +523,7 @@ function gatherInstructionLogRecord(trialEndTimeStamp, trialStartTimeStamp,
     'levelUnit': Session.get('currentUnitNumber'),
     'levelUnitType': "Instruction",
     'time': trialStartTimeStamp,
-    'CFAudioInputEnabled': Meteor.user().audioInputMode,
+    'CFAudioInputEnabled': checkAudioInputMode(),
     'CFAudioOutputEnabled': Session.get('enableAudioPromptAndFeedback'),
     'CFResponseTime': trialEndTimeStamp,
     'entryPoint': Meteor.user().loginParams.entryPoint
