@@ -1,4 +1,5 @@
 import {sessionCleanUp} from '../../lib/sessionUtils';
+import {meteorCallAsync} from '../..';
 import {routeToSignin} from '../../lib/router';
 
 Template.signUp.events({

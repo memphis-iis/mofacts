@@ -327,9 +327,10 @@ async function getTdfByFileName(filename) {
 
 
 async function getTdfByExperimentTarget(experimentTarget) {
+  experimentTarget = experimentTarget.toLowerCase();
   try {
     serverConsole('getTdfByExperimentTarget:'+experimentTarget);
-    tdf = Tdfs.findOne({"content.tdfs.tutor.setspec.experimentTarget": {$regex: experimentTarget, $options: 'i'}});
+    tdf = Tdfs.findOne({"content.tdfs.tutor.setspec.experimentTarget": experimentTarget});
     return tdf;
   } catch (e) {
     serverConsole('getTdfByExperimentTarget ERROR,', experimentTarget, ',', e);
@@ -820,6 +821,8 @@ async function combineAndSaveContentFile(tdf, stim, owner) {
   try {
     const jsonContents = typeof tdf.contents == 'string' ? JSON.parse(tdf.contents) : tdf.contents;
     const jsonPackageFile = tdf.packageFile;
+    if (jsonContents.tutor.setspec.experimentTarget)
+      jsonContents.tutor.setspec.experimentTarget = jsonContents.tutor.setspec.experimentTarget.toLowerCase();
     const json = {tutor: jsonContents.tutor};
     const lessonName = _.trim(jsonContents.tutor.setspec.lessonname);
     if (lessonName.length < 1) {
@@ -1040,6 +1043,26 @@ function getSetAMinusB(arrayA, arrayB) {
   return Array.from(difference);
 }
 
+async function updateUserAssignments(courseId) {
+  serverConsole('updateUserAssignments', courseId);
+  const sections = await Sections.find({courseId: courseId}).fetch();
+  const students = [];
+  for (const section of sections) {
+    const studentsInSection = await SectionUserMap.find({sectionId: section._id}).fetch();
+    for(const student of studentsInSection){
+      serverConsole({studentId: student.userId, sectionId: section._id})
+      students.push({studentId: student.userId, sectionId: section._id});
+    }
+  }
+  for(const student of students){
+    const assignedTDFs = await getTdfsAssignedToStudent(student.studentId, student.sectionId);
+    serverConsole('updating student', student, 'with new assignments', assignedTDFs);
+    const loginParams = Meteor.users.findOne({_id: student.studentId}).loginParams;
+    loginParams.assignedTDFs = assignedTDFs;
+    Meteor.users.update({_id: student.studentId}, {$set: {loginParams: loginParams}});
+  }
+}
+
 // Shape: {coursename: "Test Course", courseid: 1, 'tdfs': ['filename1']}
 async function editCourseAssignments(newCourseAssignment) {
   try {
@@ -1100,6 +1123,7 @@ async function editCourseAssignments(newCourseAssignment) {
       const TDFId = tdfNameIDMap[tdfName];
       Assignments.remove({courseId: newCourseAssignment.courseId, TDFId: TDFId});
     }
+    updateUserAssignments(newCourseAssignment.courseId);
     return newCourseAssignment;
   } catch (e) {
     serverConsole('editCourseAssignments ERROR,', newCourseAssignment, ',', e);
@@ -1176,7 +1200,6 @@ async function getTdfAssignmentsByCourseIdMap(instructorId) {
   }
   return assignmentTdfFileNamesByCourseIdMap;
 }
-
 
 async function getTdfsAssignedToStudent(userId, curSectionId) {
   serverConsole('getTdfsAssignedToStudent', userId, curSectionId);

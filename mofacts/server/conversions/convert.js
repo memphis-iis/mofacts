@@ -98,6 +98,9 @@ function getNewItemFormat(stimFile, stimulusFileName, stimuliSetId, responseKCMa
       if (!stim.response.hasOwnProperty('correctResponse')) {
         throw new Error(`Stim ${stimIdx} in cluster ${clusterIdx} of "${stimulusFileName}" missing 'correctResponse' property in 'response'.`);
       }
+      if (incorrectResponses) {
+        incorrectResponses = incorrectResponses.map((ir) => removeInvisibleUnicode(ir));
+      }
 
       let incorrectResponses = stim.response.incorrectResponses;
       if (incorrectResponses){
