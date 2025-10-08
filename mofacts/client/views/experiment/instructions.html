@@ -3,14 +3,11 @@
         <div class="row full-width">
             {{#if UISettings.displayInstructionsTitle}}
             <div class="header-box">
-                <h3 class="text-center">
-
+                {{curTdfName}}:
+                {{#if UISettings.displayUnitNameInInstructions}}
                     {{curTdfName}}:
-                    {{#if UISettings.displayUnitNameInInstructions}}
-                        {{curTdfName}}:
-                    {{/if}} 
-                    Instructions
-                </h3>
+                {{/if}}
+                Instructions
             </div>
             {{else}}
             {{/if}}

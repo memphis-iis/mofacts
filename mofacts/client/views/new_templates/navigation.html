@@ -1,48 +1,44 @@
 <template name="nav">
-  <!-- bootstrap 5 navigation -->
-<!-- As a link -->
 <nav class="navbar bg-light">
   <div class="container-fluid">
-    <a class="navbar-brand" href="/">{{currentTheme.properties.themeName}}</a>
+    <a class="navbar-brand" href="/">
+      {{#if currentTheme.properties.logo_url}}
+        <img src="{{currentTheme.properties.logo_url}}" alt="Logo" style="height: 30px; margin-right: 10px; vertical-align: middle;">
+      {{/if}}
+      {{currentTheme.properties.themeName}}
+    </a>
     <div class="d-flex toggle-buttons" role="menu">
       {{#if isInTrial}}
       {{else}}
       <button class="dropdown-item" id="errorReportButton" data-bs-toggle="modal" data-bs-target="#audioModal"><i class="fa fa-volume-up" aria-hidden="true"></i>
       </button>
-      <button type="button" aria-label="Toggle navigation" onclick="$('#full-menu').toggle();">
-        <span class="navbar-toggler-icon"> <i class="fa fa-bars"></i></span>
-      </button>  
+      <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#navOffcanvas" aria-controls="navOffcanvas" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"><i class="fa fa-bars"></i></span>
+      </button>
       {{/if}}
     </div>
   </div>
 </nav>
-<!-- full height menu -->
-<div class="full-menu" id="full-menu">
-  <div class="full-menu-background">
-    </div>
-    <div class="full-menu-content">
-      <nav class="navbar">
-      <div class="container-fluid">
-        <a class="navbar-brand" href="/"></a>
-        <div class="d-flex toggle-buttons" role="menu">
-          <button type="button" aria-label="Toggle navigation" onclick="$('#full-menu').toggle();">
-            <span class="navbar-toggler-icon"> <i class="fa fa-bars"></i></span>
-          </button>  
-        </div>
-      </div>
-    </nav>
-    <div class="vh-5"> </div>
-    {{#if isInRole 'admin,teacher'}}
-     <li><a class="dropdown-item" id="profileButton">Admin/Teacher Menu</a></li>
-    {{/if}}
-    <li><a class="dropdown-item" id="lessonSelectButton">Lesson Select</a></li>
-    <li><a class="dropdown-item" id="progressButton">Progress Report</a></li>
-    {{#if isInSession}}
-        <li><a  class="dropdown-item" id="wikiButton" target="_blank">Help</a></li>
-    {{/if}}
-    
-      <li><a  class="dropdown-item" id="errorReportButton" data-bs-toggle="modal" data-bs-target="#errorReportingModal">Report Error</a></li>
-      <li><a  class="dropdown-item" id="logoutButton">Logout</a></li>
-  </div>  
+
+<!-- Bootstrap 5 Offcanvas Menu -->
+<div class="offcanvas offcanvas-end" tabindex="-1" id="navOffcanvas" aria-labelledby="navOffcanvasLabel">
+  <div class="offcanvas-header">
+    <h5 class="offcanvas-title" id="navOffcanvasLabel">Menu</h5>
+    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+  </div>
+  <div class="offcanvas-body">
+    <ul class="list-unstyled">
+      {{#if isInRole 'admin,teacher'}}
+        <li><a class="dropdown-item" id="profileButton" data-bs-dismiss="offcanvas">Admin/Teacher Menu</a></li>
+      {{/if}}
+      <li><a class="dropdown-item" id="lessonSelectButton" data-bs-dismiss="offcanvas">Lesson Select</a></li>
+      <li><a class="dropdown-item" id="progressButton" data-bs-dismiss="offcanvas">Progress Report</a></li>
+      {{#if isInSession}}
+        <li><a class="dropdown-item" id="wikiButton" target="_blank" data-bs-dismiss="offcanvas">Help</a></li>
+      {{/if}}
+      <li><a class="dropdown-item" id="errorReportButton" data-bs-toggle="modal" data-bs-target="#errorReportingModal" data-bs-dismiss="offcanvas">Report Error</a></li>
+      <li><a class="dropdown-item" id="logoutButton" data-bs-dismiss="offcanvas">Logout</a></li>
+    </ul>
+  </div>
 </div>
 </template>

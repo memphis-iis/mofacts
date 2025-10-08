@@ -1,11 +1,10 @@
 <!-- User Administration Template -->
 
 <template name="adminControls">
-    {{#if isInRole 'admin'}}  
-        <div class="container-fluid" style="padding: 0% 10%;">
-            <div class="header-box">
-                Admin Control Panel
-            </div> 
+    {{#if isInRole 'admin'}}
+        <div class="container" style="margin-top: 1rem;">
+            <h2 style="margin-top: 0; text-align: center;">Admin Control Panel</h2>
+
             <div class="container">
                 <div class="row text-center">
                     <h3>Server Status</h3>
@@ -145,13 +144,25 @@
                         <input type="color" class="currentThemePropColor" value="{{currentTheme.properties.navbar_text_color}}" data-id="navbar_text_color">
                     </div>
                     <div class="col text-end">
-                        
-                        Logo URL:
+
+                        Logo:
                     </div>
                     <div class="col">
-                        <!-- file input -->
-                        <input type="text" class="form-control currentThemeProp" value="{{currentTheme.properties.logo_url}}" data-id="logo_url">
-                        <img src="{{currentTheme.properties.logo_url}}" alt="No logo set" class="img-thumbnail">
+                        <input type="file" class="form-control" id="logoUpload" accept="image/*">
+                        {{#if currentTheme.properties.logo_url}}
+                        <button type="button" id="clearLogo" class="btn btn-secondary btn-sm" style="margin-top: 0.5rem;">Clear Logo</button>
+                        <div style="margin-top: 0.5rem;">
+                            <img src="{{currentTheme.properties.logo_url}}" alt="Logo preview" class="img-thumbnail" style="max-width: 200px;">
+                        </div>
+                        {{/if}}
+                    </div>
+                </div>
+                <div class="row row-cols-2">
+                    <div class="col text-end">
+                        Sign In Description:
+                    </div>
+                    <div class="col">
+                        <textarea class="form-control currentThemeProp" rows="3" data-id="signInDescription">{{currentTheme.properties.signInDescription}}</textarea>
                     </div>
                 </div>
                 {{else}}

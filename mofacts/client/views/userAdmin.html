@@ -1,10 +1,10 @@
 <!-- User Administration Template -->
 
 <template name="userAdmin">
-    <div class="header-box">
-        User Administration
-       </div> 
-{{#if isInRole 'admin,teacher'}}  
+{{#if isInRole 'admin,teacher'}}
+    <div class="container" style="margin-top: 1rem;">
+        <h2 style="margin-top: 0; text-align: center;">User Admin</h2>
+  
     <div class="row text-center">
         <h4>Import User File</h4>
         <div class="vh-5"></div>
@@ -117,7 +117,8 @@
             </table>
         </div>
     </div>
-    <div class="modal fade" id="userAdminModal" tabindex="-1" role="dialog" aria-labelledby="userAdminModalLabel">
+</div>
+<div class="modal fade" id="userAdminModal" tabindex="-1" role="dialog" aria-labelledby="userAdminModalLabel">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -132,7 +133,10 @@
             </div>
         </div>
     </div>
-    {{else}}
-    <h3>You do not have access to this function.</h3>
+{{else}}
+    <div class="container" style="margin-top: 1rem;">
+        <h2 style="margin-top: 0; text-align: center;">User Admin</h2>
+        <h3 class="text-center">You do not have access to this function.</h3>
+    </div>
 {{/if}}
 </template>

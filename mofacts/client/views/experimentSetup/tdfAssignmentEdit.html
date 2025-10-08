@@ -1,8 +1,8 @@
 <template name="tdfAssignmentEdit">
 {{#if isInRole 'admin, teacher'}}
-  <div class="header-box">
-    Chapter Assignments
-  </div> 
+  <div class="container" style="margin-top: 1rem;">
+    <h2 style="margin-top: 0; text-align: center;">Chapter Assignments</h2>
+
   <div class="vh-5"> </div>
   <h4 class="text-center">Add/Edit Assignments</h4>
 <div class="vh-5"> </div>
@@ -39,6 +39,7 @@
   <div class="row">
     <button id="saveAssignment" class="btn">Save Assignment</button>
   </div>
-</div>
+  </div>
+  </div>
 {{/if}}
 </template>

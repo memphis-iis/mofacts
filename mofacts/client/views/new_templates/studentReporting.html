@@ -1,11 +1,13 @@
 <template name="studentReporting">
-  <div class="allContent">
-    <div class="row">    
+  <div class="container" style="margin-top: 1rem;">
+    <h2 style="margin-top: 0; text-align: center;">Student Progress</h2>
+
+    <div class="row justify-content-center">
       {{#if selectedTdf}}
         <h5 class="text-center"> Your progress for <b>{{selectedTdf.lessonName}}</b></h5>
       {{/if}}
       {{#if studentReportingTdfs}}
-             <select id="tdf-select" class="width-80-percent">
+             <select id="tdf-select" class="w-75 mx-auto d-block">
              <option value="{{INVALID}}">Select a lesson</option>
             <!-- <option value="xml">All</option> -->
             {{#each studentReportingTdfs}}
@@ -91,10 +93,10 @@
       {{/if}}
     {{/if}}
       {{#if noTime}}
-        <button id="go-to-lesson-select" class="btn btn-primary">Select a Lesson</button>
+        <button id="go-to-lesson-select" class="btn btn-fixed mx-auto d-block">Select a Lesson</button>
       {{else}}
       <div class="vh-5"></div>
-      <button id="go-to-lesson-continue" class="btn  tdfButton" type="button" name="{{selectedTdf.name}}"
+      <button id="go-to-lesson-continue" class="btn btn-fixed mx-auto d-block tdfButton" type="button" name="{{selectedTdf.name}}"
       data-tdfid="{{selectedTdf.tdfid}}"
       data-lessonname="{{selectedTdf.name}}"
       data-currentStimuliSetId="{{selectedTdf.currentStimuliSetId}}"

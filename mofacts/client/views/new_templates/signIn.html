@@ -1,65 +1,66 @@
 <template name="signIn">
     <div class="container">
-        <!-- page header -->
-        <div class="row text-center">
-            <div class="col-12 mx-auto">
-                <div class="vh-10"></div>
-                <h1 align-bottom>{{currentTheme.properties.themeName}}</h1>
-                <span id="serverErrors"></span>
-                <div class="vh-5"></div>
-            </div>
-        </div>
-        <!-- centered login form -->
-        <div class="row text-center login-form spacer">
-            <div class="col-12 mx-auto">
-                <form>
-                    {{#if isExperiment}}
-                        <input  type="text" id="signInUsername" value="" placeholder="{{experimentLoginText}}">
-                        {{#if experimentPasswordRequired}}
-                            <input  type="password" id="password" value="" placeholder="Password"><br><br>
-                        {{/if}}
-                        <div class="vh-5"></div>
-                    {{else}}
-                        <input  type="text" id="signInUsername" value="" placeholder="Username"><br>
-                        <input  type="password" id="password" value="" placeholder="Password"><br><br>
-                        <span class="help-inline danger errcheck" id="invalidLogin" hidden >Username password pair not found!</span>
-                    
+        <div class="row justify-content-center" style="margin-top: 1rem;">
+            <!-- Left: Description and Form -->
+            <div class="col-md-5 col-12">
+                <h2 style="margin-top: 0;">
+                    {{#if currentTheme.properties.logo_url}}
+                        <img src="{{currentTheme.properties.logo_url}}" alt="Logo" style="height: 40px; margin-right: 15px; vertical-align: middle;">
                     {{/if}}
-                    <button type="button" id="experimentSignin" class="btn btn-fixed">Continue</button>
-                    <div class="vh-5"></div>
+                    {{currentTheme.properties.themeName}}
+                </h2>
+                <p style="margin-top: 1rem; line-height: 1.6;">
+                    {{currentTheme.properties.signInDescription}}
+                </p>
+
+                <span id="serverErrors"></span>
+                <form style="margin-top: 1.5rem;">
+                    {{#if isExperiment}}
+                        <input type="text" id="signInUsername" value="" placeholder="{{experimentLoginText}}">
+                        {{#if experimentPasswordRequired}}
+                            <input type="password" id="password" value="" placeholder="Password">
+                        {{/if}}
+                        <button type="button" id="experimentSignin" class="btn btn-fixed w-100" style="margin-top: 0.5rem;">Continue</button>
+                    {{else}}
+                        <input type="text" id="signInUsername" value="" placeholder="Username">
+                        <input type="password" id="password" value="" placeholder="Password">
+                        <span class="help-inline danger errcheck" id="invalidLogin" hidden>Username password pair not found!</span>
+                        <button type="button" id="signInButton" class="btn btn-fixed mx-auto" style="margin-top: 1rem; display: block;">Log In</button>
+                    {{/if}}
                 </form>
             </div>
-        </div>
-        {{#unless isExperiment}}
-        <!-- login with sso and google -->
-        <div class="row text-center large-spacer login-sso-options">
-            <div class="col-12 mx-auto">
-                {{#if showTestLogin}}
-                    <button type="button" id="testSignInButton" class="btn btn-fixed">Test Log In</button><br>
-                {{/if}}
-                <button type="button" id="signInButton" class="btn btn-fixed">Log In</button><br>
+
+            <!-- Right: Login Buttons -->
+            <div class="col-md-5 col-12">
+
                 {{#unless isExperiment}}
-                    <button type="button" id="signUpButton" class="btn btn-fixed">Sign Up</button><br>
+                <div class="d-flex flex-column align-items-center" style="margin-top: 1rem;">
+                    <div class="d-grid" style="gap: 0.25rem; width: 100%;">
+                        {{#if showTestLogin}}
+                            <button type="button" id="testSignInButton" class="btn btn-fixed mx-auto">Test Log In</button>
+                        {{/if}}
+                        <button type="button" id="signUpButton" class="btn btn-fixed mx-auto">Sign Up</button>
+                        <button type="button" id="signInButtonOAuth" class="btn btn-fixed mx-auto">
+                            <img width="20px" style="margin-bottom:3px; margin-right:5px" alt="Google sign-in" src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/1024px-Google_%22G%22_logo.svg.png" />
+                            Sign in with Google
+                        </button>
+                        <button type="button" id="signInWithMicrosoftSSO" class="btn btn-fixed mx-auto">
+                            <img width="20px" style="margin-bottom:3px; margin-right:5px" alt="Microsoft sign-in" src="https://upload.wikimedia.org/wikipedia/commons/4/44/Microsoft_logo.svg" />
+                            Sign in with Microsoft
+                        </button>
+                        <button data-bs-toggle="modal" class="btn btn-fixed btn-secondary mx-auto" id="classSelectButton" data-bs-target="#classSelectModal">
+                            Teacher / Class Select
+                        </button>
+                    </div>
+                    <div style="text-align: center; margin-top: 0.75rem;">
+                        <a href="/resetPassword" class="small">Forgot Password?</a>
+                    </div>
+                </div>
                 {{/unless}}
-                <button data-bs-toggle="modal" class="btn btn-fixed btn-secondary" id="classSelectButton" data-bs-target="#classSelectModal">
-                    Teacher / Class Select
-                </button>
-                <br>
-                <button type="button" id="signInButtonOAuth" class="btn btn-fixed">
-                    <img width="20px" style="margin-bottom:3px; margin-right:5px" alt="Google sign-in" src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/1024px-Google_%22G%22_logo.svg.png" />
-                    Sign in with Google
-                </button><br>
-                <button type="button" id="signInWithMicrosoftSSO" class="btn btn-fixed">
-                    <img width="20px" style="margin-bottom:3px; margin-right:5px" alt="Google sign-in" src="https://upload.wikimedia.org/wikipedia/commons/4/44/Microsoft_logo.svg" />
-                    Sign in with Microsoft</button>
-                <br>
-                <!-- forgot password link, make it small !-->
-                <a href="/resetPassword" class="small">Forgot Password?</a> 
-                
-                  
             </div>
         </div>
-        <!-- footer -->
+
+        {{#unless isExperiment}}
         {{> footer}}
         {{/unless}}
         <!-- modal for sso login, hidden by default -->

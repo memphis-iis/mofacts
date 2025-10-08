@@ -1,11 +1,11 @@
 <template name="dataDownload">
-    <div class="header-box">
-        Data Downloads
-       </div> 
+    <div class="container" style="margin-top: 1rem;">
+        <h2 style="margin-top: 0; text-align: center;">Download User Log Data</h2>
+
     {{#if isInRole 'admin'}}
         <div class="col-md-12 text-center" id="teacherSelectContainer">
             <h3>Teacher Select</h3>
-            <select id="teacherSelect" name="teacherSelect" class="width-80-percent">
+            <select id="teacherSelect" name="teacherSelect" class="w-75 mx-auto d-block">
                 <option value="">Show all</option>
                 {{#each teachers}}
                     {{#if this.username}}
@@ -80,5 +80,6 @@
                 </tbody>
             </table>
         </div>
+    </div>
     </div>
 </template>

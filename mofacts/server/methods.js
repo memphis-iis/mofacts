@@ -3301,7 +3301,8 @@ export const methods = {
       navbar_text_color: '#000000',
       neutral_color: '#ffffff',
       alert_color: '#ff0000',
-      logo_url: ''
+      logo_url: '',
+      signInDescription: 'A web-based adaptive learning system that uses spaced practice and retrieval to help you learn and retain information more effectively. Sign in to access your personalized learning experience.'
     };
     //This inserts the theme into the database, or updates it if it already exists
     DynamicSettings.upsert({key: 'customTheme'}, {$set: {value: theme}});
@@ -3328,7 +3329,8 @@ export const methods = {
           navbar_text_color: '#000000',
           neutral_color: '#ffffff',
           alert_color: '#ff0000',
-          logo_url: ''
+          logo_url: '',
+          signInDescription: 'A web-based adaptive learning system that uses spaced practice and retrieval to help you learn and retain information more effectively. Sign in to access your personalized learning experience.'
         }
       }
      }

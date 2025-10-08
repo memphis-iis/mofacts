@@ -1,8 +1,8 @@
 <!-- MAIN profile template -->
 <template name="profile">
-    
-    <div class="container">
-        
+
+    <div class="container" style="margin-top: 1rem;">
+
         {{#if isImpersonating}}
         <div class='text-center alert alert-warning'>
                 Impersonation Mode. Nothing will be logged. Log out to reset.
@@ -13,73 +13,60 @@
         {{/unless}}
 
         {{#if isInRole 'admin,teacher'}}
-        
-        <div class="header-box">
-            Admin / Teacher Menu
-           </div> 
-           <div class="row  gy-5">
-           
-                <div class=" col-lg-3 col-md-3  col-xs-12">
-                    <button type="button" id="instructorReportingButton" class="btn width-100-percent height-100-percent">Instructor Reporting</button><br>
-                </div>
-       
-            {{#if isInRole 'admin'}}
 
-                <div class=" col-lg-3 col-md-3  col-xs-12">
-                    <button id="adminControlsBtn" class="btn width-100-percent height-100-percent" type="button">
-                        Admin Control Panel
-                    </button><br>
-                </div>
+        <h2 style="margin-top: 0; text-align: center;">Admin / Teacher Menu</h2>
 
-            {{/if}}
+        <div class="row justify-content-center g-3">
 
-                <div class=" col-lg-3 col-md-3  col-xs-12">
-                    <button type="button" id="mechTurkButton" class="btn width-100-percent height-100-percent">Mechanical Turk</button><br>
-                </div>
-
-
-                <div class=" col-lg-3 col-md-3  col-xs-12">
-                    <button type="button" id="contentUploadButton" class="btn width-100-percent height-100-percent">Content Management</button><br>
-                </div>
-
-                
-
-                <div class=" col-lg-3 col-md-3  col-xs-12">
-                    <button type="button" id="dataDownloadButton" class="btn width-100-percent height-100-percent">Download User Log Data</button><br>
-                </div>
-
-            {{#if isInRole 'admin'}}
-             
-                  <div class=" col-lg-3 col-md-3  col-xs-12">
-                      <button type="button" id="userAdminButton" class="btn width-100-percent height-100-percent">User Admin</button><br>
-                  </div>
-     
-            {{/if}}
-       
-       
-                <div class=" col-lg-3 col-md-3  col-xs-12">
-                    <button type="button" id="classEditButton" class="btn width-100-percent height-100-percent">Class Management</button><br>
-                </div>
- 
-       
-                <div class=" col-lg-3 col-md-3  col-xs-12">
-                    <button type="button" id="tdfAssignmentEditButton" class="btn width-100-percent height-100-percent">Chapter Assignments</button><br>
-                </div>
-
-       
-        
-                <div class=" col-lg-3 col-md-3  col-xs-12">
-                    <button type="button" id="wikiButton" class="btn width-100-percent height-100-percent">MoFACTs Manuals / Wiki</button><br>
-                </div>
-     
-       
-                {{#if contentGenerationAvailable}}
-                    <div class=" col-lg-3 col-md-3  col-xs-12">
-                        <button type="button" id="contentGenerationButton" class="btn width-100-percent height-100-percent">Content Generation</button><br>
-                    </div>
-                {{/if}}
-                
+            <div class="col-lg-3 col-md-4 col-sm-6 col-12">
+                <button type="button" id="instructorReportingButton" class="btn btn-fixed mx-auto d-block">Instructor Reporting</button>
             </div>
+
+            {{#if isInRole 'admin'}}
+            <div class="col-lg-3 col-md-4 col-sm-6 col-12">
+                <button id="adminControlsBtn" class="btn btn-fixed mx-auto d-block" type="button">
+                    Admin Control Panel
+                </button>
+            </div>
+            {{/if}}
+
+            <div class="col-lg-3 col-md-4 col-sm-6 col-12">
+                <button type="button" id="mechTurkButton" class="btn btn-fixed mx-auto d-block">Mechanical Turk</button>
+            </div>
+
+            <div class="col-lg-3 col-md-4 col-sm-6 col-12">
+                <button type="button" id="contentUploadButton" class="btn btn-fixed mx-auto d-block">Content Management</button>
+            </div>
+
+            <div class="col-lg-3 col-md-4 col-sm-6 col-12">
+                <button type="button" id="dataDownloadButton" class="btn btn-fixed mx-auto d-block">Download User Log Data</button>
+            </div>
+
+            {{#if isInRole 'admin'}}
+            <div class="col-lg-3 col-md-4 col-sm-6 col-12">
+                <button type="button" id="userAdminButton" class="btn btn-fixed mx-auto d-block">User Admin</button>
+            </div>
+            {{/if}}
+
+            <div class="col-lg-3 col-md-4 col-sm-6 col-12">
+                <button type="button" id="classEditButton" class="btn btn-fixed mx-auto d-block">Class Management</button>
+            </div>
+
+            <div class="col-lg-3 col-md-4 col-sm-6 col-12">
+                <button type="button" id="tdfAssignmentEditButton" class="btn btn-fixed mx-auto d-block">Chapter Assignments</button>
+            </div>
+
+            <div class="col-lg-3 col-md-4 col-sm-6 col-12">
+                <button type="button" id="wikiButton" class="btn btn-fixed mx-auto d-block">MoFACTs Manuals / Wiki</button>
+            </div>
+
+            {{#if contentGenerationAvailable}}
+            <div class="col-lg-3 col-md-4 col-sm-6 col-12">
+                <button type="button" id="contentGenerationButton" class="btn btn-fixed mx-auto d-block">Content Generation</button>
+            </div>
+            {{/if}}
+
+        </div>
         {{/if}}
 
     </div>

@@ -1,3 +1,5 @@
+import { ReactiveDict } from 'meteor/reactive-dict';
+import { Tracker } from 'meteor/tracker';
 import {
   shuffle,
   haveMeteorUser,
@@ -9,7 +11,7 @@ import {
   getAllCurrentStimAnswers,
   getTestType,
 } from '../../lib/currentTestingHelpers';
-import { 
+import {
   initializePlyr,
   playerController,
   destroyPlyr
@@ -38,7 +40,6 @@ export {
   revisitUnit,
   gatherAnswerLogRecord,
   newQuestionHandler,
-  checkAudioInputMode,
 };
 
 /*
@@ -156,6 +157,11 @@ let simTimeoutName = null;
 let userAnswer = null;
 let lastlogicIndex = 0;
 
+// ===== PHASE 2: Scoped Reactive State =====
+// Use ReactiveDict for card-specific state instead of global Session
+// This prevents memory leaks and improves performance
+const cardState = new ReactiveDict('cardState');
+
 // Helper - return elapsed seconds since unit started. Note that this is
 // technically seconds since unit RESUME began (when we set currentUnitStartTime)
 function elapsedSecs() {
@@ -195,6 +201,10 @@ function beginMainCardTimeout(delay, func) {
   console.log('beginMainCardTimeout', func);
   clearCardTimeout();
 
+  // Cache UI settings at function start
+  const uiSettings = Session.get('curTdfUISettings');
+  const displayMode = uiSettings.displayCardTimeoutAsBarOrText;
+
   timeoutFunc = function() {
     const numRemainingLocks = Session.get('pausedLocks');
     if (numRemainingLocks > 0) {
@@ -217,11 +227,11 @@ function beginMainCardTimeout(delay, func) {
   console.log('mainCardTimeoutStart', mainCardTimeoutStart);
   timeoutName = Meteor.setTimeout(timeoutFunc, timeoutDelay);
   cardStartTime = Date.now();
- if(Session.get('curTdfUISettings').displayCardTimeoutAsBarOrText == "text" || Session.get('curTdfUISettings').displayCardTimeoutAsBarOrText == "both"){
+ if(displayMode == "text" || displayMode == "both"){
   //set the countdown timer text
-  $('#CountdownTimerText').attr("hidden",false);
+  $('#CountdownTimerText').removeAttr('hidden');
  } else {
-   $('#CountdownTimerText').attr("hidden",true);
+   $('#CountdownTimerText').attr('hidden', '');
  }
   var countdownInterval = Meteor.setInterval(function() {
     const remaining = Math.round((timeoutDelay - (Date.now() - cardStartTime)) / 1000);
@@ -234,12 +244,12 @@ function beginMainCardTimeout(delay, func) {
     } else {
       $('#CountdownTimerText').text("Continuing in: " + secsIntervalString(remaining));
       percent = 100 - (remaining * 1000 / timeoutDelay * 100);
-      if(Session.get('curTdfUISettings').displayCardTimeoutAsBarOrText == "bar" || Session.get('curTdfUISettings').displayCardTimeoutAsBarOrText == "both"){
+      if(displayMode == "bar" || displayMode == "both"){
         //add the progress bar class
         $('#progressbar').addClass('progress-bar');
         document.getElementById("progressbar").style.width = percent + "%";
       } else {
-        //set width to 0% 
+        //set width to 0%
         document.getElementById("progressbar").style.width = 0 + "%";
         //remove progress bar class
         $('#progressbar').removeClass('progress-bar');
@@ -415,13 +425,61 @@ async function leavePage(dest) {
     }
   }
   clearCardTimeout();
-  clearPlayingSound();  
+  clearPlayingSound();
   if (typeof dest === 'function') {
     dest();
   } else {
     Router.go(dest);
   }
 }
+
+// ===== PHASE 2: Centralized DOM Updates =====
+// Use Tracker.autorun to batch DOM updates reactively
+// This prevents multiple unnecessary re-renders
+Template.card.onCreated(function() {
+  const template = this;
+
+  // Autorun for feedback container visibility
+  template.autorun(function() {
+    const inFeedback = cardState.get('inFeedback');
+    const feedbackPosition = cardState.get('feedbackPosition');
+
+    if (inFeedback && feedbackPosition) {
+      // Centralized DOM update based on reactive state
+      // This runs once per state change instead of scattered throughout code
+      Tracker.afterFlush(function() {
+        if (feedbackPosition === 'top') {
+          $('#userInteractionContainer').removeAttr('hidden');
+          $('#feedbackOverrideContainer').attr('hidden', '');
+        } else if (feedbackPosition === 'middle') {
+          $('#feedbackOverrideContainer').removeAttr('hidden');
+          $('#userInteractionContainer').attr('hidden', '');
+        } else if (feedbackPosition === 'bottom') {
+          $('#feedbackOverrideContainer').attr('hidden', '');
+        }
+      });
+    }
+  });
+
+  // Initialize card state defaults
+  cardState.set('inFeedback', false);
+  cardState.set('feedbackPosition', null);
+  cardState.set('displayReady', false);
+  cardState.set('isLoading', true);
+
+  // PHASE 2: FOUC Prevention - Mark card as ready after render
+  template.autorun(function() {
+    if (cardState.get('isLoading')) {
+      Tracker.afterFlush(function() {
+        // Wait for DOM to be ready, then fade in
+        Meteor.setTimeout(function() {
+          $('#cardContainer').removeClass('card-loading').addClass('card-ready');
+          cardState.set('isLoading', false);
+        }, 100);
+      });
+    }
+  });
+});
 
 Template.card.rendered = initCard;
 
@@ -450,7 +508,7 @@ async function initCard() {
     Session.set('stimDisplayTypeMap', stimDisplayTypeMap);
   }
 
-  const audioInputEnabled = checkAudioInputMode();
+  const audioInputEnabled = Meteor.user().audioInputMode;
   if (audioInputEnabled) {
     if (!Session.get('audioInputSensitivity')) {
       // Default to 20 in case tdf doesn't specify and we're in an experiment
@@ -488,11 +546,7 @@ async function initCard() {
   } else {
     cardStart();
   }
-
-  // Initialize debug panel for admins
-  initializeDebugPanel();
 };
-
 
 Template.card.events({
   'focus #userAnswer': function() {
@@ -639,7 +693,7 @@ Template.card.events({
     if($("#videoUnitContainer").length){
       destroyPlyr();
     }
-    $("#continueBar").attr("hidden", true);
+    $("#continueBar").attr('hidden', '');
     $('#continueButton').prop('disabled', true);
     unitIsFinished('Continue Button Pressed');
   },
@@ -660,71 +714,6 @@ Template.card.events({
       let curUnit = Session.get('currentUnitNumber');
       let newUnitNumber = curUnit - 1;
       revisitUnit(newUnitNumber);
-    }
-  },
-
-  // Debug Sidebar Events (Admin Only)
-  'click #debugToggle': function(event) {
-    if (Roles.userIsInRole(Meteor.user(), ['admin'])) {
-      const sidebar = document.getElementById('debugSidebar');
-      sidebar.style.display = sidebar.style.display === 'none' ? 'block' : 'none';
-      sidebar.classList.toggle('open');
-    }
-  },
-
-  'click #closeSidebar': function(event) {
-    if (Roles.userIsInRole(Meteor.user(), ['admin'])) {
-      const sidebar = document.getElementById('debugSidebar');
-      sidebar.classList.remove('open');
-      setTimeout(() => {
-        sidebar.style.display = 'none';
-      }, 300);
-    }
-  },
-
-  'click #debugGiveCorrect': function(event) {
-    if (Roles.userIsInRole(Meteor.user(), ['admin'])) {
-      giveAnswer();
-    }
-  },
-
-  'click #debugGiveWrong': function(event) {
-    if (Roles.userIsInRole(Meteor.user(), ['admin'])) {
-      giveWrongAnswer();
-    }
-  },
-
-  'click #debugSkipUnit': function(event) {
-    if (Roles.userIsInRole(Meteor.user(), ['admin'])) {
-      unitIsFinished('Skipped by admin via debug panel');
-    }
-  },
-
-  'click #debugRefreshVars': function(event) {
-    if (Roles.userIsInRole(Meteor.user(), ['admin'])) {
-      updateDebugVariables();
-    }
-  },
-
-  'click #debugSkipToNext': function(event) {
-    if (Roles.userIsInRole(Meteor.user(), ['admin'])) {
-      skipToNextQuestion();
-    }
-  },
-
-  'click .debug-section-header': function(event) {
-    if (Roles.userIsInRole(Meteor.user(), ['admin'])) {
-      const target = $(event.currentTarget).data('target');
-      const content = $('#' + target);
-      const icon = $(event.currentTarget).find('.debug-toggle-icon');
-      
-      if (content.is(':visible')) {
-        content.slideUp(200);
-        icon.removeClass('fa-chevron-down').addClass('fa-chevron-right');
-      } else {
-        content.slideDown(200);
-        icon.removeClass('fa-chevron-right').addClass('fa-chevron-down');
-      }
     }
   },
 });
@@ -783,17 +772,23 @@ Template.card.helpers({
   'ReviewStudyCountdown': () => Session.get('ReviewStudyCountdown'),
 
   'subWordClozeCurrentQuestionExists': function() {
-    console.log('subWordClozeCurrentQuestionExists: ' + (typeof(Session.get('currentExperimentState').clozeQuestionParts) != 'undefined'));
-    return typeof(Session.get('currentExperimentState').clozeQuestionParts) != 'undefined' && Session.get('currentExperimentState').clozeQuestionParts !== null;
+    const experimentState = Session.get('currentExperimentState');
+    console.log('subWordClozeCurrentQuestionExists: ' + (typeof(experimentState.clozeQuestionParts) != 'undefined'));
+    return typeof(experimentState.clozeQuestionParts) != 'undefined' && experimentState.clozeQuestionParts !== null;
   },
 
   // For now we're going to assume syllable hints are contiguous. TODO: make this more generalizable
-  'subWordParts': () => Session.get('currentExperimentState').clozeQuestionParts || undefined,
+  'subWordParts': function() {
+    const experimentState = Session.get('currentExperimentState');
+    return experimentState.clozeQuestionParts || undefined;
+  },
 
   'ifClozeDisplayTextExists': function (){
-    const clozeText = Session.get('currentDisplay') ? Session.get('currentDisplay').clozeText : undefined;
-    const text = Session.get('currentDisplay') ? Session.get('currentDisplay').text : undefined;
-    const subWordCloze = Session.get('currentExperimentState').clozeQuestionParts ? Session.get('currentExperimentState').clozeQuestionParts : undefined;
+    const currentDisplay = Session.get('currentDisplay');
+    const experimentState = Session.get('currentExperimentState');
+    const clozeText = currentDisplay ? currentDisplay.clozeText : undefined;
+    const text = currentDisplay ? currentDisplay.text : undefined;
+    const subWordCloze = experimentState.clozeQuestionParts ? experimentState.clozeQuestionParts : undefined;
     let display = false;
     if((typeof clozeText != "undefined" && clozeText != "") || (typeof subWordCloze != "undefined" && subWordCloze != "") || (typeof text != "undefined" && text != "")){
       display = true;
@@ -802,13 +797,13 @@ Template.card.helpers({
   },
 
   'clozeText': function() {
-    const clozeText = Session.get('currentDisplay') ? Session.get('currentDisplay').clozeText : undefined;
-    return clozeText;
+    const currentDisplay = Session.get('currentDisplay');
+    return currentDisplay ? currentDisplay.clozeText : undefined;
   },
 
   'text': function() {
-      const text = Session.get('currentDisplay') ? Session.get('currentDisplay').text : undefined;
-      return text;
+    const currentDisplay = Session.get('currentDisplay');
+    return currentDisplay ? currentDisplay.text : undefined;
   },
 
   'videoUnitDisplayText': function() {
@@ -822,7 +817,8 @@ Template.card.helpers({
   },
 
   'curImgSrc': function() {
-    const curImgSrc = Session.get('currentDisplay') ? Session.get('currentDisplay').imgSrc : undefined;
+    const currentDisplay = Session.get('currentDisplay');
+    const curImgSrc = currentDisplay ? currentDisplay.imgSrc : undefined;
     if (curImgSrc) {
       return imagesDict[curImgSrc].src;
     } else {
@@ -831,8 +827,8 @@ Template.card.helpers({
   },
 
   'curVideoSrc': function() {
-    const curVideoSrc = Session.get('currentDisplay') ? Session.get('currentDisplay').videoSrc : undefined;
-    return curVideoSrc;
+    const currentDisplay = Session.get('currentDisplay');
+    return currentDisplay ? currentDisplay.videoSrc : undefined;
   },
 
   'displayAnswer': function() {
@@ -843,12 +839,15 @@ Template.card.helpers({
 
   'currentProgress': () => Session.get('questionIndex'),
 
-  'displayReady': () => Session.get('displayReady'),
+  'displayReady': function() {
+    return Session.get('displayReady');
+  },
 
   'readyPromptString': () => Session.get('currentDeliveryParams').readyPromptString,
 
   'displayReadyPromptString': function() {
-    return !Session.get('displayReady') && Session.get('currentDeliveryParams').readyPromptString
+    const deliveryParams = Session.get('currentDeliveryParams');
+    return !Session.get('displayReady') && deliveryParams.readyPromptString
   },
 
   'isDevelopment': () => Meteor.isDevelopment,
@@ -858,47 +857,55 @@ Template.card.helpers({
   },
 
   'textCard': function() {
-    return !!(Session.get('currentDisplay')) && !!(Session.get('currentDisplay').text);
+    const currentDisplay = Session.get('currentDisplay');
+    return !!currentDisplay && !!currentDisplay.text;
   },
 
   'audioCard': function() {
-    return !!(Session.get('currentDisplay')) && !!(Session.get('currentDisplay').audioSrc);
+    const currentDisplay = Session.get('currentDisplay');
+    return !!currentDisplay && !!currentDisplay.audioSrc;
   },
 
   'speakerCardPosition': function() {
-    //centers the speaker icon if there are no displays. 
-    if(Session.get('currentDisplay') && 
-        !Session.get('currentDisplay').imgSrc && 
-        !Session.get('currentDisplay').videoSrc && 
-        !Session.get('currentDisplay').clozeText && 
-        !Session.get('currentDisplay').text)
+    //centers the speaker icon if there are no displays.
+    const currentDisplay = Session.get('currentDisplay');
+    if(currentDisplay &&
+        !currentDisplay.imgSrc &&
+        !currentDisplay.videoSrc &&
+        !currentDisplay.clozeText &&
+        !currentDisplay.text)
       return `col-md-12 text-center`;
     return `col-md-1`
   },
 
   'imageCard': function() {
-    return !!(Session.get('currentDisplay')) && !!(Session.get('currentDisplay').imgSrc);
+    const currentDisplay = Session.get('currentDisplay');
+    return !!currentDisplay && !!currentDisplay.imgSrc;
   },
 
   'videoCard': function() {
-    return !!(Session.get('currentDisplay')) && !!(Session.get('currentDisplay').videoSrc);
+    const currentDisplay = Session.get('currentDisplay');
+    return !!currentDisplay && !!currentDisplay.videoSrc;
   },
 
   'clozeCard': function() {
-    return !!(Session.get('currentDisplay')) && !!(Session.get('currentDisplay').clozeText);
+    const currentDisplay = Session.get('currentDisplay');
+    return !!currentDisplay && !!currentDisplay.clozeText;
   },
 
   'textOrClozeCard': function() {
-    return !!(Session.get('currentDisplay')) &&
-      (!!(Session.get('currentDisplay').text) || !!(Session.get('currentDisplay').clozeText));
+    const currentDisplay = Session.get('currentDisplay');
+    return !!currentDisplay &&
+      (!!currentDisplay.text || !!currentDisplay.clozeText);
   },
 
   'anythingButAudioCard': function() {
-    return !!(Session.get('currentDisplay')) &&
-            (!!(Session.get('currentDisplay').text) ||
-            !!(Session.get('currentDisplay').clozeText) ||
-            !!(Session.get('currentDisplay').imgSrc) ||
-            !!(Session.get('currentDisplay').videoSrc));
+    const currentDisplay = Session.get('currentDisplay');
+    return !!currentDisplay &&
+            (!!currentDisplay.text ||
+            !!currentDisplay.clozeText ||
+            !!currentDisplay.imgSrc ||
+            !!currentDisplay.videoSrc);
   },
 
   'imageResponse': function() {
@@ -969,7 +976,7 @@ Template.card.helpers({
       if (testType === 's' || testType === 'f') {
         return true;
       }
-      if(testType === 'd' && Session.get('inFeedback')){
+      if(testType === 'd' && cardState.get('inFeedback')){
         return true;
       }
     }
@@ -977,6 +984,8 @@ Template.card.helpers({
   },
 
   'buttonTrial': () => Session.get('buttonTrial'),
+
+  'inFeedback': () => cardState.get('inFeedback'),
 
   'notButtonTrialOrInDialogueLoop': () => !Session.get('buttonTrial') || DialogueUtils.isUserInDialogueLoop(),
 
@@ -1017,7 +1026,7 @@ Template.card.helpers({
 
   'userInDiaglogue': () => Session.get('showDialogueText') && Session.get('dialogueDisplay'),
 
-  'audioEnabled': () => checkAudioInputMode(),
+  'audioEnabled': () => Meteor.user().audioInputMode,
 
   'showDialogueHints': function() {
     if(Meteor.isDevelopment){
@@ -1094,31 +1103,110 @@ Template.card.helpers({
     }
   },
 
-  // Debug helper functions for admin sidebar
-  'getTestType': function() {
-    return getTestType();
+  // ============================================================
+  // TEMPLATE OPTIMIZATION HELPERS
+  // These helpers flatten deeply nested conditionals and replace
+  // inline class logic to improve template readability
+  // ============================================================
+
+  /**
+   * Checks if sub-word cloze should be displayed
+   * Replaces 6-level deep conditional nesting
+   */
+  'shouldShowSubWordCloze': function() {
+    // Check trial type
+    const type = getTestType();
+    const trial = type === 'd' || type === 's' || type === 'f' || type === 't' || type === 'm' || type === 'n' || type === 'i';
+
+    // Check anythingButAudioCard
+    const currentDisplay = Session.get('currentDisplay');
+    const anythingButAudioCard = !!currentDisplay &&
+            (!!currentDisplay.text ||
+            !!currentDisplay.clozeText ||
+            !!currentDisplay.imgSrc ||
+            !!currentDisplay.videoSrc);
+
+    // Check ifClozeDisplayTextExists
+    const experimentState = Session.get('currentExperimentState');
+    const clozeText = currentDisplay ? currentDisplay.clozeText : undefined;
+    const text = currentDisplay ? currentDisplay.text : undefined;
+    const subWordCloze = experimentState.clozeQuestionParts ? experimentState.clozeQuestionParts : undefined;
+    const ifClozeDisplayTextExists = (typeof clozeText != "undefined" && clozeText != "") || (typeof subWordCloze != "undefined" && subWordCloze != "") || (typeof text != "undefined" && text != "");
+
+    // Check textOrClozeCard
+    const textOrClozeCard = !!currentDisplay && (!!currentDisplay.text || !!currentDisplay.clozeText);
+
+    // Check subWordClozeCurrentQuestionExists
+    const subWordClozeCurrentQuestionExists = !!subWordCloze;
+
+    return trial && anythingButAudioCard && ifClozeDisplayTextExists &&
+           textOrClozeCard && subWordClozeCurrentQuestionExists;
   },
 
-  'getCurrentUnitNumber': function() {
-    return Session.get('currentUnitNumber');
+  /**
+   * Checks if standard cloze/text should be displayed
+   * Replaces 6-level deep conditional nesting
+   */
+  'shouldShowStandardCloze': function() {
+    // Check trial type
+    const type = getTestType();
+    const trial = type === 'd' || type === 's' || type === 'f' || type === 't' || type === 'm' || type === 'n' || type === 'i';
+
+    // Check anythingButAudioCard
+    const currentDisplay = Session.get('currentDisplay');
+    const anythingButAudioCard = !!currentDisplay &&
+            (!!currentDisplay.text ||
+            !!currentDisplay.clozeText ||
+            !!currentDisplay.imgSrc ||
+            !!currentDisplay.videoSrc);
+
+    // Check ifClozeDisplayTextExists
+    const experimentState = Session.get('currentExperimentState');
+    const clozeText = currentDisplay ? currentDisplay.clozeText : undefined;
+    const text = currentDisplay ? currentDisplay.text : undefined;
+    const subWordCloze = experimentState.clozeQuestionParts ? experimentState.clozeQuestionParts : undefined;
+    const ifClozeDisplayTextExists = (typeof clozeText != "undefined" && clozeText != "") || (typeof subWordCloze != "undefined" && subWordCloze != "") || (typeof text != "undefined" && text != "");
+
+    // Check textOrClozeCard
+    const textOrClozeCard = !!currentDisplay && (!!currentDisplay.text || !!currentDisplay.clozeText);
+
+    // Check subWordClozeCurrentQuestionExists
+    const subWordClozeCurrentQuestionExists = !!subWordCloze;
+
+    return trial && anythingButAudioCard && ifClozeDisplayTextExists &&
+           textOrClozeCard && !subWordClozeCurrentQuestionExists;
   },
 
-  'getCurrentFontSize': function() {
-    const params = Session.get('currentDeliveryParams');
-    return params ? params.fontsize : 'N/A';
+  /**
+   * Returns correctness class for answer display
+   * Replaces: {{#if userCorrect}}bg-success{{/if}} {{#unless userCorrect}}bg-danger{{/unless}}
+   */
+  'correctnessClass': function(isCorrect) {
+    return isCorrect ? 'bg-success' : 'bg-danger';
   },
 
-  'getCurrentTimeout': function() {
-    const params = Session.get('currentDeliveryParams');
-    const testType = getTestType();
-    if (!params) return 'N/A';
-    
-    if (testType === 's') {
-      return params.purestudy || 'N/A';
-    } else if (testType === 'd' || testType === 't') {
-      return params.drill || 'N/A';
-    }
-    return 'N/A';
+  /**
+   * Returns video session specific classes
+   * Replaces: {{#if isVideoSession}}questionContainer position-absolute z-1{{/if}}
+   */
+  'videoSessionClasses': function(isVideoSession) {
+    return isVideoSession ? 'questionContainer position-absolute z-1' : '';
+  },
+
+  /**
+   * Returns study display class
+   * Replaces: {{#if study}} {{UIsettings.textInputDisplay}} {{/if}}
+   */
+  'studyDisplayClass': function(isStudy, uiSettings) {
+    return isStudy ? (uiSettings.textInputDisplay || '') : '';
+  },
+
+  /**
+   * Returns video session overflow classes for MC container
+   * Replaces: {{#if isVideoSession}} max-vh-30 overflow-scroll {{/if}}
+   */
+  'videoMCClasses': function(isVideoSession) {
+    return isVideoSession ? 'max-vh-30 overflow-scroll' : '';
   },
 });
 
@@ -1274,7 +1362,7 @@ function preloadStimuliFiles() {
 }
 
 function checkUserAudioConfigCompatability(){
-  const audioPromptMode = checkAudioPromptMode();
+  const audioPromptMode = Meteor.user().audioPromptMode;
   if (curStimHasImageDisplayType() && ((audioPromptMode == 'all' || audioPromptMode == 'question'))) {
     console.log('PANIC: Unable to process TTS for image response', Session.get('currentRootTdfId'));
     alert('Question reading not supported on this TDF. Please disable and try again.');
@@ -1529,7 +1617,6 @@ function handleUserForceCorrectInput(e, source) {
 function handleUserInput(e, source, simAnswerCorrect) {
   let isTimeout = false;
   let isSkip = false;
-  Session.set('isSkip', false);
   let key;
   if (source === 'timeout') {
     key = ENTER_KEY;
@@ -1547,10 +1634,10 @@ function handleUserInput(e, source, simAnswerCorrect) {
   }
   if (e.currentTarget ? e.currentTarget.id === 'continueStudy' : false) {
     key = ENTER_KEY;
-    Session.set('isSkip', true);
     isSkip = true;
     console.log('skipped study');
   }
+
   // If we haven't seen the correct keypress, then we want to reset our
   // timeout and leave
   if (key != ENTER_KEY) {
@@ -1610,7 +1697,7 @@ function handleUserInput(e, source, simAnswerCorrect) {
   // Show user feedback and find out if they answered correctly
   // Note that userAnswerFeedback will display text and/or media - it is
   // our responsbility to decide when to hide it and move on
-  userAnswerFeedback(userAnswer, isSkip, isTimeout, simAnswerCorrect);
+  userAnswerFeedback(userAnswer, isSkip , isTimeout, simAnswerCorrect);
 }
 
 // Take care of user feedback - simCorrect will usually be undefined/null BUT if
@@ -1797,7 +1884,13 @@ function determineUserFeedback(userAnswer, isSkip, isCorrect, feedbackForAnswer,
 
 async function showUserFeedback(isCorrect, feedbackMessage, isTimeout, isSkip) {
   console.log('showUserFeedback');
-  if (Session.get('curTdfUISettings').suppressFeedbackDisplay) {
+
+  // Cache frequently accessed Session variables
+  const uiSettings = Session.get('curTdfUISettings');
+  const deliveryParams = Session.get('currentDeliveryParams');
+  const experimentState = Session.get('currentExperimentState');
+
+  if (uiSettings.suppressFeedbackDisplay) {
     // Do not display any feedback, but still advance the schedule
     let trialEndTimeStamp = Session.get('trialEndTimeStamp');
     let trialStartTimeStamp = Session.get('trialStartTimestamp');
@@ -1810,21 +1903,21 @@ async function showUserFeedback(isCorrect, feedbackMessage, isTimeout, isSkip) {
   }
   userFeedbackStart = Date.now();
   const isButtonTrial = getButtonTrial();
-  feedbackDisplayPosition = Session.get('curTdfUISettings').feedbackDisplayPosition;
+  feedbackDisplayPosition = uiSettings.feedbackDisplayPosition;
   // For button trials with images where they get the answer wrong, assume incorrect feedback is an image path
   if (!isCorrect && isButtonTrial && getResponseType() == 'image') {
     const buttonImageFeedback = 'Incorrect.  The correct response is displayed below.';
-    const correctImageSrc = Session.get('currentExperimentState').originalAnswer;
+    const correctImageSrc = experimentState.originalAnswer;
     $('#UserInteraction').html('<p class="text-align alert">' + buttonImageFeedback +
       '</p><img style="background: url(' + correctImageSrc +
       '); background-size:100%; background-repeat: no-repeat;" disabled="" \
-      class="btn-alt btn-block btn-image btn-responsive">').show().attr("hidden",false);
+      class="btn-alt btn-block btn-image btn-responsive">').removeAttr('hidden');
   } else {
     //check if the feedback has the word "incorrect" or "correct" in it, if so, encase it in a bold tag and a new line before it and after it
-      singleLineFeedback = Session.get('curTdfUISettings').singleLineFeedback;
-      uiCorrectColor = Session.get('curTdfUISettings').correctColor;
-      uiIncorrectColor = Session.get('curTdfUISettings').incorrectColor;
-      displayCorrectAnswerInCenter = Session.get('curTdfUISettings').displayCorrectAnswerInCenter;
+      singleLineFeedback = uiSettings.singleLineFeedback;
+      uiCorrectColor = uiSettings.correctColor;
+      uiIncorrectColor = uiSettings.incorrectColor;
+      displayCorrectAnswerInCenter = uiSettings.displayCorrectAnswerInCenter;
       if(singleLineFeedback || feedbackDisplayPosition == "middle"){
         feedbackMessage = feedbackMessage.replace("Incorrect.", "<b style='color:" + uiIncorrectColor + ";'>Incorrect.</b>");
         feedbackMessage = feedbackMessage.replace("Correct.", "<b style='color:" + uiCorrectColor + ";'>Correct.</b>");
@@ -1832,14 +1925,14 @@ async function showUserFeedback(isCorrect, feedbackMessage, isTimeout, isSkip) {
         feedbackMessage = feedbackMessage.replace("Incorrect.", "<br><b style='color:" + uiIncorrectColor + ";'>Incorrect.</b><br>");
         feedbackMessage = feedbackMessage.replace("Correct.", "<br><b style='color:" + uiCorrectColor + ";'>Correct.</b><br>");
       }
-      if(Session.get('curTdfUISettings').simplefeedbackOnCorrect && isCorrect){
+      if(uiSettings.simplefeedbackOnCorrect && isCorrect){
         feedbackMessage = "<b style='color:" + uiCorrectColor + ";'>Correct.</b>";
       }
-      if(Session.get('curTdfUISettings').simplefeedbackOnIncorrect && !isCorrect){
+      if(uiSettings.simplefeedbackOnIncorrect && !isCorrect){
         feedbackMessage = "<b style='color:" + uiIncorrectColor + ";'>Incorrect.</b>";
       }
     $('.hints').hide();
-    const hSize = Session.get('currentDeliveryParams') ? Session.get('currentDeliveryParams').fontsize.toString() : 2;
+    const hSize = deliveryParams ? deliveryParams.fontsize.toString() : 2;
     //if userAnswer is [timeout], feedbackMessage should be "<b style='color:" + uiIncorrectColor + ";'>Incorrect.</b> " + feedbackMessage
     if(isTimeout){
       //if displayCorrectAnswerInCenter is true, then we will only display simple feedback
@@ -1849,8 +1942,8 @@ async function showUserFeedback(isCorrect, feedbackMessage, isTimeout, isSkip) {
         feedbackMessage = "<b style='color:" + uiIncorrectColor + ";'>Incorrect.</b><br>" + feedbackMessage;
       }
     }
-    const displayCorrectFeedback = Session.get('curTdfUISettings').displayUserAnswerInCorrectFeedback && isCorrect;
-    const displayIncorrectFeedback = Session.get('curTdfUISettings').displayUserAnswerInIncorrectFeedback && !isCorrect;
+    const displayCorrectFeedback = uiSettings.displayUserAnswerInCorrectFeedback && isCorrect;
+    const displayIncorrectFeedback = uiSettings.displayUserAnswerInIncorrectFeedback && !isCorrect;
     if(displayCorrectFeedback || displayIncorrectFeedback){
       //prepend the user answer to the feedback message
       feedbackMessage =  "Your answer: " + userAnswer + '. ' + feedbackMessage;
@@ -1859,24 +1952,22 @@ async function showUserFeedback(isCorrect, feedbackMessage, isTimeout, isSkip) {
       feedbackMessage = "<br>" + feedbackMessage;
     }
     //we have several options for displaying the feedback, we can display it in the top (#userInteraction), bottom (#userLowerInteraction). We write a case for this
+    // PHASE 2: Set reactive state, let Tracker.autorun handle DOM updates
+    cardState.set('feedbackPosition', feedbackDisplayPosition);
+    cardState.set('inFeedback', true);
+
     switch(feedbackDisplayPosition){
       case "top":
         target = "#UserInteraction";
-        $('#userInteractionContainer').attr("hidden",false).show();
-        $('#feedbackOverrideContainer').attr("hidden",true).hide();
         break;
       case "middle":
         target = "#feedbackOverride";
-        $('#').attr("hidden",false).show();
-        $('#userInteractionContainer').attr("hidden",true).hide();
-        $('#feedbackOverrideContainer').attr("hidden",false).show();
         break;
       case "bottom":
         target = "#userLowerInteraction";
         //add the fontSize class to the target
-        const hSize = Session.get('currentDeliveryParams') ? Session.get('currentDeliveryParams').fontsize.toString() : 2;
-        $(target).addClass('h' + hSize);
-        $('#feedbackOverrideContainer').attr("hidden",true).hide();
+        const hSizeBottom = deliveryParams ? deliveryParams.fontsize.toString() : 2;
+        $(target).addClass('h' + hSizeBottom);
         break;
     }
     //remove the first <br> tag from feedback message if it exists
@@ -1885,50 +1976,57 @@ async function showUserFeedback(isCorrect, feedbackMessage, isTimeout, isSkip) {
     }
     //encapsulate the message in a span tag
     feedbackMessage = "<span>" + feedbackMessage + "</span>";
-    //hide the buttons
+
+    // Batch DOM updates to reduce reflows/repaints
     $('#multipleChoiceContainer').hide();
     $('input-box').hide();
     $('#displayContainer').removeClass('col-md-6').addClass('mx-auto');
-    $('#displaySubContainer').addClass(Session.get('curTdfUISettings').textInputDisplay);
-    //use jquery to select the target and display the feedback message
-          //if the displayOnlyCorrectAnswerAsFeedbackOverride is set to true, then we will display the correct answer in feedbackOverride div
-          if (displayCorrectAnswerInCenter) {
-            const correctAnswer = Answers.getDisplayAnswerText(Session.get('currentExperimentState').currentAnswer);
-            $('#correctAnswerDisplayContainer').html(correctAnswer);
-            $('#correctAnswerDisplayContainer').removeClass('d-none');
-          }
-          if(isTimeout && !Session.get('curTdfUISettings').displayUserAnswerInFeedback){
+    $('#displaySubContainer').addClass(uiSettings.textInputDisplay);
+
+    //if the displayOnlyCorrectAnswerAsFeedbackOverride is set to true, then we will display the correct answer in feedbackOverride div
+    if (displayCorrectAnswerInCenter) {
+      const correctAnswer = Answers.getDisplayAnswerText(experimentState.currentAnswer);
+      // Batch: single chain for both operations
+      $('#correctAnswerDisplayContainer').html(correctAnswer).removeClass('d-none');
+    }
+          if(isTimeout && !uiSettings.displayUserAnswerInFeedback){
             feedbackMessage =  ". " + feedbackMessage;
           }
           if(!isSkip){
             if(!isCorrect){
-              Session.set('inFeedback', true);
+              // inFeedback already set via cardState above
+              // Batch DOM update: get existing content, append, then single write
+              const existingContent = $(target).html() || '';
+              const newContent = existingContent + feedbackMessage;
               $(target)
-            .html($(target).html() + feedbackMessage)
-            .attr("hidden",false)
-            .show()
+            .html(newContent)
+            .removeAttr('hidden')
             var countDownStart = new Date().getTime();
             let dialogueHistory;
             if (Session.get('dialogueHistory')) {
               dialogueHistory = JSON.parse(JSON.stringify(Session.get('dialogueHistory')));
             }
-            countDownStart += getReviewTimeout(getTestType(), Session.get('currentDeliveryParams'), isCorrect, dialogueHistory, isTimeout, isSkip);
+            countDownStart += getReviewTimeout(getTestType(), deliveryParams, isCorrect, dialogueHistory, isTimeout, isSkip);
             var originalnow = new Date().getTime();
             var originalDist = countDownStart - originalnow;
             var originalSecs = Math.ceil((originalDist % (1000 * 60)) / 1000);
+
+            // Cache for interval closure
+            const displayReviewTimeoutMode = uiSettings.displayReviewTimeoutAsBarOrText;
+            const displayCardTimeoutMode = uiSettings.displayCardTimeoutAsBarOrText;
 
             var CountdownTimerInterval = Meteor.setInterval(function() {
               var now = new Date().getTime()
               var distance = countDownStart - now;
               var seconds = Math.ceil((distance % (1000 * 60)) / 1000);
               var percent = 100 - ((seconds / originalSecs) * 100);
-              if(Session.get('curTdfUISettings').displayReviewTimeoutAsBarOrText == "text" || Session.get('curTdfUISettings').displayReviewTimeoutAsBarOrText == "both"){
-                          
+              if(displayReviewTimeoutMode == "text" || displayReviewTimeoutMode == "both"){
+
                 document.getElementById("CountdownTimerText").innerHTML = 'Continuing in: ' + seconds + "s";
               } else {
                 document.getElementById("CountdownTimerText").innerHTML = '';
               }
-              if(Session.get('curTdfUISettings').displayReviewTimeoutAsBarOrText == "bar" || Session.get('curTdfUISettings').displayCardTimeoutAsBarOrText == "both"){
+              if(displayReviewTimeoutMode == "bar" || displayCardTimeoutMode == "both"){
                 //add the progress bar class
                 $('#progressbar').addClass('progress-bar');
                 document.getElementById("progressbar").style.width = percent + "%";
@@ -1953,20 +2051,19 @@ async function showUserFeedback(isCorrect, feedbackMessage, isTimeout, isSkip) {
                   $('#CountdownTimerText').text("Continuing...");
                 }
                 Session.set('CurIntervalId', undefined);
-                Session.set('inFeedback', false)
+                cardState.set('inFeedback', false)
               }
-            }, 100);
+            }, 250); // Reduced from 100ms - 4fps is smooth enough, saves CPU
             Session.set('CurIntervalId', CountdownTimerInterval);
           } else {
             //remove progress bar class
             $('#progressbar').removeClass('progress-bar');
             //set width to 0%
             document.getElementById("progressbar").style.width = 0 + "%";
-            uiCorrectColor = Session.get('curTdfUISettings').correctColor;
+            uiCorrectColor = uiSettings.correctColor;
             $(target)
             .html(feedbackMessage)
-            .attr("hidden",false)
-            .show()
+            .removeAttr('hidden')
           }
         }
   }
@@ -2003,7 +2100,7 @@ async function showUserFeedback(isCorrect, feedbackMessage, isTimeout, isSkip) {
 let afterUserFeedbackForceCorrectCb = undefined;
 function doClearForceCorrect(doForceCorrect, trialEndTimeStamp, trialStartTimeStamp, source, userAnswer, isTimeout, isCorrect, isSkip) {
   if (doForceCorrect) {
-    $('#forceCorrectionEntry').show().attr("hidden",false);
+    $('#forceCorrectionEntry').removeAttr('hidden');
 
     if (getTestType() === 'n') {
       const prompt = Session.get('currentDeliveryParams').forcecorrectprompt;
@@ -2044,120 +2141,6 @@ async function giveWrongAnswer(){
     $('#userAnswer').val(curAnswer);
     Session.set('skipTimeout', true)
     handleUserInput({keyCode: ENTER_KEY}, 'keypress');
-  }
-}
-
-// Debug helper functions for admin sidebar
-function updateDebugVariables() {
-  if (!Roles.userIsInRole(Meteor.user(), ['admin'])) return;
-  
-  // Update all debug display elements
-  $('#debugQuestionIndex').text(Session.get('questionIndex') || 'N/A');
-  $('#debugTestType').text(getTestType() || 'N/A');
-  $('#debugCurrentAnswer').text(Session.get('currentAnswer') || 'N/A');
-  $('#debugDisplayReady').text(Session.get('displayReady') || 'false');
-  $('#debugUnitNumber').text(Session.get('currentUnitNumber') || 'N/A');
-  $('#debugButtonTrial').text(Session.get('buttonTrial') || 'false');
-  $('#debugAudioEnabled').text(Meteor.user()?.audioInputMode || 'false');
-  $('#debugVideoSession').text(Session.get('isVideoSession') || 'false');
-  
-  // Add next question info for video sessions
-  if (Session.get('isVideoSession') && playerController) {
-    const currentTime = playerController.player ? playerController.player.currentTime : 0;
-    const questionTimes = playerController.times || [];
-    let nextTime = 'End';
-    for (let i = 0; i < questionTimes.length; i++) {
-      if (questionTimes[i] > currentTime + 1) {
-        nextTime = questionTimes[i] + 's';
-        break;
-      }
-    }
-    $('#debugNextQuestion').text(nextTime);
-  } else {
-    $('#debugNextQuestion').text('N/A');
-  }
-  
-  const params = Session.get('currentDeliveryParams');
-  $('#debugFontSize').text(params?.fontsize || 'N/A');
-  
-  // Update timeout based on test type
-  const testType = getTestType();
-  let timeoutValue = 'N/A';
-  if (params) {
-    if (testType === 's') {
-      timeoutValue = params.purestudy || 'N/A';
-    } else if (testType === 'd' || testType === 't') {
-      timeoutValue = params.drill || 'N/A';
-    }
-  }
-  $('#debugTimeout').text(timeoutValue);
-}
-
-function initializeDebugPanel() {
-  if (!Roles.userIsInRole(Meteor.user(), ['admin'])) return;
-  
-  // Show the debug toggle button
-  $('#debugToggle').show();
-  
-  // Set up auto-refresh of variables every 2 seconds
-  Meteor.setInterval(function() {
-    if ($('#debugSidebar').hasClass('open')) {
-      updateDebugVariables();
-    }
-  }, 2000);
-}
-
-// Debug function to skip to next question timestamp
-function skipToNextQuestion() {
-  if (!Roles.userIsInRole(Meteor.user(), ['admin'])) return;
-  
-  console.log('Admin debug: Skipping to next question');
-  
-  // Handle video sessions
-  if (Session.get('isVideoSession') && playerController) {
-    try {
-      // Get current time and find next question time
-      const currentTime = playerController.player.currentTime;
-      const questionTimes = playerController.times || [];
-      
-      // Find the next question time after current time
-      let nextTime = null;
-      for (let i = 0; i < questionTimes.length; i++) {
-        if (questionTimes[i] > currentTime + 1) { // Add 1 second buffer
-          nextTime = questionTimes[i];
-          break;
-        }
-      }
-      
-      if (nextTime !== null) {
-        console.log(`Jumping from ${currentTime}s to ${nextTime}s`);
-        playerController.player.currentTime = nextTime;
-        // Trigger the question immediately
-        setTimeout(() => {
-          playerController.showQuestion();
-        }, 100);
-      } else {
-        console.log('No more questions in this video session');
-        alert('No more question timestamps found in this video session');
-      }
-    } catch (error) {
-      console.error('Error skipping to next question in video:', error);
-      alert('Error: Could not skip to next question in video session');
-    }
-  }
-  // Handle regular question sessions
-  else {
-    try {
-      // Clear current timeouts and force next question
-      clearCardTimeout();
-      
-      // Simulate timeout to move to next question
-      console.log('Forcing timeout to advance to next question');
-      handleUserInput({}, 'timeout');
-    } catch (error) {
-      console.error('Error skipping to next question:', error);
-      alert('Error: Could not skip to next question');
-    }
   }
 }
 
@@ -2292,7 +2275,7 @@ async function afterFeedbackCallback(trialEndTimeStamp, trialStartTimeStamp, isT
 
 async function cardEnd() {
   hideUserFeedback();
-  Session.set('inFeedback', false);
+  cardState.set('inFeedback', false);
   $('#CountdownTimerText').text("Continuing...");
   $('#userLowerInteraction').html('');
   $('#userAnswer').val('');
@@ -2543,7 +2526,7 @@ function gatherAnswerLogRecord(trialEndTimeStamp, trialStartTimeStamp, source, u
     'KCCategoryDefault': '',
     'KCCluster': clusterKC,
     'KCCategoryCluster': '',
-    'CFAudioInputEnabled': checkAudioInputMode(),
+    'CFAudioInputEnabled': Meteor.user().audioInputMode,
     'CFAudioOutputEnabled': Session.get('enableAudioPromptAndFeedback'),
     'CFDisplayOrder': Session.get('questionIndex'),
     'CFStimFileIndex': stimFileIndex,
@@ -2824,9 +2807,6 @@ async function unitIsFinished(reason) {
 
 function getButtonTrial() {
   const curUnit = Session.get('currentTdfUnit');
-  const stimuliSet = Session.get('currentStimuliSet');
-  const curCardInfo = engine.findCurrentCardInfo();
-  const clusterIndex = curCardInfo.clusterIndex;
   // Default to value given in the unit
 
   let isButtonTrial
@@ -2838,10 +2818,8 @@ function getButtonTrial() {
   else
     isButtonTrial = (curUnit.isButtonTrial || curUnit.buttonTrial);
 
-  let curStimulus = undefined;
-  if (Array.isArray(stimuliSet) && Number.isInteger(clusterIndex) && clusterIndex >= 0 && clusterIndex < stimuliSet.length) {
-    curStimulus = stimuliSet[clusterIndex];
-  }
+  const curCardInfo = engine.findCurrentCardInfo();
+  const curStimulus = Session.get('currentStimuliSet')[engine.findCurrentCardInfo().clusterIndex]
   if (curCardInfo.forceButtonTrial) {
     // Did this question specifically override button trial?
     isButtonTrial = true;
@@ -2889,7 +2867,6 @@ async function prepareCard() {
   Session.set('displayReady', false);
   Session.set('submmissionLock', false);
   Session.set('currentDisplay', {});
-  console.log('displayReadyFalse, prepareCard');
   $('#helpButton').prop("disabled",false);
   if (engine.unitFinished()) {
     unitIsFinished('Unit Engine');
@@ -2922,6 +2899,9 @@ async function prepareCard() {
 async function newQuestionHandler() {
   console.log('newQuestionHandler - Secs since unit start:', elapsedSecs());
 
+  // Cache frequently accessed Session variables
+  const experimentState = Session.get('currentExperimentState');
+
   scrollList.update(
       {'justAdded': 1},
       {'$set': {'justAdded': 0}},
@@ -2941,27 +2921,27 @@ async function newQuestionHandler() {
     $('#textEntryRow').hide();
     setUpButtonTrial();
   } else {
-    $('#textEntryRow').show().attr("hidden",false);
+    $('#textEntryRow').removeAttr('hidden');
   }
 
   // If this is a study-trial and we are displaying a cloze, then we should
   // construct the question to display the actual information. Note that we
   // use a regex so that we can do a global(all matches) replace on 3 or
   // more underscores
-  if ((getTestType() === 's' || getTestType() === 'f') && !!(Session.get('currentExperimentState').currentDisplayEngine.clozeText)) {
-    const currentDisplay = Session.get('currentExperimentState').currentDisplayEngine;
-    const clozeQuestionFilledIn = Answers.clozeStudy(currentDisplay.clozeText, Session.get('currentExperimentState').currentAnswer);
+  if ((getTestType() === 's' || getTestType() === 'f') && !!(experimentState.currentDisplayEngine.clozeText)) {
+    const currentDisplay = experimentState.currentDisplayEngine;
+    const clozeQuestionFilledIn = Answers.clozeStudy(currentDisplay.clozeText, experimentState.currentAnswer);
     currentDisplay.clozeText = clozeQuestionFilledIn;
     const newExperimentState = {currentDisplayEngine: currentDisplay};
     updateExperimentState(newExperimentState, 'card.newQuestionHandler');
-    Session.get('currentExperimentState').currentDisplayEngine = currentDisplay;
+    experimentState.currentDisplayEngine = currentDisplay;
   }
 
   startQuestionTimeout();
   checkSimulation();
 
-  if (Session.get('currentExperimentState').showOverlearningText) {
-    $('#overlearningRow').show().attr("hidden",false);
+  if (experimentState.showOverlearningText) {
+    $('#overlearningRow').removeAttr('hidden');
   }
 }
 
@@ -2992,9 +2972,6 @@ function startQuestionTimeout() {
   console.log('startQuestionTimeout, closeQuestionParts', Session.get('currentExperimentState').clozeQuestionParts);
 
   Session.set('displayReady', false);
-  console.log('++++ CURRENT DISPLAY ++++');
-  console.log(currentDisplayEngine);
-  console.log('-------------------------');
 
   let readyPromptTimeout = 0;
   if(Session.get('currentDeliveryParams').readyPromptStringDisplayTime && Session.get('currentDeliveryParams').readyPromptStringDisplayTime > 0){
@@ -3065,34 +3042,26 @@ function checkAndDisplayTwoPartQuestion(deliveryParams, currentDisplayEngine, cl
   Session.set('currentDisplay', currentDisplayEngine);
   Session.get('currentExperimentState').clozeQuestionParts = closeQuestionParts;
   Session.set('displayReady', isVideoSession ? false : true);
-  console.log('checking for two part questions');
   // Handle two part questions
   const currentQuestionPart2 = Session.get('currentExperimentState').currentQuestionPart2;
   if (currentQuestionPart2) {
-    console.log('two part question detected, displaying first part');
     const twoPartQuestionWrapper = {'text': currentQuestionPart2};
     const initialviewTimeDelay = deliveryParams.initialview;
-    console.log('two part question detected, delaying for ' + initialviewTimeDelay + ' ms then continuing');
     setTimeout(function() {
-      console.log('after timeout, displaying question part two', new Date());
       Session.set('displayReady', false);
       Session.set('currentDisplay', twoPartQuestionWrapper);
       Session.set('displayReady', isVideoSession ? false : true);
-      console.log('displayReadyTrue, checkAndDisplayTwoPartQuestion');
       Session.get('currentExperimentState').currentQuestionPart2 = undefined;
       redoCardImage();
       nextStageCb();
     }, initialviewTimeDelay);
   } else {
-    console.log('one part question detected, continuing with question');
     nextStageCb();
   }
 }
 
 function beginQuestionAndInitiateUserInput(delayMs, deliveryParams) {
-  console.log('beginQuestionAndInitiateUserInput');
   firstKeypressTimestamp = 0;
-  console.log(trialStartTimestamp)
   const currentDisplay = Session.get('currentDisplay');
 
   if (currentDisplay.audioSrc) {
@@ -3185,7 +3154,7 @@ function stopUserInput() {
 
 // Audio prompt/feedback
 function speakMessageIfAudioPromptFeedbackEnabled(msg, audioPromptSource) {
-  const audioPromptMode = checkAudioPromptMode();
+  const audioPromptMode = Meteor.user().audioPromptMode;
   const enableAudioPromptAndFeedback = audioPromptMode && audioPromptMode != 'silent';
   let synthesis = window.speechSynthesis;
   if (enableAudioPromptAndFeedback) {
@@ -3305,8 +3274,22 @@ async function processLINEAR16(data) {
       // is within the realm of reasonable responses before transcribing it
       answerGrammar = getAllCurrentStimAnswers(false);
     }
+    let tdfSpeechAPIKey;
+    if(Session.get('useEmbeddedAPIKeys')){
+      tdfSpeechAPIKey = await meteorCallAsync('getTdfSpeechAPIKey', Session.get('currentTdfId'));
+    } else {
+      tdfSpeechAPIKey = '';
+    }
     // Make the actual call to the google speech api with the audio data for transcription
-    Meteor.call('makeGoogleSpeechAPICall', Session.get('currentTdfId'), Session.get('speechAPIKey'), request, answerGrammar, (err, res) => speechAPICallback(err, res));
+    if (tdfSpeechAPIKey && tdfSpeechAPIKey != '') {
+      console.log('tdf key detected');
+      Meteor.call('makeGoogleSpeechAPICall', Session.get('currentTdfId'), "", request, answerGrammar, (err, res) => speechAPICallback(err, res));
+    // If we don't have a tdf provided speech api key load up the user key
+    // NOTE: we shouldn't be able to get here if there is no user key
+    } else {
+      console.log('no tdf key, using user provided key');
+      Meteor.call('makeGoogleSpeechAPICall', Session.get('currentTdfId'), Session.get('speechAPIKey'), request, answerGrammar, (err, res) => speechAPICallback(err, res));
+    }
   } else {
     console.log('processLINEAR16 userAnswer not defined');
   }
@@ -3326,11 +3309,6 @@ function speechAPICallback(err, data){
     const content = JSON.parse(response);
     console.log(err);
     transcript = 'I did not get that. Please try again.';
-    ignoredOrSilent = true;
-  } else if(response.error) {
-    transcript = `Google API Error ${response.error.code}: ${response.error.message}`
-    alert(transcript)
-    console.log('transcript: ' + transcript)
     ignoredOrSilent = true;
   } else if (response['results']) {
     transcript = response['results'][0]['alternatives'][0]['transcript'].toLowerCase();
@@ -3352,7 +3330,6 @@ function speechAPICallback(err, data){
 
   const inUserForceCorrect = $('#forceCorrectionEntry').is(':visible');
   if (getButtonTrial()) {
-    console.log('button trial, setting user answer to verbalChoice');
     userAnswer = $('[verbalChoice=\'' + transcript + '\']')[0];
     if (!userAnswer) {
       console.log('Choice couldn\'t be found');
@@ -3362,13 +3339,11 @@ function speechAPICallback(err, data){
     if (DialogueUtils.isUserInDialogueIntroExit()) {
       speechTranscriptionTimeoutsSeen = 0;
     } else {
-      console.log('dialogue loop -> transcribe to dialogue user answer');
       DialogueUtils.setDialogueUserAnswerValue(transcript);
     }
   } else {
     userAnswer = inUserForceCorrect ? document.getElementById('userForceCorrect') :
         document.getElementById('userAnswer');
-    console.log('regular trial, transcribing user response to user answer box');
     userAnswer.value = transcript;
   }
 
@@ -3524,26 +3499,8 @@ function startUserMedia(stream) {
   cardStart();
 }
 
-function checkAudioInputMode(){
-  return Meteor.user().audioInputMode && Session.get('currentTdfFile').tdfs.tutor.setspec.audioInputEnabled
-}
-
-function checkAudioPromptMode(){
-  const tdfPromptMode = Session.get('currentTdfFile').tdfs.tutor.setspec.audioPromptMode
-  const userPromptMode = Meteor.user().audioPromptMode
-  if(userPromptMode && tdfPromptMode) {
-    if (userPromptMode == 'all' || userPromptMode == tdfPromptMode) {
-      return tdfPromptMode
-    }
-    if (tdfPromptMode == 'all') {
-      return userPromptMode
-    }
-  }
-  return 'silent' // if we get here then prompt modes are either silent, do not match, or are not set
-}
-
 function startRecording() {
-  if (recorder && !Session.get('recordingLocked') && checkAudioInputMode()) {
+  if (recorder && !Session.get('recordingLocked') && Meteor.user().audioInputMode) {
     Session.set('recording', true);
     recorder.record();
     console.log('RECORDING START');
@@ -4053,7 +4010,7 @@ async function removeCardByUser() {
   Session.set('CurTimeoutId', undefined);
   Session.set('CurIntervalId', undefined);
   $('#CountdownTimer').text('');
-  $('#removalFeedback').show().attr("hidden",false);
+  $('#removalFeedback').removeAttr('hidden');
 
   let clusterIndex = Session.get('clusterIndex');
   let stims = getStimCluster(clusterIndex).stims; 

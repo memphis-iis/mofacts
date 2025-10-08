@@ -1,43 +1,48 @@
 <template name="card">
-    <div class="container position-relative my-20">
+    <div class="container position-relative outer-container-spacing">
+
+        <!-- ============================================================
+             VIDEO SESSION MODE - Instructional video player interface
+             Only displays when user is watching educational videos
+             ============================================================ -->
         {{#if isVideoSession}}
-        <div class="row my-5">
+        <div class="row video-section-spacing">
             <div class="col-lg-12 visible-text text-center">
                 {{{videoUnitDisplayText}}}
             </div>
         </div>
-        <div class="container position-relative">
-            <div id="videoUnitContainer" class="position-absolute z-0 w-100">
-                <video id="videoUnitPlayer" playsinline controls>
-                    <!-- <source src="{{videoSource}}" type="video/mp4" /> -->
-                </video>
-                <div class="row">
-                    <dov class="col-6 offset-3">
-                        <div id="continueBar" hidden style="text-align: center; padding: 20px">
-                            <button type="button" id="continueButton" class="btn text-center">
-                                {{UIsettings.continueButtonText}}
-                            </button>
-                        </div> 
-                    </dov>
-                    {{#if allowGoBack}}
-                    <div class="col-1 offset-2">
-                        <div id="goBackBar" style="text-align: center; padding: 20px">
-                            <button type="button" id="stepBackButton" class="btn text-center">
-                                <!-- back icon -->
-                                <i class="fa fa-arrow-left" aria-hidden="true"></i>
-                            </button>
-                        </div> 
+        <div id="videoUnitContainer" class="position-absolute z-0 w-100">
+            <video id="videoUnitPlayer" playsinline controls>
+                <!-- <source src="{{videoSource}}" type="video/mp4" /> -->
+            </video>
+            <div class="row">
+                <div class="col-6 offset-3">
+                    <div id="continueBar" hidden class="video-button-bar">
+                        <button type="button" id="continueButton" class="btn text-center">
+                            {{UIsettings.continueButtonText}}
+                        </button>
                     </div>
-                    {{/if}}
-                </div> 
+                </div>
+                {{#if allowGoBack}}
+                <div class="col-1 offset-2">
+                    <div id="goBackBar" class="video-button-bar">
+                        <button type="button" id="stepBackButton" class="btn text-center">
+                            <!-- back icon -->
+                            <i class="fa fa-arrow-left" aria-hidden="true"></i>
+                        </button>
+                    </div>
+                </div>
+                {{/if}}
             </div>
         </div>
-        {{#if isVideoSession}}
-        {{else}}
+        {{#unless isVideoSession}}
         <div class="vh-100"></div>
+        {{/unless}}
         {{/if}}
-        {{/if}}
-        <br>
+
+        <!-- ============================================================
+             ADMIN/DEBUG WARNINGS
+             ============================================================ -->
         {{#if isImpersonating}}
         <div class='text-center alert alert-warning'>
                 Impersonation Mode. Nothing will be logged. Log out to reset.
@@ -45,66 +50,70 @@
         {{/if}}
         {{#if displayFeedback}}
         {{>profileDialogueToggles}}
+        <div class="stack-gap-small"></div>
         <div>
-            <br />
             {{#if resetFeedbackSettingsFromIndex}}
                 <button id='confirmFeedbackSelectionFromIndex' class='btn width-100-percent'>Confirm feedback settings</button>
             {{else}}
                 <button id='confirmFeedbackSelection' class='btn width-100-percent'>Confirm feedback settings</button>
             {{/if}}
         </div>
+        <div class="stack-gap"></div>
     {{/if}}
+
+        <!-- ============================================================
+             PRACTICE CARD - Main learning interface
+             Includes stimulus display, input methods, and feedback
+             ============================================================ -->
         {{#if displayReady}}
-        <div id="userInteractionContainer" class="vh-5" hidden>
-                <div class="text-center {{fontSizeClass}}" id="UserInteraction" style="margin-top: 0px;" hidden></div>
-                <div class="" id="forceCorrectionEntry" hidden>
+        <div id="userInteractionContainer" class="smooth-transition" hidden>
+                <div class="text-center {{fontSizeClass}} smooth-transition" id="UserInteraction" hidden></div>
+                <div id="forceCorrectionEntry" class="smooth-transition" hidden>
                     {{> inputForceCorrect}}
                 </div>
-                <div class="vh-10"></div>
+                <div class="stack-gap"></div>
         </div>
-        <br>    
 
             <div class="scrollHistoryContainer">
                 {{#if haveScrollList}}
                 {{#each scrollList}}
                 <div class="row">
-                    <div class="col-xs-12 col-sm-12 col-md-8 col-lg-12">
+                    <div class="col-12 col-md-8">
                         <div class="panel">
                             <div class="panel-heading bg-primary">{{question}}</div>
-                            <div class="panel-body {{#if userCorrect}}bg-success{{/if}} {{#unless userCorrect}}bg-danger{{/unless}}">{{answer}}</div>
+                            <div class="panel-body {{correctnessClass userCorrect}}">{{answer}}</div>
                         </div>
                     </div>
                 </div>
                 {{/each}}
                 {{/if}}
             </div>
-            <div class="row{{UIsettings.reverseStimuliAndInputColumns}} mx-auto w-100 top-0 {{#if isVideoSession}}questionContainer position-absolute z-1{{/if}}">
+            <div class="row{{UIsettings.reverseStimuliAndInputColumns}} mx-auto w-100 top-0 {{videoSessionClasses isVideoSession}}">
                 {{#if trial}}
                 <div class="{{UIsettings.displayColWidth}} mx-auto" id="displayContainer">
                     {{#if anythingButAudioCard}}
-                        <div class="{{fontSizeClass}} {{#if study}} {{UIsettings.textInputDisplay}} {{/if}} {{stimuliBoxClasses}}" style="{{stimuliBoxStyle}}" id="displaySubContainer">
+                        <div class="{{fontSizeClass}} {{studyDisplayClass study UIsettings}} {{stimuliBoxClasses}}" style="{{stimuliBoxStyle}}" id="displaySubContainer">
+                            {{#if textOrClozeCard}}
                             <p style="{{getFontSizeStyle}}">
-                            {{#if ifClozeDisplayTextExists}}
-                                {{#if textOrClozeCard}}
-                                    {{#if subWordClozeCurrentQuestionExists}}
-                                        {{{subWordParts}}}
-                                    {{else}}
-                                        {{{clozeText}}}
-                                        {{{text}}}
-                                    {{/if}}
-                                {{/if}}
+                            {{#if shouldShowSubWordCloze}}
+                                {{{subWordParts}}}
+                            {{else if shouldShowStandardCloze}}
+                                {{{clozeText}}}
+                                {{{text}}}
+                            {{else}}
+                                {{{text}}}
                             {{/if}}
                             </p>
+                            {{/if}}
                             {{#if imageCard}}
                             <div class="h2 vh-50" id="imageDisplay">
                                 <div class="w-100 text-center">
-                                    <img src="{{curImgSrc}}" class="img-responsive" style="max-height: 50vh; max-width: 100%; object-fit: contain;" alt="Image display">
+                                    <img src="{{curImgSrc}}" class="img-responsive stimulus-image" alt="Image display" loading="lazy">
                                 </div>
-                                <br>
                             </div>
                             {{/if}}
                             {{#if videoCard}}
-                                <video autoplay="">
+                                <video autoplay>
                                     <source src="{{curVideoSrc}}">
                                     Your browser does not support the video tag.
                                 </video>
@@ -112,24 +121,20 @@
                         </div>
                     {{/if}}
                     {{#if audioCard}}
-                        
-                        <!-- fa speaker icon with class img-responsive-->
                         <div class="text-center">
                             <span class="fa fa-volume-up fa-5x" id="audioIcon"></span>
                         </div>
-                        <div class="vh-5"></div>
+                        <div class="stack-gap-small"></div>
                     {{/if}}
                 </div>
                 <div id="correctAnswerDisplayContainer" class="{{UIsettings.textInputDisplay2}} alert {{fontSizeClass}} {{UIsettings.displayColWidth}} d-none text-center">
-                </div>         
-                <div id="feedbackOverrideContainer" hidden>
-                    <div id="feedbackOverride" class="{{fontSizeClass}} text-center">
-                        
-                    </div>
                 </div>
-                {{#if userInDiaglogue}}   
+                <div id="feedbackOverrideContainer" class="smooth-transition" hidden>
+                    <div id="feedbackOverride" class="{{fontSizeClass}} text-center smooth-transition"></div>
+                </div>
+                {{#if userInDiaglogue}}
                     <div class="row {{fontSizeClass}}">
-                        <div class="container-fluid" id="displayContainer">
+                        <div class="container-fluid" id="dialogueDisplayContainer">
                             <div id="leftPanel" class="col-md-11">
                                 <div class="alert text-center" id="textQuestion">
                                     {{{dialogueText}}}
@@ -141,12 +146,12 @@
             {{/if}}
 
             {{#if skipstudy}}
+            <div class="stack-gap"></div>
             <div class="col-12 text-center">
-                <button type='button' id='continueStudy' name='continueStudy' class='btn btn-block btn-responsive'>
+                <button type='button' id='continueStudy' name='continueStudy' class='btn w-100 btn-responsive'>
                     {{UIsettings.skipStudyButtonText}}
                 </button>
             </div>
-            <div class="vh-5"></div>
             {{/if}}
 
             {{#if study}}
@@ -158,15 +163,19 @@
             {{/if}}
 
             {{#if testordrill}}
+                {{#unless inFeedback}}
                 {{#if audioEnabled}}
                     {{#if isNotInDialogueLoopStageIntroOrExit}}
-                        <p class="marginLeftAndRight text-center">{{voiceTranscriptionPromptMsg}}</p>
-                        <img class="center-block" style="height:50px; width:auto; " src="{{voiceTranscriptionImgSrc}}">
-                        <br>
+                        <div class="text-center">
+                            <p class="marginLeftAndRight">{{voiceTranscriptionPromptMsg}}</p>
+                            <img class="center-block voice-icon" src="{{voiceTranscriptionImgSrc}}" loading="lazy">
+                            <div class="stack-gap-small"></div>
+                        </div>
                     {{/if}}
                 {{/if}}
+                {{/unless}}
                 {{#if notButtonTrialOrInDialogueLoop}}
-                        <div class="input-box col-12" style="box-sizing: border-box;">
+                        <div class="input-box col-12">
                             {{#if showDialogueHints}}
                                 {{#if dialogueCacheHint}}
                                     <div class="row hints">
@@ -179,16 +188,14 @@
                             {{> inputF}}
                         </div>
                 {{else}}
-                    
-                    
-                
                 {{#if buttonTrial}}
+                    {{#unless inFeedback}}
                     {{#if audioEnabled}}
                         <p class="marginLeftAndRight text-center">Please speak the letter next to the correct option for audio input</p>
                     {{/if}}
+                    {{/unless}}
                 {{/if}}
-            
-                <div id="multipleChoiceContainer" class="{{UIsettings.choiceColWidth}} {{#if isVideoSession}} max-vh-30 overflow-scroll {{/if}}">
+                <div id="multipleChoiceContainer" class="{{UIsettings.choiceColWidth}} {{videoMCClasses isVideoSession}} smooth-transition">
                     <!-- will contain multiple choice buttons which are dynamically added. -->
                     {{#if buttonTrial}}
                     <div id="multipleChoiceTable" class="row gy-3 choice text-center row-cols-{{UIsettings.choiceButtonCols}} align-items-start">
@@ -197,41 +204,37 @@
                             <div class="col ml-auto">
                                 {{#each this}}
                                 {{#if audioEnabled}}
-                                    <label style="margin-bottom:0px">{{verbalChoice}}.</label>
-                                    <br>
-                        
+                                    <label class="no-bottom-margin">{{verbalChoice}}.</label>
+                                    <div class="stack-gap-small"></div>
                                 {{/if}}
-                        
-                                    <button style="background: url({{buttonValue}});background-size: 300px 150px;;background-repeat: no-repeat;" verbalChoice='{{verbalChoice}}' type='button' name='{{buttonName}}' class='btnPaddedAndMinWidth btn-alt btn-block multipleChoiceButton btn-image btn-responsive'>
+                                    <button style="background-image: url({{buttonValue}});" verbalChoice='{{verbalChoice}}' type='button' name='{{buttonName}}' class='btnPaddedAndMinWidth btn-alt w-100 multipleChoiceButton btn-image btn-responsive'>
                                     </button>
-                                
                                 {{/each}}
                             </div>
                             {{/each}}
                         {{else}}
                             {{#each buttonList}}
-                            <div display={{displayReadyConverter (displayReady) }} class="col ml-auto">
+                            <div data-display="{{displayReadyConverter (displayReady)}}" class="col ml-auto">
                                 {{#if audioEnabled}}
-                                <label style="margin-bottom:0px">{{verbalChoice}}.</label>
-                                <br>
+                                <label class="no-bottom-margin">{{verbalChoice}}.</label>
+                                <div class="stack-gap-small"></div>
                                 {{/if}}
-                            
                                 <button verbalChoice='{{verbalChoice}}' type='button' name='{{buttonName}}' class='multipleChoiceButton btn btn-primary'>
                                 {{{buttonValue}}}
                                 </button>
-                            
                             </div>
                             {{/each}}
                         {{/if}}
                     </div>
                     {{/if}}
-                <br>
+                <div class="stack-gap-small"></div>
             </div>
             {{/if}}
 
             {{#if UIsettings.displayConfirmButton}}
+            <div class="stack-gap"></div>
             <div class="col-12 text-center">
-                <button type='button' id='confirmButton' name='confirmButton' class='btn btn-block btn-responsive' disabled>
+                <button type='button' id='confirmButton' name='confirmButton' class='btn w-100 btn-responsive' disabled>
                     {{UIsettings.continueButtonText}}
                 </button>
             </div>
@@ -239,19 +242,22 @@
 
             {{/if}}
             {{#if questionIsRemovable}}
-            <div class="vh-10"></div>
+            <div class="stack-gap"></div>
                 <div class="removalContainer">
-                    <div class="col-sm-12 col-xs-12 col-md-6 col-lg-6 mx-auto text-center">
-                        <button href="#" id="removeQuestion" class="btn btn-secondary">
+                    <div class="col-12 col-md-6 mx-auto text-center">
+                        <button id="removeQuestion" class="btn btn-secondary">
                             Report Mistake
-                        </button> 
+                        </button>
                     </div>
                 </div>
             {{/if}}
             </div>
-            
+            <div class="stack-gap"></div>
 
-
+        <!-- ============================================================
+             DEBUG PANELS - Teacher/Admin only displays
+             Shows answers, progress, and probability parameters
+             ============================================================ -->
             {{#if isInRole 'teacher'}}
             <div class="row">
                 <div class="col-lg-12 visible-text text-center">
@@ -266,7 +272,7 @@
                 <div class="col-lg-12 visible-text text-left">
                     {{#if probabilityParameters}}
                     <h5>(Debug) Probabilty input parameters for this selection:</h5>
-                        <p style="font-size: small;">
+                        <p class="small-text">
                                 {{#each probabilityParameters}}
                                 {{this.parameter}}: {{this.value}}, &nbsp;
                                 {{/each}}
@@ -278,9 +284,9 @@
                 {{/if}}
             {{/if}}
             <div class="row">
-                <div hidden  class="col-lg-offset-2 col-lg-5" style="text-align: center;" id="overlearningRow">
-                    <h4 style=" color: #585858;">You are currently overlearning!  Please consider taking a break and coming back later.</h4>
-                    <button id="overlearningButton" type="button" class="btn btn-responsive" style="width: auto;">Practice</button>
+                <div hidden class="col-lg-offset-2 col-lg-5 text-center" id="overlearningRow">
+                    <h4 class="overlearning-text">You are currently overlearning!  Please consider taking a break and coming back later.</h4>
+                    <button id="overlearningButton" type="button" class="btn btn-responsive overlearning-button">Practice</button>
                 </div>
             </div>
         {{/if}}
@@ -325,92 +331,7 @@
 
     </div> <!-- close container -->
 
-    <!-- Debug Sidebar for Admins -->
-    {{#if isInRole 'admin'}}
-    <div id="debugSidebar" class="debug-sidebar" style="display: none;">
-        <div class="debug-sidebar-header">
-            <h5>Debug Panel</h5>
-            <button id="closeSidebar" class="btn btn-sm">&times;</button>
-        </div>
-        <div class="debug-sidebar-content">
-            <div class="debug-section">
-                <h6>Quick Actions</h6>
-                <button id="debugGiveCorrect" class="btn btn-sm btn-success">Give Correct Answer</button>
-                <button id="debugGiveWrong" class="btn btn-sm btn-danger">Give Wrong Answer</button>
-                <button id="debugSkipUnit" class="btn btn-sm btn-warning">Skip Unit</button>
-                <button id="debugSkipToNext" class="btn btn-sm btn-info">Skip to Next Question</button>
-            </div>
-            
-            <div class="debug-section">
-                <h6 class="debug-section-header" data-target="currentState">
-                    <i class="fa fa-chevron-right debug-toggle-icon"></i> Current State
-                </h6>
-                <div class="debug-section-content" id="currentState" style="display: none;">
-                    <div class="debug-variable">
-                        <strong>Question Index:</strong> <span id="debugQuestionIndex">{{currentProgress}}</span>
-                    </div>
-                    <div class="debug-variable">
-                        <strong>Test Type:</strong> <span id="debugTestType">{{getTestType}}</span>
-                    </div>
-                    <div class="debug-variable">
-                        <strong>Current Answer:</strong> <span id="debugCurrentAnswer">{{rawAnswer}}</span>
-                    </div>
-                    <div class="debug-variable">
-                        <strong>Display Ready:</strong> <span id="debugDisplayReady">{{displayReady}}</span>
-                    </div>
-                    <div class="debug-variable">
-                        <strong>Next Question:</strong> <span id="debugNextQuestion">N/A</span>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="debug-section">
-                <h6 class="debug-section-header" data-target="sessionVariables">
-                    <i class="fa fa-chevron-right debug-toggle-icon"></i> Session Variables
-                </h6>
-                <div class="debug-section-content" id="sessionVariables" style="display: none;">
-                    <div class="debug-variable">
-                        <strong>Unit Number:</strong> <span id="debugUnitNumber">{{getCurrentUnitNumber}}</span>
-                    </div>
-                    <div class="debug-variable">
-                        <strong>Button Trial:</strong> <span id="debugButtonTrial">{{buttonTrial}}</span>
-                    </div>
-                    <div class="debug-variable">
-                        <strong>Audio Enabled:</strong> <span id="debugAudioEnabled">{{audioEnabled}}</span>
-                    </div>
-                    <div class="debug-variable">
-                        <strong>Video Session:</strong> <span id="debugVideoSession">{{isVideoSession}}</span>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="debug-section">
-                <h6 class="debug-section-header" data-target="deliveryParams">
-                    <i class="fa fa-chevron-right debug-toggle-icon"></i> Delivery Params
-                </h6>
-                <div class="debug-section-content" id="deliveryParams" style="display: none;">
-                    <div class="debug-variable">
-                        <strong>Font Size:</strong> <span id="debugFontSize">{{getCurrentFontSize}}</span>
-                    </div>
-                    <div class="debug-variable">
-                        <strong>Timeout (ms):</strong> <span id="debugTimeout">{{getCurrentTimeout}}</span>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="debug-section">
-                <button id="debugRefreshVars" class="btn btn-sm btn-info">Refresh Variables</button>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Debug Toggle Button -->
-    <button id="debugToggle" class="debug-toggle" style="display: none;">
-        <i class="fa fa-bug"></i>
-    </button>
-    {{/if}}
-
-    <div id="postCardContainer">&nbsp;</div>
+    <div id="postCardContainer"></div>
 
 
     <!-- Use a fixed footer if we have something to show -->
@@ -443,24 +364,23 @@
     {{/if}}
     <!-- card lower feedback-->
   {{#if isInTrial}}
-  {{#if isInInstructions}}
-  {{else}}
+  {{#unless isInInstructions}}
   <div id="userLowerInteractionContainer">
       <div class="row text-center">
-          <div class="col-sm-12 col-xs-12 col-md-6 col-lg-6 mx-auto" style="margin-bottom: 30px;">
-              <br>
-              <div id="userLowerInteraction">
+          <div class="col-12 col-md-6 mx-auto lower-interaction-spacing">
+              <div class="stack-gap-small"></div>
+              <div id="userLowerInteraction" class="smooth-transition">
               </div>
-              <div id="CountdownTimerText">
+              <div id="CountdownTimerText" class="smooth-transition">
               </div>
               <div id="progressBarContainer" class="progress">
-                  <div id="progressbar" class="bg-warning progress-bar-striped" role="progressbar" aria-label="Basic example" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100" style="width:0%;"></div>
+                  <div id="progressbar" class="bg-warning progress-bar-striped smooth-transition" role="progressbar" aria-label="Basic example" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100" style="width:0%;"></div>
               </div>
           </div>
       </div>
   </div>
+  {{/unless}}
   {{/if}}
-{{/if}}
 
 <script>
 $('#finalInstructionsDlg').on('shown.bs.modal', function() {

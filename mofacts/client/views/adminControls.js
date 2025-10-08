@@ -126,6 +126,48 @@ Template.adminControls.events({
                 console.log("Cleared stim display type map: " + res);
             }
         });
+    },
+    'change #logoUpload': function(event) {
+        const file = event.target.files[0];
+        if (file) {
+            // Validate file type
+            if (!file.type.startsWith('image/')) {
+                alert('Please select an image file');
+                return;
+            }
+            // Validate file size (max 2MB)
+            if (file.size > 2 * 1024 * 1024) {
+                alert('File size must be less than 2MB');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const base64Data = e.target.result;
+                Meteor.call('setCustomThemeProperty', 'logo_url', base64Data, function(err, res) {
+                    if (err) {
+                        alert("Error uploading logo: " + err);
+                    } else {
+                        console.log("Logo uploaded successfully");
+                        getCurrentTheme();
+                    }
+                });
+            };
+            reader.readAsDataURL(file);
+        }
+    },
+    'click #clearLogo': function(event) {
+        if (confirm('Are you sure you want to clear the logo?')) {
+            Meteor.call('setCustomThemeProperty', 'logo_url', '', function(err, res) {
+                if (err) {
+                    alert("Error clearing logo: " + err);
+                } else {
+                    console.log("Logo cleared successfully");
+                    $('#logoUpload').val('');
+                    getCurrentTheme();
+                }
+            });
+        }
     }
 });
   
