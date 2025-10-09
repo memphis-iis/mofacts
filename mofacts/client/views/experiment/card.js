@@ -2824,6 +2824,9 @@ async function unitIsFinished(reason) {
 
 function getButtonTrial() {
   const curUnit = Session.get('currentTdfUnit');
+  const stimuliSet = Session.get('currentStimuliSet');
+  const curCardInfo = engine.findCurrentCardInfo();
+  const clusterIndex = curCardInfo.clusterIndex;
   // Default to value given in the unit
 
   let isButtonTrial
@@ -2835,8 +2838,10 @@ function getButtonTrial() {
   else
     isButtonTrial = (curUnit.isButtonTrial || curUnit.buttonTrial);
 
-  const curCardInfo = engine.findCurrentCardInfo();
-  const curStimulus = Session.get('currentStimuliSet')[engine.findCurrentCardInfo().clusterIndex]
+  let curStimulus = undefined;
+  if (Array.isArray(stimuliSet) && Number.isInteger(clusterIndex) && clusterIndex >= 0 && clusterIndex < stimuliSet.length) {
+    curStimulus = stimuliSet[clusterIndex];
+  }
   if (curCardInfo.forceButtonTrial) {
     // Did this question specifically override button trial?
     isButtonTrial = true;

@@ -1610,7 +1610,7 @@ function addUserDueDateException(userId, tdfId, classId, date){
 async function checkForTDFData(tdfId){
   const userId = Meteor.userId();
   serverConsole('checkForTDFData', tdfId, userId);
-  const tdf = history.findOne({TDFId: tdfId, userId: userId, $and: [ {levelUnitType: {$ne: "schedule"}}, {levelUnitType: {$ne: "Instruction"}} ] });
+  const tdf = Histories.findOne({TDFId: tdfId, userId: userId, $and: [ {levelUnitType: {$ne: "schedule"}}, {levelUnitType: {$ne: "Instruction"}} ] });
   if(tdf){
     return true;
   }
@@ -2993,8 +2993,12 @@ export const methods = {
     return newUser
   },
 
-  clearLoginData: function(){
-    let loginParams = Meteor.user().loginParams;
+  clearLoginData: function(){    
+    const user = Meteor.user();
+    if (!user) {
+      throw new Meteor.Error(401, 'User must be logged in to clear login data');
+    }
+    let loginParams = user.loginParams || {};
     loginParams.entryPoint = null;
     loginParams.curTeacher = null;
     loginParams.curClass = null;
