@@ -1,4 +1,3 @@
-export {getAudioPromptModeFromPage, getAudioInputFromPage};
 // Set up input sensitivity range to display/hide when audio input is enabled/disabled
 
 const showHideAudioEnabledGroup = function(show) {
@@ -134,7 +133,7 @@ Template.profileAudioToggles.rendered = function() {
   $('#audioModal').on('shown.bs.modal', function() {
     const audioInputEnabled = Meteor.user().audioInputMode
     const audioPromptMode = Meteor.user().audioPromptMode || 'silent';
-    setAudioInputOnPage(audioInputEnabled || Session.get('audioEnabledView'));
+    setAudioInputOnPage(audioInputEnabled);
     setAudioPromptModeOnPage(audioPromptMode);
     showHideAudioPromptGroupDependingOnAudioPromptMode(audioPromptMode);
     setAudioPromptQuestionVolumeOnPage(Session.get('audioPromptQuestionVolume'));

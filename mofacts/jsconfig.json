@@ -1,5 +1,209 @@
 {
-    "compilerOptions": {
-        "target": "es6",
+  "compilerOptions": {
+    "target": "es6",
+    "checkJs": true,
+    "allowJs": true,
+    "jsx": "react",
+    "baseUrl": ".",
+    "paths": {
+      "/*": [
+        "./*"
+      ],
+      "meteor/accounts-password": [
+        "/home/rusty/.meteor/packages/accounts-password/1.6.3/web.browser/password_client.js",
+        "/home/rusty/.meteor/packages/accounts-password/1.6.3/web.browser/email_templates.js",
+        "/home/rusty/.meteor/packages/accounts-password/1.6.3/web.browser/password_server.js"
+      ],
+      "meteor/underscore": [
+        "/home/rusty/.meteor/packages/underscore/1.0.10/web.browser/pre.js",
+        "/home/rusty/.meteor/packages/underscore/1.0.10/web.browser/underscore.js",
+        "/home/rusty/.meteor/packages/underscore/1.0.10/web.browser/post.js"
+      ],
+      "meteor/bojicas:howler2": [
+        "/home/rusty/.meteor/packages/bojicas_howler2/2.0.0_9/web.browser//packages/bojicas_howler2.js"
+      ],
+      "meteor/alanning:roles": [
+        "/home/rusty/.meteor/packages/alanning_roles/1.2.16/web.browser/roles_common.js",
+        "/home/rusty/.meteor/packages/alanning_roles/1.2.16/web.browser/client/debug.js",
+        "/home/rusty/.meteor/packages/alanning_roles/1.2.16/web.browser/client/uiHelpers.js",
+        "/home/rusty/.meteor/packages/alanning_roles/1.2.16/web.browser/client/subscriptions.js",
+        "/home/rusty/.meteor/packages/alanning_roles/1.2.16/web.browser/roles_server.js"
+      ],
+      "meteor/http": [
+        "/home/rusty/.meteor/packages/http/1.4.2/web.browser/httpcall_client.js",
+        "/home/rusty/.meteor/packages/http/1.4.2/web.browser/httpcall_common.js",
+        "/home/rusty/.meteor/packages/http/1.4.2/web.browser/httpcall_server.js"
+      ],
+      "meteor/percolate:synced-cron": [
+        "/home/rusty/.meteor/packages/percolate_synced-cron/1.3.2/web.browser/synced-cron-server.js",
+        "/home/rusty/.meteor/packages/percolate_synced-cron/1.3.2/web.browser/example/example.js"
+      ],
+      "meteor/mfpierre:chartist-js": [
+        "/home/rusty/.meteor/packages/mfpierre_chartist-js/1.6.0/web.browser//packages/mfpierre_chartist-js.js"
+      ],
+      "meteor/tracker": [
+        "/home/rusty/.meteor/packages/tracker/1.2.0/web.browser/tracker.js"
+      ],
+      "meteor/service-configuration": [
+        "/home/rusty/.meteor/packages/service-configuration/1.0.11/web.browser/service_configuration_common.js",
+        "/home/rusty/.meteor/packages/service-configuration/1.0.11/web.browser/service_configuration_server.js"
+      ],
+      "meteor/accounts-google": [
+        "/home/rusty/.meteor/packages/accounts-google/1.3.3/web.browser/notice.js",
+        "/home/rusty/.meteor/packages/accounts-google/1.3.3/web.browser/google.js"
+      ],
+      "meteor/shell-server": [
+        "/home/rusty/.meteor/packages/shell-server/0.5.0/web.browser/main.js",
+        "/home/rusty/.meteor/packages/shell-server/0.5.0/web.browser/shell-server.js"
+      ],
+      "meteor/promise": [
+        "/home/rusty/.meteor/packages/promise/0.11.2/web.browser/modern.js",
+        "/home/rusty/.meteor/packages/promise/0.11.2/web.browser/client.js",
+        "/home/rusty/.meteor/packages/promise/0.11.2/web.browser/extensions.js",
+        "/home/rusty/.meteor/packages/promise/0.11.2/web.browser/legacy.js",
+        "/home/rusty/.meteor/packages/promise/0.11.2/web.browser/server.js"
+      ],
+      "meteor/iron:router": [
+        "/home/rusty/.meteor/packages/iron_router/1.1.2/web.browser/lib/current_options.js",
+        "/home/rusty/.meteor/packages/iron_router/1.1.2/web.browser/lib/http_methods.js",
+        "/home/rusty/.meteor/packages/iron_router/1.1.2/web.browser/lib/route_controller.js",
+        "/home/rusty/.meteor/packages/iron_router/1.1.2/web.browser/lib/route_controller_client.js",
+        "/home/rusty/.meteor/packages/iron_router/1.1.2/web.browser/lib/route.js",
+        "/home/rusty/.meteor/packages/iron_router/1.1.2/web.browser/lib/router.js",
+        "/home/rusty/.meteor/packages/iron_router/1.1.2/web.browser/lib/hooks.js",
+        "/home/rusty/.meteor/packages/iron_router/1.1.2/web.browser/lib/helpers.js",
+        "/home/rusty/.meteor/packages/iron_router/1.1.2/web.browser/lib/router_client.js",
+        "/home/rusty/.meteor/packages/iron_router/1.1.2/web.browser/lib/plugins.js",
+        "/home/rusty/.meteor/packages/iron_router/1.1.2/web.browser/lib/global_router.js",
+        "/home/rusty/.meteor/packages/iron_router/1.1.2/web.browser/lib/route_controller_server.js",
+        "/home/rusty/.meteor/packages/iron_router/1.1.2/web.browser/lib/body_parser_server.js",
+        "/home/rusty/.meteor/packages/iron_router/1.1.2/web.browser/lib/router_server.js"
+      ],
+      "meteor/google-config-ui": [
+        "/home/rusty/.meteor/packages/google-config-ui/1.0.1/web.browser/google_configure.js"
+      ],
+      "meteor/dynamic-import": [
+        "/home/rusty/.meteor/packages/dynamic-import/0.5.4/web.browser/client.js",
+        "/home/rusty/.meteor/packages/dynamic-import/0.5.4/web.browser/cache.js",
+        "/home/rusty/.meteor/packages/dynamic-import/0.5.4/web.browser/common.js",
+        "/home/rusty/.meteor/packages/dynamic-import/0.5.4/web.browser/dynamic-versions.js",
+        "/home/rusty/.meteor/packages/dynamic-import/0.5.4/web.browser/security.js",
+        "/home/rusty/.meteor/packages/dynamic-import/0.5.4/web.browser/server.js"
+      ],
+      "meteor/check": [
+        "/home/rusty/.meteor/packages/check/1.3.1/web.browser/match.js",
+        "/home/rusty/.meteor/packages/check/1.3.1/web.browser/isPlainObject.js"
+      ],
+      "meteor/random": [
+        "/home/rusty/.meteor/packages/random/1.2.0/web.browser/main_client.js",
+        "/home/rusty/.meteor/packages/random/1.2.0/web.browser/AbstractRandomGenerator.js",
+        "/home/rusty/.meteor/packages/random/1.2.0/web.browser/AleaRandomGenerator.js",
+        "/home/rusty/.meteor/packages/random/1.2.0/web.browser/BrowserRandomGenerator.js",
+        "/home/rusty/.meteor/packages/random/1.2.0/web.browser/NodeRandomGenerator.js",
+        "/home/rusty/.meteor/packages/random/1.2.0/web.browser/createAleaGenerator.js",
+        "/home/rusty/.meteor/packages/random/1.2.0/web.browser/createRandom.js",
+        "/home/rusty/.meteor/packages/random/1.2.0/web.browser/main_server.js"
+      ],
+      "meteor/harrison:papa-parse": [
+        "/home/rusty/.meteor/packages/harrison_papa-parse/1.1.7/web.browser/papa-parse.js",
+        "/home/rusty/.meteor/packages/harrison_papa-parse/1.1.7/web.browser/baby-parse.js"
+      ],
+      "meteor/ecmascript": [
+        "/home/rusty/.meteor/packages/ecmascript/0.14.4/web.browser/ecmascript.js"
+      ],
+      "meteor/email": [
+        "/home/rusty/.meteor/packages/email/2.0.0/web.browser/email.js"
+      ],
+      "meteor/natestrauser:select2": [
+        "/home/rusty/.meteor/packages/natestrauser_select2/4.0.3/web.browser/lib/select2/dist/js/select2.js"
+      ],
+      "meteor/ostrio:files": [
+        "/home/rusty/.meteor/packages/ostrio_files/2.0.1/web.browser/client.js",
+        "/home/rusty/.meteor/packages/ostrio_files/2.0.1/web.browser/core.js",
+        "/home/rusty/.meteor/packages/ostrio_files/2.0.1/web.browser/cursor.js",
+        "/home/rusty/.meteor/packages/ostrio_files/2.0.1/web.browser/lib.js",
+        "/home/rusty/.meteor/packages/ostrio_files/2.0.1/web.browser/server.js",
+        "/home/rusty/.meteor/packages/ostrio_files/2.0.1/web.browser/upload.js",
+        "/home/rusty/.meteor/packages/ostrio_files/2.0.1/web.browser/worker.js",
+        "/home/rusty/.meteor/packages/ostrio_files/2.0.1/web.browser/worker.min.js",
+        "/home/rusty/.meteor/packages/ostrio_files/2.0.1/web.browser/write-stream.js"
+      ],
+      "meteor/simonsimcity:client-session-timeout": [
+        "/home/rusty/.meteor/packages/simonsimcity_client-session-timeout/1.0.0/web.browser/client-session-timeout.js"
+      ],
+      "meteor/q42:accounts-microsoft": [
+        "/home/rusty/.meteor/packages/q42_accounts-microsoft/1.0.0/web.browser/client/login.js",
+        "/home/rusty/.meteor/packages/q42_accounts-microsoft/1.0.0/web.browser/lib/register.js",
+        "/home/rusty/.meteor/packages/q42_accounts-microsoft/1.0.0/web.browser/server/autopublish.js"
+      ],
+      "meteor/lindoelio:accounts-office365": [
+        "/home/rusty/.meteor/packages/lindoelio_accounts-office365/0.1.1/web.browser/office365.js"
+      ],
+      "meteor/practicalmeteor:chai": [
+        "/home/rusty/.meteor/packages/practicalmeteor_chai/2.1.0_1/web.browser//packages/practicalmeteor_chai.js"
+      ],
+      "meteor/practicalmeteor:sinon": [
+        "/home/rusty/.meteor/packages/practicalmeteor_sinon/1.14.1_2/web.browser//packages/practicalmeteor_sinon.js"
+      ],
+      "meteor/practicalmeteor:mocha": [
+        "/home/rusty/.meteor/packages/practicalmeteor_mocha/2.4.5_6/web.browser/meteor/src/index.js",
+        "/home/rusty/.meteor/packages/practicalmeteor_mocha/2.4.5_6/web.browser/index.js",
+        "/home/rusty/.meteor/packages/practicalmeteor_mocha/2.4.5_6/web.browser/mocha.js",
+        "/home/rusty/.meteor/packages/practicalmeteor_mocha/2.4.5_6/web.browser/bin/options.js",
+        "/home/rusty/.meteor/packages/practicalmeteor_mocha/2.4.5_6/web.browser/lib/context.js",
+        "/home/rusty/.meteor/packages/practicalmeteor_mocha/2.4.5_6/web.browser/lib/hook.js",
+        "/home/rusty/.meteor/packages/practicalmeteor_mocha/2.4.5_6/web.browser/lib/mocha.js",
+        "/home/rusty/.meteor/packages/practicalmeteor_mocha/2.4.5_6/web.browser/lib/ms.js",
+        "/home/rusty/.meteor/packages/practicalmeteor_mocha/2.4.5_6/web.browser/lib/pending.js",
+        "/home/rusty/.meteor/packages/practicalmeteor_mocha/2.4.5_6/web.browser/lib/runnable.js",
+        "/home/rusty/.meteor/packages/practicalmeteor_mocha/2.4.5_6/web.browser/lib/runner.js",
+        "/home/rusty/.meteor/packages/practicalmeteor_mocha/2.4.5_6/web.browser/lib/suite.js",
+        "/home/rusty/.meteor/packages/practicalmeteor_mocha/2.4.5_6/web.browser/lib/utils.js",
+        "/home/rusty/.meteor/packages/practicalmeteor_mocha/2.4.5_6/web.browser/lib/browser/debug.js",
+        "/home/rusty/.meteor/packages/practicalmeteor_mocha/2.4.5_6/web.browser/lib/browser/events.js",
+        "/home/rusty/.meteor/packages/practicalmeteor_mocha/2.4.5_6/web.browser/lib/browser/progress.js",
+        "/home/rusty/.meteor/packages/practicalmeteor_mocha/2.4.5_6/web.browser/lib/browser/tty.js",
+        "/home/rusty/.meteor/packages/practicalmeteor_mocha/2.4.5_6/web.browser/lib/interfaces/bdd.js",
+        "/home/rusty/.meteor/packages/practicalmeteor_mocha/2.4.5_6/web.browser/lib/interfaces/common.js",
+        "/home/rusty/.meteor/packages/practicalmeteor_mocha/2.4.5_6/web.browser/lib/interfaces/exports.js",
+        "/home/rusty/.meteor/packages/practicalmeteor_mocha/2.4.5_6/web.browser/lib/interfaces/index.js",
+        "/home/rusty/.meteor/packages/practicalmeteor_mocha/2.4.5_6/web.browser/lib/interfaces/qunit.js",
+        "/home/rusty/.meteor/packages/practicalmeteor_mocha/2.4.5_6/web.browser/lib/interfaces/tdd.js",
+        "/home/rusty/.meteor/packages/practicalmeteor_mocha/2.4.5_6/web.browser/lib/reporters/base.js",
+        "/home/rusty/.meteor/packages/practicalmeteor_mocha/2.4.5_6/web.browser/lib/reporters/doc.js",
+        "/home/rusty/.meteor/packages/practicalmeteor_mocha/2.4.5_6/web.browser/lib/reporters/dot.js",
+        "/home/rusty/.meteor/packages/practicalmeteor_mocha/2.4.5_6/web.browser/lib/reporters/html-cov.js",
+        "/home/rusty/.meteor/packages/practicalmeteor_mocha/2.4.5_6/web.browser/lib/reporters/html.js",
+        "/home/rusty/.meteor/packages/practicalmeteor_mocha/2.4.5_6/web.browser/lib/reporters/index.js",
+        "/home/rusty/.meteor/packages/practicalmeteor_mocha/2.4.5_6/web.browser/lib/reporters/json-cov.js",
+        "/home/rusty/.meteor/packages/practicalmeteor_mocha/2.4.5_6/web.browser/lib/reporters/json-stream.js",
+        "/home/rusty/.meteor/packages/practicalmeteor_mocha/2.4.5_6/web.browser/lib/reporters/json.js",
+        "/home/rusty/.meteor/packages/practicalmeteor_mocha/2.4.5_6/web.browser/lib/reporters/landing.js",
+        "/home/rusty/.meteor/packages/practicalmeteor_mocha/2.4.5_6/web.browser/lib/reporters/list.js",
+        "/home/rusty/.meteor/packages/practicalmeteor_mocha/2.4.5_6/web.browser/lib/reporters/markdown.js",
+        "/home/rusty/.meteor/packages/practicalmeteor_mocha/2.4.5_6/web.browser/lib/reporters/min.js",
+        "/home/rusty/.meteor/packages/practicalmeteor_mocha/2.4.5_6/web.browser/lib/reporters/nyan.js",
+        "/home/rusty/.meteor/packages/practicalmeteor_mocha/2.4.5_6/web.browser/lib/reporters/progress.js",
+        "/home/rusty/.meteor/packages/practicalmeteor_mocha/2.4.5_6/web.browser/lib/reporters/spec.js",
+        "/home/rusty/.meteor/packages/practicalmeteor_mocha/2.4.5_6/web.browser/lib/reporters/tap.js",
+        "/home/rusty/.meteor/packages/practicalmeteor_mocha/2.4.5_6/web.browser/lib/reporters/xunit.js",
+        "/home/rusty/.meteor/packages/practicalmeteor_mocha/2.4.5_6/web.browser/meteor/src/lib/log.js",
+        "/home/rusty/.meteor/packages/practicalmeteor_mocha/2.4.5_6/web.browser/meteor/src/reporters/html.js",
+        "/home/rusty/.meteor/packages/practicalmeteor_mocha/2.4.5_6/web.browser/meteor/src/reporters/index.js",
+        "/home/rusty/.meteor/packages/practicalmeteor_mocha/2.4.5_6/web.browser/meteor/src/setup/index.js",
+        "/home/rusty/.meteor/packages/practicalmeteor_mocha/2.4.5_6/web.browser/meteor/src/setup/setupMochaClient.js",
+        "/home/rusty/.meteor/packages/practicalmeteor_mocha/2.4.5_6/web.browser/support/browser-entry.js",
+        "/home/rusty/.meteor/packages/practicalmeteor_mocha/2.4.5_6/web.browser/meteor/src/server/autoupdate.js"
+      ]
     }
+  },
+  "typeAcquisition": {
+    "include": [
+      "meteor"
+    ]
+  },
+  "exclude": [
+    "node_modules",
+    ".meteor"
+  ]
 }

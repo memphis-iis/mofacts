@@ -81,7 +81,12 @@ Template.turkWorkflow.helpers({
   use_sandbox: function() {
     return getProfileField('use_sandbox') ? 'checked' : false;
   },
-
+  saveComplete: function() {
+    return Session.get('saveComplete');
+  },
+  profileWorkModalMessage: function() {
+    return Session.get('profileWorkModalMessage');
+  },
   have_aws_id: function() {
     return getProfileField('have_aws_id');
   },
@@ -171,7 +176,14 @@ Template.turkWorkflow.events({
     });
   },
 
-  'click #saveProfile': function(event) {
+  'click #profileWorkModalDissmiss': function(event) {
+    event.preventDefault();
+    $('#profileWorkModal').modal('hide');
+  },
+
+  'click #saveProfile': async function(event) {
+    Session.set('saveComplete', false)
+    Session.set('profileWorkModalMessage', 'Please wait while we save your information and contact Mechanical Turk.')
     event.preventDefault();
 
     const data = {
@@ -182,23 +194,22 @@ Template.turkWorkflow.events({
 
     $('#profileWorkModal').modal('show');
 
-    Meteor.call('saveUserProfileData', data, function(error, serverReturn) {
-      $('#profileWorkModal').modal('hide');
-      console.log(serverReturn);
+    const {error, saveResult} = await meteorCallAsync('saveUserAWSData', data);
+    console.log(saveResult);
 
-      if (error) {
-        console.log('Error saving user profile', error);
-        alert('Your changes were not saved! ' + error);
-      } else if (!serverReturn || !serverReturn.result) {
-        console.log('Server failure while saving profile', serverReturn);
-        alert('Your changes were not saved! The server said: ' + JSON.stringify(serverReturn, null, 2));
-      } else {
-        console.log('Profile saved:', serverReturn);
-        // Clear any controls that shouldn't be kept around
-        $('.clearOnSave').val('');
-        alert('Your profile changes have been saved: save details follow\n\n' + JSON.stringify(serverReturn, null, 2));
-      }
-    });
+    if (error) {
+      console.log('Error saving user profile', error);
+      Session.set('profileWorkModalMessage', 'Your changes were not saved! The server said: ' + JSON.stringify(error.message, null, 2));
+    } else if (!saveResult) {
+      console.log('Server failure while saving profile', saveResult);
+      Session.set('profileWorkModalMessage', 'Your changes were not saved! The server said: ' + JSON.stringify(saveResult.error.message, null, 2));
+    } else {
+      console.log('Profile saved:', saveResult);
+      // Clear any controls that shouldn't be kept around
+      $('.clearOnSave').val('');
+      Session.set('profileWorkModalMessage','Your profile changes have been saved. Save details follow: ' + JSON.stringify(saveResult, null, 2));
+    }
+    Session.set('saveComplete', true)
   },
   'change #experiment-select': async function(event) {
     event.preventDefault()
@@ -418,7 +429,7 @@ Template.turkWorkflow.events({
 });
 
 function getProfileField(field) {
-  const prof = UserProfileData.findOne({_id: Meteor.userId()});
+  const prof = Meteor.user().profile?.aws;
   if (!prof || typeof prof[field] === undefined) {
     return null;
   }

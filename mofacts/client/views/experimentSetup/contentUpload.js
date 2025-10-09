@@ -6,9 +6,6 @@ Template.contentUpload.helpers({
   TdfFiles: function() {
     return Tdfs.find();
   },
-  StimFiles: function() {
-    return Stims.find();
-  },
   currentUpload() {
     return Template.instance().currentUpload.get();
   },
@@ -25,12 +22,14 @@ Template.contentUpload.helpers({
     }
     console.log('allTdfs:', allTDfs);
     //iterate through allTdfs and get all stimuli
-    tdfSummaries = [];    for (const tdf of allTDfs) {
-      thisTdf = {};
+    tdfSummaries = [];    
+    for (const tdf of allTDfs) {
+      var thisTdf = {};
       thisTdf.lessonName = tdf.content.tdfs.tutor.setspec.lessonname;
       thisTdf.stimuliCount = tdf.stimuli.length;
       thisTdf.accessors = tdf.accessors || [];
       thisTdf.accessorsCount = thisTdf.accessors.length;
+      thisTdf.packageFile = tdf.packageFile;
       thisTdf.assets = [];
       thisTdf._id = tdf._id;
       thisTdf.errors = [];
@@ -38,8 +37,22 @@ Template.contentUpload.helpers({
       thisTdf.stimFilesCount = 0;
       thisTdf.fileName = tdf.content.fileName;
       thisTdf.owner = Meteor.users.findOne({_id: tdf.ownerId}).username;
-      checkIfConditional = allTDfs.some(function(tdf){
-        conditions = tdf.content.tdfs.tutor.setspec.condition;
+      //get all tdfs with the same packgeFile
+      var sisterTdfs = allTDfs.filter(function(tdf){
+        return tdf.packageFile == thisTdf.packageFile;
+      });
+      console.log('sisterTdfs:', sisterTdfs);
+      thisTdf.hasAPIKeys = false;
+      //check if any syter tdf has API keys at 
+      //check if thisTdf has API keys at tdf.content.tdfs.tutor.setspec.textToSpeechAPIKey or  tdf.content.tdfs.tutor.setspec.speechAPIKey
+      var checkIfAPI = sisterTdfs.some(function(tdf){
+        return tdf.content.tdfs.tutor.setspec.textToSpeechAPIKey || tdf.content.tdfs.tutor.setspec.speechAPIKey;
+      });
+      if(checkIfAPI){
+        thisTdf.hasAPIKeys = true;
+      }
+      var checkIfConditional = allTDfs.some(function(tdf){
+        var conditions = tdf.content.tdfs.tutor.setspec.condition;
         //check if condition contains the TDF filename
         if(conditions && conditions.includes(thisTdf.fileName)){
           return true;
@@ -186,9 +199,9 @@ Template.contentUpload.events({
       event.preventDefault();
       window.open(event.currentTarget.getAttribute('value'));
     },
-  'click #tdf-delete-btn': function(event){
-    const tdfId = event.currentTarget.getAttribute('value')
-    Meteor.call('deleteTDFFile',tdfId);
+  'click #package-delete-btn': function(event){
+    const packageId = event.currentTarget.getAttribute('value')
+    Meteor.call('deletePackageFile',packageId);
   },
   'click #reset-conditions-btn': function(event){
     const tdfId = event.currentTarget.getAttribute('value')
@@ -203,10 +216,11 @@ Template.contentUpload.events({
   'click #stim-download-btn': async function(event){
     event.preventDefault();
     const stimSetId = parseInt(event.currentTarget.getAttribute('value'));
-    const stimFile = Stims.findOne({'stimuliSetId': stimSetId})
-    let blob = new Blob([JSON.stringify(stimFile.stimuli,null,2)], { type: 'application/json' });
+    const tdf = Tdfs.findOne({'stimuliSetId': stimSetId})
+    const stimFile = tdf.rawStimuliFile;
+    let blob = new Blob([JSON.stringify(stimFile,null,2)], { type: 'application/json' });
     let url = window.URL.createObjectURL(blob);
-    let downloadFileName = stimFile.fileName.trim();
+    let downloadFileName = tdf.stimuli[0].stimulusFileName.trim();
     var a = document.createElement("a");
     document.body.appendChild(a);
     a.style = "display: none";
@@ -215,7 +229,7 @@ Template.contentUpload.events({
     a.click();
     window.URL.revokeObjectURL(url);
   },
-
+  
   'click #stim-delete-btn': function(event){
     const stimuliSetId = event.currentTarget.getAttribute('value')
     Meteor.call('deleteStimFile',stimuliSetId);

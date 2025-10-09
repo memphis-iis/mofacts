@@ -38,6 +38,7 @@ export {
   revisitUnit,
   gatherAnswerLogRecord,
   newQuestionHandler,
+  checkAudioInputMode,
 };
 
 /*
@@ -414,7 +415,7 @@ async function leavePage(dest) {
     }
   }
   clearCardTimeout();
-  clearPlayingSound();
+  clearPlayingSound();  
   if (typeof dest === 'function') {
     dest();
   } else {
@@ -449,7 +450,7 @@ async function initCard() {
     Session.set('stimDisplayTypeMap', stimDisplayTypeMap);
   }
 
-  const audioInputEnabled = Meteor.user().audioInputMode;
+  const audioInputEnabled = checkAudioInputMode();
   if (audioInputEnabled) {
     if (!Session.get('audioInputSensitivity')) {
       // Default to 20 in case tdf doesn't specify and we're in an experiment
@@ -487,7 +488,11 @@ async function initCard() {
   } else {
     cardStart();
   }
+
+  // Initialize debug panel for admins
+  initializeDebugPanel();
 };
+
 
 Template.card.events({
   'focus #userAnswer': function() {
@@ -655,6 +660,71 @@ Template.card.events({
       let curUnit = Session.get('currentUnitNumber');
       let newUnitNumber = curUnit - 1;
       revisitUnit(newUnitNumber);
+    }
+  },
+
+  // Debug Sidebar Events (Admin Only)
+  'click #debugToggle': function(event) {
+    if (Roles.userIsInRole(Meteor.user(), ['admin'])) {
+      const sidebar = document.getElementById('debugSidebar');
+      sidebar.style.display = sidebar.style.display === 'none' ? 'block' : 'none';
+      sidebar.classList.toggle('open');
+    }
+  },
+
+  'click #closeSidebar': function(event) {
+    if (Roles.userIsInRole(Meteor.user(), ['admin'])) {
+      const sidebar = document.getElementById('debugSidebar');
+      sidebar.classList.remove('open');
+      setTimeout(() => {
+        sidebar.style.display = 'none';
+      }, 300);
+    }
+  },
+
+  'click #debugGiveCorrect': function(event) {
+    if (Roles.userIsInRole(Meteor.user(), ['admin'])) {
+      giveAnswer();
+    }
+  },
+
+  'click #debugGiveWrong': function(event) {
+    if (Roles.userIsInRole(Meteor.user(), ['admin'])) {
+      giveWrongAnswer();
+    }
+  },
+
+  'click #debugSkipUnit': function(event) {
+    if (Roles.userIsInRole(Meteor.user(), ['admin'])) {
+      unitIsFinished('Skipped by admin via debug panel');
+    }
+  },
+
+  'click #debugRefreshVars': function(event) {
+    if (Roles.userIsInRole(Meteor.user(), ['admin'])) {
+      updateDebugVariables();
+    }
+  },
+
+  'click #debugSkipToNext': function(event) {
+    if (Roles.userIsInRole(Meteor.user(), ['admin'])) {
+      skipToNextQuestion();
+    }
+  },
+
+  'click .debug-section-header': function(event) {
+    if (Roles.userIsInRole(Meteor.user(), ['admin'])) {
+      const target = $(event.currentTarget).data('target');
+      const content = $('#' + target);
+      const icon = $(event.currentTarget).find('.debug-toggle-icon');
+      
+      if (content.is(':visible')) {
+        content.slideUp(200);
+        icon.removeClass('fa-chevron-down').addClass('fa-chevron-right');
+      } else {
+        content.slideDown(200);
+        icon.removeClass('fa-chevron-right').addClass('fa-chevron-down');
+      }
     }
   },
 });
@@ -843,17 +913,11 @@ Template.card.helpers({
   },
 
   'videoId': function() {
-    if(Session.get('isVideoSession') && Session.get('videoSource')){
-      if(Session.get('videoSource').includes('youtu.be'))
-        return Session.get('videoSource').split('youtu.be/')[1].split('?')[0];
-      else if(Session.get('videoSource').includes('youtube'))
-        return Session.get('videoSource').split('v=')[1].split('&')[0];
-    }
+    return Session.get('videoSource')
   },
 
   'videoSource': function() {
-    if(Session.get('isVideoSession') && Session.get('videoSource'))
-      return Session.get('videoSource')
+    return Session.get('isVideoSession') && Session.get('videoSource') ? Session.get('videoSource') : '';
   },
 
   'test': function() {
@@ -888,6 +952,14 @@ Template.card.helpers({
     // Take advantage of Bootstrap h1-h5 classes
     const hSize = Session.get('currentDeliveryParams') ? Session.get('currentDeliveryParams').fontsize.toString() : 2;
     return 'h' + hSize;
+  },
+
+  'getFontSizeStyle': function() {
+    const fontsize = Session.get('currentDeliveryParams') && Session.get('currentDeliveryParams').fontsizePX;
+    if (fontsize) {
+      return 'font-size: ' + fontsize + 'px;';
+    }
+    return '';
   },
 
   'skipstudy': function() {
@@ -945,7 +1017,7 @@ Template.card.helpers({
 
   'userInDiaglogue': () => Session.get('showDialogueText') && Session.get('dialogueDisplay'),
 
-  'audioEnabled': () => Meteor.user().audioInputMode,
+  'audioEnabled': () => checkAudioInputMode(),
 
   'showDialogueHints': function() {
     if(Meteor.isDevelopment){
@@ -975,6 +1047,37 @@ Template.card.helpers({
   },
   'UIsettings': () => Session.get('curTdfUISettings'),
 
+  'stimuliBoxClasses': function() {
+    const uiSettings = Session.get('curTdfUISettings');
+    if (!uiSettings.showStimuliBox) {
+      return 'alert alert-transparent';
+    }
+    
+    const baseClasses = 'alert';
+    const colorValue = uiSettings.stimuliBoxColor || 'alert-bg';
+    
+    if (colorValue.startsWith('alert-')) {
+      return baseClasses + ' ' + colorValue;
+    } else {
+      return baseClasses + ' alert-bg';
+    }
+  },
+
+  'stimuliBoxStyle': function() {
+    const uiSettings = Session.get('curTdfUISettings');
+    if (!uiSettings.showStimuliBox) {
+      return '';
+    }
+    
+    const colorValue = uiSettings.stimuliBoxColor || 'alert-bg';
+    
+    if (!colorValue.startsWith('alert-')) {
+      return 'background-color: ' + colorValue + ' !important;';
+    }
+    
+    return '';
+  },
+
   'allowGoBack': function() {
     //check if this is allowed
     if(Session.get('currentDeliveryParams').allowRevistUnit || Session.get('currentTdfFile').tdfs.tutor.setspec.allowRevistUnit){
@@ -989,6 +1092,33 @@ Template.card.helpers({
     } else {
       return false;
     }
+  },
+
+  // Debug helper functions for admin sidebar
+  'getTestType': function() {
+    return getTestType();
+  },
+
+  'getCurrentUnitNumber': function() {
+    return Session.get('currentUnitNumber');
+  },
+
+  'getCurrentFontSize': function() {
+    const params = Session.get('currentDeliveryParams');
+    return params ? params.fontsize : 'N/A';
+  },
+
+  'getCurrentTimeout': function() {
+    const params = Session.get('currentDeliveryParams');
+    const testType = getTestType();
+    if (!params) return 'N/A';
+    
+    if (testType === 's') {
+      return params.purestudy || 'N/A';
+    } else if (testType === 'd' || testType === 't') {
+      return params.drill || 'N/A';
+    }
+    return 'N/A';
   },
 });
 
@@ -1144,7 +1274,7 @@ function preloadStimuliFiles() {
 }
 
 function checkUserAudioConfigCompatability(){
-  const audioPromptMode = Meteor.user().audioPromptMode;
+  const audioPromptMode = checkAudioPromptMode();
   if (curStimHasImageDisplayType() && ((audioPromptMode == 'all' || audioPromptMode == 'question'))) {
     console.log('PANIC: Unable to process TTS for image response', Session.get('currentRootTdfId'));
     alert('Question reading not supported on this TDF. Please disable and try again.');
@@ -1194,13 +1324,15 @@ function setUpButtonTrial() {
     console.log('buttonChoices==buttonOptions', buttonChoices);
   } else {
     const currentFalseResponses = getCurrentFalseResponses();
+
     for (const falseResponse of currentFalseResponses) {
       buttonChoices.push(falseResponse);
-      correctButtonPopulated = false;
+
     }
+    correctButtonPopulated = false;
     console.log('buttonChoices==falseresponses and correct answer', buttonChoices);
   }
-  if (correctButtonPopulated == null) {
+  if (correctButtonPopulated === null) {
     console.log('No correct button');
     throw new Error('Bad TDF/Stim file - no buttonOptions and no false responses');
   }
@@ -1261,14 +1393,36 @@ function getCurrentFalseResponses() {
   const cluster = getStimCluster(curClusterIndex);
   console.log('getCurrentFalseResponses', curClusterIndex, curStimIndex, cluster);
 
-  if (typeof(cluster) == 'undefined' || !cluster.stims || cluster.stims.length == 0 ||
-    typeof(cluster.stims[curStimIndex].incorrectResponses) == 'undefined') {
-    return []; // No false responses
-  } else {
-    if(typeof(cluster.stims[curStimIndex].incorrectResponses) == 'string')
-      return cluster.stims[curStimIndex].incorrectResponses.split(',');
-    return cluster.stims[curStimIndex].incorrectResponses;
+  // Check for missing cluster, stims, or stim index out of bounds
+  if (
+    !cluster ||
+    !Array.isArray(cluster.stims) ||
+    typeof curStimIndex !== 'number' ||
+    curStimIndex < 0 ||
+    curStimIndex >= cluster.stims.length
+  ) {
+    return [];
   }
+
+  const stim = cluster.stims[curStimIndex];
+  // Return empty array if incorrectResponses is missing, null, or empty string
+  if (
+    !stim.hasOwnProperty('incorrectResponses') ||
+    stim.incorrectResponses == null ||
+    stim.incorrectResponses === ''
+  ) {
+    return [];
+  }
+
+  if (typeof stim.incorrectResponses === 'string') {
+    // Split and filter out empty strings
+    return stim.incorrectResponses.split(',').map(s => s.trim()).filter(Boolean);
+  }
+  if (Array.isArray(stim.incorrectResponses)) {
+    return stim.incorrectResponses;
+  }
+  // Fallback: not a string or array, return empty array
+  return [];
 }
 
 function getCurrentClusterAndStimIndices() {
@@ -1434,7 +1588,7 @@ function handleUserInput(e, source, simAnswerCorrect) {
     } else {
       userAnswer = e.currentTarget.name;
     }
-  } else if (source="confirmButton"){
+  } else if (source === "confirmButton"){
     userAnswer = $('.btn-secondary')[0].name;
   } else if (source === 'simulation') {
     userAnswer = simAnswerCorrect ? 'SIM: Correct Answer' : 'SIM: Wrong Answer';
@@ -1604,6 +1758,11 @@ function determineUserFeedback(userAnswer, isSkip, isCorrect, feedbackForAnswer,
     }
   }
 
+  // Handle video session checkpoint logic
+  if (Session.get('isVideoSession') && playerController) {
+    playerController.handleQuestionResponse(isCorrect);
+  }
+
   const currentDeliveryParams = Session.get('currentDeliveryParams')
   if (currentDeliveryParams.scoringEnabled) {
     // Note that we track the score in the user progress object, but we
@@ -1638,6 +1797,17 @@ function determineUserFeedback(userAnswer, isSkip, isCorrect, feedbackForAnswer,
 
 async function showUserFeedback(isCorrect, feedbackMessage, isTimeout, isSkip) {
   console.log('showUserFeedback');
+  if (Session.get('curTdfUISettings').suppressFeedbackDisplay) {
+    // Do not display any feedback, but still advance the schedule
+    let trialEndTimeStamp = Session.get('trialEndTimeStamp');
+    let trialStartTimeStamp = Session.get('trialStartTimestamp');
+    let source = Session.get('source');
+    let isCorrectVal = isCorrect;
+    let isSkipVal = isSkip;
+    let isTimeoutVal = isTimeout;
+    afterAnswerFeedbackCallback(trialEndTimeStamp, trialStartTimeStamp, source, Session.get('userAnswer'), isTimeoutVal, isSkipVal, isCorrectVal);
+    return;
+  }
   userFeedbackStart = Date.now();
   const isButtonTrial = getButtonTrial();
   feedbackDisplayPosition = Session.get('curTdfUISettings').feedbackDisplayPosition;
@@ -1874,6 +2044,120 @@ async function giveWrongAnswer(){
     $('#userAnswer').val(curAnswer);
     Session.set('skipTimeout', true)
     handleUserInput({keyCode: ENTER_KEY}, 'keypress');
+  }
+}
+
+// Debug helper functions for admin sidebar
+function updateDebugVariables() {
+  if (!Roles.userIsInRole(Meteor.user(), ['admin'])) return;
+  
+  // Update all debug display elements
+  $('#debugQuestionIndex').text(Session.get('questionIndex') || 'N/A');
+  $('#debugTestType').text(getTestType() || 'N/A');
+  $('#debugCurrentAnswer').text(Session.get('currentAnswer') || 'N/A');
+  $('#debugDisplayReady').text(Session.get('displayReady') || 'false');
+  $('#debugUnitNumber').text(Session.get('currentUnitNumber') || 'N/A');
+  $('#debugButtonTrial').text(Session.get('buttonTrial') || 'false');
+  $('#debugAudioEnabled').text(Meteor.user()?.audioInputMode || 'false');
+  $('#debugVideoSession').text(Session.get('isVideoSession') || 'false');
+  
+  // Add next question info for video sessions
+  if (Session.get('isVideoSession') && playerController) {
+    const currentTime = playerController.player ? playerController.player.currentTime : 0;
+    const questionTimes = playerController.times || [];
+    let nextTime = 'End';
+    for (let i = 0; i < questionTimes.length; i++) {
+      if (questionTimes[i] > currentTime + 1) {
+        nextTime = questionTimes[i] + 's';
+        break;
+      }
+    }
+    $('#debugNextQuestion').text(nextTime);
+  } else {
+    $('#debugNextQuestion').text('N/A');
+  }
+  
+  const params = Session.get('currentDeliveryParams');
+  $('#debugFontSize').text(params?.fontsize || 'N/A');
+  
+  // Update timeout based on test type
+  const testType = getTestType();
+  let timeoutValue = 'N/A';
+  if (params) {
+    if (testType === 's') {
+      timeoutValue = params.purestudy || 'N/A';
+    } else if (testType === 'd' || testType === 't') {
+      timeoutValue = params.drill || 'N/A';
+    }
+  }
+  $('#debugTimeout').text(timeoutValue);
+}
+
+function initializeDebugPanel() {
+  if (!Roles.userIsInRole(Meteor.user(), ['admin'])) return;
+  
+  // Show the debug toggle button
+  $('#debugToggle').show();
+  
+  // Set up auto-refresh of variables every 2 seconds
+  Meteor.setInterval(function() {
+    if ($('#debugSidebar').hasClass('open')) {
+      updateDebugVariables();
+    }
+  }, 2000);
+}
+
+// Debug function to skip to next question timestamp
+function skipToNextQuestion() {
+  if (!Roles.userIsInRole(Meteor.user(), ['admin'])) return;
+  
+  console.log('Admin debug: Skipping to next question');
+  
+  // Handle video sessions
+  if (Session.get('isVideoSession') && playerController) {
+    try {
+      // Get current time and find next question time
+      const currentTime = playerController.player.currentTime;
+      const questionTimes = playerController.times || [];
+      
+      // Find the next question time after current time
+      let nextTime = null;
+      for (let i = 0; i < questionTimes.length; i++) {
+        if (questionTimes[i] > currentTime + 1) { // Add 1 second buffer
+          nextTime = questionTimes[i];
+          break;
+        }
+      }
+      
+      if (nextTime !== null) {
+        console.log(`Jumping from ${currentTime}s to ${nextTime}s`);
+        playerController.player.currentTime = nextTime;
+        // Trigger the question immediately
+        setTimeout(() => {
+          playerController.showQuestion();
+        }, 100);
+      } else {
+        console.log('No more questions in this video session');
+        alert('No more question timestamps found in this video session');
+      }
+    } catch (error) {
+      console.error('Error skipping to next question in video:', error);
+      alert('Error: Could not skip to next question in video session');
+    }
+  }
+  // Handle regular question sessions
+  else {
+    try {
+      // Clear current timeouts and force next question
+      clearCardTimeout();
+      
+      // Simulate timeout to move to next question
+      console.log('Forcing timeout to advance to next question');
+      handleUserInput({}, 'timeout');
+    } catch (error) {
+      console.error('Error skipping to next question:', error);
+      alert('Error: Could not skip to next question');
+    }
   }
 }
 
@@ -2259,7 +2543,7 @@ function gatherAnswerLogRecord(trialEndTimeStamp, trialStartTimeStamp, source, u
     'KCCategoryDefault': '',
     'KCCluster': clusterKC,
     'KCCategoryCluster': '',
-    'CFAudioInputEnabled': Meteor.user().audioInputMode,
+    'CFAudioInputEnabled': checkAudioInputMode(),
     'CFAudioOutputEnabled': Session.get('enableAudioPromptAndFeedback'),
     'CFDisplayOrder': Session.get('questionIndex'),
     'CFStimFileIndex': stimFileIndex,
@@ -2540,14 +2824,31 @@ async function unitIsFinished(reason) {
 
 function getButtonTrial() {
   const curUnit = Session.get('currentTdfUnit');
-  // Default to value given in the unit
-  curUnit.isButtonTrial ? isButtonTrial = true : isButtonTrial = false;
-
+  const stimuliSet = Session.get('currentStimuliSet');
   const curCardInfo = engine.findCurrentCardInfo();
-  if (curCardInfo.forceButtonTrial || curUnit.buttontrial) {
+  const clusterIndex = curCardInfo.clusterIndex;
+  // Default to value given in the unit
+
+  let isButtonTrial
+
+  if (typeof curUnit.isButtonTrial === 'string' || typeof curUnit.buttonTrial === 'string') 
+    isButtonTrial = (curUnit.isButtonTrial === 'true' || curUnit.buttonTrial === 'true');
+  if (typeof curUnit.isButtonTrial === 'undefined' || typeof curUnit.buttonTrial === 'undefined') 
+    isButtonTrial = false;
+  else
+    isButtonTrial = (curUnit.isButtonTrial || curUnit.buttonTrial);
+
+  let curStimulus = undefined;
+  if (Array.isArray(stimuliSet) && Number.isInteger(clusterIndex) && clusterIndex >= 0 && clusterIndex < stimuliSet.length) {
+    curStimulus = stimuliSet[clusterIndex];
+  }
+  if (curCardInfo.forceButtonTrial) {
     // Did this question specifically override button trial?
     isButtonTrial = true;
-  } else {
+  } else if (curStimulus && curStimulus.incorrectResponses && curStimulus.incorrectResponses.length > 0) {
+    isButtonTrial = true;
+  }
+  else {
     // An entire schedule can override a button trial
     const schedButtonTrial = Session.get('schedule') ? Session.get('schedule').isButtonTrial : false;
     if (schedButtonTrial) {
@@ -2884,7 +3185,7 @@ function stopUserInput() {
 
 // Audio prompt/feedback
 function speakMessageIfAudioPromptFeedbackEnabled(msg, audioPromptSource) {
-  const audioPromptMode = Meteor.user().audioPromptMode;
+  const audioPromptMode = checkAudioPromptMode();
   const enableAudioPromptAndFeedback = audioPromptMode && audioPromptMode != 'silent';
   let synthesis = window.speechSynthesis;
   if (enableAudioPromptAndFeedback) {
@@ -3004,22 +3305,8 @@ async function processLINEAR16(data) {
       // is within the realm of reasonable responses before transcribing it
       answerGrammar = getAllCurrentStimAnswers(false);
     }
-    let tdfSpeechAPIKey;
-    if(Session.get('useEmbeddedAPIKeys')){
-      tdfSpeechAPIKey = Session.get('currentTdfFile').tdfs.tutor.setspec.speechAPIKey;
-    } else {
-      tdfSpeechAPIKey = '';
-    }
     // Make the actual call to the google speech api with the audio data for transcription
-    if (tdfSpeechAPIKey && tdfSpeechAPIKey != '') {
-      console.log('tdf key detected');
-      Meteor.call('makeGoogleSpeechAPICall', Session.get('currentTdfId'), "", request, answerGrammar, (err, res) => speechAPICallback(err, res));
-    // If we don't have a tdf provided speech api key load up the user key
-    // NOTE: we shouldn't be able to get here if there is no user key
-    } else {
-      console.log('no tdf key, using user provided key');
-      Meteor.call('makeGoogleSpeechAPICall', Session.get('currentTdfId'), Session.get('speechAPIKey'), request, answerGrammar, (err, res) => speechAPICallback(err, res));
-    }
+    Meteor.call('makeGoogleSpeechAPICall', Session.get('currentTdfId'), Session.get('speechAPIKey'), request, answerGrammar, (err, res) => speechAPICallback(err, res));
   } else {
     console.log('processLINEAR16 userAnswer not defined');
   }
@@ -3039,6 +3326,11 @@ function speechAPICallback(err, data){
     const content = JSON.parse(response);
     console.log(err);
     transcript = 'I did not get that. Please try again.';
+    ignoredOrSilent = true;
+  } else if(response.error) {
+    transcript = `Google API Error ${response.error.code}: ${response.error.message}`
+    alert(transcript)
+    console.log('transcript: ' + transcript)
     ignoredOrSilent = true;
   } else if (response['results']) {
     transcript = response['results'][0]['alternatives'][0]['transcript'].toLowerCase();
@@ -3123,7 +3415,9 @@ function speechAPICallback(err, data){
       if (inUserForceCorrect) {
         handleUserForceCorrectInput({}, 'voice');
       } else {
-        handleUserInput({}, 'voice');
+        handleUserInput({
+          answer: userAnswer
+        }, 'voice');
       }
     }
   }
@@ -3230,8 +3524,26 @@ function startUserMedia(stream) {
   cardStart();
 }
 
+function checkAudioInputMode(){
+  return Meteor.user().audioInputMode && Session.get('currentTdfFile').tdfs.tutor.setspec.audioInputEnabled
+}
+
+function checkAudioPromptMode(){
+  const tdfPromptMode = Session.get('currentTdfFile').tdfs.tutor.setspec.audioPromptMode
+  const userPromptMode = Meteor.user().audioPromptMode
+  if(userPromptMode && tdfPromptMode) {
+    if (userPromptMode == 'all' || userPromptMode == tdfPromptMode) {
+      return tdfPromptMode
+    }
+    if (tdfPromptMode == 'all') {
+      return userPromptMode
+    }
+  }
+  return 'silent' // if we get here then prompt modes are either silent, do not match, or are not set
+}
+
 function startRecording() {
-  if (recorder && !Session.get('recordingLocked') && Meteor.user().audioInputMode) {
+  if (recorder && !Session.get('recordingLocked') && checkAudioInputMode()) {
     Session.set('recording', true);
     recorder.record();
     console.log('RECORDING START');
@@ -3256,7 +3568,7 @@ function stopRecording() {
 async function getExperimentState() {
   let curExperimentState = await meteorCallAsync('getExperimentState', Meteor.userId(), Session.get('currentRootTdfId'));
   console.log('getExperimentState:', curExperimentState);
-  Meteor.call('updatePerformanceData', 'utlQuery', 'card.getExperimentState', Meteor.userId());
+  Meteor.call('updatePerformanceData', 'card.getExperimentState');
   Session.set('currentExperimentState', curExperimentState);
   return curExperimentState || {};
 }
@@ -3601,10 +3913,17 @@ async function resumeFromComponentState() {
       "stimuliPosition" : "top",
       "choiceButtonCols": 1,
       "onlyShowSimpleFeedback": "onCorrect",
+      "suppressFeedbackDisplay": false,
       "incorrectColor": "darkorange",
       "correctColor": "green",
       'instructionsTitleDisplay': "headerOnly",
       'displayConfirmButton': false,
+      'continueButtonText': "Continue",
+      'lastVideoModalText': "This is the last video, do not progress unless finished with this lesson.",
+      'skipStudyButtonText': "Skip",
+      'inputPlaceholderText': "Type your answer here...",
+      'showStimuliBox': true,
+      'stimuliBoxColor': 'alert-bg', // Can be Bootstrap class (alert-primary) or color (#ff0000, red, etc.)
     },
   }
   //here we interprit the stimulus and input position settings to set the colum widths. There are 4 possible combinations.

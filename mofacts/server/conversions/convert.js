@@ -75,19 +75,38 @@ function getNewItemFormat(stimFile, stimulusFileName, stimuliSetId, responseKCMa
   let clusterKC = baseKC;
   let stimKC = baseKC;
 
-  stimFile.stimuli.setspec.clusters.forEach((cluster, idx) => {
-    cluster.stims.forEach((stim) => {
-      let incorrectResponses = null;
-      if (stim.response.incorrectResponses) {
-        incorrectResponses = stim.response.incorrectResponses;
+  if (
+    !stimFile ||
+    !stimFile.stimuli ||
+    !stimFile.stimuli.setspec ||
+    !Array.isArray(stimFile.stimuli.setspec.clusters)
+  ) {
+    throw new Error(`Stimulus file "${stimulusFileName}" is missing or malformed (no clusters array).`);
+  }
+
+  stimFile.stimuli.setspec.clusters.forEach((cluster, clusterIdx) => {
+    if (!cluster || !Array.isArray(cluster.stims)) {
+      throw new Error(`Cluster ${clusterIdx} in "${stimulusFileName}" is missing or has no stims array.`);
+    }
+    cluster.stims.forEach((stim, stimIdx) => {
+      if (!stim || typeof stim !== 'object') {
+        throw new Error(`Stim ${stimIdx} in cluster ${clusterIdx} of "${stimulusFileName}" is undefined or not an object.`);
       }
-      if (typeof incorrectResponses === 'string') {
-        incorrectResponses = incorrectResponses.split(',');
+      if (!stim.response || typeof stim.response !== 'object') {
+        throw new Error(`Stim ${stimIdx} in cluster ${clusterIdx} of "${stimulusFileName}" missing 'response' property.`);
       }
-      if (incorrectResponses) {
-        incorrectResponses = incorrectResponses.map((ir) => removeInvisibleUnicode(ir));
+      if (!stim.response.hasOwnProperty('correctResponse')) {
+        throw new Error(`Stim ${stimIdx} in cluster ${clusterIdx} of "${stimulusFileName}" missing 'correctResponse' property in 'response'.`);
       }
 
+      let incorrectResponses = stim.response.incorrectResponses;
+      if (incorrectResponses){
+        if (typeof incorrectResponses === 'string') {
+          incorrectResponses = incorrectResponses.split(',');
+        }
+        incorrectResponses = incorrectResponses.map((ir) => removeInvisibleUnicode(ir));
+      }
+      
       let responseKC;
       const answerText = getDisplayAnswerText(stim.response.correctResponse);
 
@@ -110,11 +129,11 @@ function getNewItemFormat(stimFile, stimulusFileName, stimuliSetId, responseKCMa
         incorrectResponses: incorrectResponses,
         itemResponseType: cluster.responseType || 'text',
         speechHintExclusionList: stim.speechHintExclusionList,
-        clozeStimulus: stim.display.clozeText || stim.display.clozeStimulus,
-        textStimulus: stim.display.text || stim.display.textStimulus || "",
-        audioStimulus: stim.display.audioSrc || stim.display.audioStimulus,
-        imageStimulus: stim.display.imgSrc || stim.display.imageStimulus,
-        videoStimulus: stim.display.videoSrc || stim.display.videoStimulus,
+        clozeStimulus: stim.display?.clozeText || stim.display?.clozeStimulus,
+        textStimulus: stim.display?.text || stim.display?.textStimulus || "",
+        audioStimulus: stim.display?.audioSrc || stim.display?.audioStimulus,
+        imageStimulus: stim.display?.imgSrc || stim.display?.imageStimulus,
+        videoStimulus: stim.display?.videoSrc || stim.display?.videoStimulus,
         alternateDisplays: stim.alternateDisplays,
         tags: stim.tags,
       };

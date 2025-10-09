@@ -131,14 +131,14 @@ async function sendScheduledTurkMessages() {
     let retval = null;
 
     try {
-      const ownerProfile = UserProfileData.findOne({_id: nextJob.ownerProfileId});
+      const ownerProfile = Meteor.users.findOne({_id: nextJob.ownerProfileId});
       if (!ownerProfile) {
         throw new Error('Could not find current user profile');
       }
-      if (!ownerProfile.have_aws_id || !ownerProfile.have_aws_secret) {
+      if (!ownerProfile.aws || ownerProfile.aws.have_aws_id || !ownerProfile.aws.have_aws_secret) {
         throw new Error('Current user not set up for AWS/MTurk');
       }
-      const ret = await turk.notifyWorker(ownerProfile, nextJob.requestParams);
+      const ret = await turk.notifyWorker(ownerProfile.aws, nextJob.requestParams);
       serverConsole('Completed scheduled job', nextJob._id);
       retval = _.extend({'passedParams': nextJob.requestParams}, ret);
     } catch (e) {
@@ -195,7 +195,7 @@ Meteor.methods({
         throw new Error('You are not authorized to do that');
       }
 
-      const profile = UserProfileData.findOne({_id: usr._id});
+      const profile = usr.aws;
       if (!profile) {
         return 'Could not find current user profile';
       }
@@ -218,7 +218,7 @@ Meteor.methods({
         throw new Error('You are not authorized to do that');
       }
 
-      const profile = UserProfileData.findOne({_id: usr._id});
+      const profile = usr.aws;
       if (!profile) {
         return 'Could not find current user profile';
       }
@@ -263,12 +263,12 @@ Meteor.methods({
 
       ownerId = await getTdfOwner(experiment);
 
-      const ownerProfile = await UserProfileData.findOne({_id: ownerId});
+      const ownerProfile = await Meteor.users.findOne({_id: ownerId});
       if (!ownerProfile) {
         throw new Meteor.Error('Could not find TDF owner profile for id \'' + ownerId + '\'');
       }
       serverConsole('Found owner profile', ownerProfile);
-      if (!ownerProfile.have_aws_id || !ownerProfile.have_aws_secret) {
+      if (!ownerProfile.aws || !ownerProfile.aws.have_aws_id || !ownerProfile.aws.have_aws_secret) {
         throw new Meteor.Error('Current TDF owner not set up for AWS/MTurk');
       }
 
@@ -366,11 +366,11 @@ Meteor.methods({
       }
       ownerId = usr._id;
 
-      const ownerProfile = UserProfileData.findOne({_id: ownerId});
+      const ownerProfile = Meteor.users.findOne({_id: ownerId});
       if (!ownerProfile) {
         throw new Error('Could not find your user profile');
       }
-      if (!ownerProfile.have_aws_id || !ownerProfile.have_aws_secret) {
+      if (!ownerProfile.aws || !ownerProfile.aws.have_aws_id || !ownerProfile.aws.have_aws_secret) {
         throw new Error('You are not set up for AWS/MTurk');
       }
       turkid = _.chain(Meteor.users.findOne({'_id': workerUserId}))
@@ -475,11 +475,11 @@ Meteor.methods({
       }
       ownerId = usr._id;
 
-      const ownerProfile = UserProfileData.findOne({_id: ownerId});
+      const ownerProfile = Meteor.users.findOne({_id: ownerId});
       if (!ownerProfile) {
         throw new Error('Could not find your user profile');
       }
-      if (!ownerProfile.have_aws_id || !ownerProfile.have_aws_secret) {
+      if (!ownerProfile.aws || !ownerProfile.aws.have_aws_id || !ownerProfile.aws.have_aws_secret) {
         throw new Error('You are not set up for AWS/MTurk');
       }
 

@@ -1,3 +1,4 @@
+// @ts-nocheck
 import {DynamicTdfGenerator} from '../common/DynamicTdfGenerator';
 import {curSemester, ALL_TDFS, KC_MULTIPLE} from '../common/Definitions';
 import * as TutorialDialogue from '../server/lib/TutorialDialogue';
@@ -8,7 +9,7 @@ import {displayify, isEmpty, stringifyIfExists} from '../common/globalHelpers';
 import {createExperimentExport} from './experiment_times';
 import {getNewItemFormat} from './conversions/convert';
 import {sendScheduledTurkMessages} from './turk_methods';
-import {getItem, getCourse} from './orm';
+import {getItem, getCourse, getTdf} from './orm';
 import {result} from 'underscore';
 import { _ } from 'core-js';
 import { all } from 'bluebird';
@@ -23,7 +24,8 @@ export {
   getStimuliSetById,
   getDisplayAnswerText,
   serverConsole,
-  decryptUserData,
+  decryptData,
+  encryptData,
   createAwsHmac,
   getTdfByExperimentTarget
 };
@@ -38,6 +40,9 @@ const fs = Npm.require('fs');
 const https = require('https')
 const { randomBytes } = require('crypto')
 let verbosityLevel = 0; //0 = only output serverConsole logs, 1 = only output function times, 2 = output serverConsole and function times
+
+// Signup locks
+const signUpLocks = {};
 
 console.log('Starting server');
 if (process.env.METEOR_SETTINGS_WORKAROUND) {
@@ -186,11 +191,6 @@ Meteor.publish(null, function() {
   // user data (user times log and user record) for them
   const defaultData = [
     Meteor.users.find({_id: userId}),
-    UserProfileData.find({_id: userId}, {fields: {
-      have_aws_id: 1,
-      have_aws_secret: 1,
-      use_sandbox: 1,
-    }}),
   ];
 
   return defaultData;
@@ -273,16 +273,22 @@ const crypto = Npm.require('crypto');
 // Parameters
 const algo = 'aes256';
 
-function encryptUserData(data) {
-  const key = getConfigProperty('protectionKey');
-  const cipher = crypto.createCipher(algo, key);
-  return cipher.update(data, 'utf8', 'hex') + cipher.final('hex');
+function encryptData(data) {
+  //encrypt using crypto
+  const cipher = crypto.createCipher(algo, Meteor.settings.encryptionKey);
+  let crypted
+  crypted = cipher.update(data, 'utf8', 'hex');
+  crypted += cipher.final('hex');
+  return crypted;
 }
 
-function decryptUserData(data) {
-  const key = getConfigProperty('protectionKey');
-  const decipher = crypto.createDecipher(algo, key);
-  return decipher.update(data, 'hex', 'utf8') + decipher.final('utf8');
+function decryptData(data) {
+  //decrypt using crypto
+  const decipher = crypto.createDecipher(algo, Meteor.settings.encryptionKey);
+  let dec
+  dec = decipher.update(data, 'hex', 'utf8');
+  dec += decipher.final('utf8');
+  return dec;
 }
 
 function createAwsHmac(secretKey, dataString) {
@@ -304,11 +310,6 @@ async function checkCongentGenerationAvailable() {
   } catch (error) {
     return false;
   }
-}
-
-async function getTdfTTSAPIKey(TDFId) {
-  const textToSpeechAPIKey = Tdfs.findOne({_id: TDFId}).content.tdfs.tutor.setspec.textToSpeechAPIKey;
-  return textToSpeechAPIKey;
 }
 
 async function getTdfByFileName(filename) {
@@ -528,6 +529,14 @@ async function processPackageUpload(fileObj, owner, zipLink, emailToggle){
           const stim = unzippedFiles.find(f => f.name == tdf.contents.tutor.setspec.stimulusfile);
           serverConsole('stim', stim, 'stimFileName', stimFileName, tdf.contents.tutor.setspec.stimulusfile);
           tdf.packageFile = packageFile;
+          //search for google TTS  api key and encrypt it
+          if(tdf.contents.tutor.setspec.textToSpeechAPIKey){
+            tdf.contents.tutor.setspec.textToSpeechAPIKey = encryptData(tdf.contents.tutor.setspec.textToSpeechAPIKey);
+          }
+          //search for google speech to text api key and encrypt it
+          if(tdf.contents.tutor.setspec.speechAPIKey){
+            tdf.contents.tutor.setspec.speechAPIKey = encryptData(tdf.contents.tutor.setspec.speechAPIKey);
+          }
           const packageResult = await combineAndSaveContentFile(tdf, stim, owner);
           res.push(packageResult);
           serverConsole('packageResult', packageResult);
@@ -537,7 +546,7 @@ async function processPackageUpload(fileObj, owner, zipLink, emailToggle){
         if(emailToggle){
           sendEmail(
             Meteor.user().emails[0].address,
-            Meteor.settings.owner,
+            ownerEmail,
             "Package Upload Failed",
             "Package upload failed: " + e + " on file: " + filePath
           )
@@ -561,7 +570,7 @@ async function processPackageUpload(fileObj, owner, zipLink, emailToggle){
       if(emailToggle){
         sendEmail(
           Meteor.user().emails[0].address,
-          Meteor.settings.owner,
+          ownerEmail,
           "Package Upload Failed",
           "Package upload failed at media upload: " + e + " on file: " + filePath
         )
@@ -573,7 +582,7 @@ async function processPackageUpload(fileObj, owner, zipLink, emailToggle){
     if(emailToggle){
       sendEmail(
         Meteor.user().emails[0].address,
-        Meteor.settings.owner,
+        ownerEmail,
         "Package Upload Successful",
         "Package upload successful: " + fileName
       )
@@ -583,13 +592,23 @@ async function processPackageUpload(fileObj, owner, zipLink, emailToggle){
       if(emailToggle){
         sendEmail(
           Meteor.user().emails[0].address,
-          Meteor.settings.owner,
+          ownerEmail,
           "Package Upload Failed",
           "Package upload failed at initialization: " + e + " on file: " + filePath
         )
       }
     serverConsole('3 processPackageUpload ERROR,', path, ',', e + ' on file: ' + filePath);
     throw new Meteor.Error('package upload failed at initialization: ' + e + ' on file: ' + filePath)
+  } finally {
+    for(const tdfFile of unzippedFiles.filter(f => f.type == 'tdf')) {
+      const tdf = await Tdfs.findOne({tdfFileName: tdfFile.name})
+      if (tdf.content.tdfs.tutor.unit) {
+        processAudioFilesForTDF(tdf.content.tdfs).then((t) => {
+          tdf.content.tdfs.tutor.unit = t.tutor.unit
+          Tdfs.upsert({_id: tdf._id}, tdf)
+        })
+      }
+    }
   }
 }
 
@@ -616,6 +635,98 @@ async function saveMediaFile(media, owner, stimSetId){
   });
 }
 
+// Content Validation
+function validateStimAndTdf(tdfJson, stimJson, tdfFileName, stimFileName) {
+  // Check stimulus file structure
+  if (!stimJson || !stimJson.setspec || !Array.isArray(stimJson.setspec.clusters)) {
+    return { result: false, errmsg: `Stimulus file "${stimFileName}" missing clusters array.` };
+  }
+  const clusters = stimJson.setspec.clusters;
+  if (!clusters.length) {
+    return { result: false, errmsg: `Stimulus file "${stimFileName}" has no clusters.` };
+  }
+  // Check each cluster and stim
+  for (const [clusterIdx, cluster] of clusters.entries()) {
+    if (!cluster || !Array.isArray(cluster.stims) || !cluster.stims.length) {
+      return { result: false, errmsg: `Cluster ${clusterIdx} in "${stimFileName}" missing or empty stims array.` };
+    }
+    // Check for duplicate correctResponses in cluster
+    const corrects = cluster.stims.map(s => s.response && s.response.correctResponse).filter(Boolean);
+    if (new Set(corrects).size !== corrects.length) {
+      return { result: false, errmsg: `Duplicate correctResponse values in cluster ${clusterIdx} of "${stimFileName}".` };
+    }
+    for (const [stimIdx, stim] of cluster.stims.entries()) {
+      if (!stim || typeof stim !== 'object') {
+        return { result: false, errmsg: `Stim ${stimIdx} in cluster ${clusterIdx} is not an object.` };
+      }
+      if (!stim.response || typeof stim.response !== 'object' || !stim.response.hasOwnProperty('correctResponse')) {
+        return { result: false, errmsg: `Stim ${stimIdx} in cluster ${clusterIdx} missing correctResponse.` };
+      }
+      // Display fields should be strings if present
+      if (stim.display) {
+        ['text', 'audioSrc', 'imgSrc', 'videoSrc'].forEach(field => {
+          if (stim.display[field] && typeof stim.display[field] !== 'string') {
+            return { result: false, errmsg: `Stim ${stimIdx} in cluster ${clusterIdx} has non-string display.${field}.` };
+          }
+        });
+        //validate that audioSrc, imgSrc, and videoSrc are valid URLs or in DynamicAssets
+        ['audioSrc', 'imgSrc', 'videoSrc'].forEach(field => {
+          if (stim.display[field]) {
+            const url = stim.display[field];
+            if (!url.startsWith('http') && !DynamicAssets.collection.findOne({name: url})) {
+              return { result: false, errmsg: `Stim ${stimIdx} in cluster ${clusterIdx} has invalid display.${field}: ${url}.` };
+            }
+          }
+        });
+      }
+    }
+  }
+  // TDF checks
+  if (!tdfJson.tutor || !tdfJson.tutor.setspec) {
+    return { result: false, errmsg: `TDF "${tdfFileName}" missing tutor.setspec.` };
+  }
+  if (!tdfJson.tutor.setspec.lessonname || typeof tdfJson.tutor.setspec.lessonname !== 'string') {
+    return { result: false, errmsg: `TDF "${tdfFileName}" missing or invalid lessonname.` };
+  }
+  if (!tdfJson.tutor.setspec.stimulusfile || typeof tdfJson.tutor.setspec.stimulusfile !== 'string') {
+    return { result: false, errmsg: `TDF "${tdfFileName}" missing or invalid stimulusfile.` };
+  }
+  // Check all cluster indices referenced in TDF exist in stim file
+  function extractClusterIndicesFromTDF(tdf) {
+    let indices = new Set();
+    const units = [
+      ...(tdf.tutor.unit || []),
+      ...(tdf.tutor.unitTemplate || [])
+    ];
+    for (const [unitIdx, unit] of units.entries()) {
+      if (unit.hasOwnProperty('clusterIndex')) {
+        indices.add(Number(unit.clusterIndex));
+      }
+      if (unit.assessmentsession && unit.assessmentsession.clusterlist) {
+        const cl = unit.assessmentsession.clusterlist;
+        if (typeof cl === "string") {
+          cl.split(',').forEach(part => {
+            if (part.includes('-')) {
+              const [start, end] = part.split('-').map(Number);
+              for (let i = start; i <= end; i++) indices.add(i);
+            } else {
+              indices.add(Number(part));
+            }
+          });
+        }
+      }
+    }
+    return Array.from(indices);
+  }
+  const tdfClusterRefs = extractClusterIndicesFromTDF(tdfJson);
+  for (const idx of tdfClusterRefs) {
+    if (isNaN(idx) || idx < 0 || idx >= clusters.length) {
+      return { result: false, errmsg: `TDF "${tdfFileName}" references cluster index ${idx}, but stimulus file "${stimFileName}" only has ${clusters.length} clusters.` };
+    }
+  }
+  return { result: true };
+}
+
 // Allow file uploaded with name and contents. The type of file must be
 // specified - current allowed types are: 'stimuli', 'tdf'
 async function saveContentFile(type, filename, filecontents, owner, packagePath = null) {
@@ -628,84 +739,58 @@ async function saveContentFile(type, filename, filecontents, owner, packagePath 
   if (!type) throw new Error('Type required for File Save');
   if (!filename) throw new Error('Filename required for File Save');
   if (!filecontents) throw new Error('File Contents required for File Save');
-  let ownerId = "";
-  // We need a valid use that is either admin or teacher
-  if(owner){
-    ownerId = owner;
-  } else {
-    ownerId = Meteor.user()._id;
-  }
-  if (!ownerId) {
-    throw new Error('No user logged in - no file upload allowed');
-  }
-  if (!Roles.userIsInRole(ownerId, ['admin', 'teacher'])) {
-    throw new Error('You are not authorized to upload files');
-  }
-  if (type != 'tdf' && type != 'stim') {
-    throw new Error('Unknown file type not allowed: ' + type);
-  }
+  let ownerId = owner ? owner : Meteor.user()._id;
+  if (!ownerId) throw new Error('No user logged in - no file upload allowed');
+  if (!Roles.userIsInRole(ownerId, ['admin', 'teacher'])) throw new Error('You are not authorized to upload files');
+  if (type != 'tdf' && type != 'stim') throw new Error('Unknown file type not allowed: ' + type);
 
   try {
     if (type == 'tdf') {
-      const jsonContents = typeof filecontents == 'string' ? JSON.parse(filecontents) : filecontents;
-      const json = {tutor: jsonContents.tutor};
-      const lessonName = _.trim(jsonContents.tutor.setspec.lessonname);
-      if (lessonName.length < 1) {
+      let jsonContents;
+      try {
+        jsonContents = typeof filecontents == 'string' ? JSON.parse(filecontents) : filecontents;
+      } catch (e) {
         results.result = false;
-        results.errmsg = 'TDF has no lessonname - it cannot be valid';
-
+        results.errmsg = `Error parsing JSON in file "${filename}": ${e.message}`;
         return results;
       }
-      const stimFileName = json.tutor.setspec.stimulusfile ? json.tutor.setspec.stimulusfile : 'INVALID';
-      if (stimFileName == 'INVALID') {
-        // Note this means root tdfs will have NULL stimulisetid
+      const stimFileName = jsonContents.tutor.setspec.stimulusfile;
+      const stimTdf = Tdfs.findOne({stimulusFileName: stimFileName});
+      const stimJson = stimTdf ? stimTdf.rawStimuliFile : null;
+      const validation = validateStimAndTdf(jsonContents, stimJson, filename, stimFileName);
+      if (!validation.result) {
         results.result = false;
-        results.errmsg = 'Please upload stimulus file before uploading a TDF: ' + stimFileName;
-
-        return results;
-      } else {
-        const tdf = Tdfs.findOne({stimulusFileName: stimFileName});
-        const stimuliSetId = tdf ? tdf.stimuliSetId : null;
-        if (isEmpty(stimuliSetId)) {
-          results.result = false;
-          results.errmsg = 'Please upload stimulus file before uploading a TDF: ' + stimFileName;
-        } else {
-          try {
-            const rec = {'fileName': filename, 'tdfs': json, 'ownerId': ownerId, 'source': 'upload', 'packageFile': filecontents.packageFile};
-            const ret = await upsertTDFFile(filename, rec, ownerId);
-            if(ret && ret.res == 'awaitClientTDF'){
-              serverConsole('awaitClientTDF', ret)
-              results.result = false;
-              results.data = ret;
-              return results;
-            } else {
-              results.result = true;
-            }
-          } catch (err) {
-            results.result=false;
-            results.errmsg=err.toString();
-          }
-        }
+        results.errmsg = validation.errmsg;
         return results;
       }
+      // Continue with normal upsert logic...
+      await upsertTDFFile(filename, {fileName: filename, tdfs: jsonContents, ownerId: ownerId, source: 'upload'}, ownerId, packagePath);
+      results.result = true;
+      results.errmsg = '';
+      return results;
     } else if (type === 'stim') {
-      const jsonContents = typeof filecontents == 'string' ? JSON.parse(filecontents) : filecontents;
+      let jsonContents;
+      try {
+        jsonContents = typeof filecontents == 'string' ? JSON.parse(filecontents) : filecontents;
+      } catch (e) {
+        results.result = false;
+        results.errmsg = `Error parsing JSON in stimulus file "${filename}": ${e.message}`;
+        return results;
+      }
       await upsertStimFile(filename, jsonContents, ownerId, packagePath);
       results.data = jsonContents;
     }
   } catch (e) {
     serverConsole('ERROR saving content file:', e, e.stack);
     results.result = false;
-    results.errmsg = JSON.stringify(e);
+    results.errmsg = `saveContentFile error in file "${filename}": ${e && e.message ? e.message : e}`;
     return results;
   }
 
   results.result = true;
   results.errmsg = '';
-
   return results;
 }
-
 async function combineAndSaveContentFile(tdf, stim, owner) {
   serverConsole('combineAndSaveContentFile', tdf, stim, owner);
   const results = {
@@ -770,6 +855,38 @@ async function combineAndSaveContentFile(tdf, stim, owner) {
     console.error(e);
     return results;
   }
+}
+
+function extractSrcFromHtml(htmlString) {
+  if (!htmlString || typeof htmlString !== 'string') {
+    return [];
+  }
+  
+  const srcValues = [];
+  
+  // Multiple regex patterns to catch different src attribute formats
+  const patterns = [
+    // Standard src="value" (with double quotes)
+    /src\s*=\s*"([^"]+)"/gi,
+    // Single quotes src='value'
+    /src\s*=\s*'([^']+)'/gi,
+    // No quotes src=value (ends at space or >)
+    /src\s*=\s*([^\s>]+)/gi
+  ];
+  
+  patterns.forEach(pattern => {
+    let match;
+    while ((match = pattern.exec(htmlString)) !== null) {
+      let srcValue = match[1].trim();
+      // Remove backslashes and quotes that might be escaped or malformed
+      srcValue = srcValue.replace(/[\\\"]/g, '');
+      if (srcValue && !srcValues.includes(srcValue)) {
+        srcValues.push(srcValue);
+      }
+    }
+  });
+  
+  return srcValues;
 }
 
 function stripSpacesAndLowerCase(input) {
@@ -1493,7 +1610,7 @@ function addUserDueDateException(userId, tdfId, classId, date){
 async function checkForTDFData(tdfId){
   const userId = Meteor.userId();
   serverConsole('checkForTDFData', tdfId, userId);
-  tdf = Histories.findOne({TDFId: tdfId, userId: userId, $and: [ {levelUnitType: {$ne: "schedule"}}, {levelUnitType: {$ne: "Instruction"}} ] });
+  const tdf = Histories.findOne({TDFId: tdfId, userId: userId, $and: [ {levelUnitType: {$ne: "schedule"}}, {levelUnitType: {$ne: "Instruction"}} ] });
   if(tdf){
     return true;
   }
@@ -2011,15 +2128,18 @@ function checkDriveSpace() {
 
 
 // Save the given user profile via "upsert" logic
-function userProfileSave(id, profile) {
-  try {
-    // Insure record matching ID is present while working around MongoDB 2.4 bug
-    UserProfileData.update({_id: id}, {'$set': {'preUpdate': true}}, {upsert: true});
-  } catch (e) {
-    serverConsole('Ignoring user profile upsert ', e);
-  }
-  const numUpdated = UserProfileData.update({_id: id}, profile);
-  if (numUpdated == 1) {
+function userProfileSave(user, awsProfile) {
+  serverConsole('userProfileSave', user._id, awsProfile);
+  user.aws = awsProfile;
+  const numUpdated = Meteor.users.update(
+    { _id: user._id },
+    { $set: { aws: user.aws } },
+    { multi: false }
+  );
+  // serverConsole('numUpdated', numUpdated);
+  serverConsole('numUpdated', numUpdated);
+  if (numUpdated.numberAffected === 1) {
+    serverConsole('Save succeeded');
     return 'Save succeeed';
   }
 
@@ -2108,7 +2228,6 @@ async function upsertStimFile(stimulusFileName, stimJSON, ownerId, packagePath =
     'owner': ownerId,
     'source': 'repo',
   };
-  await Items.remove({stimuliSetId: stimuliSetId})
   const newStims = getNewItemFormat(oldStimFormat, stimulusFileName, stimuliSetId, responseKCMap);
   let maxStimulusKC = 0;
   serverConsole('!!!newStims:', newStims);
@@ -2360,6 +2479,25 @@ function tdfUpdateConfirmed(updateObj, resetShuffleClusters = false){
   }
 }
 
+async function processAudioFilesForTDF(TDF){
+  for (const unitIdx in TDF.tutor.unit){
+    const unit = TDF.tutor.unit[unitIdx]
+    if (unit && unit.unitinstructions) {
+      const srcValues = extractSrcFromHtml(unit.unitinstructions);
+      if (srcValues.length > 0) {
+        for(const src of srcValues) {
+          if(!src.includes('http')) {
+            const audio = await DynamicAssets.findOne({name: src});
+            const link = audio.link();
+            TDF.tutor.unit[unitIdx].unitinstructions = unit.unitinstructions.replace(src, link)
+          }
+        }
+      }
+    }
+  }
+  return TDF
+}
+
 function setUserLoginData(entryPoint, loginMode, curTeacher = undefined, curClass = undefined, assignedTdfs = undefined){
   serverConsole('setUserLoginData', entryPoint, loginMode, curTeacher, curClass, assignedTdfs);
   let loginParams = Meteor.user().loginParams || {};
@@ -2428,7 +2566,7 @@ function getSyllablesForWord(word) {
   return syllableArray;
 }
 
-const methods = {
+export const methods = {
   getMatchingDialogueCacheWordsForAnswer, getAllTeachers, getUserIdforUsername, getClassPerformanceByTDF, 
 
   removeUserDueDateException, insertHiddenItem, setUserLoginData, addUserDueDateException, createExperimentState,
@@ -2462,7 +2600,7 @@ const methods = {
         file ? files = [file] : files = [];
         Email.send({
           to: Meteor.user().emails[0].address,
-          from: Meteor.settings.owner,
+          from: ownerEmail,
           subject: subject,
           text: message,
           attachments: files
@@ -2476,9 +2614,9 @@ const methods = {
   removeTurkById: function(turkId, experimentId){
     serverConsole('removeTurkById', turkId, experimentId)
     ScheduledTurkMessages.remove({workerUserId: turkId, experiment: experimentId});
-    let lockout = meteor.user().lockouts;
+    let lockout = Meteor.user().lockouts;
     lockout[experimentId].lockoutMinutes = Number.MAX_SAFE_INTEGER;
-    Meteor.users.update({_id: Meteor.userId()}, {$set: {lockout: lockout}});
+    Meteor.users.update({_id: Meteor.userId()}, {$set: {lockouts: lockout}});
   },
 
   saveAudioPromptMode: function(audioPromptMode){
@@ -2740,59 +2878,87 @@ const methods = {
     }
   },
 
+  
+
   // Functionality to create a new user ID: return null on success. Return
   // an array of error messages on failure. If previous OK is true, then
   // we silently skip duplicate users (this is mainly for experimental
   // participants who are created on the fly)
+
+
+
   signUpUser: function(newUserName, newUserPassword, previousOK) {
     serverConsole('signUpUser', newUserName, 'previousOK == ', previousOK);
 
-    if (!newUserName) {
-      throw new Error('Blank user names aren\'t allowed');
-    } else {
-      const prevUser = Accounts.findUserByUsername(newUserName);
-      if (prevUser) {
-        if (previousOK) {
-          // Older accounts from turk users are having problems with
-          // passwords - so when we detect them, we automatically
-          // change the password
-          Accounts.setPassword(prevUser._id, newUserPassword);
-          return prevUser._id; // User has already been created - nothing to do
-        } else {
-          throw new Error('User is already in use');
-        }
+  if (!newUserName) throw new Error('Blank user names aren\'t allowed');
+  if (!newUserPassword || newUserPassword.length < 6) throw new Error('Passwords must be at least 6 characters long');
+
+  // Simple mutex: block if another signup is in progress for this username
+  while (signUpLocks[newUserName]) {
+    Meteor._sleepForMs(50);
+  }
+  signUpLocks[newUserName] = true;
+
+  try {
+    let prevUser = Accounts.findUserByUsername(newUserName) || Accounts.findUserByEmail(newUserName);
+    if (prevUser) {
+      if (previousOK) {
+        Accounts.setPassword(prevUser._id, newUserPassword);
+        return { userExists: true, userId: prevUser._id };
+      } else {
+        throw new Error('User is already in use');
       }
     }
 
-    if (!newUserPassword || newUserPassword.length < 6) {
-      throw new Error('Passwords must be at least 6 characters long');
+    try {
+      //get the default user profile
+      const createdId = Accounts.createUser({
+        email: newUserName,
+        username: newUserName,
+        password: newUserPassword,
+        profile: { experiment: !!previousOK },
+        aws: {
+              have_aws_id: false,
+              have_aws_secret: false,
+              aws_id: '',
+              aws_secret_key: '',
+              use_sandbox: true,
+        }
+        
+      });
+
+      // Wait for user to be available in the DB before proceeding
+      let user = null, attempts = 0;
+      while (!user && attempts < 10) {
+        user = Meteor.users.findOne({ _id: createdId });
+        if (!user) {
+          Meteor._sleepForMs(50);
+          attempts++;
+        }
+      }
+      if (!user) throw new Error('User creation race condition: user not found after createUser');
+      // userProfileSave(user, defaultUserProfile()); // Not needed if onCreateUser does this
+      return { userExists: false, userId: createdId };
+    } catch (e) {
+      if (e.error === 403 && (/Username already exists|E11000 duplicate key error/.test(e.reason))) {
+        prevUser = Accounts.findUserByUsername(newUserName) || Accounts.findUserByEmail(newUserName);
+        if (prevUser) {
+          if (previousOK) {
+            Accounts.setPassword(prevUser._id, newUserPassword);
+            return { userExists: true, userId: prevUser._id };
+          } else {
+            throw new Error('User is already in use');
+          }
+        }
+        throw new Error('Duplicate key error but user not found');
+      } else {
+        throw e;
+      }
     }
-    
-
-    // Now we can actually create the user
-    // Note that on the server we just get back the ID and have nothing
-    // to do right now. Also note that this method is called for creating
-    // NON-google user accounts (which should generally just be experiment
-    // participants) - so we make sure to set an initial profile
-    const createdId = Accounts.createUser({
-      'email': newUserName,
-      'username': newUserName,
-      'password': newUserPassword,
-      'profile': {
-        'experiment': !!previousOK,
-      },
-    });
-    if (!createdId) {
-      throw new Error('Unknown failure creating user account');
-    }
-
-    // Now we need to create a default user profile record
-    userProfileSave(createdId, defaultUserProfile());
-
-    // Remember we return a LIST of errors, so this is success
-    return createdId;
-  },
-
+  } finally {
+    delete signUpLocks[newUserName];
+  }
+},
   populateSSOProfile: function(userId){
     //check if the user has a service profile
     const user = Meteor.users.findOne(userId);
@@ -2819,13 +2985,20 @@ const methods = {
     if (!Meteor.users.findOne(userId)) {
       throw new Meteor.Error(404, 'User not found');
     }
-    Meteor.users.update({_id: Meteor.userId()}, {$set: {impersonating: userId}});
-    this.setUserId(userId);
+    if (!Roles.userIsInRole(Meteor.userId(), ['admin'])) {
+      throw new Meteor.Error(403, 'You are not authorized to do that');
+    }
+    const newUser = Meteor.users.findOne(userId);
+    newUser.impersonating = true;
+    return newUser
   },
 
-  clearLoginData: function(){
-    let loginParams = Meteor.user().loginParams;
-    if(!loginParams) loginParams = {};
+  clearLoginData: function(){    
+    const user = Meteor.user();
+    if (!user) {
+      throw new Meteor.Error(401, 'User must be logged in to clear login data');
+    }
+    let loginParams = user.loginParams || {};
     loginParams.entryPoint = null;
     loginParams.curTeacher = null;
     loginParams.curClass = null;
@@ -2839,46 +3012,50 @@ const methods = {
   },
 
   getUserSpeechAPIKey: function() {
-    const speechAPIKey = GoogleSpeechAPIKeys.findOne({_id: Meteor.userId()});
+    const speechAPIKey = Meteor.user().speechAPIKey;
     if (speechAPIKey) {
-      return decryptUserData(speechAPIKey['key']);
+      return decryptData(speechAPIKey);
     } else {
       return null;
     }
   },
 
   isUserSpeechAPIKeySetup: function() {
-    const speechAPIKey = GoogleSpeechAPIKeys.findOne({_id: Meteor.userId()});
+    const speechAPIKey = Meteor.user().speechAPIKey;
     return !!speechAPIKey;
   },
 
   saveUserSpeechAPIKey: function(key) {
-    key = encryptUserData(key);
+    key = encryptData(key);
     let result = true;
     let error = '';
-    const userID = Meteor.userId();
-    try {
-      // Insure record matching ID is present while working around MongoDB 2.4 bug
-      GoogleSpeechAPIKeys.update({_id: userID}, {'$set': {'preUpdate': true}}, {upsert: true});
-    } catch (e) {
-      serverConsole('Ignoring user speech api key upsert ', e);
-    }
-    const numUpdated = GoogleSpeechAPIKeys.update({_id: userID}, {key: key});
-
-    // WHOOOPS! If we're still here something has gone horribly wrong
-    if (numUpdated < 1) {
+    const user = Meteor.userId();
+    if (!user) {
       result = false;
-      error = 'No records updated by save';
-    } else if (numUpdated > 1) {
-      result = false;
-      error = 'More than one record updated?! ' + _.display(numUpdated);
+      error = 'User not found';
+    } else {
+      Meteor.users.upsert({_id: user}, {$set: {speechAPIKey: key}});
     }
-
-    return {
-      'result': result,
-      'error': error,
-    };
   },
+
+  getTdfTTSAPIKey: function(tdfId){
+    const tdf = Tdfs.findOne({_id: tdfId});
+    if(tdf){
+      return decryptData(tdf.content.tdfs.tutor.setspec.textToSpeechAPIKey);
+    } else {
+      return '';
+    }
+  },
+
+  getTdfSpeechAPIKey: function(tdfId){
+    const tdf = Tdfs.findOne({_id: tdfId});
+    if(tdf){
+      return decryptData(tdf.content.tdfs.tutor.setspec.speechAPIKey);
+    } else {
+      return '';
+    }
+  },
+
 
   setUserSessionId: function(sessionId, sessionIdTimestamp) {
     serverConsole('setUserSessionId', sessionId, sessionIdTimestamp)
@@ -2887,7 +3064,7 @@ const methods = {
 
   deleteUserSpeechAPIKey: function() {
     const userID = Meteor.userId();
-    GoogleSpeechAPIKeys.remove(userID);
+    Meteor.users.update({_id: userID}, {$unset: {speechAPIKey: ''}});
   },
 
   // ONLY FOR ADMINS: for the given targetUserId, perform roleAction (add
@@ -2939,8 +3116,8 @@ const methods = {
     };
   },
 
-  saveUsersFile: function(filename, filecontents) {
-    serverConsole('saveUsersFile: ' + filename);
+  insertNewUsers: function(filename, filecontents) {
+    serverConsole('insertNewUsers: ' + filename);
     const allErrors = [];
     let rows = Papa.parse(filecontents).data;
     serverConsole(rows);
@@ -2961,48 +3138,48 @@ const methods = {
     return allErrors;
   },
 
-  deleteTDFFile: function(tdfId){
-    serverConsole("Remove TDF File:", tdfId);
-    let TDF = Tdfs.findOne({_id: tdfId, ownerId: Meteor.userId()});
-    if(TDF){
-      ComponentStates.remove({TDFId: tdfId});
-      Assignments.remove({TDFId: tdfId});
-      Histories.remove({TDFId: tdfId});
-      GlobalExperimentStates.remove({TDFId: tdfId});
-      Tdfs.remove({_id: tdfId});
-      //iterate through TDF.stimuli
-      for (const stim of TDF.stimuli) {
-        asset = stim.imageStimulus || stim.audioStimulus || stim.videoStimulus || false;
-        if (asset) {
-          //remove asset
-          DynamicAssets.remove({"name": asset}, function(err, result){
-            if(err){
-              serverConsole(err);
-            } else {
-              serverConsole("Asset removed: ", asset);
+  deletePackageFile: function(packageId){
+    serverConsole("Remove package:", packageId);
+    //check if the user is an admin or owner of the TDF
+    try{
+      Tdfs.find({"packageFile": packageId}).fetch().forEach((TDF) => {
+        if(TDF && (Roles.userIsInRole(Meteor.userId(), ['admin']) || TDF.ownerId == Meteor.userId())){
+          tdfId = TDF._id;
+          ComponentStates.remove({TDFId: tdfId});
+          Assignments.remove({TDFId: tdfId});
+          Histories.remove({TDFId: tdfId});
+          GlobalExperimentStates.remove({TDFId: tdfId});
+          Tdfs.remove({_id: tdfId});
+          //iterate through TDF.stimuli
+          for (const stim of TDF.stimuli) {
+            asset = stim.imageStimulus || stim.audioStimulus || stim.videoStimulus || false;
+            if (asset) {
+              //remove asset
+              DynamicAssets.remove({"name": asset}, function(err, result){
+                if(err){
+                  serverConsole(err);
+                } else {
+                  serverConsole("Asset removed: ", asset);
+                }
+              });
             }
-          });
+          }
         }
-      }
-    } else {
-      result = 'No matching tdf file found';
-      return result;
+      });
+      return "Package removed";
+    } catch (e) {
+      serverConsole(e);
+      return "There was an error deleting the package";
     }
-    result = "TDF deleted";
-    return result;
   },
 
-  updatePerformanceData: function(type, codeLocation, userId) {
+  updatePerformanceData: function(codeLocation) {
     const timestamp = new Date();
-    const record = {userId, timestamp, codeLocation};
-    switch (type) {
-      case 'login':
-        LoginTimes.insert(record);
-        break;
-      case 'utlQuery':
-        UtlQueryTimes.insert(record);
-        break;
-    }
+    const user = Meteor.user();
+    const userId = user._id;
+    user.lastActionTimestamp = timestamp;
+    user.timestampLocation = codeLocation;
+    Meteor.users.update({_id: userId}, user);
   },
 
   isSystemDown: function() {
@@ -3011,39 +3188,31 @@ const methods = {
   },
 
   isCurrentServerLoadTooHigh: function() {
-    const last50Logins = LoginTimes.find({}, {sort: {$natural: -1}, limit: 50});
-    const last50UtlQueries = UtlQueryTimes.find({}, {sort: {$natural: -1}, limit: 50}).fetch();
+    const last50Timestamps = Meteor.users.find({}, {limit: 50}).sort({lastActionTimestamp: 1}).fetch();
     const curConfig = DynamicConfig.findOne({});
     const {loginsWithinAHalfHourLimit, utlQueriesWithinFifteenMinLimit} = curConfig.serverLoadConstants;// 10,8
 
     const loginsWithinAHalfHour = new Set();
     let utlQueriesWithinFifteenMin = [];
     const now = new Date();
-    const thirtyMinAgo = new Date(now - (30*60*1000)); // Down from an hour to 30 min
-    const fifteenMinAgo = new Date(now - (15*60*1000)); // Up from 5 min to 15 min
+    const thirtyMinAgo = new Date(now - (30*60*1000));
+    const fifteenMinAgo = new Date(now - (15*60*1000));
 
-    for (const loginData of last50Logins) {
+    for (const loginData of last50Timestamps) {
       if (loginData.timestamp > thirtyMinAgo) {
         loginsWithinAHalfHour.add(loginData.userId);
       }
     }
 
-    utlQueriesWithinFifteenMin = last50UtlQueries.filter((x) => x.timestamp > fifteenMinAgo);
+    const loginsWithinFifteenMin = last50Timestamps.filter((x) => x.timestamp > fifteenMinAgo);
     const currentServerLoadIsTooHigh = (loginsWithinAHalfHour.size > loginsWithinAHalfHourLimit ||
-          utlQueriesWithinFifteenMin.length > utlQueriesWithinFifteenMinLimit);
+          loginsWithinFifteenMin.length > utlQueriesWithinFifteenMinLimit);
 
     serverConsole('isCurrentServerLoadTooHigh:' + currentServerLoadIsTooHigh + ', loginsWithinAHalfHour:' +
-        loginsWithinAHalfHour.size + '/' + loginsWithinAHalfHourLimit + ', utlQueriesWithinFifteenMin:' +
-        utlQueriesWithinFifteenMin.length + '/' + utlQueriesWithinFifteenMinLimit);
+        loginsWithinAHalfHour.size + '/' + loginsWithinAHalfHourLimit + ', loginsWithinFifteenMin:' +
+        loginsWithinFifteenMin.length + '/' + utlQueriesWithinFifteenMinLimit);
 
     return currentServerLoadIsTooHigh;
-  },
-
-  downloadStimFile: function(stimuliSetId) {
-    serverConsole('downloadStimFile: ' + stimuliSetId);
-    stimuliSetId = parseInt(stimuliSetId);
-    let stims = Stims.find({'stimuliSetId': stimuliSetId}).fetch();
-    return stims;
   },
 
   // Let client code send console output up to server
@@ -3102,7 +3271,8 @@ const methods = {
 
   getStimsByOwnerId: (ownerId) => {
     serverConsole('getStimsByOwnerId: ' + ownerId);
-    const stims = Stims.find({'owner': ownerId}).fetch();
+    const tdfs = Tdfs.find({'ownerId': ownerId}).fetch();
+    const stims = tdfs.stimuli;
     for(let stim of stims) {
       let lessonName = Tdfs.findOne({stimuliSetId: stim.stimuliSetId}).content.tdfs.tutor.setspec.lessonname
       stim.lessonName = lessonName
@@ -3247,7 +3417,7 @@ const asyncMethods = {
   },
   
   makeGoogleTTSApiCall: async function(TDFId, message, audioPromptSpeakingRate, audioVolume, selectedVoice) {
-    const ttsAPIKey = await getTdfTTSAPIKey(TDFId);
+    const ttsAPIKey = await methods.getTdfTTSAPIKey(TDFId);
     const request = JSON.stringify({
       input: {text: message},
       voice: {languageCode: 'en-US', 'name': selectedVoice},
@@ -3284,10 +3454,11 @@ const asyncMethods = {
     Meteor.users.update({_id: Meteor.userId()}, {$set: {lockouts: lockouts}});
   },
 
-  makeGoogleSpeechAPICall: async function(TDFId, speechAPIKey = '', request, answerGrammar){
+  makeGoogleSpeechAPICall: async function(TDFId, speechAPIKey, request, answerGrammar){
     serverConsole('makeGoogleSpeechAPICall', TDFId, speechAPIKey, request, answerGrammar);
-    if(speechAPIKey == ''){
-      speechAPIKey = await getTdfTTSAPIKey(TDFId);
+    const TDFAPIKey = await methods.getTdfSpeechAPIKey(TDFId);
+    if (TDFAPIKey) {
+      speechAPIKey = TDFAPIKey
     }
     const options = {
       hostname: 'speech.googleapis.com',
@@ -3402,8 +3573,8 @@ const asyncMethods = {
   // We provide a separate server method for user profile info - this is
   // mainly since we don't want some of this data just flowing around
   // between client and server
-  saveUserProfileData: async function(profileData) {
-    serverConsole('saveUserProfileData', displayify(profileData));
+  saveUserAWSData: async function(profileData) {
+    serverConsole('saveUserAWSData', displayify(profileData));
 
     let saveResult; let result; let errmsg; let acctBal;
     try {
@@ -3413,15 +3584,15 @@ const asyncMethods = {
       data.have_aws_id = data.aws_id.length > 0;
       data.have_aws_secret = data.aws_secret_key.length > 0;
 
-      data.aws_id = encryptUserData(data.aws_id);
-      data.aws_secret_key = encryptUserData(data.aws_secret_key);
+      data.aws_id = encryptData(data.aws_id);
+      data.aws_secret_key = encryptData(data.aws_secret_key);
 
-      saveResult = userProfileSave(Meteor.userId(), data);
+      saveResult = userProfileSave(Meteor.user(), data);
 
       // We test by reading the profile back and checking their
       // account balance
       const res = await turk.getAccountBalance(
-          UserProfileData.findOne({_id: Meteor.user()._id}),
+          Meteor.users.findOne({_id: Meteor.userId()}),
       );
 
       if (!res) {
@@ -3431,17 +3602,17 @@ const asyncMethods = {
       result = true;
       acctBal = res.AvailableBalance;
       errmsg = '';
-      return {
-        'result': result,
-        'saveResult': saveResult,
-        'acctBal': acctBal,
-        'error': errmsg,
-      };
     } catch (e) {
       result = false;
-      serverConsole(e);
+      serverConsole('here', e);
       errmsg = e;
     }
+    return {
+      'result': result,
+      'saveResult': saveResult,
+      'acctBal': acctBal,
+      'error': errmsg,
+    };
   },
 
   //handle file deletions
@@ -3461,9 +3632,8 @@ const asyncMethods = {
   },
   deleteStimFile: async function(stimSetId) {
     stimSetId = parseInt(stimSetId);
-    let stim = Stims.findOne({stimuliSetId: stimSetId, owner: Meteor.userId()})
-    if(stim){
-      let tdfs = Tdfs.find({stimuliSetId: stimSetId}).fetch();
+    let tdfs = Tdfs.find({stimuliSetId: stimSetId, owner: Meteor.userId()}).fetch();
+    if(tdfs){
       serverConsole(tdfs);
       for(let tdf of tdfs) {
         tdfId = tdf._id;
@@ -3472,9 +3642,7 @@ const asyncMethods = {
         Assignments.remove({TDFId: tdfId});
         Histories.remove({TDFId: tdfId});
       }
-      Items.remove({stimuliSetId: stimSetId});
       Tdfs.remove({stimuliSetId: stimSetId});
-      Stims.remove({stimuliSetId: stimSetId});
       res = "Stim and related TDFS deleted.";
       return res;
     } else {
@@ -3580,7 +3748,7 @@ Meteor.startup(async function() {
     };
 
     // Default profile save
-    userProfileSave(user._id, defaultUserProfile());
+    //userProfileSave(user, defaultUserProfile());
 
     // Default hook's behavior
     if (options.profile) {

@@ -7,55 +7,30 @@
             </div>
         </div>
         <div class="container position-relative">
-            {{#if isYoutubeVideo}}
-                <div id="videoUnitContainer" class="z-0 w-100">
-                    <div id="videoUnitPlayer" data-plyr-provider="youtube" data-plyr-embed-id="{{videoId}}"></div>
-                    </div> 
-                    <div class="row">
-                        <dov class="col-6 offset-3">
-                            <div id="continueBar" hidden style="text-align: center; padding: 20px">
-                                <button type="button" id="continueButton" class="btn text-center">
-                                    Continue
-                                </button>
-                            </div> 
-                        </dov>
-                        {{#if allowGoBack}}
-                        <div class="col-1 offset-2">
-                            <div id="goBackBar" style="text-align: center; padding: 20px">
-                                <button type="button" id="stepBackButton" class="btn text-center">
-                                    <!-- back icon -->
-                                    <i class="fa fa-arrow-left" aria-hidden="true"></i>
-                                </button>
-                            </div> 
-                        </div>
-                        {{/if}}
-                </div>
-            {{else}}
-                <div id="videoUnitContainer" class="position-absolute z-0 w-100">
-                    <video id="videoUnitPlayer" playsinline controls>
-                        <source src="{{videoSource}}" type="video/mp4" />
-                    </video>
-                    <div class="row">
-                        <dov class="col-6 offset-3">
-                            <div id="continueBar" hidden style="text-align: center; padding: 20px">
-                                <button type="button" id="continueButton" class="btn text-center">
-                                    Continue
-                                </button>
-                            </div> 
-                        </dov>
-                        {{#if allowGoBack}}
-                        <div class="col-1 offset-2">
-                            <div id="goBackBar" style="text-align: center; padding: 20px">
-                                <button type="button" id="stepBackButton" class="btn text-center">
-                                    <!-- back icon -->
-                                    <i class="fa fa-arrow-left" aria-hidden="true"></i>
-                                </button>
-                            </div> 
-                        </div>
-                        {{/if}}
-                    </div> 
-                </div>
-            {{/if}}
+            <div id="videoUnitContainer" class="position-absolute z-0 w-100">
+                <video id="videoUnitPlayer" playsinline controls>
+                    <!-- <source src="{{videoSource}}" type="video/mp4" /> -->
+                </video>
+                <div class="row">
+                    <dov class="col-6 offset-3">
+                        <div id="continueBar" hidden style="text-align: center; padding: 20px">
+                            <button type="button" id="continueButton" class="btn text-center">
+                                {{UIsettings.continueButtonText}}
+                            </button>
+                        </div> 
+                    </dov>
+                    {{#if allowGoBack}}
+                    <div class="col-1 offset-2">
+                        <div id="goBackBar" style="text-align: center; padding: 20px">
+                            <button type="button" id="stepBackButton" class="btn text-center">
+                                <!-- back icon -->
+                                <i class="fa fa-arrow-left" aria-hidden="true"></i>
+                            </button>
+                        </div> 
+                    </div>
+                    {{/if}}
+                </div> 
+            </div>
         </div>
         {{#if isVideoSession}}
         {{else}}
@@ -107,8 +82,8 @@
                 {{#if trial}}
                 <div class="{{UIsettings.displayColWidth}} mx-auto" id="displayContainer">
                     {{#if anythingButAudioCard}}
-                        <div class="{{fontSizeClass}} {{#if study}} {{UIsettings.textInputDisplay}} {{/if}} alert alert-bg" id="displaySubContainer">
-                            <p>
+                        <div class="{{fontSizeClass}} {{#if study}} {{UIsettings.textInputDisplay}} {{/if}} {{stimuliBoxClasses}}" style="{{stimuliBoxStyle}}" id="displaySubContainer">
+                            <p style="{{getFontSizeStyle}}">
                             {{#if ifClozeDisplayTextExists}}
                                 {{#if textOrClozeCard}}
                                     {{#if subWordClozeCurrentQuestionExists}}
@@ -120,21 +95,21 @@
                                 {{/if}}
                             {{/if}}
                             </p>
-                        </div> 
-                        {{#if imageCard}}
-                        <div class="h2 vh-50" id="imageDisplay">
-            
-                                <div class="w-100  imgDisplay-container text-center" style="background-image: url({{curImgSrc}}) ;">
+                            {{#if imageCard}}
+                            <div class="h2 vh-50" id="imageDisplay">
+                                <div class="w-100 text-center">
+                                    <img src="{{curImgSrc}}" class="img-responsive" style="max-height: 50vh; max-width: 100%; object-fit: contain;" alt="Image display">
                                 </div>
                                 <br>
+                            </div>
+                            {{/if}}
+                            {{#if videoCard}}
+                                <video autoplay="">
+                                    <source src="{{curVideoSrc}}">
+                                    Your browser does not support the video tag.
+                                </video>
+                            {{/if}}
                         </div>
-                        {{/if}}
-                        {{#if videoCard}}
-                            <video autoplay="">
-                                <source src="{{curVideoSrc}}">
-                                Your browser does not support the video tag.
-                            </video>
-                        {{/if}}
                     {{/if}}
                     {{#if audioCard}}
                         
@@ -168,7 +143,7 @@
             {{#if skipstudy}}
             <div class="col-12 text-center">
                 <button type='button' id='continueStudy' name='continueStudy' class='btn btn-block btn-responsive'>
-                    Skip
+                    {{UIsettings.skipStudyButtonText}}
                 </button>
             </div>
             <div class="vh-5"></div>
@@ -177,7 +152,7 @@
             {{#if study}}
                 <div class="alert {{UIsettings.displayColWidth}} {{fontSizeClass}} {{UIsettings.textInputDisplay2}} ">
                     {{#if hideResponse}}
-                        <p id="answerLabel" class="answer-display-trial text-center">{{displayAnswer}}</p>
+                        <p id="answerLabel" class="answer-display-trial text-center" style="{{getFontSizeStyle}}">{{displayAnswer}}</p>
                     {{/if}}
                 </div>  <!-- close column -->
             {{/if}}
@@ -242,7 +217,7 @@
                                 {{/if}}
                             
                                 <button verbalChoice='{{verbalChoice}}' type='button' name='{{buttonName}}' class='multipleChoiceButton btn btn-primary'>
-                                {{buttonValue}}
+                                {{{buttonValue}}}
                                 </button>
                             
                             </div>
@@ -257,7 +232,7 @@
             {{#if UIsettings.displayConfirmButton}}
             <div class="col-12 text-center">
                 <button type='button' id='confirmButton' name='confirmButton' class='btn btn-block btn-responsive' disabled>
-                    Continue
+                    {{UIsettings.continueButtonText}}
                 </button>
             </div>
             {{/if}}
@@ -350,6 +325,91 @@
 
     </div> <!-- close container -->
 
+    <!-- Debug Sidebar for Admins -->
+    {{#if isInRole 'admin'}}
+    <div id="debugSidebar" class="debug-sidebar" style="display: none;">
+        <div class="debug-sidebar-header">
+            <h5>Debug Panel</h5>
+            <button id="closeSidebar" class="btn btn-sm">&times;</button>
+        </div>
+        <div class="debug-sidebar-content">
+            <div class="debug-section">
+                <h6>Quick Actions</h6>
+                <button id="debugGiveCorrect" class="btn btn-sm btn-success">Give Correct Answer</button>
+                <button id="debugGiveWrong" class="btn btn-sm btn-danger">Give Wrong Answer</button>
+                <button id="debugSkipUnit" class="btn btn-sm btn-warning">Skip Unit</button>
+                <button id="debugSkipToNext" class="btn btn-sm btn-info">Skip to Next Question</button>
+            </div>
+            
+            <div class="debug-section">
+                <h6 class="debug-section-header" data-target="currentState">
+                    <i class="fa fa-chevron-right debug-toggle-icon"></i> Current State
+                </h6>
+                <div class="debug-section-content" id="currentState" style="display: none;">
+                    <div class="debug-variable">
+                        <strong>Question Index:</strong> <span id="debugQuestionIndex">{{currentProgress}}</span>
+                    </div>
+                    <div class="debug-variable">
+                        <strong>Test Type:</strong> <span id="debugTestType">{{getTestType}}</span>
+                    </div>
+                    <div class="debug-variable">
+                        <strong>Current Answer:</strong> <span id="debugCurrentAnswer">{{rawAnswer}}</span>
+                    </div>
+                    <div class="debug-variable">
+                        <strong>Display Ready:</strong> <span id="debugDisplayReady">{{displayReady}}</span>
+                    </div>
+                    <div class="debug-variable">
+                        <strong>Next Question:</strong> <span id="debugNextQuestion">N/A</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="debug-section">
+                <h6 class="debug-section-header" data-target="sessionVariables">
+                    <i class="fa fa-chevron-right debug-toggle-icon"></i> Session Variables
+                </h6>
+                <div class="debug-section-content" id="sessionVariables" style="display: none;">
+                    <div class="debug-variable">
+                        <strong>Unit Number:</strong> <span id="debugUnitNumber">{{getCurrentUnitNumber}}</span>
+                    </div>
+                    <div class="debug-variable">
+                        <strong>Button Trial:</strong> <span id="debugButtonTrial">{{buttonTrial}}</span>
+                    </div>
+                    <div class="debug-variable">
+                        <strong>Audio Enabled:</strong> <span id="debugAudioEnabled">{{audioEnabled}}</span>
+                    </div>
+                    <div class="debug-variable">
+                        <strong>Video Session:</strong> <span id="debugVideoSession">{{isVideoSession}}</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="debug-section">
+                <h6 class="debug-section-header" data-target="deliveryParams">
+                    <i class="fa fa-chevron-right debug-toggle-icon"></i> Delivery Params
+                </h6>
+                <div class="debug-section-content" id="deliveryParams" style="display: none;">
+                    <div class="debug-variable">
+                        <strong>Font Size:</strong> <span id="debugFontSize">{{getCurrentFontSize}}</span>
+                    </div>
+                    <div class="debug-variable">
+                        <strong>Timeout (ms):</strong> <span id="debugTimeout">{{getCurrentTimeout}}</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="debug-section">
+                <button id="debugRefreshVars" class="btn btn-sm btn-info">Refresh Variables</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Debug Toggle Button -->
+    <button id="debugToggle" class="debug-toggle" style="display: none;">
+        <i class="fa fa-bug"></i>
+    </button>
+    {{/if}}
+
     <div id="postCardContainer">&nbsp;</div>
 
 
@@ -367,7 +427,7 @@
         <div class="row">
             <div class="col-6 offset-3">
                 <button type="button" id="continueButton" class="btn text-center">
-                    Continue
+                    {{UIsettings.continueButtonText}}
                 </button>
             </div>    
             {{#if allowGoBack}}
@@ -401,5 +461,33 @@
   </div>
   {{/if}}
 {{/if}}
+
+<script>
+$('#finalInstructionsDlg').on('shown.bs.modal', function() {
+    attachAudioListeners();
+});
+
+// Also attach globally for non-modal instructions and card pages
+new MutationObserver(() => {
+    attachAudioListeners();
+}).observe(document.body, { childList: true, subtree: true });
+
+function attachAudioListeners() {
+    document.querySelectorAll('.play-btn:not([data-listener-attached])').forEach(btn => {
+        let audId = btn.getAttribute('data-audio-id');
+        if (audId) {
+            let aud = document.getElementById(audId);
+            if (aud) {
+                btn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    aud.currentTime = 0;
+                    aud.play().catch(console.error);
+                });
+                btn.setAttribute('data-listener-attached', 'true'); // Prevent duplicates
+            }
+        }
+    });
+}
+</script>
 
 </template>

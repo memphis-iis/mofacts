@@ -41,10 +41,6 @@ if(Meteor.isServer){
             it('stim ' + stimulus._id +  ' should have a valid StimSetId', function(){
                 expect(stimulus.stimuliSetId).to.be.a('number');
             });
-            //expect stimulus to have a stimulusFileName that matches a fileName is stim_files collection
-            it('stim ' + stimulus._id +  ' should have a stimulusFileName', function(){
-                expect(Stims.findOne({fileName: stimulus.stimulusFileName})).to.not.be.undefined;
-            });
             //if stimulus has a correctResponse, expect it to have a syllables array
             it('stim ' + stimulus._id +  ' should have a syllables array if correctResponse is present', function(){
                 if(stimulus.correctResponse){

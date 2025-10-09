@@ -1,12 +1,12 @@
 import {secsIntervalString} from '../../../common/globalHelpers';
 import {haveMeteorUser} from '../../lib/currentTestingHelpers';
-import {updateExperimentState, initCard} from './card';
+import {updateExperimentState, initCard, checkAudioInputMode} from './card';
 import {routeToSignin} from '../../lib/router';
 import { meteorCallAsync } from '../../index';
 import { _ } from 'core-js';
 import { revisitUnit, getExperimentState } from './card';
 
-export {instructContinue, unitHasLockout, checkForFileImage};
+export {instructContinue, unitHasLockout, checkForFileImage, setupInlineAudioHandlers};
 // //////////////////////////////////////////////////////////////////////////
 // Instruction timer and leaving this page - we don't want to leave a
 // timer running!
@@ -397,7 +397,7 @@ Template.instructions.helpers({
   },
 
   UISettings: function() {
-    return Session.get('currentUISettings');
+    return Session.get('curTdfUISettings') ;
   },
 
   allowcontinue: function() {
@@ -429,18 +429,71 @@ Template.instructions.helpers({
       return false;
     }
   },
+  'UIsettings': function() {
+    return Session.get('curTdfUISettings');
+  },
 });
 
 Template.instructions.rendered = function() {
   // Make sure lockout interval timer is running
   lockoutKick();
-  timeRendered = Date.now();
-  const unitInstructionsExist = typeof Session.get('currentTdfFile').tdfs.tutor.unit[Session.get('currentUnitNumber')].unitinstructions !== "undefined";
-  const instructionQuestionExists = typeof Session.get('instructionQuestionResults') === "undefined";
-  const unitInstructionsQuestionExists = typeof Session.get('currentTdfFile').tdfs.tutor.unit[Session.get('currentUnitNumber')].unitinstructionsquestion !== "undefined";
-  const displayContinueBotton = unitInstructionsExist || instructionQuestionExists || unitInstructionsQuestionExists;
+  // Add event handlers for inline audio elements after DOM is ready
+  Meteor.defer(() => {
+    setupInlineAudioHandlers();
+  });
 };
 
+// Function to set up inline audio click handlers
+function setupInlineAudioHandlers() {
+  // Find all elements with class 'inline-audio' that contain play buttons and audio elements
+  const inlineAudioContainers = document.querySelectorAll('.inline-audio');
+  
+  inlineAudioContainers.forEach(container => {
+    // Find play buttons within this container
+    const playButtons = container.querySelectorAll('.play-btn');
+    
+    playButtons.forEach(button => {
+      // Remove any existing listeners to avoid duplicates
+      const newButton = button.cloneNode(true);
+      button.parentNode.replaceChild(newButton, button);
+      
+      // Add click event listener
+      newButton.addEventListener('click', function(e) {
+        e.preventDefault();
+        
+        // Find the corresponding audio element
+        // Look for audio element with ID that matches the button's pattern
+        const buttonId = this.id;
+        const audioId = buttonId.replace('play-', '') + '-audio';
+        const audioElement = document.getElementById(audioId);
+        
+        if (audioElement) {
+          // Pause any currently playing audio
+          if (window.currentAudioObj) {
+            window.currentAudioObj.pause();
+          }
+          
+          // Set this as the current audio object
+          window.currentAudioObj = audioElement;
+          
+          // Play the audio
+          audioElement.play().catch(err => {
+            console.error('Error playing inline audio:', err);
+          });
+          
+          // Clear current audio object when done playing
+          audioElement.addEventListener('ended', function() {
+            window.currentAudioObj = null;
+          }, { once: true });
+          
+          console.log('Playing inline audio:', audioId);
+        } else {
+          console.error('Audio element not found:', audioId);
+        }
+      });
+    });
+  });
+}
 
 // instructionlog 
 
@@ -470,7 +523,7 @@ function gatherInstructionLogRecord(trialEndTimeStamp, trialStartTimeStamp,
     'levelUnit': Session.get('currentUnitNumber'),
     'levelUnitType': "Instruction",
     'time': trialStartTimeStamp,
-    'CFAudioInputEnabled': Meteor.user().audioInputMode,
+    'CFAudioInputEnabled': checkAudioInputMode(),
     'CFAudioOutputEnabled': Session.get('enableAudioPromptAndFeedback'),
     'CFResponseTime': trialEndTimeStamp,
     'entryPoint': Meteor.user().loginParams.entryPoint

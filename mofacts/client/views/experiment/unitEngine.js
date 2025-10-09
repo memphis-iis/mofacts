@@ -428,15 +428,17 @@ function modelUnitEngine() {
     probabilityEstimate: -1,
   };
 
-  function setCurrentCardInfo(clusterIndex, whichStim, whichHintLevel) {
+  function setCurrentCardInfo(clusterIndex, whichStim, whichHintLevel, forceButtonTrial = false) {
     currentCardInfo.clusterIndex = clusterIndex;
     currentCardInfo.whichStim = whichStim;
     currentCardInfo.whichHintLevel = whichHintLevel;
+    currentCardInfo.forceButtonTrial = forceButtonTrial;
     currentCardInfo.probabilityEstimate = cardProbabilities.cards[clusterIndex].stims[whichStim].probabilityEstimate;
     clientConsole(1, 'MODEL UNIT card selection => ',
         'cluster-idx:', clusterIndex,
         'whichStim:', whichStim,
         'whichHintLevel:', whichHintLevel,
+        'forceButtonTrial:', forceButtonTrial,
         'parameter', getStimParameterArray(clusterIndex, whichStim),
     );
   }

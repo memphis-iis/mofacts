@@ -58,34 +58,34 @@ import {serverConsole, decryptUserData, createAwsHmac} from './methods';
 
   function validateUser(userProfile) {
     serverConsole(userProfile);
-    validateField(userProfile.have_aws_id, 'AWS request user has no ID');
-    validateField(userProfile.aws_id, 'AWS request user ID is invalid');
-    validateField(userProfile.have_aws_secret, 'AWS request user has secret key');
-    validateField(userProfile.aws_secret_key, 'AWS request user secret key is invalid');
+    validateField(userProfile.aws.have_aws_id, 'AWS request user has no ID');
+    validateField(userProfile.aws.aws_id, 'AWS request user ID is invalid');
+    validateField(userProfile.aws.have_aws_secret, 'AWS request user has secret key');
+    validateField(userProfile.aws.aws_secret_key, 'AWS request user secret key is invalid');
   }
 
   function getClient(userProfile) {
     validateUser(userProfile);
     return new AWS.MTurk({
-      accessKeyId: decryptUserData(userProfile.aws_id),
-      secretAccessKey: decryptUserData(userProfile.aws_secret_key),
+      accessKeyId: decryptUserData(userProfile.aws.aws_id),
+      secretAccessKey: decryptUserData(userProfile.aws.aws_secret_key),
       region: 'us-east-1',
     });
   }
 
   function createTurkRequest(userProfile, requestParams) {
     // Validate userProfile
-    validateField(userProfile.have_aws_id, 'AWS request user has no ID');
-    validateField(userProfile.aws_id, 'AWS request user ID is invalid');
-    validateField(userProfile.have_aws_secret, 'AWS request user has secret key');
-    validateField(userProfile.aws_secret_key, 'AWS request user secret key is invalid');
+    validateField(userProfile.aws.have_aws_id, 'AWS request user has no ID');
+    validateField(userProfile.aws.aws_id, 'AWS request user ID is invalid');
+    validateField(userProfile.aws.have_aws_secret, 'AWS request user has secret key');
+    validateField(userProfile.aws.aws_secret_key, 'AWS request user secret key is invalid');
 
     // Base url from userProfile use_sandbox
-    const url = userProfile.use_sandbox ? SANDBOX_URL : TURK_URL;
+    const url = userProfile.aws.use_sandbox ? SANDBOX_URL : TURK_URL;
 
     // Actual request data from default + requestParams
     const req = _.extend({
-      'AWSAccessKeyId': decryptUserData(userProfile.aws_id),
+      'AWSAccessKeyId': decryptUserData(userProfile.aws.aws_id),
       'Service': 'AWSMechanicalTurkRequester',
       'Timestamp': new Date(Date.now()).toISOString(),
       'Operation': '',
@@ -99,7 +99,7 @@ import {serverConsole, decryptUserData, createAwsHmac} from './methods';
 
     // Add HMAC signature for request from the fields as defined by AWS
     const sigSrc = [req.Service, req.Operation, req.Timestamp].join('');
-    req.Signature = createAwsHmac(decryptUserData(userProfile.aws_secret_key), sigSrc);
+    req.Signature = createAwsHmac(decryptUserData(userProfile.aws.aws_secret_key), sigSrc);
 
     serverConsole('About to send AWS MechTurk request', url, JSON.stringify(req, null, 2));
 

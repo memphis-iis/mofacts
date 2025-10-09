@@ -145,7 +145,7 @@ Template.lessonSelect.helpers({
     const isAdmin = Roles.userIsInRole(Meteor.user(), ['admin']);
   
     //Get all course tdfs
-    const courseId = Meteor.user().loginParams?.curClass ? Meteor.user().loginParams.curClass.courseId : null;
+    const courseId = Meteor.user().loginParams.curClass ? Meteor.user().loginParams.curClass.courseId : null;
     const courseTdfs = Assignments.find({courseId: courseId}).fetch()
     console.log('courseTdfs', courseTdfs, courseId);
 
@@ -398,8 +398,8 @@ Template.lessonSelect.helpers({
       audioPromptFeedbackVoice = setspec.audioPromptFeedbackVoice || 'en-US-Standard-A';
     }  
     else {
-      audioPromptMode = getAudioPromptModeFromPage();
-      audioInputEnabled = getAudioInputFromPage();
+      audioPromptMode = Meteor.user().audioPromptMode;
+      audioInputEnabled = Meteor.user().audioInputMode;
       audioPromptFeedbackSpeakingRate = document.getElementById('audioPromptFeedbackSpeakingRate').value;
       audioPromptQuestionSpeakingRate = document.getElementById('audioPromptQuestionSpeakingRate').value;
       audioPromptVoice = document.getElementById('audioPromptVoice').value;
@@ -474,14 +474,13 @@ Template.lessonSelect.helpers({
   
     let continueToCard = true;
   
-    if (Session.get('audioEnabled')) {
+    if (audioEnabled) {
       // Check if the tdf or user has a speech api key defined, if not show the modal form
       // for them to input one.  If so, actually continue initializing web audio
       // and going to the practice set
       Meteor.call('getUserSpeechAPIKey', function(error, key) {
         Session.set('speechAPIKey', key);
-        const tdfKeyPresent = !!curTdfContent.tdfs.tutor.setspec.speechAPIKey &&
-            !!curTdfContent.tdfs.tutor.setspec.speechAPIKey;
+        const tdfKeyPresent = !!curTdfContent.tdfs.tutor.setspec.speechAPIKey
         if (!key && !tdfKeyPresent) {
           console.log('speech api key not found, showing modal for user to input');
           $('#speechAPIModal').modal('show');
@@ -554,19 +553,3 @@ Template.lessonSelect.helpers({
       Router.go('/multiTdfSelect');
     }
   }
-
-function getAudioInputFromPage() {
-  return $('#audioInputOn').checked;
-}
-
-function getAudioPromptModeFromPage() {
-  if ($('#audioPromptFeedbackOn')[0].checked && $('#audioPromptQuestionOn')[0].checked) {
-    return 'all';
-  } else if ($('#audioPromptFeedbackOn')[0].checked){
-    return 'feedback';
-  } else if ($('#audioPromptQuestionOn')[0].checked) {
-    return 'question';
-  } else {
-    return 'silent';
-  }
-}

@@ -512,3 +512,36 @@ p.admin-info-p {
     margin-left: 15%;
     text-align: center;
 }
+
+/* Inline audio play button styling */
+.play-btn {
+    background: none;
+    border: none;
+    font-size: 1.2em;
+    cursor: pointer;
+    padding: 2px 6px;
+    margin-left: 4px;
+    border-radius: 3px;
+    transition: background-color 0.2s ease;
+}
+
+.play-btn:hover {
+    background-color: rgba(0, 0, 0, 0.1);
+}
+
+.play-btn:active {
+    background-color: rgba(0, 0, 0, 0.2);
+    transform: scale(0.95);
+}
+
+.play-btn:focus {
+    outline: 2px solid #007bff;
+    outline-offset: 1px;
+}
+
+/* Transparent alert for stimuli box when disabled */
+.alert-transparent {
+    background-color: transparent !important;
+    border: none !important;
+    color: inherit !important;
+}

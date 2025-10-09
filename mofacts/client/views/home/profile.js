@@ -5,7 +5,6 @@ import {DISABLED, ENABLED, MODEL_UNIT, SCHEDULE_UNIT} from '../../../common/Defi
 import {meteorCallAsync} from '../..';
 import {sessionCleanUp} from '../../lib/sessionUtils';
 import {routeToSignin} from '../../lib/router';
-import {getAudioPromptModeFromPage, getAudioInputFromPage} from './profileAudioToggles';
 import {checkUserSession} from '../../index'
 
 export {selectTdf};
@@ -204,11 +203,6 @@ Template.profile.events({
     Router.go('/dataDownload');
   },
 
-  'click #userProfileEditButton': function(event) {
-    event.preventDefault();
-    Router.go('/userProfileEdit');
-  },
-
   'click #userAdminButton': function(event) {
     event.preventDefault();
     Router.go('/userAdmin');
@@ -237,11 +231,6 @@ Template.profile.events({
   'click #contentGenerationButton': function(event) {
     event.preventDefault();
     Router.go('/contentGeneration');
-  },
-
-  'click #FileManagementButton': function(event) {
-    event.preventDefault();
-    Router.go('/FileManagement');
   },
 
   'click #tdfPracticeBtn': function(event, instance) {
@@ -409,7 +398,7 @@ Template.profile.rendered = async function() {
   const isAdmin = Roles.userIsInRole(Meteor.user(), ['admin']);
 
   //Get all course tdfs
-  const courseId = Meteor.user().loginParams?.curClass ? Meteor.user().loginParams.curClass.courseId : null;
+  const courseId = Meteor.user().loginParams.curClass ? Meteor.user().loginParams.curClass.courseId : null;
   const courseTdfs = Assignments.find({courseId: courseId}).fetch()
   console.log('courseTdfs', courseTdfs, courseId);
 
@@ -658,8 +647,8 @@ async function selectTdf(currentTdfId, lessonName, currentStimuliSetId, ignoreOu
     audioPromptFeedbackVoice = setspec.audioPromptFeedbackVoice || 'en-US-Standard-A';
   }  
   else {
-    audioPromptMode = getAudioPromptModeFromPage();
-    audioInputEnabled = getAudioInputFromPage();
+    audioPromptMode = Meteor.user().audioPromptMode;
+    audioInputEnabled = Meteor.user().audioInputMode;
     audioPromptFeedbackSpeakingRate = document.getElementById('audioPromptFeedbackSpeakingRate').value;
     audioPromptQuestionSpeakingRate = document.getElementById('audioPromptQuestionSpeakingRate').value;
     audioPromptVoice = document.getElementById('audioPromptVoice').value;
@@ -734,14 +723,13 @@ async function selectTdf(currentTdfId, lessonName, currentStimuliSetId, ignoreOu
 
   let continueToCard = true;
 
-  if (Session.get('audioEnabled')) {
+  if (audioEnabled) {
     // Check if the tdf or user has a speech api key defined, if not show the modal form
     // for them to input one.  If so, actually continue initializing web audio
     // and going to the practice set
     Meteor.call('getUserSpeechAPIKey', function(error, key) {
       Session.set('speechAPIKey', key);
-      const tdfKeyPresent = !!curTdfContent.tdfs.tutor.setspec.speechAPIKey &&
-          !!curTdfContent.tdfs.tutor.setspec.speechAPIKey;
+      const tdfKeyPresent = !!curTdfContent.tdfs.tutor.setspec.speechAPIKey;
       if (!key && !tdfKeyPresent) {
         console.log('speech api key not found, showing modal for user to input');
         $('#speechAPIModal').modal('show');

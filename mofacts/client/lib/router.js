@@ -178,7 +178,6 @@ Router.route('/experiment/:target?/:xcond?', {
 });
 
 defaultBehaviorRoutes = [
-  'signIn',
   'signInSouthwest',
   'tabwarning',
   'resetPassword',
@@ -188,7 +187,6 @@ defaultBehaviorRoutes = [
 const restrictedRoutes = [
   'multiTdfSelect',
   'dataDownload',
-  'userProfileEdit',
   'profileEdit',
   'userAdmin',
   'contentGeneration',
@@ -238,10 +236,6 @@ for (const route of defaultBehaviorRoutes) {
     action: getDefaultRouteAction(route),
   });
 }
-
-
-
-
 
 //special routes
 Router.route('/testLogin', {
@@ -309,22 +303,6 @@ Router.route('/', {
     }
   },
 });
-
-Router.route('/FileManagement', {
-  name: 'client.FileManagement',
-  waitOn: function() {
-    return Meteor.subscribe('ownedFiles');
-  },
-  action: function() {
-    if(this.ready()){
-      if(Meteor.user()) {
-        this.render('FileManagement');
-      } else {
-        this.redirect('/');
-      }
-    }
-  }
-})
 
 Router.route('/contentUpload', {
   name: 'client.contentUpload',
@@ -481,6 +459,10 @@ Router.route('/classEdit',{
 }});
 //Setup profile routes for direct teacher links
 Router.route('/classes/:_teacher', {
+  onBeforeAction: function() {
+    Meteor.logout();
+    this.next();
+  },
   action: async function(){
     console.log('teacher route' + this.params._teacher);
     Session.set('useEmbeddedAPIKeys', true);
@@ -558,6 +540,10 @@ Router.route('/classes/:_teacher', {
 
 //Setup profile routes for direct class links
 Router.route('/classes/:_teacher/:_class', {
+  onBeforeAction: function() {
+    Meteor.logout();
+    this.next();
+  },
   action: async function(){
     console.log('class route: ' + this.params._teacher + ' ' + this.params._class);
     Session.set('useEmbeddedAPIKeys', true);
