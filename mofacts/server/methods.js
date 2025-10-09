@@ -1610,7 +1610,7 @@ function addUserDueDateException(userId, tdfId, classId, date){
 async function checkForTDFData(tdfId){
   const userId = Meteor.userId();
   serverConsole('checkForTDFData', tdfId, userId);
-  tdf = history.findOne({TDFId: tdfId, userId: userId, $and: [ {levelUnitType: {$ne: "schedule"}}, {levelUnitType: {$ne: "Instruction"}} ] });
+  const tdf = history.findOne({TDFId: tdfId, userId: userId, $and: [ {levelUnitType: {$ne: "schedule"}}, {levelUnitType: {$ne: "Instruction"}} ] });
   if(tdf){
     return true;
   }
@@ -2616,7 +2616,7 @@ export const methods = {
     ScheduledTurkMessages.remove({workerUserId: turkId, experiment: experimentId});
     let lockout = Meteor.user().lockouts;
     lockout[experimentId].lockoutMinutes = Number.MAX_SAFE_INTEGER;
-    Meteor.users.update({_id: Meteor.userId()}, {$set: {lockout: lockout}});
+    Meteor.users.update({_id: Meteor.userId()}, {$set: {lockouts: lockout}});
   },
 
   saveAudioPromptMode: function(audioPromptMode){
@@ -2757,7 +2757,7 @@ export const methods = {
     });
     
     //Setup email variables
-    const ownerEmail = ownerEmail;
+    const ownerEmail = Meteor.settings.owner;
     const from = ownerEmail;
     const subject = 'MoFaCTs Password Reset';
     let text = 'Your password reset secret is: <b>' + secret + "</b>.<br>If this email was sent in error, please contact your MoFaCTs administrator.";
@@ -3200,7 +3200,7 @@ export const methods = {
       }
     }
 
-    loginsWithinFifteenMin = last50Timestamps.filter((x) => x.timestamp > fifteenMinAgo);
+    const loginsWithinFifteenMin = last50Timestamps.filter((x) => x.timestamp > fifteenMinAgo);
     const currentServerLoadIsTooHigh = (loginsWithinAHalfHour.size > loginsWithinAHalfHourLimit ||
           loginsWithinFifteenMin.length > utlQueriesWithinFifteenMinLimit);
 
@@ -3209,14 +3209,6 @@ export const methods = {
         loginsWithinFifteenMin.length + '/' + utlQueriesWithinFifteenMinLimit);
 
     return currentServerLoadIsTooHigh;
-  },
-
-  downloadStimFile: function(stimuliSetId) {
-    serverConsole('downloadStimFile: ' + stimuliSetId);
-    stimuliSetId = parseInt(stimuliSetId);
-    let tdf = Tdfs.find({'stimuliSetId': stimuliSetId}).fetch();
-    let stims = tdf.rawStimuliFile;
-    return stims;
   },
 
   // Let client code send console output up to server
