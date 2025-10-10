@@ -772,17 +772,6 @@ thead{
     transition: opacity 0.1s ease-in-out;
 }
 
-/* FOUC Prevention */
-/* Hide content until template is ready */
-.card-loading {
-    opacity: 0;
-    transition: opacity 0.2s ease-in;
-}
-
-.card-ready {
-    opacity: 1;
-}
-
 /* Skeleton loader for initial render */
 .skeleton-loader {
     background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
@@ -978,4 +967,66 @@ thead{
         margin-top: clamp(0.75rem, 2vh, 1.25rem);
         margin-bottom: clamp(0.75rem, 2vh, 1.25rem);
     }
+}
+
+/* ====================================================================
+   FOUC PREVENTION - Phase 1 Revised (CSS-Only Approach)
+   Added: 2025-10-09
+   Purpose: Smooth trial transitions without JavaScript timing changes
+   ==================================================================== */
+
+/* Contain layout calculations to card subtree (prevents reflow in parent) */
+#cardContainer {
+  contain: layout style;
+}
+
+/* Trial content visibility - avoids DOM teardown/rebuild */
+/* IMPORTANT: If changing duration, update TRANSITION_CONFIG.FADE_DURATION_MS in card.js */
+#trialContentWrapper {
+  opacity: 1;
+  transition: opacity 0.1s ease-in-out;  /* 100ms - keep in sync with card.js TRANSITION_CONFIG */
+}
+
+#trialContentWrapper.trial-hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Smooth layout changes during feedback - prevent flash from column width changes */
+/* IMPORTANT: Keep all transitions at 100ms or less per project requirements */
+#displayContainer {
+  transition: all 0.1s ease-in-out;  /* MAX 100ms - do not increase */
+}
+
+#displaySubContainer {
+  transition: all 0.1s ease-in-out;  /* MAX 100ms - do not increase */
+}
+
+/* Smooth visibility changes for inputs and multiple choice */
+/* IMPORTANT: Keep all transitions at 100ms or less per project requirements */
+#multipleChoiceContainer,
+.input-box,
+#textEntryRow {
+  transition: opacity 0.1s ease-in-out;  /* MAX 100ms - do not increase */
+}
+
+/* Prevent layout shift during countdown timer updates */
+#CountdownTimerText,
+#progressbar {
+  contain: layout;
+}
+
+/* Reduced motion support (WCAG 2.1 compliance) */
+@media (prefers-reduced-motion: reduce) {
+  #userInteractionContainer,
+  #feedbackOverrideContainer,
+  #displayContainer,
+  #correctAnswerDisplayContainer,
+  .input-box,
+  #multipleChoiceContainer,
+  #UserInteraction,
+  #forceCorrectionEntry {
+    transition: none !important;
+    will-change: auto !important;
+  }
 }

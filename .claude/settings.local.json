@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//c//**)",
+      "Bash(cat:*)",
+      "Read(//c/Users/ppavl/OneDrive/Active projects/mofacts_config/**)",
+      "Read(//c/Users/ppavl/OneDrive/Active projects/**)",
+      "Bash(meteor --version)",
+      "Bash(git log:*)",
+      "Bash(git checkout:*)",
+      "Bash(git reset:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

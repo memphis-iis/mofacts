@@ -65,7 +65,7 @@
              PRACTICE CARD - Main learning interface
              Includes stimulus display, input methods, and feedback
              ============================================================ -->
-        {{#if displayReady}}
+        <div id="trialContentWrapper" class="{{#unless displayReady}}trial-hidden{{/unless}}">
         <div id="userInteractionContainer" class="smooth-transition" hidden>
                 <div class="text-center {{fontSizeClass}} smooth-transition" id="UserInteraction" hidden></div>
                 <div id="forceCorrectionEntry" class="smooth-transition" hidden>
@@ -108,7 +108,7 @@
                             {{#if imageCard}}
                             <div class="h2 vh-50" id="imageDisplay">
                                 <div class="w-100 text-center">
-                                    <img src="{{curImgSrc}}" class="img-responsive stimulus-image" alt="Image display" loading="lazy">
+                                    <img src="{{curImgSrc}}" width="{{curImgWidth}}" height="{{curImgHeight}}" class="img-responsive stimulus-image" alt="Image display">
                                 </div>
                             </div>
                             {{/if}}
@@ -289,7 +289,7 @@
                     <button id="overlearningButton" type="button" class="btn btn-responsive overlearning-button">Practice</button>
                 </div>
             </div>
-        {{/if}}
+        </div><!-- Close trialContentWrapper -->
     {{#if displayReadyPromptString}}
         <div class="marginLeftAndRight alert alert-info {{fontSizeClass}} text-center" id="textQuestion">
             {{readyPromptString}}

@@ -465,20 +465,6 @@ Template.card.onCreated(function() {
   cardState.set('inFeedback', false);
   cardState.set('feedbackPosition', null);
   cardState.set('displayReady', false);
-  cardState.set('isLoading', true);
-
-  // PHASE 2: FOUC Prevention - Mark card as ready after render
-  template.autorun(function() {
-    if (cardState.get('isLoading')) {
-      Tracker.afterFlush(function() {
-        // Wait for DOM to be ready, then fade in
-        Meteor.setTimeout(function() {
-          $('#cardContainer').removeClass('card-loading').addClass('card-ready');
-          cardState.set('isLoading', false);
-        }, 100);
-      });
-    }
-  });
 });
 
 Template.card.rendered = initCard;
@@ -824,6 +810,24 @@ Template.card.helpers({
     } else {
       return '';
     }
+  },
+
+  'curImgWidth': function() {
+    const currentDisplay = Session.get('currentDisplay');
+    const curImgSrc = currentDisplay ? currentDisplay.imgSrc : undefined;
+    if (curImgSrc && imagesDict[curImgSrc]) {
+      return imagesDict[curImgSrc].naturalWidth || '';
+    }
+    return '';
+  },
+
+  'curImgHeight': function() {
+    const currentDisplay = Session.get('currentDisplay');
+    const curImgSrc = currentDisplay ? currentDisplay.imgSrc : undefined;
+    if (curImgSrc && imagesDict[curImgSrc]) {
+      return imagesDict[curImgSrc].naturalHeight || '';
+    }
+    return '';
   },
 
   'curVideoSrc': function() {
@@ -1219,6 +1223,13 @@ function getResponseType() {
   return ('' + type).toLowerCase();
 }
 
+// TRANSITION TIMING CONFIGURATION
+// IMPORTANT: Keep in sync with CSS transition durations in classic.css
+const TRANSITION_CONFIG = {
+  FADE_DURATION_MS: 100,  // Must match #trialContentWrapper transition (0.1s = 100ms)
+  FADE_BUFFER_MS: 20      // Safety buffer for timing variations under load
+};
+
 let soundsDict = {};
 let imagesDict = {};
 const onEndCallbackDict = {};
@@ -1317,22 +1328,44 @@ function preloadImages() {
   const curStimImgSrcs = getCurrentStimDisplaySources('imageStimulus');
   console.log('curStimImgSrcs: ', curStimImgSrcs);
   imagesDict = {};
+  const imageLoadPromises = [];
   let img;
   for (let src of curStimImgSrcs) {
-    if(!src.includes('http')){
-      link = DynamicAssets.findOne({name: src}).link();
-      img = new Image();
-      img.src = link;
-      console.log('img:' + img);
-      imagesDict[src] = img;
-    } else {
-      img = new Image();
-      img.src = src;
-      console.log('img:' + img);
-      imagesDict[src] = img;
-    }
+    const loadPromise = new Promise((resolve, reject) => {
+      if(!src.includes('http')){
+        link = DynamicAssets.findOne({name: src}).link();
+        img = new Image();
+        img.onload = () => {
+          console.log('img loaded:', src);
+          resolve();
+        };
+        img.onerror = () => {
+          console.warn('img failed to load:', src);
+          resolve(); // Resolve anyway to not block the UI
+        };
+        img.src = link;
+        console.log('img:' + img);
+        imagesDict[src] = img;
+      } else {
+        img = new Image();
+        img.onload = () => {
+          console.log('img loaded:', src);
+          resolve();
+        };
+        img.onerror = () => {
+          console.warn('img failed to load:', src);
+          resolve(); // Resolve anyway to not block the UI
+        };
+        img.src = src;
+        console.log('img:' + img);
+        imagesDict[src] = img;
+      }
+    });
+    imageLoadPromises.push(loadPromise);
   }
   console.log('imagesDict: ', imagesDict);
+  // Return promise that resolves when all images are loaded
+  return Promise.all(imageLoadPromises);
 }
 
 function getCurrentStimDisplaySources(filterPropertyName='clozeStimulus') {
@@ -1346,7 +1379,7 @@ function getCurrentStimDisplaySources(filterPropertyName='clozeStimulus') {
   return displaySrcs;
 }
 
-function preloadStimuliFiles() {
+async function preloadStimuliFiles() {
   // Pre-load sounds to be played into soundsDict to avoid audio lag issues
   if (curStimHasSoundDisplayType()) {
     console.log('Sound type questions detected, pre-loading sounds');
@@ -1355,7 +1388,8 @@ function preloadStimuliFiles() {
   }
   if (curStimHasImageDisplayType()) {
     console.log('image type questions detected, pre-loading images');
-    preloadImages();
+    await preloadImages();
+    console.log('All images preloaded');
   } else {
     console.log('Non image type detected');
   }
@@ -1977,11 +2011,13 @@ async function showUserFeedback(isCorrect, feedbackMessage, isTimeout, isSkip) {
     //encapsulate the message in a span tag
     feedbackMessage = "<span>" + feedbackMessage + "</span>";
 
-    // Batch DOM updates to reduce reflows/repaints
-    $('#multipleChoiceContainer').hide();
-    $('input-box').hide();
-    $('#displayContainer').removeClass('col-md-6').addClass('mx-auto');
-    $('#displaySubContainer').addClass(uiSettings.textInputDisplay);
+    // Batch DOM updates in single animation frame to reduce reflows/repaints
+    requestAnimationFrame(() => {
+      $('#multipleChoiceContainer').hide();
+      $('.input-box').hide();
+      $('#displayContainer').removeClass('col-md-6').addClass('mx-auto');
+      $('#displaySubContainer').addClass(uiSettings.textInputDisplay);
+    });
 
     //if the displayOnlyCorrectAnswerAsFeedbackOverride is set to true, then we will display the correct answer in feedbackOverride div
     if (displayCorrectAnswerInCenter) {
@@ -2265,10 +2301,10 @@ async function afterFeedbackCallback(trialEndTimeStamp, trialStartTimeStamp, isT
     }
     if(window.currentAudioObj) {
       window.currentAudioObj.addEventListener('ended', async () => {
-        cardEnd();
+        await cardEnd();
       });
     } else {
-      cardEnd();
+      await cardEnd();
     }
   }
 }
@@ -2280,7 +2316,7 @@ async function cardEnd() {
   $('#userLowerInteraction').html('');
   $('#userAnswer').val('');
   Session.set('feedbackTimeoutEnds', Date.now())
-  prepareCard();
+  await prepareCard();
 }
 
 function getReviewTimeout(testType, deliveryParams, isCorrect, dialogueHistory, isTimeout, isSkip) {
@@ -2600,6 +2636,48 @@ function hideUserFeedback() {
   $('#removeQuestion').hide();
 }
 
+// Comprehensive cleanup that mimics what {{#if displayReady}} teardown did automatically
+// IMPORTANT: Only clear input VALUES and non-reactive HTML, NOT Blaze-managed content
+function cleanupTrialContent() {
+  console.log('cleanupTrialContent - manual cleanup of all trial state');
+  console.log('  #userAnswer before cleanup:', $('#userAnswer').length, 'display:', $('#userAnswer').css('display'));
+
+  // Clear input VALUES (not HTML - let Blaze handle that)
+  $('#userAnswer').val('');
+  $('#userForceCorrect').val('');
+
+  // Clear non-reactive HTML that was set with .html() or .text()
+  $('#UserInteraction').html('');
+  $('#feedbackOverride').html('');
+  $('#userLowerInteraction').html('');
+  $('#correctAnswerDisplayContainer').html('');
+  $('#CountdownTimerText').text('');
+
+  // Reset CSS classes that may have been changed
+  $('#UserInteraction').removeClass('text-align alert alert-success alert-danger');
+  $('#displayContainer').removeClass('mx-auto');
+  $('#correctAnswerDisplayContainer').addClass('d-none');
+
+  // Reset inline styles
+  $('#progressbar').css('width', '0%');
+
+  // Hide elements that need to be hidden (using attr not .hide() to work with Blaze)
+  $('#userInteractionContainer').attr('hidden', '');
+  $('#feedbackOverrideContainer').attr('hidden', '');
+  $('#forceCorrectionEntry').attr('hidden', '');
+  $('#confirmButton').prop('disabled', true);
+
+  // CRITICAL: Show .input-box that was hidden during feedback
+  // showUserFeedback() calls $('.input-box').hide() but nothing shows it again
+  $('.input-box').show();
+  $('#multipleChoiceContainer').show();
+
+  console.log('  #userAnswer after cleanup:', $('#userAnswer').length, 'display:', $('#userAnswer').css('display'));
+
+  // NOTE: Do NOT clear Session variables here - those are cleared in prepareCard/newQuestionHandler
+  // NOTE: Do NOT clear HTML that's managed by Blaze templates (buttonList, text, etc.)
+}
+
 
 //Called to revisit a previous unit in the current session. 
 async function revisitUnit(unitNumber) {
@@ -2862,11 +2940,29 @@ async function cardStart() {
 }
 
 async function prepareCard() {
+  const trialNum = (Session.get('currentExperimentState')?.numQuestionsAnswered || 0) + 1;
+  console.log('=== prepareCard START (Trial #' + trialNum + ') ===');
+  console.log('  displayReady before:', Session.get('displayReady'));
   Meteor.logoutOtherClients();
   Session.set('wasReportedForRemoval', false);
+  // Manually clean up all trial content before hiding (mimics DOM teardown cleanup)
+  cleanupTrialContent();
+  console.log('  Setting displayReady=false to start fade-out');
   Session.set('displayReady', false);
+  console.log('  displayReady after setting false:', Session.get('displayReady'));
+
+  // Wait for CSS fade-out transition to complete
+  // This ensures old content fades out gracefully before being cleared
+  const fadeDelay = TRANSITION_CONFIG.FADE_DURATION_MS + TRANSITION_CONFIG.FADE_BUFFER_MS;
+  console.log(`  Waiting ${fadeDelay}ms for fade-out transition to complete...`);
+  await new Promise(resolve => setTimeout(resolve, fadeDelay));
+  console.log('  Fade-out complete, clearing content while invisible');
+
   Session.set('submmissionLock', false);
   Session.set('currentDisplay', {});
+  // Clear buttonTrial to force Blaze to re-evaluate input visibility
+  Session.set('buttonTrial', undefined);
+  Session.set('buttonList', []);
   $('#helpButton').prop("disabled",false);
   if (engine.unitFinished()) {
     unitIsFinished('Unit Engine');
@@ -2897,7 +2993,9 @@ async function prepareCard() {
 
 // TODO: this probably no longer needs to be separate from prepareCard
 async function newQuestionHandler() {
-  console.log('newQuestionHandler - Secs since unit start:', elapsedSecs());
+  console.log('=== newQuestionHandler START ===');
+  console.log('  #userAnswer at start:', $('#userAnswer').length, 'display:', $('#userAnswer').css('display'));
+  console.log('  Secs since unit start:', elapsedSecs());
 
   // Cache frequently accessed Session variables
   const experimentState = Session.get('currentExperimentState');
@@ -2915,13 +3013,26 @@ async function newQuestionHandler() {
   speechTranscriptionTimeoutsSeen = 0;
   const isButtonTrial = getButtonTrial();
   Session.set('buttonTrial', isButtonTrial);
-  console.log('newQuestionHandler, isButtonTrial', isButtonTrial);
+  console.log('newQuestionHandler, isButtonTrial', isButtonTrial, 'displayReady', Session.get('displayReady'));
+
+  // Batch DOM updates in single animation frame to reduce reflows/repaints
+  // IMPORTANT: Await this so DOM updates complete BEFORE displayReady=true
+  await new Promise(resolve => {
+    requestAnimationFrame(() => {
+      if (isButtonTrial) {
+        $('#textEntryRow').hide();
+        console.log('  Button trial - hiding #textEntryRow');
+      } else {
+        $('#textEntryRow').removeAttr('hidden');
+        console.log('  Text trial - showing #textEntryRow, .input-box elements:', $('.input-box').length);
+        console.log('  #userAnswer after showing textEntryRow:', $('#userAnswer').length, 'display:', $('#userAnswer').css('display'));
+      }
+      resolve();
+    });
+  });
 
   if (isButtonTrial) {
-    $('#textEntryRow').hide();
     setUpButtonTrial();
-  } else {
-    $('#textEntryRow').removeAttr('hidden');
   }
 
   // If this is a study-trial and we are displaying a cloze, then we should
@@ -2971,7 +3082,8 @@ function startQuestionTimeout() {
 
   console.log('startQuestionTimeout, closeQuestionParts', Session.get('currentExperimentState').clozeQuestionParts);
 
-  Session.set('displayReady', false);
+  // displayReady is toggled false→true for each trial to control CSS opacity transitions
+  // With CSS wrapper approach, DOM stays in place - only visibility changes via .trial-hidden class
 
   let readyPromptTimeout = 0;
   if(Session.get('currentDeliveryParams').readyPromptStringDisplayTime && Session.get('currentDeliveryParams').readyPromptStringDisplayTime > 0){
@@ -3011,46 +3123,64 @@ function startQuestionTimeout() {
     }
   }, 1000);
 }
-function checkAndDisplayPrestimulus(deliveryParams, nextStageCb) {
-  console.log('checking for prestimulus display');
+async function checkAndDisplayPrestimulus(deliveryParams, nextStageCb) {
+  console.log('=== checkAndDisplayPrestimulus START ===');
+  console.log('  displayReady at start:', Session.get('displayReady'));
   // we'll [0], if it exists
   const prestimulusDisplay = Session.get('currentTdfFile').tdfs.tutor.setspec.prestimulusDisplay;
-  console.log('prestimulusDisplay:', prestimulusDisplay);
+  console.log('  prestimulusDisplay:', prestimulusDisplay);
 
   if (prestimulusDisplay) {
     const prestimulusDisplayWrapper = {'text': prestimulusDisplay};
-    console.log('prestimulusDisplay detected, displaying', prestimulusDisplayWrapper);
+    console.log('  prestimulusDisplay detected, displaying', prestimulusDisplayWrapper);
     Session.set('currentDisplay', prestimulusDisplayWrapper);
     const isVideoSession = Session.get('isVideoSession')
-    Session.set('displayReady', isVideoSession ? false : true); //displayReady handled by video session if video unit
+    const currentDisplayReady = Session.get('displayReady');
+    console.log('  Before setting displayReady - current value:', currentDisplayReady, 'isVideoSession:', isVideoSession);
+    // Set displayReady once for the trial (no toggle to prevent shimmer)
+    if (!currentDisplayReady && !isVideoSession) {
+      console.log('  Setting displayReady=true in checkAndDisplayPrestimulus');
+      Session.set('displayReady', true); //displayReady handled by video session if video unit
+    } else {
+      console.log('  NOT setting displayReady (already true or video session)');
+    }
     const prestimulusdisplaytime = deliveryParams.prestimulusdisplaytime;
     console.log('delaying for ' + prestimulusdisplaytime + ' ms then starting question', new Date());
-    setTimeout(function() {
+    setTimeout(async function() {
       console.log('past prestimulusdisplaytime, start two part question logic');
-      nextStageCb();
+      await nextStageCb();
     }, prestimulusdisplaytime);
   } else {
     console.log('no prestimulusDisplay detected, continuing to next stage');
-    nextStageCb();
+    await nextStageCb();
   }
 }
 
-function checkAndDisplayTwoPartQuestion(deliveryParams, currentDisplayEngine, closeQuestionParts, nextStageCb) {
+async function checkAndDisplayTwoPartQuestion(deliveryParams, currentDisplayEngine, closeQuestionParts, nextStageCb) {
+  console.log('=== checkAndDisplayTwoPartQuestion START ===');
+  console.log('  displayReady at start:', Session.get('displayReady'));
   // In either case we want to set up the current display now
   const isVideoSession = Session.get('isVideoSession')
-  Session.set('displayReady', false);
+  // Update display directly without toggling displayReady (prevents input shimmer)
   Session.set('currentDisplay', currentDisplayEngine);
   Session.get('currentExperimentState').clozeQuestionParts = closeQuestionParts;
-  Session.set('displayReady', isVideoSession ? false : true);
+
+  // Set displayReady once for the trial (no toggle to prevent shimmer)
+  const currentDisplayReady = Session.get('displayReady');
+  console.log('  Before setting displayReady - current value:', currentDisplayReady, 'isVideoSession:', isVideoSession);
+  if (!currentDisplayReady && !isVideoSession) {
+    console.log('  Setting displayReady=true in checkAndDisplayTwoPartQuestion');
+    Session.set('displayReady', true);
+  }
   // Handle two part questions
   const currentQuestionPart2 = Session.get('currentExperimentState').currentQuestionPart2;
   if (currentQuestionPart2) {
     const twoPartQuestionWrapper = {'text': currentQuestionPart2};
     const initialviewTimeDelay = deliveryParams.initialview;
     setTimeout(function() {
-      Session.set('displayReady', false);
+      // Update display directly without toggling displayReady (prevents input shimmer)
       Session.set('currentDisplay', twoPartQuestionWrapper);
-      Session.set('displayReady', isVideoSession ? false : true);
+      // displayReady already true from initial set - don't toggle
       Session.get('currentExperimentState').currentQuestionPart2 = undefined;
       redoCardImage();
       nextStageCb();
@@ -3103,7 +3233,11 @@ function beginQuestionAndInitiateUserInput(delayMs, deliveryParams) {
 
 function allowUserInput() {
   console.log('allow user input');
+  // DO NOT need to show #userAnswer - CSS wrapper (#trialContentWrapper) handles visibility via opacity
+  // Visibility is controlled by displayReady, not jQuery show/hide
+  // $('#userAnswer').show(); // REMOVED - not needed with CSS wrapper approach
   $('#confirmButton').show();
+
   inputDisabled = false;
   startRecording();
 
@@ -3138,8 +3272,9 @@ function allowUserInput() {
 // loads before it and stopUserInput is erroneously executed afterwards due to timing issues
 let inputDisabled = undefined;
 function stopUserInput() {
-  $('#userAnswer').hide();
   console.log('stop user input');
+  // DO NOT hide #userAnswer - CSS wrapper (#trialContentWrapper) handles visibility via opacity
+  // $('#userAnswer').hide(); // REMOVED - breaks input visibility on subsequent trials
   inputDisabled = true;
   stopRecording();
 
@@ -3744,7 +3879,7 @@ async function resumeFromComponentState() {
   Session.set('feedbackUnset', Session.get('fromInstructions') || Session.get('feedbackUnset'));
   Session.set('fromInstructions', false);
 
-  preloadStimuliFiles();
+  await preloadStimuliFiles();
   checkUserAudioConfigCompatability();
 
   // In addition to experimental condition, we allow a root TDF to specify
