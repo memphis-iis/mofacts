@@ -3216,48 +3216,6 @@ export const methods = {
     }
   },
 
-  updatePerformanceData: function(codeLocation) {
-    const timestamp = new Date();
-    const user = Meteor.user();
-    const userId = user._id;
-    user.lastActionTimestamp = timestamp;
-    user.timestampLocation = codeLocation;
-    Meteor.users.update({_id: userId}, user);
-  },
-
-  isSystemDown: function() {
-    const curConfig = DynamicConfig.findOne({});
-    return curConfig.isSystemDown;
-  },
-
-  isCurrentServerLoadTooHigh: function() {
-    const last50Timestamps = Meteor.users.find({}, {limit: 50}).sort({lastActionTimestamp: 1}).fetch();
-    const curConfig = DynamicConfig.findOne({});
-    const {loginsWithinAHalfHourLimit, utlQueriesWithinFifteenMinLimit} = curConfig.serverLoadConstants;// 10,8
-
-    const loginsWithinAHalfHour = new Set();
-    let utlQueriesWithinFifteenMin = [];
-    const now = new Date();
-    const thirtyMinAgo = new Date(now - (30*60*1000));
-    const fifteenMinAgo = new Date(now - (15*60*1000));
-
-    for (const loginData of last50Timestamps) {
-      if (loginData.timestamp > thirtyMinAgo) {
-        loginsWithinAHalfHour.add(loginData.userId);
-      }
-    }
-
-    const loginsWithinFifteenMin = last50Timestamps.filter((x) => x.timestamp > fifteenMinAgo);
-    const currentServerLoadIsTooHigh = (loginsWithinAHalfHour.size > loginsWithinAHalfHourLimit ||
-          loginsWithinFifteenMin.length > utlQueriesWithinFifteenMinLimit);
-
-    serverConsole('isCurrentServerLoadTooHigh:' + currentServerLoadIsTooHigh + ', loginsWithinAHalfHour:' +
-        loginsWithinAHalfHour.size + '/' + loginsWithinAHalfHourLimit + ', loginsWithinFifteenMin:' +
-        loginsWithinFifteenMin.length + '/' + utlQueriesWithinFifteenMinLimit);
-
-    return currentServerLoadIsTooHigh;
-  },
-
   // Let client code send console output up to server
   debugLog: function(logtxt) {
     let usr = Meteor.user();

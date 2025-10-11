@@ -201,7 +201,6 @@ Template.signIn.events({
         Meteor.call('debugLog', 'Sign in was successful');
       }
       Meteor.call('logUserAgentAndLoginTime', Meteor.userId(), navigator.userAgent);
-      Meteor.call('updatePerformanceData', 'signinOauth.clickSigninButton');
       await meteorCallAsync('setUserLoginData', `direct`, Session.get('loginMode'));
       Meteor.logoutOtherClients();
       Router.go('/profile');
@@ -285,7 +284,6 @@ function signInNotify(landingPage = '/profile') {
     const currentUser = Meteor.users.findOne({_id: Meteor.userId()}).username;
     console.log(currentUser + ' was logged in successfully! Current route is ', Router.current().route.getName());
     Meteor.call('debugLog', 'Sign in was successful');
-    Meteor.call('updatePerformanceData', 'signin.signInNotify');
     Meteor.call('logUserAgentAndLoginTime', Meteor.userId(), navigator.userAgent);
   }
   Meteor.logoutOtherClients();
@@ -506,7 +504,6 @@ function testLogin() {
           Meteor.call('debugLog', 'TEST Sign in was successful - YOU SHOULD NOT SEE THIS IN PRODUCTION');
         }
         Meteor.call('logUserAgentAndLoginTime', Meteor.userId(), navigator.userAgent);
-        Meteor.call('updatePerformanceData', 'signinOauth.testLogin');
         const curClass = Session.get('curClass');
         const curTeacher = Session.get('curTeacher');
         if(curTeacher && curClass){
