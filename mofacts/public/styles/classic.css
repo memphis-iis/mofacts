@@ -22,6 +22,20 @@
     --border-radius-circle: 50%; /* Perfect circles */
     --border-radius-none: 0px; /* Flat elements (stimulus boxes) */
 }
+/* ===== ACCESSIBILITY ===== */
+/* Screen reader only content - visually hidden but accessible to assistive technology */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+}
+
 /* ===== BASE ELEMENTS ===== */
 body{
     background-color: var(--background-color);
@@ -143,7 +157,7 @@ select{
     background-color: var(--secondary-color);
     background-position: left center;
     border-radius: var(--border-radius-pill);
-    transition: background-position .15s ease-in-out;
+    transition: background-position 0.1s ease-in-out;
 }
 
 .form-switch .form-check-label{
@@ -725,8 +739,9 @@ thead{
 
 /* ===== ANIMATIONS ===== */
 /* Fade-in transition for elements that appear/disappear */
+/* IMPORTANT: Max 100ms transition per project requirements */
 .smooth-transition {
-    transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out;
+    transition: opacity 0.1s ease-in-out, transform 0.1s ease-in-out;
     /* Hint browser to use GPU acceleration for smoother animations */
     will-change: opacity;
 }
@@ -734,7 +749,7 @@ thead{
 /* Smooth visibility transitions (better than instant show/hide) */
 .fade-in {
     opacity: 0;
-    transition: opacity 0.15s ease-in;
+    transition: opacity 0.1s ease-in;
 }
 
 .fade-in.visible {
@@ -743,7 +758,7 @@ thead{
 
 /* Height transitions for expanding/collapsing elements */
 .height-transition {
-    transition: max-height 0.2s ease-in-out, opacity 0.2s ease-in-out;
+    transition: max-height 0.1s ease-in-out, opacity 0.1s ease-in-out;
     overflow: hidden;
 }
 
@@ -755,7 +770,7 @@ thead{
 /* Smooth element removal */
 .fade-out {
     opacity: 1;
-    transition: opacity 0.15s ease-out;
+    transition: opacity 0.1s ease-out;
 }
 
 .fade-out.hidden {
@@ -992,6 +1007,11 @@ thead{
   pointer-events: none;
 }
 
+/* Hide input elements based on trial type (button vs text) */
+.trial-input-hidden {
+  display: none !important;
+}
+
 /* Smooth layout changes during feedback - prevent flash from column width changes */
 /* IMPORTANT: Keep all transitions at 100ms or less per project requirements */
 #displayContainer {
@@ -1016,17 +1036,29 @@ thead{
   contain: layout;
 }
 
-/* Reduced motion support (WCAG 2.1 compliance) */
+/* ===== ACCESSIBILITY: Reduced Motion Support ===== */
+/* Disable all animations for users who prefer reduced motion */
+/* https://developer.mozilla.org/en-US/docs/Web/CSS/@media/prefers-reduced-motion */
 @media (prefers-reduced-motion: reduce) {
-  #userInteractionContainer,
-  #feedbackOverrideContainer,
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  /* Keep opacity changes instant but visible */
+  #trialContentWrapper,
+  .smooth-transition,
+  .fade-in,
+  .fade-out,
   #displayContainer,
-  #correctAnswerDisplayContainer,
-  .input-box,
+  #displaySubContainer,
   #multipleChoiceContainer,
-  #UserInteraction,
-  #forceCorrectionEntry {
+  .input-box,
+  #progressbar {
     transition: none !important;
-    will-change: auto !important;
   }
 }

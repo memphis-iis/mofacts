@@ -1842,8 +1842,8 @@ function scheduleUnitEngine() {
         for (k = 0; k < templateSize; ++k) {
           // "parts" is a comma-delimited entry with 4 components:
           // 0 - the offset (whichStim) - can be numeric or "r" for random
-          // 1 - legacy was f/b, now "b" forces a button trial
-          // 2 - trial type (t, d, s, m, n, i, f)
+          // 1 - input method: "f" = fill-in (text), "b" = button (multiple choice), "n" = default
+          // 2 - trial type: d=drill, t=test, s=study, m=mandatory-correction, n=timed-prompt, i=instructional-test
           // 3 - location (added to qidx)
           const groupEntry = group[index * templateSize + k];
           const parts = groupEntry.split(',');

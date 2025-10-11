@@ -977,7 +977,7 @@ Template.card.helpers({
     let parms = Session.get('currentDeliveryParams').skipstudy
     if(parms){
       const testType = getTestType();
-      if (testType === 's' || testType === 'f') {
+      if (testType === 's') {
         return true;
       }
       if(testType === 'd' && cardState.get('inFeedback')){
@@ -1230,6 +1230,222 @@ const TRANSITION_CONFIG = {
   FADE_BUFFER_MS: 20      // Safety buffer for timing variations under load
 };
 
+// TRIAL STATE MACHINE CONSTANTS (Hierarchical Model)
+// Three distinct trial flows (based on trial type):
+//   Study:  PRESENTING.LOADING → PRESENTING.FADING_IN → PRESENTING.DISPLAYING → STUDY.SHOWING → TRANSITION
+//   Drill:  PRESENTING.LOADING → PRESENTING.FADING_IN → PRESENTING.DISPLAYING → PRESENTING.AWAITING → FEEDBACK.SHOWING → TRANSITION
+//   Test:   PRESENTING.LOADING → PRESENTING.FADING_IN → PRESENTING.DISPLAYING → PRESENTING.AWAITING → TRANSITION
+// All trials share the first 3 PRESENTING substates (LOADING, FADING_IN, DISPLAYING)
+// Study skips AWAITING and uses STUDY phase; Drill adds FEEDBACK; Test skips both STUDY and FEEDBACK
+
+const TRIAL_STATES = {
+  // PRESENTING PHASE - User sees question/content (drill/test share this)
+  // Duration: 15-30s for drill/test (waiting for input)
+  PRESENTING_LOADING: 'PRESENTING.LOADING',          // Selecting card, loading assets (50-500ms)
+  PRESENTING_FADING_IN: 'PRESENTING.FADING_IN',      // New content appearing (100ms)
+  PRESENTING_DISPLAYING: 'PRESENTING.DISPLAYING',    // Visible, input disabled (brief ~10ms)
+  PRESENTING_AWAITING: 'PRESENTING.AWAITING',        // Input enabled, waiting (drill/test only)
+
+  // STUDY PHASE - Study trials only (completely separate from presenting/feedback)
+  // Duration: purestudy timeout (e.g., 3 seconds)
+  STUDY_SHOWING: 'STUDY.SHOWING',                    // Display stimulus+answer (study only)
+
+  // FEEDBACK PHASE - Drill trials only (shows correctness after input)
+  // Duration: 2-5s for drill
+  FEEDBACK_SHOWING: 'FEEDBACK.SHOWING',              // Display correct/incorrect (drill only)
+
+  // TRANSITION PHASE - Between trials (all trial types use this)
+  // Duration: ~260ms total
+  TRANSITION_START: 'TRANSITION.START',              // Brief cleanup (10ms)
+  TRANSITION_FADING_OUT: 'TRANSITION.FADING_OUT',    // Old content disappearing (100ms)
+  TRANSITION_CLEARING: 'TRANSITION.CLEARING',        // Clearing DOM while invisible (50ms)
+
+  // Special states
+  IDLE: 'IDLE',                                      // Initial page load only
+  ERROR: 'ERROR'                                     // Error recovery
+};
+
+// Helper: Get high-level phase from detailed state
+function getTrialPhase(state) {
+  if (!state) return null;
+  return state.split('.')[0]; // 'PRESENTING.AWAITING' → 'PRESENTING'
+}
+
+// Helper: Check if in a particular phase
+function isInPhase(phase) {
+  const currentPhase = getTrialPhase(currentTrialState);
+  return currentPhase === phase;
+}
+
+// Helper: Check if this trial type requires input
+function trialRequiresInput() {
+  const testType = getTestType();
+  return testType === 'd' || testType === 't'; // Drill or test
+}
+
+// Helper: Check if this is a study trial
+function isStudyTrial() {
+  const testType = getTestType();
+  return testType === 's';
+}
+
+// Helper: Check if this trial type shows feedback (FEEDBACK phase only, not STUDY)
+function trialShowsFeedback() {
+  const testType = getTestType();
+  return testType === 'd'; // Drill only (NOT study/test)
+}
+
+// Helper: Check if this trial type uses STUDY phase
+function trialUsesStudyPhase() {
+  const testType = getTestType();
+  return testType === 's';
+}
+
+// Helper: Check if this is a test trial
+function isTestTrial() {
+  const testType = getTestType();
+  return testType === 't';
+}
+
+// Track current state
+let currentTrialState = TRIAL_STATES.IDLE;
+
+// Valid state transitions (varies by trial type)
+const VALID_TRANSITIONS = {
+  [TRIAL_STATES.IDLE]: [
+    TRIAL_STATES.PRESENTING_LOADING,  // Normal: prepareCard() starts trial
+    TRIAL_STATES.PRESENTING_FADING_IN // Initial page load: first trial starts directly
+  ],
+
+  // PRESENTING phase transitions
+  [TRIAL_STATES.PRESENTING_LOADING]: [TRIAL_STATES.PRESENTING_FADING_IN],
+  [TRIAL_STATES.PRESENTING_FADING_IN]: [TRIAL_STATES.PRESENTING_DISPLAYING],
+  [TRIAL_STATES.PRESENTING_DISPLAYING]: [
+    TRIAL_STATES.PRESENTING_AWAITING,  // For drill/test
+    TRIAL_STATES.STUDY_SHOWING         // For study (skips AWAITING, goes to STUDY phase)
+  ],
+  [TRIAL_STATES.PRESENTING_AWAITING]: [
+    TRIAL_STATES.FEEDBACK_SHOWING,     // For drill (shows feedback)
+    TRIAL_STATES.TRANSITION_START      // For test (skips feedback)
+  ],
+
+  // STUDY phase transitions (study trials only)
+  [TRIAL_STATES.STUDY_SHOWING]: [TRIAL_STATES.TRANSITION_START],
+
+  // FEEDBACK phase transitions (drill trials only)
+  [TRIAL_STATES.FEEDBACK_SHOWING]: [TRIAL_STATES.TRANSITION_START],
+
+  // TRANSITION phase transitions
+  [TRIAL_STATES.TRANSITION_START]: [TRIAL_STATES.TRANSITION_FADING_OUT],
+  [TRIAL_STATES.TRANSITION_FADING_OUT]: [TRIAL_STATES.TRANSITION_CLEARING],
+  [TRIAL_STATES.TRANSITION_CLEARING]: [TRIAL_STATES.PRESENTING_LOADING], // Loop
+
+  // Error recovery
+  [TRIAL_STATES.ERROR]: [] // Terminal state
+};
+
+/**
+ * Transition to a new trial state with logging and validation
+ * @param {string} newState - The state to transition to (from TRIAL_STATES)
+ * @param {string} reason - Human-readable reason for transition
+ */
+function transitionTrialState(newState, reason = '') {
+  const previousState = currentTrialState;
+  const trialNum = (Session.get('currentExperimentState')?.numQuestionsAnswered || 0) + 1;
+
+  // Validate transition
+  const validNextStates = VALID_TRANSITIONS[previousState] || [];
+  if (!validNextStates.includes(newState) && newState !== TRIAL_STATES.ERROR) {
+    console.error(
+      `[SM] ❌ [Trial ${trialNum}] INVALID STATE TRANSITION: ${previousState} → ${newState}`,
+      `\n   Valid transitions from ${previousState}: ${validNextStates.join(', ')}`,
+      reason ? `\n   Reason: ${reason}` : ''
+    );
+    // Don't throw - just log. In production we might want to transition to ERROR state
+    // For now, allow the transition but flag it
+  }
+
+  // Log transition
+  console.log(
+    `[SM] ✓ [Trial ${trialNum}] STATE: ${previousState} → ${newState}`,
+    reason ? `(${reason})` : ''
+  );
+
+  currentTrialState = newState;
+
+  // Optional: Store in Session for debugging/visibility
+  Session.set('_debugTrialState', newState);
+
+  // ACCESSIBILITY: Announce important state changes to screen readers
+  announceTrialStateToScreenReader(newState, trialNum);
+}
+
+/**
+ * Announce trial state changes to screen readers via ARIA live region
+ * Only announces user-facing states (not internal loading states)
+ */
+function announceTrialStateToScreenReader(state, trialNum) {
+  const announcer = $('#trialStateAnnouncer');
+  if (!announcer.length) return;
+
+  let message = '';
+
+  // Only announce states that matter to users
+  switch(state) {
+    case TRIAL_STATES.PRESENTING_DISPLAYING:
+      message = `Question ${trialNum} displayed`;
+      break;
+    case TRIAL_STATES.PRESENTING_AWAITING:
+      message = `Question ${trialNum} ready for your answer`;
+      break;
+    case TRIAL_STATES.STUDY_SHOWING:
+      message = `Study card ${trialNum} displayed`;
+      break;
+    case TRIAL_STATES.FEEDBACK_SHOWING:
+      message = `Feedback for question ${trialNum}`;
+      break;
+    case TRIAL_STATES.TRANSITION_START:
+      message = `Moving to next question`;
+      break;
+    // Don't announce loading/internal states (LOADING, FADING_IN, CLEARING, etc)
+    default:
+      return; // No announcement for internal states
+  }
+
+  if (message) {
+    announcer.text(message);
+  }
+}
+
+/**
+ * Assert that we're in one of the expected states before performing an operation
+ * @param {string[]} expectedStates - Array of valid states for this operation
+ * @param {string} operation - Name of operation being performed
+ * @throws {Error} If in wrong state (in development)
+ */
+function assertTrialState(expectedStates, operation) {
+  if (!expectedStates.includes(currentTrialState)) {
+    const error = `[SM] ❌ INVALID OPERATION: ${operation} called in state ${currentTrialState}, expected one of: ${expectedStates.join(', ')}`;
+    console.error(error);
+
+    // In development, throw to catch bugs early
+    if (Meteor.isDevelopment) {
+      throw new Error(error);
+    }
+
+    // In production, log but continue
+    return false;
+  }
+  return true;
+}
+
+/**
+ * Get current trial state (for debugging/testing)
+ */
+function getCurrentTrialState() {
+  return currentTrialState;
+}
+
 let soundsDict = {};
 let imagesDict = {};
 const onEndCallbackDict = {};
@@ -1380,6 +1596,7 @@ function getCurrentStimDisplaySources(filterPropertyName='clozeStimulus') {
 }
 
 async function preloadStimuliFiles() {
+  console.log('[SM] preloadStimuliFiles called in state:', currentTrialState);
   // Pre-load sounds to be played into soundsDict to avoid audio lag issues
   if (curStimHasSoundDisplayType()) {
     console.log('Sound type questions detected, pre-loading sounds');
@@ -1649,6 +1866,7 @@ function handleUserForceCorrectInput(e, source) {
 }
 
 function handleUserInput(e, source, simAnswerCorrect) {
+  console.log('[SM] handleUserInput called in state:', currentTrialState, 'source:', source);
   let isTimeout = false;
   let isSkip = false;
   let key;
@@ -1895,6 +2113,7 @@ function determineUserFeedback(userAnswer, isSkip, isCorrect, feedbackForAnswer,
     Session.set('currentScore', newScore);
   }
   const testType = getTestType();
+  // Drill types all show feedback: 'd' = standard, 'm' = mandatory correction, 'n' = timed prompt
   const isDrill = (testType === 'd' || testType === 'm' || testType === 'n');
   if (isDrill) {
     if (feedbackForAnswer == null && correctAndText != null) {
@@ -1918,6 +2137,12 @@ function determineUserFeedback(userAnswer, isSkip, isCorrect, feedbackForAnswer,
 
 async function showUserFeedback(isCorrect, feedbackMessage, isTimeout, isSkip) {
   console.log('showUserFeedback');
+  console.log('[SM] showUserFeedback called in state:', currentTrialState);
+
+  // STATE MACHINE: Transition to FEEDBACK.SHOWING (drill only, test skips feedback)
+  if (trialShowsFeedback()) {
+    transitionTrialState(TRIAL_STATES.FEEDBACK_SHOWING, `Showing feedback (${isCorrect ? 'correct' : 'incorrect'})`);
+  }
 
   // Cache frequently accessed Session variables
   const uiSettings = Session.get('curTdfUISettings');
@@ -2122,14 +2347,21 @@ async function showUserFeedback(isCorrect, feedbackMessage, isTimeout, isSkip) {
   // * the trial params are specified to enable forceCorrection
   // * we are NOT in a sim
 
-  const isForceCorrectTrial = getTestType() === 'm' || getTestType() === 'n';
-  const doForceCorrect = (!isCorrect && !Session.get('runSimulation') &&
-    (Session.get('currentDeliveryParams').forceCorrection || isForceCorrectTrial));
-  let trialEndTimeStamp = Session.get('trialEndTimeStamp');
-  let trialStartTimeStamp = Session.get('trialStartTimestamp');
-  let source = Session.get('source');
-  const doClearForceCorrectBound = doClearForceCorrect.bind(null, doForceCorrect, trialEndTimeStamp, trialStartTimeStamp, source, userAnswer, isTimeout, isCorrect, isSkip);
-  Tracker.afterFlush(doClearForceCorrectBound);
+  // Call doClearForceCorrect non-reactively to prevent infinite loop
+  // Previously used Tracker.afterFlush which caused the callback to fire after EVERY flush,
+  // creating a loop when Session variables were updated in afterAnswerFeedbackCallback
+  Tracker.nonreactive(() => {
+    // 'm' = mandatory correction (must re-type), 'n' = timed prompt/hint (auto-continues)
+    // Both use force correction UI but with different behavior
+    const isForceCorrectTrial = getTestType() === 'm' || getTestType() === 'n';
+    const doForceCorrect = (!isCorrect && !Session.get('runSimulation') &&
+      (Session.get('currentDeliveryParams').forceCorrection || isForceCorrectTrial));
+    const trialEndTimeStamp = Session.get('trialEndTimeStamp');
+    const trialStartTimeStamp = Session.get('trialStartTimestamp');
+    const source = Session.get('source');
+
+    doClearForceCorrect(doForceCorrect, trialEndTimeStamp, trialStartTimeStamp, source, userAnswer, isTimeout, isCorrect, isSkip);
+  });
 }
 
 // Note the execution thread will finish in the keypress event above for userForceCorrect
@@ -2138,6 +2370,7 @@ function doClearForceCorrect(doForceCorrect, trialEndTimeStamp, trialStartTimeSt
   if (doForceCorrect) {
     $('#forceCorrectionEntry').removeAttr('hidden');
 
+    // Type 'n': Show timed prompt/hint, then auto-continue (no re-entry required)
     if (getTestType() === 'n') {
       const prompt = Session.get('currentDeliveryParams').forcecorrectprompt;
       $('#forceCorrectGuidance').text(prompt);
@@ -2146,6 +2379,7 @@ function doClearForceCorrect(doForceCorrect, trialEndTimeStamp, trialStartTimeSt
       const forcecorrecttimeout = Session.get('currentDeliveryParams').forcecorrecttimeout;
       beginMainCardTimeout(forcecorrecttimeout, afterAnswerFeedbackCallback(trialEndTimeStamp, trialStartTimeStamp, source, userAnswer, isTimeout, false, isCorrect));
     } else {
+      // Type 'm' (or forceCorrection=true): Require re-entry of correct answer
       const prompt = 'Please enter the correct answer to continue';
       $('#forceCorrectGuidance').text(prompt);
       speakMessageIfAudioPromptFeedbackEnabled(prompt, 'feedback');
@@ -2240,6 +2474,7 @@ async function afterAnswerFeedbackCallback(trialEndTimeStamp, trialStartTimeStam
 
 async function afterFeedbackCallback(trialEndTimeStamp, trialStartTimeStamp, isTimeout, isSkip, isCorrect, testType, deliveryParams, answerLogRecord, callLocation) {
   afterFeedbackCallbackBind = undefined;
+  console.log('[SM] afterFeedbackCallback called in state:', currentTrialState);
   Session.set('CurTimeoutId', null)
   const userLeavingTrial = callLocation != 'card';
   let reviewEnd = Date.now();
@@ -2310,19 +2545,26 @@ async function afterFeedbackCallback(trialEndTimeStamp, trialStartTimeStamp, isT
 }
 
 async function cardEnd() {
+  console.log('[SM] cardEnd called in state:', currentTrialState);
+  // STATE MACHINE: Begin TRANSITION phase
+  transitionTrialState(TRIAL_STATES.TRANSITION_START, 'Trial complete, beginning transition');
+
   hideUserFeedback();
   cardState.set('inFeedback', false);
   $('#CountdownTimerText').text("Continuing...");
   $('#userLowerInteraction').html('');
   $('#userAnswer').val('');
   Session.set('feedbackTimeoutEnds', Date.now())
+
+  // STATE MACHINE: Transition will happen in prepareCard via FADING_OUT and CLEARING
+  // prepareCard() handles fade-out and clearing, then moves to next trial's LOADING
   await prepareCard();
 }
 
 function getReviewTimeout(testType, deliveryParams, isCorrect, dialogueHistory, isTimeout, isSkip) {
   let reviewTimeout = 0;
 
-  if (testType === 's' || testType === 'f') {
+  if (testType === 's') {
     // Just a study - note that the purestudy timeout is used for the QUESTION
     // timeout, not the display timeout after the ANSWER. However, we need a
     // timeout for our logic below so just use the minimum
@@ -2630,6 +2872,7 @@ function findQTypeSimpified() {
 
 
 function hideUserFeedback() {
+  console.log('[SM] hideUserFeedback called in state:', currentTrialState);
   $('#UserInteraction').removeClass('text-align alert alert-success alert-danger').html('').hide();
   $('#userForceCorrect').val(''); // text box - see inputF.html
   $('#forceCorrectionEntry').hide(); // Container
@@ -2639,7 +2882,7 @@ function hideUserFeedback() {
 // Comprehensive cleanup that mimics what {{#if displayReady}} teardown did automatically
 // IMPORTANT: Only clear input VALUES and non-reactive HTML, NOT Blaze-managed content
 function cleanupTrialContent() {
-  console.log('cleanupTrialContent - manual cleanup of all trial state');
+  console.log('[SM] cleanupTrialContent called in state:', currentTrialState);
   console.log('  #userAnswer before cleanup:', $('#userAnswer').length, 'display:', $('#userAnswer').css('display'));
 
   // Clear input VALUES (not HTML - let Blaze handle that)
@@ -2941,22 +3184,43 @@ async function cardStart() {
 
 async function prepareCard() {
   const trialNum = (Session.get('currentExperimentState')?.numQuestionsAnswered || 0) + 1;
-  console.log('=== prepareCard START (Trial #' + trialNum + ') ===');
-  console.log('  displayReady before:', Session.get('displayReady'));
+  console.log('[SM] === prepareCard START (Trial #' + trialNum + ') ===');
+  console.log('[SM]   CALL STACK:', new Error().stack);
+  console.log('[SM]   displayReady before:', Session.get('displayReady'));
+
+  // STATE MACHINE: Handle transition to fade-out based on current state
+  if (currentTrialState === TRIAL_STATES.IDLE) {
+    // First trial - no need to fade out, will go straight to LOADING after clearing
+    console.log('[SM]   First trial (IDLE state), skipping fade-out');
+  } else if (currentTrialState === TRIAL_STATES.TRANSITION_START) {
+    transitionTrialState(TRIAL_STATES.TRANSITION_FADING_OUT, 'Fade-out previous trial content');
+  } else if (currentTrialState === TRIAL_STATES.TRANSITION_CLEARING) {
+    // Already in CLEARING (called from processUserTimesLog), skip fade-out
+    console.log('[SM]   Already in CLEARING state, skipping fade-out');
+  } else {
+    // Called from somewhere unexpected - transition to fade-out anyway
+    transitionTrialState(TRIAL_STATES.TRANSITION_FADING_OUT, 'prepareCard() starting fade-out from unexpected state');
+  }
+
   Meteor.logoutOtherClients();
   Session.set('wasReportedForRemoval', false);
   // Manually clean up all trial content before hiding (mimics DOM teardown cleanup)
   cleanupTrialContent();
-  console.log('  Setting displayReady=false to start fade-out');
+  console.log('[SM]   Setting displayReady=false to start fade-out');
   Session.set('displayReady', false);
-  console.log('  displayReady after setting false:', Session.get('displayReady'));
+  console.log('[SM]   displayReady after setting false:', Session.get('displayReady'));
 
   // Wait for CSS fade-out transition to complete
   // This ensures old content fades out gracefully before being cleared
   const fadeDelay = TRANSITION_CONFIG.FADE_DURATION_MS + TRANSITION_CONFIG.FADE_BUFFER_MS;
-  console.log(`  Waiting ${fadeDelay}ms for fade-out transition to complete...`);
+  console.log(`[SM]   Waiting ${fadeDelay}ms for fade-out transition to complete...`);
   await new Promise(resolve => setTimeout(resolve, fadeDelay));
-  console.log('  Fade-out complete, clearing content while invisible');
+  console.log('[SM]   Fade-out complete, clearing content while invisible');
+
+  // STATE MACHINE: Transition to CLEARING after fade-out completes
+  if (currentTrialState === TRIAL_STATES.TRANSITION_FADING_OUT) {
+    transitionTrialState(TRIAL_STATES.TRANSITION_CLEARING, 'Clearing previous trial content');
+  }
 
   Session.set('submmissionLock', false);
   Session.set('currentDisplay', {});
@@ -2984,6 +3248,9 @@ async function prepareCard() {
       playerController.playNextCard();
     }
   } else {
+    // STATE MACHINE: Transition to PRESENTING.LOADING
+    transitionTrialState(TRIAL_STATES.PRESENTING_LOADING, 'Starting card selection');
+
     await engine.selectNextCard(Session.get('engineIndices'), Session.get('currentExperimentState'));
     await newQuestionHandler();
     Session.set('cardStartTimestamp', Date.now());
@@ -2994,6 +3261,7 @@ async function prepareCard() {
 // TODO: this probably no longer needs to be separate from prepareCard
 async function newQuestionHandler() {
   console.log('=== newQuestionHandler START ===');
+  console.log('[SM] newQuestionHandler called in state:', currentTrialState);
   console.log('  #userAnswer at start:', $('#userAnswer').length, 'display:', $('#userAnswer').css('display'));
   console.log('  Secs since unit start:', elapsedSecs());
 
@@ -3015,21 +3283,10 @@ async function newQuestionHandler() {
   Session.set('buttonTrial', isButtonTrial);
   console.log('newQuestionHandler, isButtonTrial', isButtonTrial, 'displayReady', Session.get('displayReady'));
 
-  // Batch DOM updates in single animation frame to reduce reflows/repaints
-  // IMPORTANT: Await this so DOM updates complete BEFORE displayReady=true
-  await new Promise(resolve => {
-    requestAnimationFrame(() => {
-      if (isButtonTrial) {
-        $('#textEntryRow').hide();
-        console.log('  Button trial - hiding #textEntryRow');
-      } else {
-        $('#textEntryRow').removeAttr('hidden');
-        console.log('  Text trial - showing #textEntryRow, .input-box elements:', $('.input-box').length);
-        console.log('  #userAnswer after showing textEntryRow:', $('#userAnswer').length, 'display:', $('#userAnswer').css('display'));
-      }
-      resolve();
-    });
-  });
+  // Input visibility is now controlled by CSS classes in template (trial-input-hidden)
+  // Both text and button inputs are pre-rendered, Blaze conditionals control CSS class only
+  // This prevents DOM structure changes that cause input/stimulus desynchronization
+  console.log('  Input visibility controlled by CSS, buttonTrial:', isButtonTrial);
 
   if (isButtonTrial) {
     setUpButtonTrial();
@@ -3125,6 +3382,7 @@ function startQuestionTimeout() {
 }
 async function checkAndDisplayPrestimulus(deliveryParams, nextStageCb) {
   console.log('=== checkAndDisplayPrestimulus START ===');
+  console.log('[SM] checkAndDisplayPrestimulus called in state:', currentTrialState);
   console.log('  displayReady at start:', Session.get('displayReady'));
   // we'll [0], if it exists
   const prestimulusDisplay = Session.get('currentTdfFile').tdfs.tutor.setspec.prestimulusDisplay;
@@ -3140,16 +3398,34 @@ async function checkAndDisplayPrestimulus(deliveryParams, nextStageCb) {
     // Set displayReady once for the trial (no toggle to prevent shimmer)
     if (!currentDisplayReady && !isVideoSession) {
       console.log('  Setting displayReady=true in checkAndDisplayPrestimulus');
+
+      // STATE MACHINE: Transition to PRESENTING.FADING_IN
+      transitionTrialState(TRIAL_STATES.PRESENTING_FADING_IN, 'displayReady=true (prestimulus), starting fade-in');
+
       Session.set('displayReady', true); //displayReady handled by video session if video unit
+
+      // STATE MACHINE: After fade-in completes, transition to DISPLAYING and proceed to next stage
+      setTimeout(() => {
+        transitionTrialState(TRIAL_STATES.PRESENTING_DISPLAYING, 'Fade-in complete (prestimulus), content visible');
+
+        // Proceed to next stage AFTER fade-in completes
+        const prestimulusdisplaytime = deliveryParams.prestimulusdisplaytime;
+        console.log('delaying for ' + prestimulusdisplaytime + ' ms then starting question', new Date());
+        setTimeout(async function() {
+          console.log('past prestimulusdisplaytime, start two part question logic');
+          await nextStageCb();
+        }, prestimulusdisplaytime);
+      }, TRANSITION_CONFIG.FADE_DURATION_MS + TRANSITION_CONFIG.FADE_BUFFER_MS);
     } else {
       console.log('  NOT setting displayReady (already true or video session)');
+      // displayReady already true, proceed immediately
+      const prestimulusdisplaytime = deliveryParams.prestimulusdisplaytime;
+      console.log('delaying for ' + prestimulusdisplaytime + ' ms then starting question', new Date());
+      setTimeout(async function() {
+        console.log('past prestimulusdisplaytime, start two part question logic');
+        await nextStageCb();
+      }, prestimulusdisplaytime);
     }
-    const prestimulusdisplaytime = deliveryParams.prestimulusdisplaytime;
-    console.log('delaying for ' + prestimulusdisplaytime + ' ms then starting question', new Date());
-    setTimeout(async function() {
-      console.log('past prestimulusdisplaytime, start two part question logic');
-      await nextStageCb();
-    }, prestimulusdisplaytime);
   } else {
     console.log('no prestimulusDisplay detected, continuing to next stage');
     await nextStageCb();
@@ -3158,6 +3434,7 @@ async function checkAndDisplayPrestimulus(deliveryParams, nextStageCb) {
 
 async function checkAndDisplayTwoPartQuestion(deliveryParams, currentDisplayEngine, closeQuestionParts, nextStageCb) {
   console.log('=== checkAndDisplayTwoPartQuestion START ===');
+  console.log('[SM] checkAndDisplayTwoPartQuestion called in state:', currentTrialState);
   console.log('  displayReady at start:', Session.get('displayReady'));
   // In either case we want to set up the current display now
   const isVideoSession = Session.get('isVideoSession')
@@ -3170,23 +3447,50 @@ async function checkAndDisplayTwoPartQuestion(deliveryParams, currentDisplayEngi
   console.log('  Before setting displayReady - current value:', currentDisplayReady, 'isVideoSession:', isVideoSession);
   if (!currentDisplayReady && !isVideoSession) {
     console.log('  Setting displayReady=true in checkAndDisplayTwoPartQuestion');
+
+    // STATE MACHINE: Transition to PRESENTING.FADING_IN
+    transitionTrialState(TRIAL_STATES.PRESENTING_FADING_IN, 'displayReady=true, starting fade-in');
+
     Session.set('displayReady', true);
-  }
-  // Handle two part questions
-  const currentQuestionPart2 = Session.get('currentExperimentState').currentQuestionPart2;
-  if (currentQuestionPart2) {
-    const twoPartQuestionWrapper = {'text': currentQuestionPart2};
-    const initialviewTimeDelay = deliveryParams.initialview;
-    setTimeout(function() {
-      // Update display directly without toggling displayReady (prevents input shimmer)
-      Session.set('currentDisplay', twoPartQuestionWrapper);
-      // displayReady already true from initial set - don't toggle
-      Session.get('currentExperimentState').currentQuestionPart2 = undefined;
-      redoCardImage();
-      nextStageCb();
-    }, initialviewTimeDelay);
+
+    // STATE MACHINE: After fade-in completes, transition to DISPLAYING and proceed to next stage
+    setTimeout(() => {
+      transitionTrialState(TRIAL_STATES.PRESENTING_DISPLAYING, 'Fade-in complete, content visible');
+
+      // Handle two part questions AFTER fade-in completes
+      const currentQuestionPart2 = Session.get('currentExperimentState').currentQuestionPart2;
+      if (currentQuestionPart2) {
+        const twoPartQuestionWrapper = {'text': currentQuestionPart2};
+        const initialviewTimeDelay = deliveryParams.initialview;
+        setTimeout(function() {
+          // Update display directly without toggling displayReady (prevents input shimmer)
+          Session.set('currentDisplay', twoPartQuestionWrapper);
+          // displayReady already true from initial set - don't toggle
+          Session.get('currentExperimentState').currentQuestionPart2 = undefined;
+          redoCardImage();
+          nextStageCb();
+        }, initialviewTimeDelay);
+      } else {
+        nextStageCb();
+      }
+    }, TRANSITION_CONFIG.FADE_DURATION_MS + TRANSITION_CONFIG.FADE_BUFFER_MS);
   } else {
-    nextStageCb();
+    // displayReady already true (video session or subsequent call), proceed immediately
+    const currentQuestionPart2 = Session.get('currentExperimentState').currentQuestionPart2;
+    if (currentQuestionPart2) {
+      const twoPartQuestionWrapper = {'text': currentQuestionPart2};
+      const initialviewTimeDelay = deliveryParams.initialview;
+      setTimeout(function() {
+        // Update display directly without toggling displayReady (prevents input shimmer)
+        Session.set('currentDisplay', twoPartQuestionWrapper);
+        // displayReady already true from initial set - don't toggle
+        Session.get('currentExperimentState').currentQuestionPart2 = undefined;
+        redoCardImage();
+        nextStageCb();
+      }, initialviewTimeDelay);
+    } else {
+      nextStageCb();
+    }
   }
 }
 
@@ -3233,36 +3537,41 @@ function beginQuestionAndInitiateUserInput(delayMs, deliveryParams) {
 
 function allowUserInput() {
   console.log('allow user input');
+  console.log('[SM] allowUserInput called in state:', currentTrialState);
+
+  // STATE MACHINE: Transition to AWAITING (for drill/test) or STUDY.SHOWING (for study)
+  // This is called AFTER fade-in completes (via setTimeout callback chain)
+  if (trialUsesStudyPhase()) {
+    // Study trials: transition to STUDY.SHOWING phase
+    transitionTrialState(TRIAL_STATES.STUDY_SHOWING, 'Study trial showing stimulus+answer');
+  } else {
+    // Drill/Test trials: transition to AWAITING user input
+    transitionTrialState(TRIAL_STATES.PRESENTING_AWAITING, 'Ready for user input');
+  }
+
   // DO NOT need to show #userAnswer - CSS wrapper (#trialContentWrapper) handles visibility via opacity
   // Visibility is controlled by displayReady, not jQuery show/hide
   // $('#userAnswer').show(); // REMOVED - not needed with CSS wrapper approach
   $('#confirmButton').show();
 
-  inputDisabled = false;
   startRecording();
 
-  // Need timeout here so that the disable input timeout doesn't fire after this
-  setTimeout(async function() {
-    if (typeof inputDisabled != 'undefined') {
-      // Use inputDisabled variable so that successive calls of stop and allow
-      // are resolved synchronously i.e. whoever last set the inputDisabled variable
-      // should win
-      $('#userAnswer, #multipleChoiceContainer button').prop('disabled', inputDisabled);
-      inputDisabled = undefined;
-    } else {
-      $('#userAnswer, #multipleChoiceContainer button').prop('disabled', false);
-    }
-    // Force scrolling to bottom of screen for the input
+  // Enable input and set focus immediately - no delay needed
+  // DOM is ready since we're in callback chain after fade-in completes
+  // ALWAYS enable input - allowUserInput means we want input enabled
+  // Set inputDisabled=false so stopUserInput's setTimeout won't re-disable
+  inputDisabled = false;
+  $('#userAnswer, #multipleChoiceContainer button').prop('disabled', false);
 
-    const textFocus = !getButtonTrial();
-    if (textFocus) {
-      try {
-        $('#userAnswer').focus();
-      } catch (e) {
-        // Do nothing
-      }
+  // ACCESSIBILITY: Set focus immediately for keyboard users
+  const textFocus = !getButtonTrial();
+  if (textFocus) {
+    try {
+      $('#userAnswer').focus();
+    } catch (e) {
+      // Do nothing - focus may fail if element not in DOM
     }
-  }, 200);
+  }
 }
 
 
@@ -3273,6 +3582,7 @@ function allowUserInput() {
 let inputDisabled = undefined;
 function stopUserInput() {
   console.log('stop user input');
+  console.log('[SM] stopUserInput called in state:', currentTrialState);
   // DO NOT hide #userAnswer - CSS wrapper (#trialContentWrapper) handles visibility via opacity
   // $('#userAnswer').hide(); // REMOVED - breaks input visibility on subsequent trials
   inputDisabled = true;
@@ -3281,7 +3591,10 @@ function stopUserInput() {
   // Need a delay here so we can wait for the DOM to load before manipulating it
   setTimeout(function() {
     console.log('after delay, stopping user input');
-    $('#userAnswer, #multipleChoiceContainer button').prop('disabled', true);
+    // Only disable if inputDisabled is still true (allowUserInput may have set it to false)
+    if (inputDisabled === true) {
+      $('#userAnswer, #multipleChoiceContainer button').prop('disabled', true);
+    }
   }, 200);
 }
 

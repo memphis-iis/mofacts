@@ -62,6 +62,14 @@
     {{/if}}
 
         <!-- ============================================================
+             ACCESSIBILITY: ARIA Live Region for Screen Readers
+             Announces trial state changes to assistive technology users
+             ============================================================ -->
+        <div id="trialStateAnnouncer" role="status" aria-live="polite" aria-atomic="true" class="sr-only">
+            <!-- Updated by JavaScript with trial state messages -->
+        </div>
+
+        <!-- ============================================================
              PRACTICE CARD - Main learning interface
              Includes stimulus display, input methods, and feedback
              ============================================================ -->
@@ -174,30 +182,28 @@
                     {{/if}}
                 {{/if}}
                 {{/unless}}
-                {{#if notButtonTrialOrInDialogueLoop}}
-                        <div class="input-box col-12">
-                            {{#if showDialogueHints}}
-                                {{#if dialogueCacheHint}}
-                                    <div class="row hints">
-                                        <div class="col-lg-12 visible-text text-center">
-                                            <b>Hints:</b> {{dialogueCacheHint}}
-                                        </div>
-                                    </div>
-                                {{/if}}
-                            {{/if}}
-                            {{> inputF}}
-                        </div>
-                {{else}}
-                {{#if buttonTrial}}
-                    {{#unless inFeedback}}
-                    {{#if audioEnabled}}
-                        <p class="marginLeftAndRight text-center">Please speak the letter next to the correct option for audio input</p>
+                {{!-- Text input: always rendered, visibility controlled by CSS based on buttonTrial --}}
+                <div class="input-box col-12 {{#if buttonTrial}}trial-input-hidden{{/if}}">
+                    {{#if showDialogueHints}}
+                        {{#if dialogueCacheHint}}
+                            <div class="row hints">
+                                <div class="col-lg-12 visible-text text-center">
+                                    <b>Hints:</b> {{dialogueCacheHint}}
+                                </div>
+                            </div>
+                        {{/if}}
                     {{/if}}
-                    {{/unless}}
+                    {{> inputF}}
+                </div>
+
+                {{!-- Button/Multiple choice: always rendered, visibility controlled by CSS --}}
+                {{#unless inFeedback}}
+                {{#if audioEnabled}}
+                    <p class="marginLeftAndRight text-center {{#unless buttonTrial}}trial-input-hidden{{/unless}}">Please speak the letter next to the correct option for audio input</p>
                 {{/if}}
-                <div id="multipleChoiceContainer" class="{{UIsettings.choiceColWidth}} {{videoMCClasses isVideoSession}} smooth-transition">
+                {{/unless}}
+                <div id="multipleChoiceContainer" class="{{UIsettings.choiceColWidth}} {{videoMCClasses isVideoSession}} smooth-transition {{#if buttonTrial}}{{else}}trial-input-hidden{{/if}}">
                     <!-- will contain multiple choice buttons which are dynamically added. -->
-                    {{#if buttonTrial}}
                     <div id="multipleChoiceTable" class="row gy-3 choice text-center row-cols-{{UIsettings.choiceButtonCols}} align-items-start">
                         {{#if imageResponse}}
                             {{#each buttonListImageRows}}
@@ -226,10 +232,8 @@
                             {{/each}}
                         {{/if}}
                     </div>
-                    {{/if}}
                 <div class="stack-gap-small"></div>
             </div>
-            {{/if}}
 
             {{#if UIsettings.displayConfirmButton}}
             <div class="stack-gap"></div>
