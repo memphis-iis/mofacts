@@ -2910,49 +2910,69 @@ export const methods = {
       }
     }
 
-    try {
-      //get the default user profile
-      const createdId = Accounts.createUser({
-        email: newUserName,
-        username: newUserName,
-        password: newUserPassword,
-        profile: { experiment: !!previousOK },
-        aws: {
-              have_aws_id: false,
-              have_aws_secret: false,
-              aws_id: '',
-              aws_secret_key: '',
-              use_sandbox: true,
-        }
-        
-      });
+    // Retry loop to handle duplicate _id race condition
+    let createdId = null;
+    let retryAttempts = 0;
+    const maxRetries = 3;
 
-      // Wait for user to be available in the DB before proceeding
-      let user = null, attempts = 0;
-      while (!user && attempts < 10) {
-        user = Meteor.users.findOne({ _id: createdId });
-        if (!user) {
-          Meteor._sleepForMs(50);
-          attempts++;
-        }
-      }
-      if (!user) throw new Error('User creation race condition: user not found after createUser');
-      // userProfileSave(user, defaultUserProfile()); // Not needed if onCreateUser does this
-      return { userExists: false, userId: createdId };
-    } catch (e) {
-      if (e.error === 403 && (/Username already exists|E11000 duplicate key error/.test(e.reason))) {
-        prevUser = Accounts.findUserByUsername(newUserName) || Accounts.findUserByEmail(newUserName);
-        if (prevUser) {
-          if (previousOK) {
-            Accounts.setPassword(prevUser._id, newUserPassword);
-            return { userExists: true, userId: prevUser._id };
-          } else {
-            throw new Error('User is already in use');
+    while (!createdId && retryAttempts < maxRetries) {
+      try {
+        //get the default user profile
+        createdId = Accounts.createUser({
+          email: newUserName,
+          username: newUserName,
+          password: newUserPassword,
+          profile: { experiment: !!previousOK },
+          aws: {
+                have_aws_id: false,
+                have_aws_secret: false,
+                aws_id: '',
+                aws_secret_key: '',
+                use_sandbox: true,
+          }
+
+        });
+
+        // Wait for user to be available in the DB before proceeding
+        let user = null, attempts = 0;
+        while (!user && attempts < 10) {
+          user = Meteor.users.findOne({ _id: createdId });
+          if (!user) {
+            Meteor._sleepForMs(50);
+            attempts++;
           }
         }
-        throw new Error('Duplicate key error but user not found');
-      } else {
-        throw e;
+        if (!user) throw new Error('User creation race condition: user not found after createUser');
+        // userProfileSave(user, defaultUserProfile()); // Not needed if onCreateUser does this
+        return { userExists: false, userId: createdId };
+      } catch (e) {
+        // Check for duplicate key error on _id field (race condition in ID generation)
+        if (/E11000 duplicate key error.*\b_id\b/.test(e.message || e.reason)) {
+          retryAttempts++;
+          serverConsole('Duplicate _id detected, retrying user creation (attempt ' + retryAttempts + '/' + maxRetries + ')');
+          if (retryAttempts >= maxRetries) {
+            throw new Error('Failed to create user after ' + maxRetries + ' attempts due to ID collisions');
+          }
+          // Add small random delay before retry to reduce collision probability
+          Meteor._sleepForMs(Math.random() * 100);
+          continue;
+        }
+
+        // Check for duplicate username/email
+        if (e.error === 403 && (/Username already exists|E11000 duplicate key error/.test(e.reason || e.message))) {
+          prevUser = Accounts.findUserByUsername(newUserName) || Accounts.findUserByEmail(newUserName);
+          if (prevUser) {
+            if (previousOK) {
+              Accounts.setPassword(prevUser._id, newUserPassword);
+              return { userExists: true, userId: prevUser._id };
+            } else {
+              throw new Error('User is already in use');
+            }
+          }
+          throw new Error('Duplicate key error but user not found');
+        } else {
+          throw e;
+        }
       }
     }
   } finally {
