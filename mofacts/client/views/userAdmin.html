@@ -7,14 +7,12 @@
   
     <div class="row text-center">
         <h4>Import User File</h4>
-        <div class="vh-5"></div>
-        <div class="row text-center">        
+        <div class="row text-center mt-4">
             <input type="file" class="form-control w-50 mx-auto" name="upload-users" id="upload-users" value="" placeholder="Users File">
             <br>
             <span class='label label-info file-info' id="users-file-info"></span>
         </div>
-        <div class="vh-5"></div>
-        <div class="row row-cols-md-2 row-cols-sm-1 row-cols-xs-1 gy-2">
+        <div class="row row-cols-md-2 row-cols-sm-1 row-cols-xs-1 gy-2 mt-4">
             <div class="col">
                 <button type='button' id='doUploadUsers' class='btn'>
                     Batch Import Users
@@ -28,10 +26,8 @@
                 {{/if}}
             </div>
         </div>
-        <div class="vh-5"></div>
-        <div class="row text-center">
-            <h4>User list</h4>
-            <div class="vh-5"></div>
+        <div class="row text-center mt-4">
+            <h4 class="mb-4">User list</h4>
         </div>
         <p>Filter: <input type="text" name="filter" id="filter" value="@gmail.com" placeholder="Filter"></p>
         <div class="table-repsonsive">
@@ -126,8 +122,8 @@
                 </div>
                 <div class="modal-body">
                     <div class="clearfix">
-                        <img src="/styles/mofacts_waiting.gif" class="img-responsive pull-left"/>
-                        <p class="pull-right">Please wait while your request is processed</p>
+                        <img src="/styles/mofacts_waiting.gif" class="img-fluid float-start"/>
+                        <p class="float-end">Please wait while your request is processed</p>
                     </div>
                 </div>
             </div>

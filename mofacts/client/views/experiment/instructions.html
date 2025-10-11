@@ -30,11 +30,10 @@
                 <i class="fa fa-info-circle" aria-hidden="true"></i>
             </div>
                 <p>The lesson cannot continue just yet due to a lockout timer. Please wait before resuming.</p>
-        </div> 
-        {{/if}}  
+        </div>
+        {{/if}}
         {{#if allowcontinue}}
-            <div class="vh-5"></div>
-            <div class="text-center"><span id="lockoutTimeRemaining"></span></div>
+            <div class="text-center mt-4"><span id="lockoutTimeRemaining"></span></div>
             <div id="continueBar" class="full-width text-center" >
                 <span id="displayTimeoutMsg"></span>
                 {{#if islockout}}

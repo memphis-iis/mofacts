@@ -43,7 +43,7 @@ Template.multiTdfSelect.rendered = function() {
 
 function addSubTdfButton(btnObj) {
   console.log('ADD BUTTON CALLED: ' + JSON.stringify(btnObj));
-  let container = '<div class=\'col-xs-12 col-sm-12 col-md-3 col-lg-3 text-center\'><br></div>';
+  let container = '<div class=\'col-12 col-sm-12 col-md-3 col-lg-3 text-center\'><br></div>';
   container = $(container).prepend('<p style="display:inline-block">&nbsp;&nbsp;&nbsp;</p>');
   container = $(container).prepend(btnObj);
   $('#testButtonContainer').append(container);

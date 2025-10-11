@@ -50,15 +50,13 @@
         {{/if}}
         {{#if displayFeedback}}
         {{>profileDialogueToggles}}
-        <div class="stack-gap-small"></div>
-        <div>
+        <div class="mb-2">
             {{#if resetFeedbackSettingsFromIndex}}
                 <button id='confirmFeedbackSelectionFromIndex' class='btn width-100-percent'>Confirm feedback settings</button>
             {{else}}
-                <button id='confirmFeedbackSelection' class='btn width-100-percent'>Confirm feedback settings</button>
+                <button id='confirmFeedbackSelection' class='btn width-100-percent mb-3'>Confirm feedback settings</button>
             {{/if}}
         </div>
-        <div class="stack-gap"></div>
     {{/if}}
 
         <!-- ============================================================
@@ -74,12 +72,11 @@
              Includes stimulus display, input methods, and feedback
              ============================================================ -->
         <div id="trialContentWrapper" class="{{#unless displayReady}}trial-hidden{{/unless}}">
-        <div id="userInteractionContainer" class="smooth-transition" hidden>
+        <div id="userInteractionContainer" class="smooth-transition mb-3" hidden>
                 <div class="text-center {{fontSizeClass}} smooth-transition" id="UserInteraction" hidden></div>
                 <div id="forceCorrectionEntry" class="smooth-transition" hidden>
                     {{> inputForceCorrect}}
                 </div>
-                <div class="stack-gap"></div>
         </div>
 
             <div class="scrollHistoryContainer">
@@ -129,10 +126,9 @@
                         </div>
                     {{/if}}
                     {{#if audioCard}}
-                        <div class="text-center">
+                        <div class="text-center mb-2">
                             <span class="fa fa-volume-up fa-5x" id="audioIcon"></span>
                         </div>
-                        <div class="stack-gap-small"></div>
                     {{/if}}
                 </div>
                 <div id="correctAnswerDisplayContainer" class="{{UIsettings.textInputDisplay2}} alert {{fontSizeClass}} {{UIsettings.displayColWidth}} d-none text-center">
@@ -154,8 +150,7 @@
             {{/if}}
 
             {{#if skipstudy}}
-            <div class="stack-gap"></div>
-            <div class="col-12 text-center">
+            <div class="col-12 text-center mt-3">
                 <button type='button' id='continueStudy' name='continueStudy' class='btn w-100 btn-responsive'>
                     {{UIsettings.skipStudyButtonText}}
                 </button>
@@ -174,10 +169,9 @@
                 {{#unless inFeedback}}
                 {{#if audioEnabled}}
                     {{#if isNotInDialogueLoopStageIntroOrExit}}
-                        <div class="text-center">
+                        <div class="text-center mb-2">
                             <p class="marginLeftAndRight">{{voiceTranscriptionPromptMsg}}</p>
                             <img class="center-block voice-icon" src="{{voiceTranscriptionImgSrc}}" loading="lazy">
-                            <div class="stack-gap-small"></div>
                         </div>
                     {{/if}}
                 {{/if}}
@@ -210,8 +204,7 @@
                             <div class="col ml-auto">
                                 {{#each this}}
                                 {{#if audioEnabled}}
-                                    <label class="no-bottom-margin">{{verbalChoice}}.</label>
-                                    <div class="stack-gap-small"></div>
+                                    <label class="no-bottom-margin mb-2">{{verbalChoice}}.</label>
                                 {{/if}}
                                     <button style="background-image: url({{buttonValue}});" verbalChoice='{{verbalChoice}}' type='button' name='{{buttonName}}' class='btnPaddedAndMinWidth btn-alt w-100 multipleChoiceButton btn-image btn-responsive'>
                                     </button>
@@ -222,8 +215,7 @@
                             {{#each buttonList}}
                             <div data-display="{{displayReadyConverter (displayReady)}}" class="col ml-auto">
                                 {{#if audioEnabled}}
-                                <label class="no-bottom-margin">{{verbalChoice}}.</label>
-                                <div class="stack-gap-small"></div>
+                                <label class="no-bottom-margin mb-2">{{verbalChoice}}.</label>
                                 {{/if}}
                                 <button verbalChoice='{{verbalChoice}}' type='button' name='{{buttonName}}' class='multipleChoiceButton btn btn-primary'>
                                 {{{buttonValue}}}
@@ -232,12 +224,10 @@
                             {{/each}}
                         {{/if}}
                     </div>
-                <div class="stack-gap-small"></div>
             </div>
 
             {{#if UIsettings.displayConfirmButton}}
-            <div class="stack-gap"></div>
-            <div class="col-12 text-center">
+            <div class="col-12 text-center mt-3">
                 <button type='button' id='confirmButton' name='confirmButton' class='btn w-100 btn-responsive' disabled>
                     {{UIsettings.continueButtonText}}
                 </button>
@@ -246,8 +236,7 @@
 
             {{/if}}
             {{#if questionIsRemovable}}
-            <div class="stack-gap"></div>
-                <div class="removalContainer">
+                <div class="removalContainer mt-3">
                     <div class="col-12 col-md-6 mx-auto text-center">
                         <button id="removeQuestion" class="btn btn-secondary">
                             Report Mistake
@@ -256,7 +245,6 @@
                 </div>
             {{/if}}
             </div>
-            <div class="stack-gap"></div>
 
         <!-- ============================================================
              DEBUG PANELS - Teacher/Admin only displays
@@ -288,7 +276,7 @@
                 {{/if}}
             {{/if}}
             <div class="row">
-                <div hidden class="col-lg-offset-2 col-lg-5 text-center" id="overlearningRow">
+                <div hidden class="offset-lg-2 col-lg-5 text-center" id="overlearningRow">
                     <h4 class="overlearning-text">You are currently overlearning!  Please consider taking a break and coming back later.</h4>
                     <button id="overlearningButton" type="button" class="btn btn-responsive overlearning-button">Practice</button>
                 </div>
@@ -305,14 +293,14 @@
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header visible-text">
-                        <button type="button" class="close instructModalDismiss" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        <button type="button" class="btn-close instructModalDismiss" data-bs-dismiss="modal" aria-label="Close"></button>
                         <h4 class="modal-title" id="myModalLabel">Good Bye</h4>
                     </div>
                     <div class="modal-body visible-text">
                         <div id="finalInstructionsText"></div>
                     </div>
                     <div class="modal-footer visible-text">
-                        <button type="button" class="btn btn-default btn-responsive instructModalDismiss" data-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-secondary btn-responsive instructModalDismiss" data-bs-dismiss="modal">Close</button>
                     </div>
                 </div>
             </div>
@@ -371,8 +359,7 @@
   {{#unless isInInstructions}}
   <div id="userLowerInteractionContainer">
       <div class="row text-center">
-          <div class="col-12 col-md-6 mx-auto lower-interaction-spacing">
-              <div class="stack-gap-small"></div>
+          <div class="col-12 col-md-6 mx-auto lower-interaction-spacing mt-2">
               <div id="userLowerInteraction" class="smooth-transition">
               </div>
               <div id="CountdownTimerText" class="smooth-transition">
