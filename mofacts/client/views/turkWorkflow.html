@@ -1,9 +1,8 @@
 <!-- Turk Workflow Template -->
 
 <template name="turkWorkflow">
-    <div class="header-box">
-        Mechanical Turk
-       </div> 
+    <div class="container" style="margin-top: 1rem;">
+        <h2 style="margin-top: 0; text-align: center;">Mechanical Turk</h2>
 
     <div class="row text-center">
         <h3>AWS Login Data</h3>
@@ -58,8 +57,7 @@
             </table>
         </div>
     </div>
-    <div class="vh-5"></div>
-    <div class="row text-center">
+    <div class="row text-center mt-4">
         <h3>Logs</h3>   
       </div>
     <div id="turkLogEntireWorkflow">
@@ -169,8 +167,7 @@
             </div>
         </div> <!-- /turkLogAll -->
         {{/if}}
-            <div class="vh-5"></div>
-            <h3 class="text-center">Assignment Details</h3>
+            <h3 class="text-center mt-4">Assignment Details</h3>
         <div class="row form-inline">
             <div class="col-md-6 offset-md-3 text-center" id="turk-assignment-details">
             <div id="name">
@@ -180,8 +177,7 @@
                     </pre>
                 </div>
             </div>
-            <div class="vh-5"></div>
-            <h3 class="text-center">Send Turk Message</h3>
+            <h3 class="text-center mt-4">Send Turk Message</h3>
             <div class="col-md-6 offset-md-3" id="turk-send-message">
                 <div id="name">
    
@@ -194,8 +190,7 @@
                 </div>
             </div>
         </div>
-        <div class="vh-5"></div>
-        <div id="mainContent" class="row text-center">
+        <div id="mainContent" class="row text-center mt-4">
             <h3>Remove Turk User</h3>
             <div class="col-md-6 offset-md-3" id="turk-assignment-removal-container">
                 <p>Select an Experiment and User to remove from Mechanical Turk</p>
@@ -217,7 +212,7 @@
             </div>
         </div>
     </div> <!-- /turkLogEntireWorkflow -->
-
+    </div> <!-- /container -->
 
     <div class="modal" id="turkModal" tabindex="-1" role="dialog" aria-labelledby="turkModalLabel">
         <div class="modal-dialog" role="document">
@@ -227,8 +222,8 @@
                 </div>
                 <div class="modal-body">
                     <div class="clearfix">
-                        <img src="/styles/mofacts_waiting.gif" class="img-responsive pull-left"/>
-                        <p class="pull-right">Please wait while we contact Mechanical Turk</p>
+                        <img src="/styles/mofacts_waiting.gif" class="img-fluid float-start"/>
+                        <p class="float-end">Please wait while we contact Mechanical Turk</p>
                     </div>
                 </div>
             </div>
@@ -239,18 +234,18 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <div>
-                        <img src="/styles/mofacts_waiting.gif" class="img-responsive pull-left"/>
+                        <img src="/styles/mofacts_waiting.gif" class="img-fluid float-start"/>
                         <h4 class="modal-title" id="profileWorkModalLabel">Please Wait</h4>
                     </div>
                 </div>
                 <div class="modal-body">
                     <div class="clearfix">
-                        <p class="pull-right" id="profileWorkModalMessage">{{profileWorkModalMessage}}</p>
+                        <p class="float-end" id="profileWorkModalMessage">{{profileWorkModalMessage}}</p>
                     </div>
                 </div>
                 {{#if saveComplete}}
                     <div class="modal-footer">
-                        <button id="profileWorkModalDissmiss" type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                        <button id="profileWorkModalDissmiss" type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                     </div>
                 {{/if}}
             </div>

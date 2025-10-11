@@ -1265,30 +1265,6 @@ const TRIAL_STATES = {
   ERROR: 'ERROR'                                     // Error recovery
 };
 
-// Helper: Get high-level phase from detailed state
-function getTrialPhase(state) {
-  if (!state) return null;
-  return state.split('.')[0]; // 'PRESENTING.AWAITING' → 'PRESENTING'
-}
-
-// Helper: Check if in a particular phase
-function isInPhase(phase) {
-  const currentPhase = getTrialPhase(currentTrialState);
-  return currentPhase === phase;
-}
-
-// Helper: Check if this trial type requires input
-function trialRequiresInput() {
-  const testType = getTestType();
-  return testType === 'd' || testType === 't'; // Drill or test
-}
-
-// Helper: Check if this is a study trial
-function isStudyTrial() {
-  const testType = getTestType();
-  return testType === 's';
-}
-
 // Helper: Check if this trial type shows feedback (FEEDBACK phase only, not STUDY)
 function trialShowsFeedback() {
   const testType = getTestType();
@@ -1299,12 +1275,6 @@ function trialShowsFeedback() {
 function trialUsesStudyPhase() {
   const testType = getTestType();
   return testType === 's';
-}
-
-// Helper: Check if this is a test trial
-function isTestTrial() {
-  const testType = getTestType();
-  return testType === 't';
 }
 
 // Track current state
@@ -1415,35 +1385,6 @@ function announceTrialStateToScreenReader(state, trialNum) {
   if (message) {
     announcer.text(message);
   }
-}
-
-/**
- * Assert that we're in one of the expected states before performing an operation
- * @param {string[]} expectedStates - Array of valid states for this operation
- * @param {string} operation - Name of operation being performed
- * @throws {Error} If in wrong state (in development)
- */
-function assertTrialState(expectedStates, operation) {
-  if (!expectedStates.includes(currentTrialState)) {
-    const error = `[SM] ❌ INVALID OPERATION: ${operation} called in state ${currentTrialState}, expected one of: ${expectedStates.join(', ')}`;
-    console.error(error);
-
-    // In development, throw to catch bugs early
-    if (Meteor.isDevelopment) {
-      throw new Error(error);
-    }
-
-    // In production, log but continue
-    return false;
-  }
-  return true;
-}
-
-/**
- * Get current trial state (for debugging/testing)
- */
-function getCurrentTrialState() {
-  return currentTrialState;
 }
 
 let soundsDict = {};
