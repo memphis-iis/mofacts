@@ -10,114 +10,143 @@ Template.contentUpload.helpers({
     return Template.instance().currentUpload.get();
   },
   assets: function() {
-    userId = Meteor.userId();
-    const files = DynamicAssets.find({userId: userId}).fetch();
-    sortedFiles = [];
-    //get all tdfs
-    toggleOnlyOwnedTDFs = Template.instance().toggleOnlyOwnedTDFs.get();
-    if(toggleOnlyOwnedTDFs){
-      allTDfs = Tdfs.find({ownerId: Meteor.userId()}).fetch();
-    } else {
-      allTDfs = Tdfs.find().fetch();
-    }
-    console.log('allTdfs:', allTDfs);
-    //iterate through allTdfs and get all stimuli
-    tdfSummaries = [];    
-    for (const tdf of allTDfs) {
-      var thisTdf = {};
-      thisTdf.lessonName = tdf.content.tdfs.tutor.setspec.lessonname;
-      thisTdf.stimuliCount = tdf.stimuli.length;
-      thisTdf.accessors = tdf.accessors || [];
-      thisTdf.accessorsCount = thisTdf.accessors.length;
-      thisTdf.packageFile = tdf.packageFile;
-      thisTdf.assets = [];
-      thisTdf._id = tdf._id;
-      thisTdf.errors = [];
-      thisTdf.stimFileInfo = [];
-      thisTdf.stimFilesCount = 0;
-      thisTdf.fileName = tdf.content.fileName;
-      thisTdf.owner = Meteor.users.findOne({_id: tdf.ownerId}).username;
-      //get all tdfs with the same packgeFile
-      var sisterTdfs = allTDfs.filter(function(tdf){
-        return tdf.packageFile == thisTdf.packageFile;
-      });
-      console.log('sisterTdfs:', sisterTdfs);
-      thisTdf.hasAPIKeys = false;
-      //check if any syter tdf has API keys at 
-      //check if thisTdf has API keys at tdf.content.tdfs.tutor.setspec.textToSpeechAPIKey or  tdf.content.tdfs.tutor.setspec.speechAPIKey
-      var checkIfAPI = sisterTdfs.some(function(tdf){
-        return tdf.content.tdfs.tutor.setspec.textToSpeechAPIKey || tdf.content.tdfs.tutor.setspec.speechAPIKey;
-      });
-      if(checkIfAPI){
-        thisTdf.hasAPIKeys = true;
-      }
-      var checkIfConditional = allTDfs.some(function(tdf){
-        var conditions = tdf.content.tdfs.tutor.setspec.condition;
-        //check if condition contains the TDF filename
-        if(conditions && conditions.includes(thisTdf.fileName)){
-          return true;
-        }
-      });
-      if(tdf.content.tdfs.tutor.setspec.condition){
-        thisTdf.conditions = [];
-        for(let i=0; i<tdf.content.tdfs.tutor.setspec.condition.length; i++){
-          if(tdf.conditionCounts == undefined){
-            tdf.conditionCounts = [];
-            //add an error to thisTdf.errors
-            thisTdf.errors.push('Condition counts not found. Condition count reset needed. Please click the refresh icon for this lesson.');
-          }
-          thisTdf.conditions.push({condition: tdf.content.tdfs.tutor.setspec.condition[i], count: tdf.conditionCounts[i]});
-        }
-      }
-      //if thisTdf is conditional, skip it
-      if(checkIfConditional){
-        continue;
-      }
-      //get the original package filename by looking up the assetId in the tdf
-      tdf.packageFile ? thisTdf.packageAssetId = tdf.packageFile.split('/').pop().split('.').shift() : thisTdf.packageAssetId = false;
-      if(!thisTdf.packageAssetId){
-        thisTdf.errors.push('Package ID not found. This package was uploaded before the new upload system was implemented. Please delete this package and re-upload it.');
-        thisTdf.packageFileLink = null;
+    try {
+      console.log('[ASSETS] Starting assets helper');
+      userId = Meteor.userId();
+      console.log('[ASSETS] userId:', userId);
+      const files = DynamicAssets.find({userId: userId}).fetch();
+      console.log('[ASSETS] files:', files.length);
+      sortedFiles = [];
+      //get all tdfs
+      toggleOnlyOwnedTDFs = Template.instance().toggleOnlyOwnedTDFs.get();
+      console.log('[ASSETS] toggleOnlyOwnedTDFs:', toggleOnlyOwnedTDFs);
+      if(toggleOnlyOwnedTDFs){
+        allTDfs = Tdfs.find({ownerId: Meteor.userId()}).fetch();
       } else {
-        thisTdf.packageFileLink = DynamicAssets.findOne({_id: thisTdf.packageAssetId}).link() || false;
+        allTDfs = Tdfs.find().fetch();
       }
-      //iterate through tdf.stimuli and get all stimuli
-      for (const stim of tdf.stimuli) {
-        //check if thisTdf.stimFileInfo already contains a file with this stim.stimuliSetId
-        //if not, add it to thisTdf.stimFileInfo
-        if(!thisTdf.stimFileInfo.some(function(stimFileInfo){
-            return stimFileInfo.stimuliSetId === stim.stimuliSetId;
-        })){
-          thisTdf.stimFilesCount++;
-          thisTdf.stimFileInfo.push( {stimuliSetId: stim.stimuliSetId, fileName: stim.stimulusFileName} );
-        }
-        thisAsset = {};
-        thisAsset.filename = stim.imageStimulus || stim.audioStimulus || stim.videoStimulus;
-        thisAsset.fileType = stim.imageStimulus ? 'image' : stim.audioStimulus ? 'audio' : stim.videoStimulus ? 'video' : "unknown"
-        thisAsset.filename ? fileObj = DynamicAssets.findOne({name: thisAsset.filename}) : fileObj = false;
-        //if fileObj exists, get the file link
-        if (thisAsset.filename && fileObj) {
-          thisAsset.link = fileObj.meta.link || fileObj.link();
-        } else {
-          if(typeof thisAsset.filename !== 'undefined'){
-            thisTdf.errors.push(thisAsset.filename + ' not found. This will cause errors in the lesson.<br>');
+      console.log('[ASSETS] allTdfs:', allTDfs);
+      //iterate through allTdfs and get all stimuli
+      tdfSummaries = [];
+      for (const tdf of allTDfs) {
+        try {
+          // Check if TDF has required structure
+          if (!tdf || !tdf.content || !tdf.content.tdfs || !tdf.content.tdfs.tutor ||
+              !tdf.content.tdfs.tutor.setspec || !tdf.stimuli) {
+            console.error('TDF missing required structure:', tdf._id);
+            continue;
           }
-        }
-        //check if thisTdf.assets already contains a file with thisAsset.filename
-        //if not, add it to thisTdf.assets
-        if(!thisTdf.assets.some(function(asset){
-            return asset.filename === thisAsset.filename;
-        })){
-          //check that thisAsset.filename is not false
-          if (thisAsset.filename){
-            thisTdf.assets.push(thisAsset);
+
+          var thisTdf = {};
+          thisTdf.lessonName = tdf.content.tdfs.tutor.setspec.lessonname || 'Unknown Lesson';
+          thisTdf.stimuliCount = tdf.stimuli.length;
+          thisTdf.accessors = tdf.accessors || [];
+          thisTdf.accessorsCount = thisTdf.accessors.length;
+          thisTdf.packageFile = tdf.packageFile;
+          thisTdf.assets = [];
+          thisTdf._id = tdf._id;
+          thisTdf.errors = [];
+          thisTdf.stimFileInfo = [];
+          thisTdf.stimFilesCount = 0;
+          thisTdf.fileName = tdf.content.fileName || 'unknown.xml';
+          const ownerUser = Meteor.users.findOne({_id: tdf.ownerId});
+          thisTdf.owner = ownerUser ? ownerUser.username : 'Unknown';
+          //get all tdfs with the same packgeFile
+          var sisterTdfs = allTDfs.filter(function(tdf){
+            return tdf.packageFile == thisTdf.packageFile;
+          });
+          console.log('sisterTdfs:', sisterTdfs);
+          thisTdf.hasAPIKeys = false;
+          //check if any syter tdf has API keys at
+          //check if thisTdf has API keys at tdf.content.tdfs.tutor.setspec.textToSpeechAPIKey or  tdf.content.tdfs.tutor.setspec.speechAPIKey
+          var checkIfAPI = sisterTdfs.some(function(tdf){
+            return tdf.content?.tdfs?.tutor?.setspec?.textToSpeechAPIKey || tdf.content?.tdfs?.tutor?.setspec?.speechAPIKey;
+          });
+          if(checkIfAPI){
+            thisTdf.hasAPIKeys = true;
           }
+          var checkIfConditional = allTDfs.some(function(tdf){
+            var conditions = tdf.content?.tdfs?.tutor?.setspec?.condition;
+            //check if condition contains the TDF filename
+            if(conditions && conditions.includes(thisTdf.fileName)){
+              return true;
+            }
+          });
+          if(tdf.content.tdfs.tutor.setspec.condition){
+            thisTdf.conditions = [];
+            for(let i=0; i<tdf.content.tdfs.tutor.setspec.condition.length; i++){
+              if(tdf.conditionCounts == undefined){
+                tdf.conditionCounts = [];
+                //add an error to thisTdf.errors
+                thisTdf.errors.push('Condition counts not found. Condition count reset needed. Please click the refresh icon for this lesson.');
+              }
+              thisTdf.conditions.push({condition: tdf.content.tdfs.tutor.setspec.condition[i], count: tdf.conditionCounts[i]});
+            }
+          }
+          //if thisTdf is conditional, skip it
+          if(checkIfConditional){
+            continue;
+          }
+          //get the original package filename by looking up the assetId in the tdf
+          tdf.packageFile ? thisTdf.packageAssetId = tdf.packageFile.split('/').pop().split('.').shift() : thisTdf.packageAssetId = false;
+          if(!thisTdf.packageAssetId){
+            thisTdf.errors.push('Package ID not found. This package was uploaded before the new upload system was implemented. Please delete this package and re-upload it.');
+            thisTdf.packageFileLink = null;
+          } else {
+            const packageAsset = DynamicAssets.findOne({_id: thisTdf.packageAssetId});
+            thisTdf.packageFileLink = packageAsset ? (packageAsset.link() || false) : false;
+            if (!packageAsset) {
+              thisTdf.errors.push('Package file not found in assets. The original zip file may have been deleted.');
+            }
+          }
+          //iterate through tdf.stimuli and get all stimuli
+          for (const stim of tdf.stimuli) {
+            //check if thisTdf.stimFileInfo already contains a file with this stim.stimuliSetId
+            //if not, add it to thisTdf.stimFileInfo
+            if(!thisTdf.stimFileInfo.some(function(stimFileInfo){
+                return stimFileInfo.stimuliSetId === stim.stimuliSetId;
+            })){
+              thisTdf.stimFilesCount++;
+              thisTdf.stimFileInfo.push( {stimuliSetId: stim.stimuliSetId, fileName: stim.stimulusFileName} );
+            }
+            thisAsset = {};
+            thisAsset.filename = stim.imageStimulus || stim.audioStimulus || stim.videoStimulus;
+            thisAsset.fileType = stim.imageStimulus ? 'image' : stim.audioStimulus ? 'audio' : stim.videoStimulus ? 'video' : "unknown"
+            thisAsset.filename ? fileObj = DynamicAssets.findOne({name: thisAsset.filename}) : fileObj = false;
+            //if fileObj exists, get the file link
+            if (thisAsset.filename && fileObj) {
+              thisAsset.link = fileObj.meta.link || fileObj.link();
+            } else {
+              if(typeof thisAsset.filename !== 'undefined'){
+                thisTdf.errors.push(thisAsset.filename + ' not found. This will cause errors in the lesson.<br>');
+              }
+            }
+            //check if thisTdf.assets already contains a file with thisAsset.filename
+            //if not, add it to thisTdf.assets
+            if(!thisTdf.assets.some(function(asset){
+                return asset.filename === thisAsset.filename;
+            })){
+              //check that thisAsset.filename is not false
+              if (thisAsset.filename){
+                thisTdf.assets.push(thisAsset);
+              }
+            }
+          }
+          console.log('[ASSETS] Successfully processed TDF:', tdf._id);
+          tdfSummaries.push(thisTdf);
+        } catch (tdfError) {
+          console.error('[ASSETS] Error processing TDF:', tdf?._id, tdfError);
+          console.error('[ASSETS] Error stack:', tdfError.stack);
+          // Continue processing other TDFs even if one fails
         }
       }
-      tdfSummaries.push(thisTdf);
+      console.log('[ASSETS] Finished processing, tdfSummaries:', tdfSummaries.length, 'items');
+      return tdfSummaries;
+    } catch (error) {
+      console.error('[ASSETS] FATAL Error in assets helper:', error);
+      console.error('[ASSETS] Error stack:', error.stack);
+      return [];
     }
-  console.log('tdfSummaries:', tdfSummaries);
-  return tdfSummaries;
   },
   'packagesUploaded': function() {
     packages = DynamicAssets.find({userId: Meteor.userId()}).fetch();
@@ -200,8 +229,18 @@ Template.contentUpload.events({
       window.open(event.currentTarget.getAttribute('value'));
     },
   'click #package-delete-btn': function(event){
-    const packageId = event.currentTarget.getAttribute('value')
-    Meteor.call('deletePackageFile',packageId);
+    const packageId = event.currentTarget.getAttribute('value');
+    const fileName = event.currentTarget.getAttribute('data-filename');
+    console.log('Delete button clicked - packageId:', packageId, 'fileName:', fileName);
+    Meteor.call('deletePackageFile', packageId, function(error, result) {
+      if (error) {
+        console.error('Delete error:', error);
+        alert('Error deleting package: ' + error.message);
+      } else {
+        console.log('Delete result:', result);
+        alert('Package deleted: ' + result);
+      }
+    });
   },
   'click #reset-conditions-btn': function(event){
     const tdfId = event.currentTarget.getAttribute('value')
@@ -234,20 +273,20 @@ Template.contentUpload.events({
     const stimuliSetId = event.currentTarget.getAttribute('value')
     Meteor.call('deleteStimFile',stimuliSetId);
   },
-  'click #deleteAllAssetsPrompt'(e, template) {
-    e.preventDefault();
-    console.log('deleteAllAssetsPrompt clicked');
-    $('#deleteAllAssetsPrompt').css('display', 'none');
-    $('#deleteAllAssetsConfirm').removeAttr('hidden');
-
-  },
   'click #deleteAllAssetsConfirm': async function(e, template) {
+    e.preventDefault();
+    if (!confirm('This will delete all files, remove all lessons, and remove all stimuli. This is not recoverable. Are you sure?')) {
+      return;
+    }
+    console.log('deleteAllAssetsConfirm clicked');
     Meteor.call('deleteAllFiles',
       function(error, result) {
         if (error) {
           console.log('error:', error);
+          alert('Error deleting files: ' + error);
         } else {
-          console.log('result: deleted ', results, ' files');
+          console.log('result: deleted ', result, ' files');
+          alert('Successfully deleted ' + result + ' files');
         }
       }
     );

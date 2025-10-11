@@ -9,7 +9,6 @@
         <div class="vh-5"></div>
         <div class="row">
             <h3 class="text-center">Your Assets</h3>
-            <p>Deleting is not recoverable. Deleting stimuli will remove all related lessons and results.</p>
             <!-- toggle for viewing only owned lessons, default is checked -->
             {{#if isInRole 'admin'}}
             <div class="row">
@@ -192,7 +191,7 @@
             <p>
                 This will delete all files, remove all lessons, and remove all stimuli. <b>This is not recoverable.</b>
             </p>
-            <button class="btn width-80-percent" id="deleteAllAssetsConfirm">Delete All Uploaded Files </button>
+            <button class="btn width-80-percent" id="deleteAllAssetsConfirm">Delete All Uploaded Files</button>
         {{/if}}
     </div>
 </template>

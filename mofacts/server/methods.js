@@ -3142,7 +3142,18 @@ export const methods = {
     serverConsole("Remove package:", packageId);
     //check if the user is an admin or owner of the TDF
     try{
-      Tdfs.find({"packageFile": packageId}).fetch().forEach((TDF) => {
+      let deletedCount = 0;
+      // Extract the asset ID from the packageId (handles both "id.zip" and "/path/id.zip")
+      const packageFileName = packageId.split('/').pop(); // Get just the filename
+      const packageAssetId = packageFileName.split('.').shift(); // Get ID before .zip
+
+      // Find all TDFs that contain this package ID anywhere in their packageFile field
+      const allTdfs = Tdfs.find({}).fetch();
+      const matchingTdfs = allTdfs.filter(tdf => tdf.packageFile && tdf.packageFile.includes(packageAssetId));
+
+      serverConsole("Found", matchingTdfs.length, "TDFs with packageFile containing:", packageAssetId);
+
+      matchingTdfs.forEach((TDF) => {
         if(TDF && (Roles.userIsInRole(Meteor.userId(), ['admin']) || TDF.ownerId == Meteor.userId())){
           tdfId = TDF._id;
           ComponentStates.remove({TDFId: tdfId});
@@ -3150,6 +3161,7 @@ export const methods = {
           Histories.remove({TDFId: tdfId});
           GlobalExperimentStates.remove({TDFId: tdfId});
           Tdfs.remove({_id: tdfId});
+          deletedCount++;
           //iterate through TDF.stimuli
           for (const stim of TDF.stimuli) {
             asset = stim.imageStimulus || stim.audioStimulus || stim.videoStimulus || false;
@@ -3166,10 +3178,21 @@ export const methods = {
           }
         }
       });
-      return "Package removed";
+
+      // Also delete the package file itself from DynamicAssets
+      serverConsole("Removing package asset with ID:", packageAssetId);
+      const packageAsset = DynamicAssets.findOne({_id: packageAssetId});
+      if (packageAsset) {
+        DynamicAssets.remove({_id: packageAssetId});
+        serverConsole("Package file removed from DynamicAssets");
+      } else {
+        serverConsole("Package file not found in DynamicAssets (may have been deleted already)");
+      }
+
+      return "Package removed: " + deletedCount + " TDF(s) deleted";
     } catch (e) {
       serverConsole(e);
-      return "There was an error deleting the package";
+      return "There was an error deleting the package: " + e.message;
     }
   },
 
@@ -3620,17 +3643,52 @@ const asyncMethods = {
   //handle file deletions
 
   deleteAllFiles: async function(){
-    serverConsole('delete all uploaded files');
-    filesRemoved = 0;
-    const files = DynamicAssets.find({}).fetch();
-    serverConsole("files to remove: " + files.length);
-    for(let file of files){
-      serverConsole('removing file ' + file._id);
-      DynamicAssets.remove({_id: file._id});
-      filesRemoved++;
+    try {
+      serverConsole('delete all uploaded files');
+
+      // Delete all TDFs first
+      const tdfs = Tdfs.find({}).fetch();
+      serverConsole("TDFs to remove: " + tdfs.length);
+      let tdfsRemoved = 0;
+
+      for(let tdf of tdfs){
+        try {
+          const tdfId = tdf._id;
+          // Remove related data
+          ComponentStates.remove({TDFId: tdfId});
+          Assignments.remove({TDFId: tdfId});
+          Histories.remove({TDFId: tdfId});
+          GlobalExperimentStates.remove({TDFId: tdfId});
+          // Remove the TDF itself
+          Tdfs.remove({_id: tdfId});
+          tdfsRemoved++;
+          serverConsole('removed TDF ' + tdfId);
+        } catch (tdfError) {
+          serverConsole('Error removing TDF ' + tdf._id + ':', tdfError);
+        }
+      }
+
+      // Delete all assets
+      const files = DynamicAssets.find({}).fetch();
+      serverConsole("Asset files to remove: " + files.length);
+      let filesRemoved = 0;
+
+      for(let file of files){
+        try {
+          serverConsole('removing file ' + file._id);
+          DynamicAssets.remove({_id: file._id});
+          filesRemoved++;
+        } catch (fileError) {
+          serverConsole('Error removing file ' + file._id + ':', fileError);
+        }
+      }
+
+      serverConsole('removed ' + tdfsRemoved + ' TDFs and ' + filesRemoved + ' asset files');
+      return filesRemoved + tdfsRemoved;
+    } catch (error) {
+      serverConsole('Error in deleteAllFiles:', error);
+      throw new Meteor.Error('delete-failed', 'Failed to delete files: ' + error.message);
     }
-    serverConsole('removed ' + filesRemoved + ' files');
-    return filesRemoved;
   },
   deleteStimFile: async function(stimSetId) {
     stimSetId = parseInt(stimSetId);
