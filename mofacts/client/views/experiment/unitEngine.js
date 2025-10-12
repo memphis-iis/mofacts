@@ -1572,8 +1572,8 @@ function modelUnitEngine() {
         );
 
         // Log selections - note that the card output will also include the stim
-        clientConsole(1, 'Model selected card:', displayify(card));
-        clientConsole(1, 'Model selected stim:', displayify(stim));
+        clientConsole(1, 'Model selected card:', card);
+        clientConsole(1, 'Model selected stim:', stim);
 
         // Log time stats in human-readable form
         const elapsedStr = function(t) {

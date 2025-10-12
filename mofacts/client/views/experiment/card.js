@@ -154,6 +154,7 @@ let timeoutName = null;
 let timeoutFunc = null;
 let timeoutDelay = null;
 let simTimeoutName = null;
+let countdownInterval = null;
 let userAnswer = null;
 let lastlogicIndex = 0;
 
@@ -188,10 +189,12 @@ function clearCardTimeout() {
   safeClear(Meteor.clearTimeout, timeoutName);
   safeClear(Meteor.clearTimeout, simTimeoutName);
   safeClear(Meteor.clearInterval, Session.get('varLenTimeoutName'));
+  safeClear(Meteor.clearInterval, countdownInterval);
   timeoutName = null;
   timeoutFunc = null;
   timeoutDelay = null;
   simTimeoutName = null;
+  countdownInterval = null;
   Session.set('varLenTimeoutName', null);
 }
 
@@ -233,13 +236,17 @@ function beginMainCardTimeout(delay, func) {
  } else {
    $('#CountdownTimerText').attr('hidden', '');
  }
-  var countdownInterval = Meteor.setInterval(function() {
+  countdownInterval = Meteor.setInterval(function() {
     const remaining = Math.round((timeoutDelay - (Date.now() - cardStartTime)) / 1000);
+    const progressbarElem = document.getElementById("progressbar");
     if (remaining <= 0) {
       Meteor.clearInterval(countdownInterval);
+      countdownInterval = null;
       //reset the progress bar
       $('#progressbar').removeClass('progress-bar');
-      document.getElementById("progressbar").style.width = 0 + "%";
+      if (progressbarElem) {
+        progressbarElem.style.width = 0 + "%";
+      }
       $('#lowerInteraction').html('');
     } else {
       $('#CountdownTimerText').text("Continuing in: " + secsIntervalString(remaining));
@@ -247,10 +254,14 @@ function beginMainCardTimeout(delay, func) {
       if(displayMode == "bar" || displayMode == "both"){
         //add the progress bar class
         $('#progressbar').addClass('progress-bar');
-        document.getElementById("progressbar").style.width = percent + "%";
+        if (progressbarElem) {
+          progressbarElem.style.width = percent + "%";
+        }
       } else {
         //set width to 0%
-        document.getElementById("progressbar").style.width = 0 + "%";
+        if (progressbarElem) {
+          progressbarElem.style.width = 0 + "%";
+        }
         //remove progress bar class
         $('#progressbar').removeClass('progress-bar');
       }
@@ -805,7 +816,7 @@ Template.card.helpers({
   'curImgSrc': function() {
     const currentDisplay = Session.get('currentDisplay');
     const curImgSrc = currentDisplay ? currentDisplay.imgSrc : undefined;
-    if (curImgSrc) {
+    if (curImgSrc && imagesDict[curImgSrc]) {
       return imagesDict[curImgSrc].src;
     } else {
       return '';
@@ -961,7 +972,8 @@ Template.card.helpers({
 
   'fontSizeClass': function() {
     // Take advantage of Bootstrap h1-h5 classes
-    const hSize = Session.get('currentDeliveryParams') ? Session.get('currentDeliveryParams').fontsize.toString() : 2;
+    const params = Session.get('currentDeliveryParams');
+    const hSize = params && params.fontsize ? params.fontsize.toString() : '2';
     return 'h' + hSize;
   },
 
@@ -1225,8 +1237,10 @@ function getResponseType() {
 
 // TRANSITION TIMING CONFIGURATION
 // IMPORTANT: Keep in sync with CSS transition durations in classic.css
+// Based on UX research: 200-300ms is optimal for smooth web transitions
+// 100ms is too fast to be smooth but too slow to be imperceptible
 const TRANSITION_CONFIG = {
-  FADE_DURATION_MS: 100,  // Must match #trialContentWrapper transition (0.1s = 100ms)
+  FADE_DURATION_MS: 200,  // Must match #trialContentWrapper transition (0.2s = 200ms)
   FADE_BUFFER_MS: 20      // Safety buffer for timing variations under load
 };
 
@@ -1242,7 +1256,7 @@ const TRIAL_STATES = {
   // PRESENTING PHASE - User sees question/content (drill/test share this)
   // Duration: 15-30s for drill/test (waiting for input)
   PRESENTING_LOADING: 'PRESENTING.LOADING',          // Selecting card, loading assets (50-500ms)
-  PRESENTING_FADING_IN: 'PRESENTING.FADING_IN',      // New content appearing (100ms)
+  PRESENTING_FADING_IN: 'PRESENTING.FADING_IN',      // New content appearing (200ms fade-in)
   PRESENTING_DISPLAYING: 'PRESENTING.DISPLAYING',    // Visible, input disabled (brief ~10ms)
   PRESENTING_AWAITING: 'PRESENTING.AWAITING',        // Input enabled, waiting (drill/test only)
 
@@ -1255,10 +1269,10 @@ const TRIAL_STATES = {
   FEEDBACK_SHOWING: 'FEEDBACK.SHOWING',              // Display correct/incorrect (drill only)
 
   // TRANSITION PHASE - Between trials (all trial types use this)
-  // Duration: ~260ms total
+  // Duration: ~460ms total (200ms fade-out + 20ms buffer + 40ms cleanup + 200ms fade-in)
   TRANSITION_START: 'TRANSITION.START',              // Brief cleanup (10ms)
-  TRANSITION_FADING_OUT: 'TRANSITION.FADING_OUT',    // Old content disappearing (100ms)
-  TRANSITION_CLEARING: 'TRANSITION.CLEARING',        // Clearing DOM while invisible (50ms)
+  TRANSITION_FADING_OUT: 'TRANSITION.FADING_OUT',    // Old content disappearing (200ms fade-out)
+  TRANSITION_CLEARING: 'TRANSITION.CLEARING',        // Clearing DOM while invisible (40ms)
 
   // Special states
   IDLE: 'IDLE',                                      // Initial page load only
@@ -1565,13 +1579,19 @@ function checkUserAudioConfigCompatability(){
 function curStimHasSoundDisplayType() {
   const currentStimuliSetId = Session.get('currentStimuliSetId');
   const stimDisplayTypeMap = Session.get('stimDisplayTypeMap');
-  return currentStimuliSetId && stimDisplayTypeMap ? stimDisplayTypeMap[currentStimuliSetId].hasAudio : false;
+  // Defensive check: map might exist but not have entry for this specific stimuliSetId
+  return currentStimuliSetId && stimDisplayTypeMap && stimDisplayTypeMap[currentStimuliSetId]
+    ? stimDisplayTypeMap[currentStimuliSetId].hasAudio
+    : false;
 }
 
 function curStimHasImageDisplayType() {
   const currentStimuliSetId = Session.get('currentStimuliSetId');
   const stimDisplayTypeMap = Session.get('stimDisplayTypeMap');
-  return currentStimuliSetId && stimDisplayTypeMap ? stimDisplayTypeMap[currentStimuliSetId].hasImage : false;
+  // Check if the map exists AND the specific stimuliSetId entry exists
+  return currentStimuliSetId && stimDisplayTypeMap && stimDisplayTypeMap[currentStimuliSetId]
+    ? stimDisplayTypeMap[currentStimuliSetId].hasImage
+    : false;
 }
 
 
@@ -2490,10 +2510,10 @@ async function cardEnd() {
   // STATE MACHINE: Begin TRANSITION phase
   transitionTrialState(TRIAL_STATES.TRANSITION_START, 'Trial complete, beginning transition');
 
-  hideUserFeedback();
+  hideUserFeedback(); // Clears all feedback locations
   cardState.set('inFeedback', false);
   $('#CountdownTimerText').text("Continuing...");
-  $('#userLowerInteraction').html('');
+  // Don't clear #userLowerInteraction - hideUserFeedback() already does it
   $('#userAnswer').val('');
   Session.set('feedbackTimeoutEnds', Date.now())
 
@@ -2814,10 +2834,15 @@ function findQTypeSimpified() {
 
 function hideUserFeedback() {
   console.log('[SM] hideUserFeedback called in state:', currentTrialState);
-  $('#UserInteraction').removeClass('text-align alert alert-success alert-danger').html('').hide();
+  // Don't use .hide() - let displayReady fade-out handle visibility
+  // Using .hide() causes instant flash while content is still visible
+  // Clear ALL feedback locations (top, middle, bottom) since we don't know which was used
+  $('#UserInteraction').removeClass('text-align alert alert-success alert-danger').html('');
+  $('#feedbackOverride').html('');
+  $('#userLowerInteraction').html('');
   $('#userForceCorrect').val(''); // text box - see inputF.html
-  $('#forceCorrectionEntry').hide(); // Container
-  $('#removeQuestion').hide();
+  // Don't hide forceCorrectionEntry - let fade-out handle it
+  // Don't hide removeQuestion - let fade-out handle it
 }
 
 // Comprehensive cleanup that mimics what {{#if displayReady}} teardown did automatically
@@ -2827,18 +2852,22 @@ function cleanupTrialContent() {
   console.log('  #userAnswer before cleanup:', $('#userAnswer').length, 'display:', $('#userAnswer').css('display'));
 
   // Clear input VALUES (not HTML - let Blaze handle that)
+  // Note: #userAnswer already cleared in cardEnd(), but safe to repeat
   $('#userAnswer').val('');
   $('#userForceCorrect').val('');
 
-  // Clear non-reactive HTML that was set with .html() or .text()
-  $('#UserInteraction').html('');
-  $('#feedbackOverride').html('');
-  $('#userLowerInteraction').html('');
+  // Reset input styling that may persist from previous trial
+  // This prevents border color flash (black→red) during fade-in
+  $('#userAnswer').removeClass('is-invalid is-valid'); // Bootstrap validation classes
+  $('#userAnswer').css('border-color', ''); // Reset any inline border styles
+  $('#userAnswer').css('border', ''); // Reset full border property
+
+  // Clear non-reactive HTML (NOT feedback - hideUserFeedback() already did that)
+  // Only clear elements that weren't handled by hideUserFeedback
   $('#correctAnswerDisplayContainer').html('');
   $('#CountdownTimerText').text('');
 
-  // Reset CSS classes that may have been changed
-  $('#UserInteraction').removeClass('text-align alert alert-success alert-danger');
+  // Reset CSS classes (NOT feedback classes - already done)
   $('#displayContainer').removeClass('mx-auto');
   $('#correctAnswerDisplayContainer').addClass('d-none');
 
@@ -3145,28 +3174,35 @@ async function prepareCard() {
 
   Meteor.logoutOtherClients();
   Session.set('wasReportedForRemoval', false);
-  // Manually clean up all trial content before hiding (mimics DOM teardown cleanup)
-  cleanupTrialContent();
-  console.log('[SM]   Setting displayReady=false to start fade-out');
+
+  // Start fade-out with OLD content still visible (not cleared to empty)
+  // DON'T clean up yet - that happens AFTER fade completes
+  console.log('[SM]   Setting displayReady=false to fade out (old content remains visible during fade)');
   Session.set('displayReady', false);
-  console.log('[SM]   displayReady after setting false:', Session.get('displayReady'));
 
-  // Wait for CSS fade-out transition to complete
-  // This ensures old content fades out gracefully before being cleared
+  // Wait for fade-out transition to complete
   const fadeDelay = TRANSITION_CONFIG.FADE_DURATION_MS + TRANSITION_CONFIG.FADE_BUFFER_MS;
-  console.log(`[SM]   Waiting ${fadeDelay}ms for fade-out transition to complete...`);
+  console.log(`[SM]   Waiting ${fadeDelay}ms for fade-out to complete...`);
   await new Promise(resolve => setTimeout(resolve, fadeDelay));
-  console.log('[SM]   Fade-out complete, clearing content while invisible');
+  console.log('[SM]   Fade-out complete, now cleaning up WHILE INVISIBLE');
 
-  // STATE MACHINE: Transition to CLEARING after fade-out completes
+  // Clean up feedback/input styling AFTER fade-out (while opacity=0)
+  // This prevents flashing during the visible transition
+  cleanupTrialContent();
+
+  // STATE MACHINE: Transition to CLEARING
   if (currentTrialState === TRIAL_STATES.TRANSITION_FADING_OUT) {
     transitionTrialState(TRIAL_STATES.TRANSITION_CLEARING, 'Clearing previous trial content');
   }
 
   Session.set('submmissionLock', false);
-  Session.set('currentDisplay', {});
-  // Clear buttonTrial to force Blaze to re-evaluate input visibility
-  Session.set('buttonTrial', undefined);
+  // DON'T clear currentDisplay - keep old stimulus so it's visible during fade
+  // It will be swapped to new content in checkAndDisplayTwoPartQuestion
+  // Session.set('currentDisplay', {}); // REMOVED - prevents empty flash
+
+  // DON'T set buttonTrial to undefined - causes input to flash/paint late
+  // It will be updated with correct value in newQuestionHandler()
+  // Session.set('buttonTrial', undefined); // REMOVED - causes Blaze re-render delay
   Session.set('buttonList', []);
   $('#helpButton').prop("disabled",false);
   if (engine.unitFinished()) {
@@ -3298,16 +3334,22 @@ function startQuestionTimeout() {
   countdownInterval = setInterval(() => {
     const timeLeft = Math.max(0, readyPromptTimeout - (Date.now() - trialStartTimestamp));
     const timeLeftSecs = Math.ceil(timeLeft / 1000);
+    const progressbarElem = document.getElementById("progressbar");
     if(timeLeft <= 0){
       clearInterval(countdownInterval);
+      countdownInterval = null;
     } else {
       if(Session.get('curTdfUISettings').displayReadyPromptTimeoutAsBarOrText == "bar" || Session.get('curTdfUISettings').displayCardTimeoutAsBarOrText == "both"){
         //add the progress bar class
         $('#progressbar').addClass('progress-bar');
-        document.getElementById("progressbar").style.width = percent + "%";
+        if (progressbarElem) {
+          progressbarElem.style.width = percent + "%";
+        }
       } else {
-        //set width to 0% 
-        document.getElementById("progressbar").style.width = 0 + "%";
+        //set width to 0%
+        if (progressbarElem) {
+          progressbarElem.style.width = 0 + "%";
+        }
         //remove progress bar class
         $('#progressbar').removeClass('progress-bar');
       }

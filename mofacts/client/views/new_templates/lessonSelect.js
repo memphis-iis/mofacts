@@ -74,7 +74,7 @@ Template.lessonSelect.helpers({
     class: function(){
       thisClass = Session.get('curClass');
       console.log('class: ', thisClass);
-      if(thisClass.courseName){
+      if(thisClass && thisClass.courseName){
         return thisClass;
       } else {
         return false;

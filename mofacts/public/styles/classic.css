@@ -475,7 +475,9 @@ thead{
 .navbar-brand{
     color: var(--navbar-text-color);
     font-weight: 800;
-    font-size: 2.19rem;
+    font-size: 1.5rem;
+    display: flex;
+    align-items: center;
 }
 
 /* ===== OFFCANVAS MENU ===== */
@@ -997,9 +999,10 @@ thead{
 
 /* Trial content visibility - avoids DOM teardown/rebuild */
 /* IMPORTANT: If changing duration, update TRANSITION_CONFIG.FADE_DURATION_MS in card.js */
+/* Duration based on UX research: 200-300ms is optimal for smooth web transitions */
 #trialContentWrapper {
   opacity: 1;
-  transition: opacity 0.1s ease-in-out;  /* 100ms - keep in sync with card.js TRANSITION_CONFIG */
+  transition: opacity 0.2s ease-in-out;  /* 200ms - keep in sync with card.js TRANSITION_CONFIG */
 }
 
 #trialContentWrapper.trial-hidden {
@@ -1010,6 +1013,15 @@ thead{
 /* Hide input elements based on trial type (button vs text) */
 .trial-input-hidden {
   display: none !important;
+}
+
+/* Hide input elements during feedback with smooth transition */
+.feedback-input-hidden {
+  opacity: 0 !important;
+  pointer-events: none;
+  height: 0;
+  overflow: hidden;
+  transition: opacity 0.1s ease-in-out, height 0.1s ease-in-out;
 }
 
 /* Smooth layout changes during feedback - prevent flash from column width changes */
