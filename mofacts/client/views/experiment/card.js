@@ -3571,14 +3571,16 @@ function stopUserInput() {
   inputDisabled = true;
   stopRecording();
 
-  // Need a delay here so we can wait for the DOM to load before manipulating it
+  // Delay disabling inputs to sync with CSS fade transition (TRANSITION_CONFIG.FADE_DURATION_MS)
+  // This prevents visible button state changes during fade-out, improving perceived smoothness
+  // The inputDisabled flag guards against race conditions if allowUserInput() is called during this delay
   setTimeout(function() {
     console.log('after delay, stopping user input');
     // Only disable if inputDisabled is still true (allowUserInput may have set it to false)
     if (inputDisabled === true) {
       $('#userAnswer, #multipleChoiceContainer button').prop('disabled', true);
     }
-  }, 200);
+  }, TRANSITION_CONFIG.FADE_DURATION_MS);
 }
 
 // BEGIN WEB AUDIO section

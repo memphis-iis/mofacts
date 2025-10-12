@@ -21,6 +21,11 @@
     --border-radius-pill: 999px; /* Fully rounded (toggles, badges) */
     --border-radius-circle: 50%; /* Perfect circles */
     --border-radius-none: 0px; /* Flat elements (stimulus boxes) */
+
+    /* Transition Durations - UX Research Based Timings */
+    --transition-instant: 0.01s;      /* Instant (accessibility fallback) */
+    --transition-fast: 0.1s;          /* 100ms - UI feedback, hovers */
+    --transition-smooth: 0.2s;        /* 200ms - Trial transitions (main fade) */
 }
 /* ===== ACCESSIBILITY ===== */
 /* Screen reader only content - visually hidden but accessible to assistive technology */
@@ -157,7 +162,7 @@ select{
     background-color: var(--secondary-color);
     background-position: left center;
     border-radius: var(--border-radius-pill);
-    transition: background-position 0.1s ease-in-out;
+    transition: background-position var(--transition-fast) ease-in-out;
 }
 
 .form-switch .form-check-label{
@@ -304,8 +309,8 @@ input[type="range"]::-webkit-slider-thumb {
     display: flex;
     border-radius: var(--border-radius-lg); /* Larger radius for prominent modals */
     /* fade in and out */
-    animation: fadeIn 0.5s;
-    -webkit-animation: fadeIn 0.5s;
+    animation: fadeIn var(--transition-smooth);
+    -webkit-animation: fadeIn var(--transition-smooth);
 }
 
 .modal-title{
@@ -741,9 +746,8 @@ thead{
 
 /* ===== ANIMATIONS ===== */
 /* Fade-in transition for elements that appear/disappear */
-/* IMPORTANT: Max 100ms transition per project requirements */
 .smooth-transition {
-    transition: opacity 0.1s ease-in-out, transform 0.1s ease-in-out;
+    transition: opacity var(--transition-fast) ease-in-out, transform var(--transition-fast) ease-in-out;
     /* Hint browser to use GPU acceleration for smoother animations */
     will-change: opacity;
 }
@@ -751,7 +755,7 @@ thead{
 /* Smooth visibility transitions (better than instant show/hide) */
 .fade-in {
     opacity: 0;
-    transition: opacity 0.1s ease-in;
+    transition: opacity var(--transition-fast) ease-in;
 }
 
 .fade-in.visible {
@@ -760,7 +764,7 @@ thead{
 
 /* Height transitions for expanding/collapsing elements */
 .height-transition {
-    transition: max-height 0.1s ease-in-out, opacity 0.1s ease-in-out;
+    transition: max-height var(--transition-fast) ease-in-out, opacity var(--transition-fast) ease-in-out;
     overflow: hidden;
 }
 
@@ -772,7 +776,7 @@ thead{
 /* Smooth element removal */
 .fade-out {
     opacity: 1;
-    transition: opacity 0.1s ease-out;
+    transition: opacity var(--transition-fast) ease-out;
 }
 
 .fade-out.hidden {
@@ -781,12 +785,12 @@ thead{
 
 /* Progress bar smooth width changes */
 #progressbar {
-    transition: width 0.1s linear;
+    transition: width var(--transition-fast) linear;
 }
 
 /* Countdown timer smooth updates */
 #CountdownTimerText {
-    transition: opacity 0.1s ease-in-out;
+    transition: opacity var(--transition-fast) ease-in-out;
 }
 
 /* Skeleton loader for initial render */
@@ -1002,7 +1006,7 @@ thead{
 /* Duration based on UX research: 200-300ms is optimal for smooth web transitions */
 #trialContentWrapper {
   opacity: 1;
-  transition: opacity 0.2s ease-in-out;  /* 200ms - keep in sync with card.js TRANSITION_CONFIG */
+  transition: opacity var(--transition-smooth) ease-in-out;  /* Uses theme variable (200ms) */
 }
 
 #trialContentWrapper.trial-hidden {
@@ -1021,25 +1025,23 @@ thead{
   pointer-events: none;
   height: 0;
   overflow: hidden;
-  transition: opacity 0.1s ease-in-out, height 0.1s ease-in-out;
+  transition: opacity var(--transition-fast) ease-in-out, height var(--transition-fast) ease-in-out;
 }
 
 /* Smooth layout changes during feedback - prevent flash from column width changes */
-/* IMPORTANT: Keep all transitions at 100ms or less per project requirements */
 #displayContainer {
-  transition: all 0.1s ease-in-out;  /* MAX 100ms - do not increase */
+  transition: all var(--transition-fast) ease-in-out;
 }
 
 #displaySubContainer {
-  transition: all 0.1s ease-in-out;  /* MAX 100ms - do not increase */
+  transition: all var(--transition-fast) ease-in-out;
 }
 
 /* Smooth visibility changes for inputs and multiple choice */
-/* IMPORTANT: Keep all transitions at 100ms or less per project requirements */
 #multipleChoiceContainer,
 .input-box,
 #textEntryRow {
-  transition: opacity 0.1s ease-in-out;  /* MAX 100ms - do not increase */
+  transition: opacity var(--transition-fast) ease-in-out;
 }
 
 /* Prevent layout shift during countdown timer updates */
