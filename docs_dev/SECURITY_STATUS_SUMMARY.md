@@ -19,16 +19,24 @@
 
 ## ✅ What We Fixed
 
-### October 13, 2025 - High Severity Fixes (3)
+### October 13, 2025 - High Severity Fixes (6)
 14. ✅ **Sensitive Data Over-Publication** - Implemented publication filtering
    - **Risk:** Students could see all TDFs including answer keys
-   - **Fix:** Commit c37296ce - Role-based filtering on 5 publications
+   - **Fix:** Role-based filtering on 5 publications
    - Publications: files.assets.all, allTdfs, ownedTdfs, tdfByExperimentTarget, settings
+   - **Commit:** c37296ce | **Issue:** [#1657](https://github.com/memphis-iis/mofacts/issues/1657)
 
 15. ✅ **No Rate Limiting** - Added DDPRateLimiter rules
    - **Risk:** Brute-force attacks, DoS via unlimited requests
-   - **Fix:** Commit ed905a25 - Rate limits on auth, uploads, deletions, admin ops
+   - **Fix:** Rate limits on auth, uploads, deletions, admin ops
    - Limits: 3-30 requests/hour depending on operation type
+   - **Commit:** ed905a25 | **Issue:** [#1656](https://github.com/memphis-iis/mofacts/issues/1656)
+
+15a. ✅ **IDOR Vulnerabilities in SSO and API Key Methods** - Fixed authorization
+   - **Risk:** Users could access other users' SSO profiles and steal TDF API keys
+   - **Fix:** Added authorization checks to 3 methods
+   - Methods: populateSSOProfile, getTdfTTSAPIKey, getTdfSpeechAPIKey
+   - **Commit:** 06f57f0f | **Issue:** [#1655](https://github.com/memphis-iis/mofacts/issues/1655)
 
 16. ✅ **Unrestricted File Upload** - Implemented comprehensive upload validation
    - **Risk:** Malware upload, DoS via large files, path traversal attacks
