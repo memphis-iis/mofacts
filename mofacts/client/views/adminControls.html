@@ -144,25 +144,33 @@
                         <input type="color" class="currentThemePropColor" value="{{currentTheme.properties.navbar_text_color}}" data-id="navbar_text_color">
                     </div>
                     <div class="col text-end">
-                        Fade In Duration (ms):
+                        Transition Speed - Instant (ms):
                     </div>
                     <div class="col">
-                        <input type="number" class="currentThemeProp form-control" value="{{currentTheme.properties.fade_in_duration}}" data-id="fade_in_duration" min="0" max="2000" step="50" placeholder="50">
-                        <small class="form-text text-muted">Default: 50ms (instant feel), Max: 2000ms</small>
+                        <input type="number" class="currentThemeProp form-control" value="{{currentTheme.properties.transition_instant}}" data-id="transition_instant" min="0" max="500" step="10" placeholder="10">
+                        <small class="form-text text-muted">
+                            <strong>Default: 10ms</strong> - Near-instant (accessibility fallback, reduced motion mode)
+                        </small>
                     </div>
                     <div class="col text-end">
-                        Fade Out Duration (ms):
+                        Transition Speed - Fast (ms):
                     </div>
                     <div class="col">
-                        <input type="number" class="currentThemeProp form-control" value="{{currentTheme.properties.fade_out_duration}}" data-id="fade_out_duration" min="0" max="2000" step="50" placeholder="50">
-                        <small class="form-text text-muted">Default: 50ms (instant feel), Max: 2000ms</small>
+                        <input type="number" class="currentThemeProp form-control" value="{{currentTheme.properties.transition_fast}}" data-id="transition_fast" min="0" max="500" step="10" placeholder="100">
+                        <small class="form-text text-muted">
+                            <strong>Default: 100ms</strong> - Quick transitions<br>
+                            <em>Used for:</em> Buttons, hovers, input fields, progress bars, countdown timers, feedback displays
+                        </small>
                     </div>
                     <div class="col text-end">
-                        Button Fade Duration (ms):
+                        Transition Speed - Smooth (ms):
                     </div>
                     <div class="col">
-                        <input type="number" class="currentThemeProp form-control" value="{{currentTheme.properties.button_fade_duration}}" data-id="button_fade_duration" min="0" max="2000" step="50" placeholder="50">
-                        <small class="form-text text-muted">Default: 50ms (instant feel), Max: 2000ms</small>
+                        <input type="number" class="currentThemeProp form-control" value="{{currentTheme.properties.transition_smooth}}" data-id="transition_smooth" min="0" max="1000" step="50" placeholder="200">
+                        <small class="form-text text-muted">
+                            <strong>Default: 200ms</strong> - Main content transitions<br>
+                            <em>Used for:</em> Trial card fades, modal animations, major content changes
+                        </small>
                     </div>
                     <div class="col text-end">
 
