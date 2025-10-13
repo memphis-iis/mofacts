@@ -3850,7 +3850,7 @@ const asyncMethods = {
     // Try to get TDF API key if user is logged in (but don't require it)
     if (this.userId) {
       try {
-        const TDFAPIKey = await methods.getTdfSpeechAPIKey(TDFId);
+        const TDFAPIKey = await methods.getTdfSpeechAPIKey.call(this, TDFId);
         if (TDFAPIKey) {
           speechAPIKey = TDFAPIKey;
         }
