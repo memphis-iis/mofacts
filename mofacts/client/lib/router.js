@@ -152,8 +152,10 @@ Router.route('/experiment/:target?/:xcond?', {
         Meteor.subscribe('tdfByExperimentTarget', target, condition)
       }
       console.log('tdf found');
-      const experimentPasswordRequired = tdf.content.tdfs.tutor.setspec.experimentPasswordRequired ?
-          eval(tdf.content.tdfs.tutor.setspec.experimentPasswordRequired) : false;
+      // Security: Replace eval() with safe boolean check
+      const experimentPasswordRequired =
+        tdf.content.tdfs.tutor.setspec.experimentPasswordRequired === 'true' ||
+        tdf.content.tdfs.tutor.setspec.experimentPasswordRequired === true;
       Session.set('experimentPasswordRequired', experimentPasswordRequired);
       Session.set('loginPrompt',tdf.content.tdfs.tutor.setspec.uiSettings?.experimentLoginText || "Amazon Turk ID");
       console.log('experimentPasswordRequired:' + experimentPasswordRequired);

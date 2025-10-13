@@ -47,7 +47,10 @@ const Cookie = {
             (_.intval(expireDays, 1) * 24 * 60 * 60 * 1000),
     ).toGMTString();
 
-    this.cookieSource.cookie = name + '=' + value + '; path=/; expires=' + exp;
+    // Security: Add secure flags for cookies
+    // Secure: only send over HTTPS (safe because app runs on HTTPS)
+    // SameSite=Strict: prevent CSRF attacks
+    this.cookieSource.cookie = name + '=' + value + '; path=/; expires=' + exp + '; Secure; SameSite=Strict';
   },
 };
 

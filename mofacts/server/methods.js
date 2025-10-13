@@ -56,10 +56,14 @@ if (process.env.METEOR_SETTINGS_WORKAROUND) {
     Meteor.settings = JSON.parse(process.env.METEOR_SETTINGS_WORKAROUND);
   }
 }
-if (Meteor.settings.public.testLogin) {
-  process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = 0;
-  serverConsole('dev environment, allow insecure tls');
-}
+// SECURITY FIX: Removed insecure TLS configuration
+// Setting NODE_TLS_REJECT_UNAUTHORIZED = 0 disables certificate verification
+// for ALL outbound HTTPS connections, making the app vulnerable to MITM attacks.
+// This was not needed since no external HTTPS connections are made from server.
+// if (Meteor.settings.public.testLogin) {
+//   process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = 0;
+//   serverConsole('dev environment, allow insecure tls');
+// }
 // if Meteor settings specifies a syllableURL, use it. Otherwise check if Meteor.isProduction and use the appropriate URL, otherwise use the dev URL
 const syllableURL = Meteor.settings.syllableURL ? Meteor.settings.syllableURL : Meteor.isProduction ? 'http://syllables:4567/syllables/' : 'http://localhost:4567/syllables/';
 
@@ -3621,6 +3625,11 @@ const asyncMethods = {
   //handle file deletions
 
   deleteAllFiles: async function(){
+    // Security: Require admin role to delete all files
+    if (!this.userId || !Roles.userIsInRole(this.userId, ['admin'])) {
+      throw new Meteor.Error(403, 'Admin access required to delete all files');
+    }
+
     try {
       serverConsole('delete all uploaded files');
 
