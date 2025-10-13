@@ -3798,18 +3798,16 @@ function speechAPICallback(err, data){
   let answerGrammar = [];
   let response = {};
 
-  // Handle error cases (timeout, API failure, etc.)
+  // Handle Meteor method errors (network, timeout, server exception)
   if (err) {
-    console.error('Speech API error:', err);
+    console.error('Meteor method error:', err);
+    const errorMsg = err.reason || err.message || 'Unknown error';
+    console.log('Error details:', errorMsg);
     answerGrammar = [];
-    // Check if it's a timeout or other API error
-    if (err.error === 'google-speech-api-error') {
-      response = {error: err.reason || 'API error'};
-    } else {
-      response = {error: 'unknown'};
-    }
+    response = {}; // Empty response to trigger "NO TRANSCRIPT/SILENCE" path
   } else if (data) {
     [answerGrammar, response] = data;
+    console.log('Speech API response received:', JSON.stringify(response).substring(0, 200));
   }
 
   let transcript = '';
@@ -3818,30 +3816,40 @@ function speechAPICallback(err, data){
   // Session.get("speechOutOfGrammarFeedback");//TODO: change this in tdfs and not hardcoded
   let ignoredOrSilent = false;
 
-  // If we get back an error status make sure to inform the user so they at
-  // least have a hint at what went wrong
-  if (response.error) {
-    console.log('Speech API returned error:', response.error);
-    if (response.error.includes && response.error.includes('timeout')) {
+  // Check for Google API errors (returned in response.error field)
+  if (response && response.error) {
+    console.log('Google Speech API error object:', response.error);
+    const errorCode = response.error.code;
+    const errorMessage = response.error.message || '';
+    console.log(`Google API error - Code: ${errorCode}, Message: ${errorMessage}`);
+
+    if (errorCode === 403 || errorMessage.toLowerCase().includes('api key')) {
+      transcript = 'Invalid API key. Please check your settings.';
+    } else if (errorCode === 429 || errorMessage.toLowerCase().includes('quota')) {
+      transcript = 'API quota exceeded. Please try again later.';
+    } else if (errorMessage.toLowerCase().includes('timeout')) {
       transcript = 'Speech recognition timed out. Please try again.';
     } else {
-      transcript = 'I did not get that. Please try again.';
+      transcript = `API Error: ${errorMessage}`;
     }
     ignoredOrSilent = true;
-  } else if (response['results']) {
+  } else if (response && response['results'] && response['results'].length > 0 &&
+             response['results'][0]['alternatives'] && response['results'][0]['alternatives'].length > 0) {
+    // Successfully got transcription
     transcript = response['results'][0]['alternatives'][0]['transcript'].toLowerCase();
-    console.log('transcript: ' + transcript);
+    console.log('Transcribed text: "' + transcript + '"');
+
     if (ignoreOutOfGrammarResponses) {
       if (transcript == 'enter') {
         ignoredOrSilent = false;
-      } else if (answerGrammar.indexOf(transcript) == -1) { // Answer not in grammar, ignore and reset/re-record
-        console.log('ANSWER OUT OF GRAMMAR, IGNORING');
+      } else if (answerGrammar.indexOf(transcript) == -1) {
+        console.log('ANSWER OUT OF GRAMMAR, IGNORING. Expected one of:', answerGrammar);
         transcript = speechOutOfGrammarFeedback;
         ignoredOrSilent = true;
       }
     }
   } else {
-    console.log('NO TRANSCRIPT/SILENCE');
+    console.log('NO TRANSCRIPT/SILENCE - Response:', response);
     transcript = 'Silence detected';
     ignoredOrSilent = true;
   }
