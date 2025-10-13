@@ -753,16 +753,6 @@ thead{
     will-change: opacity;
 }
 
-/* Smooth visibility transitions (better than instant show/hide) */
-.fade-in {
-    opacity: 0;
-    transition: opacity var(--transition-fast) ease-in;
-}
-
-.fade-in.visible {
-    opacity: 1;
-}
-
 /* Height transitions for expanding/collapsing elements */
 .height-transition {
     transition: max-height var(--transition-fast) ease-in-out, opacity var(--transition-fast) ease-in-out;
@@ -772,16 +762,6 @@ thead{
 /* Prevent layout shift by reserving space */
 .min-height-preserve {
     min-height: 2em;
-}
-
-/* Smooth element removal */
-.fade-out {
-    opacity: 1;
-    transition: opacity var(--transition-fast) ease-out;
-}
-
-.fade-out.hidden {
-    opacity: 0;
 }
 
 /* Progress bar smooth width changes */
@@ -1003,11 +983,11 @@ thead{
 }
 
 /* Trial content visibility - avoids DOM teardown/rebuild */
-/* IMPORTANT: If changing duration, update TRANSITION_CONFIG.FADE_DURATION_MS in card.js */
-/* Duration based on UX research: 200-300ms is optimal for smooth web transitions */
+/* JavaScript in card.js reads this CSS variable dynamically to sync timing */
+/* Duration based on UX research: 200-300ms is optimal, configurable in Admin Panel */
 #trialContentWrapper {
   opacity: 1;
-  transition: opacity var(--transition-smooth) ease-in-out;  /* Uses theme variable (200ms) */
+  transition: opacity var(--transition-smooth) ease-in-out;  /* Admin-configurable via theme settings */
 }
 
 #trialContentWrapper.trial-hidden {

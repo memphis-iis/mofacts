@@ -1270,13 +1270,24 @@ function getResponseType() {
 }
 
 // TRANSITION TIMING CONFIGURATION
-// IMPORTANT: Keep in sync with CSS transition durations in classic.css
-// Based on UX research: 200-300ms is optimal for smooth web transitions
-// 100ms is too fast to be smooth but too slow to be imperceptible
-const TRANSITION_CONFIG = {
-  FADE_DURATION_MS: 200,  // Must match #trialContentWrapper transition (0.2s = 200ms)
-  FADE_BUFFER_MS: 20      // Safety buffer for timing variations under load
-};
+// Reads the actual CSS variable value set by admin in theme panel
+// This ensures JavaScript timing stays in sync with CSS transitions
+function getTransitionDuration() {
+  // Read --transition-smooth CSS variable from root element
+  const rootStyles = getComputedStyle(document.documentElement);
+  const cssValue = rootStyles.getPropertyValue('--transition-smooth').trim();
+
+  // Parse the value (could be "200ms" or "0.2s")
+  if (cssValue.endsWith('ms')) {
+    return parseInt(cssValue);
+  } else if (cssValue.endsWith('s')) {
+    return parseFloat(cssValue) * 1000;
+  }
+
+  // Fallback if CSS variable not found (shouldn't happen)
+  console.warn('Could not read --transition-smooth CSS variable, using fallback 200ms');
+  return 200;
+}
 
 // TRIAL STATE MACHINE CONSTANTS (Hierarchical Model)
 // Three distinct trial flows (based on trial type):
@@ -1290,7 +1301,7 @@ const TRIAL_STATES = {
   // PRESENTING PHASE - User sees question/content (drill/test share this)
   // Duration: 15-30s for drill/test (waiting for input)
   PRESENTING_LOADING: 'PRESENTING.LOADING',          // Selecting card, loading assets (50-500ms)
-  PRESENTING_FADING_IN: 'PRESENTING.FADING_IN',      // New content appearing (200ms fade-in)
+  PRESENTING_FADING_IN: 'PRESENTING.FADING_IN',      // New content appearing (uses --transition-smooth)
   PRESENTING_DISPLAYING: 'PRESENTING.DISPLAYING',    // Visible, input disabled (brief ~10ms)
   PRESENTING_AWAITING: 'PRESENTING.AWAITING',        // Input enabled, waiting (drill/test only)
 
@@ -1303,9 +1314,9 @@ const TRIAL_STATES = {
   FEEDBACK_SHOWING: 'FEEDBACK.SHOWING',              // Display correct/incorrect (drill only)
 
   // TRANSITION PHASE - Between trials (all trial types use this)
-  // Duration: ~460ms total (200ms fade-out + 20ms buffer + 40ms cleanup + 200ms fade-in)
+  // Duration: ~(2 * transition-smooth) + ~40ms cleanup (default: ~440ms total)
   TRANSITION_START: 'TRANSITION.START',              // Brief cleanup (10ms)
-  TRANSITION_FADING_OUT: 'TRANSITION.FADING_OUT',    // Old content disappearing (200ms fade-out)
+  TRANSITION_FADING_OUT: 'TRANSITION.FADING_OUT',    // Old content disappearing (uses --transition-smooth)
   TRANSITION_CLEARING: 'TRANSITION.CLEARING',        // Clearing DOM while invisible (40ms)
 
   // Special states
@@ -3221,7 +3232,7 @@ async function prepareCard() {
   Session.set('displayReady', false);
 
   // Wait for fade-out transition to complete
-  const fadeDelay = TRANSITION_CONFIG.FADE_DURATION_MS + TRANSITION_CONFIG.FADE_BUFFER_MS;
+  const fadeDelay = getTransitionDuration();
   console.log(`[SM]   Waiting ${fadeDelay}ms for fade-out to complete...`);
   await new Promise(resolve => setTimeout(resolve, fadeDelay));
   console.log('[SM]   Fade-out complete, now cleaning up WHILE INVISIBLE');
@@ -3438,7 +3449,7 @@ async function checkAndDisplayPrestimulus(deliveryParams, nextStageCb) {
           console.log('past prestimulusdisplaytime, start two part question logic');
           await nextStageCb();
         }, prestimulusdisplaytime);
-      }, TRANSITION_CONFIG.FADE_DURATION_MS + TRANSITION_CONFIG.FADE_BUFFER_MS);
+      }, getTransitionDuration());
     } else {
       console.log('  NOT setting displayReady (already true or video session)');
       // displayReady already true, proceed immediately
@@ -3496,7 +3507,7 @@ async function checkAndDisplayTwoPartQuestion(deliveryParams, currentDisplayEngi
       } else {
         nextStageCb();
       }
-    }, TRANSITION_CONFIG.FADE_DURATION_MS + TRANSITION_CONFIG.FADE_BUFFER_MS);
+    }, getTransitionDuration());
   } else {
     // displayReady already true (video session or subsequent call), proceed immediately
     const currentQuestionPart2 = Session.get('currentExperimentState').currentQuestionPart2;
@@ -3611,7 +3622,7 @@ function stopUserInput() {
   inputDisabled = true;
   stopRecording();
 
-  // Delay disabling inputs to sync with CSS fade transition (TRANSITION_CONFIG.FADE_DURATION_MS)
+  // Delay disabling inputs to sync with CSS fade transition
   // This prevents visible button state changes during fade-out, improving perceived smoothness
   // The inputDisabled flag guards against race conditions if allowUserInput() is called during this delay
   setTimeout(function() {
@@ -3620,7 +3631,7 @@ function stopUserInput() {
     if (inputDisabled === true) {
       $('#userAnswer, #multipleChoiceContainer button').prop('disabled', true);
     }
-  }, TRANSITION_CONFIG.FADE_DURATION_MS);
+  }, getTransitionDuration());
 }
 
 // BEGIN WEB AUDIO section
