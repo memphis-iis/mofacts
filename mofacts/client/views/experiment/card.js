@@ -3814,6 +3814,7 @@ function speechAPICallback(err, data){
 
   let transcript = '';
   const ignoreOutOfGrammarResponses = Session.get('ignoreOutOfGrammarResponses');
+  console.log('[SR] ignoreOutOfGrammarResponses setting:', ignoreOutOfGrammarResponses);
   const speechOutOfGrammarFeedback = 'Please try again or press enter or say skip';
   // Session.get("speechOutOfGrammarFeedback");//TODO: change this in tdfs and not hardcoded
   let ignoredOrSilent = false;
@@ -3983,7 +3984,15 @@ function startUserMedia(stream) {
   recorder.setProcessCallback(processLINEAR16);
 
   // Set up options for voice activity detection code (hark.js)
-  speechEvents = hark(stream); //{interval: 50, play: false};
+  // audioInputSensitivity: threshold for voice detection (lower = more sensitive)
+  // Default 20, range typically -100 to 0 (dB)
+  const sensitivity = Session.get('audioInputSensitivity') || 20;
+  const harkOptions = {
+    threshold: -1 * sensitivity,  // Convert to negative dB value
+    interval: 100  // Check every 100ms instead of default 50ms for more stable detection
+  };
+  console.log('[SR] Initializing Hark with threshold:', harkOptions.threshold, 'dB, interval:', harkOptions.interval, 'ms');
+  speechEvents = hark(stream, harkOptions);
 
   speechEvents.on('speaking', function() {
     if (!Session.get('recording')) {
