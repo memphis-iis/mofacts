@@ -2568,22 +2568,32 @@ async function loadStimsAndTdfsFromPrivate(adminUserId) {
   }
 }
 
-async function makeHTTPSrequest(options, request){
+async function makeHTTPSrequest(options, request, timeoutMs = 30000){
   return new Promise((resolve, reject) => {
     let chunks = []
-    const req = https.request(options, res => {        
+    let timeoutHandle = null;
+
+    const req = https.request(options, res => {
       res.on('data', d => {
           chunks.push(d);
       })
       res.on('end', function() {
+          clearTimeout(timeoutHandle);
           serverConsole(Buffer.concat(chunks).toString());
           resolve(Buffer.concat(chunks));
       })
     })
-    
+
     req.on('error', (e) => {
+      clearTimeout(timeoutHandle);
       reject(e.message);
     });
+
+    // Add timeout - if no response after timeoutMs, reject
+    timeoutHandle = setTimeout(() => {
+      req.destroy();
+      reject(new Error(`HTTPS request timeout after ${timeoutMs}ms`));
+    }, timeoutMs);
 
     req.write(request)
     req.end()
@@ -3845,11 +3855,13 @@ const asyncMethods = {
       path: '/v1/speech:recognize?key=' + speechAPIKey,
       method: 'POST'
     }
-    return await makeHTTPSrequest(options, JSON.stringify(request)).then((data, error) => {
-      if(error)
-        throw new Meteor.Error('Error with Google SR API call: ' + error);
-      return [answerGrammar, JSON.parse(data.toString('utf-8'))]
-    });
+    try {
+      const data = await makeHTTPSrequest(options, JSON.stringify(request), 30000);
+      return [answerGrammar, JSON.parse(data.toString('utf-8'))];
+    } catch(error) {
+      serverConsole('Google Speech API error:', error);
+      throw new Meteor.Error('google-speech-api-error', 'Error with Google SR API call: ' + error.message);
+    }
   },
   getUIDAndSecretForCurrentUser: async function(){
     if(!Meteor.userId()){

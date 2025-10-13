@@ -3795,7 +3795,23 @@ async function processLINEAR16(data) {
 }
 
 function speechAPICallback(err, data){
-  let [answerGrammar, response] = data;
+  let answerGrammar = [];
+  let response = {};
+
+  // Handle error cases (timeout, API failure, etc.)
+  if (err) {
+    console.error('Speech API error:', err);
+    answerGrammar = [];
+    // Check if it's a timeout or other API error
+    if (err.error === 'google-speech-api-error') {
+      response = {error: err.reason || 'API error'};
+    } else {
+      response = {error: 'unknown'};
+    }
+  } else if (data) {
+    [answerGrammar, response] = data;
+  }
+
   let transcript = '';
   const ignoreOutOfGrammarResponses = Session.get('ignoreOutOfGrammarResponses');
   const speechOutOfGrammarFeedback = 'Please try again or press enter or say skip';
@@ -3804,10 +3820,13 @@ function speechAPICallback(err, data){
 
   // If we get back an error status make sure to inform the user so they at
   // least have a hint at what went wrong
-  if (err) {
-    const content = JSON.parse(response);
-    console.log(err);
-    transcript = 'I did not get that. Please try again.';
+  if (response.error) {
+    console.log('Speech API returned error:', response.error);
+    if (response.error.includes && response.error.includes('timeout')) {
+      transcript = 'Speech recognition timed out. Please try again.';
+    } else {
+      transcript = 'I did not get that. Please try again.';
+    }
     ignoredOrSilent = true;
   } else if (response['results']) {
     transcript = response['results'][0]['alternatives'][0]['transcript'].toLowerCase();
