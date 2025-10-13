@@ -1,7 +1,7 @@
 # Security Status Summary
 
 **Last Updated:** October 13, 2025
-**Status:** 13 of 31 vulnerabilities FIXED (42% complete)
+**Status:** 15 of 31 vulnerabilities FIXED (48% complete)
 
 ---
 
@@ -10,14 +10,25 @@
 | Severity | Original Count | Fixed | Remaining |
 |----------|---------------|-------|-----------|
 | **Critical** | 5 | 5 ✅ | **0** ✅ |
-| **High** | 12 | 4 ✅ | **8** 🟠 |
+| **High** | 12 | 6 ✅ | **6** 🟠 |
 | **Medium** | 9 | 4 ✅ | **5** 🟡 |
 | **Low** | 5 | 0 | **5** ⚪ |
-| **TOTAL** | **31** | **13** | **18** |
+| **TOTAL** | **31** | **15** | **16** |
 
 ---
 
 ## ✅ What We Fixed
+
+### October 13, 2025 - High Severity Fixes (2)
+14. ✅ **Sensitive Data Over-Publication** - Implemented publication filtering
+   - **Risk:** Students could see all TDFs including answer keys
+   - **Fix:** Commit c37296ce - Role-based filtering on 5 publications
+   - Publications: files.assets.all, allTdfs, ownedTdfs, tdfByExperimentTarget, settings
+
+15. ✅ **No Rate Limiting** - Added DDPRateLimiter rules
+   - **Risk:** Brute-force attacks, DoS via unlimited requests
+   - **Fix:** Commit ed905a25 - Rate limits on auth, uploads, deletions, admin ops
+   - Limits: 3-30 requests/hour depending on operation type
 
 ### October 13, 2025 - Critical Fixes (3)
 11. ✅ **Missing Authorization on 8 Server Methods** - Added auth checks
@@ -85,31 +96,47 @@ All 5 critical security vulnerabilities have been successfully resolved as of Oc
 
 ---
 
-## 🟠 What Remains - HIGH SEVERITY (8)
+## 🟠 What Remains - HIGH SEVERITY (6)
 
 ### Most Dangerous Remaining High Issues:
 
 **#8: Insecure Direct Object References (IDOR)** - PARTIALLY FIXED
-- ~~Users can access other users' data by changing IDs~~ FIXED in commit 84147b80
+- ~~Users can access other users' data by changing IDs~~ FIXED in commits 84147b80, c37296ce
 - ~~Example: `getAccessableTDFSForUser('any-user-id')` works for ANY user~~ NOW REQUIRES AUTHORIZATION
+- ~~`ownedTdfs` publication~~ NOW VALIDATED
 - Still need to audit other methods for similar issues
 - **Impact:** Privacy violation, data theft
 
-**#12: Sensitive Data Over-Publication**
-- `allTdfs` publication sends ALL courses to ALL users
-- Students can see answer keys, instructor materials, everything
-- **Impact:** Cheating, privacy violation
-- **Time to fix:** 2-3 days
-
-**#17: No Rate Limiting**
-- Unlimited password guesses
-- Unlimited file uploads
-- DoS attacks possible
+**#10: Unrestricted File Upload**
+- File type validation only checks extension, not content
+- No virus scanning
+- Path traversal risk in zip extraction
+- **Impact:** Malware distribution, DoS
 - **Time to fix:** 1-2 days
 
-**Others (#7, #10, #11, #13, #14, #15, #16):**
-- Various authorization and injection issues
-- See full audit for details
+**#11: Insufficient Session Management**
+- Impersonation returns full user object
+- No audit trail for impersonation
+- No timeout on impersonation sessions
+- **Impact:** Privacy violation, abuse of admin features
+- **Time to fix:** 1 day
+
+**#13: innerHTML Usage Creating XSS Risks**
+- Direct DOM manipulation without sanitization
+- **Impact:** XSS if used with user content
+- **Time to fix:** 1 day (audit + fix)
+
+**#14: Race Condition in User Signup**
+- Inefficient mutex implementation
+- Lock cleanup may fail
+- **Impact:** Duplicate accounts, password conflicts
+- **Time to fix:** 1 day
+
+**#15: Cleartext Storage of Sensitive Data**
+- ~~Password reset secrets stored in cleartext~~ FIXED in commit b3ed661c
+- Check for other sensitive data storage
+- **Impact:** Data breach exposure
+- **Time to fix:** 1 day
 
 ---
 
@@ -181,10 +208,12 @@ All 5 critical security vulnerabilities have been successfully resolved as of Oc
 - [x] XSS template fixes with DOMPurify (Commit 01229bf5)
 - [x] Password reset redesign (Commit b3ed661c)
 
-**Phase 3 High Severity:** 📋 NEXT (0 of 8 complete)
-- [ ] IDOR vulnerability audit
-- [ ] Publication filtering
-- [ ] Rate limiting
+**Phase 3 High Severity:** ⏳ IN PROGRESS (2 of 12 complete)
+- [x] Sensitive data over-publication (Commit c37296ce)
+- [x] Rate limiting (Commit ed905a25)
+- [ ] IDOR vulnerability audit (partially addressed)
+- [ ] Unrestricted file upload
+- [ ] Session management improvements
 - [ ] Other high-severity issues
 
 **Phase 4 Medium/Low:** 📋 PLANNED (0 of 10 complete)
