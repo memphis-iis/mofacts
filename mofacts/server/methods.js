@@ -3846,10 +3846,25 @@ const asyncMethods = {
 
   makeGoogleSpeechAPICall: async function(TDFId, speechAPIKey, request, answerGrammar){
     serverConsole('makeGoogleSpeechAPICall', TDFId, speechAPIKey, request, answerGrammar);
-    const TDFAPIKey = await methods.getTdfSpeechAPIKey(TDFId);
-    if (TDFAPIKey) {
-      speechAPIKey = TDFAPIKey
+
+    // Try to get TDF API key if user is logged in (but don't require it)
+    if (this.userId) {
+      try {
+        const TDFAPIKey = await methods.getTdfSpeechAPIKey(TDFId);
+        if (TDFAPIKey) {
+          speechAPIKey = TDFAPIKey;
+        }
+      } catch(err) {
+        // User not authorized to access TDF key, use provided key instead
+        serverConsole('Could not access TDF key, using provided key:', err.message);
+      }
     }
+
+    // If we still don't have a key, error out
+    if (!speechAPIKey) {
+      throw new Meteor.Error('no-api-key', 'No speech API key available');
+    }
+
     const options = {
       hostname: 'speech.googleapis.com',
       path: '/v1/speech:recognize?key=' + speechAPIKey,
