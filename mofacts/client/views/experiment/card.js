@@ -45,6 +45,11 @@ function sanitizeHTML(dirty) {
   });
 }
 
+// Helper function to check if audio input mode is enabled
+function checkAudioInputMode() {
+  return Meteor.user()?.audioInputMode || false;
+}
+
 export {
   speakMessageIfAudioPromptFeedbackEnabled,
   startRecording,
@@ -58,6 +63,7 @@ export {
   revisitUnit,
   gatherAnswerLogRecord,
   newQuestionHandler,
+  checkAudioInputMode,
 };
 
 /*
