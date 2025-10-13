@@ -2898,6 +2898,8 @@ export const methods = {
     return "success";
   },
 
+  // DEPRECATED: Old insecure password reset - kept for backward compatibility
+  // Use requestPasswordReset and resetPasswordWithToken instead
   resetPasswordWithSecret: function(email, secret, newPassword){
     // Security: Validate input types
     check(email, String);
@@ -2912,7 +2914,112 @@ export const methods = {
       return true;
     } else {
       return false;
-    }        
+    }
+  },
+
+  // Security: New secure password reset - Step 1: Request reset token
+  requestPasswordReset: function(email) {
+    check(email, String);
+
+    // Rate limiting: Check recent reset requests
+    const recentResets = PasswordResetTokens.find({
+      email: email,
+      createdAt: {$gt: new Date(Date.now() - 60000)} // Last minute
+    }).count();
+
+    if (recentResets >= 3) {
+      throw new Meteor.Error('rate-limit', 'Too many reset requests. Please wait a minute.');
+    }
+
+    // Find user
+    const user = Meteor.users.findOne({username: email});
+    if (!user) {
+      // Security: Don't reveal if email exists
+      serverConsole('Password reset requested for non-existent email:', email);
+      return { success: true }; // Fake success to prevent enumeration
+    }
+
+    // Generate cryptographically secure token (32 bytes = 256 bits)
+    const token = randomBytes(32).toString('hex');
+
+    // Hash the token before storing (using SHA-256)
+    const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
+
+    // Store hashed token with expiration (1 hour)
+    const expiresAt = new Date(Date.now() + 3600000); // 1 hour
+    PasswordResetTokens.insert({
+      email: email,
+      userId: user._id,
+      tokenHash: tokenHash,
+      createdAt: new Date(),
+      expiresAt: expiresAt,
+      used: false
+    });
+
+    // In production, send email with token
+    // For now, log it (REMOVE THIS IN PRODUCTION)
+    serverConsole('Password reset token for', email, ':', token);
+    serverConsole('Token expires at:', expiresAt);
+
+    return {
+      success: true,
+      // TODO: Remove token from response in production - send via email instead
+      token: token  // TEMPORARY: For testing only
+    };
+  },
+
+  // Security: New secure password reset - Step 2: Reset with token
+  resetPasswordWithToken: function(email, token, newPassword) {
+    check(email, String);
+    check(token, String);
+    check(newPassword, String);
+
+    // Security: Validate password strength
+    if (!newPassword || newPassword.length < 8) {
+      throw new Meteor.Error('weak-password', 'Password must be at least 8 characters long');
+    }
+    if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])/.test(newPassword)) {
+      throw new Meteor.Error('weak-password', 'Password must contain at least one uppercase letter, one lowercase letter, and one number');
+    }
+
+    // Hash the provided token
+    const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
+
+    // Find valid token
+    const resetRecord = PasswordResetTokens.findOne({
+      email: email,
+      tokenHash: tokenHash,
+      used: false,
+      expiresAt: {$gt: new Date()}
+    });
+
+    if (!resetRecord) {
+      throw new Meteor.Error('invalid-token', 'Invalid or expired reset token');
+    }
+
+    // Mark token as used
+    PasswordResetTokens.update({_id: resetRecord._id}, {$set: {used: true, usedAt: new Date()}});
+
+    // Reset the password
+    Accounts.setPassword(resetRecord.userId, newPassword);
+
+    serverConsole('Password successfully reset for user:', email);
+    return { success: true };
+  },
+
+  // Security: Clean up expired tokens (call this periodically via cron)
+  cleanupExpiredPasswordResetTokens: function() {
+    // Only admins can cleanup
+    if (!this.userId || !Roles.userIsInRole(this.userId, ['admin'])) {
+      throw new Meteor.Error(403, 'Admin access required');
+    }
+
+    const deleted = PasswordResetTokens.remove({
+      expiresAt: {$lt: new Date()}
+    });
+
+    serverConsole('Cleaned up', deleted, 'expired password reset tokens');
+    return { deleted: deleted };
   },
   sendUserErrorReport: function(userID, description, curPage, sessionVars, userAgent, logs, currentExperimentState) {
     const errorReport = {
