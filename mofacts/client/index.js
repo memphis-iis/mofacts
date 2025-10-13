@@ -10,6 +10,24 @@ import {
   getTestType,
   getCurrentTheme
 } from './lib/currentTestingHelpers';
+import DOMPurify from 'dompurify';
+
+// Security: HTML sanitization for user-generated content
+// Allow safe formatting tags but block scripts, iframes, and event handlers
+function sanitizeHTML(dirty) {
+  if (!dirty) return '';
+
+  return DOMPurify.sanitize(dirty, {
+    ALLOWED_TAGS: ['b', 'i', 'em', 'strong', 'u', 'br', 'p', 'span', 'div',
+                   'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+                   'table', 'tr', 'td', 'th', 'thead', 'tbody',
+                   'ul', 'ol', 'li', 'center', 'a', 'img', 'audio', 'source'],
+    ALLOWED_ATTR: ['style', 'class', 'id', 'border', 'href', 'src', 'alt', 'width', 'height', 'controls', 'preload', 'data-audio-id'],
+    ALLOWED_URI_REGEXP: /^(?:(?:(?:f|ht)tps?|mailto|tel|callto|sms|cid|xmpp|blob):|[^a-z]|[a-z+.\-]+(?:[^a-z+.\-:]|$))/i,
+    FORBID_TAGS: ['script', 'iframe', 'object', 'embed', 'form', 'input', 'button'],
+    FORBID_ATTR: ['onerror', 'onload', 'onclick', 'onmouseover', 'onfocus', 'onblur']
+  });
+}
 
 export {checkUserSession, clientConsole}
 
@@ -398,8 +416,12 @@ Template.registerHelper('isInSession', function() {
   return (Session.get('curModule') == 'profile');
 });
 Template.registerHelper('curTdfTips', function() {
-  if(Session.get('curTdfTips'))
-    return Session.get('curTdfTips');
+  if(Session.get('curTdfTips')) {
+    // Security: Sanitize each tip to prevent XSS while allowing safe formatting
+    const tips = Session.get('curTdfTips');
+    return tips.map(tip => sanitizeHTML(tip));
+  }
+  return [];
 });
 Template.registerHelper('and',(a,b)=>{
   return a && b;

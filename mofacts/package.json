@@ -16,6 +16,7 @@
     "core-js": "^2.5.7",
     "diff": "^5.0.0",
     "diskusage": "^1.2.0",
+    "dompurify": "^3.0.6",
     "double-metaphone": "^2.0.0",
     "expect": "^29.7.0",
     "hark": "^1.2.3",

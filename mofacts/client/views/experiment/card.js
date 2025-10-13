@@ -26,6 +26,24 @@ import {Answers} from './answerAssess';
 import {sessionCleanUp} from '../../lib/sessionUtils';
 import {checkUserSession} from '../../index'
 import {instructContinue, unitHasLockout, checkForFileImage} from './instructions';
+import DOMPurify from 'dompurify';
+
+// Security: HTML sanitization for user-generated content
+// Allow safe formatting tags but block scripts, iframes, and event handlers
+function sanitizeHTML(dirty) {
+  if (!dirty) return '';
+
+  return DOMPurify.sanitize(dirty, {
+    ALLOWED_TAGS: ['b', 'i', 'em', 'strong', 'u', 'br', 'p', 'span', 'div',
+                   'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+                   'table', 'tr', 'td', 'th', 'thead', 'tbody',
+                   'ul', 'ol', 'li', 'center', 'a', 'img', 'audio', 'source'],
+    ALLOWED_ATTR: ['style', 'class', 'id', 'border', 'href', 'src', 'alt', 'width', 'height', 'controls', 'preload', 'data-audio-id'],
+    ALLOWED_URI_REGEXP: /^(?:(?:(?:f|ht)tps?|mailto|tel|callto|sms|cid|xmpp|blob):|[^a-z]|[a-z+.\-]+(?:[^a-z+.\-:]|$))/i,
+    FORBID_TAGS: ['script', 'iframe', 'object', 'embed', 'form', 'input', 'button'],
+    FORBID_ATTR: ['onerror', 'onload', 'onclick', 'onmouseover', 'onfocus', 'onblur']
+  });
+}
 
 export {
   speakMessageIfAudioPromptFeedbackEnabled,
@@ -777,7 +795,8 @@ Template.card.helpers({
   // For now we're going to assume syllable hints are contiguous. TODO: make this more generalizable
   'subWordParts': function() {
     const experimentState = Session.get('currentExperimentState');
-    return experimentState.clozeQuestionParts || undefined;
+    // Security: Sanitize HTML to prevent XSS while allowing safe formatting
+    return sanitizeHTML(experimentState.clozeQuestionParts);
   },
 
   'ifClozeDisplayTextExists': function (){
@@ -795,22 +814,26 @@ Template.card.helpers({
 
   'clozeText': function() {
     const currentDisplay = Session.get('currentDisplay');
-    return currentDisplay ? currentDisplay.clozeText : undefined;
+    // Security: Sanitize HTML to prevent XSS while allowing safe formatting
+    return currentDisplay ? sanitizeHTML(currentDisplay.clozeText) : undefined;
   },
 
   'text': function() {
     const currentDisplay = Session.get('currentDisplay');
-    return currentDisplay ? currentDisplay.text : undefined;
+    // Security: Sanitize HTML to prevent XSS while allowing safe formatting
+    return currentDisplay ? sanitizeHTML(currentDisplay.text) : undefined;
   },
 
   'videoUnitDisplayText': function() {
     const curUnit = Session.get('currentTdfUnit');
-    return curUnit.videosession.displayText;
+    // Security: Sanitize HTML to prevent XSS while allowing safe formatting
+    return sanitizeHTML(curUnit.videosession.displayText);
   },
 
   'dialogueText': function() {
     const text = Session.get('dialogueDisplay') ? Session.get('dialogueDisplay').text : undefined;
-    return text
+    // Security: Sanitize HTML to prevent XSS while allowing safe formatting
+    return sanitizeHTML(text);
   },
 
   'curImgSrc': function() {
@@ -1690,7 +1713,8 @@ function setUpButtonTrial() {
     curButtonList.push({
       verbalChoice: curChar,
       buttonName: val, // Currently, name and value are the same
-      buttonValue: val,
+      // Security: Sanitize HTML to prevent XSS while allowing safe formatting
+      buttonValue: sanitizeHTML(val),
     });
     curChar = nextChar(curChar);
   });
