@@ -2618,6 +2618,14 @@ export const methods = {
   },
 
   removeTurkById: function(turkId, experimentId){
+    // Security: User must be logged in and can only modify their own lockouts
+    if (!this.userId) {
+      throw new Meteor.Error(401, 'Must be logged in');
+    }
+    if (turkId !== this.userId && !Roles.userIsInRole(this.userId, ['admin'])) {
+      throw new Meteor.Error(403, 'Can only modify your own lockouts');
+    }
+
     serverConsole('removeTurkById', turkId, experimentId)
     ScheduledTurkMessages.remove({workerUserId: turkId, experiment: experimentId});
     let lockout = Meteor.user().lockouts;
@@ -2785,8 +2793,17 @@ export const methods = {
   },
 
   getAccessorsTDFID: function(TDFId){
+    // Security: User must be logged in and either own the TDF or be an admin
+    if (!this.userId) {
+      throw new Meteor.Error(401, 'Must be logged in');
+    }
+
     const tdf = Tdfs.findOne({_id: TDFId});
     if(tdf){
+      // Check if user is owner or admin
+      if (tdf.ownerId !== this.userId && !Roles.userIsInRole(this.userId, ['admin', 'teacher'])) {
+        throw new Meteor.Error(403, 'Access denied');
+      }
       const accessors = tdf.accessors || [];
       return accessors;
     } else {
@@ -2795,11 +2812,29 @@ export const methods = {
   },
 
   getAccessors: function(TDFId){
+    // Security: User must be logged in and either own the TDF or be an admin
+    if (!this.userId) {
+      throw new Meteor.Error(401, 'Must be logged in');
+    }
+
+    const tdf = Tdfs.findOne({_id: TDFId});
+    if (tdf && tdf.ownerId !== this.userId && !Roles.userIsInRole(this.userId, ['admin', 'teacher'])) {
+      throw new Meteor.Error(403, 'Access denied');
+    }
+
     const accessors = Meteor.users.find({'accessedTDFs': TDFId}).fetch();
     return accessors;
   },
 
   getAccessableTDFSForUser: function(userId){
+    // Security: User must be logged in and can only access their own data unless admin
+    if (!this.userId) {
+      throw new Meteor.Error(401, 'Must be logged in');
+    }
+    if (userId !== this.userId && !Roles.userIsInRole(this.userId, ['admin', 'teacher'])) {
+      throw new Meteor.Error(403, 'Can only access your own TDFs');
+    }
+
     serverConsole('getAccessableTDFSForUser', userId);
     const accessableTDFs = Meteor.users.findOne({_id: userId}).accessedTDFs || [];
     const TDFs = Tdfs.find({_id: {$in: accessableTDFs}}).fetch();
@@ -2815,6 +2850,19 @@ export const methods = {
   },
 
   assignAccessors: function(TDFId, accessors, revokedAccessors){
+    // Security: User must be logged in and either own the TDF or be an admin
+    if (!this.userId) {
+      throw new Meteor.Error(401, 'Must be logged in');
+    }
+
+    const tdf = Tdfs.findOne({_id: TDFId});
+    if (!tdf) {
+      throw new Meteor.Error(404, 'TDF not found');
+    }
+    if (tdf.ownerId !== this.userId && !Roles.userIsInRole(this.userId, ['admin', 'teacher'])) {
+      throw new Meteor.Error(403, 'Only TDF owner or admin can assign accessors');
+    }
+
     serverConsole('assignAccessors', TDFId, accessors, revokedAccessors)
     Tdfs.update({_id: TDFId}, {$set: {'accessors': accessors}});
     const userIds = accessors.map((x) => x.userId);
@@ -2823,6 +2871,11 @@ export const methods = {
   },
 
   transferDataOwnership: function(tdfId, newOwner){
+    // Security: User must be logged in and either own the TDF or be an admin
+    if (!this.userId) {
+      throw new Meteor.Error(401, 'Must be logged in');
+    }
+
     //set the Tdf owner
     serverConsole('transferDataOwnership',tdfId,newOwner);
     tdf = Tdfs.findOne({_id: tdfId});
@@ -2832,6 +2885,12 @@ export const methods = {
     } else {
       serverConsole('TDF found', tdf._id, tdf.ownerId);
     }
+
+    // Check if user is current owner or admin
+    if (tdf.ownerId !== this.userId && !Roles.userIsInRole(this.userId, ['admin'])) {
+      throw new Meteor.Error(403, 'Only current owner or admin can transfer ownership');
+    }
+
     tdf.ownerId = newOwner._id;
     Tdfs.upsert({_id: tdfId}, tdf);
     serverConsole(tdf);
@@ -3259,10 +3318,31 @@ export const methods = {
   
 
   removeAssetById: function(assetId) {
+    // Security: User must be logged in and either own the asset or be an admin
+    if (!this.userId) {
+      throw new Meteor.Error(401, 'Must be logged in');
+    }
+
+    const asset = DynamicAssets.findOne({_id: assetId});
+    if (!asset) {
+      throw new Meteor.Error(404, 'Asset not found');
+    }
+    if (asset.userId !== this.userId && !Roles.userIsInRole(this.userId, ['admin'])) {
+      throw new Meteor.Error(403, 'Can only delete your own assets');
+    }
+
     DynamicAssets.remove({_id: assetId});
   },
 
   toggleTdfPresence: function(tdfIds, mode) {
+    // Security: User must be logged in and be an admin to toggle TDF visibility
+    if (!this.userId) {
+      throw new Meteor.Error(401, 'Must be logged in');
+    }
+    if (!Roles.userIsInRole(this.userId, ['admin'])) {
+      throw new Meteor.Error(403, 'Admin access required to toggle TDF visibility');
+    }
+
     tdfIds.forEach((tdfid) => {
       Tdfs.update({_id: tdfid}, {$set: {visibility: mode}})
     })
