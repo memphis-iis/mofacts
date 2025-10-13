@@ -1593,10 +1593,15 @@ function curStimHasSoundDisplayType() {
 function curStimHasImageDisplayType() {
   const currentStimuliSetId = Session.get('currentStimuliSetId');
   const stimDisplayTypeMap = Session.get('stimDisplayTypeMap');
-  // Check if the map exists AND the specific stimuliSetId entry exists
-  return currentStimuliSetId && stimDisplayTypeMap && stimDisplayTypeMap[currentStimuliSetId]
-    ? stimDisplayTypeMap[currentStimuliSetId].hasImage
-    : false;
+
+  // Check if the map exists AND has entry for this stimuliSetId
+  if (currentStimuliSetId && stimDisplayTypeMap && stimDisplayTypeMap[currentStimuliSetId]) {
+    return stimDisplayTypeMap[currentStimuliSetId].hasImage;
+  }
+
+  // Fallback: If map not populated for this set, check if there are actual image stimuli
+  const imageSrcs = getCurrentStimDisplaySources('imageStimulus');
+  return imageSrcs && imageSrcs.length > 0;
 }
 
 
