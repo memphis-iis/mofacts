@@ -3705,7 +3705,10 @@ export const methods = {
           neutral_color: '#ffffff',
           alert_color: '#ff0000',
           logo_url: '',
-          signInDescription: 'A web-based adaptive learning system that uses spaced practice and retrieval to help you learn and retain information more effectively. Sign in to access your personalized learning experience.'
+          signInDescription: 'A web-based adaptive learning system that uses spaced practice and retrieval to help you learn and retain information more effectively. Sign in to access your personalized learning experience.',
+          fade_in_duration: '50ms',
+          fade_out_duration: '50ms',
+          button_fade_duration: '50ms'
         }
       }
      }

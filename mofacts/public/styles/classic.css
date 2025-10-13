@@ -22,10 +22,16 @@
     --border-radius-circle: 50%; /* Perfect circles */
     --border-radius-none: 0px; /* Flat elements (stimulus boxes) */
 
-    /* Transition Durations - UX Research Based Timings */
+    /* Transition Durations - Admin Configurable via Theme Settings */
+    /* Default values (can be overridden in Admin Control Panel) */
+    --fade-in-duration: 50ms;         /* Default: 50ms - Trial/element fade in */
+    --fade-out-duration: 50ms;        /* Default: 50ms - Trial/element fade out */
+    --button-fade-duration: 50ms;     /* Default: 50ms - Button transitions */
+
+    /* Legacy transition variables (kept for backwards compatibility) */
     --transition-instant: 0.01s;      /* Instant (accessibility fallback) */
-    --transition-fast: 0.1s;          /* 100ms - UI feedback, hovers */
-    --transition-smooth: 0.2s;        /* 200ms - Trial transitions (main fade) */
+    --transition-fast: var(--button-fade-duration); /* Use button fade duration */
+    --transition-smooth: var(--fade-in-duration);   /* Use fade in duration */
 }
 /* ===== ACCESSIBILITY ===== */
 /* Screen reader only content - visually hidden but accessible to assistive technology */
