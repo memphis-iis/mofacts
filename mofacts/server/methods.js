@@ -4442,3 +4442,77 @@ Router.route('clozeEditHistory', {
     serverConsole('Sent all  data for', uid, 'as file', filename, 'with record-count:', recCount);
   },
 });
+
+// ============================================================================
+// Security: Rate Limiting Configuration
+// ============================================================================
+
+import { DDPRateLimiter } from 'meteor/ddp-rate-limiter';
+
+// Rate limit password reset requests (3 per hour per connection)
+DDPRateLimiter.addRule({
+  type: 'method',
+  name: 'requestPasswordReset',
+  connectionId() { return true; }
+}, 3, 3600000); // 3 requests per hour
+
+// Rate limit password reset with token (5 attempts per hour)
+DDPRateLimiter.addRule({
+  type: 'method',
+  name: 'resetPasswordWithToken',
+  connectionId() { return true; }
+}, 5, 3600000); // 5 attempts per hour
+
+// Rate limit old password reset method (3 per hour)
+DDPRateLimiter.addRule({
+  type: 'method',
+  name: 'resetPasswordWithSecret',
+  connectionId() { return true; }
+}, 3, 3600000);
+
+// Rate limit login attempts (10 per 5 minutes per connection)
+DDPRateLimiter.addRule({
+  type: 'method',
+  name: 'login',
+  connectionId() { return true; }
+}, 10, 300000); // 10 attempts per 5 minutes
+
+// Rate limit signup (5 per hour per connection)
+DDPRateLimiter.addRule({
+  type: 'method',
+  name: 'signUpUser',
+  connectionId() { return true; }
+}, 5, 3600000); // 5 signups per hour
+
+// Rate limit file uploads (20 per hour per user)
+DDPRateLimiter.addRule({
+  type: 'method',
+  name: 'processPackageUpload',
+  userId(userId) { return !!userId; }
+}, 20, 3600000); // 20 uploads per hour
+
+// Rate limit data deletion operations (10 per hour per user)
+DDPRateLimiter.addRule({
+  type: 'method',
+  name(name) {
+    return ['deleteAllFiles', 'deleteStimFile', 'removeAssetById'].includes(name);
+  },
+  userId(userId) { return !!userId; }
+}, 10, 3600000); // 10 deletions per hour
+
+// Rate limit sensitive admin operations (30 per hour per user)
+DDPRateLimiter.addRule({
+  type: 'method',
+  name(name) {
+    return ['transferDataOwnership', 'assignAccessors', 'toggleTdfPresence', 'impersonate'].includes(name);
+  },
+  userId(userId) { return !!userId; }
+}, 30, 3600000); // 30 admin operations per hour
+
+// Log rate limit violations
+DDPRateLimiter.setErrorMessage(function(rateLimitResult) {
+  const { timeToReset, numInvocationsLeft } = rateLimitResult;
+  const seconds = Math.ceil(timeToReset / 1000);
+  serverConsole('Rate limit exceeded - wait', seconds, 'seconds. Remaining:', numInvocationsLeft);
+  return `Too many requests. Please try again in ${seconds} seconds.`;
+});
