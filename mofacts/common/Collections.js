@@ -30,7 +30,7 @@ ProbabilityEstimates = new Meteor.Collection('probabilityEstimates');
 DynamicAssets = new FilesCollection({
   collectionName: 'Assets',
   storagePath: process.env.HOME + '/dynamic-assets',
-  allowClientCode: true, // Disallow remove files from Client
+  allowClientCode: false, // Security: Disallow file operations from client (use server methods)
   onBeforeUpload(file) {
     // Allow upload files under 10MB, and only in zip formats
     if (file.size <= 104857600 && /zip/i.test(file.extension)) {

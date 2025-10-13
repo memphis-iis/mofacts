@@ -396,7 +396,8 @@ async function doFileUpload(fileArray) {
     if (existingFile) {
       //atempts to delete existing file
       try {
-        existingFile.remove();
+        // Security: Use server method instead of direct client remove
+        Meteor.call('removeAssetById', existingFile._id);
       } catch (e) {
         console.log('error deleting existing file', e);
         alert('Error deleting existing file. Please try again. If this error persists, please file a bug report.');
@@ -473,7 +474,8 @@ async function doPackageUpload(file, template){
   if (existingFile) {
     if(confirm(`Uploading this file will overwrite existing data. Continue?`)){
       console.log(`File ${file.name} already exists, overwritting.`)
-      existingFile.remove();
+      // Security: Use server method instead of direct client remove
+      Meteor.call('removeAssetById', existingFile._id);
     } else {
       return;
     }

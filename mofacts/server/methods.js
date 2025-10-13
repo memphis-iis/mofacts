@@ -3703,6 +3703,17 @@ const asyncMethods = {
 Meteor.methods(functionTimerWrapper(methods, asyncMethods));
 
 Meteor.startup(async function() {
+  // Security: Add security headers to all HTTP responses
+  import { WebApp } from 'meteor/webapp';
+  WebApp.connectHandlers.use((req, res, next) => {
+    res.setHeader('X-Frame-Options', 'DENY');
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('X-XSS-Protection', '1; mode=block');
+    res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+    res.setHeader('Permissions-Policy', 'geolocation=(), microphone=()');
+    next();
+  });
+
   highestStimuliSetId = Tdfs.findOne({}, {sort: {stimuliSetId: -1}, limit: 1 });
   nextEventId = Histories.findOne({}, {limit: 1, sort: {eventId: -1}})?.eventId + 1 || 1;
   nextStimuliSetId = highestStimuliSetId && highestStimuliSetId.stimuliSetId ? parseInt(highestStimuliSetId.stimuliSetId) + 1 : 1;
