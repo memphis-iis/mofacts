@@ -816,9 +816,14 @@ Template.card.helpers({
   'curImgSrc': function() {
     const currentDisplay = Session.get('currentDisplay');
     const curImgSrc = currentDisplay ? currentDisplay.imgSrc : undefined;
+    console.log('curImgSrc helper - curImgSrc:', curImgSrc);
+    console.log('curImgSrc helper - imagesDict has key?', curImgSrc && imagesDict[curImgSrc] !== undefined);
+    console.log('curImgSrc helper - imagesDict:', Object.keys(imagesDict));
     if (curImgSrc && imagesDict[curImgSrc]) {
+      console.log('curImgSrc helper - returning:', imagesDict[curImgSrc].src);
       return imagesDict[curImgSrc].src;
     } else {
+      console.log('curImgSrc helper - returning empty string');
       return '';
     }
   },

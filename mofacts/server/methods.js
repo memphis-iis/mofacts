@@ -14,6 +14,7 @@ import {result} from 'underscore';
 import { _ } from 'core-js';
 import { all } from 'bluebird';
 import { check, Match } from 'meteor/check'; // Security: Input validation
+import { WebApp } from 'meteor/webapp'; // Security: For adding HTTP headers
 
 
 export {
@@ -3727,7 +3728,6 @@ Meteor.methods(functionTimerWrapper(methods, asyncMethods));
 
 Meteor.startup(async function() {
   // Security: Add security headers to all HTTP responses
-  import { WebApp } from 'meteor/webapp';
   WebApp.connectHandlers.use((req, res, next) => {
     res.setHeader('X-Frame-Options', 'DENY');
     res.setHeader('X-Content-Type-Options', 'nosniff');
