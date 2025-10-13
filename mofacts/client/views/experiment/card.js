@@ -3988,10 +3988,12 @@ function startUserMedia(stream) {
   // Default 20, range typically -100 to 0 (dB)
   const sensitivity = Session.get('audioInputSensitivity') || 20;
   const harkOptions = {
-    threshold: -1 * sensitivity,  // Convert to negative dB value
-    interval: 100  // Check every 100ms instead of default 50ms for more stable detection
+    threshold: -1 * sensitivity,  // Convert to negative dB value (e.g., -20 dB)
+    interval: 100,  // Check every 100ms instead of default 50ms for more stable detection
+    history: 20,  // Require 20 samples above threshold before triggering (filters out clicks/pops)
+    smoothing: 0.1  // Smoothing time constant for audio analysis (default 0.1)
   };
-  console.log('[SR] Initializing Hark with threshold:', harkOptions.threshold, 'dB, interval:', harkOptions.interval, 'ms');
+  console.log('[SR] Initializing Hark with options:', harkOptions);
   speechEvents = hark(stream, harkOptions);
 
   speechEvents.on('speaking', function() {
