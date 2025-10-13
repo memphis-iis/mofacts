@@ -26,6 +26,7 @@ ErrorReports = new Mongo.Collection('errorReports');
 DynamicConfig = new Mongo.Collection('dynamicConfig');
 ProbabilityEstimates = new Meteor.Collection('probabilityEstimates');
 PasswordResetTokens = new Mongo.Collection('passwordResetTokens');
+AuditLog = new Mongo.Collection('auditLog');
 
 //Init DynamicAssets Collection
 DynamicAssets = new FilesCollection({

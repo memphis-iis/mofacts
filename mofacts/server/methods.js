@@ -3229,15 +3229,54 @@ export const methods = {
   //Impersonate User
   impersonate: function(userId) {
     check(userId, String);
-    if (!Meteor.users.findOne(userId)) {
+
+    // Security: Authorization check
+    if (!this.userId) {
+      throw new Meteor.Error(401, 'Must be logged in');
+    }
+
+    if (!Roles.userIsInRole(this.userId, ['admin'])) {
+      throw new Meteor.Error(403, 'Admin access required');
+    }
+
+    // Verify target user exists
+    const targetUser = Meteor.users.findOne(userId);
+    if (!targetUser) {
       throw new Meteor.Error(404, 'User not found');
     }
-    if (!Roles.userIsInRole(Meteor.userId(), ['admin'])) {
-      throw new Meteor.Error(403, 'You are not authorized to do that');
-    }
-    const newUser = Meteor.users.findOne(userId);
-    newUser.impersonating = true;
-    return newUser
+
+    // Security: Audit logging
+    const adminUser = Meteor.user();
+    AuditLog.insert({
+      action: 'impersonate',
+      adminUserId: this.userId,
+      adminUsername: adminUser.username || adminUser.emails?.[0]?.address,
+      targetUserId: userId,
+      targetUsername: targetUser.username || targetUser.emails?.[0]?.address,
+      timestamp: new Date(),
+      ipAddress: this.connection?.clientAddress,
+      userAgent: this.connection?.httpHeaders?.['user-agent']
+    });
+
+    // Security: Set impersonation with timeout (1 hour)
+    const expiration = new Date(Date.now() + 3600000); // 1 hour
+    Meteor.users.update({_id: this.userId}, {
+      $set: {
+        impersonating: true,
+        impersonatedUserId: userId,
+        impersonationStartTime: new Date(),
+        impersonationExpires: expiration
+      }
+    });
+
+    // Security: Return only necessary fields, not entire user object
+    return {
+      userId: targetUser._id,
+      username: targetUser.username || targetUser.emails?.[0]?.address,
+      roles: targetUser.roles,
+      impersonating: true,
+      impersonationExpires: expiration
+    };
   },
 
   clearLoginData: function(){    
@@ -3254,8 +3293,75 @@ export const methods = {
   },
 
   clearImpersonation: function(){
-    Meteor.users.update({_id: Meteor.userId()}, {$set: {impersonating: false}});
-    return;
+    // Security: Authorization check
+    if (!this.userId) {
+      throw new Meteor.Error(401, 'Must be logged in');
+    }
+
+    const user = Meteor.user();
+    if (!user.impersonating) {
+      throw new Meteor.Error(400, 'Not currently impersonating');
+    }
+
+    // Security: Audit logging
+    AuditLog.insert({
+      action: 'end_impersonation',
+      adminUserId: this.userId,
+      adminUsername: user.username || user.emails?.[0]?.address,
+      targetUserId: user.impersonatedUserId,
+      timestamp: new Date(),
+      ipAddress: this.connection?.clientAddress
+    });
+
+    // Clear impersonation fields
+    Meteor.users.update({_id: this.userId}, {
+      $unset: {
+        impersonating: "",
+        impersonatedUserId: "",
+        impersonationStartTime: "",
+        impersonationExpires: ""
+      }
+    });
+
+    return true;
+  },
+
+  // Security: Check and clear expired impersonation sessions
+  checkImpersonationExpiry: function() {
+    if (!this.userId) {
+      return false;
+    }
+
+    const user = Meteor.user();
+    if (!user.impersonating || !user.impersonationExpires) {
+      return false;
+    }
+
+    // Check if impersonation has expired
+    if (new Date() > user.impersonationExpires) {
+      // Automatically clear expired impersonation
+      AuditLog.insert({
+        action: 'impersonation_auto_expired',
+        adminUserId: this.userId,
+        adminUsername: user.username || user.emails?.[0]?.address,
+        targetUserId: user.impersonatedUserId,
+        timestamp: new Date(),
+        expiredAt: user.impersonationExpires
+      });
+
+      Meteor.users.update({_id: this.userId}, {
+        $unset: {
+          impersonating: "",
+          impersonatedUserId: "",
+          impersonationStartTime: "",
+          impersonationExpires: ""
+        }
+      });
+
+      return true; // Impersonation was expired and cleared
+    }
+
+    return false; // Impersonation still active
   },
 
   getUserSpeechAPIKey: function() {
