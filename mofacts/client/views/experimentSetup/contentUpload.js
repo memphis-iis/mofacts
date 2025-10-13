@@ -159,6 +159,12 @@ Template.contentUpload.helpers({
   },
   'displayUnownedTDFs': function(){
     return !Template.instance().toggleOnlyOwnedTDFs.get();
+  },
+  'showDeleteAllButton': function(){
+    // Only show delete all button if user is admin AND setting is enabled
+    const isAdmin = Roles.userIsInRole(Meteor.userId(), 'admin');
+    const settingEnabled = Meteor.settings.public.enableDeleteAllButton || false;
+    return isAdmin && settingEnabled;
   }
 });
 
