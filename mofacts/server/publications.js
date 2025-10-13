@@ -50,9 +50,13 @@ Meteor.publish('ownedTdfs', function(ownerId) {
 });
 
 Meteor.publish('tdfByExperimentTarget', function(experimentTarget, experimentConditions=undefined) {
-    let query = {"content.tdfs.tutor.setspec.experimentTarget": {$regex: experimentTarget, $options: '-i'}}
+    // Security: Sanitize regex input to prevent ReDoS attacks and regex injection
+    // Escape regex special characters: . * + ? ^ $ { } ( ) | [ ] \
+    const sanitizedTarget = experimentTarget ? experimentTarget.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') : '';
+
+    let query = {"content.tdfs.tutor.setspec.experimentTarget": {$regex: sanitizedTarget, $options: 'i'}}
     if(experimentConditions && Array.isArray(experimentConditions)){
-        query = {$or: [{"content.fileName": {$in: experimentConditions}}, {"content.tdfs.tutor.setspec.experimentTarget": {$regex: experimentTarget, $options: '-i'}}]}
+        query = {$or: [{"content.fileName": {$in: experimentConditions}}, {"content.tdfs.tutor.setspec.experimentTarget": {$regex: sanitizedTarget, $options: 'i'}}]}
         console.log(JSON.stringify(query))
     }
     return Tdfs.find(query);

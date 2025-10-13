@@ -13,6 +13,7 @@ import {getItem, getCourse, getTdf} from './orm';
 import {result} from 'underscore';
 import { _ } from 'core-js';
 import { all } from 'bluebird';
+import { check, Match } from 'meteor/check'; // Security: Input validation
 
 
 export {
@@ -2744,6 +2745,9 @@ export const methods = {
   },
 
   sendPasswordResetEmail: function(email){
+    // Security: Validate input type
+    check(email, String);
+
     serverConsole("sending password reset code for ", email)
     //Generate Code
     var secret = '';
@@ -2835,6 +2839,11 @@ export const methods = {
   },
 
   resetPasswordWithSecret: function(email, secret, newPassword){
+    // Security: Validate input types
+    check(email, String);
+    check(secret, String);
+    check(newPassword, String);
+
     user = Meteor.users.findOne({username: email});
     userId = user._id;
     userSecret = user.secret;
@@ -2892,10 +2901,24 @@ export const methods = {
 
 
   signUpUser: function(newUserName, newUserPassword, previousOK) {
+    // Security: Validate input types
+    check(newUserName, String);
+    check(newUserPassword, String);
+    check(previousOK, Match.Maybe(Boolean));
+
     serverConsole('signUpUser', newUserName, 'previousOK == ', previousOK);
 
   if (!newUserName) throw new Error('Blank user names aren\'t allowed');
-  if (!newUserPassword || newUserPassword.length < 6) throw new Error('Passwords must be at least 6 characters long');
+
+  // Security: Strengthen password requirements
+  if (!newUserPassword || newUserPassword.length < 8) {
+    throw new Meteor.Error('weak-password', 'Password must be at least 8 characters long');
+  }
+
+  // Check password complexity (uppercase, lowercase, and numbers)
+  if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])/.test(newUserPassword)) {
+    throw new Meteor.Error('weak-password', 'Password must contain at least one uppercase letter, one lowercase letter, and one number');
+  }
 
   // Simple mutex: block if another signup is in progress for this username
   while (signUpLocks[newUserName]) {
