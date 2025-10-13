@@ -3726,7 +3726,7 @@ async function processLINEAR16(data) {
   if (resetMainCardTimeout && timeoutFunc && !inputDisabled) {
     resetMainCardTimeout(); // Give ourselves a bit more time for the speech api to return results
   } else {
-    console.log('not resetting during processLINEAR16');
+    console.log('[SR] not resetting during processLINEAR16');
   }
   recorder.clear();
   const userAnswer = $('#forceCorrectionEntry').is(':visible') ?
@@ -3739,7 +3739,7 @@ async function processLINEAR16(data) {
     const setSpec = Session.get('currentTdfFile').tdfs.tutor.setspec;
     let speechRecognitionLanguage = setSpec.speechRecognitionLanguage;
     if (!speechRecognitionLanguage) {
-      console.log('no speechRecognitionLanguage in set spec, defaulting to en-US');
+      console.log('[SR] no speechRecognitionLanguage in set spec, defaulting to en-US');
       speechRecognitionLanguage = 'en-US';
     } else {
       speechRecognitionLanguage = speechRecognitionLanguage[0];
@@ -3762,6 +3762,7 @@ async function processLINEAR16(data) {
       }
     }
 
+    console.log('[SR] Sending audio to Google Speech API...');
     const request = generateRequestJSON(sampleRate, speechRecognitionLanguage, phraseHints, data);
 
     let answerGrammar = [];
@@ -3772,6 +3773,7 @@ async function processLINEAR16(data) {
       // may confuse the speech api so that we can check if what the api returns
       // is within the realm of reasonable responses before transcribing it
       answerGrammar = getAllCurrentStimAnswers(false);
+      console.log('[SR] Answer grammar:', answerGrammar);
     }
     let tdfSpeechAPIKey;
     if(Session.get('useEmbeddedAPIKeys')){
@@ -3781,16 +3783,16 @@ async function processLINEAR16(data) {
     }
     // Make the actual call to the google speech api with the audio data for transcription
     if (tdfSpeechAPIKey && tdfSpeechAPIKey != '') {
-      console.log('tdf key detected');
+      console.log('[SR] Using TDF-embedded API key');
       Meteor.call('makeGoogleSpeechAPICall', Session.get('currentTdfId'), "", request, answerGrammar, (err, res) => speechAPICallback(err, res));
     // If we don't have a tdf provided speech api key load up the user key
     // NOTE: we shouldn't be able to get here if there is no user key
     } else {
-      console.log('no tdf key, using user provided key');
+      console.log('[SR] Using user-provided API key');
       Meteor.call('makeGoogleSpeechAPICall', Session.get('currentTdfId'), Session.get('speechAPIKey'), request, answerGrammar, (err, res) => speechAPICallback(err, res));
     }
   } else {
-    console.log('processLINEAR16 userAnswer not defined');
+    console.log('[SR] processLINEAR16 userAnswer not defined');
   }
 }
 
@@ -3800,14 +3802,14 @@ function speechAPICallback(err, data){
 
   // Handle Meteor method errors (network, timeout, server exception)
   if (err) {
-    console.error('Meteor method error:', err);
+    console.error('[SR] Meteor method error:', err);
     const errorMsg = err.reason || err.message || 'Unknown error';
-    console.log('Error details:', errorMsg);
+    console.log('[SR] Error details:', errorMsg);
     answerGrammar = [];
     response = {}; // Empty response to trigger "NO TRANSCRIPT/SILENCE" path
   } else if (data) {
     [answerGrammar, response] = data;
-    console.log('Speech API response received:', JSON.stringify(response).substring(0, 200));
+    console.log('[SR] Speech API response received:', JSON.stringify(response).substring(0, 200));
   }
 
   let transcript = '';
@@ -3818,10 +3820,10 @@ function speechAPICallback(err, data){
 
   // Check for Google API errors (returned in response.error field)
   if (response && response.error) {
-    console.log('Google Speech API error object:', response.error);
+    console.log('[SR] Google Speech API error object:', response.error);
     const errorCode = response.error.code;
     const errorMessage = response.error.message || '';
-    console.log(`Google API error - Code: ${errorCode}, Message: ${errorMessage}`);
+    console.log(`[SR] Google API error - Code: ${errorCode}, Message: ${errorMessage}`);
 
     if (errorCode === 403 || errorMessage.toLowerCase().includes('api key')) {
       transcript = 'Invalid API key. Please check your settings.';
@@ -3837,19 +3839,19 @@ function speechAPICallback(err, data){
              response['results'][0]['alternatives'] && response['results'][0]['alternatives'].length > 0) {
     // Successfully got transcription
     transcript = response['results'][0]['alternatives'][0]['transcript'].toLowerCase();
-    console.log('Transcribed text: "' + transcript + '"');
+    console.log('[SR] Transcribed text: "' + transcript + '"');
 
     if (ignoreOutOfGrammarResponses) {
       if (transcript == 'enter') {
         ignoredOrSilent = false;
       } else if (answerGrammar.indexOf(transcript) == -1) {
-        console.log('ANSWER OUT OF GRAMMAR, IGNORING. Expected one of:', answerGrammar);
+        console.log('[SR] ANSWER OUT OF GRAMMAR, IGNORING. Expected one of:', answerGrammar);
         transcript = speechOutOfGrammarFeedback;
         ignoredOrSilent = true;
       }
     }
   } else {
-    console.log('NO TRANSCRIPT/SILENCE - Response:', response);
+    console.log('[SR] NO TRANSCRIPT/SILENCE - Response:', response);
     transcript = 'Silence detected';
     ignoredOrSilent = true;
   }
@@ -3985,19 +3987,19 @@ function startUserMedia(stream) {
 
   speechEvents.on('speaking', function() {
     if (!Session.get('recording')) {
-      console.log('NOT RECORDING, VOICE START');
+      console.log('[SR] NOT RECORDING, VOICE START');
       return;
     } else {
-      console.log('VOICE START');
+      console.log('[SR] VOICE START');
       if (resetMainCardTimeout && timeoutFunc) {
         if (Session.get('recording')) {
-          console.log('voice_start resetMainCardTimeout');
+          console.log('[SR] voice_start resetMainCardTimeout');
           resetMainCardTimeout();
         } else {
-          console.log('NOT RECORDING');
+          console.log('[SR] NOT RECORDING');
         }
       } else {
-        console.log('RESETMAINCARDTIMEOUT NOT DEFINED');
+        console.log('[SR] RESETMAINCARDTIMEOUT NOT DEFINED');
       }
     }
   });
@@ -4006,22 +4008,22 @@ function startUserMedia(stream) {
     if (!Session.get('recording') || Session.get('pausedLocks')>0) {
       if (document.location.pathname != '/card' && document.location.pathname != '/instructions') {
         leavePage(function() {
-          console.log('cleaning up page after nav away from card, voice_stop');
+          console.log('[SR] cleaning up page after nav away from card, voice_stop');
         });
         return;
       } else {
-        console.log('NOT RECORDING, VOICE STOP');
+        console.log('[SR] NOT RECORDING, VOICE STOP');
         return;
       }
     } else {
-      console.log('VOICE STOP');
+      console.log('[SR] VOICE STOP');
       recorder.stop();
       Session.set('recording', false);
       recorder.exportToProcessCallback();
     }
   });
 
-  console.log('Audio recorder ready');
+  console.log('[SR] Audio recorder ready');
   cardStart();
 }
 
@@ -4029,20 +4031,20 @@ function startRecording() {
   if (recorder && !Session.get('recordingLocked') && Meteor.user().audioInputMode) {
     Session.set('recording', true);
     recorder.record();
-    console.log('RECORDING START');
+    console.log('[SR] RECORDING START');
   } else {
-    console.log('NO RECORDER / RECORDING LOCKED DURING AUDIO PLAYING');
+    console.log('[SR] NO RECORDER / RECORDING LOCKED DURING AUDIO PLAYING');
   }
 }
 
 function stopRecording() {
-  console.log('stopRecording', recorder, Session.get('recording'));
+  console.log('[SR] stopRecording', recorder, Session.get('recording'));
   if (recorder && Session.get('recording')) {
     recorder.stop();
     Session.set('recording', false);
 
     recorder.clear();
-    console.log('RECORDING END');
+    console.log('[SR] RECORDING END');
   }
 }
 
