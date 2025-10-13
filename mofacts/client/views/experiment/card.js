@@ -529,9 +529,24 @@ async function initCard() {
     Session.set('stimDisplayTypeMap', stimDisplayTypeMap);
   }
 
-  const audioInputEnabled = Meteor.user().audioInputMode;
+  // Check if audio input should be enabled:
+  // 1. User must have toggled SR icon on (audioInputMode)
+  // 2. TDF must have audioInputEnabled='true'
+  // 3. Must have API key (either user key or TDF key)
+  const userAudioToggled = Meteor.user().audioInputMode || false;
+  const tdfAudioEnabled = Session.get('currentTdfFile').tdfs.tutor.setspec.audioInputEnabled === 'true';
+  let audioInputEnabled = userAudioToggled && tdfAudioEnabled;
+
   if (audioInputEnabled) {
-    if (!Session.get('audioInputSensitivity')) {
+    // Check for API key availability
+    const tdfHasKey = !!Session.get('currentTdfFile').tdfs.tutor.setspec.speechAPIKey;
+    const userHasKey = !!Session.get('speechAPIKey');
+
+    if (!tdfHasKey && !userHasKey) {
+      console.warn('Audio input requested but no API key available (user or TDF)');
+      // Don't initialize audio without API key
+      audioInputEnabled = false;
+    } else if (!Session.get('audioInputSensitivity')) {
       // Default to 20 in case tdf doesn't specify and we're in an experiment
       const audioInputSensitivity = parseInt(Session.get('currentTdfFile').tdfs.tutor.setspec.audioInputSensitivity) || 20;
       Session.set('audioInputSensitivity', audioInputSensitivity);
