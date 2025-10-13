@@ -3174,6 +3174,14 @@ export const methods = {
   }
 },
   populateSSOProfile: function(userId){
+    // Security: Users can only populate their own profile unless admin
+    if (!this.userId) {
+      throw new Meteor.Error(401, 'Must be logged in');
+    }
+    if (userId !== this.userId && !Roles.userIsInRole(this.userId, ['admin'])) {
+      throw new Meteor.Error(403, 'Can only populate your own SSO profile');
+    }
+
     //check if the user has a service profile
     const user = Meteor.users.findOne(userId);
     if(user && user.services){
@@ -3253,21 +3261,41 @@ export const methods = {
   },
 
   getTdfTTSAPIKey: function(tdfId){
+    // Security: Only TDF owner or admin can access API keys
+    if (!this.userId) {
+      throw new Meteor.Error(401, 'Must be logged in');
+    }
+
     const tdf = Tdfs.findOne({_id: tdfId});
-    if(tdf){
-      return decryptData(tdf.content.tdfs.tutor.setspec.textToSpeechAPIKey);
-    } else {
+    if(!tdf){
       return '';
     }
+
+    // Check if user owns this TDF or is admin
+    if (tdf.ownerId !== this.userId && !Roles.userIsInRole(this.userId, ['admin', 'teacher'])) {
+      throw new Meteor.Error(403, 'Access denied to TDF API keys');
+    }
+
+    return decryptData(tdf.content.tdfs.tutor.setspec.textToSpeechAPIKey);
   },
 
   getTdfSpeechAPIKey: function(tdfId){
+    // Security: Only TDF owner or admin can access API keys
+    if (!this.userId) {
+      throw new Meteor.Error(401, 'Must be logged in');
+    }
+
     const tdf = Tdfs.findOne({_id: tdfId});
-    if(tdf){
-      return decryptData(tdf.content.tdfs.tutor.setspec.speechAPIKey);
-    } else {
+    if(!tdf){
       return '';
     }
+
+    // Check if user owns this TDF or is admin
+    if (tdf.ownerId !== this.userId && !Roles.userIsInRole(this.userId, ['admin', 'teacher'])) {
+      throw new Meteor.Error(403, 'Access denied to TDF API keys');
+    }
+
+    return decryptData(tdf.content.tdfs.tutor.setspec.speechAPIKey);
   },
 
 
