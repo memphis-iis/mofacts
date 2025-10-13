@@ -35,18 +35,21 @@
    - **Fix:** Authorization checks (admin/teacher only), filename sanitization, path traversal prevention
    - Files: Collections.js (FilesCollection config), methods.js (processPackageUpload)
    - Protection: Auth checks, 100MB limit enforcement, filename validation, zip content validation
+   - **Commit:** 0e8a95ef | **Issue:** [#1652](https://github.com/memphis-iis/mofacts/issues/1652)
 
 17. ✅ **Insufficient Session Management** - Implemented impersonation security
    - **Risk:** Admin abuse, no accountability, no session limits
    - **Fix:** Audit logging, 1-hour timeout, proper authorization, limited data exposure
    - Files: Collections.js (AuditLog collection), methods.js (impersonate, clearImpersonation, checkImpersonationExpiry)
    - Features: Audit trail with IP/user-agent, auto-expiration, returns minimal user data
+   - **Commit:** 40d60522 | **Issue:** [#1653](https://github.com/memphis-iis/mofacts/issues/1653)
 
 18. ✅ **innerHTML XSS Audit** - Comprehensive security review completed
    - **Risk:** Potential XSS via unprotected innerHTML assignments
    - **Finding:** All 7 innerHTML usages are SAFE - 1 protected with DOMPurify, 6 use numeric/system data only
    - **Files Audited:** instructions.js, card.js, plyrHelper.js, gauge.js
    - **Documentation:** Created INNERHTML_AUDIT_REPORT.md with full analysis
+   - **Commit:** e3081a9e | **Issue:** [#1654](https://github.com/memphis-iis/mofacts/issues/1654)
 
 ### October 13, 2025 - Critical Fixes (3)
 11. ✅ **Missing Authorization on 8 Server Methods** - Added auth checks
