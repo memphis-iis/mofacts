@@ -33,11 +33,34 @@ DynamicAssets = new FilesCollection({
   storagePath: process.env.HOME + '/dynamic-assets',
   allowClientCode: false, // Security: Disallow file operations from client (use server methods)
   onBeforeUpload(file) {
-    // Allow upload files under 10MB, and only in zip formats
-    if (file.size <= 104857600 && /zip/i.test(file.extension)) {
-      return true;
+    // Security: Validate file uploads to prevent malicious content
+
+    // 1. Authorization check - only authenticated admin/teacher can upload
+    if (!this.userId) {
+      return 'Must be logged in to upload files';
     }
-    return 'Please upload image, audio, or video fi with size equal or less than 10MB';
+
+    if (!Roles.userIsInRole(this.userId, ['admin', 'teacher'])) {
+      return 'Only admins and teachers can upload files';
+    }
+
+    // 2. File size limit (100MB)
+    if (file.size > 104857600) {
+      return 'File size must be 100MB or less';
+    }
+
+    // 3. Filename validation - prevent path traversal
+    const filename = file.name || '';
+    if (filename.includes('..') || filename.includes('/') || filename.includes('\\')) {
+      return 'Invalid filename - path traversal not allowed';
+    }
+
+    // 4. Extension validation - only zip files
+    if (!file.extension || !/^zip$/i.test(file.extension)) {
+      return 'Only .zip files are allowed';
+    }
+
+    return true;
   }
 });
 

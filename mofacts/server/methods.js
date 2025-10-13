@@ -487,6 +487,19 @@ async function getMaxResponseKC(){
 
 // Package Uploader
 async function processPackageUpload(fileObj, owner, zipLink, emailToggle){
+  // Security: Authorization check - only owner or admin/teacher can process uploads
+  if (!this.userId) {
+    throw new Meteor.Error(401, 'Must be logged in to upload packages');
+  }
+
+  if (owner !== this.userId && !Roles.userIsInRole(this.userId, ['admin'])) {
+    throw new Meteor.Error(403, 'Can only upload packages for yourself unless admin');
+  }
+
+  if (!Roles.userIsInRole(this.userId, ['admin', 'teacher'])) {
+    throw new Meteor.Error(403, 'Only admins and teachers can upload packages');
+  }
+
   DynamicAssets.collection.update({_id: fileObj._id}, {$set: {'meta.link': zipLink}});
   let path = fileObj.path;
   let results = [];
@@ -503,8 +516,20 @@ async function processPackageUpload(fileObj, owner, zipLink, emailToggle){
     for(const file of zip.files){
       let fileContents = await file.buffer();
       filePath = file.path;
+
+      // Security: Validate path to prevent path traversal attacks
+      if (filePath.includes('..') || filePath.startsWith('/') || filePath.includes('\\..')) {
+        throw new Meteor.Error(400, 'Invalid file path in zip: path traversal detected');
+      }
+
       const filePathArray = filePath.split("/");
       fileName = filePathArray[filePathArray.length - 1];
+
+      // Security: Validate filename
+      if (fileName.includes('..') || fileName.includes('\\')) {
+        throw new Meteor.Error(400, 'Invalid filename in zip: ' + fileName);
+      }
+
       const fileNameArray = fileName.split(".");
       extension = fileNameArray[fileNameArray.length - 1];
       let type;
