@@ -78,13 +78,28 @@ let nextEventId = 1;
 let stimDisplayTypeMap = {};
 
 // How large the distance between two words can be to be considered a match. Larger values result in a slower search. Defualt is 2.
-const maxEditDistance = Meteor.settings.SymSpell.maxEditDistance ? parseInt(Meteor.settings.SymSpell.maxEditDistance) : 2;
+const maxEditDistance = Meteor.settings.SymSpell?.maxEditDistance ? parseInt(Meteor.settings.SymSpell.maxEditDistance) : 2;
 // How big the prefix used for indexing is. Larger values will be result in a faster search, but will use more memory. Default is 7.
-const prefixLength = Meteor.settings.SymSpell.prefixLength ? parseInt(Meteor.settings.SymSpell.prefixLength) : 7;
+const prefixLength = Meteor.settings.SymSpell?.prefixLength ? parseInt(Meteor.settings.SymSpell.prefixLength) : 7;
 const symSpell = new SymSpell(maxEditDistance, prefixLength);
 //get the path to the dictionary in /public/dictionaries
-symSpell.loadDictionary(Meteor.settings.frequencyDictionaryLocation, 0, 1);
-symSpell.loadBigramDictionary(Meteor.settings.bigramDictionaryLocation, 0, 2);
+// Only load dictionaries if paths are configured in settings
+if (Meteor.settings.frequencyDictionaryLocation) {
+  try {
+    symSpell.loadDictionary(Meteor.settings.frequencyDictionaryLocation, 0, 1);
+    serverConsole('SymSpell frequency dictionary loaded successfully');
+  } catch (err) {
+    serverConsole('Warning: Failed to load SymSpell frequency dictionary:', err.message);
+  }
+}
+if (Meteor.settings.bigramDictionaryLocation) {
+  try {
+    symSpell.loadBigramDictionary(Meteor.settings.bigramDictionaryLocation, 0, 2);
+    serverConsole('SymSpell bigram dictionary loaded successfully');
+  } catch (err) {
+    serverConsole('Warning: Failed to load SymSpell bigram dictionary:', err.message);
+  }
+}
 process.env.MAIL_URL = Meteor.settings.MAIL_URL;
 const adminUsers = Meteor.settings.initRoles.admins;
 const ownerEmail = Meteor.settings.owner;
@@ -551,14 +566,14 @@ async function processPackageUpload(fileObj, owner, zipLink, emailToggle){
       };
       unzippedFiles.push(fileMeta);
     }
-    serverConsole('unzippedFiles', unzippedFiles);
+    serverConsole('Unzipped', unzippedFiles.length, 'files');
     const stimFileName = unzippedFiles.filter(f => f.type == 'stim')[0].name;
     const results = await new Promise(async (resolve, reject) => {
       res = [];
       try {
         for(const tdf of unzippedFiles.filter(f => f.type == 'tdf')){
           const stim = unzippedFiles.find(f => f.name == tdf.contents.tutor.setspec.stimulusfile);
-          serverConsole('stim', stim, 'stimFileName', stimFileName, tdf.contents.tutor.setspec.stimulusfile);
+          serverConsole('Processing stimFileName:', stimFileName, 'from setspec:', tdf.contents.tutor.setspec.stimulusfile);
           tdf.packageFile = packageFile;
           //search for google TTS  api key and encrypt it
           if(tdf.contents.tutor.setspec.textToSpeechAPIKey){
@@ -609,7 +624,7 @@ async function processPackageUpload(fileObj, owner, zipLink, emailToggle){
       serverConsole('2 processPackageUpload ERROR,', path, ',', e + ' on file: ' + filePath);
       throw new Meteor.Error('package upload failed at media upload: ' + e + ' on file: ' + filePath)
     }
-    serverConsole('results', results);
+    serverConsole('Package upload completed with', results.length, 'results');
     if(emailToggle){
       sendEmail(
         Meteor.user().emails[0].address,
@@ -823,7 +838,7 @@ async function saveContentFile(type, filename, filecontents, owner, packagePath 
   return results;
 }
 async function combineAndSaveContentFile(tdf, stim, owner) {
-  serverConsole('combineAndSaveContentFile', tdf, stim, owner);
+  serverConsole('combineAndSaveContentFile for owner:', owner);
   const results = {
     'result': null,
     'errmsg': 'No action taken?',
@@ -2701,19 +2716,24 @@ export const methods = {
   },
 
   getServerStatus: function() {
-    diskusage = Npm.require('diskusage');
-    const path = "/"
-    let info = diskusage.checkSync(path);
-    let diskSpaceTotal = info.total;
-    let diskSpaceUsed = info.total - info.free;
-    let driveSpaceUsedPercent = (diskSpaceUsed / diskSpaceTotal) * 100;
-    let remainingSpace = diskSpaceTotal - diskSpaceUsed;
-    //float percentages to 2 decimal places, and space sizes to GB
-    driveSpaceUsedPercent = driveSpaceUsedPercent.toFixed(2);
-    diskSpaceTotal = (diskSpaceTotal / 1000000000).toFixed(2);
-    diskSpaceUsed = (diskSpaceUsed / 1000000000).toFixed(2);
-    remainingSpace = (remainingSpace / 1000000000).toFixed(2);
-    return {diskSpacePercent: driveSpaceUsedPercent, remainingSpace: remainingSpace, diskSpace: diskSpaceTotal, diskSpaceUsed: diskSpaceUsed};
+    try {
+      diskusage = Npm.require('diskusage');
+      const path = "/"
+      let info = diskusage.checkSync(path);
+      let diskSpaceTotal = info.total;
+      let diskSpaceUsed = info.total - info.free;
+      let driveSpaceUsedPercent = (diskSpaceUsed / diskSpaceTotal) * 100;
+      let remainingSpace = diskSpaceTotal - diskSpaceUsed;
+      //float percentages to 2 decimal places, and space sizes to GB
+      driveSpaceUsedPercent = driveSpaceUsedPercent.toFixed(2);
+      diskSpaceTotal = (diskSpaceTotal / 1000000000).toFixed(2);
+      diskSpaceUsed = (diskSpaceUsed / 1000000000).toFixed(2);
+      remainingSpace = (remainingSpace / 1000000000).toFixed(2);
+      return {diskSpacePercent: driveSpaceUsedPercent, remainingSpace: remainingSpace, diskSpace: diskSpaceTotal, diskSpaceUsed: diskSpaceUsed};
+    } catch (error) {
+      console.error('Error getting server disk usage:', error.message);
+      return {diskSpacePercent: 'N/A', remainingSpace: 'N/A', diskSpace: 'N/A', diskSpaceUsed: 'N/A', error: 'Disk usage module not available'};
+    }
   },
 
   resetAllSecretKeys: function() {
@@ -3807,7 +3827,7 @@ const asyncMethods = {
   },
   
   makeGoogleTTSApiCall: async function(TDFId, message, audioPromptSpeakingRate, audioVolume, selectedVoice) {
-    const ttsAPIKey = await methods.getTdfTTSAPIKey(TDFId);
+    const ttsAPIKey = await methods.getTdfTTSAPIKey.call(this, TDFId);
     const request = JSON.stringify({
       input: {text: message},
       voice: {languageCode: 'en-US', 'name': selectedVoice},
@@ -3845,7 +3865,7 @@ const asyncMethods = {
   },
 
   makeGoogleSpeechAPICall: async function(TDFId, speechAPIKey, request, answerGrammar){
-    serverConsole('makeGoogleSpeechAPICall', TDFId, speechAPIKey, request, answerGrammar);
+    serverConsole('makeGoogleSpeechAPICall for TDFId:', TDFId);
 
     // Try to get TDF API key if user is logged in (but don't require it)
     if (this.userId) {
@@ -3867,7 +3887,7 @@ const asyncMethods = {
 
     const options = {
       hostname: 'speech.googleapis.com',
-      path: '/v1/speech:recognize?key=' + speechAPIKey,
+      path: '/v1p1beta1/speech:recognize?key=' + speechAPIKey,  // Use v1p1beta1 for boost and better alternatives
       method: 'POST'
     }
     try {
@@ -3915,7 +3935,6 @@ const asyncMethods = {
   resetTdfConditionCounts: async function(TDFId) {
     serverConsole('resetTdfConditionCounts', TDFId);
     setspec = Tdfs.findOne({_id: TDFId}).content.tdfs.tutor.setspec;
-    serverConsole("setspec:", setspec)
     conditions = setspec.condition;
     conditionCounts = {};
     for(let condition in conditions){
@@ -3931,7 +3950,7 @@ const asyncMethods = {
       stimuli = tdf.stimuli
     }
     if (stimuli) {
-      serverConsole(stimuli);
+      serverConsole('Processing', Object.keys(stimuli).length, 'stimuli');
       const answerSyllableMap = {};
       for (const i in stimuli) {
         const stim = stimuli[i];
@@ -4109,7 +4128,7 @@ Meteor.startup(async function() {
     res.setHeader('X-Content-Type-Options', 'nosniff');
     res.setHeader('X-XSS-Protection', '1; mode=block');
     res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
-    res.setHeader('Permissions-Policy', 'geolocation=(), microphone=()');
+    res.setHeader('Permissions-Policy', 'geolocation=(), microphone=(self)');
     next();
   });
 

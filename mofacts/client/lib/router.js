@@ -76,7 +76,8 @@ Session.set('clusterMapping', '');
 
 //Set Default Template
 Router.configure({
-  layoutTemplate: 'DefaultLayout'
+  layoutTemplate: 'DefaultLayout',
+  loadingTemplate: 'customLoading'
 });
 
 function routeToSignin() {
@@ -202,8 +203,6 @@ const restrictedRoutes = [
 
 const getDefaultRouteAction = function(routeName) {
   return function() {
-    Session.set('curModule', routeName.toLowerCase());
-    console.log(routeName + ' ROUTE');
     this.render(routeName);
   };
 };
@@ -211,8 +210,6 @@ const getDefaultRouteAction = function(routeName) {
 const getRestrictedRouteAction = function(routeName) {
   return function() {
     if(Meteor.user()){
-      Session.set('curModule', routeName.toLowerCase());
-      console.log(routeName + ' ROUTE');
       this.render(routeName);
     } else {
       this.redirect('/');
@@ -224,9 +221,6 @@ const getRestrictedRouteAction = function(routeName) {
 // set up all routes with default behavior
 for (const route of restrictedRoutes) {
   Router.route('/' + route, {
-    waitOn: function() {
-      return Meteor.subscribe('settings');
-    },
     name: 'client.' + route,
     action: getRestrictedRouteAction(route),
   });
@@ -309,7 +303,11 @@ Router.route('/', {
 Router.route('/contentUpload', {
   name: 'client.contentUpload',
   waitOn: function() {
-    return [Meteor.subscribe('ownedFiles'), Meteor.subscribe('files.assets.all'), Meteor.subscribe('allTdfs')];
+    return [
+      Meteor.subscribe('allTdfs'),
+      Meteor.subscribe('files.assets.all'),
+      Meteor.subscribe('allUsers')
+    ];
   },
   action: function() {
     if(Meteor.user()){
