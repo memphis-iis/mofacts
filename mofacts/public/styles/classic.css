@@ -412,18 +412,124 @@ input[type="range"]::-webkit-slider-thumb {
     text-align: center;
 }
 
-thead{
-    background-color: var(--accent-color);
-    font-weight: 800;
-    /* border radius is 35px on left side*/
-    border: 1px solid var(--accent-color);
-    border-top-left-radius: var(--border-radius);
-    border-top-right-radius: var(--border-radius);
-    padding: clamp(8px, 2vh, 12px);
+/* Admin page spacing utilities */
+.admin-section {
+    margin-top: clamp(2rem, 4vh, 3rem);
+    margin-bottom: clamp(1.5rem, 3vh, 2rem);
+}
+
+.admin-section:first-child {
+    margin-top: 0; /* No top margin for first section */
+}
+
+.admin-subsection {
+    margin-top: clamp(1.5rem, 3vh, 2rem);
+    margin-bottom: clamp(1rem, 2vh, 1.5rem);
+}
+
+/* Admin table wrapper - provides consistent card styling */
+.admin-table-wrapper {
+    background-color: var(--neutral-color);
+    border-radius: var(--border-radius);
+    padding: 0;
+    margin-bottom: clamp(1rem, 2vh, 1.5rem);
+    margin-top: clamp(1rem, 2vh, 1.5rem);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    overflow: hidden; /* Ensures border radius is respected */
+}
+
+/* Table responsive container */
+.table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
 }
 
 .table-responsive table{
     min-width: 100%;
+    margin-bottom: 0; /* Remove default Bootstrap margin */
+}
+
+/* Table styling */
+.table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+/* Table header styling */
+thead {
+    background-color: var(--accent-color);
+    font-weight: 800;
+    border: 1px solid var(--accent-color);
+    color: var(--primary-button-text-color);
+}
+
+thead th {
+    padding: clamp(10px, 2vh, 14px) clamp(12px, 2vw, 16px);
+    text-align: left;
+    border-bottom: 2px solid var(--accent-color);
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+/* First header cell gets left radius */
+thead th:first-child {
+    border-top-left-radius: var(--border-radius);
+}
+
+/* Last header cell gets right radius */
+thead th:last-child {
+    border-top-right-radius: var(--border-radius);
+}
+
+/* Table body styling */
+tbody tr {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    transition: background-color var(--transition-fast) ease-in-out;
+}
+
+tbody tr:hover {
+    background-color: rgba(0, 0, 0, 0.02);
+}
+
+tbody td {
+    padding: clamp(8px, 1.5vh, 12px) clamp(12px, 2vw, 16px);
+    vertical-align: top;
+}
+
+/* Striped rows */
+.table-striped tbody tr:nth-of-type(odd) {
+    background-color: rgba(0, 0, 0, 0.03);
+}
+
+.table-striped tbody tr:nth-of-type(odd):hover {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+/* Bordered tables */
+.table-bordered {
+    border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.table-bordered th,
+.table-bordered td {
+    border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+/* Table footer styling */
+tfoot, .table tfoot {
+    background-color: rgba(0, 0, 0, 0.05);
+    font-weight: 600;
+    border-top: 2px solid var(--accent-color);
+}
+
+tfoot tf, .table tfoot tf, .table tfoot td, .table tfoot th {
+    padding: clamp(10px, 2vh, 14px) clamp(12px, 2vw, 16px);
+    display: table-cell;
+}
+
+/* Light table header variant */
+.table-light {
+    background-color: rgba(0, 0, 0, 0.05);
 }
 /* ===== NAVIGATION & FOOTER ===== */
 .navbar{
@@ -636,8 +742,25 @@ thead{
 }
 
 .voice-icon {
-    height: 50px;
+    height: 30px;
     width: auto;
+}
+
+/* SR Status Display - Icon + Message in same row */
+.sr-status-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;  /* 8px spacing between icon and text */
+    margin-bottom: 0.5rem;
+}
+
+.sr-status-container .fa-microphone {
+    font-size: 30px;
+}
+
+.sr-status-container span {
+    font-size: 1rem;
 }
 
 .no-bottom-margin {
@@ -874,10 +997,10 @@ thead{
     }
 
     .input-box{
-        position: absolute;
-        bottom: 20px;
-        left: 0px;
-        right: 0px;
+        position: relative;  /* Normal document flow - appears after stimulus/SR icon */
+        width: 100%;
+        margin-top: 1rem;  /* Space between stimulus and input */
+        padding: 0 1rem;   /* Left/right padding for narrow screens */
     }
 
     .input-box input{
@@ -961,7 +1084,12 @@ thead{
     /* Reduce outer container spacing on mobile */
     .outer-container-spacing {
         margin-top: clamp(0.5rem, 2vh, 1rem);
-        margin-bottom: clamp(0.5rem, 2vh, 1rem);
+        margin-bottom: 0;  /* Remove bottom margin to prevent unnecessary scrollbar */
+    }
+
+    /* Reduce lower interaction spacing to prevent scrollbar */
+    .lower-interaction-spacing {
+        margin-bottom: 0.5rem;
     }
 
     /* Tighter video section spacing */
@@ -984,10 +1112,13 @@ thead{
 
 /* Trial content visibility - avoids DOM teardown/rebuild */
 /* JavaScript in card.js reads this CSS variable dynamically to sync timing */
-/* Duration based on UX research: 200-300ms is optimal, configurable in Admin Panel */
+/* Using smooth transitions (200ms) for FADING_IN/FADING_OUT states */
 #trialContentWrapper {
   opacity: 1;
-  transition: opacity var(--transition-smooth) ease-in-out;  /* Admin-configurable via theme settings */
+  transition: opacity var(--transition-smooth) ease-in-out;  /* Smooth fade matches PRESENTING.FADING_IN state */
+  /* GPU acceleration hints for smoother animation */
+  will-change: opacity;
+  transform: translateZ(0);
 }
 
 #trialContentWrapper.trial-hidden {

@@ -167,11 +167,11 @@
 
             {{#if testordrill}}
                 {{#unless inFeedback}}
-                {{#if audioEnabled}}
+                {{#if audioInputModeEnabled}}
                     {{#if isNotInDialogueLoopStageIntroOrExit}}
-                        <div class="text-center mb-2">
-                            <p class="marginLeftAndRight">{{voiceTranscriptionPromptMsg}}</p>
-                            <img class="center-block voice-icon" src="{{voiceTranscriptionImgSrc}}" loading="eager">
+                        <div class="sr-status-container">
+                            <i class="fa fa-microphone" style="color: {{voiceTranscriptionIconColor}};"></i>
+                            <span>{{voiceTranscriptionStatusMsg}}</span>
                         </div>
                     {{/if}}
                 {{/if}}
@@ -282,11 +282,12 @@
                 </div>
             </div>
         </div><!-- Close trialContentWrapper -->
-    {{#if displayReadyPromptString}}
+    {{!-- Removed readyPromptString display to prevent "Loading..." flash between screens --}}
+    {{!-- {{#if displayReadyPromptString}}
         <div class="marginLeftAndRight alert alert-info {{fontSizeClass}} text-center" id="textQuestion">
             {{readyPromptString}}
         </div>
-    {{/if}}
+    {{/if}} --}}
 
         <!-- Modal -->
         <div class="modal fade" id="finalInstructionsDlg" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-backdrop="static">

@@ -345,7 +345,8 @@ function getAllCurrentStimAnswers(removeExcludedPhraseHints) {
   const stims = Session.get('currentStimuliSet');
   let allAnswers = new Set();
 
-  console.log(stims);
+  // Stims array logging removed - use count only
+  clientConsole('getAllCurrentStimAnswers: stims count:', stims ? stims.length : 0);
   for (const stim of stims) {
     const responseParts = stim.correctResponse.toLowerCase().split(';');
     const answerArray = responseParts.filter(function(entry) {

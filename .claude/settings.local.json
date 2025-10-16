@@ -10,7 +10,15 @@
       "Bash(git checkout:*)",
       "Bash(git reset:*)",
       "Bash(find:*)",
-      "Bash(cd:*)"
+      "Bash(cd:*)",
+      "Bash(gh issue create --title \"Flash of Unstyled Content (FOUC) on trial cards\" --body \"$(cat <<''EOF''\n## Problem\nTrial cards experience Flash of Unstyled Content (FOUC) during state transitions, causing visible flickering and poor user experience. Buttons become faded/unclickable during transitions, and animations are too slow (>100ms).\n\n## Root Causes\n- Fade animations were 300-600ms, causing noticeable delays\n- Race conditions in allowUserInput/stopUserInput synchronization\n- Template rendering race conditions\n- Orphaned {{/if}} tags causing parse errors\n- CSS transitions not optimized for instant feedback\n\n## Solution\nReduced all fade animations to <100ms, fixed race conditions, optimized CSS transitions, and removed invalid template tags.\n\n## Related Commits\n- 78088ad1 - Initial FOUC analysis and documentation\n- f093f62a - Complete FOUC fixes implementation\n\n## Files Changed\n- `mofacts/client/views/experiment/card.html` - Reduced fade times, removed orphaned tags\n- `mofacts/client/views/experiment/card.js` - Fixed race conditions in input handling\n- `mofacts/public/styles/classic.css` - Optimized CSS transitions\n- `mofacts/client/index.html` - Template optimization\n\n## Testing\nManual testing confirmed buttons are now immediately clickable and transitions are smooth without visible flicker.\nEOF\n)\")",
+      "Bash(gh issue create:*)",
+      "Bash(git commit:*)",
+      "Bash(git mv:*)",
+      "Bash(git add:*)",
+      "Bash(md5sum:*)",
+      "Bash(meteor npm run lint:*)",
+      "Bash(gh issue list:*)"
     ],
     "deny": [],
     "ask": []

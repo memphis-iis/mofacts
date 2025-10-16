@@ -1,11 +1,12 @@
 <template name="classEdit">
 {{#if isInRole 'admin, teacher'}}
     <div class="container" style="margin-top: 1rem;">
-      <h2 style="margin-top: 0; text-align: center;">Class Management</h2>
+      <h3 style="margin-top: 0; text-align: center;">Class Management</h3>
 
-      <div class="row text-center">
-        <h4>Add or Edit a Class</h4>
-      </div>
+      <div class="admin-section" style="margin-top: 0;">
+        <div class="row text-center">
+          <h4>Add or Edit a Class</h4>
+        </div>
         <div>
           <select id="class-select">
               <option selected="selected" value="">Add a class</option>
@@ -27,7 +28,10 @@
               Save Class
           </button>
         </div>
-        <div class="row mt-4">
+      </div>
+
+      <div class="admin-section">
+        <div class="row">
           <div class="col-md-12 text-center">
           <h4>Section Links</h4>
           {{#if sections}}
@@ -41,8 +45,9 @@
           {{else}}
             <p>No sections created.</p>
           {{/if}}
+          </div>
         </div>
-        </div>
+      </div>
     </div>
 {{/if}}
 </template>

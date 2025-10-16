@@ -336,9 +336,43 @@ All state machine logs follow this format:
 5. **Refactor** - Remove unnecessary checks and consolidate cleanup
 6. **Verify** - Re-run trials to confirm behavior unchanged
 
+## Known Issues Fixed
+
+### Flash During FADING_IN Transition (Fixed 2025-10-14)
+
+**Problem:** Trial cards appeared "flashy" during the PRESENTING.FADING_IN state - the fade animation was either skipped or overridden, causing visible flickering.
+
+**Root Cause:** Mismatch between CSS variable and JS timing function:
+- JS `getTransitionDuration()` read `--transition-instant` (10ms)
+- CSS comments claimed FADING_IN should use `--transition-smooth` (200ms)
+- Result: 10ms fade was too fast for smooth animation, causing visible flashing
+
+**Files Changed:**
+- [card.js:1292](../mofacts/client/views/experiment/card.js#L1292) - Changed `getTransitionDuration()` to read `--transition-smooth` instead of `--transition-instant`
+- [classic.css:1005](../mofacts/public/styles/classic.css#L1005) - Updated `#trialContentWrapper` transition to use `--transition-smooth`
+- Added GPU acceleration hints (`will-change: opacity` and `transform: translateZ(0)`)
+
+**Why This Happened:**
+1. Originally set to `--transition-instant` (10ms) to prevent "Loading..." flash
+2. 10ms is below human perception threshold (~60ms) and too fast for browsers to complete layout/paint
+3. CSS variable semantic meaning was correct (`--transition-smooth` for trial transitions) but implementation was wrong
+
+**Solution:**
+Using `--transition-smooth` (200ms) provides smooth, perceptible fades without being jarring. The "Loading..." flash was actually caused by other issues (Blaze re-rendering, not fade duration).
+
+**Testing:**
+After fix, console should show:
+```
+[SM] ✓ STATE: PRESENTING.FADING_IN (displayReady=true)
+[SM]   Waiting 200ms for fade-in transition to complete...
+[SM] ✓ STATE: PRESENTING.DISPLAYING (fade-in complete)
+```
+
 ## Files Modified
 
 - `mofacts/client/views/experiment/card.js` - Added `[SM]` logging to key functions
+- `mofacts/client/views/experiment/card.js` - Fixed `getTransitionDuration()` to use `--transition-smooth` (200ms)
+- `mofacts/public/styles/classic.css` - Fixed `#trialContentWrapper` transition timing
 
 ## Related Documentation
 

@@ -2,12 +2,13 @@
 
 <template name="contentUpload">
     <div class="container" style="margin-top: 1rem;">
-        <h2 style="margin-top: 0; text-align: center;">Content Management</h2>
+        <h3 style="margin-top: 0; text-align: center;">Content Management</h3>
 
         <p class="text-center mb-4">This manages your assets, lessons, and stimuli for use in experiments. It will upload packaged zip files with TDF/stim/asset combinations.
             Please wait until a prompt is given to navigate to a new page.</p>
-        <div class="row">
-            <h3 class="text-center">Your Assets</h3>
+
+        <div class="admin-section">
+            <h4 class="text-center">Your Assets</h4>
             <!-- toggle for viewing only owned lessons, default is checked -->
             {{#if isInRole 'admin'}}
             <div class="row">
@@ -20,97 +21,78 @@
             </div>
             {{/if}}
 
-            <div class="table-responsive card">
-                <table class="table table-striped">
-                    <thead>
-                        <tr>
-                            <th class="col-8">Summary</th>
-                            <th class="col-4">Action</th>
-                        </tr>
-                    </thead>
+            <div class="admin-table-wrapper">
+                <div class="table-responsive">
+                    <table class="table table-striped table-bordered">
+                        <thead>
+                            <tr>
+                                <th class="col-8">Summary</th>
+                                <th class="col-4">Action</th>
+                            </tr>
+                        </thead>
                     <tbody>
                         {{#each assets}}
                             <tr>
                                 <td>
-                                    <table>
-                                        <tr>
-                                            <td>
-                                                <b>{{lessonName}} 
-                                                    {{#if displayUnownedTDFs}}
-                                                        ({{owner}})
-                                                    {{/if}}
-                                                </b>
-                                            </td>
-                                        </tr>
+                                    <div style="padding: 0.5rem 0;">
+                                        <div style="margin-bottom: 0.5rem;">
+                                            <b>{{lessonName}}
+                                                {{#if displayUnownedTDFs}}
+                                                    ({{owner}})
+                                                {{/if}}
+                                            </b>
+                                        </div>
                                         {{#if conditions}}
-                                        <tr>
-                                            <td>
-                                                <b>Conditions</b>
-                                                {{#each conditions}}
-                                                    <br>
-                                                    {{this.condition}} (count: {{this.count}})
-                                                {{/each}}
-                                            </td>
-                                        </tr>
+                                        <div style="margin-bottom: 0.5rem;">
+                                            <b>Conditions</b>
+                                            {{#each conditions}}
+                                                <br>
+                                                {{this.condition}} (count: {{this.count}})
+                                            {{/each}}
+                                        </div>
                                         {{/if}}
-                                        <tr>
-                                            <td>
-                                                <b>Package Asset Id:</b> {{packageAssetId}}
-                                            </td>
-                                        </tr>
+                                        <div style="margin-bottom: 0.5rem;">
+                                            <b>Package Asset Id:</b> {{packageAssetId}}
+                                        </div>
                                         {{#if errors}}
-                                        <tr>
+                                        <div style="margin-bottom: 0.5rem; color: var(--alert-color);">
                                             <b>ERROR:</b>
                                             <br>
                                             {{#each errors}}
                                                 {{{this}}}
                                             {{/each}}
-                                        </tr>
+                                        </div>
                                         {{/if}}
-                                        <tr>
-                                            <td>
-                                                Stimuli Count: {{stimuliCount}} <a id="show_stimuli" data-file="{{this._id}}">(click to toggle view of {{stimFilesCount}})</a>
-                                                <p hidden id="stimuli-{{this._id}}">
-                                                {{#each this.stimFileInfo}}
-                                                    <button id="stim-download-btn" value="{{this.stimuliSetId}}" class="btn-icon"><span class="fa fa-download" aria-hidden="true"></span> {{this.fileName}} </button>
-                                                {{/each}}
-                                                </p>
-                                            </td>
-                                            <td>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>
-
-                                            </td>
-                                        </tr>
+                                        <div style="margin-bottom: 0.5rem;">
+                                            Stimuli Count: {{stimuliCount}} <a id="show_stimuli" data-file="{{this._id}}">(click to toggle view of {{stimFilesCount}})</a>
+                                            <div hidden id="stimuli-{{this._id}}" style="margin-top: 0.5rem;">
+                                            {{#each this.stimFileInfo}}
+                                                <button id="stim-download-btn" value="{{this.stimuliSetId}}" class="btn-icon"><span class="fa fa-download" aria-hidden="true"></span> {{this.fileName}} </button>
+                                            {{/each}}
+                                            </div>
+                                        </div>
                                         {{#if accessors}}
-                                        <tr>
-                                            <td>  
-                                                Teachers (excluding owner) ({{accessorsCount}}):
-                                                <ul>
-                                                {{#each accessors}}
-                                                    <li>
-                                                    {{this.username}}
-                                                    <!-- button to revoke access -->
-                                                    <button id="remove-access-btn" value="{{../_id}}" data-user="{{this.userId}}" class="btn-icon"><span class="fa fa-minus" aria-hidden="true"></span></button>
-                                                    </li>
-                                                {{/each}}
-                                                </ul>
-                                            </td>
-                                        </tr>
+                                        <div style="margin-bottom: 0.5rem;">
+                                            Teachers (excluding owner) ({{accessorsCount}}):
+                                            <ul style="margin-top: 0.5rem; margin-bottom: 0;">
+                                            {{#each accessors}}
+                                                <li>
+                                                {{this.username}}
+                                                <button id="remove-access-btn" value="{{../_id}}" data-user="{{this.userId}}" class="btn-icon"><span class="fa fa-minus" aria-hidden="true"></span></button>
+                                                </li>
+                                            {{/each}}
+                                            </ul>
+                                        </div>
                                         {{/if}}
-                                        <tr>
-                                            <td>
-                                                <a id="show_assets" data-file="{{this._id}}">Assets (click to toggle)</a>
-                                                <p hidden id="assets-{{this._id}}">
-                                                {{#each this.assets}}
-                                                    <a href="{{this.link}}">{{this.filename}}</a>
-                                                {{/each}}
-                                                </p>
-                                            </td>
-                                        </tr>
-                                    </table>
+                                        <div style="margin-bottom: 0.5rem;">
+                                            <a id="show_assets" data-file="{{this._id}}">Assets (click to toggle)</a>
+                                            <div hidden id="assets-{{this._id}}" style="margin-top: 0.5rem;">
+                                            {{#each this.assets}}
+                                                <a href="{{this.link}}">{{this.filename}}</a>
+                                            {{/each}}
+                                            </div>
+                                        </div>
+                                    </div>
                                 </td>
                                 <td>
                                     {{#if packageFileLink}}
@@ -155,13 +137,15 @@
                             </tr>
                         {{/each}}
                     </tbody>
-                </table>
-                
+                    </table>
+                </div>
             </div>
         </div>
-        <div class="row"> 
-            <div class="col text-center ">
-                <h3 class="text-center">Upload Package</h3>
+
+        <div class="admin-section">
+            <h4 class="text-center">Upload Package</h4>
+            <div class="row">
+            <div class="col text-center">
                 <div class="row text-center mt-4">
                     <div class="row row-cols-2">
                         <div class="col text-end">
@@ -179,16 +163,19 @@
 
                 </div>
             </div>
-        </div>
+            </div>
             <div class="row mt-4">
+            </div>
         </div>
 
         {{#if showDeleteAllButton}}
-        <h3 class="text-center">Admin Functions</h3>
+        <div class="admin-section">
+        <h4 class="text-center">Admin Functions</h4>
             <p>
                 This will delete all files, remove all lessons, and remove all stimuli. <b>This is not recoverable.</b>
             </p>
             <button class="btn width-80-percent" id="deleteAllAssetsConfirm">Delete All Uploaded Files</button>
+        </div>
         {{/if}}
     </div>
 </template>

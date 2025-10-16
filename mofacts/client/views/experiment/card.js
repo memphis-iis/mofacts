@@ -27,6 +27,7 @@ import {sessionCleanUp} from '../../lib/sessionUtils';
 import {checkUserSession} from '../../index'
 import {instructContinue, unitHasLockout, checkForFileImage} from './instructions';
 import DOMPurify from 'dompurify';
+import {doubleMetaphone} from 'double-metaphone';
 
 // Security: HTML sanitization for user-generated content
 // Allow safe formatting tags but block scripts, iframes, and event handlers
@@ -547,8 +548,8 @@ async function initCard() {
       // Don't initialize audio without API key
       audioInputEnabled = false;
     } else if (!Session.get('audioInputSensitivity')) {
-      // Default to 20 in case tdf doesn't specify and we're in an experiment
-      const audioInputSensitivity = parseInt(Session.get('currentTdfFile').tdfs.tutor.setspec.audioInputSensitivity) || 20;
+      // Default to 60 (very sensitive) in case tdf doesn't specify and we're in an experiment
+      const audioInputSensitivity = parseInt(Session.get('currentTdfFile').tdfs.tutor.setspec.audioInputSensitivity) || 60;
       Session.set('audioInputSensitivity', audioInputSensitivity);
     }
   }
@@ -619,7 +620,7 @@ Template.card.events({
         const answer = JSON.parse(JSON.stringify(_.trim($('#dialogueUserAnswer').val()).toLowerCase()));
         $('#dialogueUserAnswer').val('');
         const dialogueContext = DialogueUtils.updateDialogueState(answer);
-        console.log('getDialogFeedbackForAnswer', dialogueContext);
+        console.log('getDialogFeedbackForAnswer - context created');
         Meteor.call('getDialogFeedbackForAnswer', dialogueContext, dialogueLoop);
       }
     }
@@ -763,33 +764,33 @@ Template.card.helpers({
 
   'isNotInDialogueLoopStageIntroOrExit': () => Session.get('dialogueLoopStage') != 'intro' && Session.get('dialogueLoopStage') != 'exit',
 
-  'voiceTranscriptionImgSrc': function() {
-    if(Session.get('recording')){
-      //Change graphic path;
-      return 'images/mic_on.png';
-    } else {
-      //Change graphic path;
-      return 'images/mic_off.png';
-    }
-    
-  }, 
-  'isImpersonating': function(){
-    return Meteor.user() ? Meteor.user().profile.impersonating : false;
+  'audioInputModeEnabled': function() {
+    return Meteor.user() && Meteor.user().audioInputMode;
   },
 
-  'voiceTranscriptionPromptMsg': function() {
-    if(!Session.get('recording')){
-      if(Session.get('buttonTrial')){
-        return 'Let me select that.';
-      } else {
-        if(Session.get('recordingLocked')){
-          return 'I am waiting for audio to finish. Please do not speak until I am ready.';
-        } else {
-        return 'Let me transcribe that.';
-      }}
+  'voiceTranscriptionIconColor': function() {
+    // Get theme colors from CSS variables
+    const root = document.documentElement;
+    const successColor = getComputedStyle(root).getPropertyValue('--success-color').trim() || '#00cc00';
+    const alertColor = getComputedStyle(root).getPropertyValue('--alert-color').trim() || '#ff0000';
+
+    if(Session.get('recording')){
+      return successColor;  // Green when listening
     } else {
-      return 'I am listening.';
+      return alertColor;  // Red when waiting/processing
     }
+  },
+
+  'voiceTranscriptionStatusMsg': function() {
+    if(Session.get('recording')){
+      return 'Say skip or answer';
+    } else {
+      return 'Please wait...';
+    }
+  },
+
+  'isImpersonating': function(){
+    return Meteor.user() ? Meteor.user().profile.impersonating : false;
   },
 
   'displayFeedback': () => Session.get('displayFeedback') && Session.get('currentDeliveryParams').allowFeedbackTypeSelect,
@@ -862,7 +863,7 @@ Template.card.helpers({
     const curImgSrc = currentDisplay ? currentDisplay.imgSrc : undefined;
     console.log('curImgSrc helper - curImgSrc:', curImgSrc);
     console.log('curImgSrc helper - imagesDict has key?', curImgSrc && imagesDict[curImgSrc] !== undefined);
-    console.log('curImgSrc helper - imagesDict:', Object.keys(imagesDict));
+    console.log('curImgSrc helper - imagesDict keys count:', Object.keys(imagesDict).length);
     if (curImgSrc && imagesDict[curImgSrc]) {
       console.log('curImgSrc helper - returning:', imagesDict[curImgSrc].src);
       return imagesDict[curImgSrc].src;
@@ -1116,7 +1117,7 @@ Template.card.helpers({
         'value': parms[key]
       });
     }
-    console.log("probability parms input",probParms);
+    console.log("probability parms input - keys:", Object.keys(probParms).length);
     return probParms;
   },
   'UIsettings': () => Session.get('curTdfUISettings'),
@@ -1288,7 +1289,7 @@ function getResponseType() {
 // Reads the actual CSS variable value set by admin in theme panel
 // This ensures JavaScript timing stays in sync with CSS transitions
 function getTransitionDuration() {
-  // Read --transition-smooth CSS variable from root element
+  // Read --transition-smooth CSS variable from root element for FADING_IN/FADING_OUT transitions
   const rootStyles = getComputedStyle(document.documentElement);
   const cssValue = rootStyles.getPropertyValue('--transition-smooth').trim();
 
@@ -1302,6 +1303,26 @@ function getTransitionDuration() {
   // Fallback if CSS variable not found (shouldn't happen)
   console.warn('Could not read --transition-smooth CSS variable, using fallback 200ms');
   return 200;
+}
+
+// FADE-IN STATE MACHINE HELPERS
+// These functions encapsulate the PRESENTING.FADING_IN → PRESENTING.DISPLAYING transition
+// without changing timing behavior
+
+function shouldSkipFadeIn() {
+  const displayReady = Session.get('displayReady');
+  const isVideoSession = Session.get('isVideoSession');
+  return displayReady || isVideoSession;
+}
+
+function beginFadeIn(reason) {
+  console.log('[SM] Starting fade-in:', reason);
+  transitionTrialState(TRIAL_STATES.PRESENTING_FADING_IN, reason);
+  Session.set('displayReady', true);
+}
+
+function completeFadeIn() {
+  transitionTrialState(TRIAL_STATES.PRESENTING_DISPLAYING, 'Fade-in complete, content visible');
 }
 
 // TRIAL STATE MACHINE CONSTANTS (Hierarchical Model)
@@ -1536,7 +1557,11 @@ function initializeAudio() {
     navigator.mediaDevices.getUserMedia({audio: true, video: false})
         .then(startUserMedia)
         .catch(function(err) {
-          console.log('Error getting user media: ' + err.name + ': ' + err.message);
+          console.error('[SR] Error getting user media:', err.name, err.message);
+          console.warn('[SR] Speech recognition disabled - continuing without audio input');
+          console.warn('[SR] Note: getUserMedia requires HTTPS for remote connections');
+          // Continue card initialization even if audio fails
+          cardStart();
         });
   } catch (e) {
     console.log('Error initializing Web Audio browser');
@@ -1564,7 +1589,19 @@ function preloadImages() {
   for (let src of curStimImgSrcs) {
     const loadPromise = new Promise((resolve, reject) => {
       if(!src.includes('http')){
-        link = DynamicAssets.findOne({name: src}).link();
+        const asset = DynamicAssets.findOne({name: src});
+        link = asset.link();
+
+        // Convert absolute localhost URLs to relative URLs for remote access
+        // This ensures images work whether accessed via localhost, LAN IP, or domain
+        if (link.includes('//localhost:') || link.includes('//127.0.0.1:')) {
+          // Extract the path portion (everything after the port number)
+          const pathMatch = link.match(/:\d+(\/.+)$/);
+          if (pathMatch) {
+            link = pathMatch[1]; // Use relative path
+          }
+        }
+
         img = new Image();
         img.onload = () => {
           console.log('img loaded:', src);
@@ -2524,7 +2561,7 @@ async function afterFeedbackCallback(trialEndTimeStamp, trialStartTimeStamp, isT
   };
 
   newExperimentState.overallOutcomeHistory = Session.get('overallOutcomeHistory');
-  console.log('writing answerLogRecord to history:', answerLogRecord);
+  console.log('writing answerLogRecord to history - stimIndex:', answerLogRecord.stimIndex);
   if(Meteor.user() === undefined || !Meteor.user().impersonating){
     try {
       answerLogRecord.responseDuration = responseDuration;
@@ -3221,7 +3258,7 @@ async function cardStart() {
 async function prepareCard() {
   const trialNum = (Session.get('currentExperimentState')?.numQuestionsAnswered || 0) + 1;
   console.log('[SM] === prepareCard START (Trial #' + trialNum + ') ===');
-  console.log('[SM]   CALL STACK:', new Error().stack);
+  // Call stack logging removed (too verbose)
   console.log('[SM]   displayReady before:', Session.get('displayReady'));
 
   // STATE MACHINE: Handle transition to fade-out based on current state
@@ -3295,6 +3332,13 @@ async function prepareCard() {
     transitionTrialState(TRIAL_STATES.PRESENTING_LOADING, 'Starting card selection');
 
     await engine.selectNextCard(Session.get('engineIndices'), Session.get('currentExperimentState'));
+
+    // Set buttonTrial BEFORE newQuestionHandler so Blaze can render everything atomically
+    // when displayReady=true fires. This prevents input field from painting after image.
+    const isButtonTrial = getButtonTrial();
+    Session.set('buttonTrial', isButtonTrial);
+    console.log('[SM] prepareCard: Set buttonTrial =', isButtonTrial, 'before content display');
+
     await newQuestionHandler();
     Session.set('cardStartTimestamp', Date.now());
     Session.set('engineIndices', undefined);
@@ -3322,8 +3366,10 @@ async function newQuestionHandler() {
 
   Session.set('buttonList', []);
   speechTranscriptionTimeoutsSeen = 0;
-  const isButtonTrial = getButtonTrial();
-  Session.set('buttonTrial', isButtonTrial);
+
+  // buttonTrial is now set BEFORE newQuestionHandler (in prepareCard) to ensure
+  // Blaze can render stimulus and input atomically when displayReady=true fires
+  const isButtonTrial = Session.get('buttonTrial');
   console.log('newQuestionHandler, isButtonTrial', isButtonTrial, 'displayReady', Session.get('displayReady'));
 
   // Input visibility is now controlled by CSS classes in template (trial-input-hidden)
@@ -3430,116 +3476,72 @@ function startQuestionTimeout() {
   }, 1000);
 }
 async function checkAndDisplayPrestimulus(deliveryParams, nextStageCb) {
-  console.log('=== checkAndDisplayPrestimulus START ===');
   console.log('[SM] checkAndDisplayPrestimulus called in state:', currentTrialState);
-  console.log('  displayReady at start:', Session.get('displayReady'));
-  // we'll [0], if it exists
+
   const prestimulusDisplay = Session.get('currentTdfFile').tdfs.tutor.setspec.prestimulusDisplay;
-  console.log('  prestimulusDisplay:', prestimulusDisplay);
-
-  if (prestimulusDisplay) {
-    const prestimulusDisplayWrapper = {'text': prestimulusDisplay};
-    console.log('  prestimulusDisplay detected, displaying', prestimulusDisplayWrapper);
-    Session.set('currentDisplay', prestimulusDisplayWrapper);
-    const isVideoSession = Session.get('isVideoSession')
-    const currentDisplayReady = Session.get('displayReady');
-    console.log('  Before setting displayReady - current value:', currentDisplayReady, 'isVideoSession:', isVideoSession);
-    // Set displayReady once for the trial (no toggle to prevent shimmer)
-    if (!currentDisplayReady && !isVideoSession) {
-      console.log('  Setting displayReady=true in checkAndDisplayPrestimulus');
-
-      // STATE MACHINE: Transition to PRESENTING.FADING_IN
-      transitionTrialState(TRIAL_STATES.PRESENTING_FADING_IN, 'displayReady=true (prestimulus), starting fade-in');
-
-      Session.set('displayReady', true); //displayReady handled by video session if video unit
-
-      // STATE MACHINE: After fade-in completes, transition to DISPLAYING and proceed to next stage
-      setTimeout(() => {
-        transitionTrialState(TRIAL_STATES.PRESENTING_DISPLAYING, 'Fade-in complete (prestimulus), content visible');
-
-        // Proceed to next stage AFTER fade-in completes
-        const prestimulusdisplaytime = deliveryParams.prestimulusdisplaytime;
-        console.log('delaying for ' + prestimulusdisplaytime + ' ms then starting question', new Date());
-        setTimeout(async function() {
-          console.log('past prestimulusdisplaytime, start two part question logic');
-          await nextStageCb();
-        }, prestimulusdisplaytime);
-      }, getTransitionDuration());
-    } else {
-      console.log('  NOT setting displayReady (already true or video session)');
-      // displayReady already true, proceed immediately
-      const prestimulusdisplaytime = deliveryParams.prestimulusdisplaytime;
-      console.log('delaying for ' + prestimulusdisplaytime + ' ms then starting question', new Date());
-      setTimeout(async function() {
-        console.log('past prestimulusdisplaytime, start two part question logic');
-        await nextStageCb();
-      }, prestimulusdisplaytime);
-    }
-  } else {
-    console.log('no prestimulusDisplay detected, continuing to next stage');
+  if (!prestimulusDisplay) {
+    console.log('[SM] No prestimulus display, continuing to next stage');
     await nextStageCb();
+    return;
+  }
+
+  console.log('[SM] Displaying prestimulus:', prestimulusDisplay);
+  Session.set('currentDisplay', {'text': prestimulusDisplay});
+
+  const afterFadeIn = () => {
+    const displayTime = deliveryParams.prestimulusdisplaytime;
+    console.log(`[SM] Prestimulus displayed, waiting ${displayTime}ms before continuing`);
+    setTimeout(async () => {
+      console.log('[SM] Prestimulus display complete, continuing to question');
+      await nextStageCb();
+    }, displayTime);
+  };
+
+  if (shouldSkipFadeIn()) {
+    console.log('[SM] Skipping fade-in (already visible or video session)');
+    afterFadeIn();
+  } else {
+    beginFadeIn('Prestimulus fade-in');
+    setTimeout(() => {
+      completeFadeIn();
+      afterFadeIn();
+    }, getTransitionDuration());
   }
 }
 
 async function checkAndDisplayTwoPartQuestion(deliveryParams, currentDisplayEngine, closeQuestionParts, nextStageCb) {
-  console.log('=== checkAndDisplayTwoPartQuestion START ===');
   console.log('[SM] checkAndDisplayTwoPartQuestion called in state:', currentTrialState);
-  console.log('  displayReady at start:', Session.get('displayReady'));
-  // In either case we want to set up the current display now
-  const isVideoSession = Session.get('isVideoSession')
-  // Update display directly without toggling displayReady (prevents input shimmer)
+
   Session.set('currentDisplay', currentDisplayEngine);
   Session.get('currentExperimentState').clozeQuestionParts = closeQuestionParts;
 
-  // Set displayReady once for the trial (no toggle to prevent shimmer)
-  const currentDisplayReady = Session.get('displayReady');
-  console.log('  Before setting displayReady - current value:', currentDisplayReady, 'isVideoSession:', isVideoSession);
-  if (!currentDisplayReady && !isVideoSession) {
-    console.log('  Setting displayReady=true in checkAndDisplayTwoPartQuestion');
-
-    // STATE MACHINE: Transition to PRESENTING.FADING_IN
-    transitionTrialState(TRIAL_STATES.PRESENTING_FADING_IN, 'displayReady=true, starting fade-in');
-
-    Session.set('displayReady', true);
-
-    // STATE MACHINE: After fade-in completes, transition to DISPLAYING and proceed to next stage
-    setTimeout(() => {
-      transitionTrialState(TRIAL_STATES.PRESENTING_DISPLAYING, 'Fade-in complete, content visible');
-
-      // Handle two part questions AFTER fade-in completes
-      const currentQuestionPart2 = Session.get('currentExperimentState').currentQuestionPart2;
-      if (currentQuestionPart2) {
-        const twoPartQuestionWrapper = {'text': currentQuestionPart2};
-        const initialviewTimeDelay = deliveryParams.initialview;
-        setTimeout(function() {
-          // Update display directly without toggling displayReady (prevents input shimmer)
-          Session.set('currentDisplay', twoPartQuestionWrapper);
-          // displayReady already true from initial set - don't toggle
-          Session.get('currentExperimentState').currentQuestionPart2 = undefined;
-          redoCardImage();
-          nextStageCb();
-        }, initialviewTimeDelay);
-      } else {
-        nextStageCb();
-      }
-    }, getTransitionDuration());
-  } else {
-    // displayReady already true (video session or subsequent call), proceed immediately
-    const currentQuestionPart2 = Session.get('currentExperimentState').currentQuestionPart2;
-    if (currentQuestionPart2) {
-      const twoPartQuestionWrapper = {'text': currentQuestionPart2};
-      const initialviewTimeDelay = deliveryParams.initialview;
-      setTimeout(function() {
-        // Update display directly without toggling displayReady (prevents input shimmer)
-        Session.set('currentDisplay', twoPartQuestionWrapper);
-        // displayReady already true from initial set - don't toggle
-        Session.get('currentExperimentState').currentQuestionPart2 = undefined;
-        redoCardImage();
-        nextStageCb();
-      }, initialviewTimeDelay);
-    } else {
+  const handleTwoPartQuestion = () => {
+    const questionPart2 = Session.get('currentExperimentState').currentQuestionPart2;
+    if (!questionPart2) {
       nextStageCb();
+      return;
     }
+
+    const initialViewDelay = deliveryParams.initialview;
+    console.log(`[SM] Two-part question: waiting ${initialViewDelay}ms before showing part 2`);
+    setTimeout(() => {
+      console.log('[SM] Displaying question part 2');
+      Session.set('currentDisplay', {'text': questionPart2});
+      Session.get('currentExperimentState').currentQuestionPart2 = undefined;
+      redoCardImage();
+      nextStageCb();
+    }, initialViewDelay);
+  };
+
+  if (shouldSkipFadeIn()) {
+    console.log('[SM] Skipping fade-in (already visible or video session)');
+    handleTwoPartQuestion();
+  } else {
+    beginFadeIn('Question fade-in');
+    setTimeout(() => {
+      completeFadeIn();
+      handleTwoPartQuestion();
+    }, getTransitionDuration());
   }
 }
 
@@ -3585,6 +3587,7 @@ function beginQuestionAndInitiateUserInput(delayMs, deliveryParams) {
 }
 
 function allowUserInput() {
+  console.log('[SR] ========== allowUserInput() CALLED ==========');
   console.log('allow user input');
   console.log('[SM] allowUserInput called in state:', currentTrialState);
 
@@ -3603,7 +3606,10 @@ function allowUserInput() {
   // $('#userAnswer').show(); // REMOVED - not needed with CSS wrapper approach
   $('#confirmButton').show();
 
+  console.log('[SR] About to call startRecording()...');
   startRecording();
+  console.log('[SR] startRecording() call completed');
+  console.log('[SR] ==========================================');
 
   // Enable input and set focus immediately - no delay needed
   // DOM is ready since we're in callback chain after fade-in completes
@@ -3635,7 +3641,7 @@ function stopUserInput() {
   // DO NOT hide #userAnswer - CSS wrapper (#trialContentWrapper) handles visibility via opacity
   // $('#userAnswer').hide(); // REMOVED - breaks input visibility on subsequent trials
   inputDisabled = true;
-  stopRecording();
+  // stopRecording(); // COMMENTED OUT - destroys audio buffer before API can process it
 
   // Delay disabling inputs to sync with CSS fade transition
   // This prevents visible button state changes during fade-out, improving perceived smoothness
@@ -3656,9 +3662,15 @@ function speakMessageIfAudioPromptFeedbackEnabled(msg, audioPromptSource) {
   const audioPromptMode = Meteor.user().audioPromptMode;
   const enableAudioPromptAndFeedback = audioPromptMode && audioPromptMode != 'silent';
   let synthesis = window.speechSynthesis;
+
+  console.log('[SR] ========== speakMessageIfAudioPromptFeedbackEnabled() CALLED ==========');
+  console.log('[SR]   audioPromptSource:', audioPromptSource);
+  console.log('[SR]   audioPromptMode:', audioPromptMode);
+  console.log('[SR]   enableAudioPromptAndFeedback:', enableAudioPromptAndFeedback);
+
   if (enableAudioPromptAndFeedback) {
     if (audioPromptSource === audioPromptMode || audioPromptMode === 'all') {
-      Session.set('recordingLocked', true);
+      // Note: Recording lock moved INSIDE TTS success callback to avoid permanent lock on errors
       // Replace underscores with blank so that we don't get awkward UNDERSCORE UNDERSCORE
       // UNDERSCORE...speech from literal reading of text
       msg = msg.replace(/(&nbsp;)+/g, 'blank');
@@ -3675,12 +3687,13 @@ function speakMessageIfAudioPromptFeedbackEnabled(msg, audioPromptSource) {
         }
         Meteor.call('makeGoogleTTSApiCall', Session.get('currentTdfId'), msg, audioPromptSpeakingRate, audioPromptVolume, audioPromptVoice, function(err, res) {
           if(err){
-            console.log(err)
+            console.log('[SR]   ❌ TTS API error, NOT locking recording:', err);
           }
           else if(res == undefined){
-            console.log('makeGoogleTTSApiCall returned undefined object')
+            console.log('[SR]   ❌ TTS API returned undefined, NOT locking recording');
           }
           else{
+            console.log('[SR]   ✅ TTS audio received, LOCKING RECORDING');
             const audioObj = new Audio('data:audio/ogg;base64,' + res)
             Session.set('recordingLocked', true);
             if (window.currentAudioObj) {
@@ -3688,6 +3701,7 @@ function speakMessageIfAudioPromptFeedbackEnabled(msg, audioPromptSource) {
             }
             window.currentAudioObj = audioObj;
             window.currentAudioObj.addEventListener('ended', (event) => {
+              console.log('[SR]   ✅ TTS audio ended, unlocking recording');
               window.currentAudioObj = undefined;
               Session.set('recordingLocked', false);
               startRecording();
@@ -3696,11 +3710,13 @@ function speakMessageIfAudioPromptFeedbackEnabled(msg, audioPromptSource) {
             window.currentAudioObj.play().catch((err) => {
               console.log(err)
               let utterance = new SpeechSynthesisUtterance(msg);
-              utterance.addEventListener('end', (event) => { 
+              utterance.addEventListener('end', (event) => {
+                console.log('[SR]   ✅ TTS fallback utterance ended, unlocking recording');
                 Session.set('recordingLocked', false);
                 startRecording();
               });
-              utterance.addEventListener('error', (event) => { 
+              utterance.addEventListener('error', (event) => {
+                console.log('[SR]   ❌ TTS fallback utterance error, unlocking recording');
                 console.log(event);
                 Session.set('recordingLocked', false);
               });
@@ -3708,16 +3724,357 @@ function speakMessageIfAudioPromptFeedbackEnabled(msg, audioPromptSource) {
             });
           }
         });
-        console.log('providing audio feedback');
+        console.log('[SR]   Providing Google TTS audio feedback (async)');
       } else {
-        console.log('Text-to-Speech API key not found, using MDN Speech Synthesis');
+        console.log('[SR]   Text-to-Speech API key not found, using MDN Speech Synthesis');
+        console.log('[SR]   ✅ LOCKING RECORDING for MDN TTS playback');
+        Session.set('recordingLocked', true);
         let utterance = new SpeechSynthesisUtterance(msg);
+        utterance.addEventListener('end', (event) => {
+          console.log('[SR]   ✅ MDN TTS ended, unlocking recording');
+          Session.set('recordingLocked', false);
+          startRecording();
+        });
+        utterance.addEventListener('error', (event) => {
+          console.log('[SR]   ❌ MDN TTS error, unlocking recording');
+          console.log(event);
+          Session.set('recordingLocked', false);
+          startRecording();
+        });
         synthesis.speak(utterance);
       }
+    } else {
+      console.log('[SR]   Audio prompt source mismatch - not playing TTS');
     }
   } else {
-    console.log('audio feedback disabled');
+    console.log('[SR]   Audio feedback disabled');
   }
+  console.log('[SR] ========================================');
+}
+
+// Phonetic encoding using Double Metaphone algorithm (proven, industry standard)
+// Returns both primary and secondary phonetic codes for better matching
+function getPhoneticCodes(word) {
+  const codes = doubleMetaphone(word.toLowerCase().trim());
+  console.log(`[SR]   Double Metaphone codes for "${word}": primary="${codes[0]}", secondary="${codes[1] || 'none'}"`);
+  return codes; // [primary, secondary]
+}
+
+// Pre-compute phonetic index for O(1) lookup instead of O(n) search
+// Map: phonetic code -> [{word, length, primary, secondary}]
+function buildPhoneticIndex(grammarList) {
+  const index = new Map();
+  const startTime = performance.now();
+
+  for (const word of grammarList) {
+    const [primary, secondary] = doubleMetaphone(word.toLowerCase().trim());
+    const entry = {
+      word: word,
+      length: word.length,
+      primary: primary,
+      secondary: secondary
+    };
+
+    // Index by primary code
+    if (primary) {
+      if (!index.has(primary)) {
+        index.set(primary, []);
+      }
+      index.get(primary).push(entry);
+    }
+
+    // Index by secondary code
+    if (secondary && secondary !== primary) {
+      if (!index.has(secondary)) {
+        index.set(secondary, []);
+      }
+      index.get(secondary).push(entry);
+    }
+  }
+
+  const elapsed = performance.now() - startTime;
+  console.log(`[SR] Built phonetic index for ${grammarList.length} words in ${elapsed.toFixed(2)}ms (${index.size} unique phonetic codes)`);
+  return index;
+}
+
+// Filter out phonetically ambiguous words from grammar
+// For example, if spoken word is "molly", exclude "malawi" from candidates since it
+// phonetically matches "mali" which is closer in length to "molly"
+function filterPhoneticConflicts(spokenWord, grammarList) {
+  const [spokenPrimary, spokenSecondary] = doubleMetaphone(spokenWord.toLowerCase().trim());
+  const spokenLength = spokenWord.length;
+
+  // Build a map of phonetic codes to words with their lengths
+  const phoneticGroups = new Map();
+
+  for (const word of grammarList) {
+    const [primary, secondary] = doubleMetaphone(word.toLowerCase().trim());
+    const codes = [primary];
+    if (secondary && secondary !== primary) {
+      codes.push(secondary);
+    }
+
+    for (const code of codes) {
+      if (!phoneticGroups.has(code)) {
+        phoneticGroups.set(code, []);
+      }
+      phoneticGroups.get(code).push({ word, length: word.length });
+    }
+  }
+
+  // Find all words that share phonetic codes with spoken word
+  const relevantCodes = [spokenPrimary];
+  if (spokenSecondary && spokenSecondary !== spokenPrimary) {
+    relevantCodes.push(spokenSecondary);
+  }
+
+  let conflicts = [];
+  for (const code of relevantCodes) {
+    if (phoneticGroups.has(code)) {
+      conflicts.push(...phoneticGroups.get(code));
+    }
+  }
+
+  if (conflicts.length <= 1) {
+    // No conflicts, return original list
+    return grammarList;
+  }
+
+  // Sort conflicts by length difference from spoken word (closest first)
+  conflicts.sort((a, b) => {
+    const diffA = Math.abs(a.length - spokenLength);
+    const diffB = Math.abs(b.length - spokenLength);
+    return diffA - diffB;
+  });
+
+  // Keep ONLY the words with the exact closest length match
+  // If "molly"(5) has conflicts with "mali"(4, diff=1) and "malawi"(6, diff=1),
+  // we need a tie-breaker: prefer SHORTER words (homophones are usually not longer)
+  const closestDiff = Math.abs(conflicts[0].length - spokenLength);
+  const closestMatches = conflicts.filter(c => Math.abs(c.length - spokenLength) === closestDiff);
+
+  // Tie-breaker: prefer shorter words when multiple have same length diff
+  const preferShorter = closestMatches.filter(c => c.length <= spokenLength);
+  const finalCandidates = preferShorter.length > 0 ? preferShorter : closestMatches;
+
+  const keepWords = new Set(
+    finalCandidates
+      .slice(0, 2) // Keep at most 2 to avoid ambiguity
+      .map(c => c.word)
+  );
+
+  console.log(`[SR]   Phonetic conflicts for "${spokenWord}": keeping ${Array.from(keepWords).join(', ')}`)
+
+  const filtered = grammarList.filter(word => {
+    const shouldKeep = !conflicts.some(c => c.word === word) || keepWords.has(word);
+    if (!shouldKeep) {
+      console.log(`[SR]   Filtering out phonetic conflict: "${word}" (keeping closer length matches)`);
+    }
+    return shouldKeep;
+  });
+
+  console.log(`[SR] Filtered grammar: ${grammarList.length} → ${filtered.length} words (removed ${grammarList.length - filtered.length} conflicts)`);
+  return filtered;
+}
+
+// Find phonetically matching word from grammar list using Double Metaphone
+// If phoneticIndex is provided, uses O(1) lookup; otherwise falls back to O(n) search
+function findPhoneticMatch(spokenWord, grammarList, phoneticIndex = null) {
+  // First, filter out phonetically conflicting words (e.g., "malawi" when looking for "mali")
+  const filteredGrammar = filterPhoneticConflicts(spokenWord, grammarList);
+
+  // Rebuild index if we filtered the grammar
+  if (phoneticIndex && filteredGrammar.length < grammarList.length) {
+    console.log(`[SR] Rebuilding phonetic index for filtered grammar`);
+    phoneticIndex = buildPhoneticIndex(filteredGrammar);
+  }
+
+  // Try with original spoken word
+  const result = tryPhoneticMatch(spokenWord, filteredGrammar, phoneticIndex);
+  if (result) {
+    return result;
+  }
+
+  // If spoken word has spaces, also try without spaces (handles "care about" → "kiribati")
+  if (spokenWord.includes(' ')) {
+    const noSpaces = spokenWord.replace(/\s+/g, '');
+    console.log(`[SR] Retrying phonetic match without spaces: "${noSpaces}"`);
+    return tryPhoneticMatch(noSpaces, filteredGrammar, phoneticIndex);
+  }
+
+  return null;
+}
+
+// Internal helper for phonetic matching
+function tryPhoneticMatch(spokenWord, grammarList, phoneticIndex = null) {
+  const [spokenPrimary, spokenSecondary] = getPhoneticCodes(spokenWord);
+
+  console.log(`[SR] Looking for phonetic match for "${spokenWord}"...`);
+
+  // Additional validation: words must be similar in length to avoid false matches
+  // (e.g., "mali" shouldn't match "malawi", "akrotiri" shouldn't match "ecuador")
+  const spokenLength = spokenWord.length;
+
+  let bestMatch = null;
+  let bestMatchScore = Infinity;
+
+  // Use phonetic index for O(1) lookup if available
+  let candidateEntries = [];
+  if (phoneticIndex) {
+    console.log(`[SR] Using pre-computed phonetic index (O(1) lookup)`);
+    // Get all words that match the spoken phonetic codes EXACTLY
+    const primaryMatches = phoneticIndex.get(spokenPrimary) || [];
+    const secondaryMatches = spokenSecondary ? (phoneticIndex.get(spokenSecondary) || []) : [];
+    candidateEntries = [...primaryMatches, ...secondaryMatches];
+
+    // Also check for fuzzy matches, BUT with strict constraints
+    // Only for codes of length 3+ to avoid short code false matches (PN vs PR)
+    if (spokenPrimary && spokenPrimary.length >= 3) {
+      for (const [code, entries] of phoneticIndex) {
+        if (code && code.length >= 3) { // Only codes of length 3+
+          const distToPrimary = levenshteinDistance(spokenPrimary, code);
+          const distToSecondary = spokenSecondary && spokenSecondary.length >= 3 ?
+            levenshteinDistance(spokenSecondary, code) : Infinity;
+
+          if (distToPrimary === 1 || distToSecondary === 1) { // Exactly 1 edit
+            candidateEntries.push(...entries);
+          }
+        }
+      }
+    }
+
+    console.log(`[SR] Found ${candidateEntries.length} candidate entries from phonetic index`);
+  } else {
+    // Fallback: convert grammarList to entries format for O(n) search
+    console.log(`[SR] No phonetic index, using O(n) search`);
+    candidateEntries = grammarList.map(word => ({
+      word: word,
+      length: word.length,
+      primary: null, // Will compute lazily
+      secondary: null
+    }));
+  }
+
+  // Process candidates
+  for (const entry of candidateEntries) {
+    const grammarWord = entry.word;
+    const grammarLength = entry.length;
+
+    // Smart length guard: use BOTH absolute and proportional checks
+    // This prevents "mali" (4) → "malawi" (6) while allowing near-homophones
+    // "mali"(4) vs "malawi"(6): diff=2, proportion=2/4=50% → REJECTED
+    // "peru"(4) vs "perdue"(6): diff=2, proportion=2/4=50% → REJECTED (needs phonetic match)
+    const lengthDiff = Math.abs(spokenLength - grammarLength);
+    const maxAbsoluteDiff = 2; // Max 2 character difference (stricter)
+    const maxProportionalDiff = 0.30; // Max 30% length difference based on SHORTER word
+
+    const shorterLength = Math.min(spokenLength, grammarLength);
+    const proportionalDiff = lengthDiff / shorterLength;
+
+    // Reject if EITHER condition fails
+    if (lengthDiff > maxAbsoluteDiff || proportionalDiff > maxProportionalDiff) {
+      if (lengthDiff <= maxAbsoluteDiff + 1) { // Log near-misses for debugging
+        console.log(`[SR]   Rejected "${grammarWord}": length diff ${lengthDiff} (${(proportionalDiff * 100).toFixed(0)}% of shorter word)`);
+      }
+      continue;
+    }
+
+    // Get or compute phonetic codes
+    let grammarPrimary, grammarSecondary;
+    if (entry.primary !== null) {
+      // Already computed in index
+      grammarPrimary = entry.primary;
+      grammarSecondary = entry.secondary;
+    } else {
+      // Compute on demand for O(n) fallback
+      [grammarPrimary, grammarSecondary] = getPhoneticCodes(grammarWord);
+    }
+
+    // Check for exact phonetic code match
+    const exactPhoneticMatch = spokenPrimary === grammarPrimary ||
+        (spokenSecondary && spokenSecondary === grammarPrimary) ||
+        (grammarSecondary && spokenPrimary === grammarSecondary) ||
+        (spokenSecondary && grammarSecondary && spokenSecondary === grammarSecondary);
+
+    if (exactPhoneticMatch) {
+      // Exact phonetic match - prefer shorter length difference
+      if (lengthDiff < bestMatchScore) {
+        bestMatch = grammarWord;
+        bestMatchScore = lengthDiff;
+        console.log(`[SR] ✅ Exact phonetic match found: "${spokenWord}" → "${grammarWord}" (length diff: ${lengthDiff})`);
+      }
+      // If length diff is 0 or 1, accept immediately (perfect homophones)
+      if (lengthDiff <= 1) {
+        return grammarWord;
+      }
+    } else {
+      // Fuzzy phonetic matching: allow edit distance of 1 on phonetic codes
+      // BUT with strict constraints to avoid false positives like "benn" (PN) → "peru" (PR)
+      const phoneticEditDist = Math.min(
+        levenshteinDistance(spokenPrimary, grammarPrimary),
+        spokenSecondary ? levenshteinDistance(spokenSecondary, grammarPrimary) : Infinity,
+        grammarSecondary ? levenshteinDistance(spokenPrimary, grammarSecondary) : Infinity,
+        (spokenSecondary && grammarSecondary) ? levenshteinDistance(spokenSecondary, grammarSecondary) : Infinity
+      );
+
+      // STRICT constraints for fuzzy matching:
+      // 1. Phonetic codes must be length 3+ (avoid "PN" vs "PR" false matches)
+      // 2. Edit distance must be exactly 1
+      // 3. Length diff must be 0 or 1 (MUCH stricter than exact matches)
+      const minCodeLength = Math.min(
+        spokenPrimary.length,
+        grammarPrimary.length,
+        spokenSecondary ? spokenSecondary.length : 999,
+        grammarSecondary ? grammarSecondary.length : 999
+      );
+
+      if (phoneticEditDist === 1 && lengthDiff <= 1 && minCodeLength >= 3) {
+        const fuzzyScore = phoneticEditDist * 10 + lengthDiff; // Prefer lower edit dist, then length
+        if (fuzzyScore < bestMatchScore) {
+          bestMatch = grammarWord;
+          bestMatchScore = fuzzyScore;
+          console.log(`[SR] ✅ Fuzzy phonetic match found: "${spokenWord}" → "${grammarWord}" (phonetic edit dist: ${phoneticEditDist}, length diff: ${lengthDiff}, code length: ${minCodeLength})`);
+        }
+      }
+    }
+  }
+
+  if (bestMatch) {
+    console.log(`[SR] ✅ Best phonetic match: "${spokenWord}" → "${bestMatch}"`);
+    return bestMatch;
+  }
+
+  console.log(`[SR] No phonetic match found`);
+  return null;
+}
+
+// Levenshtein distance (edit distance) between two strings
+function levenshteinDistance(str1, str2) {
+  const matrix = [];
+
+  for (let i = 0; i <= str2.length; i++) {
+    matrix[i] = [i];
+  }
+
+  for (let j = 0; j <= str1.length; j++) {
+    matrix[0][j] = j;
+  }
+
+  for (let i = 1; i <= str2.length; i++) {
+    for (let j = 1; j <= str1.length; j++) {
+      if (str2.charAt(i - 1) === str1.charAt(j - 1)) {
+        matrix[i][j] = matrix[i - 1][j - 1];
+      } else {
+        matrix[i][j] = Math.min(
+          matrix[i - 1][j - 1] + 1, // substitution
+          matrix[i][j - 1] + 1,     // insertion
+          matrix[i - 1][j] + 1      // deletion
+        );
+      }
+    }
+  }
+
+  return matrix[str2.length][str1.length];
 }
 
 // Speech recognition function to process audio data, this is called by the web worker
@@ -3755,14 +4112,18 @@ async function processLINEAR16(data) {
       }
     } else {
       if (DialogueUtils.isUserInDialogueLoop()) {
-        DialogueUtils.setDialogueUserAnswerValue('waiting for transcription');
+        // Don't set input field text - status shown in SR icon/message display
       } else {
-        userAnswer.value = 'waiting for transcription';
+        // Don't set input field text - status shown in SR icon/message display
         phraseHints = getAllCurrentStimAnswers(true);
       }
     }
 
+    console.log('[SR] ========== PHRASE HINTS DEBUG ==========');
+    console.log('[SR] Total phrase hints:', phraseHints.length);
+    // Phrase hints list omitted from logs (use [SR] filter to see count only)
     console.log('[SR] Sending audio to Google Speech API...');
+    console.log('[SR] ==========================================');
     const request = generateRequestJSON(sampleRate, speechRecognitionLanguage, phraseHints, data);
 
     let answerGrammar = [];
@@ -3773,8 +4134,14 @@ async function processLINEAR16(data) {
       // may confuse the speech api so that we can check if what the api returns
       // is within the realm of reasonable responses before transcribing it
       answerGrammar = getAllCurrentStimAnswers(false);
-      console.log('[SR] Answer grammar:', answerGrammar);
     }
+
+    // Always allow 'skip' command for non-dialogue trials
+    if (!DialogueUtils.isUserInDialogueLoop()) {
+      answerGrammar.push('skip');
+    }
+
+    console.log('[SR] Answer grammar count (with skip):', answerGrammar.length);
     let tdfSpeechAPIKey;
     if(Session.get('useEmbeddedAPIKeys')){
       tdfSpeechAPIKey = await meteorCallAsync('getTdfSpeechAPIKey', Session.get('currentTdfId'));
@@ -3812,8 +4179,28 @@ function speechAPICallback(err, data){
     console.log('[SR] Speech API response received:', JSON.stringify(response).substring(0, 200));
   }
 
+  // Build phonetic index for efficient matching (only if we have grammar to check)
+  let phoneticIndex = null;
+  if (answerGrammar && answerGrammar.length > 10) { // Only worth it for larger grammars
+    phoneticIndex = buildPhoneticIndex(answerGrammar);
+  }
+
   let transcript = '';
-  const ignoreOutOfGrammarResponses = Session.get('ignoreOutOfGrammarResponses');
+  let ignoreOutOfGrammarResponses = Session.get('ignoreOutOfGrammarResponses');
+
+  // Fallback: read from TDF if not in Session (happens on page refresh)
+  if (ignoreOutOfGrammarResponses === undefined) {
+    const tdfFile = Session.get('currentTdfFile');
+    if (tdfFile && tdfFile.tdfs && tdfFile.tdfs.tutor && tdfFile.tdfs.tutor.setspec) {
+      const setspec = tdfFile.tdfs.tutor.setspec;
+      ignoreOutOfGrammarResponses = setspec.speechIgnoreOutOfGrammarResponses ?
+        setspec.speechIgnoreOutOfGrammarResponses.toLowerCase() === 'true' : false;
+      Session.set('ignoreOutOfGrammarResponses', ignoreOutOfGrammarResponses); // Cache it
+    } else {
+      ignoreOutOfGrammarResponses = false; // Safe default
+    }
+  }
+
   console.log('[SR] ignoreOutOfGrammarResponses setting:', ignoreOutOfGrammarResponses);
   const speechOutOfGrammarFeedback = 'Please try again or press enter or say skip';
   // Session.get("speechOutOfGrammarFeedback");//TODO: change this in tdfs and not hardcoded
@@ -3836,23 +4223,113 @@ function speechAPICallback(err, data){
       transcript = `API Error: ${errorMessage}`;
     }
     ignoredOrSilent = true;
-  } else if (response && response['results'] && response['results'].length > 0 &&
-             response['results'][0]['alternatives'] && response['results'][0]['alternatives'].length > 0) {
-    // Successfully got transcription
-    transcript = response['results'][0]['alternatives'][0]['transcript'].toLowerCase();
-    console.log('[SR] Transcribed text: "' + transcript + '"');
-
-    if (ignoreOutOfGrammarResponses) {
-      if (transcript == 'enter') {
-        ignoredOrSilent = false;
-      } else if (answerGrammar.indexOf(transcript) == -1) {
-        console.log('[SR] ANSWER OUT OF GRAMMAR, IGNORING. Expected one of:', answerGrammar);
-        transcript = speechOutOfGrammarFeedback;
-        ignoredOrSilent = true;
+  } else if (response && response['results'] && response['results'].length > 0) {
+    // Successfully got response - collect ALL alternatives from ALL results
+    // Google sometimes returns multiple results with alternatives spread across them
+    let alternatives = [];
+    for (let resultIdx = 0; resultIdx < response['results'].length; resultIdx++) {
+      const result = response['results'][resultIdx];
+      if (result['alternatives'] && result['alternatives'].length > 0) {
+        for (let altIdx = 0; altIdx < result['alternatives'].length; altIdx++) {
+          const alt = result['alternatives'][altIdx];
+          if (alt['transcript']) {
+            alternatives.push(alt);
+          }
+        }
       }
     }
+
+    if (alternatives.length === 0) {
+      console.log('[SR] NO VALID ALTERNATIVES found in any result');
+      transcript = 'Silence detected';
+      ignoredOrSilent = true;
+    } else {
+
+    console.log('[SR] ========== ALTERNATIVES RECEIVED ==========');
+    console.log('[SR] Total alternatives:', alternatives.length);
+    for (let i = 0; i < alternatives.length; i++) {
+      const alt = alternatives[i];
+      if (alt['transcript']) {
+        console.log(`[SR] Alt ${i + 1}: "${alt['transcript']}" (confidence: ${alt['confidence'] || 'N/A'})`);
+      }
+    }
+    console.log('[SR] ==========================================');
+
+    // Try to find a grammar match in alternatives (best strategy)
+    let foundGrammarMatch = false;
+    if (ignoreOutOfGrammarResponses) {
+      // First pass: Look for exact match
+      for (let i = 0; i < alternatives.length; i++) {
+        const alt = alternatives[i];
+        if (alt['transcript']) {
+          const altTranscript = alt['transcript'].toLowerCase();
+          if (answerGrammar.indexOf(altTranscript) !== -1 || altTranscript === 'skip') {
+            transcript = altTranscript;
+            foundGrammarMatch = true;
+            console.log(`[SR] ✅ FOUND EXACT GRAMMAR MATCH in alternative ${i + 1}: "${transcript}"`);
+            break;
+          }
+        }
+      }
+
+      // Second pass: Phonetic matching for homophones (Mali/Molly, Palau/pull out)
+      // Only try phonetic matching for words with 3+ characters to avoid false positives
+      if (!foundGrammarMatch && alternatives.length > 0 && alternatives[0]['transcript']) {
+        const bestAlternative = alternatives[0]['transcript'].toLowerCase();
+
+        if (bestAlternative.length >= 3) {
+          const phoneticMatch = findPhoneticMatch(bestAlternative, answerGrammar, phoneticIndex);
+
+          if (phoneticMatch) {
+            transcript = phoneticMatch;
+            foundGrammarMatch = true;
+            console.log(`[SR] ✅ FOUND PHONETIC MATCH: "${bestAlternative}" → "${transcript}"`);
+          }
+        } else {
+          console.log(`[SR] Skipping phonetic match - word too short: "${bestAlternative}" (${bestAlternative.length} chars)`);
+        }
+      }
+    }
+
+    // If no grammar match found in any alternative, use first alternative
+    if (!foundGrammarMatch) {
+      const firstAlternative = alternatives[0];
+
+      // Check if transcript exists (Google sometimes returns empty alternative objects)
+      if (!firstAlternative['transcript']) {
+        console.log('[SR] NO TRANSCRIPT in first alternative (empty object)');
+        transcript = 'Silence detected';
+        ignoredOrSilent = true;
+      } else {
+        transcript = firstAlternative['transcript'].toLowerCase();
+        console.log('[SR] No grammar match found, using first alternative: "' + transcript + '"');
+      }
+    }
+
+    // Grammar checking (will only reject if no grammar match was found in alternatives)
+    if (ignoreOutOfGrammarResponses && !ignoredOrSilent && !foundGrammarMatch) {
+      console.log('[SR] Checking grammar - transcript:', transcript);
+      console.log('[SR] Valid answers count:', answerGrammar.length);
+      if (transcript == 'enter') {
+        console.log('[SR] Transcript is "enter" - allowing');
+        ignoredOrSilent = false;
+      } else if (answerGrammar.indexOf(transcript) == -1) {
+        console.log('[SR] ❌ ANSWER OUT OF GRAMMAR, IGNORING. Transcript "' + transcript + '" not in grammar list');
+        transcript = speechOutOfGrammarFeedback;
+        ignoredOrSilent = true;
+      } else {
+        console.log('[SR] ✅ Answer IN GRAMMAR - accepting');
+      }
+    } else if (!ignoredOrSilent) {
+      if (foundGrammarMatch) {
+        console.log('[SR] ✅ Using grammar match from alternatives');
+      } else {
+        console.log('[SR] ignoreOutOfGrammarResponses is FALSE - accepting all transcripts');
+      }
+    }
+    } // Close the "if (!alternatives)" else block
   } else {
-    console.log('[SR] NO TRANSCRIPT/SILENCE - Response:', response);
+    console.log('[SR] NO TRANSCRIPT/SILENCE - No valid results in response');
     transcript = 'Silence detected';
     ignoredOrSilent = true;
   }
@@ -3868,12 +4345,18 @@ function speechAPICallback(err, data){
     if (DialogueUtils.isUserInDialogueIntroExit()) {
       speechTranscriptionTimeoutsSeen = 0;
     } else {
-      DialogueUtils.setDialogueUserAnswerValue(transcript);
+      // Only set input field for valid transcripts, not error/status messages
+      if (!ignoredOrSilent) {
+        DialogueUtils.setDialogueUserAnswerValue(transcript);
+      }
     }
   } else {
     userAnswer = inUserForceCorrect ? document.getElementById('userForceCorrect') :
         document.getElementById('userAnswer');
-    userAnswer.value = transcript;
+    // Only set input field for valid transcripts, not error/status messages
+    if (!ignoredOrSilent) {
+      userAnswer.value = transcript;
+    }
   }
 
   if (speechTranscriptionTimeoutsSeen >= Session.get('currentDeliveryParams').autostopTranscriptionAttemptLimit) {
@@ -3891,11 +4374,7 @@ function speechAPICallback(err, data){
 
   if (ignoredOrSilent) {
     startRecording();
-    // If answer is out of grammar or we pick up silence wait 5 seconds for
-    // user to read feedback then clear the answer value
-    if (!getButtonTrial() && !DialogueUtils.isUserInDialogueLoop()) {
-      setTimeout(() => userAnswer.value = '', 5000);
-    }
+    // Status messages are shown in SR icon/message display, not in input field
   } else {
     // Only simulate enter key press if we picked up transcribable/in grammar
     // audio for better UX
@@ -3933,11 +4412,15 @@ function generateRequestJSON(sampleRate, speechRecognitionLanguage, phraseHints,
       'encoding': 'LINEAR16',
       'sampleRateHertz': sampleRate,
       'languageCode': speechRecognitionLanguage,
-      'maxAlternatives': 1,
+      'maxAlternatives': 5,  // Get top 5 alternatives to find grammar match
       'profanityFilter': false,
+      'enableAutomaticPunctuation': false,  // Disable to get cleaner alternatives
+      'model': 'command_and_search',  // Optimized for short queries/commands
+      'useEnhanced': true,  // Use enhanced model for better accuracy
       'speechContexts': [
         {
           'phrases': phraseHints,
+          'boost': 5  // Low bias - forces Google to return alternatives by keeping confidence lower
         },
       ],
     },
@@ -3946,7 +4429,12 @@ function generateRequestJSON(sampleRate, speechRecognitionLanguage, phraseHints,
     },
   };
 
-  console.log('Request:' + _.pick(request, 'config'));
+  // Request config with phrase hints omitted from logs (too large)
+  console.log('[SR] Request config: encoding:', request.config.encoding,
+              'sampleRate:', request.config.sampleRateHertz,
+              'language:', request.config.languageCode,
+              'maxAlternatives:', request.config.maxAlternatives,
+              'phraseHints:', request.config.speechContexts?.[0]?.phrases?.length || 0);
 
   return request;
 }
@@ -3984,19 +4472,27 @@ function startUserMedia(stream) {
   recorder.setProcessCallback(processLINEAR16);
 
   // Set up options for voice activity detection code (hark.js)
-  // audioInputSensitivity: threshold for voice detection (lower = more sensitive)
-  // Default 20, range typically -100 to 0 (dB)
-  const sensitivity = Session.get('audioInputSensitivity') || 20;
+  // audioInputSensitivity: threshold for voice detection (higher number = more sensitive)
+  // Default 60 (converts to -60 dB threshold), range 0-100 (maps to 0 to -100 dB)
+  const sensitivity = Session.get('audioInputSensitivity') || 60;
   const harkOptions = {
     threshold: -1 * sensitivity,  // Convert to negative dB value (e.g., -20 dB)
-    interval: 100,  // Check every 100ms instead of default 50ms for more stable detection
-    history: 20,  // Require 20 samples above threshold before triggering (filters out clicks/pops)
-    smoothing: 0.1  // Smoothing time constant for audio analysis (default 0.1)
+    interval: 50,  // Check every 50ms (default) for responsive detection of short utterances
+    history: 5,  // Silence detection: needs 5 consecutive silent samples to stop (5 * 50ms = 250ms)
+    smoothing: 0.1  // Smoothing time constant for audio analysis (reduces noise spikes)
   };
   console.log('[SR] Initializing Hark with options:', harkOptions);
   speechEvents = hark(stream, harkOptions);
 
+  let recordingStartTime = null;
+
+  // Volume monitoring removed - floods console
+  // speechEvents.on('volume_change', function(volume, threshold) {
+  //   console.log('[SR] Volume:', volume.toFixed(2), 'dB | Threshold:', threshold, 'dB');
+  // });
+
   speechEvents.on('speaking', function() {
+    recordingStartTime = Date.now(); // Track when voice starts
     if (!Session.get('recording')) {
       console.log('[SR] NOT RECORDING, VOICE START');
       return;
@@ -4027,10 +4523,24 @@ function startUserMedia(stream) {
         return;
       }
     } else {
-      console.log('[SR] VOICE STOP');
+      // CRITICAL: Only process voice stop if voice actually started
+      if (!recordingStartTime) {
+        console.log('[SR] VOICE STOP IGNORED - voice never started (speaking event never fired)');
+        return;
+      }
+
+      // Prevent stopping too quickly if voice never started properly
+      const timeSinceStart = Date.now() - recordingStartTime;
+      if (timeSinceStart < 200) {
+        console.log(`[SR] VOICE STOP TOO QUICK (${timeSinceStart}ms) - ignoring`);
+        return;
+      }
+
+      console.log(`[SR] VOICE STOP (after ${timeSinceStart}ms)`);
       recorder.stop();
       Session.set('recording', false);
       recorder.exportToProcessCallback();
+      recordingStartTime = null;
     }
   });
 
@@ -4039,13 +4549,25 @@ function startUserMedia(stream) {
 }
 
 function startRecording() {
+  console.log('[SR] ========== startRecording() CALLED ==========');
+  console.log('[SR] Conditions check:');
+  console.log('[SR]   recorder exists:', !!recorder);
+  console.log('[SR]   recordingLocked:', Session.get('recordingLocked'));
+  console.log('[SR]   audioInputMode:', Meteor.user()?.audioInputMode);
+  console.log('[SR]   audioPromptMode:', Meteor.user()?.audioPromptMode);
+
   if (recorder && !Session.get('recordingLocked') && Meteor.user().audioInputMode) {
     Session.set('recording', true);
     recorder.record();
     console.log('[SR] RECORDING START');
+    console.log('[SR]   recorder.recording:', recorder.recording);
   } else {
-    console.log('[SR] NO RECORDER / RECORDING LOCKED DURING AUDIO PLAYING');
+    console.log('[SR] ❌ RECORDING BLOCKED:');
+    if (!recorder) console.log('[SR]     - NO RECORDER');
+    if (Session.get('recordingLocked')) console.log('[SR]     - RECORDING LOCKED (TTS audio likely playing)');
+    if (!Meteor.user()?.audioInputMode) console.log('[SR]     - AUDIO INPUT MODE OFF');
   }
+  console.log('[SR] ==========================================');
 }
 
 function stopRecording() {
@@ -4520,7 +5042,7 @@ async function resumeFromComponentState() {
   Session.set('curTdfUISettings', UIsettings);
 
 
-  console.log('curTdfUISettings', Session.get('curTdfUISettings'))
+  // curTdfUISettings object logging removed (too large)
 
   if (Session.get('feedbackUnset')){
     getFeedbackParameters();

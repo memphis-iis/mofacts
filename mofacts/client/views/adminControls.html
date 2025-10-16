@@ -3,11 +3,11 @@
 <template name="adminControls">
     {{#if isInRole 'admin'}}
         <div class="container" style="margin-top: 1rem;">
-            <h2 style="margin-top: 0; text-align: center;">Admin Control Panel</h2>
+            <h3 style="margin-top: 0; text-align: center;">Admin Control Panel</h3>
 
-            <div class="container">
+            <div class="admin-section" style="margin-top: 0;">
                 <div class="row text-center">
-                    <h3>Server Status</h3>
+                    <h4>Server Status</h4>
                 </div>
                 <div class="row row-cols-2">
                     <div class="col text-end">
@@ -28,8 +28,11 @@
                         Used {{serverStatus.diskSpacePercent}}%, Remaining ({{serverStatus.remainingSpace}}/{{serverStatus.diskSpace}} GB)
                     </div>
                 </div>
+            </div>
+
+            <div class="admin-section">
                 <div class="row text-center">
-                    <h3>Theme</h3>
+                    <h4>Theme</h4>
                 </div>
                 {{#if currentTheme.enabled}}
                 <div class="row">
@@ -201,8 +204,11 @@
                     </div>
                 </div>
                 {{/if}}
+            </div>
+
+            <div class="admin-section">
                 <div class="row text-center">
-                    <h3>Test Logins</h3>
+                    <h4>Test Logins</h4>
                 </div>
                 <form>
                     <div class="row row-cols-2">
@@ -222,17 +228,22 @@
                         </div>
                     </div>
                 </form>
-                
+            </div>
+
+            <div class="admin-section">
                 <div class="row text-center">
-                    <h3>Update stimDisplayTypeMap</h3>
+                    <h4>Update stimDisplayTypeMap</h4>
                 </div>
                 <div class="row">    
                     <div class="col text-center">
                         <button type="button" id="updateStimDisplayTypeMap" class="btn btn-fixed">Clear</button>
                     </div>
                 </div>
+            </div>
+
+            <div class="admin-section">
                 <div class="row text-center">
-                    <h3>Verbosity Level</h3>
+                    <h4>Verbosity Level</h4>
                 </div>
                 <form>
                     <div class="row row-cols-2">
@@ -264,11 +275,12 @@
                 </form>
             </div>
         </div>
-       
+
     {{/if}}
-    <div class="container">
+
+    <div class="admin-section">
         <div class="row text-center">
-            <h3>Client Verboisty Level</h3>
+            <h4>Client Verboisty Level</h4>
         </div>
         <form>
             <div class="row row-cols-2">
@@ -299,6 +311,5 @@
             </div>
         </form>
     </div>
-
 </template>
     
