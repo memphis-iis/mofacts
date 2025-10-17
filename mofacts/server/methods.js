@@ -1996,7 +1996,6 @@ async function getStudentPerformanceForClassAndTdfId(instructorId, date=null) {
     studentPerformanceForClassAndTdfIdMap[courseId][TDFId][userId].count += correct + incorrect;
     studentPerformanceForClassAndTdfIdMap[courseId][TDFId][userId].totalTime = totalPracticeDuration;
   }
-  serverConsole('studentPerformanceForClass:', JSON.stringify(studentPerformanceForClass, null, 4));
   for (const index of Object.keys(studentPerformanceForClass)) {
     const coursetotals = studentPerformanceForClass[index];
     for (const index2 of Object.keys(coursetotals)) {
@@ -2005,7 +2004,6 @@ async function getStudentPerformanceForClassAndTdfId(instructorId, date=null) {
       tdftotal.totalTimeDisplay = (tdftotal.totalTime / (60 * 1000) ).toFixed(1); // convert to minutes from ms
     }
   }
-  serverConsole('studentPerformanceForClassAndTdfIdMap:', studentPerformanceForClassAndTdfIdMap);
   for (const index3 of Object.keys(studentPerformanceForClassAndTdfIdMap)) {
     const coursetotals = studentPerformanceForClassAndTdfIdMap[index3];
     for (const index4 of Object.keys(coursetotals)) {
@@ -2020,24 +2018,18 @@ async function getStudentPerformanceForClassAndTdfId(instructorId, date=null) {
 }
 
 async function getTdfIDsAndDisplaysAttemptedByUserId(userId, onlyWithLearningSessions=true) {
-  console.log('getTdfIDsAndDisplaysAttemptedByUserId called for userId:', userId);
-
   // First try GlobalExperimentStates, then fall back to Histories for older data
   let tdfRet = GlobalExperimentStates.find({userId: userId}).fetch();
-  console.log('GlobalExperimentStates count:', tdfRet.length);
 
   // If no data in GlobalExperimentStates, check Histories
   if (tdfRet.length === 0) {
-    console.log('No GlobalExperimentStates, checking Histories...');
     const historyTdfIds = Histories.find(
       {userId: userId, levelUnitType: 'model'},
       {fields: {TDFId: 1}, sort: {recordedServerTime: -1}}
     ).fetch();
-    console.log('Histories count:', historyTdfIds.length);
 
     // Get unique TDF IDs from history
     const uniqueTdfIds = [...new Set(historyTdfIds.map(h => h.TDFId))];
-    console.log('Unique TDF IDs from Histories:', uniqueTdfIds);
     tdfRet = uniqueTdfIds.map(TDFId => ({TDFId}));
   }
 
@@ -2046,43 +2038,35 @@ async function getTdfIDsAndDisplaysAttemptedByUserId(userId, onlyWithLearningSes
 
   for (const obj of tdfRet) {
     const TDFId = obj.TDFId;
-    console.log('Processing TDF:', TDFId);
 
     // Skip if we've already processed this TDF
     if (seenTdfIds.has(TDFId)) {
-      console.log('  Skipped (duplicate)');
       continue;
     }
     seenTdfIds.add(TDFId);
 
     const tdf = await getTdfById(TDFId)
     if (!tdf) {
-      console.log('  Skipped (TDF not found)');
       continue;
     }
     const tdfObject = tdf.content;
     if (!tdfObject.tdfs.tutor.unit) {
-      console.log('  Skipped (no units)');
       continue;
     }
     // Remove progressReporterParams requirement - we'll compute simple stats from history
     if (tdfObject.tdfs.tutor.setspec.disableProgressReport) {
-      console.log('  Skipped (disableProgressReport=true)');
       continue;
     }
 
     // Add the TDF - we'll show stats for anything with history
     const displayName = tdfObject.tdfs.tutor.setspec.lessonname;
     tdfsAttempted.push({_id: TDFId, TDFId, displayName});
-    console.log('  Added:', displayName);
   }
 
-  console.log('Returning', tdfsAttempted.length, 'TDFs');
   return tdfsAttempted;
 }
 
 async function getSimpleTdfStats(userId, tdfId) {
-  console.log('getSimpleTdfStats:', userId, tdfId);
 
   // Get all history for this user and TDF (excluding instructions and assessments)
   const history = Histories.find({
@@ -2101,7 +2085,7 @@ async function getSimpleTdfStats(userId, tdfId) {
   let correct = 0;
   let incorrect = 0;
   let totalTime = 0;
-  const uniqueStims = new Set();
+  const uniqueItems = new Set();
   const sessionDates = new Set();
   const last10 = history.slice(-10);
   let last10Correct = 0;
@@ -2110,8 +2094,16 @@ async function getSimpleTdfStats(userId, tdfId) {
     if (trial.outcome === 'correct') correct++;
     else if (trial.outcome === 'incorrect') incorrect++;
 
-    if (trial.responseTime) totalTime += trial.responseTime;
-    if (trial.stimIndex !== undefined) uniqueStims.add(trial.stimIndex);
+    // Sum endLatency and feedbackLatency for total time practiced
+    const endLatency = trial.CFEndLatency || 0;
+    const feedbackLatency = trial.CFFeedbackLatency || 0;
+    totalTime += (endLatency + feedbackLatency);
+
+    // Track unique items practiced by itemId, CFStimFileIndex, or problemName
+    const itemIdentifier = trial.itemId || trial.CFStimFileIndex || trial.problemName;
+    if (itemIdentifier !== undefined && itemIdentifier !== null) {
+      uniqueItems.add(itemIdentifier);
+    }
 
     // Track unique practice dates
     const date = new Date(trial.recordedServerTime);
@@ -2135,7 +2127,7 @@ async function getSimpleTdfStats(userId, tdfId) {
     overallAccuracy,
     last10Accuracy,
     totalTimeMinutes,
-    itemsPracticed: uniqueStims.size,
+    itemsPracticed: uniqueItems.size,
     lastPracticeDate,
     totalSessions
   };
@@ -2862,15 +2854,12 @@ export const methods = {
             userAnswers = mongoResult.userAnswers;
         }
         if (result.tag != 0) {
-          console.log('error with refutational feedback, feedback call: ' + result.name);
-          console.log(result);
+          // Error getting refutational feedback
         } else if (result.tag == 0) {
-          console.log('refutationalFeedback,return:', result);
           const refutationalFeedback = result.fields[0].Feedback || result.fields[0].feedback;
           if (typeof(refutationalFeedback) != 'undefined' && refutationalFeedback != null) {
             userAnswers[userAnswer] = refutationalFeedback;
             ElaboratedFeedbackCache.upsert(id, {$set: {correctAnswer: correctAnswer, userAnswers: userAnswers}});
-            serverConsole('result1: ' + JSON.stringify(result), mongoResult);
           }
         }
       });

@@ -93,13 +93,9 @@ Template.studentReporting.helpers({
 });
 
 Template.studentReporting.rendered = async function() {
-  console.log('studentReporting rendered!!!');
-
   const studentID = Session.get('curStudentID') || Meteor.userId();
-  console.log('Loading stats for student:', studentID);
 
   const tdfsAttempted = await meteorCallAsync('getTdfIDsAndDisplaysAttemptedByUserId', studentID);
-  console.log('TDFs with history:', tdfsAttempted);
 
   Session.set('studentReportingTdfs', tdfsAttempted);
 
@@ -113,7 +109,6 @@ Template.studentReporting.rendered = async function() {
   });
 
   const allStats = await Promise.all(statsPromises);
-  console.log('All TDF stats:', allStats);
 
   // Filter out TDFs with no stats (shouldn't happen, but just in case)
   const validStats = allStats.filter(s => s.totalTrials > 0);
@@ -130,7 +125,6 @@ Template.studentReporting.events({
     const target = $(event.currentTarget);
     const tdfId = target.data('tdfid');
     const lessonName = target.data('lessonname');
-    console.log('Continue lesson:', lessonName, tdfId);
 
     // Get TDF info from Tdfs collection
     const tdf = Tdfs.findOne({_id: tdfId});
@@ -151,18 +145,15 @@ Template.studentReporting.events({
 });
 
 async function updateDashboard(selectedTdfId){
-  console.log('change tdf select', selectedTdfId);
   if (selectedTdfId && selectedTdfId!==INVALID) {
     $(`#tdf-select option[value='${INVALID}']`).prop('disabled', true);
     $(`#select option[value='${INVALID}']`).prop('disabled', true);
     curTdf = selectedTdfId;
     tdfData = Session.get('allTdfs').find((x) => x._id == curTdf);
     tdfDate = tdfData.content.tdfs.tutor.setspec.duedate;
-    console.log('tdfDate', tdfDate, tdfData);
     Session.set('selectedTdfDueDate', tdfDate);
     exception = await meteorCallAsync('checkForUserException',Meteor.userId(), curTdf);
     Session.set('exception', exception);
-    console.log('exception', exception);
     const studentID = Session.get('curStudentID') || Meteor.userId();
     const studentUsername = Session.get('studentUsername') || Meteor.user().username;
     setStudentPerformance(studentID, studentUsername, selectedTdfId);
@@ -230,14 +221,10 @@ async function drawDashboard(studentId, selectedTdfId){
         clusterlist.push(unitNumber + 10000 * curStimSetId)
     }
   }
-  console.log('selectedTdfIdProgressReportParams',selectedTdfIdProgressReportParams);
   const [optimumDifficulty, difficultyHistory, masteryDisplay, masteryHistory, timeToMasterDisplay, timeToMasterHistory] = selectedTdfIdProgressReportParams;
-  console.log('expanded params',  optimumDifficulty, difficultyHistory, masteryDisplay, masteryHistory, timeToMasterDisplay, timeToMasterHistory);
   //Get Student Data
   const stimids = await meteorCallAsync('getStimSetFromLearningSessionByClusterList', curStimSetId, clusterlist);
-  console.log('stimids from clusterlist:', stimids?.length || 0);
   const curStudentGraphData = await meteorCallAsync('getStudentPerformanceByIdAndTDFId', studentId, selectedTdfId, stimids);
-  console.log("curStudentGraphData(all trials)", curStudentGraphData);
   //Expand Data
   if(curStudentGraphData){
     const curStudentTotalData = await meteorCallAsync('getStudentPerformanceByIdAndTDFId', studentId, selectedTdfId);
@@ -246,15 +233,10 @@ async function drawDashboard(studentId, selectedTdfId){
     const masteryEstimateData = await meteorCallAsync('getStudentPerformanceByIdAndTDFIdFromHistory', studentId, selectedTdfId, timeToMasterHistory);
     const difficultyData = await meteorCallAsync('getStudentPerformanceByIdAndTDFIdFromHistory', studentId, selectedTdfId, difficultyHistory);
     const numDroppedStims = await meteorCallAsync('getNumDroppedItemsByUserIDAndTDFId', studentId, selectedTdfId);
-    console.log(`speedOfLearningData(${30} trials)`, speedOfLearningData);
-    console.log(`masteryRateData(${masteryHistory} trials)`, masteryRateData);
-    console.log(`masteryEstimateData(${timeToMasterHistory} trials)`, masteryEstimateData);
-    console.log(`difficultyData(${difficultyHistory} trials)`, difficultyData);
     let {totalStimCount, stimsIntroduced} = curStudentGraphData;
     const {allTimeNumCorrect, allTimeNumIncorrect, allTimePracticeDuration} = curStudentTotalData;
     totalAttempts = parseFloat(allTimeNumCorrect) + parseFloat(allTimeNumIncorrect);
     percentCorrect = (parseFloat(allTimeNumCorrect) / totalAttempts) * 100;
-    console.log('totalAttempts', totalAttempts);
     percentCorrect = (parseFloat(allTimeNumCorrect) / totalAttempts) * 100;
     totalPracticeDurationInMinutes = allTimePracticeDuration / 60000;
     totalPracticeDurationMinutesDisplay = totalPracticeDurationInMinutes.toFixed();
@@ -299,29 +281,24 @@ async function drawDashboard(studentId, selectedTdfId){
     dashClusterCanvases = document.getElementsByClassName('dashCanvas');
     for(let dash of dashClusterCanvases){
       if(dash.classList.contains('masteredItems')){
-        console.log(dash);
         let gaugeMeter = new progressGauge(dash,"donut",0,100,donutOptionsMasteredItems);
         dashCluster.push(gaugeMeter);
       }
       if(dash.classList.contains('percentCorrect')){
-        console.log(dash);
         let gaugeMeter = new progressGauge(dash,"donut",0,100,donutOptionsMasteredItems);
         dashCluster.push(gaugeMeter);
       }
       if(dash.classList.contains('learningSpeed')){
-        console.log(dash);
         let gaugeMeter = new progressGauge(dash,"gauge",0,350,gaugeOptionsSpeedOfLearning);
         dashCluster.push(gaugeMeter);
       }
       if(dash.classList.contains('difficulty')){
-        console.log(dash);
         let gaugeMeter = new progressGauge(dash,"gauge",0,60,gaugeOptionsDifficulty);
         dashCluster.push(gaugeMeter);
       }
     }
 
     //Populate Dashboard values
-    console.log('Testing dashCluster:',dashCluster);
     dashCluster[0].set(percentStimsSeen);
     dashCluster[1].set(percentCorrect);
     dashCluster[2].set(speedOfLearning);
@@ -339,17 +316,13 @@ async function drawDashboard(studentId, selectedTdfId){
 }
 function progressGauge(target, gaugeType, currentValue,maxValue,options = defaultGaugeOptions){
     if(target != undefined){
-      console.log('gauge canvas found and loaded.')
-      console.log('gaugeType',gaugeType);
-      if(gaugeType == "gauge"){ gauge = new Gauge(target).setOptions(options);} 
+      if(gaugeType == "gauge"){ gauge = new Gauge(target).setOptions(options);}
       if(gaugeType == "donut"){ gauge = new Donut(target).setOptions(options);}
       gauge.maxValue = maxValue; // set max gauge value
       gauge.animationSpeed = 32; // set animation speed (32 is default value)
       gauge.set(currentValue); // set actual value
       gauge.setTextField(document.getElementById("preview-textfield"));
       return gauge;
-  } else {
-      console.log('canvas not found in DOM call.')
   }
  
 }
@@ -360,11 +333,8 @@ function lookUpLabelByDataValue(labels, series, value) {
   })];
 }
 
-async function selectTdf(currentTdfId, lessonName, currentStimuliSetId, ignoreOutOfGrammarResponses, 
+async function selectTdf(currentTdfId, lessonName, currentStimuliSetId, ignoreOutOfGrammarResponses,
   speechOutOfGrammarFeedback, how, isMultiTdf, fromSouthwest, setspec, isExperiment = false) {
-  console.log('Starting Lesson', lessonName, currentTdfId,
-      'currentStimuliSetId:', currentStimuliSetId, 'isMultiTdf:', isMultiTdf);
-
   const audioPromptFeedbackView = Session.get('audioPromptFeedbackView');
 
   // make sure session variables are cleared from previous tests
@@ -454,13 +424,12 @@ async function selectTdf(currentTdfId, lessonName, currentStimuliSetId, ignoreOu
     userAgent = _.display(navigator.userAgent);
     prefLang = _.display(navigator.language);
   } catch (err) {
-    console.log('Error getting browser info', err);
+    // Silently handle browser info error
   }
 
   // Check to see if the user has turned on audio prompt.
   // If so and if the tdf has it enabled then turn on, otherwise we won't do anything
   const userAudioPromptFeedbackToggled = (audioPromptFeedbackView == 'feedback') || (audioPromptFeedbackView == 'all') || (audioPromptFeedbackView == 'question');
-  console.log(curTdfContent);
   const tdfAudioPromptFeedbackEnabled = !!curTdfContent.tdfs.tutor.setspec.enableAudioPromptAndFeedback &&
       curTdfContent.tdfs.tutor.setspec.enableAudioPromptAndFeedback == 'true';
   const audioPromptTTSAPIKeyAvailable = !!curTdfContent.tdfs.tutor.setspec.textToSpeechAPIKey &&
@@ -495,15 +464,10 @@ async function selectTdf(currentTdfId, lessonName, currentStimuliSetId, ignoreOu
       const tdfKeyPresent = !!curTdfContent.tdfs.tutor.setspec.speechAPIKey &&
           !!curTdfContent.tdfs.tutor.setspec.speechAPIKey;
       if (!key && !tdfKeyPresent) {
-        console.log('speech api key not found, showing modal for user to input');
         $('#speechAPIModal').modal('show');
         continueToCard = false;
-      } else {
-        console.log('audio input enabled and key present, navigating to card and initializing audio input');
       }
     });
-  } else {
-    console.log('audio toggle not checked, navigating to card');
   }
 
   // Go directly to the card session - which will decide whether or

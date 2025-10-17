@@ -48,7 +48,10 @@ function sanitizeHTML(dirty) {
 
 // Helper function to check if audio input mode is enabled
 function checkAudioInputMode() {
-  return Meteor.user()?.audioInputMode || false;
+  // SR should only be enabled if BOTH user has it toggled on AND TDF supports it
+  const userAudioToggled = Meteor.user()?.audioInputMode || false;
+  const tdfAudioEnabled = Session.get('currentTdfFile')?.tdfs?.tutor?.setspec?.audioInputEnabled === 'true';
+  return userAudioToggled && tdfAudioEnabled;
 }
 
 export {
@@ -761,7 +764,10 @@ Template.card.helpers({
   'isNotInDialogueLoopStageIntroOrExit': () => Session.get('dialogueLoopStage') != 'intro' && Session.get('dialogueLoopStage') != 'exit',
 
   'audioInputModeEnabled': function() {
-    return Meteor.user() && Meteor.user().audioInputMode;
+    // SR icon should only show as enabled if BOTH user has it on AND TDF supports it
+    const userAudioToggled = Meteor.user()?.audioInputMode || false;
+    const tdfAudioEnabled = Session.get('currentTdfFile')?.tdfs?.tutor?.setspec?.audioInputEnabled === 'true';
+    return userAudioToggled && tdfAudioEnabled;
   },
 
   'voiceTranscriptionIconColor': function() {
@@ -1082,7 +1088,12 @@ Template.card.helpers({
 
   'userInDiaglogue': () => Session.get('showDialogueText') && Session.get('dialogueDisplay'),
 
-  'audioEnabled': () => Meteor.user().audioInputMode,
+  'audioEnabled': () => {
+    // SR should only be enabled if BOTH user has it toggled on AND TDF supports it
+    const userAudioToggled = Meteor.user()?.audioInputMode || false;
+    const tdfAudioEnabled = Session.get('currentTdfFile')?.tdfs?.tutor?.setspec?.audioInputEnabled === 'true';
+    return userAudioToggled && tdfAudioEnabled;
+  },
 
   'showDialogueHints': function() {
     if(Meteor.isDevelopment){
@@ -1585,21 +1596,18 @@ function preloadImages() {
           return;
         }
         link = asset.link();
-        clientConsole(2, 'Original asset link:', link);
 
         // Convert ALL absolute URLs to relative paths for remote/LAN access
         // This ensures images work whether accessed via localhost, LAN IP, or domain
         const pathMatch = link.match(/^https?:\/\/[^/]+(\/.+)$/);
         if (pathMatch) {
           link = pathMatch[1]; // Use relative path
-          clientConsole(2, 'Converted to relative path:', link);
         } else {
           clientConsole(1, 'Failed to convert URL to relative:', link);
         }
 
         img = new Image();
         img.onload = () => {
-          clientConsole(2, 'img loaded:', src);
           resolve();
         };
         img.onerror = () => {
@@ -1658,7 +1666,15 @@ async function preloadStimuliFiles() {
 }
 
 function checkUserAudioConfigCompatability(){
-  const audioPromptMode = Meteor.user().audioPromptMode;
+  // Check if TTS would actually be enabled based on both user preference AND TDF settings
+  const userAudioPromptMode = Meteor.user().audioPromptMode;
+  const tdfAudioPromptMode = Session.get('currentTdfFile')?.tdfs?.tutor?.setspec?.audioPromptMode;
+  const tdfSupportsAudioPrompts = tdfAudioPromptMode && tdfAudioPromptMode !== 'silent';
+  const userWantsAudioPrompts = userAudioPromptMode && userAudioPromptMode !== 'silent';
+
+  // Only check compatibility if TTS would actually be active
+  const audioPromptMode = (tdfSupportsAudioPrompts && userWantsAudioPrompts) ? userAudioPromptMode : 'silent';
+
   if (curStimHasImageDisplayType() && ((audioPromptMode == 'all' || audioPromptMode == 'question'))) {
     clientConsole(1, 'PANIC: Unable to process TTS for image response', Session.get('currentRootTdfId'));
     alert('Question reading not supported on this TDF. Please disable and try again.');
@@ -2851,7 +2867,7 @@ function gatherAnswerLogRecord(trialEndTimeStamp, trialStartTimeStamp, source, u
     'KCCategoryDefault': '',
     'KCCluster': clusterKC,
     'KCCategoryCluster': '',
-    'CFAudioInputEnabled': Meteor.user().audioInputMode,
+    'CFAudioInputEnabled': checkAudioInputMode(), // Use shared check that verifies both user pref AND TDF support
     'CFAudioOutputEnabled': Session.get('enableAudioPromptAndFeedback'),
     'CFDisplayOrder': Session.get('questionIndex'),
     'CFStimFileIndex': stimFileIndex,
@@ -3537,16 +3553,10 @@ function beginQuestionAndInitiateUserInput(delayMs, deliveryParams) {
   } else { // Not a sound - can unlock now for data entry now
     const questionToSpeak = currentDisplay.clozeText || currentDisplay.text;
     // Only speak the prompt if the question type makes sense
+    // For button trials: speak question but NOT button labels (A, B, C, D)
     if (questionToSpeak) {
       clientConsole(2, 'text to speak playing prompt: ', new Date());
-      let buttons = Session.get('buttonList');
-      let buttonsToSpeak = '';
-      if(buttons){
-        for(button in buttons){
-          buttonsToSpeak = buttonsToSpeak + ' ' + buttons[button].buttonName;
-        }
-      }
-      speakMessageIfAudioPromptFeedbackEnabled(questionToSpeak + buttonsToSpeak, 'question');
+      speakMessageIfAudioPromptFeedbackEnabled(questionToSpeak, 'question');
     }
     allowUserInput();
     beginMainCardTimeout(delayMs, function() {
@@ -3577,9 +3587,14 @@ function allowUserInput() {
   // $('#userAnswer').show(); // REMOVED - not needed with CSS wrapper approach
   $('#confirmButton').show();
 
-  clientConsole(2, '[SR] About to call startRecording()...');
-  startRecording();
-  clientConsole(2, '[SR] startRecording() call completed');
+  // SR should not activate for button trials (multiple choice) - only for text input
+  if (!getButtonTrial()) {
+    clientConsole(2, '[SR] About to call startRecording()...');
+    startRecording();
+    clientConsole(2, '[SR] startRecording() call completed');
+  } else {
+    clientConsole(2, '[SR] Button trial detected - skipping startRecording()');
+  }
   clientConsole(2, '[SR] ==========================================');
 
   // Enable input and set focus immediately - no delay needed
@@ -3630,12 +3645,25 @@ function stopUserInput() {
 
 // Audio prompt/feedback
 function speakMessageIfAudioPromptFeedbackEnabled(msg, audioPromptSource) {
-  const audioPromptMode = Meteor.user().audioPromptMode;
-  const enableAudioPromptAndFeedback = audioPromptMode && audioPromptMode != 'silent';
+  const userAudioPromptMode = Meteor.user().audioPromptMode;
+  const tdfAudioPromptMode = Session.get('currentTdfFile')?.tdfs?.tutor?.setspec?.audioPromptMode;
+
+  // TTS should only activate if:
+  // 1. TDF has audioPromptMode set to something other than 'silent' (or unset, which defaults to 'silent')
+  // 2. User has their preference set to something other than 'silent'
+  // The icon toggle only controls user preference - if TDF doesn't support it, don't activate
+  const tdfSupportsAudioPrompts = tdfAudioPromptMode && tdfAudioPromptMode !== 'silent';
+  const userWantsAudioPrompts = userAudioPromptMode && userAudioPromptMode !== 'silent';
+  const enableAudioPromptAndFeedback = tdfSupportsAudioPrompts && userWantsAudioPrompts;
+  const audioPromptMode = enableAudioPromptAndFeedback ? userAudioPromptMode : 'silent';
   let synthesis = window.speechSynthesis;
 
   clientConsole(2, '[SR] ========== speakMessageIfAudioPromptFeedbackEnabled() CALLED ==========');
   clientConsole(2, '[SR]   audioPromptSource:', audioPromptSource);
+  clientConsole(2, '[SR]   userAudioPromptMode:', userAudioPromptMode);
+  clientConsole(2, '[SR]   tdfAudioPromptMode:', tdfAudioPromptMode);
+  clientConsole(2, '[SR]   tdfSupportsAudioPrompts:', tdfSupportsAudioPrompts);
+  clientConsole(2, '[SR]   userWantsAudioPrompts:', userWantsAudioPrompts);
   clientConsole(2, '[SR]   audioPromptMode:', audioPromptMode);
   clientConsole(2, '[SR]   enableAudioPromptAndFeedback:', enableAudioPromptAndFeedback);
 
@@ -3838,9 +3866,6 @@ function filterPhoneticConflicts(spokenWord, grammarList) {
 
   const filtered = grammarList.filter(word => {
     const shouldKeep = !conflicts.some(c => c.word === word) || keepWords.has(word);
-    if (!shouldKeep) {
-      clientConsole(2, `[SR]   Filtering out phonetic conflict: "${word}" (keeping closer length matches)`);
-    }
     return shouldKeep;
   });
 
@@ -3944,9 +3969,6 @@ function tryPhoneticMatch(spokenWord, grammarList, phoneticIndex = null) {
 
     // Reject if EITHER condition fails
     if (lengthDiff > maxAbsoluteDiff || proportionalDiff > maxProportionalDiff) {
-      if (lengthDiff <= maxAbsoluteDiff + 1) { // Log near-misses for debugging
-        clientConsole(2, `[SR]   Rejected "${grammarWord}": length diff ${lengthDiff} (${(proportionalDiff * 100).toFixed(0)}% of shorter word)`);
-      }
       continue;
     }
 
@@ -3972,7 +3994,6 @@ function tryPhoneticMatch(spokenWord, grammarList, phoneticIndex = null) {
       if (lengthDiff < bestMatchScore) {
         bestMatch = grammarWord;
         bestMatchScore = lengthDiff;
-        clientConsole(2, `[SR] ✅ Exact phonetic match found: "${spokenWord}" → "${grammarWord}" (length diff: ${lengthDiff})`);
       }
       // If length diff is 0 or 1, accept immediately (perfect homophones)
       if (lengthDiff <= 1) {
@@ -4004,7 +4025,6 @@ function tryPhoneticMatch(spokenWord, grammarList, phoneticIndex = null) {
         if (fuzzyScore < bestMatchScore) {
           bestMatch = grammarWord;
           bestMatchScore = fuzzyScore;
-          clientConsole(2, `[SR] ✅ Fuzzy phonetic match found: "${spokenWord}" → "${grammarWord}" (phonetic edit dist: ${phoneticEditDist}, length diff: ${lengthDiff}, code length: ${minCodeLength})`);
         }
       }
     }
@@ -4147,7 +4167,6 @@ function speechAPICallback(err, data){
     response = {}; // Empty response to trigger "NO TRANSCRIPT/SILENCE" path
   } else if (data) {
     [answerGrammar, response] = data;
-    clientConsole(2, '[SR] Speech API response received:', JSON.stringify(response).substring(0, 200));
   }
 
   // Build phonetic index for efficient matching (only if we have grammar to check)
@@ -4218,12 +4237,6 @@ function speechAPICallback(err, data){
 
     clientConsole(2, '[SR] ========== ALTERNATIVES RECEIVED ==========');
     clientConsole(2, '[SR] Total alternatives:', alternatives.length);
-    for (let i = 0; i < alternatives.length; i++) {
-      const alt = alternatives[i];
-      if (alt['transcript']) {
-        clientConsole(2, `[SR] Alt ${i + 1}: "${alt['transcript']}" (confidence: ${alt['confidence'] || 'N/A'})`);
-      }
-    }
     clientConsole(2, '[SR] ==========================================');
 
     // Try to find a grammar match in alternatives (best strategy)
@@ -4237,10 +4250,12 @@ function speechAPICallback(err, data){
           if (answerGrammar.indexOf(altTranscript) !== -1 || altTranscript === 'skip') {
             transcript = altTranscript;
             foundGrammarMatch = true;
-            clientConsole(2, `[SR] ✅ FOUND EXACT GRAMMAR MATCH in alternative ${i + 1}: "${transcript}"`);
             break;
           }
         }
+      }
+      if (foundGrammarMatch) {
+        clientConsole(2, `[SR] ✅ FOUND EXACT GRAMMAR MATCH: "${transcript}"`);
       }
 
       // Second pass: Phonetic matching for homophones (Mali/Molly, Palau/pull out)

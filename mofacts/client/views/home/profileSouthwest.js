@@ -26,7 +26,6 @@ Template.profileSouthwest.events({
   // Start a TDF
   'click .tdfButton': function(event) {
     event.preventDefault();
-    console.log(event);
 
     const target = $(event.currentTarget);
     selectTdf(
@@ -43,7 +42,6 @@ Template.profileSouthwest.events({
 });
 
 const addButton = function(btnObj, audioInputEnabled, enableAudioPromptAndFeedback) {
-  console.log('ADD BUTTON CALLED: ' + JSON.stringify(btnObj));
   let container = '<div class=\'col-12 col-sm-12 col-md-3 col-lg-3 text-center\'></div>'
   container = $(container).prepend(btnObj);
   $('#testButtonContainer').append(container);
@@ -59,7 +57,6 @@ Template.profileSouthwest.rendered = async function() {
   // Check all the valid TDF's
   allTdfs.forEach( function(tdf) {
     const TDFId = tdf._id;
-    console.log('assignedTdfs', tdf);
     const tdfObject = tdf.content;
     const isMultiTdf = tdfObject.isMultiTdf;
 
@@ -67,13 +64,11 @@ Template.profileSouthwest.rendered = async function() {
     const setspec = tdfObject.tdfs.tutor.setspec;
 
     if (!setspec) {
-      console.log('Invalid TDF - it will never work', tdfObject);
       return;
     }
 
     const name = setspec.lessonname;
     if (!name) {
-      console.log('Skipping TDF with no name', setspec);
       return;
     }
 
@@ -105,10 +100,9 @@ Template.profileSouthwest.rendered = async function() {
 
     isOverDue = false;
     if(dueDate) {
-      console.log("dueDate", dueDate, curDate, exceptionDate);
       if(dueDate < curDate) {
         isOverDue = true;
-      } 
+      }
     } 
     if(isOverDue && exceptionDate){
       if(exceptionDate < curDate) {
