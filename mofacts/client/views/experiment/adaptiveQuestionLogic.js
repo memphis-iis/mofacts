@@ -1,4 +1,4 @@
-import { meteorCallAsync } from "../../index";
+import { meteorCallAsync, clientConsole } from "../../index";
 
 export class AdaptiveQuestionLogic {  
 
@@ -9,7 +9,7 @@ export class AdaptiveQuestionLogic {
         this.curUnit = Session.get('currentTdfUnit');
         this.tdfId = Session.get('currentTdfId');
         this.userId = Meteor.userId();
-        console.log('adaptive - componentStates:', this.userId, this.tdfId);
+        clientConsole(2, 'adaptive - componentStates:', this.userId, this.tdfId);
     }
 
     async setSchedule(schedule){
@@ -41,7 +41,7 @@ export class AdaptiveQuestionLogic {
 
 
 
-        console.log('evaluate logicString:', logicString);
+        clientConsole(2, 'evaluate logicString:', logicString);
         const operators = {
             "NOT": "!",
             "AND": "&&",
@@ -85,10 +85,10 @@ export class AdaptiveQuestionLogic {
                 let clusterIndex = parseInt(parts[0]);
                 let stimulusIndex = parseInt(parts[1]);
                 //get the performance for this cluster and stimulus
-                console.log('getting component state for cluster:', clusterIndex, 'stimulus:', stimulusIndex, history[stimulusIndex]);
+                clientConsole(2, 'getting component state for cluster:', clusterIndex, 'stimulus:', stimulusIndex, history[stimulusIndex]);
                 let outcome = history[clusterIndex];
                 //if the outcome is 1, lastOutcome is true, otherwise false
-                console.log('lastOutcome for ' + token + ':', outcome);
+                clientConsole(2, 'lastOutcome for ' + token + ':', outcome);
                 conditionExpression += outcome;
             } else if (Number.isInteger(parseInt(token))){
                 conditionExpression += token;
@@ -108,7 +108,7 @@ export class AdaptiveQuestionLogic {
             }
         }
 
-        console.log('conditionExpression:', conditionExpression);
+        clientConsole(2, 'conditionExpression:', conditionExpression);
 
 
         //build a new function that will be called to evaluate the condition
@@ -126,7 +126,7 @@ export class AdaptiveQuestionLogic {
         }
 
         //the action can be either a single action as a string or an array of actions. To check, we will find if parenthesis are present
-        console.log('action:', actions);
+        clientConsole(2, 'action:', actions);
 
         let addToschedule = [];
         let questions = [];
@@ -159,7 +159,7 @@ export class AdaptiveQuestionLogic {
                             time: when
                         });
                     }
-                    console.log('adding to adaptive schedule:', addToschedule);
+                    clientConsole(2, 'adding to adaptive schedule - count:', addToschedule.length);
                 } else {
                     //throw an error if the action is not a valid action
                     throw new Error(`Invalid action: ${action}`);
@@ -185,7 +185,7 @@ export class AdaptiveQuestionLogic {
                         time: when
                     });
                 }
-                console.log('adding to adaptive schedule:', addToschedule);
+                clientConsole(2, 'adding to adaptive schedule - count:', addToschedule.length);
             } else {
                 //throw an error if the action is not a valid action
                 throw new Error(`Invalid action: ${actions}`);

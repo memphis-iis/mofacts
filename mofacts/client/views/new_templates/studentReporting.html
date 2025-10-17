@@ -1,114 +1,45 @@
 <template name="studentReporting">
   <div class="container" style="margin-top: 1rem;">
-    <h2 style="margin-top: 0; text-align: center;">Student Progress</h2>
+    <h3 style="margin-top: 0; text-align: center;">Student Progress</h3>
 
-    <div class="row justify-content-center">
-      {{#if selectedTdf}}
-        <h5 class="text-center"> Your progress for <b>{{selectedTdf.lessonName}}</b></h5>
-      {{/if}}
-      {{#if studentReportingTdfs}}
-             <select id="tdf-select" class="w-75 mx-auto d-block">
-             <option value="{{INVALID}}">Select a lesson</option>
-            <!-- <option value="xml">All</option> -->
-            {{#each studentReportingTdfs}}
-              <option value="{{this.TDFId}}">{{this.displayName}}</option>
-            {{/each}}
-            </select>
-      {{/if}}
+    {{#if studentReportingTdfs.length}}
+      <table class="table table-striped table-hover mt-4">
+        <thead>
+          <tr>
+            <th>Lesson</th>
+            <th>Total Trials</th>
+            <th>Overall Accuracy</th>
+            <th>Last 10 Accuracy</th>
+            <th>Time (min)</th>
+            <th>Items Practiced</th>
+            <th>Sessions</th>
+            <th>Last Practice</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {{#each tdfStats}}
+            <tr>
+              <td><strong>{{this.displayName}}</strong></td>
+              <td>{{this.totalTrials}}</td>
+              <td>{{this.overallAccuracy}}%</td>
+              <td>{{this.last10Accuracy}}%</td>
+              <td>{{this.totalTimeMinutes}}</td>
+              <td>{{this.itemsPracticed}}</td>
+              <td>{{this.totalSessions}}</td>
+              <td>{{this.lastPracticeDate}}</td>
+              <td class="text-center">
+                <button class="btn btn-sm btn-primary continue-lesson" data-tdfid="{{this.TDFId}}" data-lessonname="{{this.displayName}}" data-currentstimulisetid="{{this.currentStimuliSetId}}" data-ismultitdf="{{this.isMultiTdf}}">Continue</button>
+              </td>
+            </tr>
+          {{/each}}
+        </tbody>
+      </table>
+    {{else}}
+      <div class="alert alert-info text-center mt-4">
+        <p>No practice history found. Start practicing to see your progress here!</p>
+        <button id="go-to-lesson-select" class="btn btn-primary">Select a Lesson</button>
       </div>
-      <div class="row full-width">
-            {{#if studentReportingTdfs}}
-              {{#if selectedTdf}}
-                {{#if tooFewStims}}
-                <div class="alert">
-                  <div class="alert-icon">
-                    <i class="fa fa-info-circle" aria-hidden="true"></i>
-                  </div>
-                    We do not have enough data to
-                    give a full report.  You have completed {{stimsSeen}} questions. Please complete at least 30 questions.
-                  </div>
-                {{/if}}
-              {{else}}
-              <div class="alert">
-                <div class="alert-icon">
-                  <i class="fa fa-info-circle" aria-hidden="true"></i>
-                </div>
-                  Please choose a Lesson in the dropdown above to see your progress.
-                </div>
-              {{/if}}
-            {{else}}
-            <div class="alert">
-              <div class="alert-icon">
-                <i class="fa fa-info-circle" aria-hidden="true"></i>
-              </div>
-              <h3>Welcome to {{currentTheme.properties.themeName}}</h3>
-                Once you have completed 30 questions on a lesson, return for a full report of your progress. Click the button below to get started.
-              </div>
-            {{/if}}
-      </div> 
-      {{#if selectedTdf}}
-      {{#if tooFewStims}}
-      <div class="vh-30"></div>
-      {{else}}
-        <div class="row">
-          <div id="dashboardGauges">
-            <div class="row row-cols-lg-4 row-cols-xl-4 row-cols-2" style="padding-top:20px;">   
-              <div class="gauge col">
-                <div id="preview-textfield-custom" style="position:relative; top:65px;"><b>{{percentageOfStimsSeen}}%</b></div>  
-                <canvas class="dashCanvas masteredItems" width="100" height="100" id="canvas-unit-item-progress"></canvas>
-              </div>
-              <div class="col align-left" style="margin-top:50px;">
-                <span class="align-left">You have mastered {{percentageOfStimsSeen}} of the items in <b>{{selectedTdf.lessonName}}</b>. Well done!</span>
-              </div>
-              <div class="gauge col">
-                <div id="preview-textfield-custom" style="position:relative; top:65px;"><b>{{percentCorrect}}%</b></div>  
-                <canvas class="dashCanvas percentCorrect" width="100" height="100" id="canvas-unit-item-progress"></canvas>
-              </div>
-              <div class="col align-left" style="margin-top:30px;">
-                <span class="align-left">You answered correctly<b> {{percentCorrect}}%</b> of the time.</span>
-              </div>
-              <div class="gauge col gy-3">   
-                  <canvas class="dashCanvas learningSpeed" width="120" height="70" id="canvas-unit-percent-correct"></canvas>
-              </div>
-              <div class="col align-left gy-3">
-                <p>
-                {{#if displayItemsMasteredPerMinute}}
-                    You have mastered <b>{{itemMasteryRate}} items per minute</b>.
-                  {{/if}}
-                  {{#if displayEstimatedMasteryTime}}
-                    At this rate, you will master all items in <b>{{itemMasteryTime}} minutes</b>
-                  {{/if}}
-                  </p>
-              </div>
-              <div class="gauge col gy-2">
-                <canvas class="dashCanvas difficulty" width="120" height="70" id="canvas-ai-new-card-prediction"></canvas>
-                <div id="preview-textfield" style="display:none;">0%</div>  
-              </div>
-              <div class="col align-left gy-2">
-                <p>MoFacts has determined that the questions are <b>{{difficulty}}</b>.</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      {{/if}}
-    {{/if}}
-      {{#if noTime}}
-        <button id="go-to-lesson-select" class="btn btn-fixed mx-auto d-block">Select a Lesson</button>
-      {{else}}
-      <button id="go-to-lesson-continue" class="btn btn-fixed mx-auto d-block tdfButton mt-4" type="button" name="{{selectedTdf.name}}"
-      data-tdfid="{{selectedTdf.tdfid}}"
-      data-lessonname="{{selectedTdf.name}}"
-      data-currentStimuliSetId="{{selectedTdf.currentStimuliSetId}}"
-      data-ignoreOutOfGrammarResponses="{{selectedTdf.ignoreOutOfGrammarResponses}}"
-      data-speechOutOfGrammarFeedback="{{selectedTdf.speechOutOfGrammarFeedback}}"
-      data-isMultiTdf="{{selectedTdf.isMultiTdf}}">Continue {{selectedTdf.lessonName}}
-      {{#if selectedTdf.enableAudioPromptAndFeedback}}
-          <span class="fa fa-headphones"></span>
-      {{/if}}
-      {{#if selectedTdf.audioInputEnabled}}
-          <span class="fa fa-microphone"></span>
-      {{/if}}
-      </button>
     {{/if}}
   </div>
 </template>

@@ -30,15 +30,15 @@ export {
 //function to get current theme from server and set the css variables
 function getCurrentTheme() {
   let theme = Meteor.call('getTheme', function(err, res) {
-    console.log('getCurrentTheme', err, res);
+    clientConsole(2, 'getCurrentTheme', err, res);
     Session.set('curTheme', res);
     //set the css variables to the theme values
     themeProps = res.properties;
     for (let prop in themeProps) {
       //add -- to the front of the property name and convert _ to -
       propConverted = '--' + prop.replace(/_/g, '-');
-      console.log(propConverted, themeProps[prop]);
-      document.documentElement.style.setProperty(propConverted, themeProps[prop]); 
+      clientConsole(2, propConverted, themeProps[prop]);
+      document.documentElement.style.setProperty(propConverted, themeProps[prop]);
     }
     document.title = themeProps['themeName'];
   });
@@ -137,8 +137,8 @@ function updateCurStudentPerformance(isCorrect, practiceTime, testType) {
   // note this assumes curStudentPerformance has already been initialized on initial page entry
   const curUserPerformance = Session.get('curStudentPerformance');
   curUserPerformance.count = curUserPerformance.count + 1;
-  console.log('updateCurStudentPerformance', isCorrect, practiceTime,
-      JSON.parse(JSON.stringify((Session.get('curStudentPerformance')))));
+  clientConsole(2, 'updateCurStudentPerformance', isCorrect, practiceTime,
+      'count:', curUserPerformance.count);
   if (testType !== 's') {
     if (isCorrect) curUserPerformance.numCorrect = curUserPerformance.numCorrect + 1;
     else curUserPerformance.numIncorrect = curUserPerformance.numIncorrect + 1;
@@ -156,8 +156,8 @@ function updateCurStudedentPracticeTime(practiceTime) {
   // Update running user metrics total,
   // note this assumes curStudentPerformance has already been initialized on initial page entry
   const curUserPerformance = Session.get('curStudentPerformance');
-  console.log('updateCurStudentPerformance', practiceTime,
-      JSON.parse(JSON.stringify((Session.get('curStudentPerformance')))));
+  clientConsole(2, 'updateCurStudentPerformance', practiceTime,
+      'totalTime:', curUserPerformance.totalTime);
   curUserPerformance.totalTime = parseInt(curUserPerformance.totalTime) + practiceTime;
   curUserPerformance.totalTimeDisplay = (curUserPerformance.totalTime / (1000*60)).toFixed(1);
   Session.set('constantTotalTime',curUserPerformance.totalTimeDisplay);
@@ -165,7 +165,7 @@ function updateCurStudedentPracticeTime(practiceTime) {
 }
 
 async function setStudentPerformance(studentID, studentUsername, tdfId) {
-  console.log('setStudentPerformance:', studentID, studentUsername, tdfId);
+  clientConsole(2, 'setStudentPerformance:', studentID, studentUsername, tdfId);
   let componentState = ComponentStates.findOne({userId: studentID, TDFId: tdfId});
   const studentPerformance = {
     username: studentUsername,
@@ -202,7 +202,8 @@ async function setStudentPerformance(studentID, studentUsername, tdfId) {
   studentPerformance.percentCorrect = (divisor > 0) ? ((studentPerformance.numCorrect / divisor)*100).toFixed(2) + '%' : 'N/A';;
   studentPerformance.totalTimeDisplay = (studentPerformance.totalTime / (1000*60)).toFixed(1);
   Session.set('curStudentPerformance', studentPerformance);
-  console.log('setStudentPerformance,output:', studentPerformance);
+  clientConsole(2, 'setStudentPerformance,output:', 'correct:', studentPerformance.numCorrect,
+    'incorrect:', studentPerformance.numIncorrect, 'percent:', studentPerformance.percentCorrect);
 }
 
 // Return the total number of stim clusters
@@ -388,7 +389,7 @@ function getCurrentDeliveryParams() {
 
   const isLearningSession = Session.get('unitType') == MODEL_UNIT;
 
-  console.log('getCurrentDeliveryParams:', currUnit, isLearningSession);
+  clientConsole(2, 'getCurrentDeliveryParams:', currUnit ? 'unit found' : 'no unit', isLearningSession);
 
   // Note that we will only extract values that have a specified default
   // value here.

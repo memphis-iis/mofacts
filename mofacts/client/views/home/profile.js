@@ -5,7 +5,7 @@ import {DISABLED, ENABLED, MODEL_UNIT, SCHEDULE_UNIT} from '../../../common/Defi
 import {meteorCallAsync} from '../..';
 import {sessionCleanUp} from '../../lib/sessionUtils';
 import {routeToSignin} from '../../lib/router';
-import {checkUserSession} from '../../index'
+import {checkUserSession, clientConsole} from '../../index'
 
 export {selectTdf};
 
@@ -39,7 +39,7 @@ Template.profile.helpers({
 
   class: function(){
     thisClass = Meteor.user().class;
-    console.log('class: ', thisClass);
+    clientConsole(2, 'class:', thisClass);
     if(thisClass.courseName){
       return thisClass;
     } else {
@@ -100,10 +100,10 @@ Template.profile.events({
   'click .enableTdf': function(event, instance) {
       Meteor.call('toggleTdfPresence', event.target.tdfid, ENABLED, function(err, result) {
         if (err) {
-          console.log(err);
+          clientConsole(1, 'Error enabling TDF:', err);
           alert('Error enabling TDF');
-        } else {ll
-          console.log('TDF enabled');
+        } else {
+          clientConsole(2, 'TDF enabled');
           //update the enabledTdfs reactive var
           const enabledTdfs = instance.enabledTdfs.get();
           const tdfToEnable = enabledTdfs.find((tdf) => {
@@ -138,9 +138,9 @@ Template.profile.events({
         return tag.toLowerCase().includes(search.toLowerCase());
       });
     }));
-    
+
     instance.filteredTdfs.set(filteredTdfs);
-    console.log('filteredTdfs', filteredTdfs);
+    clientConsole(2, 'filteredTdfs count:', filteredTdfs?.length || 0);
     //change visibility of search results
     $('#practiceTDFSearchResultsContainer').css('visibility', 'visible');
   },
@@ -151,7 +151,6 @@ Template.profile.events({
   // Start a TDF
   'click .tdfButton': function(event) {
     event.preventDefault();
-    console.log(event);
 
     const target = $(event.currentTarget);
     selectTdf(
@@ -167,8 +166,6 @@ Template.profile.events({
   },
   'click .tdfLink' : function(event) {
     event.preventDefault();
-    console.log(event);
-    console.log('tdfLink clicked');
     const target = $(event.currentTarget);
     selectTdf(
       target.data('tdfid'),
@@ -185,7 +182,7 @@ Template.profile.events({
   'click #simulation': function(event, template) {
     const checked = template.$('#simulation').prop('checked');
     Session.set('runSimulation', checked);
-    console.log('runSimulation', Session.get('runSimulation'));
+    clientConsole(2, 'runSimulation:', Session.get('runSimulation'));
   },
 
   'click #mechTurkButton': function(event) {
@@ -322,7 +319,7 @@ function toggleTdfPresence(instance, mode) {
   const dis1 = instance.disabledTdfs.get();
 
 
-  console.log('toggleTdfPresence, mode: ', mode, tdfsToChange, en1, dis1, instance);
+  clientConsole(2, 'toggleTdfPresence, mode:', mode, 'count:', tdfsToChange?.length || 0);
 
   Meteor.call('toggleTdfPresence', tdfsToChange, mode);
   const remainingTdfs = [];
@@ -371,16 +368,78 @@ Template.profile.rendered = async function() {
   sessionCleanUp();
   await checkUserSession()
   Session.set('showSpeechAPISetup', true);
-  let allTdfs = Tdfs.find().fetch();
 
-  console.log('allTdfs', allTdfs, typeof(allTdfs));
-  Session.set('allTdfs', allTdfs);
+  // Wait for subscriptions to be ready before accessing Tdfs
+  const templateInstance = this;
+  Tracker.autorun(function() {
+    // Check if the router subscriptions are ready
+    if (Router.current() && Router.current().ready()) {
+      let allTdfs = Tdfs.find().fetch();
+
+      clientConsole(2, 'allTdfs count:', allTdfs?.length || 0);
+      Session.set('allTdfs', allTdfs);
+
+      processAllTdfs(templateInstance, allTdfs);
+    }
+  });
+
+  // Uniformly size admin buttons based on longest label
+  Tracker.afterFlush(function() {
+    uniformSizeAdminButtons();
+  });
+};
+
+/**
+ * Measures all admin menu buttons and sets them to the width of the longest one
+ */
+function uniformSizeAdminButtons() {
+  const adminButtons = $('.btn-fixed').filter(function() {
+    // Only target buttons in the admin menu (those with specific admin button IDs)
+    const id = $(this).attr('id');
+    return id && (
+      id === 'instructorReportingButton' ||
+      id === 'adminControlsBtn' ||
+      id === 'mechTurkButton' ||
+      id === 'contentUploadButton' ||
+      id === 'dataDownloadButton' ||
+      id === 'userAdminButton' ||
+      id === 'classEditButton' ||
+      id === 'tdfAssignmentEditButton' ||
+      id === 'wikiButton' ||
+      id === 'contentGenerationButton'
+    );
+  });
+
+  if (adminButtons.length === 0) {
+    return; // No admin buttons found
+  }
+
+  // First, reset any fixed width to measure natural width
+  adminButtons.css('width', '');
+
+  // Measure the natural width of each button and find the maximum
+  let maxWidth = 0;
+  adminButtons.each(function() {
+    const width = $(this).outerWidth();
+    if (width > maxWidth) {
+      maxWidth = width;
+    }
+  });
+
+  // Set all buttons to the maximum width
+  if (maxWidth > 0) {
+    adminButtons.css('width', maxWidth + 'px');
+    clientConsole(2, 'Admin buttons uniformly sized to:', maxWidth + 'px');
+  }
+}
+
+async function processAllTdfs(templateInstance, allTdfs) {
 
   $('#expDataDownloadContainer').html('');
 
   Meteor.call('getContentGenerationAvailable', function(err, res) {
     if (err) {
-      console.log(err);
+      clientConsole(1, 'Error getting content generation availability:', err);
     } else {
       Session.set('contentGenerationAvailable', res);
     }
@@ -400,7 +459,7 @@ Template.profile.rendered = async function() {
   //Get all course tdfs
   const courseId = Meteor.user().loginParams.curClass ? Meteor.user().loginParams.curClass.courseId : null;
   const courseTdfs = Assignments.find({courseId: courseId}).fetch()
-  console.log('courseTdfs', courseTdfs, courseId);
+  clientConsole(2, 'courseTdfs count:', courseTdfs?.length || 0, 'courseId:', courseId);
 
   // Check all the valid TDF's
   for (const tdf of allTdfs) {
@@ -413,7 +472,7 @@ Template.profile.rendered = async function() {
     const setspec = tdfObject.tdfs.tutor.setspec ? tdfObject.tdfs.tutor.setspec : null;
 
     if (!setspec) {
-      console.log('Invalid TDF - it will never work', tdfObject);
+      clientConsole(1, 'Invalid TDF - missing setspec:', tdfObject.fileName || 'unknown');
       continue;
     }
 
@@ -474,10 +533,8 @@ Template.profile.rendered = async function() {
     tdfObject.enableAudioPromptAndFeedback = enableAudioPromptAndFeedback;
 
     //Get Class TDFS
-    
+
     tdfIsAssigned = courseTdfs.filter(e => e.TDFId === TDFId);
-    console.log("courseTdfs", courseTdfs);
-    console.log("tdfIsAssigned", tdfIsAssigned);
     if(courseTdfs.length > 0){
       if(tdfIsAssigned.length > 0) {
         tdfObject.isAssigned = true;
@@ -526,7 +583,7 @@ Template.profile.rendered = async function() {
     }
     //sort tdfTags by natural alphabetical order
     tdfTags.sort((a, b) => a.tag.localeCompare(b.tag, 'en', {numeric: true, sensitivity: 'base'}));
-    this.tdfTags.set(tdfTags);
+    templateInstance.tdfTags.set(tdfTags);
 
 
     if ((tdf.visibility == 'profileOnly' || tdf.visibility == 'enabled') && tdfObject.isAssigned) {
@@ -545,18 +602,17 @@ Template.profile.rendered = async function() {
       enabledTdfs.sort((a, b) => a.name.localeCompare(b.name, 'en', {numeric: true, sensitivity: 'base'}));
     }
 
-    this.disabledTdfs.set(disabledTdfs);
-    this.enabledTdfs.set(enabledTdfs);
+    templateInstance.disabledTdfs.set(disabledTdfs);
+    templateInstance.enabledTdfs.set(enabledTdfs);
   }
 
   if (isAdmin) {
-    const templateInstance = this;
     Meteor.call('getTdfOwnersMap', tdfOwnerIds, function(err, res) {
       if (err) {
-        console.log(err);
+        clientConsole(1, 'Error getting TDF owners map:', err);
       } else {
         templateInstance.tdfOwnersMap.set(res);
-        console.log(templateInstance.tdfOwnersMap.get());
+        clientConsole(2, 'TDF owners map loaded, count:', Object.keys(res || {}).length);
       }
     });
   }
@@ -589,16 +645,16 @@ Template.profile.rendered = async function() {
         }
       });
     });
-    this.recentTdfs.set(enabledRecentTdfs);
-    console.log('recentTdfs', enabledRecentTdfs);
-};
+    templateInstance.recentTdfs.set(enabledRecentTdfs);
+    clientConsole(2, 'recentTdfs count:', enabledRecentTdfs?.length || 0);
+}
 
 // Actual logic for selecting and starting a TDF
 // eslint-disable-next-line max-len
-async function selectTdf(currentTdfId, lessonName, currentStimuliSetId, ignoreOutOfGrammarResponses, 
+async function selectTdf(currentTdfId, lessonName, currentStimuliSetId, ignoreOutOfGrammarResponses,
   speechOutOfGrammarFeedback, how, isMultiTdf, fromSouthwest, setspec, isExperiment = false, isRefresh = false) {
-  console.log('Starting Lesson', lessonName, currentTdfId,
-      'currentStimuliSetId:', currentStimuliSetId, 'isMultiTdf:', isMultiTdf);
+  clientConsole(2, 'Starting Lesson:', lessonName, 'tdfId:', currentTdfId,
+      'stimuliSetId:', currentStimuliSetId, 'isMultiTdf:', isMultiTdf);
 
   const audioPromptFeedbackView = Session.get('audioPromptFeedbackView');
 
@@ -691,13 +747,12 @@ async function selectTdf(currentTdfId, lessonName, currentStimuliSetId, ignoreOu
     userAgent = _.display(navigator.userAgent);
     prefLang = _.display(navigator.language);
   } catch (err) {
-    console.log('Error getting browser info', err);
+    clientConsole(1, 'Error getting browser info:', err);
   }
 
   // Check to see if the user has turned on audio prompt.
   // If so and if the tdf has it enabled then turn on, otherwise we won't do anything
   const userAudioPromptFeedbackToggled = (audioPromptFeedbackView == 'feedback') || (audioPromptFeedbackView == 'all') || (audioPromptFeedbackView == 'question');
-  console.log(curTdfContent);
   const tdfAudioPromptFeedbackEnabled = !!curTdfContent.tdfs.tutor.setspec.enableAudioPromptAndFeedback &&
       curTdfContent.tdfs.tutor.setspec.enableAudioPromptAndFeedback == 'true';
   const audioPromptTTSAPIKeyAvailable = !!curTdfContent.tdfs.tutor.setspec.textToSpeechAPIKey &&
@@ -731,15 +786,15 @@ async function selectTdf(currentTdfId, lessonName, currentStimuliSetId, ignoreOu
       Session.set('speechAPIKey', key);
       const tdfKeyPresent = !!curTdfContent.tdfs.tutor.setspec.speechAPIKey;
       if (!key && !tdfKeyPresent) {
-        console.log('speech api key not found, showing modal for user to input');
+        clientConsole(2, 'speech api key not found, showing modal for user to input');
         $('#speechAPIModal').modal('show');
         continueToCard = false;
       } else {
-        console.log('audio input enabled and key present, navigating to card and initializing audio input');
+        clientConsole(2, 'audio input enabled and key present, navigating to card and initializing audio input');
       }
     });
   } else {
-    console.log('audio toggle not checked, navigating to card');
+    clientConsole(2, 'audio toggle not checked, navigating to card');
   }
 
   // Go directly to the card session - which will decide whether or

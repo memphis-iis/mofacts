@@ -5,6 +5,7 @@ import {Cookie} from './cookies';
 import {displayify} from '../../common/globalHelpers';
 import {selectTdf} from '../views/home/profile';
 import {sessionCleanUp} from '../lib/sessionUtils';
+import {clientConsole} from '../index';
 
 export {routeToSignin};
 /* router.js - the routing logic we use for the application.
@@ -81,7 +82,6 @@ Router.configure({
 });
 
 function routeToSignin() {
-  console.log('routeToSignin');
   // If the isExperiment cookie is set we always for experiment mode. This
   // handles an experimental participant refreshing the browser
   const expCookie = _.chain(Cookie.get('isExperiment')).trim().intval().value();
@@ -92,10 +92,8 @@ function routeToSignin() {
   }
 
   const loginMode = Session.get('loginMode');
-  console.log('loginMode: ' + loginMode);
 
   if (loginMode === 'experiment') {
-    console.log('loginMode === experiment');
     const routeParts = ['/experiment'];
 
     const target = Session.get('experimentTarget');
@@ -109,13 +107,10 @@ function routeToSignin() {
 
     Router.go(routeParts.join('/'));
   } else if (loginMode === 'southwest') {
-    console.log('southwest login, routing to southwest login');
     Router.go('/signInSouthwest');
   } else if (loginMode === 'password') {
-    console.log('password login');
     Router.go('/signIn');
   } else { // Normal login mode
-    console.log('else, signin');
     Router.go('/');
   }
 }
@@ -152,25 +147,25 @@ Router.route('/experiment/:target?/:xcond?', {
         const condition = tdf.content.tdfs.tutor.setspec.condition;
         Meteor.subscribe('tdfByExperimentTarget', target, condition)
       }
-      console.log('tdf found');
+      clientConsole(2, 'tdf found');
       // Security: Replace eval() with safe boolean check
       const experimentPasswordRequired =
         tdf.content.tdfs.tutor.setspec.experimentPasswordRequired === 'true' ||
         tdf.content.tdfs.tutor.setspec.experimentPasswordRequired === true;
       Session.set('experimentPasswordRequired', experimentPasswordRequired);
       Session.set('loginPrompt',tdf.content.tdfs.tutor.setspec.uiSettings?.experimentLoginText || "Amazon Turk ID");
-      console.log('experimentPasswordRequired:' + experimentPasswordRequired);
+      clientConsole(2, 'experimentPasswordRequired:', experimentPasswordRequired);
 
-      console.log('EXPERIMENT target:', target, 'xcond', xcond);
+      clientConsole(2, 'EXPERIMENT target:', target, 'xcond', xcond);
 
       Session.set('clusterMapping', '');
-      
+
       // Log out the user to make sure we start clean and to avoid any double logins
       Meteor.logout();
       this.render('signIn');
-      
+
     } else {
-      console.log('tdf not found');
+      clientConsole(1, 'tdf not found');
       alert('The experiment you are trying to access does not exist.');
       if (Meteor.user()) {
         Meteor.logout();
@@ -238,7 +233,7 @@ Router.route('/testLogin', {
   name: 'client.testLogin',
   action: async function() {
     testLoginsEnabled = await meteorCallAsync('getTestLogin');
-    console.log('testLoginsEnabled', testLoginsEnabled);
+    clientConsole(2, 'testLoginsEnabled', testLoginsEnabled);
     if(testLoginsEnabled){
       this.render('testLogin');
     } else {
@@ -276,7 +271,6 @@ Router.route('/studentReporting', {
   action: function() {
     routeName = 'studentReporting';
     Session.set('curModule', routeName.toLowerCase());
-    console.log(routeName + ' ROUTE');
     this.render(routeName);
   }
 })
@@ -344,7 +338,7 @@ Router.route('/profile', {
     let allSubscriptions = [
       Meteor.subscribe('allUserExperimentState', assignedTdfs)];
     if (curCourseId == 'undefined' || curCourseId == undefined)
-      console.log('no assignments found')
+      clientConsole(2, 'no assignments found')
     else
       allSubscriptions.push(Meteor.subscribe('Assignments', curCourseId));
     
@@ -362,10 +356,8 @@ Router.route('/profile', {
   action: function() {
     if (Meteor.user()) {
       const loginMode = Meteor.user().loginParams?.loginMode || 'normal';
-      console.log('loginMode: ' + loginMode);
 
       if (loginMode === 'southwest') {
-        console.log('southwest login, routing to southwest profile');
         Session.set('curModule', 'profileSouthwest');
         this.render('/profile');
       } else if (loginMode === 'experiment') {
@@ -375,7 +367,6 @@ Router.route('/profile', {
         Session.set('curModule', 'signinoauth');
         this.redirect('/signIn');
       } else { // Normal login mode
-        console.log('else, progress');
         Session.set('curModule', 'profile');
         this.render('profile');
       }
@@ -417,26 +408,25 @@ Router.route('/classEdit',{
   if(Meteor.user()){
     teacherSelected = Meteor.user().username;
     let verifiedTeachers = await meteorCallAsync('getAllTeachers');
-    console.log('verifiedTeachers', verifiedTeachers);
-  
+    clientConsole(2, 'verifiedTeachers count:', verifiedTeachers?.length || 0);
+
     // Hack to redirect rblaudow classes to ambanker
     const ambanker = verifiedTeachers.find((x) => x.username === 'ambanker@southwest.tn.edu');
     const rblaudow = verifiedTeachers.find((x) => x.username === 'rblaudow@southwest.tn.edu');
     if (ambanker && rblaudow) rblaudow._id = ambanker._id;
-  
+
     //Get teacher info
     const teacher = verifiedTeachers.find((x) => x.username === teacherSelected);
     if(!teacher){
-      console.log('teacher not found');
+      clientConsole(1, 'teacher not found');
       alert('This account is not a teacher account. Please log in with a teacher account.');
       router.go('/');
       return;
     }
-    console.log('got teachers', teacher);
+    clientConsole(2, 'got teacher:', teacher.username);
 
-    Session.set('teachers', verifiedTeachers);    
-    
-    console.log(teacher);
+    Session.set('teachers', verifiedTeachers);
+
     Session.set('curTeacher', teacher);
     const allCourseSections = await meteorCallAsync('getAllCourseSections');
     const classesByInstructorId = {};
@@ -449,7 +439,7 @@ Router.route('/classEdit',{
     }
     Session.set('classesByInstructorId', classesByInstructorId);
     const curClasses = Session.get('classesByInstructorId')[teacher._id];
-    console.log('setTeacher', Session.get('classesByInstructorId'), teacher._id, teacher);
+    clientConsole(2, 'setTeacher:', teacher._id, 'classes count:', curClasses?.length || 0);
     Session.set('curTeacherClasses', curClasses);
     $('#classSelection').prop('hidden', '');
     this.render('classEdit');
@@ -464,7 +454,6 @@ Router.route('/classes/:_teacher', {
     this.next();
   },
   action: async function(){
-    console.log('teacher route' + this.params._teacher);
     Session.set('useEmbeddedAPIKeys', true);
     teacherSelected = this.params._teacher;
     let southwestOnly = false;
@@ -473,24 +462,22 @@ Router.route('/classes/:_teacher', {
       loginMode = 'southwest'
       let southwestOnly=true;
     }
-    console.log('loginMode: ' + loginMode);
     let verifiedTeachers = await meteorCallAsync('getAllTeachers', southwestOnly);
-    console.log('verifiedTeachers', verifiedTeachers);
-  
+    clientConsole(2, 'verifiedTeachers count:', verifiedTeachers?.length || 0);
+
     // Hack to redirect rblaudow classes to ambanker
     const ambanker = verifiedTeachers.find((x) => x.username === 'ambanker@southwest.tn.edu');
     const rblaudow = verifiedTeachers.find((x) => x.username === 'rblaudow@southwest.tn.edu');
     if (ambanker && rblaudow) rblaudow._id = ambanker._id;
-  
+
     //Get teacher info
     const teacher = verifiedTeachers.find((x) => x.username === teacherSelected);
-    console.log('got teachers', teacher);
-    Session.set('teachers', verifiedTeachers);    
-    
-    console.log('teacher', teacher);
+    clientConsole(2, 'got teacher:', teacher?.username || 'not found');
+    Session.set('teachers', verifiedTeachers);
+
     Session.set('curTeacher', teacher);
     const allCourseSections = await meteorCallAsync('getAllCourseSections');
-    console.log('allCourseSections', allCourseSections);
+    clientConsole(2, 'allCourseSections count:', allCourseSections?.length || 0);
     const sectionsByInstructorId = [];
     const classesByInstructorId = [];
     //  //sectionid, courseandsectionname
@@ -507,16 +494,14 @@ Router.route('/classes/:_teacher', {
         }
       }
     }  else {
-      console.log('teacher not found');
+      clientConsole(1, 'teacher not found');
       alert('Your instructor hasn\'t set up their classes yet.  Please contact them and check back in at a later time.')
       Router.go('/');
     }
     Session.set('classesByInstructorId', classesByInstructorId);
     Session.set('sectionsByInstructorId', sectionsByInstructorId);
     const curClasses = Session.get('classesByInstructorId');
-    console.log('setTeacher', Session.get('classesByInstructorId'), teacher._id, teacher);
-    console.log('setClasses', curClasses);
-    console.log('setSections', Session.get('sectionsByInstructorId'));
+    clientConsole(2, 'setTeacher:', teacher?._id, 'classes:', curClasses?.length || 0, 'sections:', sectionsByInstructorId?.length || 0);
     if (curClasses == undefined) {
       $('#initialInstructorSelection').prop('hidden', '');
       alert('Your instructor hasn\'t set up their classes yet.  Please contact them and check back in at a later time.');
@@ -526,11 +511,9 @@ Router.route('/classes/:_teacher', {
       $('#classSelection').prop('hidden', '');
     }
     if (loginMode === 'southwest') {
-      console.log('southwest login, routing to southwest profile');
       Session.set('curModule', 'profileSouthwest');
       this.render('/signInSouthwest');
     } else { // Normal login mode
-      console.log('else, progress');
       Session.set('curModule', 'profile');
       this.render('signIn');
     }
@@ -545,7 +528,6 @@ Router.route('/classes/:_teacher/:_class', {
     this.next();
   },
   action: async function(){
-    console.log('class route: ' + this.params._teacher + ' ' + this.params._class);
     Session.set('useEmbeddedAPIKeys', true);
     teacherSelected = this.params._teacher;
     curClassID = this.params._class;
@@ -557,23 +539,22 @@ Router.route('/classes/:_teacher/:_class', {
     } else {
       let loginMode = "";
     }
-    console.log('loginMode: ' + loginMode);
     let verifiedTeachers = await meteorCallAsync('getAllTeachers', southwestOnly);
-    console.log('verifiedTeachers', verifiedTeachers);
+    clientConsole(2, 'verifiedTeachers count:', verifiedTeachers?.length || 0);
 
-    
-  
+
+
     // Hack to redirect rblaudow classes to ambanker
     const ambanker = verifiedTeachers.find((x) => x.username === 'ambanker@southwest.tn.edu');
     const rblaudow = verifiedTeachers.find((x) => x.username === 'rblaudow@southwest.tn.edu');
     if (ambanker && rblaudow) rblaudow._id = ambanker._id;
-  
+
     //Get teacher info
     const teacher = verifiedTeachers.find((x) => x.username === teacherSelected);
-    console.log('got teachers', teacher);
+    clientConsole(2, 'got teacher:', teacher?.username || 'not found');
 
-    Session.set('teachers', verifiedTeachers);    
-    
+    Session.set('teachers', verifiedTeachers);
+
     Session.set('curTeacher', teacher);
     const allCourseSections = await meteorCallAsync('getAllCourseSections');
     const classesByInstructorId = {};
@@ -586,20 +567,18 @@ Router.route('/classes/:_teacher/:_class', {
     }
     Session.set('classesByInstructorId', classesByInstructorId);
     const curClasses = Session.get('classesByInstructorId')[teacher._id];
-    console.log('curClasses', curClasses);
-    console.log('setTeacher', Session.get('classesByInstructorId'), teacher._id, teacher);
+    clientConsole(2, 'curClasses count:', curClasses?.length || 0);
+    clientConsole(2, 'setTeacher:', teacher?._id, 'classID:', curClassID);
     if (curClasses == undefined) {
       $('#initialInstructorSelection').prop('hidden', '');
       alert('Your instructor hasn\'t set up their classes yet.  Please contact them and check back in at a later time.');
       Session.set('curTeacher', {});
     } else {
       Session.set('curTeacherClasses', curClasses);
-      console.log(curClassID);
       const allClasses = Session.get('curTeacherClasses');
       const curClass = allClasses.find((aClass) => aClass.sectionId == curClassID);
       Session.set('curClass', curClass);
     }
-    console.log('else, progress');
     Session.set('curModule', 'profile');
     Router.go('/');
   },
@@ -668,7 +647,7 @@ Router.route('/instructions', {
   },
   onBeforeAction: function() {
     if (!haveMeteorUser()) {
-      console.log('No one logged in - allowing template to handle');
+      clientConsole(2, 'No one logged in - allowing template to handle');
     } else {
       const unit = Session.get('currentTdfUnit');
       const lockout = unitHasLockout() > 0;
@@ -676,7 +655,7 @@ Router.route('/instructions', {
       const pic = unit.picture ? unit.picture.trim() : undefined;
       const instructionsq = unit.unitinstructionsquestion ? unit.unitinstructionsquestion.trim() : undefined;
       if (!txt && !pic && !instructionsq && !lockout) {
-        console.log('Instructions empty: skipping', displayify(unit));
+        clientConsole(2, 'Instructions empty: skipping', displayify(unit));
         instructContinue();
       } else {
         this.next();

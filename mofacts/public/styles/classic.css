@@ -238,12 +238,7 @@ input[type="range"]::-webkit-slider-thumb {
 }
 
 .btn{
-    font-family: inherit;
-    border-width: 1px;
     border-radius: var(--border-radius);
-    padding: clamp(10px, 2.5vh, 15px);
-    width: 80%;
-    height: 100%;
 }
 
 .btn-fixed{
@@ -251,6 +246,7 @@ input[type="range"]::-webkit-slider-thumb {
     height: inherit;
     margin-bottom: 0.25rem;
 }
+
 
 .btn-icon{
     font-family: inherit;

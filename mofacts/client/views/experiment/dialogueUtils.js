@@ -1,4 +1,5 @@
 import {speakMessageIfAudioPromptFeedbackEnabled, startRecording, stopRecording} from './card.js';
+import {clientConsole} from '../../index';
 export {dialogueLoop, dialogueContinue, initiateDialogue};
 export const DialogueUtils = {
   isUserInDialogueLoop: function() {
@@ -53,21 +54,21 @@ function updateDialogueDisplay(newDisplay) {
   Session.set('displayReady', true);
   Tracker.afterFlush(function() {
     // $('#textQuestion').css({'color': '#383d41', 'background-color': '#e2e3e5', 'border-color': '#d6d8db'})
-    console.log('dialogue after flush');
+    clientConsole(2, 'dialogue after flush');
     $('#dialogueUserAnswer').focus();
   });
 }
 
 function dialogueLoop(err, res) {
-  console.log('dialogue loop');
+  clientConsole(2, 'dialogue loop');
   stopRecording();
   if (typeof(err) != 'undefined') {
-    console.log('error with dialogue loop, meteor call: ', err);
-    console.log(res);
+    clientConsole(1, 'error with dialogue loop, meteor call:', err);
+    clientConsole(1, 'dialogue loop error result:', res);
     dialogueCallbackSaver();
   } else if (res.tag != 0) {
-    console.log('error with dialog loop, dialogue call: ' + res.name);
-    console.log(res);
+    clientConsole(1, 'error with dialog loop, dialogue call:', res.name);
+    clientConsole(1, 'dialogue loop error details:', res);
     dialogueCallbackSaver();
   } else if (res.tag == 0) {
     const result = res.fields[0];
@@ -89,24 +90,24 @@ function dialogueLoop(err, res) {
   }
   Meteor.setTimeout(() => {
     Session.set('enterKeyLock', false);
-    console.log('releasing enterKeyLock in dialogueLoop');
+    clientConsole(2, 'releasing enterKeyLock in dialogueLoop');
   }, 2000);
 }
 
 function dialogueContinue() {
-  console.log('dialogueContinue');
+  clientConsole(2, 'dialogueContinue');
   const dialogueLoopStage = Session.get('dialogueLoopStage');
   switch (dialogueLoopStage) {
     case 'intro':
       // Enter dialogue loop
       Session.set('displayReady', false); // This will get flipped back after we update the display inside dialogueLoop
       Session.set('dialogueLoopStage', 'insideLoop');
-      console.log('getDialogFeedbackForAnswer3', dialogueContext);
+      clientConsole(2, 'getDialogFeedbackForAnswer3');
       Meteor.call('getDialogFeedbackForAnswer', dialogueContext, dialogueLoop);
       break;
     case 'exit':
       // Exit dialogue loop
-      console.log('dialogue loop finished, restoring state');
+      clientConsole(2, 'dialogue loop finished, restoring state');
       Session.set('dialogueTotalTime', Date.now() - Session.get('dialogueStart'));
       Session.set('dialogueStart', undefined);
       Session.set('displayReady', false);
@@ -115,7 +116,7 @@ function dialogueContinue() {
       // restore session state
       Session.set('currentDisplay', dialogueCurrentDisplaySaver);
       Session.set('closeQuestionParts', closeQuestionPartsSaver);
-      console.log('finished, exiting dialogue loop');
+      clientConsole(2, 'finished, exiting dialogue loop');
       dialogueContext.UserPrompts = JSON.parse(JSON.stringify(dialogueUserPrompts));
       dialogueContext.UserAnswers = JSON.parse(JSON.stringify(dialogueUserAnswers));
       dialogueUserPrompts = [];
@@ -125,7 +126,7 @@ function dialogueContinue() {
     // eslint-disable-next-line no-fallthrough
     default:
       Session.set('enterKeyLock', false);
-      console.log('releasing enterKeyLock in dialogueContinue');
+      clientConsole(2, 'releasing enterKeyLock in dialogueContinue');
   }
 }
 
@@ -137,20 +138,20 @@ function initiateDialogue(incorrectUserAnswer, callback, lookupFailCallback) {
 
   Meteor.call('initializeTutorialDialogue', clozeAnswer, incorrectUserAnswer, clozeItem, (err, res)=>{
     if (err) {
-      console.log('ERROR initializing tutorial dialogue:', err);
+      clientConsole(1, 'ERROR initializing tutorial dialogue:', err);
     } else {
-      console.log('initializeTutorialDialogue,res:', res);
+      clientConsole(2, 'initializeTutorialDialogue result tag:', res?.tag);
       if (res.tag != 0) {
-        console.log('cache miss, showing normal feedback:');
+        clientConsole(2, 'cache miss, showing normal feedback');
         Session.set('dialogueHistory', res);
-        console.log('dialogueHistory updated - length:', Session.get('dialogueHistory')?.length);
+        clientConsole(2, 'dialogueHistory updated - length:', Session.get('dialogueHistory')?.length);
         Session.set('dialogueLoopStage', undefined);
         Tracker.afterFlush(()=>$('#userAnswer').val(incorrectUserAnswer));
         lookupFailCallback();
       } else {
         dialogueContext = res.fields[0];
         if (!dialogueContext) {
-          console.log('ERROR getting context during dialogue initialization');
+          clientConsole(1, 'ERROR getting context during dialogue initialization');
         } else {
           closeQuestionPartsSaver = Session.get('clozeQuestionParts');
           Session.set('clozeQuestionParts', undefined);

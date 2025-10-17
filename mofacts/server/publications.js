@@ -79,10 +79,25 @@ Meteor.publish('allTdfs', function() {
         });
     }
 
-    // Students can only see TDFs they've been explicitly granted access to
-    const user = Meteor.users.findOne(this.userId);
-    const accessedTDFs = user?.accessedTDFs || [];
-    return Tdfs.find({ _id: { $in: accessedTDFs } });
+    // Students can see:
+    // 1. TDFs with userselect='true' (self-selectable)
+    // 2. TDFs they have practiced (have history for) - for progress reporting
+
+    // Get TDF IDs the student has history for
+    const historicalTdfIds = Histories.find(
+        { userId: this.userId },
+        { fields: { TDFId: 1 } }
+    ).fetch().map(h => h.TDFId);
+
+    // Get unique TDF IDs
+    const uniqueHistoricalTdfIds = [...new Set(historicalTdfIds)];
+
+    return Tdfs.find({
+        $or: [
+            { 'content.tdfs.tutor.setspec.userselect': 'true' },
+            { _id: { $in: uniqueHistoricalTdfIds } }
+        ]
+    });
 });
 
 Meteor.publish('ownedTdfs', function(ownerId) {

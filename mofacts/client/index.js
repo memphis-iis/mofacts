@@ -33,7 +33,7 @@ export {checkUserSession, clientConsole}
 
 // This redirects to the SSL version of the page if we're not on it
 const forceSSL = Meteor.settings.public.forceSSL || false;
-console.log('forceSSL', forceSSL);
+// forceSSL setting logged via clientConsole after it's defined
 if (location.protocol !== 'https:' && forceSSL) {
   location.href = location.href.replace(/^http:/, 'https:');
 }
@@ -142,9 +142,9 @@ Accounts.onLogin(function() {
   if (Meteor.userId() && !Meteor.user().profile.username) {
     Meteor.call('populateSSOProfile', Meteor.userId(), function(error, result) {
       if (error) {
-        console.log(error);
+        clientConsole(1, 'populateSSOProfile error:', error);
       } else {
-        console.log(result);
+        clientConsole(2, 'populateSSOProfile result:', result);
       }
     });
   }
@@ -178,7 +178,7 @@ Meteor.startup(function() {
 Template.DefaultLayout.onRendered(function() {
   loadClientSettings();
   $('#errorReportingModal').on('hidden.bs.modal', function() {
-    console.log('error reporting modal hidden');
+    clientConsole(2, 'error reporting modal hidden');
     restartMainCardTimeoutIfNecessary();
   });
   //load css into head based on user's preferences
@@ -197,12 +197,11 @@ Template.DefaultLayout.onRendered(function() {
     if (key == ENTER_KEY && e.target.tagName != 'INPUT') {
       window.keypressEvent = e;
       const curPage = document.location.pathname;
-      console.log('global enter key, curPage: ' + curPage);
-      console.log(e);
+      clientConsole(2, 'global enter key, curPage:', curPage);
 
       if (!Session.get('enterKeyLock')) {
         Session.set('enterKeyLock', true);
-        console.log('grabbed enterKeyLock on global enter handler');
+        clientConsole(2, 'grabbed enterKeyLock on global enter handler');
         switch (curPage) {
           case '/instructions':
             e.preventDefault();
@@ -251,7 +250,7 @@ Template.DefaultLayout.events({
       title: 'Report an Error',
     }
     Session.set('modalTemplate', templateObject);
-    console.log("modalTemplate: " + Session.get('modalTemplate'));
+    clientConsole(2, 'modalTemplate:', Session.get('modalTemplate'));
   },
 
   'click #resetFeedbackSettingsButton': function(event) {
@@ -262,7 +261,7 @@ Template.DefaultLayout.events({
   }, 
   'click #errorReportingSaveButton': function(event) {
     event.preventDefault();
-    console.log('save error reporting button pressed');
+    clientConsole(2, 'save error reporting button pressed');
     const errorDescription = $('#errorDescription').val();
     //if error description is empty, alert the user to enter a description
     if (errorDescription === '') {
@@ -293,7 +292,7 @@ Template.DefaultLayout.events({
     Meteor.logout( function(error) {
       if (typeof error !== 'undefined') {
         // something happened during logout
-        console.log('User:', Meteor.user(), 'Error:', error);
+        clientConsole(1, 'Logout error - User:', Meteor.user(), 'Error:', error);
       } else {
         Session.set('curTeacher', undefined);
         Session.set('curClass', undefined);
@@ -362,7 +361,7 @@ Template.registerHelper('currentTheme', function() {
 });
 Template.registerHelper('modalTemplate', function() {
   modalTemplate = Session.get('modalTemplate');
-  console.log('modalTemplate: ' + JSON.stringify(modalTemplate));
+  clientConsole(2, 'modalTemplate:', JSON.stringify(modalTemplate));
   return modalTemplate.template;
 });
 Template.registerHelper('isLoggedIn', function() {
@@ -370,7 +369,7 @@ Template.registerHelper('isLoggedIn', function() {
 });
 Template.registerHelper('showPerformanceDetails', function() {
   const type = getTestType();
-  console.log('showPerformanceDetails type: ' + type);
+  clientConsole(2, 'showPerformanceDetails type:', type);
   const uiSettings = Session.get('curTdfUISettings');
   if(Session.get('curModule') == 'instructions') return false;
   if(type == "s" && uiSettings.displayPerformanceDuringStudy) return true;

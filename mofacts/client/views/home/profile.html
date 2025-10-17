@@ -16,7 +16,7 @@
 
         <h3 style="margin-top: 0; text-align: center;">Admin / Teacher Menu</h3>
 
-        <div class="row justify-content-center g-3">
+        <div class="row justify-content-center g-3" style="max-width: 900px; margin: 0 auto;">
 
             <div class="col-lg-3 col-md-4 col-sm-6 col-12">
                 <button type="button" id="instructorReportingButton" class="btn btn-fixed mx-auto d-block">Instructor Reporting</button>
@@ -24,9 +24,7 @@
 
             {{#if isInRole 'admin'}}
             <div class="col-lg-3 col-md-4 col-sm-6 col-12">
-                <button id="adminControlsBtn" class="btn btn-fixed mx-auto d-block" type="button">
-                    Admin Control Panel
-                </button>
+                <button id="adminControlsBtn" class="btn btn-fixed mx-auto d-block" type="button">Admin Control Panel</button>
             </div>
             {{/if}}
 

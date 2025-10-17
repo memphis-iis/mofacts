@@ -16,7 +16,7 @@ import {
   playerController,
   destroyPlyr
 } from '../../lib/plyrHelper.js'
-import {meteorCallAsync, redoCardImage} from '../../index';
+import {meteorCallAsync, redoCardImage, clientConsole} from '../../index';
 import {DialogueUtils, dialogueContinue, dialogueLoop, initiateDialogue} from './dialogueUtils';
 import {SCHEDULE_UNIT, ENTER_KEY} from '../../../common/Definitions';
 import {secsIntervalString, displayify, stringifyIfExists} from '../../../common/globalHelpers';
@@ -208,7 +208,7 @@ function clearCardTimeout() {
         clearFunc(clearParm);
       }
     } catch (e) {
-      console.log('Error clearing meteor timeout/interval', e);
+      clientConsole(1, 'Error clearing meteor timeout/interval', e);
     }
   };
   safeClear(Meteor.clearTimeout, timeoutName);
@@ -226,7 +226,7 @@ function clearCardTimeout() {
 // Start a timeout count
 // Note we reverse the params for Meteor.setTimeout - makes calling code much cleaner
 function beginMainCardTimeout(delay, func) {
-  console.log('beginMainCardTimeout', func);
+  clientConsole(2, 'beginMainCardTimeout');
   clearCardTimeout();
 
   // Cache UI settings at function start
@@ -236,23 +236,23 @@ function beginMainCardTimeout(delay, func) {
   timeoutFunc = function() {
     const numRemainingLocks = Session.get('pausedLocks');
     if (numRemainingLocks > 0) {
-      console.log('timeout reached but there are ' + numRemainingLocks + ' locks outstanding');
+      clientConsole(2, 'timeout reached but there are', numRemainingLocks, 'locks outstanding');
     } else {
       if (document.location.pathname != '/card') {
         leavePage(function() {
-          console.log('cleaning up page after nav away from card');
+          clientConsole(2, 'cleaning up page after nav away from card');
         });
       } else if (typeof func === 'function') {
         func();
       } else {
-        console.log('function!!!: ' + JSON.stringify(func));
+        clientConsole(1, 'function!!!:', func);
       }
     }
   };
   timeoutDelay = delay;
   const mainCardTimeoutStart = new Date();
   Session.set('mainCardTimeoutStart', mainCardTimeoutStart);
-  console.log('mainCardTimeoutStart', mainCardTimeoutStart);
+  clientConsole(2, 'mainCardTimeoutStart', mainCardTimeoutStart);
   timeoutName = Meteor.setTimeout(timeoutFunc, timeoutDelay);
   cardStartTime = Date.now();
  if(displayMode == "text" || displayMode == "both"){
@@ -297,7 +297,7 @@ function beginMainCardTimeout(delay, func) {
 
 // Reset the previously set timeout counter
 function resetMainCardTimeout() {
-  console.log('RESETTING MAIN CARD TIMEOUT');
+  clientConsole(2, 'RESETTING MAIN CARD TIMEOUT');
   const savedFunc = timeoutFunc;
   const savedDelay = timeoutDelay;
   clearCardTimeout();
@@ -305,7 +305,7 @@ function resetMainCardTimeout() {
   timeoutDelay = savedDelay;
   const mainCardTimeoutStart = new Date();
   Session.set('mainCardTimeoutStart', mainCardTimeoutStart);
-  console.log('reset, mainCardTimeoutStart:', mainCardTimeoutStart);
+  clientConsole(2, 'reset, mainCardTimeoutStart:', mainCardTimeoutStart);
   timeoutName = Meteor.setTimeout(savedFunc, savedDelay);
   Session.set('varLenTimeoutName', Meteor.setInterval(varLenDisplayTimeout, 400));
 }
@@ -313,7 +313,7 @@ function resetMainCardTimeout() {
 // TODO: there is a minor bug here related to not being able to truly pause on
 // re-entering a tdf for the first trial
 function restartMainCardTimeoutIfNecessary() {
-  console.log('restartMainCardTimeoutIfNecessary');
+  clientConsole(2, 'restartMainCardTimeoutIfNecessary');
   const mainCardTimeoutStart = Session.get('mainCardTimeoutStart');
   if (!mainCardTimeoutStart) {
     const numRemainingLocks = Session.get('pausedLocks')-1;
@@ -333,7 +333,7 @@ function restartMainCardTimeoutIfNecessary() {
     if (numRemainingLocks <= 0) {
       if (timeoutFunc) timeoutFunc();
     } else {
-      console.log('timeout reached but there are ' + numRemainingLocks + ' locks outstanding');
+      clientConsole(2, 'timeout reached but there are', numRemainingLocks, 'locks outstanding');
     }
   }
   timeoutName = Meteor.setTimeout(wrappedTimeout, remainingDelay);
@@ -358,9 +358,9 @@ function checkSimulation() {
 
   // If we we are here, then we should set a timeout to sim a correct answer
   const correct = Math.random() <= simCorrectProb;
-  console.log('SIM: will simulate response with correct=', correct, 'in', simTimeout);
+  clientConsole(2, 'SIM: will simulate response with correct=', correct, 'in', simTimeout);
   simTimeoutName = Meteor.setTimeout(function() {
-    console.log('SIM: Fired!');
+    clientConsole(2, 'SIM: Fired!');
     simTimeoutName = null;
     handleUserInput({}, 'simulation', correct);
   }, simTimeout);
@@ -431,18 +431,18 @@ function varLenDisplayTimeout() {
 
 // Clean up things if we navigate away from this page
 async function leavePage(dest) {
-  console.log('leaving page for dest: ' + dest);
+  clientConsole(2, 'leaving page for dest:', dest);
   if (dest != '/card' && dest != '/instructions' && document.location.pathname != '/instructions') {
     Session.set('currentExperimentState', undefined);
-    console.log('resetting subtdfindex, dest: ' + dest);
+    clientConsole(2, 'resetting subtdfindex, dest:', dest);
     Session.set('subTdfIndex', null);
     sessionCleanUp();
     if (window.AudioContext) {
-      console.log('closing audio context');
+      clientConsole(2, 'closing audio context');
       stopRecording();
       clearAudioContextAndRelatedVariables();
     } else {
-      console.log('NOT closing audio context');
+      clientConsole(2, 'NOT closing audio context');
     }
   } else if (dest === '/instructions') {
     let unit = Session.get('currentTdfUnit');
@@ -455,7 +455,7 @@ async function leavePage(dest) {
     const pic = unit.picture ? unit.picture.trim() : undefined;
     const instructionsq = unit.unitinstructionsquestion ? unit.unitinstructionsquestion.trim() : undefined;
     if (!txt && !pic && !instructionsq && !lockout) {
-      console.log('Instructions empty and no lockout: skipping', displayify(unit));
+      clientConsole(2, 'Instructions empty and no lockout: skipping');
       instructContinue();
       return;
     }
@@ -516,7 +516,6 @@ async function initCard() {
   }
   Session.set('curTdfTips', formattedTips)
   await checkUserSession();
-  console.log('RENDERED----------------------------------------------');
   // Catch page navigation events (like pressing back button) so we can call our cleanup method
   window.onpopstate = function() {
     if (document.location.pathname == '/card') {
@@ -620,7 +619,7 @@ Template.card.events({
         const answer = JSON.parse(JSON.stringify(_.trim($('#dialogueUserAnswer').val()).toLowerCase()));
         $('#dialogueUserAnswer').val('');
         const dialogueContext = DialogueUtils.updateDialogueState(answer);
-        console.log('getDialogFeedbackForAnswer - context created');
+        clientConsole(2, 'getDialogFeedbackForAnswer - context created');
         Meteor.call('getDialogFeedbackForAnswer', dialogueContext, dialogueLoop);
       }
     }
@@ -660,16 +659,15 @@ Template.card.events({
 
   'click .multipleChoiceButton': function(event) {
     event.preventDefault();
-    console.log("multipleChoiceButton clicked");
+    clientConsole(2, "multipleChoiceButton clicked");
     if(!Session.get('submmissionLock')){
       if(!Session.get('curTdfUISettings').displayConfirmButton){
         Session.set('submmissionLock', true);
         handleUserInput(event, 'buttonClick');
       } else {
-        console.log("multipleChoiceButton clicked (waiting for confirm)");
+        clientConsole(2, "multipleChoiceButton clicked (waiting for confirm)");
         //for all multipleChoiceButtons, make the selected one have class btn-selected, remove btn-selected from all others
         const selectedButton = event.currentTarget;
-        console.log("selectedButton", selectedButton, "event.currentTarget", event.currentTarget);
         $('.multipleChoiceButton').each(function(){
           $(this).removeClass('btn-secondary').addClass('btn-primary');
         });
@@ -681,21 +679,19 @@ Template.card.events({
   },
   'click #confirmButton': function(event) {
     event.preventDefault();``
-    console.log("displayConfirmButton clicked");
+    clientConsole(2, "displayConfirmButton clicked");
     $('#confirmButton').hide();
     if(!Session.get('submmissionLock')){
       if(Session.get('buttonTrial')){
         const selectedButton = $('.btn-secondary, .multipleChoiceButton');
         //change this event to a buttonClick event for that button
         event.currentTarget = selectedButton;
-        console.log("selectedButton", selectedButton, "event.currentTarget", event.currentTarget);
         handleUserInput(event, 'confirmButton');
       } else {
         //get user answer target element
         const userAnswer = document.getElementById('userAnswer');
         event.currentTarget = userAnswer;
         event.keyCode = ENTER_KEY;
-        console.log("userAnswer", userAnswer, "event.currentTarget", event.currentTarget);
         handleUserInput(event, 'confirmButton');
       }
     }
@@ -799,7 +795,7 @@ Template.card.helpers({
 
   'username': function() {
     if (!haveMeteorUser()) {
-      console.log('!haveMeteorUser');
+      clientConsole(1, '!haveMeteorUser');
       leavePage(routeToSignin);
     } else {
       return Meteor.user().username;
@@ -810,7 +806,6 @@ Template.card.helpers({
 
   'subWordClozeCurrentQuestionExists': function() {
     const experimentState = Session.get('currentExperimentState');
-    console.log('subWordClozeCurrentQuestionExists: ' + (typeof(experimentState.clozeQuestionParts) != 'undefined'));
     return typeof(experimentState.clozeQuestionParts) != 'undefined' && experimentState.clozeQuestionParts !== null;
   },
 
@@ -861,14 +856,9 @@ Template.card.helpers({
   'curImgSrc': function() {
     const currentDisplay = Session.get('currentDisplay');
     const curImgSrc = currentDisplay ? currentDisplay.imgSrc : undefined;
-    console.log('curImgSrc helper - curImgSrc:', curImgSrc);
-    console.log('curImgSrc helper - imagesDict has key?', curImgSrc && imagesDict[curImgSrc] !== undefined);
-    console.log('curImgSrc helper - imagesDict keys count:', Object.keys(imagesDict).length);
     if (curImgSrc && imagesDict[curImgSrc]) {
-      console.log('curImgSrc helper - returning:', imagesDict[curImgSrc].src);
       return imagesDict[curImgSrc].src;
     } else {
-      console.log('curImgSrc helper - returning empty string');
       return '';
     }
   },
@@ -1117,7 +1107,6 @@ Template.card.helpers({
         'value': parms[key]
       });
     }
-    console.log("probability parms input - keys:", Object.keys(probParms).length);
     return probParms;
   },
   'UIsettings': () => Session.get('curTdfUISettings'),
@@ -1316,7 +1305,7 @@ function shouldSkipFadeIn() {
 }
 
 function beginFadeIn(reason) {
-  console.log('[SM] Starting fade-in:', reason);
+  clientConsole(2, '[SM] Starting fade-in:', reason);
   transitionTrialState(TRIAL_STATES.PRESENTING_FADING_IN, reason);
   Session.set('displayReady', true);
 }
@@ -1431,7 +1420,7 @@ function transitionTrialState(newState, reason = '') {
   }
 
   // Log transition
-  console.log(
+  clientConsole(2,
     `[SM] ✓ [Trial ${trialNum}] STATE: ${previousState} → ${newState}`,
     reason ? `(${reason})` : ''
   );
@@ -1490,7 +1479,7 @@ function pollMediaDevices() {
   navigator.mediaDevices.enumerateDevices().then(function(devices) {
     if (selectedInputDevice != null) {
       if (devices.filter((x) => x.deviceId == selectedInputDevice).length == 0) {
-        console.log('input device lost!!!');
+        clientConsole(1, 'input device lost!!!');
         reinitializeMediaDueToDeviceChange();
       }
     }
@@ -1528,7 +1517,7 @@ function initializeAudio() {
   try {
     // Older browsers might not implement mediaDevices at all, so we set an empty object first
     if (navigator.mediaDevices === undefined) {
-      console.log('media devices undefined');
+      clientConsole(2, 'media devices undefined');
       navigator.mediaDevices = {};
     }
 
@@ -1564,7 +1553,7 @@ function initializeAudio() {
           cardStart();
         });
   } catch (e) {
-    console.log('Error initializing Web Audio browser');
+    clientConsole(1, 'Error initializing Web Audio browser', e);
   }
 }
 
@@ -1582,7 +1571,7 @@ function preloadVideos() {
 
 function preloadImages() {
   const curStimImgSrcs = getCurrentStimDisplaySources('imageStimulus');
-  console.log('curStimImgSrcs: ', curStimImgSrcs);
+  clientConsole(2, 'curStimImgSrcs count:', curStimImgSrcs?.length || 0);
   imagesDict = {};
   const imageLoadPromises = [];
   let img;
@@ -1590,48 +1579,52 @@ function preloadImages() {
     const loadPromise = new Promise((resolve, reject) => {
       if(!src.includes('http')){
         const asset = DynamicAssets.findOne({name: src});
+        if (!asset) {
+          clientConsole(1, 'Image asset not found:', src);
+          resolve();
+          return;
+        }
         link = asset.link();
+        clientConsole(2, 'Original asset link:', link);
 
-        // Convert absolute localhost URLs to relative URLs for remote access
+        // Convert ALL absolute URLs to relative paths for remote/LAN access
         // This ensures images work whether accessed via localhost, LAN IP, or domain
-        if (link.includes('//localhost:') || link.includes('//127.0.0.1:')) {
-          // Extract the path portion (everything after the port number)
-          const pathMatch = link.match(/:\d+(\/.+)$/);
-          if (pathMatch) {
-            link = pathMatch[1]; // Use relative path
-          }
+        const pathMatch = link.match(/^https?:\/\/[^/]+(\/.+)$/);
+        if (pathMatch) {
+          link = pathMatch[1]; // Use relative path
+          clientConsole(2, 'Converted to relative path:', link);
+        } else {
+          clientConsole(1, 'Failed to convert URL to relative:', link);
         }
 
         img = new Image();
         img.onload = () => {
-          console.log('img loaded:', src);
+          clientConsole(2, 'img loaded:', src);
           resolve();
         };
         img.onerror = () => {
-          console.warn('img failed to load:', src);
+          clientConsole(1, 'img failed to load:', src);
           resolve(); // Resolve anyway to not block the UI
         };
         img.src = link;
-        console.log('img:' + img);
         imagesDict[src] = img;
       } else {
         img = new Image();
         img.onload = () => {
-          console.log('img loaded:', src);
+          clientConsole(2, 'img loaded:', src);
           resolve();
         };
         img.onerror = () => {
-          console.warn('img failed to load:', src);
+          clientConsole(1, 'img failed to load:', src);
           resolve(); // Resolve anyway to not block the UI
         };
         img.src = src;
-        console.log('img:' + img);
         imagesDict[src] = img;
       }
     });
     imageLoadPromises.push(loadPromise);
   }
-  console.log('imagesDict: ', imagesDict);
+  clientConsole(2, 'imagesDict count:', Object.keys(imagesDict).length);
   // Return promise that resolves when all images are loaded
   return Promise.all(imageLoadPromises);
 }
@@ -1648,26 +1641,26 @@ function getCurrentStimDisplaySources(filterPropertyName='clozeStimulus') {
 }
 
 async function preloadStimuliFiles() {
-  console.log('[SM] preloadStimuliFiles called in state:', currentTrialState);
+  clientConsole(2, '[SM] preloadStimuliFiles called in state:', currentTrialState);
   // Pre-load sounds to be played into soundsDict to avoid audio lag issues
   if (curStimHasSoundDisplayType()) {
-    console.log('Sound type questions detected, pre-loading sounds');
+    clientConsole(2, 'Sound type questions detected, pre-loading sounds');
   } else {
-    console.log('Non sound type detected');
+    clientConsole(2, 'Non sound type detected');
   }
   if (curStimHasImageDisplayType()) {
-    console.log('image type questions detected, pre-loading images');
+    clientConsole(2, 'image type questions detected, pre-loading images');
     await preloadImages();
-    console.log('All images preloaded');
+    clientConsole(2, 'All images preloaded');
   } else {
-    console.log('Non image type detected');
+    clientConsole(2, 'Non image type detected');
   }
 }
 
 function checkUserAudioConfigCompatability(){
   const audioPromptMode = Meteor.user().audioPromptMode;
   if (curStimHasImageDisplayType() && ((audioPromptMode == 'all' || audioPromptMode == 'question'))) {
-    console.log('PANIC: Unable to process TTS for image response', Session.get('currentRootTdfId'));
+    clientConsole(1, 'PANIC: Unable to process TTS for image response', Session.get('currentRootTdfId'));
     alert('Question reading not supported on this TDF. Please disable and try again.');
     leavePage('/profile');
   }
@@ -1723,7 +1716,7 @@ function setUpButtonTrial() {
       buttonChoices = buttonOptions.split(',');
     }
     correctButtonPopulated = true;
-    console.log('buttonChoices==buttonOptions', buttonChoices);
+    clientConsole(2, 'buttonChoices==buttonOptions', buttonChoices);
   } else {
     const currentFalseResponses = getCurrentFalseResponses();
 
@@ -1732,10 +1725,9 @@ function setUpButtonTrial() {
 
     }
     correctButtonPopulated = false;
-    console.log('buttonChoices==falseresponses and correct answer', buttonChoices);
   }
   if (correctButtonPopulated === null) {
-    console.log('No correct button');
+    clientConsole(1, 'No correct button');
     throw new Error('Bad TDF/Stim file - no buttonOptions and no false responses');
   }
 
@@ -1794,7 +1786,7 @@ function setUpButtonTrial() {
 function getCurrentFalseResponses() {
   const {curClusterIndex, curStimIndex} = getCurrentClusterAndStimIndices();
   const cluster = getStimCluster(curClusterIndex);
-  console.log('getCurrentFalseResponses', curClusterIndex, curStimIndex, cluster);
+  clientConsole(2, 'getCurrentFalseResponses', curClusterIndex, curStimIndex);
 
   // Check for missing cluster, stims, or stim index out of bounds
   if (
@@ -1832,16 +1824,12 @@ function getCurrentClusterAndStimIndices() {
   let curClusterIndex = null;
   let curStimIndex = null;
 
-  console.log('getCurrentClusterAndStimIndices: ' + !engine);
-
   if (!engine) {
-    console.log('getCurrentClusterAndStimIndices, no engine: ' + Session.get('clusterIndex'));
     curClusterIndex = Session.get('clusterIndex');
   } else {
     const currentQuest = engine.findCurrentCardInfo();
     curClusterIndex = currentQuest.clusterIndex;
     curStimIndex = currentQuest.whichStim;
-    console.log('getCurrentClusterAndStimIndices, engine: ', currentQuest);
   }
 
   return {curClusterIndex, curStimIndex};
@@ -1861,7 +1849,7 @@ function clearPlayingSound() {
 function playCurrentSound(onEndCallback) {
   // We currently only play one sound at a time
   let currentAudioSrc = Session.get('currentDisplay').audioSrc;
-  console.log('currentAudioSrc: ' + currentAudioSrc);
+  clientConsole(2, 'currentAudioSrc:', currentAudioSrc);
   if(!currentAudioSrc.includes('http')){
     try {
       currentAudioSrc = DynamicAssets.findOne({name: currentAudioSrc}).link();
@@ -1879,21 +1867,19 @@ function playCurrentSound(onEndCallback) {
     if (onEndCallback) {
       onEndCallback();
     }
-    console.log('Sound completed');
+    clientConsole(2, 'Sound completed');
   })
 }
 
 function handleUserForceCorrectInput(e, source) {
   const key = e.keyCode || e.which;
   if (key == ENTER_KEY || source === 'voice') {
-    console.log('handleUserForceCorrectInput');
+    clientConsole(2, 'handleUserForceCorrectInput');
     $('#userForceCorrect').prop('disabled', true);
     stopRecording();
-    console.log('userForceCorrect, enter key');
     // Enter key - see if gave us the correct answer
     const entry = _.trim($('#userForceCorrect').val()).toLowerCase();
     if (getTestType() === 'n') {
-      console.log('force correct n type test');
       if (entry.length < 4) {
         const oldPrompt = $('#forceCorrectGuidance').text();
         $('#userForceCorrect').prop('disabled', false);
@@ -1905,16 +1891,15 @@ function handleUserForceCorrectInput(e, source) {
         savedFunc();
       }
     } else {
-      console.log('force correct non n type test');
       const answer = Answers.getDisplayAnswerText(Session.get('currentExperimentState').currentAnswer).toLowerCase();
       const originalAnswer = Answers.getDisplayAnswerText(Session.get('currentExperimentState').originalAnswer).toLowerCase();
       if (entry === answer || entry === originalAnswer) {
-        console.log('force correct, correct answer');
+        clientConsole(2, 'force correct, correct answer');
         const afterUserFeedbackForceCorrectCbHolder = afterUserFeedbackForceCorrectCb;
         afterUserFeedbackForceCorrectCb = undefined;
         afterUserFeedbackForceCorrectCbHolder();
       } else {
-        console.log('force correct, wrong answer');
+        clientConsole(2, 'force correct, wrong answer');
         $('#userForceCorrect').prop('disabled', false);
         $('#userForceCorrect').val('');
         $('#forceCorrectGuidance').text('Incorrect - please enter \'' + answer + '\'');
@@ -1923,14 +1908,13 @@ function handleUserForceCorrectInput(e, source) {
       }
     }
   } else if (getTestType() === 'n') {
-    console.log('not enter key and test type n, resetting main card timeout');
     // "Normal" keypress - reset the timeout period
     resetMainCardTimeout();
   }
 }
 
 function handleUserInput(e, source, simAnswerCorrect) {
-  console.log('[SM] handleUserInput called in state:', currentTrialState, 'source:', source);
+  clientConsole(2, '[SM] handleUserInput called in state:', currentTrialState, 'source:', source);
   let isTimeout = false;
   let isSkip = false;
   let key;
@@ -1951,7 +1935,7 @@ function handleUserInput(e, source, simAnswerCorrect) {
   if (e.currentTarget ? e.currentTarget.id === 'continueStudy' : false) {
     key = ENTER_KEY;
     isSkip = true;
-    console.log('skipped study');
+    clientConsole(2, 'skipped study');
   }
 
   // If we haven't seen the correct keypress, then we want to reset our
@@ -2131,7 +2115,7 @@ async function writeCurrentToScrollList(userAnswer, isTimeout, simCorrect, justA
       'userCorrect': isCorrect,
     }, function(err) {
       if (err) {
-        console.log('ERROR inserting scroll list member:', displayify(err));
+        clientConsole(1, 'ERROR inserting scroll list member:', displayify(err));
       }
       Session.set('scrollListCount', currCount + 1);
     });
@@ -2200,8 +2184,7 @@ function determineUserFeedback(userAnswer, isSkip, isCorrect, feedbackForAnswer,
 }
 
 async function showUserFeedback(isCorrect, feedbackMessage, isTimeout, isSkip) {
-  console.log('showUserFeedback');
-  console.log('[SM] showUserFeedback called in state:', currentTrialState);
+  clientConsole(2, '[SM] showUserFeedback called in state:', currentTrialState);
 
   // STATE MACHINE: Transition to FEEDBACK.SHOWING (drill only, test skips feedback)
   if (trialShowsFeedback()) {
@@ -2399,7 +2382,7 @@ async function showUserFeedback(isCorrect, feedbackMessage, isTimeout, isSkip) {
   // we need to replay the sound, after the optional audio feedback delay time
   if (!!(Session.get('currentDisplay').audioSrc) && !isCorrect) {
     setTimeout(function() {
-      console.log('playing sound after timeuntilaudiofeedback', new Date());
+      clientConsole(2, 'playing sound after timeuntilaudiofeedback', new Date());
       playCurrentSound();
     }, Session.get('currentDeliveryParams').timeuntilaudiofeedback);
   }
@@ -2538,7 +2521,7 @@ async function afterAnswerFeedbackCallback(trialEndTimeStamp, trialStartTimeStam
 
 async function afterFeedbackCallback(trialEndTimeStamp, trialStartTimeStamp, isTimeout, isSkip, isCorrect, testType, deliveryParams, answerLogRecord, callLocation) {
   afterFeedbackCallbackBind = undefined;
-  console.log('[SM] afterFeedbackCallback called in state:', currentTrialState);
+  clientConsole(2, '[SM] afterFeedbackCallback called in state:', currentTrialState);
   Session.set('CurTimeoutId', null)
   const userLeavingTrial = callLocation != 'card';
   let reviewEnd = Date.now();
@@ -2561,7 +2544,7 @@ async function afterFeedbackCallback(trialEndTimeStamp, trialStartTimeStamp, isT
   };
 
   newExperimentState.overallOutcomeHistory = Session.get('overallOutcomeHistory');
-  console.log('writing answerLogRecord to history - stimIndex:', answerLogRecord.stimIndex);
+  clientConsole(2, 'writing answerLogRecord to history - stimIndex:', answerLogRecord.stimIndex);
   if(Meteor.user() === undefined || !Meteor.user().impersonating){
     try {
       answerLogRecord.responseDuration = responseDuration;
@@ -2571,11 +2554,11 @@ async function afterFeedbackCallback(trialEndTimeStamp, trialStartTimeStamp, isT
       Meteor.call('insertHistory', answerLogRecord);
       updateExperimentState(newExperimentState, 'card.afterAnswerFeedbackCallback');
     } catch (e) {
-      console.log('error writing history record:', e);
+      clientConsole(1, 'error writing history record:', e);
       throw new Error('error inserting history/updating state:', e);
     }
   } else {
-    console.log('no history saved. impersonation mode.');
+    clientConsole(2, 'no history saved. impersonation mode.');
   }
 
   if(!userLeavingTrial){
@@ -2593,7 +2576,7 @@ async function afterFeedbackCallback(trialEndTimeStamp, trialStartTimeStamp, isT
       const threshold = deliveryParams.autostopTimeoutThreshold;
 
       if (threshold > 0 && timeoutsSeen >= threshold) {
-        console.log('Hit timeout threshold', threshold, 'Quitting');
+        clientConsole(2, 'Hit timeout threshold', threshold, 'Quitting');
         leavePage('/profile');
         return; // We are totally done
       }
@@ -2609,7 +2592,7 @@ async function afterFeedbackCallback(trialEndTimeStamp, trialStartTimeStamp, isT
 }
 
 async function cardEnd() {
-  console.log('[SM] cardEnd called in state:', currentTrialState);
+  clientConsole(2, '[SM] cardEnd called in state:', currentTrialState);
   // STATE MACHINE: Begin TRANSITION phase
   transitionTrialState(TRIAL_STATES.TRANSITION_START, 'Trial complete, beginning transition');
 
@@ -2693,7 +2676,7 @@ function getTrialTime(trialEndTimeStamp, trialStartTimeStamp, reviewEnd, testTyp
     firstActionTimestamp: ${firstActionTimestamp}
     trialEndTimeStamp: ${trialEndTimeStamp}
     trialStartTimeStamp: ${trialStartTimeStamp}`
-    console.log(`responseDuration: ${responseDuration}
+    clientConsole(1, `responseDuration: ${responseDuration}
     startLatency: ${startLatency}
     endLatency: ${endLatency}
     firstKeypressTimestamp: ${firstKeypressTimestamp}
@@ -2936,7 +2919,7 @@ function findQTypeSimpified() {
 
 
 function hideUserFeedback() {
-  console.log('[SM] hideUserFeedback called in state:', currentTrialState);
+  clientConsole(2, '[SM] hideUserFeedback called in state:', currentTrialState);
   // Don't use .hide() - let displayReady fade-out handle visibility
   // Using .hide() causes instant flash while content is still visible
   // Clear ALL feedback locations (top, middle, bottom) since we don't know which was used
@@ -2951,8 +2934,7 @@ function hideUserFeedback() {
 // Comprehensive cleanup that mimics what {{#if displayReady}} teardown did automatically
 // IMPORTANT: Only clear input VALUES and non-reactive HTML, NOT Blaze-managed content
 function cleanupTrialContent() {
-  console.log('[SM] cleanupTrialContent called in state:', currentTrialState);
-  console.log('  #userAnswer before cleanup:', $('#userAnswer').length, 'display:', $('#userAnswer').css('display'));
+  clientConsole(2, '[SM] cleanupTrialContent called in state:', currentTrialState);
 
   // Clear input VALUES (not HTML - let Blaze handle that)
   // Note: #userAnswer already cleared in cardEnd(), but safe to repeat
@@ -2988,16 +2970,14 @@ function cleanupTrialContent() {
   $('.input-box').show();
   $('#multipleChoiceContainer').show();
 
-  console.log('  #userAnswer after cleanup:', $('#userAnswer').length, 'display:', $('#userAnswer').css('display'));
-
   // NOTE: Do NOT clear Session variables here - those are cleared in prepareCard/newQuestionHandler
   // NOTE: Do NOT clear HTML that's managed by Blaze templates (buttonList, text, etc.)
 }
 
 
-//Called to revisit a previous unit in the current session. 
+//Called to revisit a previous unit in the current session.
 async function revisitUnit(unitNumber) {
-  console.log('REVIST UNIT: ', unitNumber);
+  clientConsole(2, 'REVIST UNIT:', unitNumber);
   clearCardTimeout();
   destroyPlyr();
 
@@ -3053,7 +3033,7 @@ async function revisitUnit(unitNumber) {
   if (newUnitNum < curTdf.tdfs.tutor.unit.length || curTdf.tdfs.tutor.unit[newUnitNum] > 0) {
     // Revisiting a Unit, we need to restart with instructions
     // Check if the unit has a learning session, assess
-    console.log('REVISIT UNIT: show instructions for unit', newUnitNum);
+    clientConsole(2, 'REVISIT UNIT: show instructions for unit', newUnitNum);
       const rootTDFBoxed = Tdfs.findOne({_id: Session.get('currentRootTdfId')});
       const rootTDF = rootTDFBoxed.content;
       const setspec = rootTDF.tdfs.tutor.setspec;
@@ -3082,7 +3062,7 @@ async function unitIsFinished(reason) {
     if(engine.adaptiveQuestionLogic){
       logic = engine.adaptiveQuestionLogic.curUnit.adaptiveLogic;
       if(logic != '' && logic != undefined){
-        console.log('adaptive schedule', engine.adaptiveQuestionLogic.schedule);
+        clientConsole(2, 'adaptive schedule');
         for(let adaptiveUnitIndex in adaptive){
           let newUnitIndex = adaptive[adaptiveUnitIndex].split(',')[0];
           let isTemplate = adaptive[adaptiveUnitIndex].split(',')[1] == 't';
@@ -3133,7 +3113,7 @@ async function unitIsFinished(reason) {
   let leaveTarget;
   if (newUnitNum < curTdf.tdfs.tutor.unit.length) {
     // Just hit a new unit - we need to restart with instructions
-    console.log('UNIT FINISHED: show instructions for next unit', newUnitNum);
+    clientConsole(2, 'UNIT FINISHED: show instructions for next unit', newUnitNum);
       const rootTDFBoxed = Tdfs.findOne({_id: Session.get('currentRootTdfId')});
       const rootTDF = rootTDFBoxed.content;
       const setspec = rootTDF.tdfs.tutor.setspec;
@@ -3150,7 +3130,7 @@ async function unitIsFinished(reason) {
     leaveTarget = '/instructions';
   } else {
     // We have run out of units - return home for now
-    console.log('UNIT FINISHED: No More Units');
+    clientConsole(2, 'UNIT FINISHED: No More Units');
     //if loadbalancing is enabled and countcompletion is "end" then we need to increment the completion count of the current condition in the root tdf
     const rootTDFBoxed = Tdfs.findOne({_id: Session.get('currentRootTdfId')});
     const rootTDF = rootTDFBoxed.content;
@@ -3195,7 +3175,7 @@ async function unitIsFinished(reason) {
   }
 
   const res = await updateExperimentState(newExperimentState, 'card.unitIsFinished');
-  console.log('unitIsFinished,updateExperimentState', res);
+  clientConsole(2, 'unitIsFinished,updateExperimentState', res);
   leavePage(leaveTarget);  
 }
 
@@ -3245,7 +3225,7 @@ async function cardStart() {
     Session.set('buttonTrial', false);
     Session.set('buttonList', []);
 
-    console.log('cards template rendered => Performing resume');
+    clientConsole(2, 'cards template rendered => Performing resume');
     let curExperimentState = Session.get('currentExperimentState') || {};
     curExperimentState.showOverlearningText = false;
     Session.set('currentExperimentState', curExperimentState);
@@ -3257,19 +3237,19 @@ async function cardStart() {
 
 async function prepareCard() {
   const trialNum = (Session.get('currentExperimentState')?.numQuestionsAnswered || 0) + 1;
-  console.log('[SM] === prepareCard START (Trial #' + trialNum + ') ===');
+  clientConsole(2, '[SM] === prepareCard START (Trial #' + trialNum + ') ===');
   // Call stack logging removed (too verbose)
-  console.log('[SM]   displayReady before:', Session.get('displayReady'));
+  clientConsole(2, '[SM]   displayReady before:', Session.get('displayReady'));
 
   // STATE MACHINE: Handle transition to fade-out based on current state
   if (currentTrialState === TRIAL_STATES.IDLE) {
     // First trial - no need to fade out, will go straight to LOADING after clearing
-    console.log('[SM]   First trial (IDLE state), skipping fade-out');
+    clientConsole(2, '[SM]   First trial (IDLE state), skipping fade-out');
   } else if (currentTrialState === TRIAL_STATES.TRANSITION_START) {
     transitionTrialState(TRIAL_STATES.TRANSITION_FADING_OUT, 'Fade-out previous trial content');
   } else if (currentTrialState === TRIAL_STATES.TRANSITION_CLEARING) {
     // Already in CLEARING (called from processUserTimesLog), skip fade-out
-    console.log('[SM]   Already in CLEARING state, skipping fade-out');
+    clientConsole(2, '[SM]   Already in CLEARING state, skipping fade-out');
   } else {
     // Called from somewhere unexpected - transition to fade-out anyway
     transitionTrialState(TRIAL_STATES.TRANSITION_FADING_OUT, 'prepareCard() starting fade-out from unexpected state');
@@ -3280,14 +3260,14 @@ async function prepareCard() {
 
   // Start fade-out with OLD content still visible (not cleared to empty)
   // DON'T clean up yet - that happens AFTER fade completes
-  console.log('[SM]   Setting displayReady=false to fade out (old content remains visible during fade)');
+  clientConsole(2, '[SM]   Setting displayReady=false to fade out (old content remains visible during fade)');
   Session.set('displayReady', false);
 
   // Wait for fade-out transition to complete
   const fadeDelay = getTransitionDuration();
-  console.log(`[SM]   Waiting ${fadeDelay}ms for fade-out to complete...`);
+  clientConsole(2, `[SM]   Waiting ${fadeDelay}ms for fade-out to complete...`);
   await new Promise(resolve => setTimeout(resolve, fadeDelay));
-  console.log('[SM]   Fade-out complete, now cleaning up WHILE INVISIBLE');
+  clientConsole(2, '[SM]   Fade-out complete, now cleaning up WHILE INVISIBLE');
 
   // Clean up feedback/input styling AFTER fade-out (while opacity=0)
   // This prevents flashing during the visible transition
@@ -3337,7 +3317,7 @@ async function prepareCard() {
     // when displayReady=true fires. This prevents input field from painting after image.
     const isButtonTrial = getButtonTrial();
     Session.set('buttonTrial', isButtonTrial);
-    console.log('[SM] prepareCard: Set buttonTrial =', isButtonTrial, 'before content display');
+    clientConsole(2, '[SM] prepareCard: Set buttonTrial =', isButtonTrial, 'before content display');
 
     await newQuestionHandler();
     Session.set('cardStartTimestamp', Date.now());
@@ -3347,10 +3327,8 @@ async function prepareCard() {
 
 // TODO: this probably no longer needs to be separate from prepareCard
 async function newQuestionHandler() {
-  console.log('=== newQuestionHandler START ===');
-  console.log('[SM] newQuestionHandler called in state:', currentTrialState);
-  console.log('  #userAnswer at start:', $('#userAnswer').length, 'display:', $('#userAnswer').css('display'));
-  console.log('  Secs since unit start:', elapsedSecs());
+  clientConsole(2, '=== newQuestionHandler START ===');
+  clientConsole(2, '[SM] newQuestionHandler called in state:', currentTrialState);
 
   // Cache frequently accessed Session variables
   const experimentState = Session.get('currentExperimentState');
@@ -3360,7 +3338,7 @@ async function newQuestionHandler() {
       {'$set': {'justAdded': 0}},
       {'multi': true},
       function(err, numrecs) {
-        if (err) console.log('UDPATE ERROR:', displayify(err));
+        if (err) clientConsole(1, 'UDPATE ERROR:', displayify(err));
       },
   );
 
@@ -3370,12 +3348,7 @@ async function newQuestionHandler() {
   // buttonTrial is now set BEFORE newQuestionHandler (in prepareCard) to ensure
   // Blaze can render stimulus and input atomically when displayReady=true fires
   const isButtonTrial = Session.get('buttonTrial');
-  console.log('newQuestionHandler, isButtonTrial', isButtonTrial, 'displayReady', Session.get('displayReady'));
-
-  // Input visibility is now controlled by CSS classes in template (trial-input-hidden)
-  // Both text and button inputs are pre-rendered, Blaze conditionals control CSS class only
-  // This prevents DOM structure changes that cause input/stimulus desynchronization
-  console.log('  Input visibility controlled by CSS, buttonTrial:', isButtonTrial);
+  clientConsole(2, 'newQuestionHandler, isButtonTrial', isButtonTrial, 'displayReady', Session.get('displayReady'));
 
   if (isButtonTrial) {
     setUpButtonTrial();
@@ -3410,7 +3383,7 @@ function startQuestionTimeout() {
   if (!deliveryParams) {
     throw new Error('No delivery params');
   }
-  console.log('startQuestionTimeout deliveryParams', deliveryParams);
+  clientConsole(2, 'startQuestionTimeout deliveryParams');
 
   let delayMs = 0;
   if (getTestType() === 's' || getTestType() === 'f') { // Study
@@ -3425,8 +3398,6 @@ function startQuestionTimeout() {
   
   // We do this little shuffle of session variables so the display will update all at the same time
   const currentDisplayEngine = Session.get('currentExperimentState').currentDisplayEngine;
-
-  console.log('startQuestionTimeout, closeQuestionParts', Session.get('currentExperimentState').clozeQuestionParts);
 
   // displayReady is toggled false→true for each trial to control CSS opacity transitions
   // With CSS wrapper approach, DOM stays in place - only visibility changes via .trial-hidden class
@@ -3476,29 +3447,29 @@ function startQuestionTimeout() {
   }, 1000);
 }
 async function checkAndDisplayPrestimulus(deliveryParams, nextStageCb) {
-  console.log('[SM] checkAndDisplayPrestimulus called in state:', currentTrialState);
+  clientConsole(2, '[SM] checkAndDisplayPrestimulus called in state:', currentTrialState);
 
   const prestimulusDisplay = Session.get('currentTdfFile').tdfs.tutor.setspec.prestimulusDisplay;
   if (!prestimulusDisplay) {
-    console.log('[SM] No prestimulus display, continuing to next stage');
+    clientConsole(2, '[SM] No prestimulus display, continuing to next stage');
     await nextStageCb();
     return;
   }
 
-  console.log('[SM] Displaying prestimulus:', prestimulusDisplay);
+  clientConsole(2, '[SM] Displaying prestimulus:', prestimulusDisplay);
   Session.set('currentDisplay', {'text': prestimulusDisplay});
 
   const afterFadeIn = () => {
     const displayTime = deliveryParams.prestimulusdisplaytime;
-    console.log(`[SM] Prestimulus displayed, waiting ${displayTime}ms before continuing`);
+    clientConsole(2, `[SM] Prestimulus displayed, waiting ${displayTime}ms before continuing`);
     setTimeout(async () => {
-      console.log('[SM] Prestimulus display complete, continuing to question');
+      clientConsole(2, '[SM] Prestimulus display complete, continuing to question');
       await nextStageCb();
     }, displayTime);
   };
 
   if (shouldSkipFadeIn()) {
-    console.log('[SM] Skipping fade-in (already visible or video session)');
+    clientConsole(2, '[SM] Skipping fade-in (already visible or video session)');
     afterFadeIn();
   } else {
     beginFadeIn('Prestimulus fade-in');
@@ -3510,7 +3481,7 @@ async function checkAndDisplayPrestimulus(deliveryParams, nextStageCb) {
 }
 
 async function checkAndDisplayTwoPartQuestion(deliveryParams, currentDisplayEngine, closeQuestionParts, nextStageCb) {
-  console.log('[SM] checkAndDisplayTwoPartQuestion called in state:', currentTrialState);
+  clientConsole(2, '[SM] checkAndDisplayTwoPartQuestion called in state:', currentTrialState);
 
   Session.set('currentDisplay', currentDisplayEngine);
   Session.get('currentExperimentState').clozeQuestionParts = closeQuestionParts;
@@ -3523,9 +3494,9 @@ async function checkAndDisplayTwoPartQuestion(deliveryParams, currentDisplayEngi
     }
 
     const initialViewDelay = deliveryParams.initialview;
-    console.log(`[SM] Two-part question: waiting ${initialViewDelay}ms before showing part 2`);
+    clientConsole(2, `[SM] Two-part question: waiting ${initialViewDelay}ms before showing part 2`);
     setTimeout(() => {
-      console.log('[SM] Displaying question part 2');
+      clientConsole(2, '[SM] Displaying question part 2');
       Session.set('currentDisplay', {'text': questionPart2});
       Session.get('currentExperimentState').currentQuestionPart2 = undefined;
       redoCardImage();
@@ -3534,7 +3505,7 @@ async function checkAndDisplayTwoPartQuestion(deliveryParams, currentDisplayEngi
   };
 
   if (shouldSkipFadeIn()) {
-    console.log('[SM] Skipping fade-in (already visible or video session)');
+    clientConsole(2, '[SM] Skipping fade-in (already visible or video session)');
     handleTwoPartQuestion();
   } else {
     beginFadeIn('Question fade-in');
@@ -3552,12 +3523,12 @@ function beginQuestionAndInitiateUserInput(delayMs, deliveryParams) {
   if (currentDisplay.audioSrc) {
     const timeuntilaudio = deliveryParams.timeuntilaudio;
     setTimeout(function() {
-      console.log('playing audio: ', new Date());
+      clientConsole(2, 'playing audio: ', new Date());
       // We don't allow user input until the sound is finished playing
       playCurrentSound(function() {
         allowUserInput();
         beginMainCardTimeout(delayMs, function() {
-          console.log('stopping input after ' + delayMs + ' ms');
+          clientConsole(2, 'stopping input after ' + delayMs + ' ms');
           stopUserInput();
           handleUserInput({}, 'timeout');
         });
@@ -3567,7 +3538,7 @@ function beginQuestionAndInitiateUserInput(delayMs, deliveryParams) {
     const questionToSpeak = currentDisplay.clozeText || currentDisplay.text;
     // Only speak the prompt if the question type makes sense
     if (questionToSpeak) {
-      console.log('text to speak playing prompt: ', new Date());
+      clientConsole(2, 'text to speak playing prompt: ', new Date());
       let buttons = Session.get('buttonList');
       let buttonsToSpeak = '';
       if(buttons){
@@ -3579,7 +3550,7 @@ function beginQuestionAndInitiateUserInput(delayMs, deliveryParams) {
     }
     allowUserInput();
     beginMainCardTimeout(delayMs, function() {
-      console.log('stopping input after ' + delayMs + ' ms');
+      clientConsole(2, 'stopping input after ' + delayMs + ' ms');
       stopUserInput();
       handleUserInput({}, 'timeout');
     });
@@ -3587,9 +3558,9 @@ function beginQuestionAndInitiateUserInput(delayMs, deliveryParams) {
 }
 
 function allowUserInput() {
-  console.log('[SR] ========== allowUserInput() CALLED ==========');
-  console.log('allow user input');
-  console.log('[SM] allowUserInput called in state:', currentTrialState);
+  clientConsole(2, '[SR] ========== allowUserInput() CALLED ==========');
+  clientConsole(2, 'allow user input');
+  clientConsole(2, '[SM] allowUserInput called in state:', currentTrialState);
 
   // STATE MACHINE: Transition to AWAITING (for drill/test) or STUDY.SHOWING (for study)
   // This is called AFTER fade-in completes (via setTimeout callback chain)
@@ -3606,10 +3577,10 @@ function allowUserInput() {
   // $('#userAnswer').show(); // REMOVED - not needed with CSS wrapper approach
   $('#confirmButton').show();
 
-  console.log('[SR] About to call startRecording()...');
+  clientConsole(2, '[SR] About to call startRecording()...');
   startRecording();
-  console.log('[SR] startRecording() call completed');
-  console.log('[SR] ==========================================');
+  clientConsole(2, '[SR] startRecording() call completed');
+  clientConsole(2, '[SR] ==========================================');
 
   // Enable input and set focus immediately - no delay needed
   // DOM is ready since we're in callback chain after fade-in completes
@@ -3636,8 +3607,8 @@ function allowUserInput() {
 // loads before it and stopUserInput is erroneously executed afterwards due to timing issues
 let inputDisabled = undefined;
 function stopUserInput() {
-  console.log('stop user input');
-  console.log('[SM] stopUserInput called in state:', currentTrialState);
+  clientConsole(2, 'stop user input');
+  clientConsole(2, '[SM] stopUserInput called in state:', currentTrialState);
   // DO NOT hide #userAnswer - CSS wrapper (#trialContentWrapper) handles visibility via opacity
   // $('#userAnswer').hide(); // REMOVED - breaks input visibility on subsequent trials
   inputDisabled = true;
@@ -3647,7 +3618,7 @@ function stopUserInput() {
   // This prevents visible button state changes during fade-out, improving perceived smoothness
   // The inputDisabled flag guards against race conditions if allowUserInput() is called during this delay
   setTimeout(function() {
-    console.log('after delay, stopping user input');
+    clientConsole(2, 'after delay, stopping user input');
     // Only disable if inputDisabled is still true (allowUserInput may have set it to false)
     if (inputDisabled === true) {
       $('#userAnswer, #multipleChoiceContainer button').prop('disabled', true);
@@ -3663,10 +3634,10 @@ function speakMessageIfAudioPromptFeedbackEnabled(msg, audioPromptSource) {
   const enableAudioPromptAndFeedback = audioPromptMode && audioPromptMode != 'silent';
   let synthesis = window.speechSynthesis;
 
-  console.log('[SR] ========== speakMessageIfAudioPromptFeedbackEnabled() CALLED ==========');
-  console.log('[SR]   audioPromptSource:', audioPromptSource);
-  console.log('[SR]   audioPromptMode:', audioPromptMode);
-  console.log('[SR]   enableAudioPromptAndFeedback:', enableAudioPromptAndFeedback);
+  clientConsole(2, '[SR] ========== speakMessageIfAudioPromptFeedbackEnabled() CALLED ==========');
+  clientConsole(2, '[SR]   audioPromptSource:', audioPromptSource);
+  clientConsole(2, '[SR]   audioPromptMode:', audioPromptMode);
+  clientConsole(2, '[SR]   enableAudioPromptAndFeedback:', enableAudioPromptAndFeedback);
 
   if (enableAudioPromptAndFeedback) {
     if (audioPromptSource === audioPromptMode || audioPromptMode === 'all') {
@@ -3687,13 +3658,13 @@ function speakMessageIfAudioPromptFeedbackEnabled(msg, audioPromptSource) {
         }
         Meteor.call('makeGoogleTTSApiCall', Session.get('currentTdfId'), msg, audioPromptSpeakingRate, audioPromptVolume, audioPromptVoice, function(err, res) {
           if(err){
-            console.log('[SR]   ❌ TTS API error, NOT locking recording:', err);
+            clientConsole(2, '[SR]   ❌ TTS API error, NOT locking recording:', err);
           }
           else if(res == undefined){
-            console.log('[SR]   ❌ TTS API returned undefined, NOT locking recording');
+            clientConsole(2, '[SR]   ❌ TTS API returned undefined, NOT locking recording');
           }
           else{
-            console.log('[SR]   ✅ TTS audio received, LOCKING RECORDING');
+            clientConsole(2, '[SR]   ✅ TTS audio received, LOCKING RECORDING');
             const audioObj = new Audio('data:audio/ogg;base64,' + res)
             Session.set('recordingLocked', true);
             if (window.currentAudioObj) {
@@ -3701,62 +3672,62 @@ function speakMessageIfAudioPromptFeedbackEnabled(msg, audioPromptSource) {
             }
             window.currentAudioObj = audioObj;
             window.currentAudioObj.addEventListener('ended', (event) => {
-              console.log('[SR]   ✅ TTS audio ended, unlocking recording');
+              clientConsole(2, '[SR]   ✅ TTS audio ended, unlocking recording');
               window.currentAudioObj = undefined;
               Session.set('recordingLocked', false);
               startRecording();
             });
-            console.log('inside callback, playing audioObj:');
+            clientConsole(2, 'inside callback, playing audioObj:');
             window.currentAudioObj.play().catch((err) => {
-              console.log(err)
+              clientConsole(2, err)
               let utterance = new SpeechSynthesisUtterance(msg);
               utterance.addEventListener('end', (event) => {
-                console.log('[SR]   ✅ TTS fallback utterance ended, unlocking recording');
+                clientConsole(2, '[SR]   ✅ TTS fallback utterance ended, unlocking recording');
                 Session.set('recordingLocked', false);
                 startRecording();
               });
               utterance.addEventListener('error', (event) => {
-                console.log('[SR]   ❌ TTS fallback utterance error, unlocking recording');
-                console.log(event);
+                clientConsole(2, '[SR]   ❌ TTS fallback utterance error, unlocking recording');
+                clientConsole(2, event);
                 Session.set('recordingLocked', false);
               });
               synthesis.speak(utterance);
             });
           }
         });
-        console.log('[SR]   Providing Google TTS audio feedback (async)');
+        clientConsole(2, '[SR]   Providing Google TTS audio feedback (async)');
       } else {
-        console.log('[SR]   Text-to-Speech API key not found, using MDN Speech Synthesis');
-        console.log('[SR]   ✅ LOCKING RECORDING for MDN TTS playback');
+        clientConsole(2, '[SR]   Text-to-Speech API key not found, using MDN Speech Synthesis');
+        clientConsole(2, '[SR]   ✅ LOCKING RECORDING for MDN TTS playback');
         Session.set('recordingLocked', true);
         let utterance = new SpeechSynthesisUtterance(msg);
         utterance.addEventListener('end', (event) => {
-          console.log('[SR]   ✅ MDN TTS ended, unlocking recording');
+          clientConsole(2, '[SR]   ✅ MDN TTS ended, unlocking recording');
           Session.set('recordingLocked', false);
           startRecording();
         });
         utterance.addEventListener('error', (event) => {
-          console.log('[SR]   ❌ MDN TTS error, unlocking recording');
-          console.log(event);
+          clientConsole(2, '[SR]   ❌ MDN TTS error, unlocking recording');
+          clientConsole(2, event);
           Session.set('recordingLocked', false);
           startRecording();
         });
         synthesis.speak(utterance);
       }
     } else {
-      console.log('[SR]   Audio prompt source mismatch - not playing TTS');
+      clientConsole(2, '[SR]   Audio prompt source mismatch - not playing TTS');
     }
   } else {
-    console.log('[SR]   Audio feedback disabled');
+    clientConsole(2, '[SR]   Audio feedback disabled');
   }
-  console.log('[SR] ========================================');
+  clientConsole(2, '[SR] ========================================');
 }
 
 // Phonetic encoding using Double Metaphone algorithm (proven, industry standard)
 // Returns both primary and secondary phonetic codes for better matching
 function getPhoneticCodes(word) {
   const codes = doubleMetaphone(word.toLowerCase().trim());
-  console.log(`[SR]   Double Metaphone codes for "${word}": primary="${codes[0]}", secondary="${codes[1] || 'none'}"`);
+  clientConsole(2, `[SR]   Double Metaphone codes for "${word}": primary="${codes[0]}", secondary="${codes[1] || 'none'}"`);
   return codes; // [primary, secondary]
 }
 
@@ -3793,7 +3764,7 @@ function buildPhoneticIndex(grammarList) {
   }
 
   const elapsed = performance.now() - startTime;
-  console.log(`[SR] Built phonetic index for ${grammarList.length} words in ${elapsed.toFixed(2)}ms (${index.size} unique phonetic codes)`);
+  clientConsole(2, `[SR] Built phonetic index for ${grammarList.length} words in ${elapsed.toFixed(2)}ms (${index.size} unique phonetic codes)`);
   return index;
 }
 
@@ -3863,17 +3834,17 @@ function filterPhoneticConflicts(spokenWord, grammarList) {
       .map(c => c.word)
   );
 
-  console.log(`[SR]   Phonetic conflicts for "${spokenWord}": keeping ${Array.from(keepWords).join(', ')}`)
+  clientConsole(2, `[SR]   Phonetic conflicts for "${spokenWord}": keeping ${Array.from(keepWords).join(', ')}`)
 
   const filtered = grammarList.filter(word => {
     const shouldKeep = !conflicts.some(c => c.word === word) || keepWords.has(word);
     if (!shouldKeep) {
-      console.log(`[SR]   Filtering out phonetic conflict: "${word}" (keeping closer length matches)`);
+      clientConsole(2, `[SR]   Filtering out phonetic conflict: "${word}" (keeping closer length matches)`);
     }
     return shouldKeep;
   });
 
-  console.log(`[SR] Filtered grammar: ${grammarList.length} → ${filtered.length} words (removed ${grammarList.length - filtered.length} conflicts)`);
+  clientConsole(2, `[SR] Filtered grammar: ${grammarList.length} → ${filtered.length} words (removed ${grammarList.length - filtered.length} conflicts)`);
   return filtered;
 }
 
@@ -3885,7 +3856,7 @@ function findPhoneticMatch(spokenWord, grammarList, phoneticIndex = null) {
 
   // Rebuild index if we filtered the grammar
   if (phoneticIndex && filteredGrammar.length < grammarList.length) {
-    console.log(`[SR] Rebuilding phonetic index for filtered grammar`);
+    clientConsole(2, `[SR] Rebuilding phonetic index for filtered grammar`);
     phoneticIndex = buildPhoneticIndex(filteredGrammar);
   }
 
@@ -3898,7 +3869,7 @@ function findPhoneticMatch(spokenWord, grammarList, phoneticIndex = null) {
   // If spoken word has spaces, also try without spaces (handles "care about" → "kiribati")
   if (spokenWord.includes(' ')) {
     const noSpaces = spokenWord.replace(/\s+/g, '');
-    console.log(`[SR] Retrying phonetic match without spaces: "${noSpaces}"`);
+    clientConsole(2, `[SR] Retrying phonetic match without spaces: "${noSpaces}"`);
     return tryPhoneticMatch(noSpaces, filteredGrammar, phoneticIndex);
   }
 
@@ -3909,7 +3880,7 @@ function findPhoneticMatch(spokenWord, grammarList, phoneticIndex = null) {
 function tryPhoneticMatch(spokenWord, grammarList, phoneticIndex = null) {
   const [spokenPrimary, spokenSecondary] = getPhoneticCodes(spokenWord);
 
-  console.log(`[SR] Looking for phonetic match for "${spokenWord}"...`);
+  clientConsole(2, `[SR] Looking for phonetic match for "${spokenWord}"...`);
 
   // Additional validation: words must be similar in length to avoid false matches
   // (e.g., "mali" shouldn't match "malawi", "akrotiri" shouldn't match "ecuador")
@@ -3921,7 +3892,7 @@ function tryPhoneticMatch(spokenWord, grammarList, phoneticIndex = null) {
   // Use phonetic index for O(1) lookup if available
   let candidateEntries = [];
   if (phoneticIndex) {
-    console.log(`[SR] Using pre-computed phonetic index (O(1) lookup)`);
+    clientConsole(2, `[SR] Using pre-computed phonetic index (O(1) lookup)`);
     // Get all words that match the spoken phonetic codes EXACTLY
     const primaryMatches = phoneticIndex.get(spokenPrimary) || [];
     const secondaryMatches = spokenSecondary ? (phoneticIndex.get(spokenSecondary) || []) : [];
@@ -3943,10 +3914,10 @@ function tryPhoneticMatch(spokenWord, grammarList, phoneticIndex = null) {
       }
     }
 
-    console.log(`[SR] Found ${candidateEntries.length} candidate entries from phonetic index`);
+    clientConsole(2, `[SR] Found ${candidateEntries.length} candidate entries from phonetic index`);
   } else {
     // Fallback: convert grammarList to entries format for O(n) search
-    console.log(`[SR] No phonetic index, using O(n) search`);
+    clientConsole(2, `[SR] No phonetic index, using O(n) search`);
     candidateEntries = grammarList.map(word => ({
       word: word,
       length: word.length,
@@ -3974,7 +3945,7 @@ function tryPhoneticMatch(spokenWord, grammarList, phoneticIndex = null) {
     // Reject if EITHER condition fails
     if (lengthDiff > maxAbsoluteDiff || proportionalDiff > maxProportionalDiff) {
       if (lengthDiff <= maxAbsoluteDiff + 1) { // Log near-misses for debugging
-        console.log(`[SR]   Rejected "${grammarWord}": length diff ${lengthDiff} (${(proportionalDiff * 100).toFixed(0)}% of shorter word)`);
+        clientConsole(2, `[SR]   Rejected "${grammarWord}": length diff ${lengthDiff} (${(proportionalDiff * 100).toFixed(0)}% of shorter word)`);
       }
       continue;
     }
@@ -4001,7 +3972,7 @@ function tryPhoneticMatch(spokenWord, grammarList, phoneticIndex = null) {
       if (lengthDiff < bestMatchScore) {
         bestMatch = grammarWord;
         bestMatchScore = lengthDiff;
-        console.log(`[SR] ✅ Exact phonetic match found: "${spokenWord}" → "${grammarWord}" (length diff: ${lengthDiff})`);
+        clientConsole(2, `[SR] ✅ Exact phonetic match found: "${spokenWord}" → "${grammarWord}" (length diff: ${lengthDiff})`);
       }
       // If length diff is 0 or 1, accept immediately (perfect homophones)
       if (lengthDiff <= 1) {
@@ -4033,18 +4004,18 @@ function tryPhoneticMatch(spokenWord, grammarList, phoneticIndex = null) {
         if (fuzzyScore < bestMatchScore) {
           bestMatch = grammarWord;
           bestMatchScore = fuzzyScore;
-          console.log(`[SR] ✅ Fuzzy phonetic match found: "${spokenWord}" → "${grammarWord}" (phonetic edit dist: ${phoneticEditDist}, length diff: ${lengthDiff}, code length: ${minCodeLength})`);
+          clientConsole(2, `[SR] ✅ Fuzzy phonetic match found: "${spokenWord}" → "${grammarWord}" (phonetic edit dist: ${phoneticEditDist}, length diff: ${lengthDiff}, code length: ${minCodeLength})`);
         }
       }
     }
   }
 
   if (bestMatch) {
-    console.log(`[SR] ✅ Best phonetic match: "${spokenWord}" → "${bestMatch}"`);
+    clientConsole(2, `[SR] ✅ Best phonetic match: "${spokenWord}" → "${bestMatch}"`);
     return bestMatch;
   }
 
-  console.log(`[SR] No phonetic match found`);
+  clientConsole(2, `[SR] No phonetic match found`);
   return null;
 }
 
@@ -4083,7 +4054,7 @@ async function processLINEAR16(data) {
   if (resetMainCardTimeout && timeoutFunc && !inputDisabled) {
     resetMainCardTimeout(); // Give ourselves a bit more time for the speech api to return results
   } else {
-    console.log('[SR] not resetting during processLINEAR16');
+    clientConsole(2, '[SR] not resetting during processLINEAR16');
   }
   recorder.clear();
   const userAnswer = $('#forceCorrectionEntry').is(':visible') ?
@@ -4096,7 +4067,7 @@ async function processLINEAR16(data) {
     const setSpec = Session.get('currentTdfFile').tdfs.tutor.setspec;
     let speechRecognitionLanguage = setSpec.speechRecognitionLanguage;
     if (!speechRecognitionLanguage) {
-      console.log('[SR] no speechRecognitionLanguage in set spec, defaulting to en-US');
+      clientConsole(2, '[SR] no speechRecognitionLanguage in set spec, defaulting to en-US');
       speechRecognitionLanguage = 'en-US';
     } else {
       speechRecognitionLanguage = speechRecognitionLanguage[0];
@@ -4119,11 +4090,11 @@ async function processLINEAR16(data) {
       }
     }
 
-    console.log('[SR] ========== PHRASE HINTS DEBUG ==========');
-    console.log('[SR] Total phrase hints:', phraseHints.length);
+    clientConsole(2, '[SR] ========== PHRASE HINTS DEBUG ==========');
+    clientConsole(2, '[SR] Total phrase hints:', phraseHints.length);
     // Phrase hints list omitted from logs (use [SR] filter to see count only)
-    console.log('[SR] Sending audio to Google Speech API...');
-    console.log('[SR] ==========================================');
+    clientConsole(2, '[SR] Sending audio to Google Speech API...');
+    clientConsole(2, '[SR] ==========================================');
     const request = generateRequestJSON(sampleRate, speechRecognitionLanguage, phraseHints, data);
 
     let answerGrammar = [];
@@ -4141,7 +4112,7 @@ async function processLINEAR16(data) {
       answerGrammar.push('skip');
     }
 
-    console.log('[SR] Answer grammar count (with skip):', answerGrammar.length);
+    clientConsole(2, '[SR] Answer grammar count (with skip):', answerGrammar.length);
     let tdfSpeechAPIKey;
     if(Session.get('useEmbeddedAPIKeys')){
       tdfSpeechAPIKey = await meteorCallAsync('getTdfSpeechAPIKey', Session.get('currentTdfId'));
@@ -4150,16 +4121,16 @@ async function processLINEAR16(data) {
     }
     // Make the actual call to the google speech api with the audio data for transcription
     if (tdfSpeechAPIKey && tdfSpeechAPIKey != '') {
-      console.log('[SR] Using TDF-embedded API key');
+      clientConsole(2, '[SR] Using TDF-embedded API key');
       Meteor.call('makeGoogleSpeechAPICall', Session.get('currentTdfId'), "", request, answerGrammar, (err, res) => speechAPICallback(err, res));
     // If we don't have a tdf provided speech api key load up the user key
     // NOTE: we shouldn't be able to get here if there is no user key
     } else {
-      console.log('[SR] Using user-provided API key');
+      clientConsole(2, '[SR] Using user-provided API key');
       Meteor.call('makeGoogleSpeechAPICall', Session.get('currentTdfId'), Session.get('speechAPIKey'), request, answerGrammar, (err, res) => speechAPICallback(err, res));
     }
   } else {
-    console.log('[SR] processLINEAR16 userAnswer not defined');
+    clientConsole(2, '[SR] processLINEAR16 userAnswer not defined');
   }
 }
 
@@ -4171,12 +4142,12 @@ function speechAPICallback(err, data){
   if (err) {
     console.error('[SR] Meteor method error:', err);
     const errorMsg = err.reason || err.message || 'Unknown error';
-    console.log('[SR] Error details:', errorMsg);
+    clientConsole(2, '[SR] Error details:', errorMsg);
     answerGrammar = [];
     response = {}; // Empty response to trigger "NO TRANSCRIPT/SILENCE" path
   } else if (data) {
     [answerGrammar, response] = data;
-    console.log('[SR] Speech API response received:', JSON.stringify(response).substring(0, 200));
+    clientConsole(2, '[SR] Speech API response received:', JSON.stringify(response).substring(0, 200));
   }
 
   // Build phonetic index for efficient matching (only if we have grammar to check)
@@ -4201,17 +4172,17 @@ function speechAPICallback(err, data){
     }
   }
 
-  console.log('[SR] ignoreOutOfGrammarResponses setting:', ignoreOutOfGrammarResponses);
+  clientConsole(2, '[SR] ignoreOutOfGrammarResponses setting:', ignoreOutOfGrammarResponses);
   const speechOutOfGrammarFeedback = 'Please try again or press enter or say skip';
   // Session.get("speechOutOfGrammarFeedback");//TODO: change this in tdfs and not hardcoded
   let ignoredOrSilent = false;
 
   // Check for Google API errors (returned in response.error field)
   if (response && response.error) {
-    console.log('[SR] Google Speech API error object:', response.error);
+    clientConsole(2, '[SR] Google Speech API error object:', response.error);
     const errorCode = response.error.code;
     const errorMessage = response.error.message || '';
-    console.log(`[SR] Google API error - Code: ${errorCode}, Message: ${errorMessage}`);
+    clientConsole(2, `[SR] Google API error - Code: ${errorCode}, Message: ${errorMessage}`);
 
     if (errorCode === 403 || errorMessage.toLowerCase().includes('api key')) {
       transcript = 'Invalid API key. Please check your settings.';
@@ -4240,20 +4211,20 @@ function speechAPICallback(err, data){
     }
 
     if (alternatives.length === 0) {
-      console.log('[SR] NO VALID ALTERNATIVES found in any result');
+      clientConsole(2, '[SR] NO VALID ALTERNATIVES found in any result');
       transcript = 'Silence detected';
       ignoredOrSilent = true;
     } else {
 
-    console.log('[SR] ========== ALTERNATIVES RECEIVED ==========');
-    console.log('[SR] Total alternatives:', alternatives.length);
+    clientConsole(2, '[SR] ========== ALTERNATIVES RECEIVED ==========');
+    clientConsole(2, '[SR] Total alternatives:', alternatives.length);
     for (let i = 0; i < alternatives.length; i++) {
       const alt = alternatives[i];
       if (alt['transcript']) {
-        console.log(`[SR] Alt ${i + 1}: "${alt['transcript']}" (confidence: ${alt['confidence'] || 'N/A'})`);
+        clientConsole(2, `[SR] Alt ${i + 1}: "${alt['transcript']}" (confidence: ${alt['confidence'] || 'N/A'})`);
       }
     }
-    console.log('[SR] ==========================================');
+    clientConsole(2, '[SR] ==========================================');
 
     // Try to find a grammar match in alternatives (best strategy)
     let foundGrammarMatch = false;
@@ -4266,7 +4237,7 @@ function speechAPICallback(err, data){
           if (answerGrammar.indexOf(altTranscript) !== -1 || altTranscript === 'skip') {
             transcript = altTranscript;
             foundGrammarMatch = true;
-            console.log(`[SR] ✅ FOUND EXACT GRAMMAR MATCH in alternative ${i + 1}: "${transcript}"`);
+            clientConsole(2, `[SR] ✅ FOUND EXACT GRAMMAR MATCH in alternative ${i + 1}: "${transcript}"`);
             break;
           }
         }
@@ -4283,10 +4254,10 @@ function speechAPICallback(err, data){
           if (phoneticMatch) {
             transcript = phoneticMatch;
             foundGrammarMatch = true;
-            console.log(`[SR] ✅ FOUND PHONETIC MATCH: "${bestAlternative}" → "${transcript}"`);
+            clientConsole(2, `[SR] ✅ FOUND PHONETIC MATCH: "${bestAlternative}" → "${transcript}"`);
           }
         } else {
-          console.log(`[SR] Skipping phonetic match - word too short: "${bestAlternative}" (${bestAlternative.length} chars)`);
+          clientConsole(2, `[SR] Skipping phonetic match - word too short: "${bestAlternative}" (${bestAlternative.length} chars)`);
         }
       }
     }
@@ -4297,39 +4268,39 @@ function speechAPICallback(err, data){
 
       // Check if transcript exists (Google sometimes returns empty alternative objects)
       if (!firstAlternative['transcript']) {
-        console.log('[SR] NO TRANSCRIPT in first alternative (empty object)');
+        clientConsole(2, '[SR] NO TRANSCRIPT in first alternative (empty object)');
         transcript = 'Silence detected';
         ignoredOrSilent = true;
       } else {
         transcript = firstAlternative['transcript'].toLowerCase();
-        console.log('[SR] No grammar match found, using first alternative: "' + transcript + '"');
+        clientConsole(2, '[SR] No grammar match found, using first alternative: "' + transcript + '"');
       }
     }
 
     // Grammar checking (will only reject if no grammar match was found in alternatives)
     if (ignoreOutOfGrammarResponses && !ignoredOrSilent && !foundGrammarMatch) {
-      console.log('[SR] Checking grammar - transcript:', transcript);
-      console.log('[SR] Valid answers count:', answerGrammar.length);
+      clientConsole(2, '[SR] Checking grammar - transcript:', transcript);
+      clientConsole(2, '[SR] Valid answers count:', answerGrammar.length);
       if (transcript == 'enter') {
-        console.log('[SR] Transcript is "enter" - allowing');
+        clientConsole(2, '[SR] Transcript is "enter" - allowing');
         ignoredOrSilent = false;
       } else if (answerGrammar.indexOf(transcript) == -1) {
-        console.log('[SR] ❌ ANSWER OUT OF GRAMMAR, IGNORING. Transcript "' + transcript + '" not in grammar list');
+        clientConsole(2, '[SR] ❌ ANSWER OUT OF GRAMMAR, IGNORING. Transcript "' + transcript + '" not in grammar list');
         transcript = speechOutOfGrammarFeedback;
         ignoredOrSilent = true;
       } else {
-        console.log('[SR] ✅ Answer IN GRAMMAR - accepting');
+        clientConsole(2, '[SR] ✅ Answer IN GRAMMAR - accepting');
       }
     } else if (!ignoredOrSilent) {
       if (foundGrammarMatch) {
-        console.log('[SR] ✅ Using grammar match from alternatives');
+        clientConsole(2, '[SR] ✅ Using grammar match from alternatives');
       } else {
-        console.log('[SR] ignoreOutOfGrammarResponses is FALSE - accepting all transcripts');
+        clientConsole(2, '[SR] ignoreOutOfGrammarResponses is FALSE - accepting all transcripts');
       }
     }
     } // Close the "if (!alternatives)" else block
   } else {
-    console.log('[SR] NO TRANSCRIPT/SILENCE - No valid results in response');
+    clientConsole(2, '[SR] NO TRANSCRIPT/SILENCE - No valid results in response');
     transcript = 'Silence detected';
     ignoredOrSilent = true;
   }
@@ -4338,7 +4309,7 @@ function speechAPICallback(err, data){
   if (getButtonTrial()) {
     userAnswer = $('[verbalChoice=\'' + transcript + '\']')[0];
     if (!userAnswer) {
-      console.log('Choice couldn\'t be found');
+      clientConsole(2, 'Choice couldn\'t be found');
       ignoredOrSilent = true;
     }
   } else if (DialogueUtils.isUserInDialogueLoop()) {
@@ -4363,7 +4334,7 @@ function speechAPICallback(err, data){
     ignoredOrSilent = false; // Force out of a silence loop if we've tried enough
     const transcriptionMsg = ' transcription attempts which is over autostopTranscriptionAttemptLimit, \
         forcing incorrect answer to move things along.';
-    console.log(speechTranscriptionTimeoutsSeen + transcriptionMsg);
+    clientConsole(2, speechTranscriptionTimeoutsSeen + transcriptionMsg);
     // Dummy up some data so we don't fail downstream
     if (getButtonTrial()) {
       userAnswer = {'answer': {'name': 'a'}};
@@ -4391,7 +4362,7 @@ function speechAPICallback(err, data){
       } else {
         const answer = DialogueUtils.getDialogueUserAnswerValue();
         const dialogueContext = DialogueUtils.updateDialogueState(answer);
-        console.log('getDialogFeedbackForAnswer2', dialogueContext);
+        clientConsole(2, 'getDialogFeedbackForAnswer2', dialogueContext);
         Meteor.call('getDialogFeedbackForAnswer', dialogueContext, dialogueLoop);
       }
     } else {
@@ -4430,7 +4401,7 @@ function generateRequestJSON(sampleRate, speechRecognitionLanguage, phraseHints,
   };
 
   // Request config with phrase hints omitted from logs (too large)
-  console.log('[SR] Request config: encoding:', request.config.encoding,
+  clientConsole(2, '[SR] Request config: encoding:', request.config.encoding,
               'sampleRate:', request.config.sampleRateHertz,
               'language:', request.config.languageCode,
               'maxAlternatives:', request.config.maxAlternatives,
@@ -4453,7 +4424,7 @@ function startUserMedia(stream) {
   const tracks = stream.getTracks();
   selectedInputDevice = tracks[0].getSettings().deviceId;
   pollMediaDevicesInterval = Meteor.setInterval(pollMediaDevices, 2000);
-  console.log('START USER MEDIA');
+  clientConsole(2, 'START USER MEDIA');
   const input = audioContext.createMediaStreamSource(stream);
   window.audioContext = audioContext;
   streamSource = input;
@@ -4462,7 +4433,7 @@ function startUserMedia(stream) {
   // Capture the sampling rate for later use in google speech api as input
   Session.set('sampleRate', input.context.sampleRate);
   const audioRecorderConfig = {errorCallback: function(x) {
-    console.log('Error from recorder: ' + x);
+    clientConsole(2, 'Error from recorder: ' + x);
   }};
   // eslint-disable-next-line no-undef
   recorder = new Recorder(input, audioRecorderConfig);
@@ -4481,32 +4452,32 @@ function startUserMedia(stream) {
     history: 5,  // Silence detection: needs 5 consecutive silent samples to stop (5 * 50ms = 250ms)
     smoothing: 0.1  // Smoothing time constant for audio analysis (reduces noise spikes)
   };
-  console.log('[SR] Initializing Hark with options:', harkOptions);
+  clientConsole(2, '[SR] Initializing Hark with options:', harkOptions);
   speechEvents = hark(stream, harkOptions);
 
   let recordingStartTime = null;
 
   // Volume monitoring removed - floods console
   // speechEvents.on('volume_change', function(volume, threshold) {
-  //   console.log('[SR] Volume:', volume.toFixed(2), 'dB | Threshold:', threshold, 'dB');
+  //   clientConsole(2, '[SR] Volume:', volume.toFixed(2), 'dB | Threshold:', threshold, 'dB');
   // });
 
   speechEvents.on('speaking', function() {
     recordingStartTime = Date.now(); // Track when voice starts
     if (!Session.get('recording')) {
-      console.log('[SR] NOT RECORDING, VOICE START');
+      clientConsole(2, '[SR] NOT RECORDING, VOICE START');
       return;
     } else {
-      console.log('[SR] VOICE START');
+      clientConsole(2, '[SR] VOICE START');
       if (resetMainCardTimeout && timeoutFunc) {
         if (Session.get('recording')) {
-          console.log('[SR] voice_start resetMainCardTimeout');
+          clientConsole(2, '[SR] voice_start resetMainCardTimeout');
           resetMainCardTimeout();
         } else {
-          console.log('[SR] NOT RECORDING');
+          clientConsole(2, '[SR] NOT RECORDING');
         }
       } else {
-        console.log('[SR] RESETMAINCARDTIMEOUT NOT DEFINED');
+        clientConsole(2, '[SR] RESETMAINCARDTIMEOUT NOT DEFINED');
       }
     }
   });
@@ -4515,28 +4486,28 @@ function startUserMedia(stream) {
     if (!Session.get('recording') || Session.get('pausedLocks')>0) {
       if (document.location.pathname != '/card' && document.location.pathname != '/instructions') {
         leavePage(function() {
-          console.log('[SR] cleaning up page after nav away from card, voice_stop');
+          clientConsole(2, '[SR] cleaning up page after nav away from card, voice_stop');
         });
         return;
       } else {
-        console.log('[SR] NOT RECORDING, VOICE STOP');
+        clientConsole(2, '[SR] NOT RECORDING, VOICE STOP');
         return;
       }
     } else {
       // CRITICAL: Only process voice stop if voice actually started
       if (!recordingStartTime) {
-        console.log('[SR] VOICE STOP IGNORED - voice never started (speaking event never fired)');
+        clientConsole(2, '[SR] VOICE STOP IGNORED - voice never started (speaking event never fired)');
         return;
       }
 
       // Prevent stopping too quickly if voice never started properly
       const timeSinceStart = Date.now() - recordingStartTime;
       if (timeSinceStart < 200) {
-        console.log(`[SR] VOICE STOP TOO QUICK (${timeSinceStart}ms) - ignoring`);
+        clientConsole(2, `[SR] VOICE STOP TOO QUICK (${timeSinceStart}ms) - ignoring`);
         return;
       }
 
-      console.log(`[SR] VOICE STOP (after ${timeSinceStart}ms)`);
+      clientConsole(2, `[SR] VOICE STOP (after ${timeSinceStart}ms)`);
       recorder.stop();
       Session.set('recording', false);
       recorder.exportToProcessCallback();
@@ -4544,40 +4515,40 @@ function startUserMedia(stream) {
     }
   });
 
-  console.log('[SR] Audio recorder ready');
+  clientConsole(2, '[SR] Audio recorder ready');
   cardStart();
 }
 
 function startRecording() {
-  console.log('[SR] ========== startRecording() CALLED ==========');
-  console.log('[SR] Conditions check:');
-  console.log('[SR]   recorder exists:', !!recorder);
-  console.log('[SR]   recordingLocked:', Session.get('recordingLocked'));
-  console.log('[SR]   audioInputMode:', Meteor.user()?.audioInputMode);
-  console.log('[SR]   audioPromptMode:', Meteor.user()?.audioPromptMode);
+  clientConsole(2, '[SR] ========== startRecording() CALLED ==========');
+  clientConsole(2, '[SR] Conditions check:');
+  clientConsole(2, '[SR]   recorder exists:', !!recorder);
+  clientConsole(2, '[SR]   recordingLocked:', Session.get('recordingLocked'));
+  clientConsole(2, '[SR]   audioInputMode:', Meteor.user()?.audioInputMode);
+  clientConsole(2, '[SR]   audioPromptMode:', Meteor.user()?.audioPromptMode);
 
   if (recorder && !Session.get('recordingLocked') && Meteor.user().audioInputMode) {
     Session.set('recording', true);
     recorder.record();
-    console.log('[SR] RECORDING START');
-    console.log('[SR]   recorder.recording:', recorder.recording);
+    clientConsole(2, '[SR] RECORDING START');
+    clientConsole(2, '[SR]   recorder.recording:', recorder.recording);
   } else {
-    console.log('[SR] ❌ RECORDING BLOCKED:');
-    if (!recorder) console.log('[SR]     - NO RECORDER');
-    if (Session.get('recordingLocked')) console.log('[SR]     - RECORDING LOCKED (TTS audio likely playing)');
-    if (!Meteor.user()?.audioInputMode) console.log('[SR]     - AUDIO INPUT MODE OFF');
+    clientConsole(2, '[SR] ❌ RECORDING BLOCKED:');
+    if (!recorder) clientConsole(2, '[SR]     - NO RECORDER');
+    if (Session.get('recordingLocked')) clientConsole(2, '[SR]     - RECORDING LOCKED (TTS audio likely playing)');
+    if (!Meteor.user()?.audioInputMode) clientConsole(2, '[SR]     - AUDIO INPUT MODE OFF');
   }
-  console.log('[SR] ==========================================');
+  clientConsole(2, '[SR] ==========================================');
 }
 
 function stopRecording() {
-  console.log('[SR] stopRecording', recorder, Session.get('recording'));
+  clientConsole(2, '[SR] stopRecording', recorder, Session.get('recording'));
   if (recorder && Session.get('recording')) {
     recorder.stop();
     Session.set('recording', false);
 
     recorder.clear();
-    console.log('[SR] RECORDING END');
+    clientConsole(2, '[SR] RECORDING END');
   }
 }
 
@@ -4585,7 +4556,7 @@ function stopRecording() {
 
 async function getExperimentState() {
   let curExperimentState = await meteorCallAsync('getExperimentState', Meteor.userId(), Session.get('currentRootTdfId'));
-  console.log('getExperimentState:', curExperimentState);
+  clientConsole(2, 'getExperimentState:', curExperimentState);
   Session.set('currentExperimentState', curExperimentState);
   return curExperimentState || {};
 }
@@ -4593,7 +4564,7 @@ async function getExperimentState() {
 async function updateExperimentState(newState, codeCallLocation, unitEngineOverride = {}) {
   let curExperimentState = Session.get('currentExperimentState') || await getExperimentState();
   newState.lastActionTimeStamp = Date.now();
-  console.log('currentExperimentState:', curExperimentState);
+  clientConsole(2, 'currentExperimentState:', curExperimentState);
   if (unitEngineOverride && Object.keys(unitEngineOverride).length > 0)
     curExperimentState = unitEngineOverride;
   if (curExperimentState.currentTdfId === undefined || newState.currentTdfId === undefined) {
@@ -4606,7 +4577,7 @@ async function updateExperimentState(newState, codeCallLocation, unitEngineOverr
     curExperimentState = Object.assign(JSON.parse(JSON.stringify(curExperimentState)), newState);
     Meteor.call('updateExperimentState', curExperimentState, curExperimentState.id);
   }
-  console.log('updateExperimentState', codeCallLocation, '\nnew:', curExperimentState);
+  clientConsole(2, 'updateExperimentState', codeCallLocation, '\nnew:', curExperimentState);
   Session.set('currentExperimentState', curExperimentState);
   return curExperimentState.currentTdfId;
 }
@@ -4620,12 +4591,12 @@ async function updateExperimentState(newState, codeCallLocation, unitEngineOverr
 // before continuing to resume the session
 async function resumeFromComponentState() {
   if (Session.get('inResume')) {
-    console.log('RESUME DENIED - already running in resume');
+    clientConsole(2, 'RESUME DENIED - already running in resume');
     return;
   }
   Session.set('inResume', true);
 
-  console.log('Resuming from previous componentState info (if any)');
+  clientConsole(2, 'Resuming from previous componentState info (if any)');
 
   // Clear any previous permutation and/or timeout call
   timeoutsSeen = 0;
@@ -4648,7 +4619,7 @@ async function resumeFromComponentState() {
   let curTdf = rootTDFBoxed;
   let rootTDF = rootTDFBoxed.content;
   if (!rootTDF) {
-    console.log('PANIC: Unable to load the root TDF for learning', Session.get('currentRootTdfId'));
+    clientConsole(2, 'PANIC: Unable to load the root TDF for learning', Session.get('currentRootTdfId'));
     alert('Unfortunately, something is broken and this lesson cannot continue');
     leavePage('/profile');
     return;
@@ -4662,24 +4633,24 @@ async function resumeFromComponentState() {
 
   // We must always check for experiment condition
   if (needExpCondition) {
-    console.log('Experimental condition is required: searching');
+    clientConsole(2, 'Experimental condition is required: searching');
     const prevCondition = curExperimentState.conditionTdfId;
 
     let conditionTdfId = null;
 
     if (prevCondition) {
       // Use previous condition and log a notification that we did so
-      console.log('Found previous experimental condition: using that');
+      clientConsole(2, 'Found previous experimental condition: using that');
       conditionTdfId = prevCondition;
     } else {
       if(!setspec.loadbalancing){
         // Select condition and save it
-        console.log('No previous experimental condition: Selecting from ' + setspec.condition.length);
+        clientConsole(2, 'No previous experimental condition: Selecting from ' + setspec.condition.length);
         const randomConditionFileName =  _.sample(setspec.condition)
         conditionTdfId = Tdfs.findOne({"content.fileName": randomConditionFileName})._id;
         newExperimentState.conditionTdfId = conditionTdfId;
         newExperimentState.conditionNote = 'Selected from ' + _.display(setspec.condition.length) + ' conditions';
-        console.log('Exp Condition', conditionTdfId, newExperimentState.conditionNote);
+        clientConsole(2, 'Exp Condition', conditionTdfId, newExperimentState.conditionNote);
       } else {
         conditionCounts = rootTDFBoxed.conditionCounts;
         if(setspec.loadbalancing == "max"){
@@ -4723,9 +4694,9 @@ async function resumeFromComponentState() {
           const randomConditionFileName =  _.sample(minConditions)
           conditionTdf = Tdfs.findOne({"content.fileName": randomConditionFileName});
           conditionTdfId = conditionTdf._id;
-          console.log('conditionTdf, conditionTdfId', conditionTdf, conditionTdf._id);
+          clientConsole(2, 'conditionTdf, conditionTdfId', conditionTdf, conditionTdf._id);
       } else {
-        console.log('Invalid loadbalancing parameter');
+        clientConsole(2, 'Invalid loadbalancing parameter');
         alert('Unfortunately, something is broken and this lesson cannot continue');
         leavePage('/profile');
         return;
@@ -4753,7 +4724,7 @@ async function resumeFromComponentState() {
   }
 
     if (!conditionTdfId) {
-      console.log('No experimental condition could be selected!');
+      clientConsole(2, 'No experimental condition could be selected!');
       alert('Unfortunately, something is broken and this lesson cannot continue');
       leavePage('/profile');
       return;
@@ -4769,7 +4740,7 @@ async function resumeFromComponentState() {
     // Also need to read new stimulus file (and note that we allow an exception
     // to kill us if the current tdf is broken and has no stimulus file)
     Session.set('currentStimuliSetId', curTdf.stimuliSetId);
-    console.log('condition stimuliSetId', curTdf);
+    clientConsole(2, 'condition stimuliSetId', curTdf);
   } else {
     //if currentTdfFile is not set, we are resuming from a previous state and need to set it
     if(!Session.get('currentTdfFile')){
@@ -4780,7 +4751,7 @@ async function resumeFromComponentState() {
     } 
     
     // Just notify that we're skipping
-    console.log('No Experimental condition is required: continuing', rootTDFBoxed);
+    clientConsole(2, 'No Experimental condition is required: continuing', rootTDFBoxed);
   }
 
   if(curTdf.content.tdfs.tutor.setspec.unitTemplate){
@@ -4794,7 +4765,7 @@ async function resumeFromComponentState() {
       // Also need to read new stimulus file (and note that we allow an exception
       // to kill us if the current tdf is broken and has no stimulus file)
       Session.set('currentStimuliSetId', curTdf.stimuliSetId);
-      console.log('condition stimuliSetId', curTdf);
+      clientConsole(2, 'condition stimuliSetId', curTdf);
     }
   }
 
@@ -4811,24 +4782,24 @@ async function resumeFromComponentState() {
   // that the xcond parameter used for selecting from multiple deliveryParms's
   // is to be system assigned (as opposed to URL-specified)
   if (setspec.randomizedDelivery && setspec.randomizedDelivery.length) {
-    console.log('xcond for delivery params is sys assigned: searching');
+    clientConsole(2, 'xcond for delivery params is sys assigned: searching');
     const prevExperimentXCond = curExperimentState.experimentXCond;
 
     let experimentXCond;
 
     if (prevExperimentXCond) {
       // Found it!
-      console.log('Found previous xcond for delivery');
+      clientConsole(2, 'Found previous xcond for delivery');
       experimentXCond = prevExperimentXCond;
     } else {
       // Not present - we need to select one
-      console.log('NO previous xcond for delivery - selecting one');
+      clientConsole(2, 'NO previous xcond for delivery - selecting one');
       const xcondCount = _.intval(_.first(setspec.randomizedDelivery));
       experimentXCond = Math.floor(Math.random() * xcondCount);
       newExperimentState.experimentXCond = experimentXCond;
     }
 
-    console.log('Setting XCond from sys-selection', experimentXCond);
+    clientConsole(2, 'Setting XCond from sys-selection', experimentXCond);
     Session.set('experimentXCond', experimentXCond);
   }
 
@@ -4848,18 +4819,18 @@ async function resumeFromComponentState() {
     const shuffles = setSpec.shuffleclusters ? setSpec.shuffleclusters.trim().split(" ") : [''];
     const swaps = setSpec.swapclusters ? setSpec.swapclusters.trim().split(" ") : [''];
     clusterMapping = [];
-    console.log('shuffles.length', shuffles.length);
-    console.log('swaps.length', swaps.length);
+    clientConsole(2, 'shuffles.length', shuffles.length);
+    clientConsole(2, 'swaps.length', swaps.length);
     clusterMapping = createStimClusterMapping(stimCount, shuffles || [], swaps || [], clusterMapping)
     newExperimentState.clusterMapping = clusterMapping;
-    console.log('Cluster mapping created', clusterMapping);
+    clientConsole(2, 'Cluster mapping created', clusterMapping);
   } else {
     // Found the cluster mapping record - extract the embedded mapping
-    console.log('Cluster mapping found', clusterMapping);
+    clientConsole(2, 'Cluster mapping found', clusterMapping);
   }
 
   if (!clusterMapping || !clusterMapping.length || clusterMapping.length !== stimCount) {
-    console.log('Invalid cluster mapping', stimCount, clusterMapping);
+    clientConsole(2, 'Invalid cluster mapping', stimCount, clusterMapping);
     throw new Error('The cluster mapping is invalid - can not continue');
   }
   // Go ahead and save the cluster mapping we found/created
@@ -4882,12 +4853,12 @@ async function resumeFromComponentState() {
   const curTdfUnit = curTdf.content.tdfs.tutor.unit[Session.get('currentUnitNumber')];
   if (curTdfUnit.videosession) { 
     Session.set('isVideoSession', true)
-    console.log('video type questions detected, pre-loading video');
+    clientConsole(2, 'video type questions detected, pre-loading video');
     preloadVideos();
   } else
     Session.set('isVideoSession', false)
   Session.set('currentTdfUnit', curTdfUnit);
-  console.log('resume, currentTdfUnit:', curTdfUnit);
+  clientConsole(2, 'resume, currentTdfUnit:', curTdfUnit);
 
   if (curExperimentState.questionIndex) {
     Session.set('questionIndex', curExperimentState.questionIndex);
@@ -4906,11 +4877,11 @@ async function resumeFromComponentState() {
   
   //show which settings are being used
   if(curTdfUISettings){
-    console.log('using tdf ui settings')
+    clientConsole(2, 'using tdf ui settings')
   } else if(curUnitUISettions){
-    console.log('using unit ui settings')
+    clientConsole(2, 'using unit ui settings')
   } else {
-    console.log('using default ui settings')
+    clientConsole(2, 'using default ui settings')
   }
   // priority is card, then unit, then tdf. 
   var UIsettings = curUnitUISettions || curTdfUISettings || false;
@@ -5089,7 +5060,7 @@ async function processUserTimesLog() {
 // Get TDF info
   const tdfFile = Session.get('currentTdfFile');
   const curExperimentState = Session.get('currentExperimentState');
-  console.log('tdfFile', tdfFile);
+  clientConsole(2, 'tdfFile', tdfFile);
 
   Session.set('overallOutcomeHistory', curExperimentState.overallOutcomeHistory || []);
 
@@ -5176,7 +5147,7 @@ async function processUserTimesLog() {
 
   if (moduleCompleted) {
     // They are DONE!determineUserFeedback
-    console.log('TDF already completed - leaving for profile page.');
+    clientConsole(2, 'TDF already completed - leaving for profile page.');
     if (Meteor.user().loginParams.loginMode === 'experiment') {
       // Experiment users don't *have* a normal page
       leavePage(routeToSignin);
@@ -5225,11 +5196,11 @@ async function processUserTimesLog() {
       }
     } else if (resumeToQuestion) {
       // Question outstanding: force question display and let them give an answer
-      console.log('RESUME FINISHED: displaying current question');
+      clientConsole(2, 'RESUME FINISHED: displaying current question');
       await newQuestionHandler();
     } else if (needFirstUnitInstructions && typeof curTdfUnit.unitinstructions !== 'undefined') {
       // They haven't seen our first instruction yet
-      console.log('RESUME FINISHED: displaying initial instructions');
+      clientConsole(2, 'RESUME FINISHED: displaying initial instructions');
       leavePage('/instructions');
     } else {
       // If we get this far and the unit engine thinks the unit is finished,
@@ -5248,13 +5219,13 @@ async function processUserTimesLog() {
           }
           lockoutFreeTime = unitStartTimestamp + (lockoutMins * (60 * 1000)); // minutes to ms
           if (Date.now() < lockoutFreeTime && (typeof curTdfUnit.unitinstructions !== 'undefined') ){
-            console.log('RESUME FINISHED: showing lockout instructions');
+            clientConsole(2, 'RESUME FINISHED: showing lockout instructions');
             leavePage('/instructions');
             return;
           }
         }
       }
-      console.log('RESUME FINISHED: next-question logic to commence');
+      clientConsole(2, 'RESUME FINISHED: next-question logic to commence');
 
       if(Session.get('unitType') == "model")
         Session.set('engineIndices', await engine.calculateIndices());

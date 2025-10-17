@@ -279,9 +279,13 @@ Template.lessonSelect.helpers({
       //sort tdfTags by natural alphabetical order
       tdfTags.sort((a, b) => a.tag.localeCompare(b.tag, 'en', {numeric: true, sensitivity: 'base'}));
       this.tdfTags.set(tdfTags);
-      
 
-      if ((tdf.visibility == 'profileOnly' || tdf.visibility == 'enabled') & typeof name != "undefined" & name != "" && setspec.userselect != 'false') {
+      // Show TDF ONLY if userselect is explicitly 'true'
+      const shouldShow = (setspec.userselect === 'true');
+
+      console.log('TDF:', name, 'userselect:', setspec.userselect, 'shouldShow:', shouldShow);
+
+      if (shouldShow && (tdf.visibility == 'profileOnly' || tdf.visibility == 'enabled') && tdfObject.isAssigned) {
         enabledTdfs.push(tdfObject);
       } else {
         disabledTdfs.push(tdfObject);

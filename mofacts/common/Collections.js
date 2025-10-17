@@ -33,9 +33,6 @@ DynamicAssets = new FilesCollection({
   collectionName: 'Assets',
   storagePath: process.env.HOME + '/dynamic-assets',
   allowClientCode: false, // Security: Disallow file operations from client (use server methods)
-  public: true, // Allow public read access to files (needed for image display)
-  downloadRoute: '/cdn/storage', // Required route for public collections
-  allowQueryStringCookies: true, // Allow authentication via query string for remote access
   onBeforeUpload(file) {
     // Security: Validate file uploads to prevent malicious content
 

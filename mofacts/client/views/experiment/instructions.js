@@ -2,7 +2,7 @@ import {secsIntervalString} from '../../../common/globalHelpers';
 import {haveMeteorUser} from '../../lib/currentTestingHelpers';
 import {updateExperimentState, initCard, checkAudioInputMode} from './card';
 import {routeToSignin} from '../../lib/router';
-import { meteorCallAsync } from '../../index';
+import { meteorCallAsync, clientConsole } from '../../index';
 import { _ } from 'core-js';
 import { revisitUnit, getExperimentState } from './card';
 import DOMPurify from 'dompurify';
@@ -75,7 +75,7 @@ function leavePage(dest) {
 // call every 1000ms (1 second)
 const logLockout = _.throttle(
     function(lockoutminutes) {
-      console.log('LOCKOUT:', lockoutminutes, 'min');
+      clientConsole(2, 'LOCKOUT:', lockoutminutes, 'min');
     },
     250,
 );
@@ -146,7 +146,7 @@ async function lockoutKick() {
   const doDisplay = (display.minSecs > 0 || display.maxSecs > 0);
   const doLockout = (!lockoutInterval && currLockOut() > 0);
   if (doDisplay || doLockout) {
-    console.log('interval kicked');
+    clientConsole(2, 'interval kicked');
     startLockoutInterval();
   }
 }
@@ -243,9 +243,9 @@ function lockoutPeriodicCheck() {
         Meteor.call('turkScheduleLockoutMessage', experimentId, lockoutFreeTime + 1, subject, turkemail,
             function(error) {
               if (typeof error !== 'undefined') {
-                console.log('Server schedule failed. Error:', error);
+                clientConsole(1, 'Server schedule failed. Error:', error);
               } else {
-                console.log('Server accepted lockout msg schedule', lockoutFreeTime + 1, turkemail);
+                clientConsole(2, 'Server accepted lockout msg schedule', lockoutFreeTime + 1, turkemail);
               }
             });
       };
@@ -364,13 +364,13 @@ async function instructContinue() {
 
     const res = await updateExperimentState(newExperimentState, 'instructions.instructContinue');
     Session.set('curUnitInstructionsSeen', true);
-    console.log('instructions,new experiment state:', newExperimentState);
-    console.log('instructContinue', res);
+    clientConsole(2, 'instructions,new experiment state:', newExperimentState);
+    clientConsole(2, 'instructContinue', res);
     Session.set('inResume', true);
     leavePage('/card');
     Session.set('fromInstructions', true);
     Session.set('enterKeyLock', false);
-    console.log('releasing enterKeyLock in instructContinue');
+    clientConsole(2, 'releasing enterKeyLock in instructContinue');
   }, 1);
 }
 
@@ -434,7 +434,7 @@ Template.instructions.helpers({
   },
     'curTdfName': function(){
     lessonname = Session.get('currentTdfFile').tdfs.tutor.setspec.lessonname;
-    console.log("lessonname",lessonname);
+    clientConsole(2, "lessonname",lessonname);
     return lessonname;
   },
   'allowGoBack': function() {
@@ -501,17 +501,17 @@ function setupInlineAudioHandlers() {
           
           // Play the audio
           audioElement.play().catch(err => {
-            console.error('Error playing inline audio:', err);
+            clientConsole(1, 'Error playing inline audio:', err);
           });
-          
+
           // Clear current audio object when done playing
           audioElement.addEventListener('ended', function() {
             window.currentAudioObj = null;
           }, { once: true });
-          
-          console.log('Playing inline audio:', audioId);
+
+          clientConsole(2, 'Playing inline audio:', audioId);
         } else {
-          console.error('Audio element not found:', audioId);
+          clientConsole(1, 'Audio element not found:', audioId);
         }
       });
     });
@@ -575,7 +575,7 @@ Template.instructions.events({
     const recordInstructions = curUnit.recordInstructions || recordInstructionsIncludesUnit|| curTdf.tdfs.tutor.setspec.recordInstructions === true || curTdf.tdfs.tutor.setspec.recordInstructions === "true";
     if(recordInstructions){
       const instructionLog = gatherInstructionLogRecord(Date.now(), timeRendered, Session.get('currentDeliveryParams'));
-      console.log('instructionLog', instructionLog);
+      clientConsole(2, 'instructionLog', instructionLog);
       Meteor.call('insertHistory', instructionLog)
     }
     instructContinue();

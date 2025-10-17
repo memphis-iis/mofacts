@@ -89,112 +89,64 @@ let donutOptionsMasteredItems = {
 
 Template.studentReporting.helpers({
   studentReportingTdfs: () => Session.get('studentReportingTdfs'),
-  curClassPerformance: () => Session.get('curClassPerformance'),
-  curClass: () => Meteor.user().loginParams.curClass,
-  selectedTdfDueDate: () => Session.get('selectedTdfDueDate'),
-  curTotalAttempts: () => Session.get('curTotalAttempts') || 0,
-  curStudentPerformance: () => Session.get('curStudentPerformance'),
-  curTotalTime: () => Session.get('practiceDuration'),
-  noTime: () => Session.get('practiceDuration') === 0,
-  curStudentPerformanceCorrectInInteger: function() {
-    var percentCorrectInteger = parseFloat(Session.get('stimsSeenPercentCorrect')).toFixed(0);
-    return percentCorrectInteger;
-  },
-  studentUsername: () => Session.get('studentUsername'),
-  stimsSeenPredictedProbability: () => Session.get('stimsSeenPredictedProbability'),
-  stimsNotSeenPredictedProbability: () => Session.get('stimsNotSeenPredictedProbability'),
-  stimCount: () => Session.get('stimCount'),
-  stimsSeen: () => Session.get('stimsSeen'),
-  tooFewStims: () => Session.get('stimsSeen') < 30,
-  percentageOfStimsSeen: function() {
-    var percentageOfStimsSeen = parseFloat(Session.get('stimsSeen') / Session.get('stimCount') * 100).toFixed(0);
-    return percentageOfStimsSeen;
-  },
-  itemMasteryRate: () => Session.get('itemMasteryRate'),
-  itemMasteryTime: () => Session.get('itemMasteryTime'),
-  displayItemsMasteredPerMinute: () => Session.get('displayItemMasteryRate'),
-  displayEstimatedMasteryTime: () => Session.get('displayEstimatedMasteryTime'),
-  exception: () => Session.get('exception'),
-  selectedTdf: () => Session.get('selectedTdf'),
-  lastTdf: async function() {
-    const recentTdfs = await meteorCallAsync('getUserRecentTDFs', Meteor.userId());
-    if(recentTdfs.length === 0) {
-      return false;
-    }
-    return recentTdfs[0];
-  },
-  percentCorrect: () => Session.get('percentCorrect'),
-  difficulty: () => Session.get('displayDifficulty'),
-  INVALID: INVALID,
+  tdfStats: () => Session.get('tdfStats') || [],
 });
 
 Template.studentReporting.rendered = async function() {
-  console.log("toofewstims", Session.get('tooFewStims'));
-  console.log("noTime", Session.get('practiceDuration') === 0);
-  Session.set('curTotalAttempts', 0);
-  Session.set('practiceDuration', 0);
-  window.onpopstate = function(event) {
-    console.log('window popstate student reporting');
-    if (document.location.pathname == '/studentReporting' && Meteor.user().loginParams.loginMode === 'southwest') {
-      Router.go('/profileSouthwest');
-    } else {
-      Router.go('/profile');
-    }
-  };
   console.log('studentReporting rendered!!!');
 
-  const studentUsername = Session.get('studentUsername') || Meteor.user().username;
   const studentID = Session.get('curStudentID') || Meteor.userId();
-  console.log('student,', studentUsername, studentID);
+  console.log('Loading stats for student:', studentID);
 
   const tdfsAttempted = await meteorCallAsync('getTdfIDsAndDisplaysAttemptedByUserId', studentID);
-  Session.set('studentReportingTdfs', tdfsAttempted);
-  console.log('studentReportingTdfs', tdfsAttempted);
+  console.log('TDFs with history:', tdfsAttempted);
 
-  // let dataAlreadyInCache = false;
-  if (Roles.userIsInRole(Meteor.user(), ['admin', 'teacher'])) {
-    console.log('admin/teacher');
-  } else {
-    Session.set('curStudentID', studentID);
-    Session.set('studentUsername', studentUsername);
-  }
-  if (Session.get('instructorSelectedTdf')) {
-    Tracker.afterFlush(async function() {
-      const tdfToSelect = Session.get('instructorSelectedTdf');
-      $('#tdf-select').val(tdfToSelect);
-      setStudentPerformance(studentID, studentUsername, tdfToSelect);
-      
-    });
-  }
-  // check that the currentTdfId has data
-  const allowUpdate = await meteorCallAsync('checkForTDFData', Session.get('currentTdfId'));
-  if(allowUpdate)
-    updateDashboard(Session.get('currentTdfId'));
+  Session.set('studentReportingTdfs', tdfsAttempted);
+
+  // Load stats for each TDF
+  const statsPromises = tdfsAttempted.map(async (tdf) => {
+    const stats = await meteorCallAsync('getSimpleTdfStats', studentID, tdf.TDFId);
+    return {
+      ...tdf,
+      ...stats
+    };
+  });
+
+  const allStats = await Promise.all(statsPromises);
+  console.log('All TDF stats:', allStats);
+
+  // Filter out TDFs with no stats (shouldn't happen, but just in case)
+  const validStats = allStats.filter(s => s.totalTrials > 0);
+  Session.set('tdfStats', validStats);
 };
 
 Template.studentReporting.events({
-  'change #tdf-select': async function(event) {
-    const selectedTdfId = $(event.currentTarget).val();
-    updateDashboard(selectedTdfId)
-  },
   'click #go-to-lesson-select': function(event) {
     event.preventDefault();
     Router.go('/lessonSelect');
   },
-  'click #go-to-lesson-continue': function(event) {
+  'click .continue-lesson': function(event) {
     event.preventDefault();
-    console.log(event);
     const target = $(event.currentTarget);
-    selectTdf(
-        target.data('tdfid'),
-        target.data('lessonname'),
-        target.data('currentstimulisetid'),
-        target.data('ignoreoutofgrammarresponses'),
-        target.data('speechoutofgrammarfeedback'),
-        'User button click',
-        target.data('ismultitdf'),
+    const tdfId = target.data('tdfid');
+    const lessonName = target.data('lessonname');
+    console.log('Continue lesson:', lessonName, tdfId);
+
+    // Get TDF info from Tdfs collection
+    const tdf = Tdfs.findOne({_id: tdfId});
+    if (tdf) {
+      const setspec = tdf.content.tdfs.tutor.setspec;
+      selectTdf(
+        tdfId,
+        lessonName,
+        tdf.stimuliSetId,
+        setspec.speechIgnoreOutOfGrammarResponses === 'true',
+        setspec.speechOutOfGrammarFeedback || 'Response not in answer set',
+        'Continue from progress',
+        tdf.content.isMultiTdf,
         false,
-    );
+      );
+    }
   }
 });
 
@@ -225,12 +177,26 @@ async function updateDashboard(selectedTdfId){
 async function drawDashboard(studentId, selectedTdfId){
   // Get TDF Parameters
   selectedTdf = Tdfs.findOne({_id: selectedTdfId});
+  if (!selectedTdf) {
+    console.error('TDF not found:', selectedTdfId);
+    Session.set('practiceDuration', 0);
+    Session.set('curTotalAttempts', 0);
+    return;
+  }
   //set tdf as selected tdf session variable
   const TDFId = selectedTdf._id;
   const tdfObject = selectedTdf.content;
   const isMultiTdf = tdfObject.isMultiTdf;
   const currentStimuliSetId = selectedTdf.stimuliSetId;
   const setspec = tdfObject.tdfs.tutor.setspec ? tdfObject.tdfs.tutor.setspec : null;
+
+  if (!setspec) {
+    console.error('TDF missing setspec:', selectedTdfId);
+    Session.set('practiceDuration', 0);
+    Session.set('curTotalAttempts', 0);
+    return;
+  }
+
   const name = setspec.lessonname;
   const ignoreOutOfGrammarResponses = setspec.speechIgnoreOutOfGrammarResponses ?
       setspec.speechIgnoreOutOfGrammarResponses.toLowerCase() == 'true' : false;
@@ -247,6 +213,14 @@ async function drawDashboard(studentId, selectedTdfId){
   };
   Session.set('selectedTdf', displayTdf);
   selectedTdfIdProgressReportParams = selectedTdf.content.tdfs.tutor.setspec.progressReporterParams;
+
+  if (!selectedTdfIdProgressReportParams || selectedTdfIdProgressReportParams.length < 6) {
+    console.error('TDF missing progressReporterParams:', selectedTdfId, selectedTdfIdProgressReportParams);
+    Session.set('practiceDuration', 0);
+    Session.set('curTotalAttempts', 0);
+    return;
+  }
+
   let curStimSetId = selectedTdf.stimuliSetId;
   let clusterlist = [];
   for(let unit of selectedTdf.content.tdfs.tutor.unit){
@@ -261,6 +235,7 @@ async function drawDashboard(studentId, selectedTdfId){
   console.log('expanded params',  optimumDifficulty, difficultyHistory, masteryDisplay, masteryHistory, timeToMasterDisplay, timeToMasterHistory);
   //Get Student Data
   const stimids = await meteorCallAsync('getStimSetFromLearningSessionByClusterList', curStimSetId, clusterlist);
+  console.log('stimids from clusterlist:', stimids?.length || 0);
   const curStudentGraphData = await meteorCallAsync('getStudentPerformanceByIdAndTDFId', studentId, selectedTdfId, stimids);
   console.log("curStudentGraphData(all trials)", curStudentGraphData);
   //Expand Data
@@ -316,48 +291,41 @@ async function drawDashboard(studentId, selectedTdfId){
     } else {
       Session.set('displayEstimatedMasteryTime', false);
     }
-    
-      
-    //Draw Dashboard
-    if(Session.get('curTotalAttempts') > 29){
-      $('#dashboardGauges').show();
-      $('#guagesUnavailableMsg').hide();
-      let dashCluster = [];
-      dashClusterCanvases = document.getElementsByClassName('dashCanvas');
-      for(let dash of dashClusterCanvases){
-        if(dash.classList.contains('masteredItems')){
-          console.log(dash);
-          let gaugeMeter = new progressGauge(dash,"donut",0,100,donutOptionsMasteredItems);
-          dashCluster.push(gaugeMeter);
-        }
-        if(dash.classList.contains('percentCorrect')){
-          console.log(dash);
-          let gaugeMeter = new progressGauge(dash,"donut",0,100,donutOptionsMasteredItems);
-          dashCluster.push(gaugeMeter);
-        }
-        if(dash.classList.contains('learningSpeed')){
-          console.log(dash);
-          let gaugeMeter = new progressGauge(dash,"gauge",0,350,gaugeOptionsSpeedOfLearning);
-          dashCluster.push(gaugeMeter);
-        }
-        if(dash.classList.contains('difficulty')){
-          console.log(dash);
-          let gaugeMeter = new progressGauge(dash,"gauge",0,60,gaugeOptionsDifficulty);
-          dashCluster.push(gaugeMeter);
-        }
-      }
-    
-      //Populate Dashboard values
-      console.log('Testing dashCluster:',dashCluster);
-      dashCluster[0].set(percentStimsSeen);
-      dashCluster[1].set(percentCorrect);
-      dashCluster[2].set(speedOfLearning);
-      dashCluster[3].set(displayDifficulty);
 
-    } else {
-      $('#dashboardGauges').hide();
-      $('#guagesUnavailableMsg').show();
+
+    //Draw Dashboard
+    $('#dashboardGauges').show();
+    let dashCluster = [];
+    dashClusterCanvases = document.getElementsByClassName('dashCanvas');
+    for(let dash of dashClusterCanvases){
+      if(dash.classList.contains('masteredItems')){
+        console.log(dash);
+        let gaugeMeter = new progressGauge(dash,"donut",0,100,donutOptionsMasteredItems);
+        dashCluster.push(gaugeMeter);
+      }
+      if(dash.classList.contains('percentCorrect')){
+        console.log(dash);
+        let gaugeMeter = new progressGauge(dash,"donut",0,100,donutOptionsMasteredItems);
+        dashCluster.push(gaugeMeter);
+      }
+      if(dash.classList.contains('learningSpeed')){
+        console.log(dash);
+        let gaugeMeter = new progressGauge(dash,"gauge",0,350,gaugeOptionsSpeedOfLearning);
+        dashCluster.push(gaugeMeter);
+      }
+      if(dash.classList.contains('difficulty')){
+        console.log(dash);
+        let gaugeMeter = new progressGauge(dash,"gauge",0,60,gaugeOptionsDifficulty);
+        dashCluster.push(gaugeMeter);
+      }
     }
+
+    //Populate Dashboard values
+    console.log('Testing dashCluster:',dashCluster);
+    dashCluster[0].set(percentStimsSeen);
+    dashCluster[1].set(percentCorrect);
+    dashCluster[2].set(speedOfLearning);
+    dashCluster[3].set(displayDifficulty);
   } else {
     Session.set('practiceDuration', 0);
     Session.set('curTotalAttempts', 0);

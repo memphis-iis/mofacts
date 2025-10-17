@@ -675,7 +675,7 @@ async function saveMediaFile(media, owner, stimSetId){
     if (error) {
       serverConsole(`File ${media.name} could not be uploaded`, error)
     } else {
-      const metadata = { link: DynamicAssets.link(fileRef), stimuliSetId: stimSetId }
+      const metadata = { link: DynamicAssets.link(fileRef), stimuliSetId: stimSetId, public: true }
       DynamicAssets.collection.update({_id: fileRef._id}, {$set: {meta: metadata}});
     }
   });
@@ -2020,32 +2020,125 @@ async function getStudentPerformanceForClassAndTdfId(instructorId, date=null) {
 }
 
 async function getTdfIDsAndDisplaysAttemptedByUserId(userId, onlyWithLearningSessions=true) {
-  const tdfRet = GlobalExperimentStates.find({userId: userId}).fetch();
+  console.log('getTdfIDsAndDisplaysAttemptedByUserId called for userId:', userId);
 
-  const tdfsAttempted = [];
-  for (const obj of tdfRet) {
-    const TDFId = obj.TDFId;
-    const tdf = await getTdfById(TDFId)
-    if (!tdf) continue; // Handle a case where user has data from a no longer existing tdf
-    const tdfObject = tdf.content;
-    if (!tdfObject.tdfs.tutor.unit) continue;// TODO: fix root/condition tdfs
-    if (!tdfObject.tdfs.tutor.setspec.progressReporterParams) continue; // Don't display tdfs without progressReporterParams
-    if (tdfObject.tdfs.tutor.setspec.disableProgressReport) continue; // Don't display tdfs with disableProgressReport
-    if (onlyWithLearningSessions) {
-      for (const unit of tdfObject.tdfs.tutor.unit) {
-        if (unit.learningsession) {
-          const displayName = tdfObject.tdfs.tutor.setspec.lessonname;
-          tdfsAttempted.push({TDFId, displayName});
-          break;
-        }
-      }
-    } else {
-      const displayName = tdfObject.tdfs.tutor.setspec.lessonname;
-      tdfsAttempted.push({TDFId, displayName});
-    }
+  // First try GlobalExperimentStates, then fall back to Histories for older data
+  let tdfRet = GlobalExperimentStates.find({userId: userId}).fetch();
+  console.log('GlobalExperimentStates count:', tdfRet.length);
+
+  // If no data in GlobalExperimentStates, check Histories
+  if (tdfRet.length === 0) {
+    console.log('No GlobalExperimentStates, checking Histories...');
+    const historyTdfIds = Histories.find(
+      {userId: userId, levelUnitType: 'model'},
+      {fields: {TDFId: 1}, sort: {recordedServerTime: -1}}
+    ).fetch();
+    console.log('Histories count:', historyTdfIds.length);
+
+    // Get unique TDF IDs from history
+    const uniqueTdfIds = [...new Set(historyTdfIds.map(h => h.TDFId))];
+    console.log('Unique TDF IDs from Histories:', uniqueTdfIds);
+    tdfRet = uniqueTdfIds.map(TDFId => ({TDFId}));
   }
 
+  const tdfsAttempted = [];
+  const seenTdfIds = new Set();
+
+  for (const obj of tdfRet) {
+    const TDFId = obj.TDFId;
+    console.log('Processing TDF:', TDFId);
+
+    // Skip if we've already processed this TDF
+    if (seenTdfIds.has(TDFId)) {
+      console.log('  Skipped (duplicate)');
+      continue;
+    }
+    seenTdfIds.add(TDFId);
+
+    const tdf = await getTdfById(TDFId)
+    if (!tdf) {
+      console.log('  Skipped (TDF not found)');
+      continue;
+    }
+    const tdfObject = tdf.content;
+    if (!tdfObject.tdfs.tutor.unit) {
+      console.log('  Skipped (no units)');
+      continue;
+    }
+    // Remove progressReporterParams requirement - we'll compute simple stats from history
+    if (tdfObject.tdfs.tutor.setspec.disableProgressReport) {
+      console.log('  Skipped (disableProgressReport=true)');
+      continue;
+    }
+
+    // Add the TDF - we'll show stats for anything with history
+    const displayName = tdfObject.tdfs.tutor.setspec.lessonname;
+    tdfsAttempted.push({_id: TDFId, TDFId, displayName});
+    console.log('  Added:', displayName);
+  }
+
+  console.log('Returning', tdfsAttempted.length, 'TDFs');
   return tdfsAttempted;
+}
+
+async function getSimpleTdfStats(userId, tdfId) {
+  console.log('getSimpleTdfStats:', userId, tdfId);
+
+  // Get all history for this user and TDF (excluding instructions and assessments)
+  const history = Histories.find({
+    userId: userId,
+    TDFId: tdfId,
+    levelUnitType: 'model'
+  }, {
+    sort: { recordedServerTime: 1 }
+  }).fetch();
+
+  if (history.length === 0) {
+    return null;
+  }
+
+  // Calculate basic stats
+  let correct = 0;
+  let incorrect = 0;
+  let totalTime = 0;
+  const uniqueStims = new Set();
+  const sessionDates = new Set();
+  const last10 = history.slice(-10);
+  let last10Correct = 0;
+
+  for (const trial of history) {
+    if (trial.outcome === 'correct') correct++;
+    else if (trial.outcome === 'incorrect') incorrect++;
+
+    if (trial.responseTime) totalTime += trial.responseTime;
+    if (trial.stimIndex !== undefined) uniqueStims.add(trial.stimIndex);
+
+    // Track unique practice dates
+    const date = new Date(trial.recordedServerTime);
+    sessionDates.add(date.toDateString());
+  }
+
+  // Last 10 trials accuracy
+  for (const trial of last10) {
+    if (trial.outcome === 'correct') last10Correct++;
+  }
+
+  const totalTrials = history.length;
+  const overallAccuracy = (correct + incorrect) > 0 ? (correct / (correct + incorrect) * 100).toFixed(1) : 0;
+  const last10Accuracy = last10.length > 0 ? (last10Correct / last10.length * 100).toFixed(1) : 0;
+  const totalTimeMinutes = (totalTime / 60000).toFixed(1);
+  const lastPracticeDate = new Date(history[history.length - 1].recordedServerTime).toLocaleDateString();
+  const totalSessions = sessionDates.size;
+
+  return {
+    totalTrials,
+    overallAccuracy,
+    last10Accuracy,
+    totalTimeMinutes,
+    itemsPracticed: uniqueStims.size,
+    lastPracticeDate,
+    totalSessions
+  };
 }
 
 function setLearningSessionItemsMulti(learningSessionItem, tdf) {
@@ -3422,7 +3515,7 @@ export const methods = {
   },
 
   getTdfTTSAPIKey: function(tdfId){
-    // Security: Only TDF owner or admin can access API keys
+    // Security: Users practicing a TDF can access its TTS API key
     if (!this.userId) {
       throw new Meteor.Error(401, 'Must be logged in');
     }
@@ -3432,8 +3525,16 @@ export const methods = {
       return '';
     }
 
-    // Check if user owns this TDF or is admin
-    if (tdf.ownerId !== this.userId && !Roles.userIsInRole(this.userId, ['admin', 'teacher'])) {
+    // Allow access if:
+    // 1. User owns this TDF
+    // 2. User is admin/teacher
+    // 3. TDF is accessible to this user (has userselect=true or user has history with it)
+    const isOwner = tdf.ownerId === this.userId;
+    const isAdminOrTeacher = Roles.userIsInRole(this.userId, ['admin', 'teacher']);
+    const isUserSelectTdf = tdf.content?.tdfs?.tutor?.setspec?.userselect === 'true';
+    const hasHistory = Histories.findOne({ userId: this.userId, TDFId: tdfId });
+
+    if (!isOwner && !isAdminOrTeacher && !isUserSelectTdf && !hasHistory) {
       throw new Meteor.Error(403, 'Access denied to TDF API keys');
     }
 
@@ -3441,7 +3542,7 @@ export const methods = {
   },
 
   getTdfSpeechAPIKey: function(tdfId){
-    // Security: Only TDF owner or admin can access API keys
+    // Security: Users practicing a TDF can access its speech API key
     if (!this.userId) {
       throw new Meteor.Error(401, 'Must be logged in');
     }
@@ -3451,8 +3552,16 @@ export const methods = {
       return '';
     }
 
-    // Check if user owns this TDF or is admin
-    if (tdf.ownerId !== this.userId && !Roles.userIsInRole(this.userId, ['admin', 'teacher'])) {
+    // Allow access if:
+    // 1. User owns this TDF
+    // 2. User is admin/teacher
+    // 3. TDF is accessible to this user (has userselect=true or user has history with it)
+    const isOwner = tdf.ownerId === this.userId;
+    const isAdminOrTeacher = Roles.userIsInRole(this.userId, ['admin', 'teacher']);
+    const isUserSelectTdf = tdf.content?.tdfs?.tutor?.setspec?.userselect === 'true';
+    const hasHistory = Histories.findOne({ userId: this.userId, TDFId: tdfId });
+
+    if (!isOwner && !isAdminOrTeacher && !isUserSelectTdf && !hasHistory) {
       throw new Meteor.Error(403, 'Access denied to TDF API keys');
     }
 
@@ -3779,6 +3888,8 @@ const asyncMethods = {
   getTdfNamesAssignedByInstructor, getTdfNamesByOwnerId, getTdfsAssignedToStudent, getTdfAssignmentsByCourseIdMap,
 
   getStudentPerformanceByIdAndTDFId, getStudentPerformanceByIdAndTDFIdFromHistory, getNumDroppedItemsByUserIDAndTDFId,
+
+  getSimpleTdfStats,
   
   getStudentPerformanceForClassAndTdfId, getStimSetFromLearningSessionByClusterList,
 

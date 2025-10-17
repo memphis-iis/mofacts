@@ -1,6 +1,6 @@
 <template name="lessonSelect">
   <div class="container" style="margin-top: 1rem;">
-    <h2 style="margin-top: 0; text-align: center;">Lesson Select</h2>
+    <h3 style="margin-top: 0; text-align: center;">Lesson Select</h3>
 
     <div class="row justify-content-center">
       <div class="col-12">
@@ -11,12 +11,12 @@
         {{#if searching}}
         {{else}}
             {{#if recentTdfs}}
-            <h3 style="text-align: center; margin-top: 1.5rem;">
+            <h4 style="text-align: center; margin-top: 1.5rem;">
                 Recent Lessons
                 {{#if class}}
                 : {{class.courseName}}
                 {{/if}}
-            </h3>
+            </h4>
 
             <div class="row justify-content-center g-3">
                 {{#each recentTdfs}}
@@ -40,7 +40,7 @@
             </div>
         {{/if}}
     {{/if}}
-        <h3 style="text-align: center; margin-top: 1.5rem;">
+        <h4 style="text-align: center; margin-top: 1.5rem;">
             {{#if searching}}
                 Search Results
                 {{#if class}}
@@ -52,7 +52,7 @@
                 : {{class.courseName}}
                 {{/if}}
             {{/if}}
-        </h3>
+        </h4>
 
         {{#if enabledTdfs}}
         <div class="row justify-content-center g-3">
