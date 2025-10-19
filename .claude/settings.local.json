@@ -18,7 +18,8 @@
       "Bash(git add:*)",
       "Bash(md5sum:*)",
       "Bash(meteor npm run lint:*)",
-      "Bash(gh issue list:*)"
+      "Bash(gh issue list:*)",
+      "Bash(npm run lint)"
     ],
     "deny": [],
     "ask": []

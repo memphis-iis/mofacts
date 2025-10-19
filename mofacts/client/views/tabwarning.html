@@ -1,3 +1,52 @@
 <template name="tabwarning">
-    This tab has been automatically redirected. Multiple tabs are not allowed. Please continue on your new tab.
+    <div class="container">
+        <div class="row justify-content-center" style="margin-top: 3rem;">
+            <!-- Left Column: Icon, Title, and Warning Box -->
+            <div class="col-md-5 col-12">
+                <div style="text-align: center; margin-bottom: 1.5rem;">
+                    <svg width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="#f0ad4e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                        <line x1="12" y1="9" x2="12" y2="13"></line>
+                        <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                    </svg>
+                </div>
+
+                <h3 style="margin-top: 0; text-align: center;">
+                    {{#if currentTheme.properties.logo_url}}
+                        <img src="{{currentTheme.properties.logo_url}}" alt="Logo" style="height: 40px; margin-right: 15px; vertical-align: middle;">
+                    {{/if}}
+                    Multiple Tabs Detected
+                </h3>
+
+                <div class="alert alert-warning" role="alert" style="margin-top: 1.5rem; color: inherit; border-color: transparent; display: block;">
+                    <div style="display: block; width: 100%;"><strong>This tab has been deactivated.</strong></div>
+                    <div style="display: block; width: 100%; margin-top: 0.5rem;">
+                        You have opened {{currentTheme.properties.themeName}} in another tab or window.
+                        Using multiple tabs simultaneously can cause data loss or progress tracking issues.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Actions and Info Box -->
+            <div class="col-md-5 col-12">
+                <h4 style="margin-top: 0; margin-bottom: 0.75rem;">What to do:</h4>
+                <p style="line-height: 1.6; padding-left: 1rem; border-left: 3px solid currentColor;">
+                    <strong>Recommended:</strong> Close this tab and continue in your other {{currentTheme.properties.themeName}} tab or window.
+                </p>
+                <p style="line-height: 1.6; margin-top: 1rem;">
+                    Or, if you can't find the other tab, <a href="#" id="takeOverSession" style="font-weight: 500;">click here to continue in this tab</a>.
+                </p>
+
+                <div class="alert alert-info" role="alert" style="margin-top: 1.5rem; font-size: 0.9em; color: inherit; border-color: transparent; display: block;">
+                    <div style="display: block; width: 100%;"><strong>Note:</strong></div>
+                    <div style="display: block; width: 100%; margin-top: 0.5rem;">
+                        If you recently experienced a network disconnection and believe this is an error,
+                        you can use the link above to continue in this tab.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {{> footer}}
+    </div>
 </template>

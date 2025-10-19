@@ -166,16 +166,16 @@
             {{/if}}
 
             {{#if testordrill}}
-                {{#unless inFeedback}}
+                {{#if shouldShowSpeechRecognitionUI}}
                 {{#if audioInputModeEnabled}}
                     {{#if isNotInDialogueLoopStageIntroOrExit}}
                         <div class="sr-status-container">
-                            <i class="fa fa-microphone" style="color: {{voiceTranscriptionIconColor}};"></i>
+                            <i class="fa fa-microphone sr-mic-icon {{microphoneColorClass}}"></i>
                             <span>{{voiceTranscriptionStatusMsg}}</span>
                         </div>
                     {{/if}}
                 {{/if}}
-                {{/unless}}
+                {{/if}}
                 {{!-- Text input: always rendered, visibility controlled by CSS based on buttonTrial --}}
                 <div class="input-box col-12 {{#if buttonTrial}}trial-input-hidden{{/if}}">
                     {{#if showDialogueHints}}

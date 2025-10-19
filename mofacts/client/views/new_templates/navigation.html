@@ -21,7 +21,7 @@
 </nav>
 
 <!-- Bootstrap 5 Offcanvas Menu -->
-<div class="offcanvas offcanvas-end" tabindex="-1" id="navOffcanvas" aria-labelledby="navOffcanvasLabel">
+<div class="offcanvas offcanvas-end" data-bs-scroll="true" data-bs-backdrop="true" tabindex="-1" id="navOffcanvas" aria-labelledby="navOffcanvasLabel">
   <div class="offcanvas-header">
     <h5 class="offcanvas-title" id="navOffcanvasLabel">Menu</h5>
     <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
@@ -31,12 +31,11 @@
       {{#if isInRole 'admin,teacher'}}
         <li><a class="dropdown-item" id="profileButton" data-bs-dismiss="offcanvas">Admin/Teacher Menu</a></li>
       {{/if}}
-      <li><a class="dropdown-item" id="lessonSelectButton" data-bs-dismiss="offcanvas">Lesson Select</a></li>
-      <li><a class="dropdown-item" id="progressButton" data-bs-dismiss="offcanvas">Progress Report</a></li>
-      {{#if isInSession}}
-        <li><a class="dropdown-item" id="wikiButton" target="_blank" data-bs-dismiss="offcanvas">Help</a></li>
-      {{/if}}
-      <li><a class="dropdown-item" id="errorReportButton" data-bs-toggle="modal" data-bs-target="#errorReportingModal" data-bs-dismiss="offcanvas">Report Error</a></li>
+      <li><a class="dropdown-item" id="learningDashboardButton" data-bs-dismiss="offcanvas">Learning Dashboard</a></li>
+      {{!-- <li><a class="dropdown-item" id="lessonSelectButton" data-bs-dismiss="offcanvas">Lesson Select</a></li> --}}
+      {{!-- <li><a class="dropdown-item" id="progressButton" data-bs-dismiss="offcanvas">Progress Report</a></li> --}}
+      <li><a class="dropdown-item" id="wikiButton" data-bs-dismiss="offcanvas">Help</a></li>
+      {{!-- <li><a class="dropdown-item" id="errorReportButton" data-bs-toggle="modal" data-bs-target="#errorReportingModal" data-bs-dismiss="offcanvas">Report Error</a></li> --}}
       <li><a class="dropdown-item" id="logoutButton" data-bs-dismiss="offcanvas">Logout</a></li>
     </ul>
   </div>

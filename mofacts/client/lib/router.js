@@ -275,11 +275,63 @@ Router.route('/studentReporting', {
   }
 })
 
+Router.route('/learningDashboard', {
+  name: 'client.learningDashboard',
+  waitOn: function() {
+    let assignedTdfs = Meteor.user()?.loginParams?.assignedTdfs;
+    let curCourseId = Meteor.user()?.loginParams?.curClass?.courseId || 'undefined';
+    let allSubscriptions = [
+      Meteor.subscribe('allUserExperimentState', assignedTdfs)
+    ];
+    if (curCourseId != undefined)
+      allSubscriptions.push(Meteor.subscribe('Assignments', curCourseId));
+    if (Roles.userIsInRole(Meteor.user(), ['admin']))
+      allSubscriptions.push(Meteor.subscribe('allUsers'));
+    if (assignedTdfs === undefined || assignedTdfs === 'all')
+      allSubscriptions.push(Meteor.subscribe('allTdfs'));
+    else
+      allSubscriptions.push(Meteor.subscribe('currentTdf', assignedTdfs));
+    return allSubscriptions;
+  },
+  action: function() {
+    if (Meteor.user()) {
+      Session.set('curModule', 'learningDashboard');
+      this.render('learningDashboard');
+    } else {
+      this.redirect('/');
+    }
+  }
+})
+
+Router.route('/help', {
+  name: 'client.help',
+  action: function() {
+    Session.set('curModule', 'help');
+    this.render('help');
+  }
+})
+
 Router.route('/', {
   name: 'client.index',
+  waitOn: function() {
+    // Wait for user data to be ready before checking authentication
+    return Meteor.subscribe('meteor.loginServiceConfiguration');
+  },
   action: function() {
+    // Wait for user data to load
+    if (!this.ready()) {
+      this.render('customLoading');
+      return;
+    }
+
     if(Meteor.user() && Meteor.user().loginParams.loginMode != 'experiment'){
-      this.redirect('/profile');
+      // Check if user is admin or teacher, redirect to profile
+      // Otherwise redirect to learning dashboard for students
+      if (Roles.userIsInRole(Meteor.user(), ['admin', 'teacher'])) {
+        this.redirect('/profile');
+      } else {
+        this.redirect('/learningDashboard');
+      }
     } else {
       // If they are navigating to "/" then we clear the (possible) cookie
       // keeping them in experiment mode

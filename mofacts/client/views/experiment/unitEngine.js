@@ -719,11 +719,9 @@ function modelUnitEngine() {
           //Detect Hint Levels
           if (!stimCluster.stims[stimIndex].syllables) {
             hintLevelIndex = 1;
-            clientConsole(2, 'no cached syllables for: ' + currentStimuliSetId + ' | ' + answerText + '. hintlevel index is 1.');
           } else {
             const stimSyllableData = stimCluster.stims[stimIndex].syllables;
             hintLevelIndex = stimSyllableData.length;
-            clientConsole(2, 'syllables detected for: ' + currentStimuliSetId + ' | ' + answerText + '. hintlevel index is ' + hintLevelIndex);
           }
           parms = this.calculateSingleProb(clusterIndex, stimIndex, 0, count, stimCluster);
           tdfDebugLog.push(parms.debugLog);
@@ -911,9 +909,6 @@ function modelUnitEngine() {
       p.overallOutcomeHistory = Session.get('overallOutcomeHistory');
       p.overallStudyHistory = Session.get('overallStudyHistory');
 
-      if (p.i<15) {
-        clientConsole(1, 'cardProbability parameters:', JSON.parse(JSON.stringify(p)));
-      }
       return probFunction(p, pFunc);
     },
 

@@ -585,7 +585,8 @@ async function processPackageUpload(fileObj, owner, zipLink, emailToggle){
           }
           const packageResult = await combineAndSaveContentFile(tdf, stim, owner);
           res.push(packageResult);
-          serverConsole('packageResult', packageResult);
+          // REDUCED: Don't log entire package result object
+          serverConsole('packageResult success:', packageResult?.tdfFileName || 'unknown');
         }
         resolve(res)
       } catch(e) {
@@ -1096,13 +1097,16 @@ async function updateUserAssignments(courseId) {
   for (const section of sections) {
     const studentsInSection = await SectionUserMap.find({sectionId: section._id}).fetch();
     for(const student of studentsInSection){
-      serverConsole({studentId: student.userId, sectionId: section._id})
+      // REMOVED: Don't log every student in loop
+      // serverConsole({studentId: student.userId, sectionId: section._id})
       students.push({studentId: student.userId, sectionId: section._id});
     }
   }
+  serverConsole('updateUserAssignments: Processing', students.length, 'students');
   for(const student of students){
     const assignedTDFs = await getTdfsAssignedToStudent(student.studentId, student.sectionId);
-    serverConsole('updating student', student, 'with new assignments', assignedTDFs);
+    // REDUCED: Don't log full objects, just counts
+    // serverConsole('updating student', student, 'with new assignments', assignedTDFs);
     const loginParams = Meteor.users.findOne({_id: student.studentId}).loginParams;
     loginParams.assignedTDFs = assignedTDFs;
     Meteor.users.update({_id: student.studentId}, {$set: {loginParams: loginParams}});
@@ -1159,10 +1163,12 @@ async function editCourseAssignments(newCourseAssignment) {
       tdfNameIDMap[tdfNamesAndID.content.fileName] = tdfNamesAndID._id;
     }
 
+    serverConsole('editCourseAssignments: Adding', tdfsAdded.length, 'TDFs, removing', tdfsRemoved.length, 'TDFs');
     for (const tdfName of tdfsAdded) {
       const TDFId = tdfNameIDMap[tdfName];
-      serverConsole('editCourseAssignments tdf:', tdfNamesAndIDs, TDFId, tdfName, tdfsAdded, tdfsRemoved,
-          curCourseAssignments, existingTdfs, newTdfs);
+      // REMOVED: Don't log 7 large arrays for every TDF in loop!
+      // serverConsole('editCourseAssignments tdf:', tdfNamesAndIDs, TDFId, tdfName, tdfsAdded, tdfsRemoved,
+      //     curCourseAssignments, existingTdfs, newTdfs);
       Assignments.insert({courseId: newCourseAssignment.courseId, TDFId: TDFId});
     }
     for (const tdfName of tdfsRemoved) {
@@ -1172,7 +1178,8 @@ async function editCourseAssignments(newCourseAssignment) {
     updateUserAssignments(newCourseAssignment.courseId);
     return newCourseAssignment;
   } catch (e) {
-    serverConsole('editCourseAssignments ERROR,', newCourseAssignment, ',', e);
+    // REDUCED: Don't log entire course assignment object on error
+    serverConsole('editCourseAssignments ERROR for courseId:', newCourseAssignment.courseId, ',', e);
     return null;
   }
 }
@@ -1215,7 +1222,8 @@ async function getTdfAssignmentsByCourseIdMap(instructorId) {
       courseId: 1
     }
   }]).toArray();
-  serverConsole(assignmentTdfFileNamesRet)
+  // REDUCED: Don't log entire array, just count
+  serverConsole('Found', assignmentTdfFileNamesRet.length, 'assigned TDFs');
   // const courses = Courses.find({teacherUserId: instructorId}).fetch();
   // const assignments = Assignments.find().fetch();
   // let assignmentTdfFileNamesRet = []
@@ -1233,7 +1241,8 @@ async function getTdfAssignmentsByCourseIdMap(instructorId) {
   //     con
   //   })
   // }
-  serverConsole('assignmentTdfFileNames', assignmentTdfFileNamesRet);
+  // REMOVED: Already logged count above, don't log entire array
+  // serverConsole('assignmentTdfFileNames', assignmentTdfFileNamesRet);
   const assignmentTdfFileNamesByCourseIdMap = {};
   for (const assignment of assignmentTdfFileNamesRet) {
     if (!assignmentTdfFileNamesByCourseIdMap[assignment.courseId]) {
@@ -1356,7 +1365,8 @@ async function getTdfNamesByOwnerId(ownerId) {
   try {
     tdfs = Tdfs.find({ownerId: ownerId}).fetch();
     const ownedTdfFileNames = tdfs.map(tdf => tdf.content.fileName);
-    serverConsole('ownedTdfFileNames', ownedTdfFileNames);
+    // REDUCED: Don't log entire array, just count
+    serverConsole('ownedTdfFileNames count:', ownedTdfFileNames.length);
     return ownedTdfFileNames;
   } catch (e) {
     serverConsole('getTdfNamesByOwnerId ERROR,', e);
@@ -1370,7 +1380,8 @@ async function getTdfNamesByAccessorId(accessorId) {
     //find tdfs where accessors array contains accessorId
     tdfs = Tdfs.find({accessors: accessorId}).fetch();
     const accessibleTdfFileNames = tdfs.map(tdf => tdf.content.fileName);
-    serverConsole('accessibleTdfFileNames', accessibleTdfFileNames);
+    // REDUCED: Don't log entire array, just count
+    serverConsole('accessibleTdfFileNames count:', accessibleTdfFileNames.length);
     return accessibleTdfFileNames;
   } catch (e) {
     serverConsole('getTdfNamesByAccessorId ERROR,', e);
@@ -1401,10 +1412,11 @@ async function getExperimentState(userId, TDFId) { // by currentRootTDFId, not c
 
 // UPSERT not INSERT
 async function setExperimentState(userId, TDFId, experimentStateId, newExperimentState, where) { // by currentRootTDFId, not currentTdfId
-  serverConsole('setExperimentState:', where, userId, TDFId, newExperimentState);
+  // REDUCED LOGGING: Only log essential info, not entire experiment state objects
+  serverConsole('setExperimentState:', where, userId, TDFId);
   const experimentStateRet = GlobalExperimentStates.findOne({_id: experimentStateId})
-  serverConsole(experimentStateRet)
-  serverConsole(newExperimentState)
+  // serverConsole(experimentStateRet)
+  // serverConsole(newExperimentState)
   if (experimentStateRet != null) {
     const updatedExperimentState = Object.assign(experimentStateRet.experimentState, newExperimentState);
     GlobalExperimentStates.update({_id: experimentStateId}, {$set: {experimentState: updatedExperimentState}})
@@ -1448,7 +1460,8 @@ async function insertHistory(historyRecord) {
   nextEventId += 1;
   historyRecord.dynamicTagFields = dynamicTagFields || [];
   historyRecord.recordedServerTime = (new Date()).getTime();
-  serverConsole('insertHistory', historyRecord);
+  // REMOVED: This logs the entire history record on EVERY trial answer - extremely verbose
+  // serverConsole('insertHistory', historyRecord);
   Histories.insert(historyRecord)
 }
 
@@ -2361,7 +2374,8 @@ async function upsertStimFile(stimulusFileName, stimJSON, ownerId, packagePath =
   };
   const newStims = getNewItemFormat(oldStimFormat, stimulusFileName, stimuliSetId, responseKCMap);
   let maxStimulusKC = 0;
-  serverConsole('!!!newStims:', newStims);
+  // REDUCED: Don't log entire stims array, just count
+  serverConsole('newStims count:', newStims.length);
   for (const stim of newStims) {
     if(stim.stimulusKC > maxStimulusKC){
       maxStimulusKC = stim.stimulusKC;
@@ -2382,7 +2396,8 @@ async function upsertStimFile(stimulusFileName, stimJSON, ownerId, packagePath =
 
 async function upsertTDFFile(tdfFilename, tdfJSON, ownerId, packagePath = null) {
   serverConsole('upsertTDFFile', tdfFilename);
-  serverConsole('tdfJSON', tdfJSON);
+  // REMOVED: Don't log entire TDF JSON object - can be very large
+  // serverConsole('tdfJSON', tdfJSON);
   let ret = {reason: []};
   let Tdf = tdfJSON.tdfs;
   let lessonName = _.trim(Tdf.tutor.setspec.lessonname);
@@ -2472,7 +2487,8 @@ async function upsertTDFFile(tdfFilename, tdfJSON, ownerId, packagePath = null) 
 }
 
 async function upsertPackage(packageJSON, ownerId) {
-  serverConsole('upsertPackage', packageJSON);
+  // REDUCED: Don't log entire package JSON, just filename
+  serverConsole('upsertPackage', packageJSON.packageFile || 'unknown');
   const responseKCMap = await getResponseKCMap();
   const stimulusFileName = packageJSON.stimFileName
   const stimJSON = packageJSON.stimuli
@@ -2599,7 +2615,8 @@ async function upsertPackage(packageJSON, ownerId) {
 }
 
 function tdfUpdateConfirmed(updateObj, resetShuffleClusters = false){
-  serverConsole('tdfUpdateConfirmed', updateObj);
+  // REDUCED: Don't log entire update object
+  serverConsole('tdfUpdateConfirmed for TDF:', updateObj.TDFId || 'unknown');
   Tdfs.upsert({_id: updateObj._id},{$set:updateObj});
   if(resetShuffleClusters){
     const expStatses = GlobalExperimentStates.find({TDFId: updateObj._id}).fetch();
@@ -2679,7 +2696,8 @@ async function makeHTTPSrequest(options, request, timeoutMs = 30000){
       })
       res.on('end', function() {
           clearTimeout(timeoutHandle);
-          serverConsole(Buffer.concat(chunks).toString());
+          // REMOVED: Don't log response data - can contain large audio bytes or speech transcription data
+          // serverConsole(Buffer.concat(chunks).toString());
           resolve(Buffer.concat(chunks));
       })
     })
@@ -2779,7 +2797,8 @@ export const methods = {
   },
 
   updateExperimentState: function(curExperimentState, experimentId) {
-    serverConsole('updateExperimentState', curExperimentState, curExperimentState.currentTdfId);
+    // REDUCED LOGGING: Only log TDF ID, not entire experiment state object
+    serverConsole('updateExperimentState', curExperimentState.currentTdfId);
     if(experimentId) {
       GlobalExperimentStates.update({_id: experimentId}, {$set: {experimentState: curExperimentState}});
     } else {
@@ -2788,7 +2807,8 @@ export const methods = {
   },
 
   createExperimentState: function(curExperimentState) {
-    serverConsole('createExperimentState', curExperimentState, curExperimentState.currentTdfId);
+    // REDUCED LOGGING: Only log TDF ID, not entire experiment state object
+    serverConsole('createExperimentState', curExperimentState.currentTdfId);
     GlobalExperimentStates.insert({
       userId: Meteor.userId(),
       TDFId: curExperimentState.currentTdfId,

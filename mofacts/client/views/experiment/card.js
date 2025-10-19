@@ -165,7 +165,16 @@ Session.set('wasReportedForRemoval', false);
 Session.set('hiddenItems', []);
 Session.set('numVisibleCards', 0);
 Session.set('recordingLocked', false);
+let waitingForTranscription = false; // Track if we're waiting for Google Speech API response
 let cachedSyllables = null;
+let cachedSuccessColor = null;
+let cachedAlertColor = null;
+let audioInputModeEnabled = false;
+// Cache for speech recognition answer grammar and phonetic index
+// Answer grammar is per-unit (currentStimuliSet), so invalidate when unit changes
+let cachedAnswerGrammar = null;
+let cachedPhoneticIndex = null;
+let lastCachedUnitNumber = null;
 let speechTranscriptionTimeoutsSeen = 0;
 let timeoutsSeen = 0; // Reset to zero on resume or non-timeout
 let trialStartTimestamp = 0;
@@ -240,6 +249,12 @@ function beginMainCardTimeout(delay, func) {
     const numRemainingLocks = Session.get('pausedLocks');
     if (numRemainingLocks > 0) {
       clientConsole(2, 'timeout reached but there are', numRemainingLocks, 'locks outstanding');
+    } else if (waitingForTranscription) {
+      clientConsole(2, '[SR] timeout reached but waiting for speech transcription, delaying timeout');
+      // Retry timeout after a short delay to give transcription more time
+      // This prevents timeout from firing while Google Speech API is processing
+      clearCardTimeout();
+      beginMainCardTimeout(3000, func); // Give 3 more seconds for transcription
     } else {
       if (document.location.pathname != '/card') {
         leavePage(function() {
@@ -440,6 +455,14 @@ async function leavePage(dest) {
     clientConsole(2, 'resetting subtdfindex, dest:', dest);
     Session.set('subTdfIndex', null);
     sessionCleanUp();
+
+    // Clean up session check interval
+    const sessionCheckInterval = Session.get('sessionCheckInterval');
+    if (sessionCheckInterval) {
+      Meteor.clearInterval(sessionCheckInterval);
+      Session.set('sessionCheckInterval', undefined);
+    }
+
     if (window.AudioContext) {
       clientConsole(2, 'closing audio context');
       stopRecording();
@@ -478,7 +501,30 @@ async function leavePage(dest) {
 Template.card.onCreated(function() {
   const template = this;
 
+  // Cache CSS color variables for SR status icon (prevents repeated getComputedStyle calls)
+  Tracker.afterFlush(function() {
+    const root = document.documentElement;
+    cachedSuccessColor = getComputedStyle(root).getPropertyValue('--success-color').trim() || '#00cc00';
+    cachedAlertColor = getComputedStyle(root).getPropertyValue('--alert-color').trim() || '#ff0000';
+  });
+
+  // Reactive computation for audio input mode (prevents duplicate TDF checks in multiple helpers)
+  // FIX: Use Tracker.nonreactive to prevent cascade invalidation on unrelated state changes
+  template.autorun(function() {
+    // Explicitly track only the dependencies we care about
+    const userAudioToggled = Meteor.user()?.audioInputMode;
+    const tdfFile = Session.get('currentTdfFile');
+
+    // Compute in a non-reactive context to prevent cascade
+    Tracker.nonreactive(function() {
+      const tdfAudioEnabled = tdfFile?.tdfs?.tutor?.setspec?.audioInputEnabled === 'true';
+      audioInputModeEnabled = (userAudioToggled || false) && tdfAudioEnabled;
+    });
+  });
+
   // Autorun for feedback container visibility
+  // FIX: RESTORED - This was incorrectly removed, causing DOM thrashing and 40-90% performance regression
+  // Mixing reactive state changes with manual jQuery DOM updates violates Meteor/Blaze reactivity rules
   template.autorun(function() {
     const inFeedback = cardState.get('inFeedback');
     const feedbackPosition = cardState.get('feedbackPosition');
@@ -519,6 +565,16 @@ async function initCard() {
   }
   Session.set('curTdfTips', formattedTips)
   await checkUserSession();
+
+  // Set up periodic multi-tab detection check during practice (every 1 second as backup)
+  // Note: BroadcastChannel provides instant detection, this is just a fallback
+  if (!Session.get('sessionCheckInterval')) {
+    const sessionCheckInterval = Meteor.setInterval(async function() {
+      await checkUserSession();
+    }, 1000); // Check every 1 second
+    Session.set('sessionCheckInterval', sessionCheckInterval);
+  }
+
   // Catch page navigation events (like pressing back button) so we can call our cleanup method
   window.onpopstate = function() {
     if (document.location.pathname == '/card') {
@@ -764,23 +820,13 @@ Template.card.helpers({
   'isNotInDialogueLoopStageIntroOrExit': () => Session.get('dialogueLoopStage') != 'intro' && Session.get('dialogueLoopStage') != 'exit',
 
   'audioInputModeEnabled': function() {
-    // SR icon should only show as enabled if BOTH user has it on AND TDF supports it
-    const userAudioToggled = Meteor.user()?.audioInputMode || false;
-    const tdfAudioEnabled = Session.get('currentTdfFile')?.tdfs?.tutor?.setspec?.audioInputEnabled === 'true';
-    return userAudioToggled && tdfAudioEnabled;
+    // Use cached value from reactive autorun (prevents duplicate TDF checks)
+    return audioInputModeEnabled;
   },
 
-  'voiceTranscriptionIconColor': function() {
-    // Get theme colors from CSS variables
-    const root = document.documentElement;
-    const successColor = getComputedStyle(root).getPropertyValue('--success-color').trim() || '#00cc00';
-    const alertColor = getComputedStyle(root).getPropertyValue('--alert-color').trim() || '#ff0000';
-
-    if(Session.get('recording')){
-      return successColor;  // Green when listening
-    } else {
-      return alertColor;  // Red when waiting/processing
-    }
+  'microphoneColorClass': function() {
+    // Use CSS classes instead of inline styles for better performance
+    return Session.get('recording') ? 'sr-mic-recording' : 'sr-mic-waiting';
   },
 
   'voiceTranscriptionStatusMsg': function() {
@@ -789,6 +835,14 @@ Template.card.helpers({
     } else {
       return 'Please wait...';
     }
+  },
+
+  'shouldShowSpeechRecognitionUI': function() {
+    // Only show SR UI during PRESENTING.AWAITING - the ONLY state where user can input answer
+    // This prevents the SR icon/message from flashing during trial transitions
+    const state = Session.get('_debugTrialState');
+
+    return state === TRIAL_STATES.PRESENTING_AWAITING;
   },
 
   'isImpersonating': function(){
@@ -1089,10 +1143,8 @@ Template.card.helpers({
   'userInDiaglogue': () => Session.get('showDialogueText') && Session.get('dialogueDisplay'),
 
   'audioEnabled': () => {
-    // SR should only be enabled if BOTH user has it toggled on AND TDF supports it
-    const userAudioToggled = Meteor.user()?.audioInputMode || false;
-    const tdfAudioEnabled = Session.get('currentTdfFile')?.tdfs?.tutor?.setspec?.audioInputEnabled === 'true';
-    return userAudioToggled && tdfAudioEnabled;
+    // Use cached value from reactive autorun (prevents duplicate TDF checks)
+    return audioInputModeEnabled;
   },
 
   'showDialogueHints': function() {
@@ -1582,7 +1634,6 @@ function preloadVideos() {
 
 function preloadImages() {
   const curStimImgSrcs = getCurrentStimDisplaySources('imageStimulus');
-  clientConsole(2, 'curStimImgSrcs count:', curStimImgSrcs?.length || 0);
   imagesDict = {};
   const imageLoadPromises = [];
   let img;
@@ -1632,7 +1683,6 @@ function preloadImages() {
     });
     imageLoadPromises.push(loadPromise);
   }
-  clientConsole(2, 'imagesDict count:', Object.keys(imagesDict).length);
   // Return promise that resolves when all images are loaded
   return Promise.all(imageLoadPromises);
 }
@@ -2202,6 +2252,10 @@ function determineUserFeedback(userAnswer, isSkip, isCorrect, feedbackForAnswer,
 async function showUserFeedback(isCorrect, feedbackMessage, isTimeout, isSkip) {
   clientConsole(2, '[SM] showUserFeedback called in state:', currentTrialState);
 
+  // NOTE: Do NOT call stopRecording() here - it destroys the audio buffer before
+  // the speech recognition API can process it. Recording stops naturally when
+  // user stops speaking (hark.js voice detection) and exports buffer to API.
+
   // STATE MACHINE: Transition to FEEDBACK.SHOWING (drill only, test skips feedback)
   if (trialShowsFeedback()) {
     transitionTrialState(TRIAL_STATES.FEEDBACK_SHOWING, `Showing feedback (${isCorrect ? 'correct' : 'incorrect'})`);
@@ -2281,12 +2335,15 @@ async function showUserFeedback(isCorrect, feedbackMessage, isTimeout, isSkip) {
     switch(feedbackDisplayPosition){
       case "top":
         target = "#UserInteraction";
+        // DOM updates handled by autorun in Template.card.onCreated()
         break;
       case "middle":
         target = "#feedbackOverride";
+        // DOM updates handled by autorun in Template.card.onCreated()
         break;
       case "bottom":
         target = "#userLowerInteraction";
+        // DOM updates handled by autorun in Template.card.onCreated()
         //add the fontSize class to the target
         const hSizeBottom = deliveryParams ? deliveryParams.fontsize.toString() : 2;
         $(target).addClass('h' + hSizeBottom);
@@ -2375,7 +2432,10 @@ async function showUserFeedback(isCorrect, feedbackMessage, isTimeout, isSkip) {
                   $('#CountdownTimerText').text("Continuing...");
                 }
                 Session.set('CurIntervalId', undefined);
-                cardState.set('inFeedback', false)
+                // FIX: DO NOT set inFeedback=false here - let afterAnswerFeedbackCallback() handle it
+                // after BOTH countdown AND TTS complete. This prevents UI flash and ensures proper
+                // synchronization between countdown timer and TTS audio completion.
+                // cardState.set('inFeedback', false); // REMOVED - moved to afterAnswerFeedbackCallback
               }
             }, 250); // Reduced from 100ms - 4fps is smooth enough, saves CPU
             Session.set('CurIntervalId', CountdownTimerInterval);
@@ -2597,13 +2657,50 @@ async function afterFeedbackCallback(trialEndTimeStamp, trialStartTimeStamp, isT
         return; // We are totally done
       }
     }
-    if(window.currentAudioObj) {
-      window.currentAudioObj.addEventListener('ended', async () => {
-        await cardEnd();
-      });
-    } else {
-      await cardEnd();
-    }
+
+    // FIX: Wait for BOTH countdown timer AND TTS to complete before transitioning to next trial
+    // This prevents TTS from the current trial bleeding into the next trial
+    clientConsole(2, '[SM] afterAnswerFeedbackCallback: Waiting for countdown and TTS to complete');
+
+    // Wait for countdown to finish (if not already finished)
+    const waitForCountdown = new Promise(resolve => {
+      const countdownId = Session.get('CurIntervalId');
+      if (!countdownId) {
+        clientConsole(2, '[SM] Countdown already finished');
+        resolve(); // Already finished
+      } else {
+        clientConsole(2, '[SM] Waiting for countdown to finish...');
+        const checkInterval = Meteor.setInterval(() => {
+          if (!Session.get('CurIntervalId')) {
+            clientConsole(2, '[SM] Countdown finished');
+            Meteor.clearInterval(checkInterval);
+            resolve();
+          }
+        }, 100);
+      }
+    });
+
+    // Wait for TTS to finish (if playing)
+    const waitForTTS = new Promise(resolve => {
+      if (window.currentAudioObj) {
+        clientConsole(2, '[SM] Waiting for TTS to finish...');
+        window.currentAudioObj.addEventListener('ended', () => {
+          clientConsole(2, '[SM] TTS finished');
+          resolve();
+        }, { once: true });
+      } else {
+        clientConsole(2, '[SM] No TTS playing');
+        resolve(); // No TTS playing
+      }
+    });
+
+    // Wait for BOTH to complete
+    await Promise.all([waitForCountdown, waitForTTS]);
+    clientConsole(2, '[SM] Both countdown and TTS complete, transitioning to next trial');
+
+    // NOW safe to transition to next trial
+    cardState.set('inFeedback', false);
+    await cardEnd();
   }
 }
 
@@ -3524,11 +3621,17 @@ async function checkAndDisplayTwoPartQuestion(deliveryParams, currentDisplayEngi
     clientConsole(2, '[SM] Skipping fade-in (already visible or video session)');
     handleTwoPartQuestion();
   } else {
-    beginFadeIn('Question fade-in');
-    setTimeout(() => {
-      completeFadeIn();
-      handleTwoPartQuestion();
-    }, getTransitionDuration());
+    // CRITICAL: Wait one frame for Blaze to finish computing buttonTrial visibility classes
+    // Before this fix: displayReady=true triggered CSS fade-in while Blaze was still updating
+    // .trial-input-hidden class, causing input field to flash/repaint mid-transition
+    // After: Blaze completes DOM updates → THEN fade-in starts with final layout already set
+    requestAnimationFrame(() => {
+      beginFadeIn('Question fade-in');
+      setTimeout(() => {
+        completeFadeIn();
+        handleTwoPartQuestion();
+      }, getTransitionDuration());
+    });
   }
 }
 
@@ -3658,14 +3761,7 @@ function speakMessageIfAudioPromptFeedbackEnabled(msg, audioPromptSource) {
   const audioPromptMode = enableAudioPromptAndFeedback ? userAudioPromptMode : 'silent';
   let synthesis = window.speechSynthesis;
 
-  clientConsole(2, '[SR] ========== speakMessageIfAudioPromptFeedbackEnabled() CALLED ==========');
-  clientConsole(2, '[SR]   audioPromptSource:', audioPromptSource);
-  clientConsole(2, '[SR]   userAudioPromptMode:', userAudioPromptMode);
-  clientConsole(2, '[SR]   tdfAudioPromptMode:', tdfAudioPromptMode);
-  clientConsole(2, '[SR]   tdfSupportsAudioPrompts:', tdfSupportsAudioPrompts);
-  clientConsole(2, '[SR]   userWantsAudioPrompts:', userWantsAudioPrompts);
-  clientConsole(2, '[SR]   audioPromptMode:', audioPromptMode);
-  clientConsole(2, '[SR]   enableAudioPromptAndFeedback:', enableAudioPromptAndFeedback);
+  clientConsole(2, '[SR] speakMessage:', audioPromptSource, 'enabled:', enableAudioPromptAndFeedback);
 
   if (enableAudioPromptAndFeedback) {
     if (audioPromptSource === audioPromptMode || audioPromptMode === 'all') {
@@ -3723,10 +3819,9 @@ function speakMessageIfAudioPromptFeedbackEnabled(msg, audioPromptSource) {
             });
           }
         });
-        clientConsole(2, '[SR]   Providing Google TTS audio feedback (async)');
+        clientConsole(2, '[SR] Using Google TTS (async)');
       } else {
-        clientConsole(2, '[SR]   Text-to-Speech API key not found, using MDN Speech Synthesis');
-        clientConsole(2, '[SR]   ✅ LOCKING RECORDING for MDN TTS playback');
+        clientConsole(2, '[SR] Using MDN Speech Synthesis, locking recording');
         Session.set('recordingLocked', true);
         let utterance = new SpeechSynthesisUtterance(msg);
         utterance.addEventListener('end', (event) => {
@@ -3742,19 +3837,26 @@ function speakMessageIfAudioPromptFeedbackEnabled(msg, audioPromptSource) {
         });
         synthesis.speak(utterance);
       }
-    } else {
-      clientConsole(2, '[SR]   Audio prompt source mismatch - not playing TTS');
     }
-  } else {
-    clientConsole(2, '[SR]   Audio feedback disabled');
   }
-  clientConsole(2, '[SR] ========================================');
 }
+
+// Cache for phonetic codes to avoid recomputing Double Metaphone (expensive operation)
+const phoneticCache = new Map();
 
 // Phonetic encoding using Double Metaphone algorithm (proven, industry standard)
 // Returns both primary and secondary phonetic codes for better matching
 function getPhoneticCodes(word) {
-  const codes = doubleMetaphone(word.toLowerCase().trim());
+  const normalizedWord = word.toLowerCase().trim();
+
+  // Check cache first
+  if (phoneticCache.has(normalizedWord)) {
+    return phoneticCache.get(normalizedWord);
+  }
+
+  // Compute and cache
+  const codes = doubleMetaphone(normalizedWord);
+  phoneticCache.set(normalizedWord, codes);
   clientConsole(2, `[SR]   Double Metaphone codes for "${word}": primary="${codes[0]}", secondary="${codes[1] || 'none'}"`);
   return codes; // [primary, secondary]
 }
@@ -3766,7 +3868,8 @@ function buildPhoneticIndex(grammarList) {
   const startTime = performance.now();
 
   for (const word of grammarList) {
-    const [primary, secondary] = doubleMetaphone(word.toLowerCase().trim());
+    // Use cached phonetic codes
+    const [primary, secondary] = getPhoneticCodes(word);
     const entry = {
       word: word,
       length: word.length,
@@ -3792,7 +3895,7 @@ function buildPhoneticIndex(grammarList) {
   }
 
   const elapsed = performance.now() - startTime;
-  clientConsole(2, `[SR] Built phonetic index for ${grammarList.length} words in ${elapsed.toFixed(2)}ms (${index.size} unique phonetic codes)`);
+  clientConsole(2, `[SR] Built phonetic index in ${elapsed.toFixed(2)}ms`);
   return index;
 }
 
@@ -3800,14 +3903,16 @@ function buildPhoneticIndex(grammarList) {
 // For example, if spoken word is "molly", exclude "malawi" from candidates since it
 // phonetically matches "mali" which is closer in length to "molly"
 function filterPhoneticConflicts(spokenWord, grammarList) {
-  const [spokenPrimary, spokenSecondary] = doubleMetaphone(spokenWord.toLowerCase().trim());
+  // Use cached phonetic codes
+  const [spokenPrimary, spokenSecondary] = getPhoneticCodes(spokenWord);
   const spokenLength = spokenWord.length;
 
   // Build a map of phonetic codes to words with their lengths
   const phoneticGroups = new Map();
 
   for (const word of grammarList) {
-    const [primary, secondary] = doubleMetaphone(word.toLowerCase().trim());
+    // Use cached phonetic codes
+    const [primary, secondary] = getPhoneticCodes(word);
     const codes = [primary];
     if (secondary && secondary !== primary) {
       codes.push(secondary);
@@ -3862,14 +3967,11 @@ function filterPhoneticConflicts(spokenWord, grammarList) {
       .map(c => c.word)
   );
 
-  clientConsole(2, `[SR]   Phonetic conflicts for "${spokenWord}": keeping ${Array.from(keepWords).join(', ')}`)
-
   const filtered = grammarList.filter(word => {
     const shouldKeep = !conflicts.some(c => c.word === word) || keepWords.has(word);
     return shouldKeep;
   });
 
-  clientConsole(2, `[SR] Filtered grammar: ${grammarList.length} → ${filtered.length} words (removed ${grammarList.length - filtered.length} conflicts)`);
   return filtered;
 }
 
@@ -3881,7 +3983,6 @@ function findPhoneticMatch(spokenWord, grammarList, phoneticIndex = null) {
 
   // Rebuild index if we filtered the grammar
   if (phoneticIndex && filteredGrammar.length < grammarList.length) {
-    clientConsole(2, `[SR] Rebuilding phonetic index for filtered grammar`);
     phoneticIndex = buildPhoneticIndex(filteredGrammar);
   }
 
@@ -4071,6 +4172,14 @@ function levenshteinDistance(str1, str2) {
 // Speech recognition function to process audio data, this is called by the web worker
 // started with the recorder object when enough data is received to fill up the buffer
 async function processLINEAR16(data) {
+  clientConsole(2, '[SR] ========== processLINEAR16 CALLED ==========');
+  clientConsole(2, '[SR] Audio data received, processing...');
+  clientConsole(2, '[SR] Data parameter:', data ? `${data.length} bytes` : 'UNDEFINED/NULL');
+
+  // Set flag to prevent timeout from triggering while waiting for transcription
+  waitingForTranscription = true;
+  clientConsole(2, '[SR] Set waitingForTranscription=true to block timeout');
+
   if (resetMainCardTimeout && timeoutFunc && !inputDisabled) {
     resetMainCardTimeout(); // Give ourselves a bit more time for the speech api to return results
   } else {
@@ -4080,6 +4189,8 @@ async function processLINEAR16(data) {
   const userAnswer = $('#forceCorrectionEntry').is(':visible') ?
       document.getElementById('userForceCorrect') : document.getElementById('userAnswer');
   const isButtonTrial = getButtonTrial();
+
+  clientConsole(2, '[SR] userAnswer:', !!userAnswer, 'isButtonTrial:', isButtonTrial, 'inDialogue:', DialogueUtils.isUserInDialogueLoop());
 
   if (userAnswer || isButtonTrial || DialogueUtils.isUserInDialogueLoop()) {
     speechTranscriptionTimeoutsSeen += 1;
@@ -4094,6 +4205,8 @@ async function processLINEAR16(data) {
     }
 
     let phraseHints = [];
+    let answerGrammar = [];
+
     if (isButtonTrial) {
       let curChar = 'a';
       phraseHints.push(curChar);
@@ -4101,38 +4214,44 @@ async function processLINEAR16(data) {
         curChar = nextChar(curChar);
         phraseHints.push(curChar);
       }
-    } else {
-      if (DialogueUtils.isUserInDialogueLoop()) {
-        // Don't set input field text - status shown in SR icon/message display
-      } else {
-        // Don't set input field text - status shown in SR icon/message display
-        phraseHints = getAllCurrentStimAnswers(true);
-      }
-    }
-
-    clientConsole(2, '[SR] ========== PHRASE HINTS DEBUG ==========');
-    clientConsole(2, '[SR] Total phrase hints:', phraseHints.length);
-    // Phrase hints list omitted from logs (use [SR] filter to see count only)
-    clientConsole(2, '[SR] Sending audio to Google Speech API...');
-    clientConsole(2, '[SR] ==========================================');
-    const request = generateRequestJSON(sampleRate, speechRecognitionLanguage, phraseHints, data);
-
-    let answerGrammar = [];
-    if (isButtonTrial) {
       answerGrammar = phraseHints;
     } else if (!DialogueUtils.isUserInDialogueLoop()) {
-      // We call getAllCurrentStimAnswers again but not excluding phrase hints that
-      // may confuse the speech api so that we can check if what the api returns
-      // is within the realm of reasonable responses before transcribing it
-      answerGrammar = getAllCurrentStimAnswers(false);
+      // PERFORMANCE OPTIMIZATION: Cache answer grammar per UNIT
+      // Answer grammar is ALL possible answers for current unit (currentStimuliSet)
+      // It only changes when unit changes. Recomputing every trial wastes 100+ ms!
+      const {curClusterIndex, curStimIndex} = getCurrentClusterAndStimIndices();
+      const currentUnitNumber = Session.get('currentTdfUnit')?.unitnumber;
+
+      // Check if cache is valid (same unit)
+      const cacheValid = (cachedAnswerGrammar !== null && lastCachedUnitNumber === currentUnitNumber);
+
+      if (cacheValid) {
+        // Use cached answer grammar - instant!
+        answerGrammar = cachedAnswerGrammar;
+        clientConsole(2, `[SR] ✅ Using cached answer grammar (${answerGrammar.length} items)`);
+      } else {
+        // Cache miss - compute once per unit
+        answerGrammar = getAllCurrentStimAnswers(false);
+        cachedAnswerGrammar = answerGrammar;
+        lastCachedUnitNumber = currentUnitNumber;
+        clientConsole(2, `[SR] 📦 Cached answer grammar for unit ${currentUnitNumber} (${answerGrammar.length} items)`);
+      }
+
+      // Phrase hints need per-trial filtering (exclusion list varies by stim)
+      const curSpeechHintExclusionListText =
+          getStimCluster(curClusterIndex).stims[curStimIndex].speechHintExclusionList || '';
+      const exclusionList = curSpeechHintExclusionListText.split(',');
+      phraseHints = answerGrammar.filter((el) => exclusionList.indexOf(el) === -1);
     }
+
+    clientConsole(2, '[SR] Sending audio to Google Speech API...');
+    const request = generateRequestJSON(sampleRate, speechRecognitionLanguage, phraseHints, data);
 
     // Always allow 'skip' command for non-dialogue trials
     if (!DialogueUtils.isUserInDialogueLoop()) {
       answerGrammar.push('skip');
     }
 
-    clientConsole(2, '[SR] Answer grammar count (with skip):', answerGrammar.length);
     let tdfSpeechAPIKey;
     if(Session.get('useEmbeddedAPIKeys')){
       tdfSpeechAPIKey = await meteorCallAsync('getTdfSpeechAPIKey', Session.get('currentTdfId'));
@@ -4155,6 +4274,10 @@ async function processLINEAR16(data) {
 }
 
 function speechAPICallback(err, data){
+  // Clear the waiting flag now that transcription has returned (success or error)
+  waitingForTranscription = false;
+  clientConsole(2, '[SR] speechAPICallback received, set waitingForTranscription=false');
+
   let answerGrammar = [];
   let response = {};
 
@@ -4169,10 +4292,23 @@ function speechAPICallback(err, data){
     [answerGrammar, response] = data;
   }
 
-  // Build phonetic index for efficient matching (only if we have grammar to check)
+  // PERFORMANCE OPTIMIZATION: Cache phonetic index per UNIT
+  // Building phonetic index is expensive (100+ ms for large grammars)
+  // Since answer grammar doesn't change within a unit, cache the index too
   let phoneticIndex = null;
-  if (answerGrammar && answerGrammar.length > 10) { // Only worth it for larger grammars
-    phoneticIndex = buildPhoneticIndex(answerGrammar);
+  if (answerGrammar && answerGrammar.length > 10) {
+    const currentUnitNumber = Session.get('currentTdfUnit')?.unitnumber;
+
+    // Check if we can reuse cached phonetic index (same unit as grammar)
+    if (cachedPhoneticIndex !== null && lastCachedUnitNumber === currentUnitNumber) {
+      phoneticIndex = cachedPhoneticIndex;
+      clientConsole(2, `[SR] ✅ Using cached phonetic index (${phoneticIndex.size} codes)`);
+    } else {
+      // Build and cache phonetic index for this unit
+      phoneticIndex = buildPhoneticIndex(answerGrammar);
+      cachedPhoneticIndex = phoneticIndex;
+      clientConsole(2, `[SR] 📦 Cached phonetic index (${phoneticIndex.size} codes)`);
+    }
   }
 
   let transcript = '';
@@ -4235,10 +4371,6 @@ function speechAPICallback(err, data){
       ignoredOrSilent = true;
     } else {
 
-    clientConsole(2, '[SR] ========== ALTERNATIVES RECEIVED ==========');
-    clientConsole(2, '[SR] Total alternatives:', alternatives.length);
-    clientConsole(2, '[SR] ==========================================');
-
     // Try to find a grammar match in alternatives (best strategy)
     let foundGrammarMatch = false;
     if (ignoreOutOfGrammarResponses) {
@@ -4295,7 +4427,6 @@ function speechAPICallback(err, data){
     // Grammar checking (will only reject if no grammar match was found in alternatives)
     if (ignoreOutOfGrammarResponses && !ignoredOrSilent && !foundGrammarMatch) {
       clientConsole(2, '[SR] Checking grammar - transcript:', transcript);
-      clientConsole(2, '[SR] Valid answers count:', answerGrammar.length);
       if (transcript == 'enter') {
         clientConsole(2, '[SR] Transcript is "enter" - allowing');
         ignoredOrSilent = false;
@@ -4393,6 +4524,8 @@ function speechAPICallback(err, data){
 }
 
 function generateRequestJSON(sampleRate, speechRecognitionLanguage, phraseHints, data) {
+  clientConsole(2, '[SR] generateRequestJSON - data type:', typeof data, 'constructor:', data?.constructor?.name, 'isArray:', Array.isArray(data));
+
   const request = {
     'config': {
       'encoding': 'LINEAR16',
@@ -4414,6 +4547,8 @@ function generateRequestJSON(sampleRate, speechRecognitionLanguage, phraseHints,
       'content': data,
     },
   };
+
+  clientConsole(2, '[SR] generateRequestJSON - request.audio.content type:', typeof request.audio.content);
 
   // Request config with phrase hints omitted from logs (too large)
   clientConsole(2, '[SR] Request config: encoding:', request.config.encoding,
@@ -4535,25 +4670,17 @@ function startUserMedia(stream) {
 }
 
 function startRecording() {
-  clientConsole(2, '[SR] ========== startRecording() CALLED ==========');
-  clientConsole(2, '[SR] Conditions check:');
-  clientConsole(2, '[SR]   recorder exists:', !!recorder);
-  clientConsole(2, '[SR]   recordingLocked:', Session.get('recordingLocked'));
-  clientConsole(2, '[SR]   audioInputMode:', Meteor.user()?.audioInputMode);
-  clientConsole(2, '[SR]   audioPromptMode:', Meteor.user()?.audioPromptMode);
-
   if (recorder && !Session.get('recordingLocked') && Meteor.user().audioInputMode) {
     Session.set('recording', true);
     recorder.record();
     clientConsole(2, '[SR] RECORDING START');
-    clientConsole(2, '[SR]   recorder.recording:', recorder.recording);
   } else {
-    clientConsole(2, '[SR] ❌ RECORDING BLOCKED:');
-    if (!recorder) clientConsole(2, '[SR]     - NO RECORDER');
-    if (Session.get('recordingLocked')) clientConsole(2, '[SR]     - RECORDING LOCKED (TTS audio likely playing)');
-    if (!Meteor.user()?.audioInputMode) clientConsole(2, '[SR]     - AUDIO INPUT MODE OFF');
+    clientConsole(2, '[SR] ❌ RECORDING BLOCKED:',
+      !recorder ? 'NO RECORDER' : '',
+      Session.get('recordingLocked') ? 'RECORDING LOCKED' : '',
+      !Meteor.user()?.audioInputMode ? 'AUDIO INPUT MODE OFF' : ''
+    );
   }
-  clientConsole(2, '[SR] ==========================================');
 }
 
 function stopRecording() {

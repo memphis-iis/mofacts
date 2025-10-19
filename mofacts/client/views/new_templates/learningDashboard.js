@@ -1,0 +1,431 @@
+import {ReactiveVar} from 'meteor/reactive-var';
+import {haveMeteorUser} from '../../lib/currentTestingHelpers';
+import {getExperimentState, updateExperimentState} from '../experiment/card';
+import {DISABLED, ENABLED, MODEL_UNIT, SCHEDULE_UNIT} from '../../../common/Definitions';
+import {meteorCallAsync} from '../..';
+import {sessionCleanUp} from '../../lib/sessionUtils';
+import {routeToSignin} from '../../lib/router';
+import {checkUserSession} from '../../index';
+
+export {selectTdf};
+
+Template.learningDashboard.created = function() {
+  this.allTdfsList = new ReactiveVar([]);
+  this.filteredTdfsList = new ReactiveVar(false);
+  this.searching = new ReactiveVar(false);
+  this.isLoading = new ReactiveVar(true);
+};
+
+Template.learningDashboard.helpers({
+  isLoading: () => {
+    return Template.instance().isLoading.get();
+  },
+
+  hasTdfs: () => {
+    const allTdfs = Template.instance().allTdfsList.get();
+    const filtered = Template.instance().filteredTdfsList.get();
+    const list = filtered || allTdfs;
+    return list && list.length > 0;
+  },
+
+  allTdfsList: () => {
+    const filtered = Template.instance().filteredTdfsList.get();
+    if (filtered) {
+      return filtered;
+    }
+    return Template.instance().allTdfsList.get();
+  },
+});
+
+Template.learningDashboard.events({
+  'keyup #learningDashboardSearch': function(event, instance) {
+    const search = event.target.value;
+    if (search.length > 0) {
+      instance.searching.set(true);
+    } else {
+      instance.searching.set(false);
+      instance.filteredTdfsList.set(false);
+      return;
+    }
+
+    const allTdfs = instance.allTdfsList.get();
+    let filteredTdfs = allTdfs.filter((tdf) => {
+      return tdf.displayName.toLowerCase().includes(search.toLowerCase());
+    });
+
+    // Also search tags
+    const tagFiltered = allTdfs.filter((tdf) => {
+      return tdf.tags && tdf.tags.some((tag) => {
+        return tag.toLowerCase().includes(search.toLowerCase());
+      });
+    });
+
+    // Merge and deduplicate
+    filteredTdfs = [...new Set([...filteredTdfs, ...tagFiltered])];
+
+    instance.filteredTdfsList.set(filteredTdfs);
+  },
+
+  'click .continue-lesson': function(event) {
+    event.preventDefault();
+    const target = $(event.currentTarget);
+    const tdfId = target.data('tdfid');
+    const lessonName = target.data('lessonname');
+
+    // Get TDF info from Tdfs collection
+    const tdf = Tdfs.findOne({_id: tdfId});
+    if (tdf) {
+      const setspec = tdf.content.tdfs.tutor.setspec;
+      selectTdf(
+        tdfId,
+        lessonName,
+        tdf.stimuliSetId,
+        setspec.speechIgnoreOutOfGrammarResponses === 'true',
+        setspec.speechOutOfGrammarFeedback || 'Response not in answer set',
+        'Continue from Learning Dashboard',
+        tdf.content.isMultiTdf,
+        false,
+      );
+    }
+  },
+
+  'click .start-lesson': function(event) {
+    event.preventDefault();
+    const target = $(event.currentTarget);
+    selectTdf(
+      target.data('tdfid'),
+      target.data('lessonname'),
+      target.data('currentstimulisetid'),
+      target.data('ignoreoutofgrammarresponses'),
+      target.data('speechoutofgrammarfeedback'),
+      'Start from Learning Dashboard',
+      target.data('ismultitdf'),
+      false,
+    );
+  },
+});
+
+Template.learningDashboard.rendered = async function() {
+  sessionCleanUp();
+  await checkUserSession();
+  Session.set('showSpeechAPISetup', true);
+
+  const studentID = Session.get('curStudentID') || Meteor.userId();
+
+  // Get all TDFs the user can access
+  let allTdfs = Tdfs.find().fetch();
+  Session.set('allTdfs', allTdfs);
+
+  // Get attempted TDFs with stats
+  const tdfsAttempted = await meteorCallAsync('getTdfIDsAndDisplaysAttemptedByUserId', studentID);
+
+  // Load stats for each attempted TDF
+  const statsPromises = tdfsAttempted.map(async (tdf) => {
+    const stats = await meteorCallAsync('getSimpleTdfStats', studentID, tdf.TDFId);
+    return {
+      ...tdf,
+      ...stats,
+      isUsed: true
+    };
+  });
+
+  const usedTdfsWithStats = await Promise.all(statsPromises);
+
+  // Filter out TDFs with no stats
+  const validUsedTdfs = usedTdfsWithStats.filter(s => s.totalTrials > 0);
+
+  // Process all TDFs to find unused ones
+  const isAdmin = Roles.userIsInRole(Meteor.user(), ['admin']);
+  const courseId = Meteor.user().loginParams.curClass ? Meteor.user().loginParams.curClass.courseId : null;
+  const courseTdfs = Assignments.find({courseId: courseId}).fetch();
+
+  // Filter by section if curClass is set
+  if (Session.get('curClass') && Session.get('curClass').sectionId) {
+    const sectionId = Session.get('curClass').sectionId;
+    const sectionTdfs = await meteorCallAsync('getTdfsAssignedToStudent', Meteor.userId(), sectionId);
+    allTdfs = allTdfs.filter((tdf) => {
+      return sectionTdfs.includes(tdf._id);
+    });
+  }
+
+  const unusedTdfs = [];
+
+  // Process all TDFs
+  for (const tdf of allTdfs) {
+    const TDFId = tdf._id;
+    const tdfObject = tdf.content;
+    const isMultiTdf = tdfObject.isMultiTdf;
+    const currentStimuliSetId = tdf.stimuliSetId;
+
+    // Make sure we have a valid TDF (with a setspec)
+    const setspec = tdfObject.tdfs.tutor.setspec ? tdfObject.tdfs.tutor.setspec : null;
+
+    if (!setspec) {
+      continue;
+    }
+
+    const name = setspec.lessonname;
+    const ignoreOutOfGrammarResponses = setspec.speechIgnoreOutOfGrammarResponses ?
+      setspec.speechIgnoreOutOfGrammarResponses.toLowerCase() == 'true' : false;
+    const speechOutOfGrammarFeedback = setspec.speechOutOfGrammarFeedback ?
+      setspec.speechOutOfGrammarFeedback : 'Response not in answer set';
+    const audioInputEnabled = setspec.audioInputEnabled ? setspec.audioInputEnabled == 'true' : false;
+    const enableAudioPromptAndFeedback = setspec.enableAudioPromptAndFeedback ?
+      setspec.enableAudioPromptAndFeedback == 'true' : false;
+
+    // Check if this TDF is assigned to the user
+    const tdfIsAssigned = courseTdfs.filter(e => e.TDFId === TDFId);
+    const isAssigned = courseTdfs.length > 0 ? tdfIsAssigned.length > 0 : true;
+
+    // Show TDF ONLY if userselect is explicitly 'true'
+    const shouldShow = (setspec.userselect === 'true');
+
+    // Check if this TDF has been used
+    const isUsed = validUsedTdfs.some(usedTdf => usedTdf.TDFId === TDFId);
+
+    if (shouldShow && (tdf.visibility == 'profileOnly' || tdf.visibility == 'enabled') && isAssigned && !isUsed) {
+      unusedTdfs.push({
+        TDFId: TDFId,
+        displayName: name,
+        currentStimuliSetId: currentStimuliSetId,
+        ignoreOutOfGrammarResponses: ignoreOutOfGrammarResponses,
+        speechOutOfGrammarFeedback: speechOutOfGrammarFeedback,
+        audioInputEnabled: audioInputEnabled,
+        enableAudioPromptAndFeedback: enableAudioPromptAndFeedback,
+        isMultiTdf: isMultiTdf,
+        isUsed: false,
+        tags: setspec.tags || []
+      });
+    }
+  }
+
+  // Sort used TDFs by lastPracticeDate (most recent first)
+  validUsedTdfs.sort((a, b) => {
+    const dateA = new Date(a.lastPracticeDate || 0);
+    const dateB = new Date(b.lastPracticeDate || 0);
+    return dateB - dateA;
+  });
+
+  // Sort unused TDFs alphabetically by name
+  unusedTdfs.sort((a, b) => a.displayName.localeCompare(b.displayName, 'en', {numeric: true, sensitivity: 'base'}));
+
+  // Combine: used first (sorted by recent), then unused (sorted alphabetically)
+  const combinedTdfs = [...validUsedTdfs, ...unusedTdfs];
+
+  this.allTdfsList.set(combinedTdfs);
+  this.isLoading.set(false);
+
+  // Ensure body styles from offcanvas are cleared before fade-in
+  document.body.style.overflow = '';
+  document.body.style.paddingRight = '';
+
+  // Trigger fade-in with stable layout (page-container prevents reflow)
+  const container = document.getElementById('learningDashboardContainer');
+  if (container) {
+    container.classList.remove('page-loading');
+    container.classList.add('page-loaded');
+  }
+};
+
+// Actual logic for selecting and starting a TDF
+async function selectTdf(currentTdfId, lessonName, currentStimuliSetId, ignoreOutOfGrammarResponses,
+  speechOutOfGrammarFeedback, how, isMultiTdf, fromSouthwest, setspec, isExperiment = false) {
+
+  const audioPromptFeedbackView = Session.get('audioPromptFeedbackView');
+
+  // make sure session variables are cleared from previous tests
+  sessionCleanUp();
+
+  // Set the session variables we know
+  // Note that we assume the root and current TDF names are the same.
+  // The resume logic in the the card template will determine if the
+  // current TDF should be changed due to an experimental condition
+  Session.set('currentRootTdfId', currentTdfId);
+  Session.set('currentTdfId', currentTdfId);
+  const tdfResponse = Tdfs.findOne({_id: currentTdfId});
+  const curTdfContent = tdfResponse.content;
+  const curTdfTips = tdfResponse.content.tdfs.tutor.setspec.tips;
+  Session.set('currentTdfFile', curTdfContent);
+  Session.set('currentTdfName', curTdfContent.fileName);
+  Session.set('currentStimuliSetId', currentStimuliSetId);
+  Session.set('ignoreOutOfGrammarResponses', ignoreOutOfGrammarResponses);
+  Session.set('speechOutOfGrammarFeedback', speechOutOfGrammarFeedback);
+  Session.set('curTdfTips', curTdfTips);
+
+  // Record state to restore when we return to this page
+  let audioPromptMode;
+  let audioInputEnabled;
+  let audioPromptFeedbackSpeakingRate;
+  let audioPromptQuestionSpeakingRate;
+  let audioPromptVoice;
+  let audioInputSensitivity;
+  let audioPromptQuestionVolume;
+  let audioPromptFeedbackVolume;
+  let feedbackType;
+  let audioPromptFeedbackVoice;
+
+  if (isExperiment) {
+    audioPromptMode = setspec.audioPromptMode || 'silent';
+    audioInputEnabled = setspec.audioInputEnabled || false;
+    audioPromptFeedbackSpeakingRate = setspec.audioPromptFeedbackSpeakingRate || 1;
+    audioPromptQuestionSpeakingRate = setspec.audioPromptQuestionSpeakingRate || 1;
+    audioPromptVoice = setspec.audioPromptVoice || 'en-US-Standard-A';
+    audioInputSensitivity = setspec.audioInputSensitivity || 20;
+    audioPromptQuestionVolume = setspec.audioPromptQuestionVolume || 0;
+    audioPromptFeedbackVolume = setspec.audioPromptFeedbackVolume || 0;
+    feedbackType = setspec.feedbackType;
+    audioPromptFeedbackVoice = setspec.audioPromptFeedbackVoice || 'en-US-Standard-A';
+  } else {
+    audioPromptMode = Meteor.user().audioPromptMode;
+    audioInputEnabled = Meteor.user().audioInputMode;
+    audioPromptFeedbackSpeakingRate = document.getElementById('audioPromptFeedbackSpeakingRate').value;
+    audioPromptQuestionSpeakingRate = document.getElementById('audioPromptQuestionSpeakingRate').value;
+    audioPromptVoice = document.getElementById('audioPromptVoice').value;
+    audioInputSensitivity = document.getElementById('audioInputSensitivity').value;
+    audioPromptQuestionVolume = document.getElementById('audioPromptQuestionVolume').value;
+    audioPromptFeedbackVolume = document.getElementById('audioPromptFeedbackVolume').value;
+    feedbackType = GlobalExperimentStates.findOne({userId: Meteor.userId(), TDFId: currentTdfId})?.experimentState?.feedbackType || null;
+    audioPromptFeedbackVoice = document.getElementById('audioPromptFeedbackVoice').value;
+    if (feedbackType)
+      Session.set('feedbackTypeFromHistory', feedbackType.feedbacktype);
+    else
+      Session.set('feedbackTypeFromHistory', null);
+  }
+
+  Session.set('audioPromptMode', audioPromptMode);
+  Session.set('audioPromptFeedbackView', audioPromptMode);
+  Session.set('audioEnabledView', audioInputEnabled);
+  Session.set('audioPromptFeedbackSpeakingRateView', audioPromptFeedbackSpeakingRate);
+  Session.set('audioPromptQuestionSpeakingRateView', audioPromptQuestionSpeakingRate);
+  Session.set('audioPromptVoiceView', audioPromptVoice);
+  Session.set('audioInputSensitivityView', audioInputSensitivity);
+  Session.set('audioPromptQuestionVolume', audioPromptQuestionVolume);
+  Session.set('audioPromptFeedbackVolume', audioPromptFeedbackVolume);
+  Session.set('audioPromptFeedbackVoiceView', audioPromptFeedbackVoice);
+
+  if (feedbackType)
+    Session.set('feedbackTypeFromHistory', feedbackType.feedbacktype);
+  else
+    Session.set('feedbackTypeFromHistory', null);
+
+  // Set values for card.js to use later, in experiment mode we'll default to the values in the tdf
+  Session.set('audioPromptFeedbackSpeakingRate', audioPromptFeedbackSpeakingRate);
+  Session.set('audioPromptQuestionSpeakingRate', audioPromptQuestionSpeakingRate);
+  Session.set('audioPromptVoice', audioPromptVoice);
+  Session.set('audioPromptFeedbackVoice', audioPromptFeedbackVoice);
+  Session.set('audioInputSensitivity', audioInputSensitivity);
+
+  // Get some basic info about the current user's environment
+  let userAgent = '[Could not read user agent string]';
+  let prefLang = '[N/A]';
+  try {
+    userAgent = _.display(navigator.userAgent);
+    prefLang = _.display(navigator.language);
+  } catch (err) {
+    // Silently handle browser info error
+  }
+
+  // Check to see if the user has turned on audio prompt.
+  // If so and if the tdf has it enabled then turn on, otherwise we won't do anything
+  const userAudioPromptFeedbackToggled = (audioPromptFeedbackView == 'feedback') || (audioPromptFeedbackView == 'all') || (audioPromptFeedbackView == 'question');
+  const tdfAudioPromptFeedbackEnabled = !!curTdfContent.tdfs.tutor.setspec.enableAudioPromptAndFeedback &&
+    curTdfContent.tdfs.tutor.setspec.enableAudioPromptAndFeedback == 'true';
+  const audioPromptTTSAPIKeyAvailable = !!curTdfContent.tdfs.tutor.setspec.textToSpeechAPIKey &&
+    !!curTdfContent.tdfs.tutor.setspec.textToSpeechAPIKey;
+  let audioPromptFeedbackEnabled = undefined;
+
+  if (Session.get('experimentTarget')) {
+    audioPromptFeedbackEnabled = tdfAudioPromptFeedbackEnabled;
+  } else if (fromSouthwest) {
+    audioPromptFeedbackEnabled = tdfAudioPromptFeedbackEnabled &&
+      userAudioPromptFeedbackToggled && audioPromptTTSAPIKeyAvailable;
+  } else {
+    audioPromptFeedbackEnabled = tdfAudioPromptFeedbackEnabled && userAudioPromptFeedbackToggled;
+  }
+  Session.set('enableAudioPromptAndFeedback', audioPromptFeedbackEnabled);
+
+  // If we're in experiment mode and the tdf file defines whether audio input is enabled
+  // forcibly use that, otherwise go with whatever the user set the audio input toggle to
+  const userAudioToggled = audioInputEnabled;
+  const tdfAudioEnabled = curTdfContent.tdfs.tutor.setspec.audioInputEnabled ?
+    curTdfContent.tdfs.tutor.setspec.audioInputEnabled == 'true' : false;
+  const audioEnabled = !Session.get('experimentTarget') ? (tdfAudioEnabled && userAudioToggled) : tdfAudioEnabled;
+  Session.set('audioEnabled', audioEnabled);
+
+  let continueToCard = true;
+
+  if (audioEnabled) {
+    // Check if the tdf or user has a speech api key defined, if not show the modal form
+    // for them to input one.  If so, actually continue initializing web audio
+    // and going to the practice set
+    Meteor.call('getUserSpeechAPIKey', function(error, key) {
+      Session.set('speechAPIKey', key);
+      const tdfKeyPresent = !!curTdfContent.tdfs.tutor.setspec.speechAPIKey &&
+        !!curTdfContent.tdfs.tutor.setspec.speechAPIKey;
+      if (!key && !tdfKeyPresent) {
+        $('#speechAPIModal').modal('show');
+        continueToCard = false;
+      }
+    });
+  }
+
+  // Go directly to the card session - which will decide whether or
+  // not to show instruction
+  if (continueToCard) {
+    const newExperimentState = {
+      userAgent: userAgent,
+      browserLanguage: prefLang,
+      selectedHow: how,
+      isMultiTdf: isMultiTdf,
+      currentTdfId,
+      currentTdfName: curTdfContent.fileName,
+      currentStimuliSetId: currentStimuliSetId,
+    };
+    updateExperimentState(newExperimentState, 'profile.selectTdf');
+
+    Session.set('inResume', true);
+    if (isMultiTdf) {
+      navigateForMultiTdf();
+    } else {
+      Router.go('/card');
+    }
+  }
+}
+
+async function navigateForMultiTdf() {
+  function getUnitType(curUnit) {
+    let unitType = 'other';
+    if (curUnit.assessmentsession) {
+      unitType = SCHEDULE_UNIT;
+    } else if (curUnit.learningsession) {
+      unitType = MODEL_UNIT;
+    }
+    return unitType;
+  }
+
+  const experimentState = await getExperimentState();
+  const lastUnitCompleted = experimentState.lastUnitCompleted || -1;
+  const lastUnitStarted = experimentState.lastUnitStarted || -1;
+  let unitLocked = false;
+
+  // If we haven't finished the unit yet, we may want to lock into the current unit
+  // so the user can't mess up the data
+  if (lastUnitStarted > lastUnitCompleted) {
+    const curUnit = experimentState.currentTdfUnit;
+    const curUnitType = getUnitType(curUnit);
+    // We always want to lock users in to an assessment session
+    if (curUnitType === SCHEDULE_UNIT) {
+      unitLocked = true;
+    } else if (curUnitType === MODEL_UNIT) {
+      if (!!curUnit.displayMinSeconds || !!curUnit.displayMaxSeconds) {
+        unitLocked = true;
+      }
+    }
+  }
+  // Only show selection if we're in a unit where it doesn't matter (infinite learning sessions)
+  if (unitLocked) {
+    Router.go('/card');
+  } else {
+    Router.go('/multiTdfSelect');
+  }
+}

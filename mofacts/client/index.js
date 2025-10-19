@@ -29,7 +29,7 @@ function sanitizeHTML(dirty) {
   });
 }
 
-export {checkUserSession, clientConsole}
+export {checkUserSession, clientConsole, initTabDetection}
 
 // This redirects to the SSL version of the page if we're not on it
 const forceSSL = Meteor.settings.public.forceSSL || false;
@@ -40,26 +40,113 @@ if (location.protocol !== 'https:' && forceSSL) {
 
 getCurrentTheme();
 
+// Multi-tab detection: Generate unique ID for this tab
+const TAB_ID = Math.random().toString(36).substr(2, 9);
+let tabChannel = null;
 
+// Initialize BroadcastChannel for modern multi-tab detection
+function initTabDetection() {
+  // Try to use BroadcastChannel API (modern browsers)
+  if (typeof BroadcastChannel !== 'undefined') {
+    try {
+      tabChannel = new BroadcastChannel('mofacts-tabs');
+      tabChannel.onmessage = (event) => {
+        if (event.data.type === 'new-tab-opened' && event.data.tabId !== TAB_ID) {
+          // Check if we should ignore broadcasts (tab is taking over)
+          const ignoreBroadcastUntil = Session.get('ignoreBroadcastUntil');
+          if (ignoreBroadcastUntil && Date.now() < ignoreBroadcastUntil) {
+            clientConsole(1, 'Ignoring broadcast - this tab is taking over');
+            return;
+          }
 
+          // Another tab just opened - IMMEDIATELY redirect this tab
+          clientConsole(1, 'BroadcastChannel detected new tab, redirecting to warning');
+          Router.go('/tabwarning');
+        }
+      };
+    } catch (e) {
+      console.log('BroadcastChannel not available, using localStorage fallback');
+    }
+  }
+
+  // Fallback to localStorage events for older browsers
+  if (!tabChannel) {
+    window.addEventListener('storage', (e) => {
+      if (e.key === 'mofacts-active-tab' && e.newValue !== TAB_ID) {
+        // Check if we should ignore broadcasts (tab is taking over)
+        const ignoreBroadcastUntil = Session.get('ignoreBroadcastUntil');
+        if (ignoreBroadcastUntil && Date.now() < ignoreBroadcastUntil) {
+          clientConsole(1, 'Ignoring localStorage event - this tab is taking over');
+          return;
+        }
+
+        // Another tab took over - IMMEDIATELY redirect
+        clientConsole(1, 'localStorage detected new tab, redirecting to warning');
+        Router.go('/tabwarning');
+      }
+    });
+  }
+
+  // Clean up on page unload
+  window.addEventListener('beforeunload', () => {
+    if (tabChannel) {
+      tabChannel.close();
+    }
+  });
+}
 
 async function checkUserSession(){
+  // Guard against null user or connection
+  if (!Meteor.user() || !Meteor.default_connection || !Meteor.default_connection._lastSessionId) {
+    return;
+  }
+
   const currentSessionId = Meteor.default_connection._lastSessionId;
   const lastSessionId = Meteor.user().lastSessionId;
   const lastSessionIdTimestampServer = Meteor.user().lastSessionIdTimestamp;
   const lastSessionIdTimestampClient = Session.get('lastSessionIdTimestamp');
+  const storedSessionId = Session.get('lastSessionId');
+
   if(lastSessionIdTimestampClient){
-    //user previously logged in this session
-    if (lastSessionId !== currentSessionId && lastSessionIdTimestampClient < lastSessionIdTimestampServer) {
-      // This is an expired session
-      Router.go('/tabwarning')
+    // We've been here before in this tab
+
+    if (currentSessionId !== storedSessionId) {
+      // Our connection's session ID changed - this is a RECONNECTION, not a new tab
+      Session.set('lastSessionId', currentSessionId);
+
+      // Check if another tab took over while we were disconnected
+      if (lastSessionId !== currentSessionId && lastSessionIdTimestampClient < lastSessionIdTimestampServer) {
+        // Server has a DIFFERENT session with a NEWER timestamp
+        // = Another tab took over while we were disconnected/idle
+        Router.go('/tabwarning');
+        return;
+      }
+
+      // We reconnected and no other tab took over - claim the session
+      const currentSessionIdTimestamp = Date.now();
+      Meteor.call('setUserSessionId', currentSessionId, currentSessionIdTimestamp);
+      Session.set('lastSessionIdTimestamp', currentSessionIdTimestamp);
+
+    } else if (lastSessionId !== currentSessionId && lastSessionIdTimestampClient < lastSessionIdTimestampServer) {
+      // Our connection is stable (currentSessionId === storedSessionId)
+      // BUT server has a different session with newer timestamp
+      // = Another tab is active
+      Router.go('/tabwarning');
     }
+
   } else {
-    //user has not logged in this session
-    const currentSessionIdTimestamp = new Date().getTime();
+    // First time in this session - initialize
+    const currentSessionIdTimestamp = Date.now();
     Meteor.call('setUserSessionId', currentSessionId, currentSessionIdTimestamp);
     Session.set('lastSessionId', currentSessionId);
     Session.set('lastSessionIdTimestamp', currentSessionIdTimestamp);
+
+    // Announce this tab to others using BroadcastChannel or localStorage
+    if (tabChannel) {
+      tabChannel.postMessage({ type: 'new-tab-opened', tabId: TAB_ID });
+    } else {
+      localStorage.setItem('mofacts-active-tab', TAB_ID);
+    }
   }
 }
 
@@ -167,6 +254,9 @@ Meteor.startup(function() {
 
   Session.set('debugging', true);
   sessionCleanUp();
+
+  // Initialize multi-tab detection
+  initTabDetection();
 
   // Include any special jQuery handling we need
   $(window).on('resize', function() {
@@ -306,8 +396,12 @@ Template.DefaultLayout.events({
     if (window.currentAudioObj) {
       window.currentAudioObj.pause();
     }
-    //open the wiki in a new tab
-    window.open('https://github.com/memphis-iis/mofacts/wiki', '_blank');
+    // Instantly hide offcanvas to prevent layout shift during page transition
+    const offcanvas = bootstrap.Offcanvas.getInstance(document.getElementById('navOffcanvas'));
+    if (offcanvas) {
+      offcanvas.hide();
+    }
+    Router.go('/help');
   },
   'click #mechTurkButton': function(event) {
     event.preventDefault();

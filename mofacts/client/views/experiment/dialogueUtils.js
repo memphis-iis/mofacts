@@ -144,7 +144,6 @@ function initiateDialogue(incorrectUserAnswer, callback, lookupFailCallback) {
       if (res.tag != 0) {
         clientConsole(2, 'cache miss, showing normal feedback');
         Session.set('dialogueHistory', res);
-        clientConsole(2, 'dialogueHistory updated - length:', Session.get('dialogueHistory')?.length);
         Session.set('dialogueLoopStage', undefined);
         Tracker.afterFlush(()=>$('#userAnswer').val(incorrectUserAnswer));
         lookupFailCallback();

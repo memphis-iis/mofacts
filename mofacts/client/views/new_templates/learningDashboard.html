@@ -1,0 +1,85 @@
+<template name="learningDashboard">
+  <div class="page-container page-loading" id="learningDashboardContainer">
+    <h3 style="margin-top: 0; text-align: center;">Learning Dashboard</h3>
+
+    <!-- Search Field -->
+    <div class="row justify-content-center">
+      <div class="col-12">
+        <div class="row justify-content-center" style="margin: 10px;">
+          <input id="learningDashboardSearch" type="text" placeholder="Search lessons by name or tag..." alt="lesson search box" class="w-75 mx-auto d-block">
+        </div>
+      </div>
+    </div>
+
+    {{#if hasTdfs}}
+      <table class="table table-striped table-hover mt-4">
+        <thead>
+          <tr>
+            <th>Lesson</th>
+            <th>Features</th>
+            <th>Total Trials</th>
+            <th>Overall Accuracy</th>
+            <th>Last 10 Accuracy</th>
+            <th>Time (min)</th>
+            <th>Items Practiced</th>
+            <th>Days with Sessions</th>
+            <th>Last Practice</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {{#each allTdfsList}}
+            <tr>
+              <td><strong>{{this.displayName}}</strong></td>
+              <td>
+                {{#if this.enableAudioPromptAndFeedback}}
+                  <span class="fa fa-headphones" title="Text-to-Speech enabled"></span>
+                {{/if}}
+                {{#if this.audioInputEnabled}}
+                  <span class="fa fa-microphone" title="Speech Recognition enabled"></span>
+                {{/if}}
+              </td>
+              {{#if this.isUsed}}
+                <td>{{this.totalTrials}}</td>
+                <td>{{this.overallAccuracy}}%</td>
+                <td>{{this.last10Accuracy}}%</td>
+                <td>{{this.totalTimeMinutes}}</td>
+                <td>{{this.itemsPracticed}}</td>
+                <td>{{this.totalSessions}}</td>
+                <td>{{this.lastPracticeDate}}</td>
+                <td class="text-center">
+                  <button class="btn btn-sm btn-primary continue-lesson"
+                    data-tdfid="{{this.TDFId}}"
+                    data-lessonname="{{this.displayName}}"
+                    data-currentstimulisetid="{{this.currentStimuliSetId}}"
+                    data-ismultitdf="{{this.isMultiTdf}}">Continue</button>
+                </td>
+              {{else}}
+                <td>-</td>
+                <td>-</td>
+                <td>-</td>
+                <td>-</td>
+                <td>-</td>
+                <td>-</td>
+                <td>-</td>
+                <td class="text-center">
+                  <button class="btn btn-sm btn-success start-lesson"
+                    data-tdfid="{{this.TDFId}}"
+                    data-lessonname="{{this.displayName}}"
+                    data-currentstimulisetid="{{this.currentStimuliSetId}}"
+                    data-ignoreoutofgrammarresponses="{{this.ignoreOutOfGrammarResponses}}"
+                    data-speechoutofgrammarfeedback="{{this.speechOutOfGrammarFeedback}}"
+                    data-ismultitdf="{{this.isMultiTdf}}">Start</button>
+                </td>
+              {{/if}}
+            </tr>
+          {{/each}}
+        </tbody>
+      </table>
+    {{else}}
+      <div class="alert alert-info text-center mt-4">
+        <p>No lessons found. Please contact your administrator.</p>
+      </div>
+    {{/if}}
+  </div>
+</template>
