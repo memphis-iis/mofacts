@@ -127,6 +127,12 @@ function sessionCleanUp() {
   Session.set('selectedTdfDueDate', undefined);
   Session.set('currentStimProbFunctionParameters', undefined);
   Session.set('furthestUnit', undefined);
+
+  // Clear audio warmup flags so they can re-warm on next session
+  Session.set('ttsWarmedUp', false);
+  Session.set('srWarmedUp', false);
+  Session.set('audioRecorderInitialized', false);
+
   if(playerController) {
     destroyPlyr();
   }
@@ -135,6 +141,27 @@ function sessionCleanUp() {
     window.currentAudioObj.pause();
     window.currentAudioObj = null;
   }
+
+  // Clean up pre-initialized audio stream from warmup
+  if (window.preInitializedAudioStream) {
+    try {
+      window.preInitializedAudioStream.getTracks().forEach(track => track.stop());
+    } catch (e) {
+      // Ignore errors stopping tracks
+    }
+    window.preInitializedAudioStream = null;
+  }
+
+  // Clean up audio recorder context from warmup
+  if (window.audioRecorderContext && window.audioRecorderContext.state !== "closed") {
+    try {
+      window.audioRecorderContext.close();
+    } catch (e) {
+      // Ignore errors closing context
+    }
+    window.audioRecorderContext = null;
+  }
+
   if(window.audioContext && window.audioContext.state != "closed"){
     window.audioContext.close();
     window.audioContext = null;

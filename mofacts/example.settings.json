@@ -1,8 +1,9 @@
-{  
+{
     "logNotice": "Test Config",
     "public": {
         "testLogin": true,
-        "enableDeleteAllButton": false
+        "enableDeleteAllButton": false,
+        "admin": "ADMIN"
     },
     "owner": "ADMIN",
     "initRoles": {

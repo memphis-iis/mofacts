@@ -6,12 +6,26 @@
             </button>
         {{else}}
             <div class="text-center w-80">
-                <input id="dialogueUserAnswer" style="display:table-cell;width:100%;" placeholder="{{UISettings.inputPlaceholder}}">
+                <label for="dialogueUserAnswer" class="sr-only">
+                    Enter your answer to the dialogue question
+                </label>
+                <input id="dialogueUserAnswer"
+                       style="display:table-cell;width:100%;"
+                       placeholder="{{UISettings.inputPlaceholder}}"
+                       aria-required="true">
             </div>
         {{/if}}
     {{else}}
         <div class="text-center w-80">
-            <input type="text" id="userAnswer" style="display:table-cell;width:100%;" autocomplete="off" placeholder="{{UISettings.inputPlaceholder}}">
+            <label for="userAnswer" class="sr-only">
+                Enter your answer
+            </label>
+            <input type="text"
+                   id="userAnswer"
+                   style="display:table-cell;width:100%;"
+                   autocomplete="off"
+                   placeholder="{{UISettings.inputPlaceholder}}"
+                   aria-required="true">
         </div>
     {{/if}}
 
@@ -20,6 +34,13 @@
 <template name="inputForceCorrect">
     <div class="{{fontSizeClass}}">
     <p id="forceCorrectGuidance" style="{{getFontSizeStyle}}"></p>
-        <input id="userForceCorrect" class="alert alert-warning" style="display:table-cell;width:100%;">
+        <label for="userForceCorrect" class="sr-only">
+            Enter the correct answer
+        </label>
+        <input id="userForceCorrect"
+               class="alert alert-warning"
+               style="display:table-cell;width:100%;"
+               aria-required="true"
+               aria-describedby="forceCorrectGuidance">
     </div>
 </template>

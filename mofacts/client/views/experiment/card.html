@@ -196,7 +196,11 @@
                     <p class="marginLeftAndRight text-center {{#unless buttonTrial}}trial-input-hidden{{/unless}}">Please speak the letter next to the correct option for audio input</p>
                 {{/if}}
                 {{/unless}}
-                <div id="multipleChoiceContainer" class="{{UIsettings.choiceColWidth}} {{videoMCClasses isVideoSession}} smooth-transition {{#if buttonTrial}}{{else}}trial-input-hidden{{/if}}">
+                <div id="multipleChoiceContainer"
+                     class="{{UIsettings.choiceColWidth}} {{videoMCClasses isVideoSession}} smooth-transition {{#if buttonTrial}}{{else}}trial-input-hidden{{/if}}"
+                     role="radiogroup"
+                     aria-labelledby="displaySubContainer"
+                     aria-required="true">
                     <!-- will contain multiple choice buttons which are dynamically added. -->
                     <div id="multipleChoiceTable" class="row gy-3 choice text-center row-cols-{{UIsettings.choiceButtonCols}} align-items-start">
                         {{#if imageResponse}}
@@ -206,7 +210,14 @@
                                 {{#if audioEnabled}}
                                     <label class="no-bottom-margin mb-2">{{verbalChoice}}.</label>
                                 {{/if}}
-                                    <button style="background-image: url({{buttonValue}});" verbalChoice='{{verbalChoice}}' type='button' name='{{buttonName}}' class='btnPaddedAndMinWidth btn-alt w-100 multipleChoiceButton btn-image btn-responsive'>
+                                    <button style="background-image: url({{buttonValue}});"
+                                            verbalChoice='{{verbalChoice}}'
+                                            type='button'
+                                            name='{{buttonName}}'
+                                            class='btnPaddedAndMinWidth btn-alt w-100 multipleChoiceButton btn-image btn-responsive'
+                                            role="radio"
+                                            aria-checked="false"
+                                            aria-label="Option {{verbalChoice}}: {{buttonName}}">
                                     </button>
                                 {{/each}}
                             </div>
@@ -217,7 +228,13 @@
                                 {{#if audioEnabled}}
                                 <label class="no-bottom-margin mb-2">{{verbalChoice}}.</label>
                                 {{/if}}
-                                <button verbalChoice='{{verbalChoice}}' type='button' name='{{buttonName}}' class='multipleChoiceButton btn btn-primary'>
+                                <button verbalChoice='{{verbalChoice}}'
+                                        type='button'
+                                        name='{{buttonName}}'
+                                        class='multipleChoiceButton btn btn-primary'
+                                        role="radio"
+                                        aria-checked="false"
+                                        aria-label="Option {{verbalChoice}}: {{buttonName}}">
                                 {{{buttonValue}}}
                                 </button>
                             </div>

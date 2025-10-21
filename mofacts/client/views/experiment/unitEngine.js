@@ -976,7 +976,9 @@ function modelUnitEngine() {
       const curKCBase = getStimKCBaseForCurrentStimuliSet();
       let stimulusKC = curKCBase;
       clientConsole(1, 'initializeActRModel', numQuestions, curKCBase);
-      const responseKCMap = await meteorCallAsync('getResponseKCMap');
+      // PERFORMANCE FIX: Use scoped method that only fetches current TDF (100x+ faster than getResponseKCMap)
+      const currentTdfId = Session.get('currentTdfId');
+      const responseKCMap = await meteorCallAsync('getResponseKCMapForTdf', currentTdfId);
       Session.set('responseKCMap', responseKCMap)
       clientConsole(2, 'initializeActRModel,responseKCMap', responseKCMap);
       for (i = 0; i < numQuestions; ++i) {

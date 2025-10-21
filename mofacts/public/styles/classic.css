@@ -786,6 +786,7 @@ tfoot tf, .table tfoot tf, .table tfoot td, .table tfoot th {
     justify-content: center;
     gap: 0.5rem;  /* 8px spacing between icon and text */
     margin-bottom: 0.5rem;
+    min-height: 38px;  /* Reserve space to prevent layout shift (30px icon + 8px gap) */
 }
 
 .sr-status-container .fa-microphone {
@@ -1168,9 +1169,27 @@ tfoot tf, .table tfoot tf, .table tfoot td, .table tfoot th {
   pointer-events: none;
 }
 
+/* General utility class for hiding elements */
+/* Replaces jQuery .hide()/.show() with CSS class toggle pattern */
+/* Uses visibility + opacity + height:0 for smooth transitions and proper accessibility */
+.hidden {
+  visibility: hidden !important;
+  opacity: 0 !important;
+  height: 0 !important;
+  overflow: hidden !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
 /* Hide input elements based on trial type (button vs text) */
+/* Using visibility instead of display to allow smooth opacity transitions */
 .trial-input-hidden {
-  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  height: 0 !important;
+  overflow: hidden !important;
+  margin: 0 !important;
+  padding: 0 !important;
 }
 
 /* Hide input elements during feedback with smooth transition */

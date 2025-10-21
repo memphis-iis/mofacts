@@ -21,6 +21,10 @@ Template.learningDashboard.helpers({
     return Template.instance().isLoading.get();
   },
 
+  audioWarmupInProgress: () => {
+    return Session.get('audioWarmupInProgress');
+  },
+
   hasTdfs: () => {
     const allTdfs = Template.instance().allTdfsList.get();
     const filtered = Template.instance().filteredTdfsList.get();
@@ -66,7 +70,7 @@ Template.learningDashboard.events({
     instance.filteredTdfsList.set(filteredTdfs);
   },
 
-  'click .continue-lesson': function(event) {
+  'click .continue-lesson': async function(event) {
     event.preventDefault();
     const target = $(event.currentTarget);
     const tdfId = target.data('tdfid');
@@ -76,7 +80,7 @@ Template.learningDashboard.events({
     const tdf = Tdfs.findOne({_id: tdfId});
     if (tdf) {
       const setspec = tdf.content.tdfs.tutor.setspec;
-      selectTdf(
+      await selectTdf(
         tdfId,
         lessonName,
         tdf.stimuliSetId,
@@ -89,10 +93,10 @@ Template.learningDashboard.events({
     }
   },
 
-  'click .start-lesson': function(event) {
+  'click .start-lesson': async function(event) {
     event.preventDefault();
     const target = $(event.currentTarget);
-    selectTdf(
+    await selectTdf(
       target.data('tdfid'),
       target.data('lessonname'),
       target.data('currentstimulisetid'),
@@ -226,6 +230,198 @@ Template.learningDashboard.rendered = async function() {
     container.classList.add('page-loaded');
   }
 };
+
+// Helper function to check if audio input mode is enabled
+function checkAudioInputMode() {
+  // SR should only be enabled if BOTH user has it toggled on AND TDF supports it
+  const userAudioToggled = Meteor.user()?.audioInputMode || false;
+  const tdfAudioEnabled = Session.get('currentTdfFile')?.tdfs?.tutor?.setspec?.audioInputEnabled === 'true';
+  return userAudioToggled && tdfAudioEnabled;
+}
+
+// Scenario 2: Warmup audio if TDF has embedded keys (before navigating to card)
+async function checkAndWarmupAudioIfNeeded() {
+  const currentTdfFile = Session.get('currentTdfFile');
+  if (!currentTdfFile) {
+    console.log('[Audio] No currentTdfFile, skipping Scenario 2 warmup');
+    return;
+  }
+
+  const user = Meteor.user();
+  if (!user) {
+    console.log('[Audio] No user, skipping Scenario 2 warmup');
+    return;
+  }
+
+  console.log('[Audio] Checking Scenario 2 warmup needs...');
+  const promises = [];
+
+  // Check TTS warmup (Scenario 2: TDF has embedded key)
+  if (currentTdfFile.tdfs?.tutor?.setspec?.textToSpeechAPIKey) {
+    const audioPromptMode = user.audioPromptMode;
+    if (audioPromptMode && audioPromptMode !== 'silent' && !Session.get('ttsWarmedUp')) {
+      console.log('[TTS] TDF has embedded key, warming up before first trial (Scenario 2)');
+
+      // Set flag immediately to prevent duplicate warmups
+      Session.set('ttsWarmedUp', true);
+
+      // Make async warmup call
+      const ttsPromise = new Promise((resolve, reject) => {
+        const startTime = performance.now();
+        Meteor.call('makeGoogleTTSApiCall',
+          Session.get('currentTdfId'),
+          'warmup',
+          1.0,
+          0.0,
+          function(error, result) {
+            if (error) {
+              console.log('[TTS] Warmup failed:', error);
+              reject(error);
+            } else {
+              const duration = performance.now() - startTime;
+              console.log(`[TTS] ✅ Warmup complete in ${duration.toFixed(0)}ms`);
+              resolve(result);
+            }
+          }
+        );
+      });
+      promises.push(ttsPromise);
+    }
+  }
+
+  // Check SR warmup (Scenario 2: TDF has embedded key)
+  if (currentTdfFile.tdfs?.tutor?.setspec?.speechAPIKey) {
+    if (checkAudioInputMode() && !Session.get('srWarmedUp')) {
+      console.log('[SR] TDF has embedded key, warming up before first trial (Scenario 2)');
+
+      // Set flag immediately to prevent duplicate warmups
+      Session.set('srWarmedUp', true);
+
+      // Create minimal silent audio data (LINEAR16 format, 16kHz, 100ms of silence)
+      const silentAudioBytes = new Uint8Array(3200).fill(0);
+      const base64Audio = btoa(String.fromCharCode.apply(null, silentAudioBytes));
+
+      // Build minimal request matching production format
+      const request = {
+        config: {
+          encoding: 'LINEAR16',
+          sampleRateHertz: 16000,
+          languageCode: 'en-US',
+          maxAlternatives: 1,
+          profanityFilter: false,
+          enableAutomaticPunctuation: false,
+          model: 'command_and_search',
+          useEnhanced: true,
+          speechContexts: [{
+            phrases: ['warmup'],
+            boost: 5
+          }]
+        },
+        audio: {
+          content: base64Audio
+        }
+      };
+
+      // Make async warmup call
+      const srPromise = new Promise((resolve, reject) => {
+        const startTime = performance.now();
+        Meteor.call('makeGoogleSpeechAPICall',
+          Session.get('currentTdfId'),
+          '', // Empty key - server will fetch TDF or user key
+          request,
+          ['warmup'], // Minimal answer grammar
+          function(error, result) {
+            if (error) {
+              console.log('[SR] Warmup failed:', error);
+              Session.set('srWarmedUp', false); // Allow retry on failure
+              reject(error);
+            } else {
+              const duration = performance.now() - startTime;
+              console.log(`[SR] ✅ Warmup complete in ${duration.toFixed(0)}ms`);
+              resolve(result);
+            }
+          }
+        );
+      });
+      promises.push(srPromise);
+
+      // Also initialize the audio recorder in parallel with SR warmup
+      // This saves ~2 seconds on trial 1 load
+      const recorderPromise = new Promise(async (resolve, reject) => {
+        try {
+          console.log('[SR] Initializing audio recorder during warmup...');
+          const startTime = performance.now();
+
+          // Create AudioContext if not already created
+          if (!window.audioRecorderContext) {
+            window.AudioContext = window.webkitAudioContext || window.AudioContext;
+            const audioContextConfig = {sampleRate: 16000};
+            window.audioRecorderContext = new AudioContext(audioContextConfig);
+          }
+
+          // Initialize media devices polyfill
+          if (navigator.mediaDevices === undefined) {
+            navigator.mediaDevices = {};
+          }
+          if (navigator.mediaDevices.getUserMedia === undefined) {
+            navigator.mediaDevices.getUserMedia = function(constraints) {
+              const getUserMedia = navigator.webkitGetUserMedia || navigator.mozGetUserMedia ||
+                navigator.msGetUserMedia || navigator.getUserMedia;
+              if (!getUserMedia) {
+                return Promise.reject(new Error('getUserMedia is not implemented in this browser'));
+              }
+              return new Promise(function(resolve, reject) {
+                getUserMedia.call(navigator, constraints, resolve, reject);
+              });
+            };
+          }
+
+          // Request microphone access
+          const stream = await navigator.mediaDevices.getUserMedia({audio: true, video: false});
+
+          // Store stream globally for card.js to use
+          window.preInitializedAudioStream = stream;
+          Session.set('audioRecorderInitialized', true);
+
+          const duration = performance.now() - startTime;
+          console.log(`[SR] ✅ Audio recorder initialized in ${duration.toFixed(0)}ms`);
+          resolve(stream);
+        } catch (error) {
+          console.log('[SR] Audio recorder initialization failed:', error);
+          Session.set('audioRecorderInitialized', false);
+          reject(error);
+        }
+      });
+      promises.push(recorderPromise);
+    }
+  }
+
+  // Wait for all warmups to complete (or fail)
+  if (promises.length > 0) {
+    console.log(`[Audio] Starting Scenario 2 warmup with ${promises.length} API(s), showing spinner...`);
+    Session.set('audioWarmupInProgress', true);
+    try {
+      // Use allSettled to wait for ALL promises to complete, even if some fail
+      const results = await Promise.allSettled(promises);
+
+      // Log results
+      const succeeded = results.filter(r => r.status === 'fulfilled').length;
+      const failed = results.filter(r => r.status === 'rejected').length;
+      console.log(`[Audio] Scenario 2 warmup complete: ${succeeded} succeeded, ${failed} failed`);
+
+      if (failed > 0) {
+        console.log('[Audio] Some warmups failed, but continuing to card page');
+      }
+    } catch (err) {
+      // This should never happen with allSettled, but just in case
+      console.log('[Audio] Unexpected warmup error:', err);
+    } finally {
+      Session.set('audioWarmupInProgress', false);
+    }
+  } else {
+    console.log('[Audio] No warmup needed');
+  }
+}
 
 // Actual logic for selecting and starting a TDF
 async function selectTdf(currentTdfId, lessonName, currentStimuliSetId, ignoreOutOfGrammarResponses,
@@ -384,9 +580,16 @@ async function selectTdf(currentTdfId, lessonName, currentStimuliSetId, ignoreOu
     updateExperimentState(newExperimentState, 'profile.selectTdf');
 
     Session.set('inResume', true);
+
+    // Scenario 2: Warmup audio if TDF has embedded keys (before navigating to card)
+    console.log('[Audio] ===== BEFORE warmup await =====');
+    await checkAndWarmupAudioIfNeeded();
+    console.log('[Audio] ===== AFTER warmup await - now navigating =====');
+
     if (isMultiTdf) {
-      navigateForMultiTdf();
+      await navigateForMultiTdf();
     } else {
+      console.log('[Audio] ===== Calling Router.go(/card) =====');
       Router.go('/card');
     }
   }
@@ -422,6 +625,9 @@ async function navigateForMultiTdf() {
       }
     }
   }
+  // Scenario 2: Warmup audio if TDF has embedded keys (before navigating)
+  await checkAndWarmupAudioIfNeeded();
+
   // Only show selection if we're in a unit where it doesn't matter (infinite learning sessions)
   if (unitLocked) {
     Router.go('/card');

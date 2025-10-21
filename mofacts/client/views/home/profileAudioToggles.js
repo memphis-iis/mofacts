@@ -139,12 +139,15 @@ Template.profileAudioToggles.rendered = function() {
     setAudioPromptQuestionVolumeOnPage(Session.get('audioPromptQuestionVolume'));
     setAudioPromptFeedbackVolumeOnPage(Session.get('audioPromptFeedbackVolume'));
     showHideAudioInputGroup(audioInputEnabled);
-    showHideAudioEnabledGroup(audioPromptMode != 'silent' || audioInputEnabled);    
+    showHideAudioEnabledGroup(audioPromptMode != 'silent' || audioInputEnabled);
     const showHeadphonesSuggestedDiv = audioPromptMode != 'silent' && audioInputEnabled;
     showHideheadphonesSuggestedDiv(showHeadphonesSuggestedDiv);
   });
 
   checkAndSetSpeechAPIKeyIsSetup();
+
+  // Note: TTS warmup on hot code reload is now handled in index.js Meteor.startup
+  // This ensures it runs even if the user is already in a practice session
 
   $('#audioInputSensitivity').change(function() {
     $('#audioInputSensitivityLabel').text(document.getElementById('audioInputSensitivity').value);
@@ -197,6 +200,13 @@ Template.profileAudioToggles.events({
     showHideheadphonesSuggestedDiv(showHeadphonesSuggestedDiv);
     showHideAudioInputGroup(audioInputEnabled)
     showHideAudioEnabledGroup(audioInputEnabled || (getAudioPromptModeFromPage() != 'silent'));
+
+    // FIX: Warm up Google Speech Recognition API when user enables audio input
+    // This eliminates the cold start delay on first trial
+    if (audioInputEnabled) {
+      warmupGoogleSpeechRecognition();
+    }
+
     //save the audio input mode to the user profile in mongodb
     Meteor.call('saveAudioInputMode', audioInputEnabled, function(error) {
       if (error) {
@@ -307,6 +317,10 @@ function updateAudioPromptMode(e){
     $('.audioEnabledGroup').show();
     $('#audio-modal-dialog').addClass('modal-expanded');
     console.log('showing audio enabled group');
+
+    // FIX: Warm up Google TTS API when user enables audio prompts
+    // This eliminates the 8-9 second cold start delay on first trial
+    warmupGoogleTTS();
   } else if(audioPromptMode == 'silent' && !getAudioInputFromPage()){
     $('.audioEnabledGroup').hide();
     $('#audio-modal-dialog').removeClass('modal-expanded');
@@ -319,4 +333,93 @@ function updateAudioPromptMode(e){
       console.log('Error saving audio prompt mode', error);
     }
   });
+}
+
+export function warmupGoogleTTS() {
+  console.log('[TTS] 🔥 Warming up Google TTS API...');
+  const startTime = performance.now();
+
+  // Set flag immediately to prevent duplicate warmups
+  Session.set('ttsWarmedUp', true);
+
+  // Get voice from TDF if available, otherwise use default
+  const tdfFile = Session.get('currentTdfFile');
+  const voice = tdfFile?.tdfs?.tutor?.setspec?.audioPromptFeedbackVoice || 'en-US-Standard-A';
+
+  // Make a dummy TTS request to establish the Meteor method connection
+  // Use valid text instead of "." - Google TTS rejects punctuation-only input
+  // Server will handle key lookup (user personal key or TDF key fallback)
+  Meteor.call('makeGoogleTTSApiCall',
+    Session.get('currentTdfId'),
+    'warmup', // Valid word for synthesis
+    1.0, // Default rate
+    0.0, // Volume 0 (silent warmup)
+    voice,
+    function(err, res) {
+      const elapsed = performance.now() - startTime;
+      if (err) {
+        console.log(`[TTS] 🔥 Warm-up failed (${elapsed.toFixed(0)}ms):`, err);
+        Session.set('ttsWarmedUp', false); // Allow retry on failure
+      } else {
+        console.log(`[TTS] 🔥 Warm-up complete (${elapsed.toFixed(0)}ms) - first trial TTS should be fast`);
+      }
+    }
+  );
+}
+
+export function warmupGoogleSpeechRecognition() {
+  // Check if already warmed up
+  if (Session.get('srWarmedUp')) {
+    console.log('[SR] Already warmed up, skipping');
+    return;
+  }
+
+  console.log('[SR] 🔥 Warming up Google Speech Recognition API...');
+  const startTime = performance.now();
+
+  // Set flag immediately to prevent duplicate warmups
+  Session.set('srWarmedUp', true);
+
+  // Create minimal silent audio data (LINEAR16 format, 16kHz, 100ms of silence)
+  // 16kHz * 100ms = 1600 samples, each sample is 2 bytes (16-bit) = 3200 bytes
+  const silentAudioBytes = new Uint8Array(3200).fill(0);
+  const base64Audio = btoa(String.fromCharCode.apply(null, silentAudioBytes));
+
+  // Build minimal request matching production format
+  const request = {
+    config: {
+      encoding: 'LINEAR16',
+      sampleRateHertz: 16000,  // Using 16kHz (Google recommended)
+      languageCode: 'en-US',
+      maxAlternatives: 1,
+      profanityFilter: false,
+      enableAutomaticPunctuation: false,
+      model: 'command_and_search',
+      useEnhanced: true,
+      speechContexts: [{
+        phrases: ['warmup'],  // Minimal phrase hint
+        boost: 5
+      }]
+    },
+    audio: {
+      content: base64Audio
+    }
+  };
+
+  // Make warmup call
+  Meteor.call('makeGoogleSpeechAPICall',
+    Session.get('currentTdfId'),
+    '', // Empty key - server will fetch TDF or user key
+    request,
+    ['warmup'], // Minimal answer grammar
+    function(err, res) {
+      const elapsed = performance.now() - startTime;
+      if (err) {
+        console.log(`[SR] 🔥 Warm-up failed (${elapsed.toFixed(0)}ms):`, err);
+        Session.set('srWarmedUp', false); // Allow retry on failure
+      } else {
+        console.log(`[SR] 🔥 Warm-up complete (${elapsed.toFixed(0)}ms) - first trial SR should be fast`);
+      }
+    }
+  );
 }

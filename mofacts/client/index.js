@@ -11,6 +11,7 @@ import {
   getCurrentTheme
 } from './lib/currentTestingHelpers';
 import DOMPurify from 'dompurify';
+import {warmupGoogleTTS, warmupGoogleSpeechRecognition} from './views/home/profileAudioToggles.js';
 
 // Security: HTML sanitization for user-generated content
 // Allow safe formatting tags but block scripts, iframes, and event handlers
@@ -177,7 +178,10 @@ function loadClientSettings() {
   const handle = Meteor.subscribe('settings');
   Tracker.autorun(function() {
     if (handle.ready()) {
-      verbosityLevel = DynamicSettings.findOne({key: 'clientVerbosityLevel'}).value;
+      const setting = DynamicSettings.findOne({key: 'clientVerbosityLevel'});
+      if (setting) {
+        verbosityLevel = setting.value;
+      }
     }
   });
 }
@@ -225,16 +229,26 @@ function redoCardImage() {
 }
 //change the theme of the page onlogin
 Accounts.onLogin(function() {
-  //check if the user has a profile with an email, first name, and last name
-  if (Meteor.userId() && !Meteor.user().profile.username) {
-    Meteor.call('populateSSOProfile', Meteor.userId(), function(error, result) {
-      if (error) {
-        clientConsole(1, 'populateSSOProfile error:', error);
-      } else {
-        clientConsole(2, 'populateSSOProfile result:', result);
+  // Use Tracker to wait for user data to be fully loaded
+  Tracker.autorun((computation) => {
+    const user = Meteor.user();
+
+    // Wait for user AND profile to be loaded
+    if (user && user.profile) {
+      computation.stop(); // Only run once
+
+      // Check if the user has a profile with an email, first name, and last name
+      if (!user.profile.username) {
+        Meteor.call('populateSSOProfile', Meteor.userId(), function(error, result) {
+          if (error) {
+            clientConsole(1, 'populateSSOProfile error:', error);
+          } else {
+            clientConsole(2, 'populateSSOProfile result:', result);
+          }
+        });
       }
-    });
-  }
+    }
+  });
 });
 
 //change the theme of the page onlogin to /neo or /neo-dark depending on browser
@@ -262,6 +276,48 @@ Meteor.startup(function() {
   $(window).on('resize', function() {
     redoCardImage();
   });
+
+  // FIX: Warm up TTS on hot code reload if audio prompts are already enabled
+  // This handles the scenario where user has audio enabled, code reloads,
+  // and warmup needs to happen again BEFORE they start their next trial
+  // SCENARIO 1: Warmup with user personal keys (no TDF required)
+  // If user has configured personal API keys, warm up immediately on hot reload/login
+  Tracker.autorun((computation) => {
+    const user = Meteor.user();
+
+    if (!user) return; // Wait for user to load
+
+    // Check if user has personal API keys
+    Meteor.call('hasUserPersonalKeys', function(err, keys) {
+      if (err) {
+        console.log('[Warmup] Error checking personal keys:', err);
+        return;
+      }
+
+      console.log('[Warmup] Personal keys check:', keys);
+
+      // Warm up TTS if user has personal TTS key AND TTS is enabled
+      if (keys.hasTTS && user.audioPromptMode && user.audioPromptMode !== 'silent') {
+        if (!Session.get('ttsWarmedUp')) {
+          console.log('[TTS] User has personal key, warming up immediately (Scenario 1)');
+          warmupGoogleTTS();
+        }
+      }
+
+      // Warm up SR if user has personal SR key AND SR is enabled
+      if (keys.hasSR && user.audioInputMode) {
+        if (!Session.get('srWarmedUp')) {
+          console.log('[SR] User has personal key, warming up immediately (Scenario 1)');
+          warmupGoogleSpeechRecognition();
+        }
+      }
+    });
+
+    computation.stop(); // Only run once
+  });
+
+  // SCENARIO 2: Warmup with TDF keys before first trial
+  // This is handled in card.js checkAndWarmupAudioIfNeeded() function
 
 });
 

@@ -1,8 +1,13 @@
 import {DialogueUtils} from './dialogueUtils';
 
-Template.inputF.rendered = function() {
-  this.$('input').focus();
-};
+// REMOVED: Focus is handled by allowUserInput() in card.js:3714 after fade-in completes
+// Calling focus here causes race conditions:
+// 1. Fires before opacity transition completes (input invisible to user)
+// 2. Conflicts with dialogue mode focus in dialogueUtils.js:58
+// 3. Causes double screen reader announcements for accessibility users
+// Template.inputF.rendered = function() {
+//   this.$('input').focus();
+// };
 
 Template.inputF.helpers({
   'fontSizeClass': function() {

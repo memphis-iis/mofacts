@@ -1,4 +1,5 @@
 import DOMPurify from 'dompurify';
+import {Meteor} from 'meteor/meteor';
 
 // Simple markdown to HTML converter for wiki content
 function convertMarkdownToHTML(markdown) {
@@ -39,6 +40,12 @@ function convertMarkdownToHTML(markdown) {
     FORBID_ATTR: ['onerror', 'onload', 'onclick', 'onmouseover', 'onfocus', 'onblur']
   });
 }
+
+Template.help.helpers({
+  ownerContact() {
+    return Meteor.settings.public?.admin || null;
+  }
+});
 
 Template.help.rendered = async function() {
   // Fetch and render the wiki content

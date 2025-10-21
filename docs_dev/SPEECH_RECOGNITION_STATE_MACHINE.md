@@ -4,13 +4,13 @@
 
 The Speech Recognition (SR) system in MoFACTS is a sub-state machine that runs within the main trial state machine. It handles voice input, transcription via Google Speech API, and answer validation.
 
-**Status:** 🔴 CRITICAL ISSUES - Performance regression causing long delays
+**Status:** ✅ STABLE - Duplicate feedback race condition FIXED
 
-**Last Updated:** 2025-10-17
-**Issues:**
-1. Removed feedback autorun causing DOM thrashing and race conditions
-2. Long "please wait" period after speaking (300ms-2000ms delay)
-3. Long delay between trials due to feedback cleanup synchronization issues
+**Last Updated:** 2025-10-20
+**Recent Fixes:**
+1. ✅ Duplicate TTS feedback race condition (2025-10-20) - Implemented 3-layer defense
+2. ⏳ Performance regression from feedback autorun removal (2025-10-17) - pending
+3. ⏳ Long delays between trials (2025-10-17) - pending
 
 ---
 

@@ -54,104 +54,6 @@ function checkAudioInputMode() {
   return userAudioToggled && tdfAudioEnabled;
 }
 
-// Scenario 2: Warmup audio if TDF has embedded keys (before first trial)
-async function checkAndWarmupAudioIfNeeded() {
-  const currentTdfFile = Session.get('currentTdfFile');
-  if (!currentTdfFile) {
-    clientConsole(2, '[Audio] No currentTdfFile, skipping Scenario 2 warmup');
-    return;
-  }
-
-  const user = Meteor.user();
-  if (!user) {
-    clientConsole(2, '[Audio] No user, skipping Scenario 2 warmup');
-    return;
-  }
-
-  clientConsole(2, '[Audio] Checking Scenario 2 warmup needs...');
-  const promises = [];
-
-  // Check TTS warmup (Scenario 2: TDF has embedded key)
-  if (currentTdfFile.tdfs?.tutor?.setspec?.textToSpeechAPIKey) {
-    const audioPromptMode = user.audioPromptMode;
-    if (audioPromptMode && audioPromptMode !== 'silent' && !Session.get('ttsWarmedUp')) {
-      clientConsole(2, '[TTS] TDF has embedded key, warming up before first trial (Scenario 2)');
-
-      // Set flag immediately to prevent duplicate warmups
-      Session.set('ttsWarmedUp', true);
-
-      // Make async warmup call
-      const ttsPromise = new Promise((resolve, reject) => {
-        const startTime = performance.now();
-        Meteor.call('makeGoogleTTSApiCall',
-          Session.get('currentTdfId'),
-          'warmup',
-          1.0,
-          0.0,
-          function(error, result) {
-            if (error) {
-              clientConsole(2, '[TTS] Warmup failed:', error);
-              reject(error);
-            } else {
-              const duration = performance.now() - startTime;
-              clientConsole(2, `[TTS] ✅ Warmup complete in ${duration.toFixed(0)}ms`);
-              resolve(result);
-            }
-          }
-        );
-      });
-      promises.push(ttsPromise);
-    }
-  }
-
-  // Check SR warmup (Scenario 2: TDF has embedded key)
-  if (currentTdfFile.tdfs?.tutor?.setspec?.speechAPIKey) {
-    if (checkAudioInputMode() && !Session.get('srWarmedUp')) {
-      clientConsole(2, '[SR] TDF has embedded key, warming up before first trial (Scenario 2)');
-
-      // Set flag immediately to prevent duplicate warmups
-      Session.set('srWarmedUp', true);
-
-      // Make async warmup call
-      const srPromise = new Promise((resolve, reject) => {
-        const startTime = performance.now();
-        Meteor.call('makeGoogleSpeechAPICall',
-          Session.get('currentTdfId'),
-          'warmup',
-          function(error, result) {
-            if (error) {
-              clientConsole(2, '[SR] Warmup failed:', error);
-              reject(error);
-            } else {
-              const duration = performance.now() - startTime;
-              clientConsole(2, `[SR] ✅ Warmup complete in ${duration.toFixed(0)}ms`);
-              resolve(result);
-            }
-          }
-        );
-      });
-      promises.push(srPromise);
-    }
-  }
-
-  // Wait for all warmups to complete
-  if (promises.length > 0) {
-    console.log(`[Audio] Starting Scenario 2 warmup with ${promises.length} API(s), showing spinner...`);
-    Session.set('audioWarmupInProgress', true);
-    try {
-      await Promise.all(promises);
-      console.log('[Audio] Scenario 2 warmup complete, hiding spinner');
-    } catch (err) {
-      console.log('[Audio] Scenario 2 warmup error:', err);
-    } finally {
-      Session.set('audioWarmupInProgress', false);
-    }
-  } else {
-    console.log('[Audio] No warmup needed - promises.length:', promises.length);
-    console.log('[Audio] ttsWarmedUp:', Session.get('ttsWarmedUp'), 'srWarmedUp:', Session.get('srWarmedUp'));
-  }
-}
-
 export {
   speakMessageIfAudioPromptFeedbackEnabled,
   startRecording,
@@ -822,20 +724,10 @@ async function initCard() {
 
   window.AudioContext = window.webkitAudioContext || window.AudioContext;
   window.URL = window.URL || window.webkitURL;
-
-  // Check if audio recorder was pre-initialized during warmup
-  if (window.audioRecorderContext) {
-    clientConsole(2, '[Audio] Using pre-initialized audio context from warmup');
-    audioContext = window.audioRecorderContext;
-  } else {
-    const audioContextConfig = {
-      // FIX: Lower sample rate from 48kHz to 16kHz (Google recommended for Speech API)
-      // This reduces audio payload size and improves latency on EVERY trial
-      sampleRate: 16000,
-    }
-    audioContext = new AudioContext(audioContextConfig);
+  const audioContextConfig = {
+    sampleRate: 48000,
   }
-
+  audioContext = new AudioContext(audioContextConfig);
   // If user has enabled audio input initialize web audio (this takes a bit)
   // (this will eventually call cardStart after we redirect through the voice
   // interstitial and get back here again)
@@ -843,17 +735,7 @@ async function initCard() {
   $('#userLowerInteraction').html('');
 
   if (audioInputEnabled) {
-    // Check if audio stream was pre-initialized during warmup
-    if (window.preInitializedAudioStream && Session.get('audioRecorderInitialized')) {
-      clientConsole(2, '[Audio] Using pre-initialized audio stream from warmup - skipping getUserMedia');
-      // Use the pre-initialized stream directly
-      startUserMedia(window.preInitializedAudioStream);
-      // Clear the flag so we don't reuse it
-      window.preInitializedAudioStream = null;
-      Session.set('audioRecorderInitialized', false);
-    } else {
-      await initializeAudio();
-    }
+    initializeAudio();
   } else {
     cardStart();
   }
@@ -2521,12 +2403,6 @@ async function showUserFeedback(isCorrect, feedbackMessage, isTimeout, isSkip) {
     transitionTrialState(TRIAL_STATES.FEEDBACK_SHOWING, `Showing feedback (${isCorrect ? 'correct' : 'incorrect'})`);
   }
 
-  // FIX: Stop recording when entering FEEDBACK phase (Layer 1 of 3-layer defense)
-  if (recorder && Session.get('recording')) {
-    clientConsole(2, '[SR] Stopping recording - entered FEEDBACK phase');
-    stopRecording();
-  }
-
   // Cache frequently accessed Session variables
   const uiSettings = Session.get('curTdfUISettings');
   const deliveryParams = Session.get('currentDeliveryParams');
@@ -2667,17 +2543,11 @@ async function showUserFeedback(isCorrect, feedbackMessage, isTimeout, isSkip) {
               var distance = countDownStart - now;
               var seconds = Math.ceil((distance % (1000 * 60)) / 1000);
               var percent = 100 - ((seconds / originalSecs) * 100);
-              const timerElement = document.getElementById("CountdownTimerText");
-              if (!timerElement) {
-                // Element doesn't exist, clear interval and exit
-                Meteor.clearInterval(CountdownTimerInterval);
-                return;
-              }
               if(displayReviewTimeoutMode == "text" || displayReviewTimeoutMode == "both"){
 
-                timerElement.innerHTML = 'Continuing in: ' + seconds + "s";
+                document.getElementById("CountdownTimerText").innerHTML = 'Continuing in: ' + seconds + "s";
               } else {
-                timerElement.innerHTML = '';
+                document.getElementById("CountdownTimerText").innerHTML = '';
               }
               if(displayReviewTimeoutMode == "bar" || displayCardTimeoutMode == "both"){
                 //add the progress bar class
@@ -2847,7 +2717,7 @@ async function afterAnswerFeedbackCallback(trialEndTimeStamp, trialStartTimeStam
       testType, deliveryParams, dialogueHistory, wasReportedForRemoval);
   afterFeedbackCallbackBind = afterFeedbackCallback.bind(null, trialEndTimeStamp, trialStartTimeStamp, isTimeout, isSkip, isCorrect, testType, deliveryParams, answerLogRecord, 'card')
   const timeout = Meteor.setTimeout(async function() {
-    await afterFeedbackCallbackBind()
+    afterFeedbackCallbackBind()
     engine.updatePracticeTime(Date.now() - trialEndTimeStamp)
   }, reviewTimeout)
   Session.set('CurTimeoutId', timeout)
@@ -2943,11 +2813,9 @@ async function afterFeedbackCallback(trialEndTimeStamp, trialStartTimeStamp, isT
         resolve(); // Already finished
       } else {
         clientConsole(2, '[SM] Waiting for countdown to finish...');
-        const countdownStartTime = Date.now();
         const checkInterval = Meteor.setInterval(() => {
           if (!Session.get('CurIntervalId')) {
-            const countdownDuration = Date.now() - countdownStartTime;
-            clientConsole(2, `[SM] ⏱️ Countdown finished after ${countdownDuration}ms`);
+            clientConsole(2, '[SM] Countdown finished');
             Meteor.clearInterval(checkInterval);
             resolve();
           }
@@ -2962,35 +2830,22 @@ async function afterFeedbackCallback(trialEndTimeStamp, trialStartTimeStamp, isT
     const waitForTTS = new Promise(resolve => {
       if (Session.get('ttsRequested')) {
         clientConsole(2, '[SM] 🎤 TTS was requested, waiting for it to complete...');
-        const ttsStartTime = Date.now();
 
         // Poll every 50ms until TTS request completes (ttsRequested becomes false)
         const checkTTS = Meteor.setInterval(() => {
           if (!Session.get('ttsRequested')) {
             Meteor.clearInterval(checkTTS);
-            Meteor.clearTimeout(timeoutId); // FIX: Clear timeout when TTS completes normally
-            const ttsDuration = Date.now() - ttsStartTime;
-            clientConsole(2, `[SM] 🎤 TTS request complete after ${ttsDuration}ms`);
+            clientConsole(2, '[SM] 🎤 TTS request complete');
             resolve();
           }
         }, 50);
 
         // Failsafe: timeout after 30 seconds (network issues, API errors)
-        const timeoutId = Meteor.setTimeout(() => {
+        Meteor.setTimeout(() => {
           if (Session.get('ttsRequested')) {
             Meteor.clearInterval(checkTTS);
             clientConsole(1, '[SM] ⚠️ TTS timeout (30s), forcing continue');
-
-            // FIX: Stop any playing/pending audio to prevent bleed into next trial
-            if (window.currentAudioObj) {
-              clientConsole(1, '[SM]   Stopping orphaned TTS audio from timeout');
-              window.currentAudioObj.pause();
-              window.currentAudioObj.onended = null; // Remove event listener
-              window.currentAudioObj = undefined;
-            }
-
             Session.set('ttsRequested', false);
-            Session.set('recordingLocked', false); // Unlock recording in case TTS had locked it
             resolve();
           }
         }, 30000);
@@ -3000,12 +2855,9 @@ async function afterFeedbackCallback(trialEndTimeStamp, trialStartTimeStamp, isT
       }
     });
 
-    // Wait for BOTH to complete (whichever happens LAST)
-    // This ensures reviewstudy timeout is extended if TTS hasn't returned yet
-    const startWait = Date.now();
+    // Wait for BOTH to complete
     await Promise.all([waitForCountdown, waitForTTS]);
-    const waitDuration = Date.now() - startWait;
-    clientConsole(2, `[SM] ✅ Both countdown and TTS complete (waited ${waitDuration}ms), transitioning to next trial`);
+    clientConsole(2, '[SM] Both countdown and TTS complete, transitioning to next trial');
 
     // NOW safe to transition to next trial
     cardState.set('inFeedback', false);
@@ -3358,17 +3210,6 @@ function hideUserFeedback() {
 function cleanupTrialContent() {
   clientConsole(2, '[SM] cleanupTrialContent called in state:', currentTrialState);
 
-  // FIX: Stop any orphaned TTS audio from previous trial
-  // This is a safety measure to prevent audio bleeding into the next trial
-  // Normally Promise.all waits for audio to finish, but this catches edge cases
-  if (window.currentAudioObj) {
-    clientConsole(2, '[SM]   Stopping orphaned TTS audio during cleanup');
-    window.currentAudioObj.pause();
-    // Remove event listeners to prevent them from firing after cleanup
-    window.currentAudioObj.onended = null;
-    window.currentAudioObj = undefined;
-  }
-
   // Clear input VALUES (not HTML - let Blaze handle that)
   // Note: #userAnswer already cleared in cardEnd(), but safe to repeat
   $('#userAnswer').val('');
@@ -3644,7 +3485,7 @@ function getButtonTrial() {
   return isButtonTrial;
 }
 
-function cardStart() {
+async function cardStart() {
   // Reset resizing for card images (see also index.js)
   $('#cardQuestionImg').load(function(evt) {
     redoCardImage();
@@ -4151,12 +3992,6 @@ function speakMessageIfAudioPromptFeedbackEnabled(msg, audioPromptSource) {
             clientConsole(2, '[SR] 🎤 TTS request complete (undefined) (ttsRequested=false)');
           }
           else{
-            // FIX: Check if request is still active (timeout may have fired)
-            if (!Session.get('ttsRequested')) {
-              clientConsole(1, '[SR]   ⚠️ TTS audio received but request was already cancelled (timeout), ignoring');
-              return;
-            }
-
             clientConsole(2, '[SR]   ✅ TTS audio received, LOCKING RECORDING');
             const audioObj = new Audio('data:audio/ogg;base64,' + res)
             Session.set('recordingLocked', true);
@@ -4170,13 +4005,7 @@ function speakMessageIfAudioPromptFeedbackEnabled(msg, audioPromptSource) {
               Session.set('recordingLocked', false);
               Session.set('ttsRequested', false);
               clientConsole(2, '[SR] 🎤 TTS request complete (audio ended) (ttsRequested=false)');
-
-              // FIX: Only restart recording if we're still in a state that accepts input (Layer 2)
-              if (currentTrialState === TRIAL_STATES.PRESENTING_AWAITING) {
-                startRecording();
-              } else {
-                clientConsole(2, '[SR] TTS ended but state is', currentTrialState, '- not restarting recording');
-              }
+              startRecording();
             });
             clientConsole(2, 'inside callback, playing audioObj:');
             window.currentAudioObj.play().catch((err) => {
@@ -4187,13 +4016,7 @@ function speakMessageIfAudioPromptFeedbackEnabled(msg, audioPromptSource) {
               utterance.addEventListener('end', (event) => {
                 clientConsole(2, '[SR]   ✅ TTS fallback utterance ended, unlocking recording');
                 Session.set('recordingLocked', false);
-
-                // FIX: Only restart recording if we're still in a state that accepts input (Layer 2)
-                if (currentTrialState === TRIAL_STATES.PRESENTING_AWAITING) {
-                  startRecording();
-                } else {
-                  clientConsole(2, '[SR] TTS fallback ended but state is', currentTrialState, '- not restarting recording');
-                }
+                startRecording();
               });
               utterance.addEventListener('error', (event) => {
                 clientConsole(2, '[SR]   ❌ TTS fallback utterance error, unlocking recording');
@@ -4220,13 +4043,7 @@ function speakMessageIfAudioPromptFeedbackEnabled(msg, audioPromptSource) {
           Session.set('recordingLocked', false);
           Session.set('ttsRequested', false);
           clientConsole(2, '[SR] 🎤 TTS request complete (native ended) (ttsRequested=false)');
-
-          // FIX: Only restart recording if we're still in a state that accepts input (Layer 2)
-          if (currentTrialState === TRIAL_STATES.PRESENTING_AWAITING) {
-            startRecording();
-          } else {
-            clientConsole(2, '[SR] MDN TTS ended but state is', currentTrialState, '- not restarting recording');
-          }
+          startRecording();
         });
         utterance.addEventListener('error', (event) => {
           clientConsole(2, '[SR]   ❌ MDN TTS error, unlocking recording');
@@ -4234,13 +4051,7 @@ function speakMessageIfAudioPromptFeedbackEnabled(msg, audioPromptSource) {
           Session.set('recordingLocked', false);
           Session.set('ttsRequested', false);
           clientConsole(2, '[SR] 🎤 TTS request complete (native error) (ttsRequested=false)');
-
-          // FIX: Only restart recording if we're still in a state that accepts input (Layer 2)
-          if (currentTrialState === TRIAL_STATES.PRESENTING_AWAITING) {
-            startRecording();
-          } else {
-            clientConsole(2, '[SR] MDN TTS error but state is', currentTrialState, '- not restarting recording');
-          }
+          startRecording();
         });
         synthesis.speak(utterance);
       }
@@ -4306,57 +4117,6 @@ function buildPhoneticIndex(grammarList) {
   const elapsed = performance.now() - startTime;
   clientConsole(2, `[SR] 📇 Built phonetic index: ${grammarList.length} words → ${index.size} codes in ${elapsed.toFixed(2)}ms`);
   return index;
-}
-
-// Find words in grammar that have phonetic conflicts with the correct answer
-// These should be removed from phrase hints and answer grammar to prevent false matches
-// Uses SAME matching logic as Tier 2 (exact) and Tier 3 (fuzzy) phonetic matching
-// Examples:
-//   - "anguilla" vs "angola": ANKL = ANKL (exact) → conflict
-//   - "cameroon" vs "comoros": KMRN vs KMRS (edit distance = 1) → conflict
-//   - "akrotiri" vs "ecuador": AKRTR vs AKTR (edit distance = 1) → conflict
-function findPhoneticConflictsWithCorrectAnswer(correctAnswer, grammarList, phoneticIndex = null) {
-  const conflicts = [];
-
-  // Get phonetic codes for the correct answer
-  const [correctPrimary, correctSecondary] = getPhoneticCodes(correctAnswer);
-
-  // Search through grammar with SAME logic as Tier 2 + Tier 3
-  for (const word of grammarList) {
-    if (word === correctAnswer) continue; // Skip the correct answer itself
-
-    const [wordPrimary, wordSecondary] = getPhoneticCodes(word);
-
-    // Tier 2: Check if ANY codes match exactly (primary-to-primary, primary-to-secondary, etc.)
-    const exactMatch =
-      (correctPrimary && (correctPrimary === wordPrimary || correctPrimary === wordSecondary)) ||
-      (correctSecondary && (correctSecondary === wordPrimary || correctSecondary === wordSecondary));
-
-    if (exactMatch) {
-      conflicts.push(word);
-      continue;
-    }
-
-    // Fuzzy phonetic matching - edit distance = 1 on phonetic codes
-    // No minimum code length constraint - works for all countries including short ones like "mali" (ML)
-    const phoneticEditDist = Math.min(
-      levenshteinDistance(correctPrimary, wordPrimary),
-      correctSecondary ? levenshteinDistance(correctSecondary, wordPrimary) : Infinity,
-      wordSecondary ? levenshteinDistance(correctPrimary, wordSecondary) : Infinity,
-      (correctSecondary && wordSecondary) ? levenshteinDistance(correctSecondary, wordSecondary) : Infinity
-    );
-
-    // If phonetic codes are within edit distance of 1, it's a conflict
-    if (phoneticEditDist === 1) {
-      conflicts.push(word);
-    }
-  }
-
-  if (conflicts.length > 0) {
-    clientConsole(2, `[SR] 🚫 Found ${conflicts.length} phonetic conflict(s) with "${correctAnswer}": [${conflicts.join(', ')}]`);
-  }
-
-  return conflicts;
 }
 
 // Filter out phonetically ambiguous words from grammar
@@ -4436,8 +4196,6 @@ function filterPhoneticConflicts(spokenWord, grammarList) {
 }
 
 // Find phonetically matching word from grammar list using Double Metaphone
-// Two-tier matching: Tier 1 (exact string) + Tier 2 (exact phonetic code)
-// NOTE: Fuzzy phonetic conflicts are filtered out BEFORE calling this function
 // If phoneticIndex is provided, uses O(1) lookup; otherwise falls back to O(n) search
 function findPhoneticMatch(spokenWord, grammarList, phoneticIndex = null) {
   // First, filter out phonetically conflicting words (e.g., "malawi" when looking for "mali")
@@ -4485,6 +4243,22 @@ function tryPhoneticMatch(spokenWord, grammarList, phoneticIndex = null) {
     const primaryMatches = phoneticIndex.get(spokenPrimary) || [];
     const secondaryMatches = spokenSecondary ? (phoneticIndex.get(spokenSecondary) || []) : [];
     candidateEntries = [...primaryMatches, ...secondaryMatches];
+
+    // Also check for fuzzy matches, BUT with strict constraints
+    // Only for codes of length 3+ to avoid short code false matches (PN vs PR)
+    if (spokenPrimary && spokenPrimary.length >= 3) {
+      for (const [code, entries] of phoneticIndex) {
+        if (code && code.length >= 3) { // Only codes of length 3+
+          const distToPrimary = levenshteinDistance(spokenPrimary, code);
+          const distToSecondary = spokenSecondary && spokenSecondary.length >= 3 ?
+            levenshteinDistance(spokenSecondary, code) : Infinity;
+
+          if (distToPrimary === 1 || distToSecondary === 1) { // Exactly 1 edit
+            candidateEntries.push(...entries);
+          }
+        }
+      }
+    }
 
     clientConsole(2, `[SR] Found ${candidateEntries.length} candidate entries from phonetic index`);
   } else {
@@ -4547,9 +4321,8 @@ function tryPhoneticMatch(spokenWord, grammarList, phoneticIndex = null) {
         return grammarWord;
       }
     } else {
-      // Tier 3: Fuzzy phonetic matching - edit distance = 1 on PHONETIC CODES
-      // This checks if the phonetic codes are similar, not the literal words
-      // Pre-filtering is just a bias, so we still need this as backup
+      // Fuzzy phonetic matching: allow edit distance of 1 on phonetic codes
+      // BUT with strict constraints to avoid false positives like "benn" (PN) → "peru" (PR)
       const phoneticEditDist = Math.min(
         levenshteinDistance(spokenPrimary, grammarPrimary),
         spokenSecondary ? levenshteinDistance(spokenSecondary, grammarPrimary) : Infinity,
@@ -4557,10 +4330,19 @@ function tryPhoneticMatch(spokenWord, grammarList, phoneticIndex = null) {
         (spokenSecondary && grammarSecondary) ? levenshteinDistance(spokenSecondary, grammarSecondary) : Infinity
       );
 
-      // Allow fuzzy match if phonetic codes differ by exactly 1 character
-      // No minimum code length restriction - works for all countries
-      if (phoneticEditDist === 1) {
-        const fuzzyScore = phoneticEditDist * 10 + lengthDiff;
+      // STRICT constraints for fuzzy matching:
+      // 1. Phonetic codes must be length 3+ (avoid "PN" vs "PR" false matches)
+      // 2. Edit distance must be exactly 1
+      // 3. Length diff must be 0 or 1 (MUCH stricter than exact matches)
+      const minCodeLength = Math.min(
+        spokenPrimary.length,
+        grammarPrimary.length,
+        spokenSecondary ? spokenSecondary.length : 999,
+        grammarSecondary ? grammarSecondary.length : 999
+      );
+
+      if (phoneticEditDist === 1 && lengthDiff <= 1 && minCodeLength >= 3) {
+        const fuzzyScore = phoneticEditDist * 10 + lengthDiff; // Prefer lower edit dist, then length
         if (fuzzyScore < bestMatchScore) {
           bestMatch = grammarWord;
           bestMatchScore = fuzzyScore;
@@ -4632,36 +4414,6 @@ async function processLINEAR16(data) {
 
   if (userAnswer || isButtonTrial || DialogueUtils.isUserInDialogueLoop()) {
     speechTranscriptionTimeoutsSeen += 1;
-    const maxAttempts = Session.get('currentDeliveryParams').autostopTranscriptionAttemptLimit;
-    clientConsole(2, `[SR] Attempt ${speechTranscriptionTimeoutsSeen} of ${maxAttempts}`);
-
-    // Check if we've ALREADY exceeded maxAttempts (attempt 4 when limit is 3)
-    // If so, skip API call and force incorrect answer immediately
-    if (speechTranscriptionTimeoutsSeen > maxAttempts) {
-      clientConsole(2, `[SR] ⚠️ Exceeded maxAttempts (${speechTranscriptionTimeoutsSeen} > ${maxAttempts}), skipping API call and forcing incorrect feedback`);
-
-      // Clear waiting flag
-      waitingForTranscription = false;
-
-      // Simulate empty/incorrect answer and go to feedback
-      // The speechAPICallback logic will be bypassed entirely
-      if (getButtonTrial()) {
-        handleUserInput({answer: {'answer': {'name': 'a'}}}, 'voice');
-      } else if (DialogueUtils.isUserInDialogueLoop()) {
-        DialogueUtils.setDialogueUserAnswerValue('');
-        const answer = DialogueUtils.getDialogueUserAnswerValue();
-        handleUserInput(answer, 'voice');
-      } else {
-        const userAnswerElem = document.getElementById('userAnswer');
-        if (userAnswerElem) {
-          userAnswerElem.value = ''; // Empty answer = incorrect
-        }
-        handleUserInput({answer: userAnswerElem}, 'voice');
-      }
-
-      return; // Exit early - don't make API call
-    }
-
     const sampleRate = Session.get('sampleRate');
     const setSpec = Session.get('currentTdfFile').tdfs.tutor.setspec;
     let speechRecognitionLanguage = setSpec.speechRecognitionLanguage;
@@ -4705,68 +4457,11 @@ async function processLINEAR16(data) {
         clientConsole(2, `[SR] 📦 Cached answer grammar for unit ${currentUnitNumber} (${answerGrammar.length} items)`);
       }
 
-      // Get the correct answer for THIS trial to filter out phonetic conflicts
-      // Use Session's currentExperimentState which is always set for SR trials
-      const experimentState = Session.get('currentExperimentState');
-      const correctAnswer = experimentState?.currentAnswer;
-
-      // Initialize phonetic conflicts array (will be populated if we find conflicts)
-      let phoneticConflicts = [];
-
-      // Only perform phonetic conflict filtering if we have a valid correct answer
-      if (correctAnswer && typeof correctAnswer === 'string' && correctAnswer.trim()) {
-        // Build or reuse phonetic index for conflict detection
-        let phoneticIndexForConflicts = null;
-        if (answerGrammar.length > 10) {
-          // Reuse cached phonetic index if available for this unit
-          if (cachedPhoneticIndex !== null && lastCachedUnitNumber === currentUnitNumber) {
-            phoneticIndexForConflicts = cachedPhoneticIndex;
-          } else {
-            // Will be built later for validation, but we need it now for conflict detection
-            phoneticIndexForConflicts = buildPhoneticIndex(answerGrammar);
-            cachedPhoneticIndex = phoneticIndexForConflicts;
-          }
-        }
-
-        // Find phonetically conflicting words with the correct answer
-        // Example: if correct answer is "anguilla", remove "angola" from grammar
-        const [correctPrimary, correctSecondary] = getPhoneticCodes(correctAnswer);
-        clientConsole(2, `[SR] 🔍 Correct answer "${correctAnswer}" phonetic codes: primary="${correctPrimary}", secondary="${correctSecondary || 'none'}"`);
-
-        phoneticConflicts = findPhoneticConflictsWithCorrectAnswer(
-          correctAnswer,
-          answerGrammar,
-          phoneticIndexForConflicts
-        );
-
-        // Remove phonetic conflicts from answer grammar for validation
-        // This forces clearer pronunciation since conflicting words won't match
-        if (phoneticConflicts.length > 0) {
-          answerGrammar = answerGrammar.filter(word => phoneticConflicts.indexOf(word) === -1);
-          clientConsole(2, `[SR] 🚫 Removed ${phoneticConflicts.length} phonetic conflict(s) from answer grammar: [${phoneticConflicts.join(', ')}]`);
-
-          // CRITICAL: Rebuild phonetic index with FILTERED grammar
-          // The cached index includes removed conflicts, causing false matches in callback
-          // Example: "guinea" test removes "ghana", but old index still has it → "guini" matches "ghana"
-          cachedPhoneticIndex = buildPhoneticIndex(answerGrammar);
-          clientConsole(2, `[SR] 🔄 Rebuilt phonetic index with filtered grammar (${answerGrammar.length} items)`);
-        } else {
-          clientConsole(2, `[SR] ✓ No phonetic conflicts found with "${correctAnswer}"`);
-        }
-      } else {
-        clientConsole(2, `[SR] ⚠️ No valid correct answer found, skipping phonetic conflict filtering`);
-      }
-
       // Phrase hints need per-trial filtering (exclusion list varies by stim)
       const curSpeechHintExclusionListText =
           getStimCluster(curClusterIndex).stims[curStimIndex].speechHintExclusionList || '';
-      const tdfExclusionList = curSpeechHintExclusionListText.split(',').filter(x => x.trim());
-
-      // Combine TDF exclusions with phonetic conflicts for phrase hints
-      const fullExclusionList = [...tdfExclusionList, ...phoneticConflicts];
-
-      // Build phrase hints excluding both TDF exclusions and phonetic conflicts
-      phraseHints = answerGrammar.filter((el) => fullExclusionList.indexOf(el) === -1);
+      const exclusionList = curSpeechHintExclusionListText.split(',');
+      phraseHints = answerGrammar.filter((el) => exclusionList.indexOf(el) === -1);
     }
 
     clientConsole(2, '[SR] Sending audio to Google Speech API...');
@@ -4802,21 +4497,6 @@ function speechAPICallback(err, data){
   // Clear the waiting flag now that transcription has returned (success or error)
   waitingForTranscription = false;
   clientConsole(2, '[SR] speechAPICallback received, set waitingForTranscription=false');
-
-  // FIX: Check if we're still in a valid state for input (Layer 3 of 3-layer defense)
-  // This prevents processing late transcriptions that arrive after state has changed
-  if (currentTrialState !== TRIAL_STATES.PRESENTING_AWAITING) {
-    clientConsole(2, '[SR] ⚠️ Transcription arrived too late - trial state is:', currentTrialState);
-    clientConsole(2, '[SR] Discarding transcription to prevent state machine violation');
-
-    // Clear the "waiting for transcription" message if still showing
-    const userAnswer = document.getElementById('userAnswer');
-    if (userAnswer && userAnswer.value === 'waiting for transcription') {
-      userAnswer.value = '';
-    }
-
-    return; // EXIT EARLY - don't process this transcription
-  }
 
   let answerGrammar = [];
   let response = {};
@@ -5016,24 +4696,16 @@ function speechAPICallback(err, data){
     }
   }
 
-  // Check if we've reached maxAttempts AFTER this attempt finished
-  // If so, force feedback instead of retrying
-  const maxAttempts = Session.get('currentDeliveryParams').autostopTranscriptionAttemptLimit;
-  if (speechTranscriptionTimeoutsSeen >= maxAttempts && ignoredOrSilent) {
-    clientConsole(2, `[SR] ⚠️ Reached maxAttempts (${speechTranscriptionTimeoutsSeen} >= ${maxAttempts}) in callback, forcing incorrect feedback instead of retry`);
-
-    // Force incorrect answer by setting empty value and submitting
-    ignoredOrSilent = false; // Don't retry
-
+  if (speechTranscriptionTimeoutsSeen >= Session.get('currentDeliveryParams').autostopTranscriptionAttemptLimit) {
+    ignoredOrSilent = false; // Force out of a silence loop if we've tried enough
+    const transcriptionMsg = ' transcription attempts which is over autostopTranscriptionAttemptLimit, \
+        forcing incorrect answer to move things along.';
+    clientConsole(2, speechTranscriptionTimeoutsSeen + transcriptionMsg);
+    // Dummy up some data so we don't fail downstream
     if (getButtonTrial()) {
       userAnswer = {'answer': {'name': 'a'}};
     } else if (DialogueUtils.isUserInDialogueLoop()) {
-      DialogueUtils.setDialogueUserAnswerValue('');
-    } else if (!inUserForceCorrect) {
-      const userAnswerElem = document.getElementById('userAnswer');
-      if (userAnswerElem) {
-        userAnswerElem.value = '';
-      }
+      DialogueUtils.setDialogueUserAnswerValue('FORCEDINCORRECT');
     }
   }
 
