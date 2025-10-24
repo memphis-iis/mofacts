@@ -234,9 +234,6 @@ Template.profile.events({
     const showTdfs = instance.showTdfs.get();
     instance.showTdfs.set(!showTdfs);
   },
-  'click #wikiButton': function(event, instance) {
-    window.location.href="https://github.com/memphis-iis/mofacts/wiki";
-  },
 
   'click #select-disable': (event, instance) => {
     const checked = event.target.checked;
