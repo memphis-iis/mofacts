@@ -29,3 +29,4 @@ db/mongodump/*
 installer/src/obj/Debug/net6.0/*
 db/mongodump.tar.gz
 **settings.json
+assets/settings.json

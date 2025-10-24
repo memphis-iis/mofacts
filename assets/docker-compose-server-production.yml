@@ -1,11 +1,18 @@
+# Docker Compose configuration for PRODUCTION SERVER deployment
+# Location: /var/www/mofacts/docker-compose.yaml on staging.optimallearning.org
+# Purpose: Runs pre-built images pulled from Docker Hub (no build sections)
+#
+# Usage on server:
+#   cd /var/www/mofacts
+#   sudo docker compose pull
+#   sudo docker compose down
+#   sudo docker compose up -d
+
 services:
   mofacts:
     container_name: mofacts
     restart: always
     image: ppavlikmemphis/mofacts-mini:upgrades
-    build:
-      context: ../../
-      dockerfile: Dockerfile
     volumes:
       - type: bind
         source: /mofactsAssets
@@ -45,9 +52,6 @@ services:
 
   syllables:
     image: ppavlikmemphis/mofacts-syllables
-    build:
-      context: ../../syllables_subsystem
-      dockerfile: Dockerfile
     ports:
       - '4567:4567'
     networks:
@@ -61,5 +65,3 @@ volumes:
 networks:
   mofacts:
     driver: bridge
-
-

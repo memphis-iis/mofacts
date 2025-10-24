@@ -65,118 +65,220 @@ We strongly recommend using **[nvm](https://github.com/nvm-sh/nvm)** (Node Versi
     meteor run --settings settings.json
     ```
 
-## Deploying Using Docker 
-### Server Deployment
+## Deploying Using Docker
 
-You can deploy MoFaCTS and its dependencies easily using Docker Compose.
+### Local Development with Docker
 
-## 1. Prerequisites
+You can run MoFaCTS locally using Docker Compose for a containerized development environment.
 
-- [Docker](https://docs.docker.com/get-docker/) and [Docker Compose](https://docs.docker.com/compose/) installed on your system.
-- A valid `settings.json` file and any required assets in a directory (e.g., `/mofactsAssets`).
+#### Prerequisites
 
-## 2. Configuration
+- [Docker](https://docs.docker.com/get-docker/) and [Docker Compose](https://docs.docker.com/compose/) installed on your system
+- A valid `settings.json` file in `mofacts/.deploy/assets/` directory
 
-- Place your `settings.json` and any other required files in a directory on your host (e.g., `/mofactsAssets`).
-- Edit the `docker-compose.yml` file if you need to change asset or data locations.
+#### Quick Start
 
-## 3. Start the Services
+1. **Navigate to the deployment directory:**
+   ```bash
+   cd mofacts/.deploy
+   ```
 
-From the directory containing your `docker-compose.yml` file, run:
+2. **Build and start the services:**
+   ```bash
+   docker compose up -d
+   ```
 
-```bash
-docker compose up -d
+3. **Access the application:**
+   - MoFaCTS app: [http://localhost:3000](http://localhost:3000)
+   - Syllables service: port 4567
+
+4. **Stop the services:**
+   ```bash
+   docker compose down
+   ```
+
+### Production Deployment to AWS/Remote Server
+
+This section covers deploying MoFaCTS to a production server (e.g., AWS EC2 instance running Ubuntu).
+
+#### Server Prerequisites
+
+- Ubuntu 18.04 or later
+- Docker and Docker Compose installed
+- Apache web server (for reverse proxy and SSL)
+- SSH access to the server
+- `/mofactsAssets` directory with `settings.json` and other required assets
+
+#### 1. Server Setup
+
+**Install Apache and configure as reverse proxy:**
+
+Apache should be configured to proxy requests from your domain to the Docker container on port 3000. See `docs_dev/DEPLOYING.md` for detailed Apache configuration including SSL setup with Let's Encrypt.
+
+Key Apache configuration for the domain:
+```apache
+<VirtualHost *:443>
+    ServerName staging.optimallearning.org
+
+    ProxyRequests Off
+    ProxyPass /websocket ws://localhost:3000/websocket
+    ProxyPassMatch ^/sockjs/(.*)/websocket ws://localhost:3000/sockjs/$1/websocket
+    ProxyPass / http://127.0.0.1:3000/
+    ProxyPassReverse / http://127.0.0.1:3000/
+    ProxyPreserveHost on
+
+    # SSL configuration here
+</VirtualHost>
 ```
 
-This will start:
-- MoFaCTS (using the prebuilt image `iisdevs/mofacts-mini:main`)
-- MongoDB (data persisted in a Docker volume)
-- Syllables service (using `iisdevs/mofacts-syllables`)
-
-## 4. Access the Application
-
-- The MoFaCTS app will be available at [http://localhost:3000](http://localhost:3000).
-- The syllables service will be available at port 4567 if needed.
-
-## 5. Stopping and Removing the Services
-
-To stop the services:
-
+**Ensure Apache is running:**
 ```bash
-docker compose down
+sudo systemctl start apache2
+sudo systemctl enable apache2
 ```
 
-This will stop and remove the containers, but the MongoDB data will persist in the named Docker volume.
+#### 2. Building and Pushing Docker Images
 
-## 6. Notes
+**On your local development machine:**
 
-- The `MONGO_URL` and other environment variables are set automatically in the compose file.
-- For production, you may want to adjust resource limits or use external MongoDB.
-- To update to the latest image, run `docker compose pull` before starting.
-- If you want to use a different image tag (e.g., `staging`), edit the `image:` line in the compose file.
+1. **Navigate to the deployment directory:**
+   ```bash
+   cd mofacts/.deploy
+   ```
+
+2. **Ensure the docker-compose.yml has build sections:**
+   The `docker-compose.yml` file must include `build:` sections for building from source:
+   ```yaml
+   services:
+     mofacts:
+       image: yourdockerhub/mofacts-mini:yourtag
+       build:
+         context: ../../
+         dockerfile: Dockerfile
+       # ... other configuration
+   ```
+
+3. **Build the Docker images:**
+   ```bash
+   docker compose build --no-cache
+   ```
+
+   The `--no-cache` flag ensures a clean build from scratch, avoiding cached layers.
+
+4. **Push images to Docker Hub:**
+   ```bash
+   docker compose push
+   ```
+
+#### 3. Deploying to Production Server
+
+**On the production server:**
+
+1. **Navigate to the deployment directory:**
+   ```bash
+   cd /var/www/mofacts
+   ```
+
+2. **Ensure the docker-compose.yaml is configured for production:**
+   - Remove `build:` sections (production uses pre-built images)
+   - Set correct `ROOT_URL` environment variable
+   - Configure proper restart policies
+   - Set up networks for container communication
+
+   Example production configuration:
+   ```yaml
+   services:
+     mofacts:
+       container_name: mofacts
+       restart: always
+       image: yourdockerhub/mofacts-mini:yourtag
+       environment:
+         ROOT_URL: https://staging.optimallearning.org
+         MONGO_URL: mongodb://mongodb:27017/MoFACT
+         PORT: 3000
+         METEOR_SETTINGS_WORKAROUND: '/mofactsAssets/settings.json'
+       # ... other configuration
+   ```
+
+3. **Pull the latest images:**
+   ```bash
+   sudo docker compose pull
+   ```
+
+4. **Stop existing containers and start with new images:**
+   ```bash
+   sudo docker compose down
+   sudo docker compose up -d
+   ```
+
+5. **Verify the deployment:**
+   ```bash
+   sudo docker ps  # Check containers are running
+   sudo docker logs mofacts --tail 50  # Check application logs
+   ```
+
+#### 4. Common Deployment Issues and Solutions
+
+**Issue: "No route definitions found" or module errors**
+- **Cause:** The Docker image was built from old/cached source code
+- **Solution:** Rebuild with `--no-cache` flag and ensure you're on the correct git branch
+
+**Issue: Out of memory errors during startup**
+- **Cause:** Docker memory limits too restrictive (e.g., 512MB limit)
+- **Solution:** Remove or increase memory limits in docker-compose.yml. For production, do not set memory limits or set them higher (e.g., 2GB+)
+
+**Issue: Cannot access site (502 Bad Gateway)**
+- **Cause:** Apache not running or not configured correctly
+- **Solution:**
+  ```bash
+  sudo systemctl status apache2
+  sudo systemctl start apache2
+  ```
+  Verify Apache virtual host configuration points to localhost:3000
+
+**Issue: npm packages not available on client-side (e.g., "Cannot find module 'plyr'")**
+- **Cause:** Meteor doesn't automatically bundle npm packages for client-side use
+- **Solution:** Use CDN versions for client-side libraries. Add script tags in `client/index.html` and use `/* global PackageName */` instead of `import`
+
+#### 5. Updating an Existing Deployment
+
+To deploy new code changes:
+
+1. **On local machine:**
+   ```bash
+   cd mofacts/.deploy
+   docker compose build --no-cache
+   docker compose push
+   ```
+
+2. **On production server:**
+   ```bash
+   cd /var/www/mofacts
+   sudo docker compose pull
+   sudo docker compose down
+   sudo docker compose up -d
+   ```
+
+3. **Monitor the deployment:**
+   ```bash
+   sudo docker logs mofacts -f  # Follow logs in real-time
+   ```
+
+#### 6. Important Notes
+
+- **Database persistence:** MongoDB data persists in Docker volumes even when containers are stopped/removed
+- **Asset files:** Place settings.json and other assets in `/mofactsAssets` on the server
+- **Build context:** The Dockerfile uses `context: ../../` which means it builds from the repository root
+- **Image tags:** Use meaningful tags (e.g., `staging`, `production`, branch names) to track deployments
+- **Rollback:** Keep previous image tags to quickly rollback if needed: `docker tag yourdockerhub/mofacts-mini:current yourdockerhub/mofacts-mini:backup-YYYYMMDD`
 
 ---
 
-### Example `docker-compose.yml`
+## Additional Resources
 
-```yaml
-version: '3.2'
-
-services:
-    mofacts:
-        image: iisdevs/mofacts-mini:main
-        volumes:
-            - type: bind
-                source: /mofactsAssets
-                target: /mofactsAssets
-                bind:
-                    propagation: shared
-        build:
-            context: ../../
-            dockerfile: Dockerfile
-        ports:
-            - '3000:3000'
-        depends_on:
-            - mongo
-            - syllables
-        environment:
-            ROOT_URL: ${APP_ROOT_URL:-http://localhost}
-            MONGO_URL: mongodb://mongo:27017/MoFACT
-            PORT: 3000
-            METEOR_SETTINGS_WORKAROUND: '/mofactsAssets/settings.json'
-        deploy:
-            restart_policy:
-                condition: on-failure
-                delay: 5s
-                max_attempts: 3
-                window: 120s
-            resources:
-                limits:
-                    cpus: '0.5'
-                    memory: 512M
-                reservations:
-                    cpus: '0.25'
-                    memory: 256M
-
-    mongo:
-        image: mongo:latest
-        command:
-            - --storageEngine=wiredTiger
-        volumes:
-            - data:/data/db
-
-    syllables:
-        image: iisdevs/mofacts-syllables
-        build:
-            context: ../../syllables_subsystem
-            dockerfile: Dockerfile
-        ports:
-            - '4567:4567'
-
-
-volumes:
-    data:
-```
+- **Detailed deployment guide:** See `docs_dev/DEPLOYING.md` for comprehensive Apache setup and configuration
+- **Docker compose examples:** See `mofacts/.deploy/docker-compose.yml` for working configuration
+- **Server setup scripts:** See `scripts/server/` directory for automated server setup scripts
 
 ### Latest DOI (IES_Fall_2019 Release)
 

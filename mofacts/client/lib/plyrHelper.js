@@ -1,4 +1,5 @@
-import Plyr from 'plyr';
+// Plyr loaded from CDN in index.html
+/* global Plyr */
 import { newQuestionHandler } from '../views/experiment/card.js'
 import { Session } from 'meteor/session';
 

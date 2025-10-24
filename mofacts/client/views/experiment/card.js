@@ -3547,7 +3547,17 @@ async function unitIsFinished(reason) {
   if (newUnitNum < curTdf.tdfs.tutor.unit.length) {
     // Just hit a new unit - we need to restart with instructions
     clientConsole(2, 'UNIT FINISHED: show instructions for next unit', newUnitNum);
-      const rootTDFBoxed = Tdfs.findOne({_id: Session.get('currentRootTdfId')});
+      let rootTDFBoxed = Tdfs.findOne({_id: Session.get('currentRootTdfId')});
+      if (!rootTDFBoxed) {
+        clientConsole(1, 'Root TDF not found in client collection, fetching from server:', Session.get('currentRootTdfId'));
+        rootTDFBoxed = await meteorCallAsync('getTdfById', Session.get('currentRootTdfId'));
+        if (!rootTDFBoxed) {
+          clientConsole(1, 'Could not find root TDF:', Session.get('currentRootTdfId'));
+          alert('Unfortunately, the root TDF could not be loaded. Please contact your administrator.');
+          leavePage('/profile');
+          return;
+        }
+      }
       const rootTDF = rootTDFBoxed.content;
       const setspec = rootTDF.tdfs.tutor.setspec;
       if((setspec.loadbalancing && setspec.countcompletion == newUnitNum) || (setspec.loadbalancing && countCompletion && !setspec.countcompletion)){
@@ -5306,10 +5316,20 @@ async function resumeFromComponentState() {
   // currentTdfId and currentStimuliSetId based on experimental conditions
   // (if necessary)
   let rootTDFBoxed = Tdfs.findOne({_id: Session.get('currentRootTdfId')});
+  if (!rootTDFBoxed) {
+    clientConsole(1, 'Root TDF not found in client collection, fetching from server:', Session.get('currentRootTdfId'));
+    rootTDFBoxed = await meteorCallAsync('getTdfById', Session.get('currentRootTdfId'));
+    if (!rootTDFBoxed) {
+      clientConsole(1, 'PANIC: Unable to load the root TDF for learning', Session.get('currentRootTdfId'));
+      alert('Unfortunately, the root TDF could not be loaded. Please contact your administrator.');
+      leavePage('/profile');
+      return;
+    }
+  }
   let curTdf = rootTDFBoxed;
   let rootTDF = rootTDFBoxed.content;
   if (!rootTDF) {
-    clientConsole(2, 'PANIC: Unable to load the root TDF for learning', Session.get('currentRootTdfId'));
+    clientConsole(2, 'PANIC: Root TDF has no content', Session.get('currentRootTdfId'));
     alert('Unfortunately, something is broken and this lesson cannot continue');
     leavePage('/profile');
     return;
@@ -5337,7 +5357,18 @@ async function resumeFromComponentState() {
         // Select condition and save it
         clientConsole(2, 'No previous experimental condition: Selecting from ' + setspec.condition.length);
         const randomConditionFileName =  _.sample(setspec.condition)
-        conditionTdfId = Tdfs.findOne({"content.fileName": randomConditionFileName})._id;
+        let conditionTdf = Tdfs.findOne({"content.fileName": randomConditionFileName});
+        if (!conditionTdf) {
+          clientConsole(1, 'Condition TDF not found in client collection, fetching from server:', randomConditionFileName);
+          conditionTdf = await meteorCallAsync('getTdfByFileName', randomConditionFileName);
+          if (!conditionTdf) {
+            clientConsole(1, 'Could not find condition TDF:', randomConditionFileName);
+            alert('Unfortunately, the experiment condition TDF could not be found. Please contact your administrator.');
+            leavePage('/profile');
+            return;
+          }
+        }
+        conditionTdfId = conditionTdf._id;
         newExperimentState.conditionTdfId = conditionTdfId;
         newExperimentState.conditionNote = 'Selected from ' + _.display(setspec.condition.length) + ' conditions';
         clientConsole(2, 'Exp Condition', conditionTdfId, newExperimentState.conditionNote);
@@ -5362,7 +5393,18 @@ async function resumeFromComponentState() {
             maxConditions = setspec.condition;
           }
           const randomConditionFileName =  _.sample(maxConditions)
-          conditionTdfId = Tdfs.findOne({"content.fileName": randomConditionFileName})._id;
+          let conditionTdf = Tdfs.findOne({"content.fileName": randomConditionFileName});
+          if (!conditionTdf) {
+            clientConsole(1, 'Condition TDF not found in client collection, fetching from server:', randomConditionFileName);
+            conditionTdf = await meteorCallAsync('getTdfByFileName', randomConditionFileName);
+            if (!conditionTdf) {
+              clientConsole(1, 'Could not find condition TDF:', randomConditionFileName);
+              alert('Unfortunately, the experiment condition TDF could not be found. Please contact your administrator.');
+              leavePage('/profile');
+              return;
+            }
+          }
+          conditionTdfId = conditionTdf._id;
         } else if(setspec.loadbalancing == "min"){
           //we check the conditionCounts and select randomly from the conditions with a count equal to the min
           let min = 1000000000;
@@ -5383,6 +5425,16 @@ async function resumeFromComponentState() {
           }
           const randomConditionFileName =  _.sample(minConditions)
           conditionTdf = Tdfs.findOne({"content.fileName": randomConditionFileName});
+          if (!conditionTdf) {
+            clientConsole(1, 'Condition TDF not found in client collection, fetching from server:', randomConditionFileName);
+            conditionTdf = await meteorCallAsync('getTdfByFileName', randomConditionFileName);
+            if (!conditionTdf) {
+              clientConsole(1, 'Could not find condition TDF:', randomConditionFileName);
+              alert('Unfortunately, the experiment condition TDF could not be found. Please contact your administrator.');
+              leavePage('/profile');
+              return;
+            }
+          }
           conditionTdfId = conditionTdf._id;
           clientConsole(2, 'conditionTdf, conditionTdfId', conditionTdf, conditionTdf._id);
       } else {
@@ -5424,6 +5476,16 @@ async function resumeFromComponentState() {
     Session.set('currentTdfId', conditionTdfId);
 
     curTdf = Tdfs.findOne({_id: conditionTdfId});
+    if (!curTdf) {
+      clientConsole(1, 'Condition TDF not found by ID in client collection, fetching from server:', conditionTdfId);
+      curTdf = await meteorCallAsync('getTdfById', conditionTdfId);
+      if (!curTdf) {
+        clientConsole(1, 'Could not find condition TDF by ID:', conditionTdfId);
+        alert('Unfortunately, the experiment condition TDF could not be loaded. Please contact your administrator.');
+        leavePage('/profile');
+        return;
+      }
+    }
     Session.set('currentTdfFile', curTdf.content);
     Session.set('currentTdfName', curTdf.content.fileName);
 

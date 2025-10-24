@@ -1,3 +1,16 @@
+# Docker Compose configuration for LOCAL DEVELOPMENT (building images)
+# Location: mofacts/.deploy/docker-compose.yml on local development machine
+# Purpose: Builds Docker images from source code and pushes to Docker Hub
+#
+# Usage on local machine:
+#   cd mofacts/.deploy
+#   docker compose build --no-cache
+#   docker compose push
+#
+# Key differences from production version:
+# - Has 'build:' sections to build from source
+# - Used for creating new Docker images before deployment
+
 services:
   mofacts:
     container_name: mofacts
@@ -61,5 +74,3 @@ volumes:
 networks:
   mofacts:
     driver: bridge
-
-

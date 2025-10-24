@@ -19,7 +19,10 @@
       "Bash(md5sum:*)",
       "Bash(meteor npm run lint:*)",
       "Bash(gh issue list:*)",
-      "Bash(npm run lint)"
+      "Bash(npm run lint)",
+      "Bash(docker compose build:*)",
+      "Bash(docker compose push:*)",
+      "Bash(ssh:*)"
     ],
     "deny": [],
     "ask": []

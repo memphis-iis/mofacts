@@ -2272,7 +2272,12 @@ function sendErrorReportSummaries() {
 //function to check drive space and send email if it is low
 function checkDriveSpace() {
   serverConsole('checkDriveSpace');
-  diskusage = Npm.require('diskusage');
+  try {
+    diskusage = Npm.require('diskusage');
+  } catch (err) {
+    serverConsole('diskusage package not available, skipping disk space check');
+    return;
+  }
   const path = "/"
   try{
     let info = diskusage.checkSync(path);
@@ -3257,14 +3262,17 @@ export const methods = {
 
   if (!newUserName) throw new Error('Blank user names aren\'t allowed');
 
-  // Security: Strengthen password requirements
-  if (!newUserPassword || newUserPassword.length < 8) {
-    throw new Meteor.Error('weak-password', 'Password must be at least 8 characters long');
-  }
+  // Security: Strengthen password requirements - but NOT for experiment/Turk logins
+  // For experiment logins (previousOK=true), any string is allowed as username with auto-generated password
+  if (!previousOK) {
+    if (!newUserPassword || newUserPassword.length < 8) {
+      throw new Meteor.Error('weak-password', 'Password must be at least 8 characters long');
+    }
 
-  // Check password complexity (uppercase, lowercase, and numbers)
-  if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])/.test(newUserPassword)) {
-    throw new Meteor.Error('weak-password', 'Password must contain at least one uppercase letter, one lowercase letter, and one number');
+    // Check password complexity (uppercase, lowercase, and numbers)
+    if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])/.test(newUserPassword)) {
+      throw new Meteor.Error('weak-password', 'Password must contain at least one uppercase letter, one lowercase letter, and one number');
+    }
   }
 
   // Simple mutex: block if another signup is in progress for this username
