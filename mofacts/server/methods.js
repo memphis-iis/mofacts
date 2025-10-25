@@ -4466,6 +4466,10 @@ Meteor.startup(async function() {
   const adminUserId = _.prop(adminUser, '_id') || '';
   // adminUser should be in an admin role
   if (adminUserId) {
+    // Create 'admin' role if it doesn't exist (required in newer alanning:roles)
+    if (!Roles.getAllRoles().fetch().find(r => r.name === 'admin')) {
+      Roles.createRole('admin');
+    }
     Roles.addUsersToRoles(adminUserId, 'admin');
     serverConsole('Admin User Found ID:', adminUserId, 'with obj:', _.pick(adminUser, '_id', 'username', 'email'));
   } else {
