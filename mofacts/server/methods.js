@@ -4463,12 +4463,15 @@ Meteor.startup(async function() {
 
   // Create roles if they don't exist (required in newer alanning:roles)
   // Must be done BEFORE any role assignments
-  const allRolesEarly = Roles.getAllRoles().fetch();
-  if (!allRolesEarly.find(r => r.name === 'admin')) {
+  try {
     Roles.createRole('admin');
+  } catch (e) {
+    // Role already exists, that's fine
   }
-  if (!allRolesEarly.find(r => r.name === 'teacher')) {
+  try {
     Roles.createRole('teacher');
+  } catch (e) {
+    // Role already exists, that's fine
   }
 
   // Used below for ownership
