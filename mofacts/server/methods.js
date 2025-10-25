@@ -3919,7 +3919,7 @@ export const methods = {
     serverConsole('toggleCustomTheme');
     //This toggles the custom theme on or off
     let theme = DynamicSettings.findOne({key: 'customTheme'});
-    if(!theme) { 
+    if(!theme) {
       Meteor.call('initializeCustomTheme', 'Custom Theme');
     } else {
       theme = theme.value;
@@ -3927,6 +3927,80 @@ export const methods = {
       serverConsole('custom theme enabled:', theme.enabled);
       DynamicSettings.update({key: 'customTheme'}, {$set: {'value.enabled': theme.enabled}});
     }
+  },
+
+  // Custom Help Page Methods
+  setCustomHelpPage: function(markdownContent) {
+    serverConsole('setCustomHelpPage');
+
+    // Verify user is admin
+    if (!Roles.userIsInRole(this.userId, ['admin'])) {
+      throw new Meteor.Error('unauthorized', 'Only admins can set custom help page');
+    }
+
+    // Validate content size (max 1MB)
+    if (markdownContent.length > 1048576) {
+      throw new Meteor.Error('file-too-large', 'Help file must be less than 1MB');
+    }
+
+    const helpPageData = {
+      enabled: true,
+      markdownContent: markdownContent,
+      uploadedAt: new Date(),
+      uploadedBy: this.userId
+    };
+
+    DynamicSettings.upsert(
+      {key: 'customHelpPage'},
+      {$set: {value: helpPageData}}
+    );
+
+    return {success: true};
+  },
+
+  getCustomHelpPage: function() {
+    serverConsole('getCustomHelpPage');
+
+    const customHelp = DynamicSettings.findOne({key: 'customHelpPage'});
+
+    if (!customHelp || !customHelp.value || !customHelp.value.enabled) {
+      return null;
+    }
+
+    return customHelp.value.markdownContent;
+  },
+
+  removeCustomHelpPage: function() {
+    serverConsole('removeCustomHelpPage');
+
+    // Verify user is admin
+    if (!Roles.userIsInRole(this.userId, ['admin'])) {
+      throw new Meteor.Error('unauthorized', 'Only admins can remove custom help page');
+    }
+
+    DynamicSettings.remove({key: 'customHelpPage'});
+
+    return {success: true};
+  },
+
+  getCustomHelpPageStatus: function() {
+    serverConsole('getCustomHelpPageStatus');
+
+    const customHelp = DynamicSettings.findOne({key: 'customHelpPage'});
+
+    if (!customHelp || !customHelp.value || !customHelp.value.enabled) {
+      return {
+        enabled: false,
+        uploadedAt: null,
+        uploadedBy: null
+      };
+    }
+
+    return {
+      enabled: true,
+      uploadedAt: customHelp.value.uploadedAt,
+      uploadedBy: customHelp.value.uploadedBy
+    };
   }
 }
 

@@ -1,39 +1,26 @@
 import DOMPurify from 'dompurify';
+import {marked} from 'marked';
 import {Meteor} from 'meteor/meteor';
 
-// Simple markdown to HTML converter for wiki content
+// Configure marked for secure rendering
+marked.setOptions({
+  breaks: true,        // Convert \n to <br>
+  gfm: true,          // GitHub Flavored Markdown
+  headerIds: false,   // Don't add IDs to headers
+  mangle: false       // Don't mangle email addresses
+});
+
+// Convert markdown to sanitized HTML
 function convertMarkdownToHTML(markdown) {
-  let html = markdown;
-
-  // Headers
-  html = html.replace(/^### (.*$)/gim, '<h3>$1</h3>');
-  html = html.replace(/^## (.*$)/gim, '<h2>$1</h2>');
-  html = html.replace(/^# (.*$)/gim, '<h1>$1</h1>');
-
-  // Bold
-  html = html.replace(/\*\*(.*?)\*\*/gim, '<strong>$1</strong>');
-
-  // Italic
-  html = html.replace(/\*(.*?)\*/gim, '<em>$1</em>');
-
-  // Links
-  html = html.replace(/\[([^\]]+)\]\(([^\)]+)\)/gim, '<a href="$2" target="_blank">$1</a>');
-
-  // Lists
-  html = html.replace(/^\* (.+)$/gim, '<li>$1</li>');
-  html = html.replace(/^- (.+)$/gim, '<li>$1</li>');
-  html = html.replace(/(<li>.*<\/li>)/s, '<ul>$1</ul>');
-
-  // Line breaks
-  html = html.replace(/\n\n/gim, '</p><p>');
-  html = '<p>' + html + '</p>';
+  // Parse markdown with marked
+  const html = marked.parse(markdown);
 
   // Sanitize the HTML to prevent XSS
   return DOMPurify.sanitize(html, {
     ALLOWED_TAGS: ['b', 'i', 'em', 'strong', 'u', 'br', 'p', 'span', 'div',
                    'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
                    'table', 'tr', 'td', 'th', 'thead', 'tbody',
-                   'ul', 'ol', 'li', 'center', 'a'],
+                   'ul', 'ol', 'li', 'center', 'a', 'code', 'pre', 'blockquote', 'hr'],
     ALLOWED_ATTR: ['style', 'class', 'id', 'href', 'target'],
     ALLOWED_URI_REGEXP: /^(?:(?:(?:f|ht)tps?|mailto|tel):|[^a-z]|[a-z+.\-]+(?:[^a-z+.\-:]|$))/i,
     FORBID_TAGS: ['script', 'iframe', 'object', 'embed', 'form', 'input', 'button'],
@@ -48,13 +35,32 @@ Template.help.helpers({
 });
 
 Template.help.rendered = async function() {
-  // Fetch and render the wiki content
+  // Fetch and render the help content
   try {
-    const response = await fetch('https://raw.githubusercontent.com/wiki/memphis-iis/mofacts/Student-Overview.md');
-    if (!response.ok) {
-      throw new Error('Failed to load help content');
+    let markdown;
+
+    // First, check for custom help page
+    const customHelp = await new Promise((resolve, reject) => {
+      Meteor.call('getCustomHelpPage', (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result);
+        }
+      });
+    });
+
+    if (customHelp) {
+      // Use custom help markdown
+      markdown = customHelp;
+    } else {
+      // Fall back to GitHub wiki
+      const response = await fetch('https://raw.githubusercontent.com/wiki/memphis-iis/mofacts/Student-Overview.md');
+      if (!response.ok) {
+        throw new Error('Failed to load help content');
+      }
+      markdown = await response.text();
     }
-    const markdown = await response.text();
 
     // Convert markdown to HTML
     const html = convertMarkdownToHTML(markdown);
@@ -89,6 +95,6 @@ Template.help.rendered = async function() {
       container.classList.remove('page-loading');
       container.classList.add('page-loaded');
     }
-    console.error('Error loading wiki content:', error);
+    console.error('Error loading help content:', error);
   }
 };

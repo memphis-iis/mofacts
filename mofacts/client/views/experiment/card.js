@@ -3345,7 +3345,7 @@ function hideUserFeedback() {
   // Don't use .hide() - let displayReady fade-out handle visibility
   // Using .hide() causes instant flash while content is still visible
   // Clear ALL feedback locations (top, middle, bottom) since we don't know which was used
-  $('#UserInteraction').removeClass('text-align alert alert-success alert-danger').html('');
+  $('#UserInteraction').removeClass('text-align alert').html('');
   $('#feedbackOverride').html('');
   $('#userLowerInteraction').html('');
   $('#userForceCorrect').val(''); // text box - see inputF.html

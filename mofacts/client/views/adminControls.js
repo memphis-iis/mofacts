@@ -32,6 +32,14 @@ Template.adminControls.rendered = function() {
         console.log("clientVerbosityLevel: " + name);
         //check the radio button
         document.getElementById(name).checked = true;
+
+        // Load custom help page status
+        Meteor.call('getCustomHelpPageStatus', function(err, status) {
+            if (!err && status) {
+                Session.set('customHelpPageEnabled', status.enabled);
+                Session.set('customHelpPageUploadedAt', status.uploadedAt);
+            }
+        });
     };
 
 Template.adminControls.helpers({
@@ -46,7 +54,17 @@ Template.adminControls.helpers({
     },
     'currentTheme': function() {
         return Session.get('curTheme');
-    }   
+    },
+    'customHelpPageEnabled': function() {
+        return Session.get('customHelpPageEnabled') || false;
+    },
+    'customHelpPageUploadedAt': function() {
+        return Session.get('customHelpPageUploadedAt');
+    },
+    'formatDate': function(date) {
+        if (!date) return '';
+        return new Date(date).toLocaleString();
+    }
 });
 
 Template.adminControls.events({
@@ -165,6 +183,90 @@ Template.adminControls.events({
                     console.log("Logo cleared successfully");
                     $('#logoUpload').val('');
                     getCurrentTheme();
+                }
+            });
+        }
+    },
+
+    // Custom Help Page Upload
+    'click #uploadHelpFileButton': function(event) {
+        const fileInput = document.getElementById('helpFileUpload');
+        const file = fileInput.files[0];
+        const statusSpan = document.getElementById('helpFileUploadStatus');
+
+        if (!file) {
+            statusSpan.textContent = 'Please select a file first';
+            statusSpan.className = 'text-danger';
+            return;
+        }
+
+        // Validate file extension
+        if (!file.name.endsWith('.md')) {
+            statusSpan.textContent = 'Please select a markdown (.md) file';
+            statusSpan.className = 'text-danger';
+            return;
+        }
+
+        // Validate file size (1MB max)
+        if (file.size > 1048576) {
+            statusSpan.textContent = 'File size must be less than 1MB';
+            statusSpan.className = 'text-danger';
+            return;
+        }
+
+        statusSpan.textContent = 'Uploading...';
+        statusSpan.className = 'text-info';
+
+        // Read file as text
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const markdownContent = e.target.result;
+
+            Meteor.call('setCustomHelpPage', markdownContent, function(err, res) {
+                if (err) {
+                    statusSpan.textContent = 'Error: ' + err.message;
+                    statusSpan.className = 'text-danger';
+                } else {
+                    statusSpan.textContent = 'Custom help page uploaded successfully!';
+                    statusSpan.className = 'text-success';
+                    fileInput.value = '';
+
+                    // Update session to show status
+                    Meteor.call('getCustomHelpPageStatus', function(err, status) {
+                        if (!err && status) {
+                            Session.set('customHelpPageEnabled', status.enabled);
+                            Session.set('customHelpPageUploadedAt', status.uploadedAt);
+                        }
+                    });
+                }
+            });
+        };
+
+        reader.onerror = function() {
+            statusSpan.textContent = 'Error reading file';
+            statusSpan.className = 'text-danger';
+        };
+
+        reader.readAsText(file);
+    },
+
+    'click #removeHelpFileButton': function(event) {
+        if (confirm('Are you sure you want to remove the custom help page and revert to the wiki?')) {
+            const statusSpan = document.getElementById('helpFileUploadStatus');
+            statusSpan.textContent = 'Removing...';
+            statusSpan.className = 'text-info';
+
+            Meteor.call('removeCustomHelpPage', function(err, res) {
+                if (err) {
+                    statusSpan.textContent = 'Error: ' + err.message;
+                    statusSpan.className = 'text-danger';
+                } else {
+                    statusSpan.textContent = 'Custom help page removed. Now using wiki.';
+                    statusSpan.className = 'text-success';
+
+                    // Update session
+                    Session.set('customHelpPageEnabled', false);
+                    Session.set('customHelpPageUploadedAt', null);
                 }
             });
         }

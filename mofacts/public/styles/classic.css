@@ -385,16 +385,6 @@ input[type="range"]::-webkit-slider-thumb {
     color: var(--alert-color);
 }
 
-.alert-success, .alert-danger{
-    background-color: var(--background-color) !important;
-    /* fix to bottom of page */
-    position: fixed;
-    bottom: 0;
-    width: 100%;
-    /* make sure no border */
-    border: none;
-}
-
 .alert-bg{
     background-color: var(--neutral-color) !important;
     color: var(--text-color) !important;
@@ -411,16 +401,6 @@ input[type="range"]::-webkit-slider-thumb {
     font-size: 3.13rem;
     /* circle */
     border-radius: var(--border-radius-circle);
-}
-
-.alert-danger b{
-    color: var(--alert-color);
-    font-size: 1.25rem;
-}
-
-.alert-success b{
-    color: var(--accent-color);
-    font-size: 1.25rem;
 }
 
 /* Transparent alert for stimuli box when disabled */
