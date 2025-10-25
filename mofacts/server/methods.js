@@ -4502,6 +4502,15 @@ Meteor.startup(async function() {
     });
   };
 
+  // Create roles if they don't exist (required in newer alanning:roles)
+  const allRoles = Roles.getAllRoles().fetch();
+  if (!allRoles.find(r => r.name === 'admin')) {
+    Roles.createRole('admin');
+  }
+  if (!allRoles.find(r => r.name === 'teacher')) {
+    Roles.createRole('teacher');
+  }
+
   roleAdd('admins', 'admin');
   roleAdd('teachers', 'teacher');
   const ret = Tdfs.find().count();
