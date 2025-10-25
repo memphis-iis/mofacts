@@ -41,7 +41,9 @@
     "@types/underscore": "^1.11.4",
     "chai": "^4.5.0",
     "eslint": "^7.28.0",
-    "eslint-config-google": "^0.14.0",
+    "eslint-config-google": "^0.14.0"
+  },
+  "engines": {
     "node": "^14.21.4"
   },
   "scripts": {
