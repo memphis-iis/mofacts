@@ -4,7 +4,7 @@
 # but you can also edit it by hand.
 
 standard-app-packages@1.0.9
-accounts-password@1.6.3
+accounts-password
 underscore@1.0.10
 bojicas:howler2
 
@@ -32,7 +32,6 @@ email@2.0.0
 natestrauser:select2
 fourseven:scss@4.12.0
 ostrio:files
-simonsimcity:client-session-timeout
 q42:accounts-microsoft
 lindoelio:accounts-office365
 zodern:standard-minifier-js@5.0.0-beta.5

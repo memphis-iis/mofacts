@@ -10,7 +10,9 @@ mofacts/build/mof*
 .vagrant
 /nbproject/private/
 /nbproject/
-.meteor
+.meteor/local/
+.meteor/.finished-upgraders
+.meteor/.id
 build/*.tar.gz
 mofacts/settings.json
 .tags*

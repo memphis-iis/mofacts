@@ -5,7 +5,6 @@ import {sessionCleanUp} from './lib/sessionUtils.js';
 import {restartMainCardTimeoutIfNecessary} from './views/experiment/card.js';
 import {instructContinue} from './views/experiment/instructions.js';
 import {routeToSignin} from './lib/router.js';
-import { init } from "meteor/simonsimcity:client-session-timeout";
 import {
   getTestType,
   getCurrentTheme
@@ -165,11 +164,6 @@ if((navigator.userAgent.indexOf("Opera") || navigator.userAgent.indexOf('OPR')) 
   Session.set('isIE', true)
 }
 
-//Set checks if user is inactive
-const options = {
-  expiryTime: 30 * 60 * 60 * 1000 // 30 mins
-};
-init(options);
 export {redoCardImage, meteorCallAsync};
 let verbosityLevel = 1;
 const meteorCallAsync = Promise.promisify(Meteor.call);
