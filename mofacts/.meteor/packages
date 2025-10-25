@@ -32,8 +32,8 @@ email@2.0.0
 natestrauser:select2
 fourseven:scss@4.12.0
 ostrio:files
-q42:accounts-microsoft
-lindoelio:accounts-office365
+mofacts:microsoft-oauth
+mofacts:accounts-microsoft
 zodern:standard-minifier-js@5.0.0-beta.5
 practicalmeteor:chai
 practicalmeteor:sinon
