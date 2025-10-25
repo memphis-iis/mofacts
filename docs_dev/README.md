@@ -19,6 +19,7 @@ This directory contains design documents, implementation guides, and technical d
 ### Operations & Deployment
 - **[DEPLOYING.md](DEPLOYING.md)** - Deployment procedures and guidelines
 - **[database_recovery_commands.md](database_recovery_commands.md)** - Database backup and recovery procedures
+- **[METEOR_2.0_UPGRADE_GUIDE.md](METEOR_2.0_UPGRADE_GUIDE.md)** - Complete guide for upgrading from Meteor 1.12 to 2.0
 
 ### Planning
 - **[main_developement_plan.md](main_developement_plan.md)** - Main development roadmap and priorities
