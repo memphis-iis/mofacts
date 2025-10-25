@@ -18,6 +18,9 @@ RUN bash $SCRIPTS_FOLDER/build-app-npm-dependencies.sh
 # Copy app source into container
 COPY ./mofacts/ $APP_SOURCE_FOLDER/
 
+# Clear Meteor build cache to ensure fresh compilation
+RUN rm -rf $APP_SOURCE_FOLDER/.meteor/local
+
 RUN bash $SCRIPTS_FOLDER/build-meteor-bundle.sh
 
 
