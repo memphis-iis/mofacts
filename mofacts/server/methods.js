@@ -4461,15 +4461,20 @@ Meteor.startup(async function() {
   // Note that we accept username or email and then find the ID
   const adminUser = findUserByName(getConfigProperty('owner'));
 
+  // Create roles if they don't exist (required in newer alanning:roles)
+  // Must be done BEFORE any role assignments
+  const allRolesEarly = Roles.getAllRoles().fetch();
+  if (!allRolesEarly.find(r => r.name === 'admin')) {
+    Roles.createRole('admin');
+  }
+  if (!allRolesEarly.find(r => r.name === 'teacher')) {
+    Roles.createRole('teacher');
+  }
 
   // Used below for ownership
   const adminUserId = _.prop(adminUser, '_id') || '';
   // adminUser should be in an admin role
   if (adminUserId) {
-    // Create 'admin' role if it doesn't exist (required in newer alanning:roles)
-    if (!Roles.getAllRoles().fetch().find(r => r.name === 'admin')) {
-      Roles.createRole('admin');
-    }
     Roles.addUsersToRoles(adminUserId, 'admin');
     serverConsole('Admin User Found ID:', adminUserId, 'with obj:', _.pick(adminUser, '_id', 'username', 'email'));
   } else {
@@ -4501,15 +4506,6 @@ Meteor.startup(async function() {
       serverConsole('Added user', username, 'to role', roleName);
     });
   };
-
-  // Create roles if they don't exist (required in newer alanning:roles)
-  const allRoles = Roles.getAllRoles().fetch();
-  if (!allRoles.find(r => r.name === 'admin')) {
-    Roles.createRole('admin');
-  }
-  if (!allRoles.find(r => r.name === 'teacher')) {
-    Roles.createRole('teacher');
-  }
 
   roleAdd('admins', 'admin');
   roleAdd('teachers', 'teacher');
