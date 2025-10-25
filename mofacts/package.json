@@ -42,7 +42,7 @@
     "chai": "^4.5.0",
     "eslint": "^7.28.0",
     "eslint-config-google": "^0.14.0",
-    "node": "^12.22.12"
+    "node": "^14.21.4"
   },
   "scripts": {
     "test": "TEST_WATCH=1 meteor test --driver-package=meteortesting:mocha --port 3010 --settings settings.json"
