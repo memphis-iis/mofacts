@@ -241,6 +241,24 @@ Accounts.onLogin(function() {
           }
         });
       }
+
+      // CRITICAL: Handle Microsoft OAuth redirect flow
+      // With loginStyle: 'redirect', the button callback doesn't fire
+      // So we need to initialize loginParams here and route to profile
+      if (!user.loginParams && user.services && user.services.microsoft) {
+        console.log('[MS-LOGIN] Microsoft user logged in via redirect, initializing loginParams');
+
+        // Initialize loginParams for Microsoft users
+        const loginMode = Session.get('loginMode') || 'microsoft';
+        meteorCallAsync('setUserLoginData', 'direct', loginMode).then(() => {
+          console.log('[MS-LOGIN] loginParams initialized, routing to /profile');
+          Meteor.call('logUserAgentAndLoginTime', Meteor.userId(), navigator.userAgent);
+          Meteor.logoutOtherClients();
+          Router.go('/profile');
+        }).catch((err) => {
+          console.error('[MS-LOGIN] Error initializing loginParams:', err);
+        });
+      }
     }
   });
 });
