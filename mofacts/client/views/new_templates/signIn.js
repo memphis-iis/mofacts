@@ -127,7 +127,7 @@ Template.signIn.events({
 
     console.log('[MS-LOGIN] Initiating Meteor.loginWithMicrosoft...');
     Meteor.loginWithMicrosoft({
-      loginStyle: 'redirect',
+      loginStyle: 'popup',
       requestOfflineToken: true,
       requestPermissions: ['User.Read', 'offline_access', 'openid', 'profile', 'email'],
     }, async function(err) {

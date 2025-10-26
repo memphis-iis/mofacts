@@ -1,0 +1,59 @@
+<IfModule mod_ssl.c>
+<VirtualHost *:443>
+    ServerName staging.optimallearning.org
+
+    #Added by lets encrypt
+    Include /etc/letsencrypt/options-ssl-apache.conf
+
+    #Added by craig
+    ProxyRequests Off
+    
+    ProxyPass /websocket ws://localhost:3000/websocket
+    ProxyPassMatch ^/sockjs/(.*)/websocket ws://localhost:3000/sockjs/$1/websocket
+    
+    ProxyPass / http://127.0.0.1:3000/
+    ProxyPassReverse / http://127.0.0.1:3000/
+    ProxyPreserveHost on
+
+    #Added by Andrew
+    SetEnv proxy-initial-not-pooled 1
+    SetEnv proxy-nokeepalive 1
+#    SSLCertificateFile /etc/letsencrypt/live/mofacts.optimallearning.org/fullchain.pem
+#    SSLCertificateKeyFile /etc/letsencrypt/live/mofacts.optimallearning.org/privkey.pem
+    SSLUseStapling off
+SSLCertificateFile /etc/letsencrypt/live/staging.optimallearning.org/fullchain.pem
+SSLCertificateKeyFile /etc/letsencrypt/live/staging.optimallearning.org/privkey.pem
+</VirtualHost>
+
+# vim: syntax=apache ts=4 sw=4 sts=4 sr noet
+</IfModule>
+<IfModule mod_ssl.c>
+<VirtualHost *:80>
+    ServerName staging.optimallearning.org
+    ProxyPass / http://127.0.0.1:3000/
+    ProxyPassReverse / http://127.0.0.1:3000/
+    ProxyPreserveHost on
+
+    #Added by Andrew
+    SetEnv proxy-initial-not-pooled 1
+    SetEnv proxy-nokeepalive 1
+
+    RewriteEngine on
+
+    # Added by craig
+    ReWriteCond %{SERVER_PORT} !^443$
+#    ReWriteCond %{REQUEST_URI} !.*metadata$
+    # This allows DDP clients like ObjectiveDDP and Meteor-Unity to connect
+    RewriteRule ^/websocket wss://%{SERVER_NAME}/websocket [NC,R,L]
+    # This allows the meteor webapp to connect
+    RewriteRule ^/sockjs/(.*)/websocket wss://%{SERVER_NAME}/sockjs/$1/websocket [NC,R,L]
+    # from lets encrypt
+    #RewriteRule !.*metadata$ https://%{SERVER_NAME}%{REQUEST_URI} [END,NE,R=permanent]
+# Some rewrite rules in this file were disabled on your HTTPS site,
+# because they have the potential to create redirection loops.
+
+#     RewriteRule ^ https://%{SERVER_NAME}%{REQUEST_URI} [END,NE,R=permanent]
+
+
+</VirtualHost>
+</IfModule>
