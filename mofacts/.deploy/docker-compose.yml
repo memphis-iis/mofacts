@@ -2,7 +2,7 @@ services:
   mofacts:
     container_name: mofacts
     restart: always
-    image: ppavlikmemphis/mofacts-mini:meteor-2.14-fix
+    image: ppavlikmemphis/mofacts-mini:upgrades
     build:
       context: ../../
       dockerfile: Dockerfile
