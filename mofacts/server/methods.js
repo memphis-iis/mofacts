@@ -4438,7 +4438,6 @@ Meteor.startup(async function() {
   const google = getConfigProperty('google');
   ServiceConfiguration.configurations.insert({
     'service': 'google',
-    'loginStyle': 'popup',
     'clientId': _.prop(google, 'clientId'),
     'secret': _.prop(google, 'secret'),
   });
