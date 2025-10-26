@@ -153,6 +153,27 @@ Template.signIn.events({
         console.log('[MS-LOGIN] Calling setUserLoginData...');
         await meteorCallAsync('setUserLoginData', `direct`, Session.get('loginMode'));
 
+        // CRITICAL: Wait for loginParams to actually appear in client-side user object
+        // There's a race between the server updating the user document and the client
+        // receiving the updated data via DDP. We must wait for it before routing.
+        console.log('[MS-LOGIN] Waiting for loginParams to be set on client...');
+        await new Promise((resolve) => {
+          const checkLoginParams = Tracker.autorun(() => {
+            const user = Meteor.user();
+            if (user && user.loginParams) {
+              console.log('[MS-LOGIN] loginParams detected on client:', user.loginParams);
+              checkLoginParams.stop();
+              resolve();
+            }
+          });
+          // Timeout after 5 seconds
+          setTimeout(() => {
+            checkLoginParams.stop();
+            console.warn('[MS-LOGIN] Timeout waiting for loginParams, routing anyway...');
+            resolve();
+          }, 5000);
+        });
+
         console.log('[MS-LOGIN] Calling logUserAgentAndLoginTime...');
         Meteor.call('logUserAgentAndLoginTime', Meteor.userId(), navigator.userAgent);
 
