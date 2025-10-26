@@ -4445,12 +4445,12 @@ Meteor.startup(async function() {
 
   if(Meteor.settings.microsoft) {
     //add microsoft service config
-    ServiceConfiguration.configurations.upsert({service: 'office365'}, {
+    ServiceConfiguration.configurations.upsert({service: 'microsoft'}, {
       $set: {
         loginStyle: 'popup',
         clientId: Meteor.settings.microsoft.clientId,
         secret: Meteor.settings.microsoft.secret,
-        tenent: 'common',
+        tenant: 'common',
         //save the refresh token
         refreshToken: true,
       },
