@@ -324,7 +324,7 @@ Router.route('/', {
       return;
     }
 
-    if(Meteor.user() && Meteor.user().loginParams.loginMode != 'experiment'){
+    if(Meteor.user() && Meteor.user().loginParams && Meteor.user().loginParams.loginMode != 'experiment'){
       // Check if user is admin or teacher, redirect to profile
       // Otherwise redirect to learning dashboard for students
       if (Roles.userIsInRole(Meteor.user(), ['admin', 'teacher'])) {

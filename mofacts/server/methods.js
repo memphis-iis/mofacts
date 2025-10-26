@@ -4447,7 +4447,7 @@ Meteor.startup(async function() {
     //add microsoft service config
     ServiceConfiguration.configurations.upsert({service: 'microsoft'}, {
       $set: {
-        loginStyle: 'popup',
+        loginStyle: 'redirect',
         clientId: Meteor.settings.microsoft.clientId,
         secret: Meteor.settings.microsoft.secret,
         tenant: 'common',
@@ -4515,10 +4515,13 @@ Meteor.startup(async function() {
   const ret = Tdfs.find().count();
   if (ret == 0) loadStimsAndTdfsFromPrivate(adminUserId);
 
-  // Make sure we create a default user profile record when a new Google user
-  // shows up. We still want the default hook's 'profile' behavior, AND we want
-  // our custom user profile collection to have a default record
+  // Make sure we create a default user profile record when a new OAuth user
+  // shows up (Google or Microsoft). We still want the default hook's 'profile'
+  // behavior, AND we want our custom user profile collection to have a default record
   Accounts.onCreateUser(function(options, user) {
+    serverConsole('[ACCOUNTS] onCreateUser called');
+    serverConsole('[ACCOUNTS] User services:', Object.keys(user.services || {}));
+
     // Little display helper
     const dispUsr = function(u) {
       return _.pick(u, '_id', 'username', 'emails', 'profile');
@@ -4537,15 +4540,46 @@ Meteor.startup(async function() {
       return user;
     }
 
-    // Set username and an email address from the google service info
-    // We use the lowercase email for both username and email
-    const email = _.chain(user)
-        .prop('services')
-        .prop('google')
-        .prop('email').trim()
-        .value().toLowerCase();
+    let email = null;
+    let serviceName = null;
+
+    // Try to get email from Google service
+    if (user.services && user.services.google) {
+      email = _.chain(user)
+          .prop('services')
+          .prop('google')
+          .prop('email').trim()
+          .value().toLowerCase();
+      serviceName = 'Google';
+    }
+    // Try to get email from Microsoft service
+    else if (user.services && user.services.microsoft) {
+      // Microsoft uses 'mail' or 'userPrincipalName'
+      const msEmail = _.chain(user)
+          .prop('services')
+          .prop('microsoft')
+          .prop('mail')
+          .value();
+      const msUserPrincipalName = _.chain(user)
+          .prop('services')
+          .prop('microsoft')
+          .prop('userPrincipalName')
+          .value();
+
+      email = (msEmail || msUserPrincipalName || '').trim().toLowerCase();
+      serviceName = 'Microsoft';
+
+      serverConsole('[ACCOUNTS] Microsoft user data:', {
+        mail: msEmail,
+        userPrincipalName: msUserPrincipalName,
+        extractedEmail: email
+      });
+    }
+
     if (!email) {
-      // throw new Meteor.Error("No email found for your Google account");
+      serverConsole('[ACCOUNTS] WARNING: No email found for OAuth user!');
+      serverConsole('[ACCOUNTS] User object:', JSON.stringify(user, null, 2));
+      // throw new Meteor.Error("No email found for your OAuth account");
     }
 
     if (email) {
@@ -4556,7 +4590,7 @@ Meteor.startup(async function() {
       }];
     }
 
-    serverConsole('Creating new Google user:', dispUsr(user));
+    serverConsole(`[ACCOUNTS] Creating new ${serviceName} user:`, dispUsr(user));
 
     // If the user is initRoles, go ahead and add them to the roles.
     // Unfortunately, the user hasn't been created... so we need to actually

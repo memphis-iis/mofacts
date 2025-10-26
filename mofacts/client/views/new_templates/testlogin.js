@@ -17,7 +17,7 @@ Template.testLogin.onRendered(async function() {
     console.log('got teachers');
     Session.set('teachers', verifiedTeachers);
   }
-  if(Meteor.userId() && Meteor.user().loginParams.loginMode !== 'experiment'){
+  if(Meteor.userId() && Meteor.user().loginParams && Meteor.user().loginParams.loginMode !== 'experiment'){
     console.log("already logged in")
     Router.go("/profile");
   }

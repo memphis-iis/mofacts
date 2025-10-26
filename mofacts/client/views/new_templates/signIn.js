@@ -10,14 +10,15 @@ Template.signIn.onRendered(async function() {
   if (Session.get('loginMode') !== 'experiment') {
     console.log('password signin, setting login mode');
     Session.set('loginMode', 'password');
-    
+
     let verifiedTeachers = await meteorCallAsync('getAllTeachers');
     console.log('verifiedTeachers', verifiedTeachers);
-  
+
     console.log('got teachers');
     Session.set('teachers', verifiedTeachers);
   }
-  if(Meteor.userId() && Meteor.user().loginParams.loginMode !== 'experiment'){
+  // CRITICAL: Check loginParams exists before accessing loginMode
+  if(Meteor.userId() && Meteor.user().loginParams && Meteor.user().loginParams.loginMode !== 'experiment'){
     console.log("already logged in")
     Router.go("/profile");
   }
@@ -117,26 +118,48 @@ Template.signIn.events({
   'click #signInWithMicrosoftSSO': function(event) {
     //login with the Accounts service microsoft
     event.preventDefault();
-    console.log('Microsoft Login Proceeding');
+    console.log('[MS-LOGIN] Microsoft Login Button Clicked');
+    console.log('[MS-LOGIN] Current loginMode:', Session.get('loginMode'));
+    console.log('[MS-LOGIN] Current user:', Meteor.userId());
+
     //set the login mode to microsoft
     Session.set('loginMode', 'microsoft');
+
+    console.log('[MS-LOGIN] Initiating Meteor.loginWithMicrosoft...');
     Meteor.loginWithMicrosoft({
-      loginStyle: 'popup',
+      loginStyle: 'redirect',
       requestOfflineToken: true,
       requestPermissions: ['User.Read', 'offline_access', 'openid', 'profile', 'email'],
     }, async function(err) {
+      console.log('[MS-LOGIN] Callback invoked!');
+      console.log('[MS-LOGIN] Error:', err);
+      console.log('[MS-LOGIN] User after login:', Meteor.userId());
+      console.log('[MS-LOGIN] User object:', Meteor.user());
+
       //if we are not in a class and we log in, we need to disable embedded API keys.
       if(!Session.get('curClass')){
         Session.set('useEmbeddedAPIKeys', false);
       }
       if (err) {
         // error handling
-        console.log('Could not log in with Microsoft', err);
+        console.error('[MS-LOGIN] Login Error:', err);
+        console.error('[MS-LOGIN] Error details:', JSON.stringify(err, null, 2));
         $('#signInButton').prop('disabled', false);
         return;
       } else {
-        //redirect to profile edit page, since we don't have a profile yet
-        signInNotify();
+        console.log('[MS-LOGIN] Login successful!');
+
+        // CRITICAL: Initialize loginParams just like Google login does
+        console.log('[MS-LOGIN] Calling setUserLoginData...');
+        await meteorCallAsync('setUserLoginData', `direct`, Session.get('loginMode'));
+
+        console.log('[MS-LOGIN] Calling logUserAgentAndLoginTime...');
+        Meteor.call('logUserAgentAndLoginTime', Meteor.userId(), navigator.userAgent);
+
+        console.log('[MS-LOGIN] Logging out other clients...');
+        Meteor.logoutOtherClients();
+
+        console.log('[MS-LOGIN] Routing to /profile');
         Router.go('/profile');
       }
     });
