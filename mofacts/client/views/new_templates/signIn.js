@@ -115,12 +115,12 @@ Template.signIn.events({
     Session.set('useEmbeddedAPIKeys', false);
   },
   'click #signInWithMicrosoftSSO': function(event) {
-    //login with the Accounts service office365
+    //login with the Accounts service microsoft
     event.preventDefault();
     console.log('Microsoft Login Proceeding');
     //set the login mode to microsoft
     Session.set('loginMode', 'microsoft');
-    Meteor.loginWithOffice365({
+    Meteor.loginWithMicrosoft({
       loginStyle: 'popup',
       requestOfflineToken: true,
       requestPermissions: ['User.Read', 'offline_access', 'openid', 'profile', 'email'],
