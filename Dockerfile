@@ -5,7 +5,7 @@ FROM geoffreybooth/meteor-base:2.14
 COPY ./mofacts/package*.json $APP_SOURCE_FOLDER/
 
 # Copy settings.json into container
-COPY ./assets/ /mofactsAssets/
+COPY ./mofacts/.deploy/assets/ /mofactsAssets/
 
 #verify the presence of the settings.json file in the assets folder
 RUN test -f /mofactsAssets/settings.json && echo "settings.json file found" || echo "settings.json file not found"
@@ -54,7 +54,7 @@ ENV APP_BUNDLE_FOLDER /opt/bundle
 ENV SCRIPTS_FOLDER /docker
 
 #copy ./assets into the meteor assets folder
-COPY ./assets/ /mofactsAssets/
+COPY ./mofacts/.deploy/assets/ /mofactsAssets/
 
 #verify the presence of the settings.json file in the assets folder
 RUN test -f /mofactsAssets/settings.json && echo "settings.json file found" || echo "settings.json file not found"
