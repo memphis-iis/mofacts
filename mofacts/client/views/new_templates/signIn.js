@@ -158,11 +158,11 @@ Template.signIn.events({
         // receiving the updated data via DDP. We must wait for it before routing.
         console.log('[MS-LOGIN] Waiting for loginParams to be set on client...');
         await new Promise((resolve) => {
-          const checkLoginParams = Tracker.autorun(() => {
+          const checkLoginParams = Tracker.autorun((computation) => {
             const user = Meteor.user();
             if (user && user.loginParams) {
               console.log('[MS-LOGIN] loginParams detected on client:', user.loginParams);
-              checkLoginParams.stop();
+              computation.stop();
               resolve();
             }
           });
