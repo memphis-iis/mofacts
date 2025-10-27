@@ -1062,6 +1062,13 @@ tfoot tf, .table tfoot tf, .table tfoot td, .table tfoot th {
         padding: 0.75rem 1rem;
     }
 
+    /* Allow buttons to shrink on mobile - remove 200px minimum, allow text wrapping */
+    .btn-fixed {
+        max-width: 100%;
+        min-width: auto;
+        white-space: normal; /* Allow text to wrap */
+    }
+
     /* Larger multiple choice buttons */
     .choice .btn {
         padding: 1rem;
