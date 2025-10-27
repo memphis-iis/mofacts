@@ -191,6 +191,10 @@ function clientConsole(...args) {
   // eslint-disable-next-line no-invalid-this
   console.log.apply(this, disp);
 }
+
+// Make clientConsole globally available for Meteor packages
+window.clientConsole = clientConsole;
+
 // function meteorCallAsync(funcName, ...rest) {
 //   const promisedMeteorCall = Promise.promisify(Meteor.call);
 //   return promisedMeteorCall.apply(null, [funcName, rest]);
