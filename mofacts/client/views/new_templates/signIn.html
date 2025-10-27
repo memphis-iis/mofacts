@@ -14,18 +14,18 @@
                 </p>
 
                 <span id="serverErrors"></span>
-                <form class="mt-4">
+                <form class="mt-4 text-center">
                     {{#if isExperiment}}
-                        <input type="text" id="signInUsername" value="" placeholder="{{experimentLoginText}}">
+                        <input type="text" id="signInUsername" value="" placeholder="{{experimentLoginText}}" maxlength="16" class="sign-in-input d-block mb-2">
                         {{#if experimentPasswordRequired}}
-                            <input type="password" id="password" value="" placeholder="Password">
+                            <input type="password" id="password" value="" placeholder="Password" maxlength="16" class="sign-in-input d-block mb-2">
                         {{/if}}
-                        <button type="button" id="experimentSignin" class="btn btn-fixed w-100 mt-2">Continue</button>
+                        <button type="button" id="experimentSignin" class="btn btn-fixed">Continue</button>
                     {{else}}
-                        <input type="text" id="signInUsername" value="" placeholder="Username">
-                        <input type="password" id="password" value="" placeholder="Password">
+                        <input type="text" id="signInUsername" value="" placeholder="Username" maxlength="16" class="sign-in-input d-block mb-2">
+                        <input type="password" id="password" value="" placeholder="Password" maxlength="16" class="sign-in-input d-block mb-2">
                         <span class="help-inline danger errcheck" id="invalidLogin" hidden>Username password pair not found!</span>
-                        <button type="button" id="signInButton" class="btn btn-fixed d-block mx-auto mt-3">Log In</button>
+                        <button type="button" id="signInButton" class="btn btn-fixed">Log In</button>
                     {{/if}}
                 </form>
             </div>
@@ -34,8 +34,8 @@
             <div class="col-md-5 col-12">
 
                 {{#unless isExperiment}}
-                <div class="d-flex flex-column align-items-center mt-3">
-                    <div class="d-grid gap-1 w-100">
+                <div class="d-flex flex-column align-items-center mt-2">
+                    <div class="d-grid gap-2 w-100">
                         {{#if showTestLogin}}
                             <button type="button" id="testSignInButton" class="btn btn-fixed">Test Log In</button>
                         {{/if}}

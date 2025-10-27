@@ -152,9 +152,11 @@ input[type=text], input[type=password], select{
     border-width: 1px;
     border-radius: var(--border-radius-sm); /* Modern subtle rounding for inputs */
     padding: clamp(6px, 1vh, 10px) 12px; /* Match stimulus box padding */
-    margin: 5px;
-    /*give margin to the left of the input*/
-    margin-left: 10px;
+}
+
+/* Sign-in page inputs - remove default margins for Bootstrap spacing control */
+.sign-in-input {
+    margin: 0 auto;
 }
 
 input[type=radio]{
@@ -279,9 +281,8 @@ input[type="range"]::-webkit-slider-thumb {
 }
 
 .btn-fixed{
-    max-width: clamp(200px, 30vw, 300px);
+    max-width: 300px;
     height: inherit;
-    margin-bottom: 0.25rem;
 }
 
 
@@ -1062,12 +1063,6 @@ tfoot tf, .table tfoot tf, .table tfoot td, .table tfoot th {
         padding: 0.75rem 1rem;
     }
 
-    /* Allow buttons to shrink on mobile - remove 200px minimum, allow text wrapping */
-    .btn-fixed {
-        max-width: 100%;
-        min-width: auto;
-        white-space: normal; /* Allow text to wrap */
-    }
 
     /* Larger multiple choice buttons */
     .choice .btn {
