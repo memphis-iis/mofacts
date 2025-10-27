@@ -92,28 +92,42 @@ Template.studentReporting.helpers({
   tdfStats: () => Session.get('tdfStats') || [],
 });
 
-Template.studentReporting.rendered = async function() {
-  const studentID = Session.get('curStudentID') || Meteor.userId();
+Template.studentReporting.onRendered(function() {
+  // Wait for userId to be available before fetching data
+  // This is critical for new OAuth logins where DDP hasn't synced user yet
+  this.autorun(async () => {
+    const studentID = Session.get('curStudentID') || Meteor.userId();
 
-  const tdfsAttempted = await meteorCallAsync('getTdfIDsAndDisplaysAttemptedByUserId', studentID);
+    // If no userId yet, skip and wait for reactive re-run
+    if (!studentID) {
+      clientConsole(2, '[STUDENT-REPORTING] Waiting for userId to sync...');
+      return;
+    }
 
-  Session.set('studentReportingTdfs', tdfsAttempted);
+    clientConsole(2, '[STUDENT-REPORTING] UserId available, fetching TDF stats...');
 
-  // Load stats for each TDF
-  const statsPromises = tdfsAttempted.map(async (tdf) => {
-    const stats = await meteorCallAsync('getSimpleTdfStats', studentID, tdf.TDFId);
-    return {
-      ...tdf,
-      ...stats
-    };
+    const tdfsAttempted = await meteorCallAsync('getTdfIDsAndDisplaysAttemptedByUserId', studentID);
+
+    Session.set('studentReportingTdfs', tdfsAttempted);
+
+    // Load stats for each TDF
+    const statsPromises = tdfsAttempted.map(async (tdf) => {
+      const stats = await meteorCallAsync('getSimpleTdfStats', studentID, tdf.TDFId);
+      return {
+        ...tdf,
+        ...stats
+      };
+    });
+
+    const allStats = await Promise.all(statsPromises);
+
+    // Filter out TDFs with no stats (shouldn't happen, but just in case)
+    const validStats = allStats.filter(s => s.totalTrials > 0);
+    Session.set('tdfStats', validStats);
+
+    clientConsole(2, '[STUDENT-REPORTING] Loaded stats for', validStats.length, 'TDFs');
   });
-
-  const allStats = await Promise.all(statsPromises);
-
-  // Filter out TDFs with no stats (shouldn't happen, but just in case)
-  const validStats = allStats.filter(s => s.totalTrials > 0);
-  Session.set('tdfStats', validStats);
-};
+});
 
 Template.studentReporting.events({
   'click #go-to-lesson-select': function(event) {
