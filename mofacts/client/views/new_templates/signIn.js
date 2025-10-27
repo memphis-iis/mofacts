@@ -131,57 +131,63 @@ Template.signIn.events({
       requestOfflineToken: true,
       requestPermissions: ['User.Read'],
     }, async function(err) {
-      clientConsole(2, '[MS-LOGIN] Callback invoked!');
-      clientConsole(2, '[MS-LOGIN] Error:', err);
-      clientConsole(2, '[MS-LOGIN] User after login:', Meteor.userId());
-      clientConsole(2, '[MS-LOGIN] User object:', Meteor.user());
+      try {
+        clientConsole(2, '[MS-LOGIN] Callback invoked!');
+        clientConsole(2, '[MS-LOGIN] Error:', err);
+        clientConsole(2, '[MS-LOGIN] User after login:', Meteor.userId());
+        clientConsole(2, '[MS-LOGIN] User object:', Meteor.user());
 
-      //if we are not in a class and we log in, we need to disable embedded API keys.
-      if(!Session.get('curClass')){
-        Session.set('useEmbeddedAPIKeys', false);
-      }
-      if (err) {
-        // error handling
-        clientConsole(1, '[MS-LOGIN] Login Error:', err);
-        clientConsole(1, '[MS-LOGIN] Error details:', JSON.stringify(err, null, 2));
-        $('#signInButton').prop('disabled', false);
-        return;
-      } else {
-        clientConsole(2, '[MS-LOGIN] Login successful!');
+        //if we are not in a class and we log in, we need to disable embedded API keys.
+        if(!Session.get('curClass')){
+          Session.set('useEmbeddedAPIKeys', false);
+        }
+        if (err) {
+          // error handling
+          clientConsole(1, '[MS-LOGIN] Login Error:', err);
+          clientConsole(1, '[MS-LOGIN] Error details:', JSON.stringify(err, null, 2));
+          $('#signInButton').prop('disabled', false);
+          return;
+        } else {
+          clientConsole(2, '[MS-LOGIN] Login successful!');
 
-        // CRITICAL: Initialize loginParams just like Google login does
-        clientConsole(2, '[MS-LOGIN] Calling setUserLoginData...');
-        await meteorCallAsync('setUserLoginData', `direct`, Session.get('loginMode'));
+          // CRITICAL: Initialize loginParams just like Google login does
+          clientConsole(2, '[MS-LOGIN] Calling setUserLoginData...');
+          await meteorCallAsync('setUserLoginData', `direct`, Session.get('loginMode'));
 
-        // CRITICAL: Wait for loginParams to actually appear in client-side user object
-        // There's a race between the server updating the user document and the client
-        // receiving the updated data via DDP. We must wait for it before routing.
-        clientConsole(2, '[MS-LOGIN] Waiting for loginParams to be set on client...');
-        await new Promise((resolve) => {
-          const checkLoginParams = Tracker.autorun((computation) => {
-            const user = Meteor.user();
-            if (user && user.loginParams) {
-              clientConsole(2, '[MS-LOGIN] loginParams detected on client:', user.loginParams);
-              computation.stop();
+          // CRITICAL: Wait for loginParams to actually appear in client-side user object
+          // There's a race between the server updating the user document and the client
+          // receiving the updated data via DDP. We must wait for it before routing.
+          clientConsole(2, '[MS-LOGIN] Waiting for loginParams to be set on client...');
+          await new Promise((resolve) => {
+            const checkLoginParams = Tracker.autorun((computation) => {
+              const user = Meteor.user();
+              if (user && user.loginParams) {
+                clientConsole(2, '[MS-LOGIN] loginParams detected on client:', user.loginParams);
+                computation.stop();
+                resolve();
+              }
+            });
+            // Timeout after 5 seconds
+            setTimeout(() => {
+              checkLoginParams.stop();
+              clientConsole(2, '[MS-LOGIN] Timeout waiting for loginParams, routing anyway...');
               resolve();
-            }
+            }, 5000);
           });
-          // Timeout after 5 seconds
-          setTimeout(() => {
-            checkLoginParams.stop();
-            clientConsole(2, '[MS-LOGIN] Timeout waiting for loginParams, routing anyway...');
-            resolve();
-          }, 5000);
-        });
 
-        clientConsole(2, '[MS-LOGIN] Calling logUserAgentAndLoginTime...');
-        Meteor.call('logUserAgentAndLoginTime', Meteor.userId(), navigator.userAgent);
+          clientConsole(2, '[MS-LOGIN] Calling logUserAgentAndLoginTime...');
+          Meteor.call('logUserAgentAndLoginTime', Meteor.userId(), navigator.userAgent);
 
-        clientConsole(2, '[MS-LOGIN] Logging out other clients...');
-        Meteor.logoutOtherClients();
+          clientConsole(2, '[MS-LOGIN] Logging out other clients...');
+          Meteor.logoutOtherClients();
 
-        clientConsole(2, '[MS-LOGIN] Routing to /profile');
-        Router.go('/profile');
+          clientConsole(2, '[MS-LOGIN] Routing to /profile');
+          Router.go('/profile');
+        }
+      } catch (error) {
+        clientConsole(1, '[MS-LOGIN] FATAL ERROR in callback:', error);
+        clientConsole(1, '[MS-LOGIN] Error stack:', error.stack);
+        alert('Microsoft login failed: ' + error.message);
       }
     });
   },
