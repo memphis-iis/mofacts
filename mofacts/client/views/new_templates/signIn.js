@@ -1,4 +1,4 @@
-import {meteorCallAsync} from '../..';
+import {meteorCallAsync, clientConsole} from '../..';
 import {blankPassword} from '../../lib/currentTestingHelpers';
 import {sessionCleanUp} from '../../lib/sessionUtils';
 import {displayify} from '../../../common/globalHelpers';
@@ -8,18 +8,18 @@ import {routeToSignin} from '../../lib/router';
 
 Template.signIn.onRendered(async function() {
   if (Session.get('loginMode') !== 'experiment') {
-    console.log('password signin, setting login mode');
+    clientConsole(2, 'password signin, setting login mode');
     Session.set('loginMode', 'password');
 
     let verifiedTeachers = await meteorCallAsync('getAllTeachers');
-    console.log('verifiedTeachers', verifiedTeachers);
+    clientConsole(2, 'verifiedTeachers', verifiedTeachers);
 
-    console.log('got teachers');
+    clientConsole(2, 'got teachers');
     Session.set('teachers', verifiedTeachers);
   }
   // CRITICAL: Check loginParams exists before accessing loginMode
   if(Meteor.userId() && Meteor.user().loginParams && Meteor.user().loginParams.loginMode !== 'experiment'){
-    console.log("already logged in")
+    clientConsole(2, "already logged in")
     Router.go("/profile");
   }
   const allCourseSections = await meteorCallAsync('getAllCourseSections');
@@ -33,7 +33,7 @@ Template.signIn.onRendered(async function() {
   }
   Session.set('classesByInstructorId', classesByInstructorId);
   curTeacher = Session.get('curTeacher');
-  console.log("teacher:", curTeacher?._id || 'none');
+  clientConsole(2, "teacher:", curTeacher?._id || 'none');
   if (curTeacher?._id){
     $('#initialInstructorSelection').prop('hidden', 'true');
     $('#classSelection').prop('hidden', 'false');
@@ -70,7 +70,7 @@ Template.signIn.events({
   },
   'change #classSelect': function(event) {
     event.preventDefault();
-    console.log('class select');
+    clientConsole(2, 'class select');
     //route to /classes/teacher._username/section._id
     Router.go('/classes/' + Session.get('curTeacher').username + '/' + event.target.value);
     //hide ClassSelectModal
@@ -78,7 +78,7 @@ Template.signIn.events({
   },
   'change #institutionSelect': function(event) {
     event.preventDefault();
-    console.log('institution select');
+    clientConsole(2, 'institution select');
     //if the value is not empty, route to the institution's signin page, else show teacher selection
     if(event.target.value){
       Router.go('/' + event.target.value);
@@ -92,7 +92,7 @@ Template.signIn.events({
     //get the teacher's information fron allTeachers in format {_id:'{{this._id}}',username:'{{this.username}}
     const teacher = Session.get('teachers').find(teacher => teacher._id === event.target.value);
     setTeacher(teacher);
-    console.log('teacher select' + teacher);
+    clientConsole(2, 'teacher select' + teacher);
     //show class selection
     $('#classSelect').removeAttr('hidden');
     //hide teacher selection
@@ -188,7 +188,7 @@ Template.signIn.events({
   'click #courseLink': function(event) {
     event.preventDefault();
     const sectionId = event.target.getAttribute('section-id');
-    console.log(sectionId);
+    clientConsole(2, sectionId);
     $('#classSelection').prop('hidden', 'true');
     const allClasses = Session.get('curTeacherClasses');
     const curClass = allClasses.find((aClass) => aClass.sectionId.includes(sectionId));
@@ -218,7 +218,7 @@ Template.signIn.events({
     Meteor.logout();
     $('#signInButton').prop('disabled', true);
     event.preventDefault();
-    console.log('Google Login Proceeding');
+    clientConsole(2, 'Google Login Proceeding');
 
     const options = {
       requestOfflineToken: true,
@@ -234,14 +234,14 @@ Template.signIn.events({
       if (err) {
         $('#signInButton').prop('disabled', false);
         // error handling
-        console.log('Could not log in with Google', err);
+        clientConsole(1, 'Could not log in with Google', err);
         throw new Meteor.Error(Accounts.LoginCancelledError.numericError, 'Error');
       }
 
       // Made it!
       if (Session.get('debugging')) {
         const currentUser = Meteor.users.findOne({_id: Meteor.userId()}).username;
-        console.log(currentUser + ' was logged in successfully! Current route is ', Router.current().route.getName());
+        clientConsole(2, currentUser + ' was logged in successfully! Current route is ', Router.current().route.getName());
         Meteor.call('debugLog', 'Sign in was successful');
       }
       Meteor.call('logUserAgentAndLoginTime', Meteor.userId(), navigator.userAgent);
@@ -309,11 +309,11 @@ function signInNotify(landingPage = '/profile') {
     Meteor.call('addUserToTeachersClass', Meteor.userId(), curTeacher._id, curClass.sectionId,
     async function(err, result) {
       if (err) {
-        console.log('error adding user to teacher class: ' + err);
+        clientConsole(1, 'error adding user to teacher class: ' + err);
         alert(err);
         return;
       }
-      console.log('addUserToTeachersClass result: ' + result);
+      clientConsole(2, 'addUserToTeachersClass result: ' + result);
       let sectionName = "";
       if(curClass.sectionName){
         sectionName = "/" + curClass.sectionName;
@@ -326,7 +326,7 @@ function signInNotify(landingPage = '/profile') {
   }
   if (Session.get('debugging')) {
     const currentUser = Meteor.users.findOne({_id: Meteor.userId()}).username;
-    console.log(currentUser + ' was logged in successfully! Current route is ', Router.current().route.getName());
+    clientConsole(2, currentUser + ' was logged in successfully! Current route is ', Router.current().route.getName());
     Meteor.call('debugLog', 'Sign in was successful');
     Meteor.call('logUserAgentAndLoginTime', Meteor.userId(), navigator.userAgent);
   }
@@ -355,10 +355,10 @@ function userPasswordCheck() {
     if (experimentPasswordRequired) {
       sessionCleanUp();
       Session.set('experimentPasswordRequired', true);
-      console.log('username:' + newUsername + ',password:' + newPassword);
+      clientConsole(2, 'username:' + newUsername + ',password:' + newPassword);
       Meteor.loginWithPassword(newUsername, newPassword, async function(error) {
         if (typeof error !== 'undefined') {
-          console.log('ERROR: The user was not logged in on experiment sign in?', newUsername, 'Error:', error);
+          clientConsole(1, 'ERROR: The user was not logged in on experiment sign in?', newUsername, 'Error:', error);
           alert('It appears that you couldn\'t be logged in as ' + newUsername);
           $('#signInButton').prop('disabled', false);
         } else {
@@ -407,7 +407,7 @@ function userPasswordCheck() {
         // If there was a call failure or server returned error message,
         // then we can't proceed
         if (errorMsgs.length > 0) {
-          console.log('Experiment user login errors:', displayify(errorMsgs));
+          clientConsole(1, 'Experiment user login errors:', displayify(errorMsgs));
           $('#serverErrors')
               .html(errorMsgs.join('<br>'))
               .show();
@@ -422,7 +422,7 @@ function userPasswordCheck() {
 
         Meteor.loginWithPassword(newUsername, newPassword, async function(error) {
           if (typeof error !== 'undefined') {
-            console.log('ERROR: The user was not logged in on experiment sign in?', newUsername, 'Error:', error);
+            clientConsole(1, 'ERROR: The user was not logged in on experiment sign in?', newUsername, 'Error:', error);
             alert('It appears that you couldn\'t be logged in as ' + newUsername);
             $('#signInButton').prop('disabled', false);
           } else {
@@ -467,7 +467,7 @@ function userPasswordCheck() {
       Session.set('useEmbeddedAPIKeys', false);
     }
     if (typeof error !== 'undefined') {
-      console.log('Login error: ' + error);
+      clientConsole(1, 'Login error: ' + error);
       $('#invalidLogin').show();
       alert('Your username or password was incorrect. Please try again.');
       $('#signInButton').prop('disabled', false);
@@ -477,7 +477,7 @@ function userPasswordCheck() {
         // with a blank password. Currently this is someone who's
         // managed to figure out to use the "normal" login flow. Tell
         // them the "correct" way to use the system.
-        console.log('Detected non-experimental login for turk ID', newUsername);
+        clientConsole(2, 'Detected non-experimental login for turk ID', newUsername);
         alert('This login page is not for Mechanical Turk workers. Please use the link provided with your HIT');
         $('#signInButton').prop('disabled', false);
         return;
@@ -494,18 +494,18 @@ function testUserEnabled() {
 }
 
 function testLogin() {
-  console.log('TEST Login');
+  clientConsole(2, 'TEST Login');
 
   // Just a sanity check
   if (!testUserEnabled()) {
-    console.log('TEST Login REJECTED');
+    clientConsole(1, 'TEST Login REJECTED');
     $('#testSignInButton').prop('disabled', false);
     return;
   }
 
   const testUserName = _.trim($('#signInUsername').val()).toUpperCase();
   if (!testUserName) {
-    console.log('No TEST user name specified');
+    clientConsole(1, 'No TEST user name specified');
     alert('No TEST user name specified');
     $('#testSignInButton').prop('disabled', false);
     return;
@@ -524,7 +524,7 @@ function testLogin() {
     // then we can't proceed
     if (errorMsgs.length > 0) {
       const errorText = displayify(errorMsgs);
-      console.log('Experiment user login errors:', errorText);
+      clientConsole(1, 'Experiment user login errors:', errorText);
       alert('Experiment user login errors:', errorText);
       $('#testSignInButton').prop('disabled', false);
       return;
@@ -538,13 +538,13 @@ function testLogin() {
     // users, which you can promote to admin or teacher
     Meteor.loginWithPassword({'username': testUserName}, testPassword, async function(error) {
       if (typeof error !== 'undefined') {
-        console.log('ERROR: The user was not logged in on TEST sign in?', testUserName, 'Error:', error);
+        clientConsole(1, 'ERROR: The user was not logged in on TEST sign in?', testUserName, 'Error:', error);
         alert('It appears that you couldn\'t be logged in as ' + testUserName);
         $('#testSignInButton').prop('disabled', false);
       } else {
         if (Session.get('debugging')) {
           const currentUser = Meteor.users.findOne({_id: Meteor.userId()}).username;
-          console.log(currentUser + ' was test logged in successfully! Current route is ', Router.current().route.getName());
+          clientConsole(2, currentUser + ' was test logged in successfully! Current route is ', Router.current().route.getName());
           Meteor.call('debugLog', 'TEST Sign in was successful - YOU SHOULD NOT SEE THIS IN PRODUCTION');
         }
         Meteor.call('logUserAgentAndLoginTime', Meteor.userId(), navigator.userAgent);
@@ -554,11 +554,11 @@ function testLogin() {
           Meteor.call('addUserToTeachersClass', Meteor.userId(), curTeacher._id, curClass.sectionId,
           async function(err, result) {
             if (err) {
-              console.log('error adding user to teacher class: ' + err);
+              clientConsole(1, 'error adding user to teacher class: ' + err);
               alert(err);
               return;
             }
-            console.log('addUserToTeachersClass result: ' + result);
+            clientConsole(2, 'addUserToTeachersClass result: ' + result);
             let sectionName = "";
             if(curClass.sectionName){
               sectionName = "/" + curClass.sectionName;
