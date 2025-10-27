@@ -412,6 +412,23 @@ Router.route('/profile', {
     }
 
     if (Meteor.user()) {
+      // CRITICAL: For new OAuth users, loginParams might not be synced yet
+      // If missing, wait for it to appear before rendering
+      if (!Meteor.user().loginParams) {
+        clientConsole(2, '[ROUTER] loginParams not found, waiting...');
+        // Wait briefly for DDP sync, then retry
+        setTimeout(() => {
+          if (Meteor.user() && Meteor.user().loginParams) {
+            clientConsole(2, '[ROUTER] loginParams found after wait, re-rendering');
+            Router.go('/profile');  // Re-trigger the route
+          } else {
+            clientConsole(1, '[ROUTER] loginParams still missing, redirecting to signin');
+            Router.go('/');  // Something went wrong, back to login
+          }
+        }, 500);
+        return;
+      }
+
       const loginMode = Meteor.user().loginParams?.loginMode || 'normal';
 
       if (loginMode === 'southwest') {
