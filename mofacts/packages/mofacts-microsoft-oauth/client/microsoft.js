@@ -4,7 +4,7 @@ Microsoft = {
 
   // Request Microsoft credentials for the user
   requestCredential: function (options, credentialRequestCompleteCallback) {
-    console.log('[MS-OAUTH-CLIENT] requestCredential called with options:', options);
+    clientConsole(2, '[MS-OAUTH-CLIENT] requestCredential called with options:', options);
 
     // Support both (options, callback) and (callback)
     if (!credentialRequestCompleteCallback && typeof options === 'function') {
@@ -16,15 +16,15 @@ Microsoft = {
 
     // Fetch the service configuration
     const config = ServiceConfiguration.configurations.findOne({service: Microsoft.serviceName});
-    console.log('[MS-OAUTH-CLIENT] Service config found:', !!config);
+    clientConsole(2, '[MS-OAUTH-CLIENT] Service config found:', !!config);
     if (!config) {
-      console.error('[MS-OAUTH-CLIENT] ERROR: No service configuration found for Microsoft!');
+      clientConsole(1, '[MS-OAUTH-CLIENT] ERROR: No service configuration found for Microsoft!');
       credentialRequestCompleteCallback &&
         credentialRequestCompleteCallback(new ServiceConfiguration.ConfigError());
       return;
     }
 
-    console.log('[MS-OAUTH-CLIENT] Config details:', {
+    clientConsole(2, '[MS-OAUTH-CLIENT] Config details:', {
       hasClientId: !!config.clientId,
       hasSecret: !!config.secret,
       tenant: config.tenant,
@@ -34,7 +34,7 @@ Microsoft = {
     const credentialToken = Random.secret();
     const loginStyle = OAuth._loginStyle(Microsoft.serviceName, config, options);
 
-    console.log('[MS-OAUTH-CLIENT] Using loginStyle:', loginStyle);
+    clientConsole(2, '[MS-OAUTH-CLIENT] Using loginStyle:', loginStyle);
 
     // Microsoft Identity Platform v2 scopes (OpenID Connect)
     const scope = ['openid', 'profile', 'email'];
@@ -49,7 +49,7 @@ Microsoft = {
       scope.push(...options.requestPermissions);
     }
 
-    console.log('[MS-OAUTH-CLIENT] Requested scopes:', scope);
+    clientConsole(2, '[MS-OAUTH-CLIENT] Requested scopes:', scope);
 
     const loginUrlParameters = {};
 
@@ -76,7 +76,7 @@ Microsoft = {
     const baseUrl = `https://login.microsoftonline.com/${tenant}/oauth2/v2.0/authorize`;
 
     const redirectUri = OAuth._redirectUri(Microsoft.serviceName, config);
-    console.log('[MS-OAUTH-CLIENT] Redirect URI:', redirectUri);
+    clientConsole(2, '[MS-OAUTH-CLIENT] Redirect URI:', redirectUri);
 
     Object.assign(loginUrlParameters, {
       response_type: 'code',
@@ -92,8 +92,8 @@ Microsoft = {
         .map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(value)}`)
         .join('&');
 
-    console.log('[MS-OAUTH-CLIENT] Launching OAuth login to:', baseUrl);
-    console.log('[MS-OAUTH-CLIENT] Full login URL (check redirect_uri):', loginUrl);
+    clientConsole(2, '[MS-OAUTH-CLIENT] Launching OAuth login to:', baseUrl);
+    clientConsole(2, '[MS-OAUTH-CLIENT] Full login URL (check redirect_uri):', loginUrl);
 
     OAuth.launchLogin({
       loginService: Microsoft.serviceName,
@@ -104,6 +104,6 @@ Microsoft = {
       popupOptions: { width: 520, height: 680 }
     });
 
-    console.log('[MS-OAUTH-CLIENT] OAuth.launchLogin called');
+    clientConsole(2, '[MS-OAUTH-CLIENT] OAuth.launchLogin called');
   }
 };

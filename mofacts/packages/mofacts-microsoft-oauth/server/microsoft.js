@@ -91,10 +91,10 @@ const getIdentity = async (accessToken) => {
 
 // Register the OAuth service handler (legacy OAuth2 integration)
 OAuth.registerService(Microsoft.serviceName, 2, null, async (query) => {
-  console.log('[MS-OAUTH-SERVER] OAuth callback received, query params:', Object.keys(query));
+  serverConsole('[MS-OAUTH-SERVER] OAuth callback received, query params:', Object.keys(query));
 
   const tokens = await getTokens(query);
-  console.log('[MS-OAUTH-SERVER] Tokens received:', {
+  serverConsole('[MS-OAUTH-SERVER] Tokens received:', {
     hasAccessToken: !!tokens.accessToken,
     hasRefreshToken: !!tokens.refreshToken,
     hasIdToken: !!tokens.idToken,
@@ -102,7 +102,7 @@ OAuth.registerService(Microsoft.serviceName, 2, null, async (query) => {
   });
 
   const identity = await getIdentity(tokens.accessToken);
-  console.log('[MS-OAUTH-SERVER] Identity received from Microsoft Graph:', {
+  serverConsole('[MS-OAUTH-SERVER] Identity received from Microsoft Graph:', {
     id: identity.id,
     displayName: identity.displayName,
     mail: identity.mail,
@@ -133,7 +133,7 @@ OAuth.registerService(Microsoft.serviceName, 2, null, async (query) => {
   // Normalize email - Microsoft Graph uses 'mail' or 'userPrincipalName'
   const email = identity.mail || identity.userPrincipalName;
 
-  console.log('[MS-OAUTH-SERVER] Preparing user data:', {
+  serverConsole('[MS-OAUTH-SERVER] Preparing user data:', {
     email: email,
     name: identity.displayName || identity.givenName,
     serviceDataKeys: Object.keys(serviceData)

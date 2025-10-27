@@ -118,23 +118,23 @@ Template.signIn.events({
   'click #signInWithMicrosoftSSO': function(event) {
     //login with the Accounts service microsoft
     event.preventDefault();
-    console.log('[MS-LOGIN] Microsoft Login Button Clicked');
-    console.log('[MS-LOGIN] Current loginMode:', Session.get('loginMode'));
-    console.log('[MS-LOGIN] Current user:', Meteor.userId());
+    clientConsole(2, '[MS-LOGIN] Microsoft Login Button Clicked');
+    clientConsole(2, '[MS-LOGIN] Current loginMode:', Session.get('loginMode'));
+    clientConsole(2, '[MS-LOGIN] Current user:', Meteor.userId());
 
     //set the login mode to microsoft
     Session.set('loginMode', 'microsoft');
 
-    console.log('[MS-LOGIN] Initiating Meteor.loginWithMicrosoft...');
+    clientConsole(2, '[MS-LOGIN] Initiating Meteor.loginWithMicrosoft...');
     Meteor.loginWithMicrosoft({
       loginStyle: 'popup',
       requestOfflineToken: true,
-      requestPermissions: ['User.Read', 'offline_access', 'openid', 'profile', 'email'],
+      requestPermissions: ['User.Read'],
     }, async function(err) {
-      console.log('[MS-LOGIN] Callback invoked!');
-      console.log('[MS-LOGIN] Error:', err);
-      console.log('[MS-LOGIN] User after login:', Meteor.userId());
-      console.log('[MS-LOGIN] User object:', Meteor.user());
+      clientConsole(2, '[MS-LOGIN] Callback invoked!');
+      clientConsole(2, '[MS-LOGIN] Error:', err);
+      clientConsole(2, '[MS-LOGIN] User after login:', Meteor.userId());
+      clientConsole(2, '[MS-LOGIN] User object:', Meteor.user());
 
       //if we are not in a class and we log in, we need to disable embedded API keys.
       if(!Session.get('curClass')){
@@ -142,26 +142,26 @@ Template.signIn.events({
       }
       if (err) {
         // error handling
-        console.error('[MS-LOGIN] Login Error:', err);
-        console.error('[MS-LOGIN] Error details:', JSON.stringify(err, null, 2));
+        clientConsole(1, '[MS-LOGIN] Login Error:', err);
+        clientConsole(1, '[MS-LOGIN] Error details:', JSON.stringify(err, null, 2));
         $('#signInButton').prop('disabled', false);
         return;
       } else {
-        console.log('[MS-LOGIN] Login successful!');
+        clientConsole(2, '[MS-LOGIN] Login successful!');
 
         // CRITICAL: Initialize loginParams just like Google login does
-        console.log('[MS-LOGIN] Calling setUserLoginData...');
+        clientConsole(2, '[MS-LOGIN] Calling setUserLoginData...');
         await meteorCallAsync('setUserLoginData', `direct`, Session.get('loginMode'));
 
         // CRITICAL: Wait for loginParams to actually appear in client-side user object
         // There's a race between the server updating the user document and the client
         // receiving the updated data via DDP. We must wait for it before routing.
-        console.log('[MS-LOGIN] Waiting for loginParams to be set on client...');
+        clientConsole(2, '[MS-LOGIN] Waiting for loginParams to be set on client...');
         await new Promise((resolve) => {
           const checkLoginParams = Tracker.autorun((computation) => {
             const user = Meteor.user();
             if (user && user.loginParams) {
-              console.log('[MS-LOGIN] loginParams detected on client:', user.loginParams);
+              clientConsole(2, '[MS-LOGIN] loginParams detected on client:', user.loginParams);
               computation.stop();
               resolve();
             }
@@ -169,18 +169,18 @@ Template.signIn.events({
           // Timeout after 5 seconds
           setTimeout(() => {
             checkLoginParams.stop();
-            console.warn('[MS-LOGIN] Timeout waiting for loginParams, routing anyway...');
+            clientConsole(2, '[MS-LOGIN] Timeout waiting for loginParams, routing anyway...');
             resolve();
           }, 5000);
         });
 
-        console.log('[MS-LOGIN] Calling logUserAgentAndLoginTime...');
+        clientConsole(2, '[MS-LOGIN] Calling logUserAgentAndLoginTime...');
         Meteor.call('logUserAgentAndLoginTime', Meteor.userId(), navigator.userAgent);
 
-        console.log('[MS-LOGIN] Logging out other clients...');
+        clientConsole(2, '[MS-LOGIN] Logging out other clients...');
         Meteor.logoutOtherClients();
 
-        console.log('[MS-LOGIN] Routing to /profile');
+        clientConsole(2, '[MS-LOGIN] Routing to /profile');
         Router.go('/profile');
       }
     });
