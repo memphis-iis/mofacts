@@ -181,8 +181,8 @@ Template.signIn.events({
           clientConsole(2, '[MS-LOGIN] Logging out other clients...');
           Meteor.logoutOtherClients();
 
-          clientConsole(2, '[MS-LOGIN] Routing to /profile');
-          Router.go('/profile');
+          clientConsole(2, '[MS-LOGIN] Routing to / (will redirect to profile after loginParams check)');
+          Router.go('/');
         }
       } catch (error) {
         clientConsole(1, '[MS-LOGIN] FATAL ERROR in callback:', error);
