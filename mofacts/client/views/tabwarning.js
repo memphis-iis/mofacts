@@ -5,7 +5,7 @@ Template.tabwarning.events({
     event.stopPropagation();
 
     // Force this tab to take over the session
-    const currentSessionId = Meteor.default_connection._lastSessionId;
+    const currentSessionId = Meteor.default_connection?._lastSessionId || Meteor.connection?._lastSessionId || null;
     const currentSessionIdTimestamp = Date.now();
 
     console.log('Updating session:', currentSessionId, currentSessionIdTimestamp);

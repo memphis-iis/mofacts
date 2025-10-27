@@ -533,7 +533,7 @@ function gatherInstructionLogRecord(trialEndTimeStamp, trialStartTimeStamp,
     'sectionId': Session.get('curSectionId'),
     'teacherId': Session.get('curTeacher')?._id,
     'anonStudentId': Meteor.user().username,
-    'sessionID': Meteor.default_connection._lastSessionId,
+    'sessionID': Meteor.default_connection?._lastSessionId || Meteor.connection?._lastSessionId || null,
     'conditionNameA': 'tdf file',
     // Note: we use this to enrich the history record server side, change both places if at all
     'conditionTypeA': Session.get('currentTdfName'),
