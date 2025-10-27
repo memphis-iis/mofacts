@@ -406,6 +406,11 @@ Router.route('/profile', {
     return allSubscriptions;
   },
   action: function() {
+    // Wait for subscriptions from waitOn to be ready
+    if (!this.ready()) {
+      return;  // Iron Router will show loadingTemplate automatically
+    }
+
     if (Meteor.user()) {
       const loginMode = Meteor.user().loginParams?.loginMode || 'normal';
 
