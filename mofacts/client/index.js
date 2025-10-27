@@ -249,19 +249,6 @@ Accounts.onLogin(function() {
   });
 });
 
-//change the theme of the page onlogin to /neo or /neo-dark depending on browser
-Accounts.onLogout(function() {
-  //if the browser's preference is dark, set the theme to /neo-dark
-  if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-    $('#theme').attr('href', '/styles/neo-dark.css');
-    $('#themeSelect').val('/styles/neo-dark.css');
-  } else {
-    //otherwise, set the theme to /neo
-    $('#theme').attr('href', '/styles/neo.css');
-    $('#themeSelect').val('/styles/neo.css');
-  }
-});
-
 Meteor.startup(function() {
 
   Session.set('debugging', true);

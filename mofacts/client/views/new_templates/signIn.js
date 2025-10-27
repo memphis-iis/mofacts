@@ -41,6 +41,13 @@ Template.signIn.onRendered(async function() {
     //start bootstrap modal
     $('#classSelect').removeAttr('hidden');
   }
+
+  // Trigger fade-in now that page is ready (prevents layout shift)
+  const container = document.querySelector('.container.page-loading');
+  if (container) {
+    container.classList.remove('page-loading');
+    container.classList.add('page-loaded');
+  }
 });
 
 
