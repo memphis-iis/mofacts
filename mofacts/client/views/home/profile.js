@@ -428,6 +428,13 @@ function uniformSizeAdminButtons() {
     adminButtons.css('width', maxWidth + 'px');
     clientConsole(2, 'Admin buttons uniformly sized to:', maxWidth + 'px');
   }
+
+  // Trigger fade-in now that button layout is finalized (prevents layout shift)
+  const container = document.getElementById("adminButtonContainer");
+  if (container) {
+    container.classList.remove("page-loading");
+    container.classList.add("page-loaded");
+  }
 }
 
 async function processAllTdfs(templateInstance, allTdfs) {
