@@ -707,6 +707,15 @@ Router.route('/instructions', {
       clientConsole(2, 'No one logged in - allowing template to handle');
     } else {
       const unit = Session.get('currentTdfUnit');
+
+      // IMPORTANT: If unit is not yet loaded, always show instructions page
+      // to avoid race condition where instructions are skipped on first unit
+      if (!unit) {
+        clientConsole(2, 'Unit not yet loaded - showing instructions page to avoid race');
+        this.next();
+        return;
+      }
+
       const lockout = unitHasLockout() > 0;
       const txt = unit.unitinstructions ? unit.unitinstructions.trim() : undefined;
       const pic = unit.picture ? unit.picture.trim() : undefined;
