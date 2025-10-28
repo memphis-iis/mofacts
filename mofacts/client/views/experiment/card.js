@@ -5640,9 +5640,9 @@ async function resumeFromComponentState() {
 
   const displayPresets = {
     default:{
-      "displayReviewTimeoutAsBarOrText": "both",
-      "displayReadyPromptTimeoutAsBarOrText": "both",
-      "displayCardTimeoutAsBarOrText": "both",
+      "displayReviewTimeoutAsBarOrText": "false",
+      "displayReadyPromptTimeoutAsBarOrText": "false",
+      "displayCardTimeoutAsBarOrText": false,
       "displayTimeOutDuringStudy": true,
       "displayUserAnswerInFeedback": "onIncorrect",
       "displayPerformanceDuringStudy": false,
