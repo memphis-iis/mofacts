@@ -38,9 +38,13 @@ Template.profile.helpers({
   },
 
   class: function(){
-    thisClass = Meteor.user().class;
+    const user = Meteor.user();
+    if (!user) {
+      return false;
+    }
+    thisClass = user.class;
     clientConsole(2, 'class:', thisClass);
-    if(thisClass.courseName){
+    if(thisClass && thisClass.courseName){
       return thisClass;
     } else {
       return false;
@@ -439,6 +443,14 @@ function uniformSizeAdminButtons() {
 
 async function processAllTdfs(templateInstance, allTdfs) {
 
+  // Guard clause: Exit early if user is not logged in
+  // This prevents crashes during logout or session cleanup when reactive computations rerun
+  const user = Meteor.user();
+  if (!user) {
+    clientConsole(2, 'processAllTdfs: No user logged in, skipping processing');
+    return;
+  }
+
   $('#expDataDownloadContainer').html('');
 
   Meteor.call('getContentGenerationAvailable', function(err, res) {
@@ -458,10 +470,10 @@ async function processAllTdfs(templateInstance, allTdfs) {
   const tdfTags = [];
   const disabledTdfs = [];
   const tdfOwnerIds = [];
-  const isAdmin = Roles.userIsInRole(Meteor.user(), ['admin']);
+  const isAdmin = Roles.userIsInRole(user, ['admin']);
 
   //Get all course tdfs
-  const courseId = Meteor.user().loginParams.curClass ? Meteor.user().loginParams.curClass.courseId : null;
+  const courseId = user.loginParams?.curClass?.courseId || null;
   const courseTdfs = Assignments.find({courseId: courseId}).fetch()
   clientConsole(2, 'courseTdfs count:', courseTdfs?.length || 0, 'courseId:', courseId);
 
@@ -705,18 +717,19 @@ async function selectTdf(currentTdfId, lessonName, currentStimuliSetId, ignoreOu
     audioPromptFeedbackVolume = setspec.audioPromptFeedbackVolume || 0;
     feedbackType = setspec.feedbackType;
     audioPromptFeedbackVoice = setspec.audioPromptFeedbackVoice || 'en-US-Standard-A';
-  }  
+  }
   else {
-    audioPromptMode = Meteor.user().audioPromptMode;
-    audioInputEnabled = Meteor.user().audioInputMode;
-    audioPromptFeedbackSpeakingRate = document.getElementById('audioPromptFeedbackSpeakingRate').value;
-    audioPromptQuestionSpeakingRate = document.getElementById('audioPromptQuestionSpeakingRate').value;
-    audioPromptVoice = document.getElementById('audioPromptVoice').value;
-    audioInputSensitivity = document.getElementById('audioInputSensitivity').value;
-    audioPromptQuestionVolume = document.getElementById('audioPromptQuestionVolume').value;
-    audioPromptFeedbackVolume = document.getElementById('audioPromptFeedbackVolume').value;
+    const user = Meteor.user();
+    audioPromptMode = user?.audioPromptMode || 'silent';
+    audioInputEnabled = user?.audioInputMode || false;
+    audioPromptFeedbackSpeakingRate = document.getElementById('audioPromptFeedbackSpeakingRate')?.value || 1;
+    audioPromptQuestionSpeakingRate = document.getElementById('audioPromptQuestionSpeakingRate')?.value || 1;
+    audioPromptVoice = document.getElementById('audioPromptVoice')?.value || 'en-US-Standard-A';
+    audioInputSensitivity = document.getElementById('audioInputSensitivity')?.value || 20;
+    audioPromptQuestionVolume = document.getElementById('audioPromptQuestionVolume')?.value || 0;
+    audioPromptFeedbackVolume = document.getElementById('audioPromptFeedbackVolume')?.value || 0;
     feedbackType = GlobalExperimentStates.findOne({userId: Meteor.userId(), TDFId: currentTdfId})?.experimentState?.feedbackType || null;
-    audioPromptFeedbackVoice = document.getElementById('audioPromptFeedbackVoice').value;
+    audioPromptFeedbackVoice = document.getElementById('audioPromptFeedbackVoice')?.value || 'en-US-Standard-A';
     if(feedbackType)
       Session.set('feedbackTypeFromHistory', feedbackType)
     else
