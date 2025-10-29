@@ -120,25 +120,26 @@ Template.learningDashboard.rendered = async function() {
   let allTdfs = Tdfs.find().fetch();
   Session.set('allTdfs', allTdfs);
 
-  // Get attempted TDFs with stats
+  // Get list of attempted TDF IDs
   const tdfsAttempted = await meteorCallAsync('getTdfIDsAndDisplaysAttemptedByUserId', studentID);
+  const attemptedTdfIds = new Set(tdfsAttempted.map(t => t.TDFId));
 
-  // Load stats for each attempted TDF
+  // Fetch all stats in parallel for performance (don't wait for each one sequentially)
   const statsPromises = tdfsAttempted.map(async (tdf) => {
     const stats = await meteorCallAsync('getSimpleTdfStats', studentID, tdf.TDFId);
-    return {
-      ...tdf,
-      ...stats,
-      isUsed: true
-    };
+    return {TDFId: tdf.TDFId, stats};
   });
+  const statsResults = await Promise.all(statsPromises);
 
-  const usedTdfsWithStats = await Promise.all(statsPromises);
+  // Build a map of TDFId -> stats for fast lookup
+  const statsMap = new Map();
+  for (const result of statsResults) {
+    if (result.stats && result.stats.totalTrials > 0) {
+      statsMap.set(result.TDFId, result.stats);
+    }
+  }
 
-  // Filter out TDFs with no stats
-  const validUsedTdfs = usedTdfsWithStats.filter(s => s.totalTrials > 0);
-
-  // Process all TDFs to find unused ones
+  // Process all TDFs to build used/unused lists
   const isAdmin = Roles.userIsInRole(Meteor.user(), ['admin']);
   const courseId = Meteor.user().loginParams.curClass ? Meteor.user().loginParams.curClass.courseId : null;
   const courseTdfs = Assignments.find({courseId: courseId}).fetch();
@@ -152,9 +153,9 @@ Template.learningDashboard.rendered = async function() {
     });
   }
 
-  const unusedTdfs = [];
+  const allTdfObjects = [];
 
-  // Process all TDFs
+  // FIRST PASS: Extract audio features from TDF and create base objects
   for (const tdf of allTdfs) {
     const TDFId = tdf._id;
     const tdfObject = tdf.content;
@@ -173,9 +174,21 @@ Template.learningDashboard.rendered = async function() {
       setspec.speechIgnoreOutOfGrammarResponses.toLowerCase() == 'true' : false;
     const speechOutOfGrammarFeedback = setspec.speechOutOfGrammarFeedback ?
       setspec.speechOutOfGrammarFeedback : 'Response not in answer set';
+
+    // Extract audio features from TDF setspec
     const audioInputEnabled = setspec.audioInputEnabled ? setspec.audioInputEnabled == 'true' : false;
     const enableAudioPromptAndFeedback = setspec.enableAudioPromptAndFeedback ?
       setspec.enableAudioPromptAndFeedback == 'true' : false;
+
+    // Debug: Log what we're extracting
+    if (audioInputEnabled || enableAudioPromptAndFeedback) {
+      console.log(`[Dashboard] TDF: ${name}`);
+      console.log(`  - setspec.audioInputEnabled: "${setspec.audioInputEnabled}"`);
+      console.log(`  - audioInputEnabled (parsed): ${audioInputEnabled}`);
+      console.log(`  - setspec.enableAudioPromptAndFeedback: "${setspec.enableAudioPromptAndFeedback}"`);
+      console.log(`  - enableAudioPromptAndFeedback (parsed): ${enableAudioPromptAndFeedback}`);
+      console.log(`  - hasBeenAttempted: ${attemptedTdfIds.has(TDFId)}`);
+    }
 
     // Check if this TDF is assigned to the user
     const tdfIsAssigned = courseTdfs.filter(e => e.TDFId === TDFId);
@@ -184,11 +197,12 @@ Template.learningDashboard.rendered = async function() {
     // Show TDF ONLY if userselect is explicitly 'true'
     const shouldShow = (setspec.userselect === 'true');
 
-    // Check if this TDF has been used
-    const isUsed = validUsedTdfs.some(usedTdf => usedTdf.TDFId === TDFId);
+    // Check if this TDF has been attempted
+    const hasBeenAttempted = attemptedTdfIds.has(TDFId);
 
-    if (shouldShow && (tdf.visibility == 'profileOnly' || tdf.visibility == 'enabled') && isAssigned && !isUsed) {
-      unusedTdfs.push({
+    if (shouldShow && (tdf.visibility == 'profileOnly' || tdf.visibility == 'enabled') && isAssigned) {
+      // Build base object with TDF properties (features from TDF)
+      const tdfData = {
         TDFId: TDFId,
         displayName: name,
         currentStimuliSetId: currentStimuliSetId,
@@ -197,14 +211,45 @@ Template.learningDashboard.rendered = async function() {
         audioInputEnabled: audioInputEnabled,
         enableAudioPromptAndFeedback: enableAudioPromptAndFeedback,
         isMultiTdf: isMultiTdf,
-        isUsed: false,
-        tags: setspec.tags || []
-      });
+        tags: setspec.tags || [],
+        isUsed: false,  // Default to false, will update in second pass if practiced
+        hasBeenAttempted: hasBeenAttempted
+      };
+
+      allTdfObjects.push(tdfData);
     }
   }
 
+  // SECOND PASS: Add stats to practiced lessons (lookup from map - already fetched in parallel)
+  for (const tdfData of allTdfObjects) {
+    const stats = statsMap.get(tdfData.TDFId);
+    if (stats) {
+      // Add stats properties directly to existing object
+      tdfData.totalTrials = stats.totalTrials;
+      tdfData.overallAccuracy = stats.overallAccuracy;
+      tdfData.last10Accuracy = stats.last10Accuracy;
+      tdfData.totalTimeMinutes = stats.totalTimeMinutes;
+      tdfData.itemsPracticed = stats.itemsPracticed;
+      tdfData.lastPracticeDate = stats.lastPracticeDate;
+      tdfData.totalSessions = stats.totalSessions;
+      tdfData.isUsed = true;
+
+      if (tdfData.audioInputEnabled || tdfData.enableAudioPromptAndFeedback) {
+        console.log(`[Dashboard] After adding stats for ${tdfData.displayName}:`, {
+          audioInputEnabled: tdfData.audioInputEnabled,
+          enableAudioPromptAndFeedback: tdfData.enableAudioPromptAndFeedback,
+          isUsed: tdfData.isUsed
+        });
+      }
+    }
+  }
+
+  // Separate into used and unused for sorting
+  const usedTdfs = allTdfObjects.filter(t => t.isUsed);
+  const unusedTdfs = allTdfObjects.filter(t => !t.isUsed);
+
   // Sort used TDFs by lastPracticeDate (most recent first)
-  validUsedTdfs.sort((a, b) => {
+  usedTdfs.sort((a, b) => {
     const dateA = new Date(a.lastPracticeDate || 0);
     const dateB = new Date(b.lastPracticeDate || 0);
     return dateB - dateA;
@@ -214,7 +259,7 @@ Template.learningDashboard.rendered = async function() {
   unusedTdfs.sort((a, b) => a.displayName.localeCompare(b.displayName, 'en', {numeric: true, sensitivity: 'base'}));
 
   // Combine: used first (sorted by recent), then unused (sorted alphabetically)
-  const combinedTdfs = [...validUsedTdfs, ...unusedTdfs];
+  const combinedTdfs = [...usedTdfs, ...unusedTdfs];
 
   this.allTdfsList.set(combinedTdfs);
   this.isLoading.set(false);

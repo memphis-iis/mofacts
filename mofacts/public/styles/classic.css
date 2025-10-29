@@ -1077,12 +1077,22 @@ tfoot tf, .table tfoot tf, .table tfoot td, .table tfoot th {
     }
 
     /* Larger tap targets for icons/links */
-    a, .fa {
+    a {
         min-width: 44px;
         min-height: 44px;
         display: inline-flex;
         align-items: center;
         justify-content: center;
+    }
+
+    /* Font Awesome icons - preserve inline-block for proper rendering */
+    .fa {
+        min-width: 44px;
+        min-height: 44px;
+        /* Keep display: inline-block for FA pseudo-element rendering */
+        display: inline-block !important;
+        line-height: 44px;
+        text-align: center;
     }
 
     /* Tighter spacing on mobile to reduce scrolling */
