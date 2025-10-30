@@ -4621,7 +4621,7 @@ Meteor.startup(async function() {
   })
 
   // Create any helpful indexes for queries we run
-  ScheduledTurkMessages._ensureIndex({'sent': 1, 'scheduled': 1});
+  ScheduledTurkMessages.rawCollection().createIndex({'sent': 1, 'scheduled': 1});
 
   // Start up synched cron background jobs
   SyncedCron.start();
