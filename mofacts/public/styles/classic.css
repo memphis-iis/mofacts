@@ -282,7 +282,6 @@ input[type="range"]::-webkit-slider-thumb {
 
 .btn-fixed{
     max-width: 300px;
-    height: inherit;
 }
 
 
@@ -1239,5 +1238,57 @@ tfoot tf, .table tfoot tf, .table tfoot td, .table tfoot th {
   .input-box,
   #progressbar {
     transition: none !important;
+  }
+}
+
+/* ====================================================================
+   LEARNING DASHBOARD RESPONSIVE DESIGN
+   Added: 2025-10-29
+   Purpose: Mobile-responsive card layout for Learning Dashboard
+   Documentation: docs_dev/LEARNING_DASHBOARD_MOBILE_RESPONSIVE.md
+   ==================================================================== */
+
+/* FOUC Prevention - Set initial state for desktop (most common viewport) */
+.learning-dashboard-cards {
+  display: none;
+}
+
+.learning-dashboard-table {
+  display: table;
+}
+
+/* Mobile + Tablet: Card layout (mobile-first approach) */
+@media (max-width: 991px) {
+  .learning-dashboard-table {
+    display: none;
+  }
+
+  .learning-dashboard-cards {
+    display: block;
+  }
+
+  /* Chevron icon rotation - uses theme's --transition-smooth (200ms) */
+  .card-expand-icon {
+    transition: transform var(--transition-smooth) ease;
+  }
+
+  button[aria-expanded="true"] .card-expand-icon {
+    transform: rotate(180deg);
+  }
+
+  /* Unused lesson opacity - 0.75 for better WCAG contrast compliance */
+  .lesson-card-unused {
+    opacity: 0.75;
+  }
+}
+
+/* Desktop: Traditional table (overrides mobile defaults) */
+@media (min-width: 992px) {
+  .learning-dashboard-table {
+    display: table;
+  }
+
+  .learning-dashboard-cards {
+    display: none;
   }
 }
