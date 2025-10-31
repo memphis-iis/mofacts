@@ -238,24 +238,25 @@ Template.contentUpload.events({
     const packageId = event.currentTarget.getAttribute('value');
     const fileName = event.currentTarget.getAttribute('data-filename');
     console.log('Delete button clicked - packageId:', packageId, 'fileName:', fileName);
-    Meteor.call('deletePackageFile', packageId, function(error, result) {
-      if (error) {
-        console.error('Delete error:', error);
-        alert('Error deleting package: ' + error.message);
-      } else {
+    (async () => {
+      try {
+        const result = await Meteor.callAsync('deletePackageFile', packageId);
         console.log('Delete result:', result);
         alert('Package deleted: ' + result);
+      } catch (error) {
+        console.error('Delete error:', error);
+        alert('Error deleting package: ' + error.message);
       }
-    });
+    })();
   },
   'click #reset-conditions-btn': function(event){
     const tdfId = event.currentTarget.getAttribute('value')
-    Meteor.call('resetTdfConditionCounts',tdfId);
+    Meteor.callAsync('resetTdfConditionCounts',tdfId);
   },
 
   'click #assetDeleteButton': function(event){
     const assetId = event.currentTarget.getAttribute('value')
-    Meteor.call('removeAssetById', assetId);
+    Meteor.callAsync('removeAssetById', assetId);
   },
 
   'click #stim-download-btn': async function(event){
@@ -277,7 +278,7 @@ Template.contentUpload.events({
   
   'click #stim-delete-btn': function(event){
     const stimuliSetId = event.currentTarget.getAttribute('value')
-    Meteor.call('deleteStimFile',stimuliSetId);
+    Meteor.callAsync('deleteStimFile',stimuliSetId);
   },
   'click #deleteAllAssetsConfirm': async function(e, template) {
     e.preventDefault();
@@ -285,7 +286,7 @@ Template.contentUpload.events({
       return;
     }
     console.log('deleteAllAssetsConfirm clicked');
-    Meteor.call('deleteAllFiles',
+    Meteor.callAsync('deleteAllFiles',
       function(error, result) {
         if (error) {
           console.log('error:', error);
@@ -324,13 +325,14 @@ Template.contentUpload.events({
     }
     console.log('accessors:', newAccessors);
     const revokedAccessors = [];
-    Meteor.call('assignAccessors', tdfId, newAccessors, revokedAccessors, function(error, result){
-      if(error){
-        console.log('error:', error);
-      } else {
+    (async () => {
+      try {
+        const result = await Meteor.callAsync('assignAccessors', tdfId, newAccessors, revokedAccessors);
         console.log('result:', result);
+      } catch (error) {
+        console.log('error:', error);
       }
-    });
+    })();
   },
   'click #remove-access-btn': function(event){
     //call assignAccessors meteor method with args tdfId and [accessors] and [revokedAccessors]
@@ -344,25 +346,27 @@ Template.contentUpload.events({
     const revokedAccessorId = event.currentTarget.getAttribute('data-user');
     //get the revoked accessors _id
     const revokedAccessors = [revokedAccessorId];
-    Meteor.call('assignAccessors', tdfId, curAccessors, revokedAccessors, function(error, result){
-      if(error){
-        console.log('error:', error);
-      } else {
+    (async () => {
+      try {
+        const result = await Meteor.callAsync('assignAccessors', tdfId, curAccessors, revokedAccessors);
         console.log('result:', result);
+      } catch (error) {
+        console.log('error:', error);
       }
-    });
+    })();
   },
   'click #transfer-btn': function(event){
     const tdfId = event.currentTarget.getAttribute('value');
     const newOwnerUsername = $('#transfer-' + tdfId).val();
     const newOwner = Session.get('allUsers').filter(user => user.username == newOwnerUsername)[0];
-    Meteor.call('transferDataOwnership', tdfId, newOwner, function(error, result){
-      if(error){
-        console.log('error:', error);
-      } else {
+    (async () => {
+      try {
+        const result = await Meteor.callAsync('transferDataOwnership', tdfId, newOwner);
         console.log('result:', result);
+      } catch (error) {
+        console.log('error:', error);
       }
-    });
+    })();
   },
   'click #showAllAssets': function(event){
     showAllAssets = Template.instance().toggleOnlyOwnedTDFs.get();
@@ -403,7 +407,7 @@ async function doFileUpload(fileArray) {
       //atempts to delete existing file
       try {
         // Security: Use server method instead of direct client remove
-        Meteor.call('removeAssetById', existingFile._id);
+        Meteor.callAsync('removeAssetById', existingFile._id);
       } catch (e) {
         console.log('error deleting existing file', e);
         alert('Error deleting existing file. Please try again. If this error persists, please file a bug report.');
@@ -430,11 +434,11 @@ async function doFileUpload(fileArray) {
             if(result.data && result.data.res == 'awaitClientTDF'){
               console.log('Client TDF could break experiment, asking for confirmation');
               if(confirm(`The uploaded package contains a TDF file that could break the experiment. Do you want to continue?\nFile Name: ${result.data.TDF.content.fileName}`)){
-                Meteor.call('tdfUpdateConfirmed', result.data.TDF, function(err,res){
-                  if(err){
-                    alert(err);
-                  }
-                });
+                try {
+                  await Meteor.callAsync('tdfUpdateConfirmed', result.data.TDF);
+                } catch (err) {
+                  alert(err);
+                }
               }
             } else {
               console.log(fileDescrip + ' save failed', result);
@@ -481,7 +485,7 @@ async function doPackageUpload(file, template){
     if(confirm(`Uploading this file will overwrite existing data. Continue?`)){
       console.log(`File ${file.name} already exists, overwritting.`)
       // Security: Use server method instead of direct client remove
-      Meteor.call('removeAssetById', existingFile._id);
+      Meteor.callAsync('removeAssetById', existingFile._id);
     } else {
       return;
     }
@@ -504,40 +508,43 @@ async function doPackageUpload(file, template){
         console.log('package detected')
         // check if emailInsteadOfAlert is checked
         const emailToggle = $('#emailInsteadOfAlert').is(':checked') ? true : false;
-        Meteor.call('processPackageUpload', fileObj, Meteor.userId(), link, emailToggle, function(err,result){
-            if(err){
-            alert(err);
-          } 
-          console.log('result:', result);
-          for(res of result.results){
-            if (res.data && res.data.res == 'awaitClientTDF') {
-              let reason = []
-              if(res.data.reason.includes('prevTDFExists'))
-                reason.push(`Previous ${res.data.TDF.content.fileName} already exists, continuing the upload will overwrite the old file. Continue?`)
-              if(res.data.reason.includes(`prevStimExists`))
-                reason.push(`Previous ${res.data.TDF.content.tdfs.tutor.setspec.stimulusfile} already exists, continuing the upload will overwrite the old file. Continue?`)
-              if(res.data.reason.includes('shuffleclusterMissmatch'))
-                reason.push(`The uploaded package contains a TDF file that could break the experiment. Do you want to continue?\nFile Name: ${res.data.TDF.content.fileName}`)
-              console.log('Client TDF could break experiment, asking for confirmation');
-              if(confirm(reason.join('\n'))){
-                Meteor.call('tdfUpdateConfirmed', res.data.TDF, res.data.reason.includes('shuffleclusterMissmatch'), function(err,res){
-                  if(err){
+        (async () => {
+          try {
+            const result = await Meteor.callAsync('processPackageUpload', fileObj, Meteor.userId(), link, emailToggle);
+            console.log('result:', result);
+            for(res of result.results){
+              if (res.data && res.data.res == 'awaitClientTDF') {
+                let reason = []
+                if(res.data.reason.includes('prevTDFExists'))
+                  reason.push(`Previous ${res.data.TDF.content.fileName} already exists, continuing the upload will overwrite the old file. Continue?`)
+                if(res.data.reason.includes(`prevStimExists`))
+                  reason.push(`Previous ${res.data.TDF.content.tdfs.tutor.setspec.stimulusfile} already exists, continuing the upload will overwrite the old file. Continue?`)
+                if(res.data.reason.includes('shuffleclusterMissmatch'))
+                  reason.push(`The uploaded package contains a TDF file that could break the experiment. Do you want to continue?\nFile Name: ${res.data.TDF.content.fileName}`)
+                console.log('Client TDF could break experiment, asking for confirmation');
+                if(confirm(reason.join('\n'))){
+                  try {
+                    await Meteor.callAsync('tdfUpdateConfirmed', res.data.TDF, res.data.reason.includes('shuffleclusterMissmatch'));
+                  } catch (err) {
                     alert(err);
                   }
-                });
+                }
+              }
+              else if(!res.result) {
+                alert("Package upload failed: " + res.errmsg);
+                return
               }
             }
-            else if(!res.result) {
-              alert("Package upload failed: " + res.errmsg);
-              return
+            //if email toggle, then we don't wait for the server to process the package
+            if(!emailToggle){
+              alert("Package upload succeded.");
+            } else {
+              alert("Package is being processed. You will be notified when it is complete or if there are any errors.");
             }
+          } catch (err) {
+            alert(err);
           }
-        //if email toggle, then we don't wait for the server to process the package
-        if(!emailToggle){
-          alert("Package upload succeded.");
-        } else {
-          alert("Package is being processed. You will be notified when it is complete or if there are any errors.");}
-        });  
+        })();  
       }
     }
   });
