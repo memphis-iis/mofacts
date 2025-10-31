@@ -251,7 +251,7 @@ function serverConsole(...args) {
   console.log.apply(this, disp);
 }
 
-async function functionTimerWrapper(methods, asyncMethods)
+function functionTimerWrapper(methods, asyncMethods)
 {
   const newMethods = _.reduce(Object.keys(methods), function(newMethods, method) {
     newMethods[method] = function() {
