@@ -1511,11 +1511,11 @@ async function getUserRecentTDFs(userId) {
   return recentTDFs;
 }
 
-function getAllTeachers(southwestOnly=false) {
+async function getAllTeachers(southwestOnly=false) {
   const query = {'roles': 'teacher'};
   if (southwestOnly) query['username']=/southwest[.]tn[.]edu/i;
   serverConsole('getAllTeachers', query);
-  const allTeachers = Meteor. await users.find(query).fetchAsync();
+  const allTeachers = await Meteor.users.find(query).fetchAsync();
 
   return allTeachers;
 }
