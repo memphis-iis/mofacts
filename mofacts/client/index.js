@@ -237,13 +237,14 @@ Accounts.onLogin(function() {
 
       // Check if the user has a profile with an email, first name, and last name
       if (!user.profile.username) {
-        Meteor.callAsync('populateSSOProfile', Meteor.userId(), function(error, result) {
-          if (error) {
-            clientConsole(1, 'populateSSOProfile error:', error);
-          } else {
+        (async () => {
+          try {
+            const result = await Meteor.callAsync('populateSSOProfile', Meteor.userId());
             clientConsole(2, 'populateSSOProfile result:', result);
+          } catch (error) {
+            clientConsole(1, 'populateSSOProfile error:', error);
           }
-        });
+        })();
       }
     }
   });
@@ -273,30 +274,30 @@ Meteor.startup(function() {
     if (!user) return; // Wait for user to load
 
     // Check if user has personal API keys
-    Meteor.callAsync('hasUserPersonalKeys', function(err, keys) {
-      if (err) {
+    (async () => {
+      try {
+        const keys = await Meteor.callAsync('hasUserPersonalKeys');
+        console.log('[Warmup] Personal keys check:', keys);
+
+        // Warm up TTS if user has personal TTS key AND TTS is enabled
+        if (keys.hasTTS && user.audioPromptMode && user.audioPromptMode !== 'silent') {
+          if (!Session.get('ttsWarmedUp')) {
+            console.log('[TTS] User has personal key, warming up immediately (Scenario 1)');
+            warmupGoogleTTS();
+          }
+        }
+
+        // Warm up SR if user has personal SR key AND SR is enabled
+        if (keys.hasSR && user.audioInputMode) {
+          if (!Session.get('srWarmedUp')) {
+            console.log('[SR] User has personal key, warming up immediately (Scenario 1)');
+            warmupGoogleSpeechRecognition();
+          }
+        }
+      } catch (err) {
         console.log('[Warmup] Error checking personal keys:', err);
-        return;
       }
-
-      console.log('[Warmup] Personal keys check:', keys);
-
-      // Warm up TTS if user has personal TTS key AND TTS is enabled
-      if (keys.hasTTS && user.audioPromptMode && user.audioPromptMode !== 'silent') {
-        if (!Session.get('ttsWarmedUp')) {
-          console.log('[TTS] User has personal key, warming up immediately (Scenario 1)');
-          warmupGoogleTTS();
-        }
-      }
-
-      // Warm up SR if user has personal SR key AND SR is enabled
-      if (keys.hasSR && user.audioInputMode) {
-        if (!Session.get('srWarmedUp')) {
-          console.log('[SR] User has personal key, warming up immediately (Scenario 1)');
-          warmupGoogleSpeechRecognition();
-        }
-      }
-    });
+    })();
 
     computation.stop(); // Only run once
   });
