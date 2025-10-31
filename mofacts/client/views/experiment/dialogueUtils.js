@@ -103,7 +103,7 @@ function dialogueContinue() {
       Session.set('displayReady', false); // This will get flipped back after we update the display inside dialogueLoop
       Session.set('dialogueLoopStage', 'insideLoop');
       clientConsole(2, 'getDialogFeedbackForAnswer3');
-      Meteor.call('getDialogFeedbackForAnswer', dialogueContext, dialogueLoop);
+      Meteor.callAsync('getDialogFeedbackForAnswer', dialogueContext, dialogueLoop);
       break;
     case 'exit':
       // Exit dialogue loop
@@ -136,7 +136,7 @@ function initiateDialogue(incorrectUserAnswer, callback, lookupFailCallback) {
   const clozeItem = curExperimentState.originalQuestion || Session.get('currentDisplay').clozeText;
   const clozeAnswer = curExperimentState.originalAnswer || GlobalExperimentStates.findOne({TDFId: Session.get('currentTdfId')}).experimentState.currentAnswer;
 
-  Meteor.call('initializeTutorialDialogue', clozeAnswer, incorrectUserAnswer, clozeItem, (err, res)=>{
+  Meteor.callAsync('initializeTutorialDialogue', clozeAnswer, incorrectUserAnswer, clozeItem, (err, res)=>{
     if (err) {
       clientConsole(1, 'ERROR initializing tutorial dialogue:', err);
     } else {

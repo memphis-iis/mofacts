@@ -128,20 +128,21 @@ Template.dataDownload.helpers({
     return Meteor.user() ? Meteor.user().username : false;
   },
   'accessableFiles': function() {
-    Meteor.call('getAccessableTDFSForUser', Meteor.userId(), function(err, result) {
-      if (err) {
-        console.log(err);
-      } else {
-        console.log(result)
+    (async () => {
+      try {
+        const result = await Meteor.callAsync('getAccessableTDFSForUser', Meteor.userId());
+        console.log(result);
         const dataDownloads = result.TDFs?.map(function(tdf) {
           const name = tdf.content.tdfs.tutor.setspec.lessonname ? tdf.content.tdfs.tutor.setspec.lessonname : 'NO NAME';
           tdf.disp = name;
-    
+
           return tdf;
-        })
+        });
         Session.set('accessableFiles', dataDownloads);
+      } catch (err) {
+        console.log(err);
       }
-    });
+    })();
     return Session.get('accessableFiles') || [];
   },
 });
@@ -194,32 +195,28 @@ Template.dataDownload.events({
     Session.set('transferOwnershipFileId', fileId);
   },
 
-  'click #AssignAccessorsButton': function(event) {
+  'click #AssignAccessorsButton': async function(event) {
     let fileId = event.currentTarget.getAttribute('data-fileId');
-    Meteor.call('getAccessorsTDFID', fileId, function(err, res){
-      if(err){
-        console.log(err)
-      }
-      else{
-        Session.set('fileAccessors', res);
-      }
-    })
+    try {
+      const res = await Meteor.callAsync('getAccessorsTDFID', fileId);
+      Session.set('fileAccessors', res);
+    } catch (err) {
+      console.log(err);
+    }
     Session.set('AssignAccessorsFileId', fileId);
   },
 
-  'click #transferOwnershipSaveButton': function(event, instance) {
+  'click #transferOwnershipSaveButton': async function(event, instance) {
     alert('Transfer ownership save button clicked');
     const TDFId = Session.get('transferOwnershipFileId');
     const newOwnerUserName = $('#transferOwnershipDataList').val();
     const newOwnerId = $('#ownersDataList [value="' + newOwnerUserName + '"]').attr('data-teacherid');
-    Meteor.call('transferDataOwnership', TDFId, newOwnerId, Meteor.userId(), function(err, res){
-      if(err){
-        console.log(err)
-      }
-      else{
-        console.log(res)
-      }
-    })
+    try {
+      const res = await Meteor.callAsync('transferDataOwnership', TDFId, newOwnerId, Meteor.userId());
+      console.log(res);
+    } catch (err) {
+      console.log(err);
+    }
   },
 
   'click #addAcessor': function(event, instance) {
@@ -248,42 +245,39 @@ Template.dataDownload.events({
     Session.set('fileAccessors', accessors);
     },
 
-  'click #assignAccessorsSaveButton': function(event) {
+  'click #assignAccessorsSaveButton': async function(event) {
     const fileId = Session.get('AssignAccessorsFileId');
     const accessors = Session.get('fileAccessors');
     const removedAccessors = Session.get('removedAccessors');
-    Meteor.call('assignAccessors', fileId, accessors, removedAccessors, function(err, res){
-      if(err){
-        console.log(err)  
-      } else {
-        console.log(res)
-        alert('Accessors Assigned Successfully');
-        Session.set('fileAccessors', []);
-        Session.set('removedAccessors', []);
-      }
-    });
+    try {
+      const res = await Meteor.callAsync('assignAccessors', fileId, accessors, removedAccessors);
+      console.log(res);
+      alert('Accessors Assigned Successfully');
+      Session.set('fileAccessors', []);
+      Session.set('removedAccessors', []);
+    } catch (err) {
+      console.log(err);
+    }
   }
 });
 
-function makeDataDownloadAPICall(path){
+async function makeDataDownloadAPICall(path){
   //in order to securely get the current user's secret
-  Meteor.call('getUIDAndSecretForCurrentUser', function(err, res){
-    if(err){
-      console.log(err)
-    }
-    else{
-      HTTP.call('GET', path, {'headers': {'x-user-id': res[0], 'x-auth-token': res[1]}}, function(err, response) {
-        if (response.statusCode != 200) {
-          console.error(response);
-        } else if(err) {
-          console.error(err)
-        }
-        else {
-          createData(response)
-        }
-      });
-    }
-  })
+  try {
+    const res = await Meteor.callAsync('getUIDAndSecretForCurrentUser');
+    HTTP.call('GET', path, {'headers': {'x-user-id': res[0], 'x-auth-token': res[1]}}, function(err, response) {
+      if (response.statusCode != 200) {
+        console.error(response);
+      } else if(err) {
+        console.error(err)
+      }
+      else {
+        createData(response)
+      }
+    });
+  } catch (err) {
+    console.log(err);
+  }
 }
 
 function createData(result){

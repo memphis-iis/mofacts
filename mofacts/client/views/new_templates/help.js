@@ -41,7 +41,7 @@ Template.help.rendered = async function() {
 
     // First, check for custom help page
     const customHelp = await new Promise((resolve, reject) => {
-      Meteor.call('getCustomHelpPage', (error, result) => {
+      Meteor.callAsync('getCustomHelpPage', (error, result) => {
         if (error) {
           reject(error);
         } else {

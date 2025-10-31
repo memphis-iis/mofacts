@@ -20,21 +20,15 @@ function turkLogInsert(newRec) {
   turkExperimentLog.insert(newRec);
 }
 
-function turkLogRefresh(exp) {
+async function turkLogRefresh(exp) {
   $('#turkExpTitle').text('Viewing data for ' + exp);
   clearTurkExpLog();
 
   $('#turkModal').modal('show');
 
-  Meteor.callAsync('turkUserLogStatus', exp, function(error, result) {
+  try {
+    const result = await Meteor.callAsync('turkUserLogStatus', exp);
     $('#turkModal').modal('hide');
-
-    if (typeof error !== 'undefined') {
-      const disp = 'Failed to retrieve log entries. Error:' + error;
-      console.log(disp);
-      alert(disp);
-      return;
-    }
 
     _.each(result, function(val, idx) {
       turkLogInsert(_.extend({
@@ -44,7 +38,13 @@ function turkLogRefresh(exp) {
         experiment: exp,
       }, val));
     });
-  });
+  } catch (error) {
+    $('#turkModal').modal('hide');
+
+    const disp = 'Failed to retrieve log entries. Error:' + error;
+    console.log(disp);
+    alert(disp);
+  }
 }
 
 function turkLogButtonToRec(element) {
@@ -159,21 +159,21 @@ Template.turkWorkflow.rendered = async function() {
 
 Template.turkWorkflow.events({
   // Admin/Teachers - show details from single Turk assignment
-  'click #turk-show-assign': function(event) {
+  'click #turk-show-assign': async function(event) {
     event.preventDefault();
     const assignid = $('#turk-assignid').val();
     $('#turk-assign-results').text('Working on ' + assignid);
     $('#turkModal').modal('show');
-    Meteor.callAsync('turkGetAssignment', assignid, function(error, result) {
+    try {
+      const result = await Meteor.callAsync('turkGetAssignment', assignid);
       $('#turkModal').modal('hide');
-      let disp;
-      if (typeof error !== 'undefined') {
-        disp = 'Failed to handle turk approval. Error:' + error;
-      } else {
-        disp = 'Server returned:' + JSON.stringify(result, null, 2);
-      }
+      const disp = 'Server returned:' + JSON.stringify(result, null, 2);
       $('#turk-assign-results').text(disp);
-    });
+    } catch (error) {
+      $('#turkModal').modal('hide');
+      const disp = 'Failed to handle turk approval. Error:' + error;
+      $('#turk-assign-results').text(disp);
+    }
   },
 
   'click #profileWorkModalDissmiss': function(event) {
@@ -227,23 +227,24 @@ Template.turkWorkflow.events({
   },
 
   // Admin/Teachers - send Turk message
-  'click #turk-send-msg': function(event) {
+  'click #turk-send-msg': async function(event) {
     event.preventDefault();
     const workerid = $('#turk-workerid').val();
     const msgtext = $('#turk-msg').val();
     console.log('Sending to', workerid, 'Msg:', msgtext);
     $('#turkModal').modal('show');
-    Meteor.callAsync('turkSendMessage', workerid, msgtext, function(error, result) {
+    try {
+      const result = await Meteor.callAsync('turkSendMessage', workerid, msgtext);
       $('#turkModal').modal('hide');
-      let disp;
-      if (typeof error !== 'undefined') {
-        disp = 'Failed to handle turk approval. Error:' + error;
-      } else {
-        disp = 'Server returned:' + JSON.stringify(result, null, 2);
-      }
+      const disp = 'Server returned:' + JSON.stringify(result, null, 2);
       console.log(disp);
       alert(disp);
-    });
+    } catch (error) {
+      $('#turkModal').modal('hide');
+      const disp = 'Failed to handle turk approval. Error:' + error;
+      console.log(disp);
+      alert(disp);
+    }
   },
 
   // Admin/Teachers - show user log for a particular experiment
@@ -281,7 +282,8 @@ Template.turkWorkflow.events({
     const msg = 'Thank you for participating';
 
     $('#turkModal').modal('show');
-    Meteor.callAsync('turkPay', rec.userId, expId, msg, function(error, result) {
+    try {
+      const result = await Meteor.callAsync('turkPay', rec.userId, expId, msg);
       $('#turkModal').modal('hide');
 
       rec.turkpayDetails = {
@@ -289,12 +291,7 @@ Template.turkWorkflow.events({
         details: '',
       };
 
-      if (error) {
-        rec.turkpay = 'FAIL';
-        rec.turkpayDetails.details = error;
-        console.log('turkPay failure:', error);
-        alert('There was a server failure of some kind: ' + error);
-      } else if (result) {
+      if (result) {
         console.log('turkPay error:', result);
         rec.turkpay = 'FAIL';
         rec.turkpayDetails.details = result;
@@ -307,7 +304,20 @@ Template.turkWorkflow.events({
 
       turkExperimentLog.remove({'idx': rec.idx});
       turkLogInsert(rec);
-    });
+    } catch (error) {
+      $('#turkModal').modal('hide');
+
+      rec.turkpayDetails = {
+        msg: 'Refresh the view to see details on server',
+        details: error,
+      };
+      rec.turkpay = 'FAIL';
+      console.log('turkPay failure:', error);
+      alert('There was a server failure of some kind: ' + error);
+
+      turkExperimentLog.remove({'idx': rec.idx});
+      turkLogInsert(rec);
+    }
   },
 
   // Admin/Teachers - pay bonus to a user in the Turk log view
@@ -330,7 +340,8 @@ Template.turkWorkflow.events({
 
     $('#turkModal').modal('show');
 
-    Meteor.callAsync('turkBonus', rec.userId, expFile, expId, function(error, result) {
+    try {
+      const result = await Meteor.callAsync('turkBonus', rec.userId, expFile, expId);
       $('#turkModal').modal('hide');
 
       rec.turkbonusDetails = {
@@ -338,12 +349,7 @@ Template.turkWorkflow.events({
         details: '',
       };
 
-      if (error) {
-        rec.turkbonus = 'FAIL';
-        rec.turkbonusDetails.details = error;
-        console.log('turkBonus failure:', error);
-        alert('There was a server failure of some kind: ' + error);
-      } else if (result) {
+      if (result) {
         rec.turkbonus = 'FAIL';
         rec.turkbonusDetails.details = result;
         console.log('turkBonus error:', result);
@@ -356,7 +362,20 @@ Template.turkWorkflow.events({
 
       turkExperimentLog.remove({'idx': rec.idx});
       turkLogInsert(rec);
-    });
+    } catch (error) {
+      $('#turkModal').modal('hide');
+
+      rec.turkbonusDetails = {
+        msg: 'Refresh the view to see details on server',
+        details: error,
+      };
+      rec.turkbonus = 'FAIL';
+      console.log('turkBonus failure:', error);
+      alert('There was a server failure of some kind: ' + error);
+
+      turkExperimentLog.remove({'idx': rec.idx});
+      turkLogInsert(rec);
+    }
   },
 
   // Admin/Teachers - show previous approve/pay for a user in the Turk log view

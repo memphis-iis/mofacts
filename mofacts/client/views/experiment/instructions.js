@@ -240,7 +240,7 @@ function lockoutPeriodicCheck() {
 
         const experimentId = Session.get('currentRootTdfId');
 
-        Meteor.call('turkScheduleLockoutMessage', experimentId, lockoutFreeTime + 1, subject, turkemail,
+        Meteor.callAsync('turkScheduleLockoutMessage', experimentId, lockoutFreeTime + 1, subject, turkemail,
             function(error) {
               if (typeof error !== 'undefined') {
                 clientConsole(1, 'Server schedule failed. Error:', error);
@@ -576,7 +576,7 @@ Template.instructions.events({
     if(recordInstructions){
       const instructionLog = gatherInstructionLogRecord(Date.now(), timeRendered, Session.get('currentDeliveryParams'));
       clientConsole(2, 'instructionLog', instructionLog);
-      Meteor.call('insertHistory', instructionLog)
+      Meteor.callAsync('insertHistory', instructionLog)
     }
     instructContinue();
   },

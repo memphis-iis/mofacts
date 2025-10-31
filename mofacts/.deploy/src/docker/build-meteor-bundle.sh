@@ -12,4 +12,7 @@ mkdir --parents $APP_BUNDLE_FOLDER
 
 cd $APP_SOURCE_FOLDER
 
-TOOL_NODE_FLAGS=--max-old-space-size=8000 llmeteor build --directory $APP_BUNDLE_FOLDER --server-only --settings /mofactsAssets/settings.json
+# Remove old package versions to allow fresh resolution for Meteor 3.0
+rm -f .meteor/versions
+
+TOOL_NODE_FLAGS=--max-old-space-size=8000 meteor build --allow-incompatible-update --directory $APP_BUNDLE_FOLDER --server-only --settings /mofactsAssets/settings.json

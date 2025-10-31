@@ -1,13 +1,13 @@
 Package.describe({
   name: 'mofacts:microsoft-oauth',
-  version: '2.0.0',
-  summary: 'Microsoft OAuth flow for Meteor 2.14+ using Microsoft Identity Platform v2',
+  version: '3.0.0',
+  summary: 'Microsoft OAuth flow for Meteor 3.0+ using Microsoft Identity Platform v2',
   git: '',
   documentation: 'README.md'
 });
 
 Package.onUse(function(api) {
-  api.versionsFrom('2.14');
+  api.versionsFrom('3.0');
   api.use('ecmascript');
   api.use('oauth2', ['client', 'server']);
   api.use('oauth', ['client', 'server']);

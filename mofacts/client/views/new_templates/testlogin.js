@@ -80,7 +80,7 @@ function signinNotify(landingPage = '/profile') {
   const curClass = Session.get('curClass');
   const curTeacher = Session.get('curTeacher');
   if(curTeacher && curClass){
-    Meteor.call('addUserToTeachersClass', Meteor.userId(), curTeacher._id, curClass.sectionId,
+    Meteor.callAsync('addUserToTeachersClass', Meteor.userId(), curTeacher._id, curClass.sectionId,
     async function(err, result) {
       if (err) {
         console.log('error adding user to teacher class: ' + err);
@@ -101,8 +101,8 @@ function signinNotify(landingPage = '/profile') {
   if (Session.get('debugging')) {
     const currentUser = Meteor.users.findOne({_id: Meteor.userId()}).username;
     console.log(currentUser + ' was logged in successfully! Current route is ', Router.current().route.getName());
-    Meteor.call('debugLog', 'Sign in was successful');
-    Meteor.call('logUserAgentAndLoginTime', Meteor.userId(), navigator.userAgent);
+    Meteor.callAsync('debugLog', 'Sign in was successful');
+    Meteor.callAsync('logUserAgentAndLoginTime', Meteor.userId(), navigator.userAgent);
   }
   Meteor.logoutOtherClients();
   if(landingPage)
@@ -124,47 +124,40 @@ function testLogin() {
 
   const testPassword = blankPassword(testUserName);
 
-  Meteor.call('signUpUser', testUserName, testPassword, true, function(error, result) {
-    const errorMsgs = [];
+  (async () => {
+    try {
+      await Meteor.callAsync('signUpUser', testUserName, testPassword, true);
 
-    if (typeof error !== 'undefined') {
-      errorMsgs.push(error);
-    }
+      Meteor.callAsync('clearImpersonation');
+      sessionCleanUp();
 
-    // If there was a call failure or server returned error message,
-    // then we can't proceed
-    if (errorMsgs.length > 0) {
-      const errorText = displayify(errorMsgs);
+      // Note that we force Meteor to think we have a user name so that
+      // it doesn't try it as an email - this let's you test email-like
+      // users, which you can promote to admin or teacher
+      Meteor.loginWithPassword({'username': testUserName}, testPassword, async function(error) {
+        if (typeof error !== 'undefined') {
+          console.log('ERROR: The user was not logged in on TEST sign in?', testUserName, 'Error:', error);
+          alert('It appears that you couldn\'t be logged in as ' + testUserName);
+          $('#testSignInButton').prop('disabled', false);
+        } else {
+          if (Session.get('debugging')) {
+            const currentUser = Meteor.users.findOne({_id: Meteor.userId()}).username;
+            console.log(currentUser + ' was test logged in successfully! Current route is ', Router.current().route.getName());
+            Meteor.callAsync('debugLog', 'TEST Sign in was successful - YOU SHOULD NOT SEE THIS IN PRODUCTION');
+          }
+          Meteor.callAsync('logUserAgentAndLoginTime', Meteor.userId(), navigator.userAgent);
+          await meteorCallAsync('setUserLoginData', 'direct', Session.get('loginMode'));
+          Meteor.logoutOtherClients();
+          Router.go('/profile');
+        }
+      });
+    } catch (error) {
+      const errorText = displayify([error]);
       console.log('Experiment user login errors:', errorText);
       alert('Experiment user login errors:', errorText);
       $('#testSignInButton').prop('disabled', false);
-      return;
     }
-
-    Meteor.call('clearImpersonation');
-    sessionCleanUp();
-
-    // Note that we force Meteor to think we have a user name so that
-    // it doesn't try it as an email - this let's you test email-like
-    // users, which you can promote to admin or teacher
-    Meteor.loginWithPassword({'username': testUserName}, testPassword, async function(error) {
-      if (typeof error !== 'undefined') {
-        console.log('ERROR: The user was not logged in on TEST sign in?', testUserName, 'Error:', error);
-        alert('It appears that you couldn\'t be logged in as ' + testUserName);
-        $('#testSignInButton').prop('disabled', false);
-      } else {
-        if (Session.get('debugging')) {
-          const currentUser = Meteor.users.findOne({_id: Meteor.userId()}).username;
-          console.log(currentUser + ' was test logged in successfully! Current route is ', Router.current().route.getName());
-          Meteor.call('debugLog', 'TEST Sign in was successful - YOU SHOULD NOT SEE THIS IN PRODUCTION');
-        }
-        Meteor.call('logUserAgentAndLoginTime', Meteor.userId(), navigator.userAgent);
-        await meteorCallAsync('setUserLoginData', 'direct', Session.get('loginMode'));
-        Meteor.logoutOtherClients();
-        Router.go('/profile');
-      }
-    });
-  });
+  })();
 }
 
 

@@ -387,13 +387,18 @@ const Answers = {
       const answerToCheck = originalAnswer || answer;
       switch (feedbackType) {
         case 'refutational':
-          Meteor.call('getSimpleFeedbackForAnswer', userInput, answerToCheck, function(err, res) {
-            console.log('simpleFeedback, err: ', err, ', res: ', res);
-            if (typeof(err) == 'undefined' && res != 'default feedback') {
-              fullTextIsCorrect.matchText = res;
+          (async () => {
+            try {
+              const res = await Meteor.callAsync('getSimpleFeedbackForAnswer', userInput, answerToCheck);
+              console.log('simpleFeedback, err: ', undefined, ', res: ', res);
+              if (res != 'default feedback') {
+                fullTextIsCorrect.matchText = res;
+              }
+              return fullTextIsCorrect;
+            } catch (err) {
+              console.log('simpleFeedback, err: ', err, ', res: ', undefined);
             }
-            return fullTextIsCorrect;
-          });
+          })();
           break;
         case 'dialogue':
         default:

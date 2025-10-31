@@ -21,7 +21,7 @@ Template.contentGeneration.events({
     if(compressionLevel > .99 || compressionLevel < .01) {
       alert('Compression level must be between 0.01 and 0.99');
     } else {
-      Meteor.call('generateContent', compressionLevel, stringArrayJson, inputText, userEmail);
+      Meteor.callAsync('generateContent', compressionLevel, stringArrayJson, inputText, userEmail);
       alert(`Content generation has begun. An email will be sent too ${userEmail} with your file when it is complete.`);
     }
   },

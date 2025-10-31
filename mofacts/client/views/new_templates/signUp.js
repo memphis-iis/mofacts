@@ -43,47 +43,40 @@ Template.signUp.events({
       return;
     }
 
-    Meteor.call('signUpUser', formUsername, formPassword1, function(error, result) {
-      const errorMsgs = [];
+    (async () => {
+      try {
+        await Meteor.callAsync('signUpUser', formUsername, formPassword1);
 
-      if (typeof error !== 'undefined') {
-        errorMsgs.push(error);
-      }
+        // Everything was OK if we make it here - now we init the session,
+        // login, and proceed to the pofile screen
 
-      // If there was a call failure or server returned error message,
-      // then we can't proceed
-      if (errorMsgs.length > 0) {
-        $('#serverErrors')
-            .html(errorMsgs.join('<br>'))
-            .show();
-        return;
-      }
+        sessionCleanUp();
 
-      // Everything was OK if we make it here - now we init the session,
-      // login, and proceed to the pofile screen
+        alert('Your account has been created! You will now be logged in.')
 
-      sessionCleanUp();
-
-      alert('Your account has been created! You will now be logged in.')
-
-      Meteor.loginWithPassword(formUsername, formPassword1, async function(error) {
-        if (typeof error !== 'undefined') {
-          // This means that we have an issue of some kind - but there's
-          // nothing that we can do? We'll just fall thru for now since
-          // we don't have a good way to fix this
-          console.log('ERROR: The user was not logged in on account creation?', formUsername);
-          alert('It appears that you couldn\'t be logged in as ' + formUsername);
-        } else {
-          if (Session.get('debugging')) {
-            const currentUser = Meteor.users.findOne({_id: Meteor.userId()}).username;
-            console.log(currentUser + ' was logged in successfully!');
-            Meteor.call('debugLog', 'Sign in was successful');
+        Meteor.loginWithPassword(formUsername, formPassword1, async function(error) {
+          if (typeof error !== 'undefined') {
+            // This means that we have an issue of some kind - but there's
+            // nothing that we can do? We'll just fall thru for now since
+            // we don't have a good way to fix this
+            console.log('ERROR: The user was not logged in on account creation?', formUsername);
+            alert('It appears that you couldn\'t be logged in as ' + formUsername);
+          } else {
+            if (Session.get('debugging')) {
+              const currentUser = Meteor.users.findOne({_id: Meteor.userId()}).username;
+              console.log(currentUser + ' was logged in successfully!');
+              Meteor.callAsync('debugLog', 'Sign in was successful');
+            }
+            await meteorCallAsync('setUserLoginData', `direct`, 'password');
+            Meteor.logoutOtherClients();
           }
-          await meteorCallAsync('setUserLoginData', `direct`, 'password');
-          Meteor.logoutOtherClients();
-        }
-      });
-    });
+        });
+      } catch (error) {
+        $('#serverErrors')
+            .html(error.toString())
+            .show();
+      }
+    })();
   },
 
   'blur #signUpUsername': function(event) {

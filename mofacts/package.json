@@ -44,7 +44,7 @@
     "eslint-config-google": "^0.14.0"
   },
   "engines": {
-    "node": "^14.21.4"
+    "node": "^20.0.0"
   },
   "scripts": {
     "test": "TEST_WATCH=1 meteor test --driver-package=meteortesting:mocha --port 3010 --settings settings.json"

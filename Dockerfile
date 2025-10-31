@@ -1,5 +1,5 @@
 # The tag here should match the Meteor version of your app, per .meteor/release
-FROM geoffreybooth/meteor-base:2.16
+FROM geoffreybooth/meteor-base:3.0.4
 
 # Copy app package.json and package-lock.json into container
 COPY ./mofacts/package*.json $APP_SOURCE_FOLDER/
@@ -21,11 +21,17 @@ COPY ./mofacts/ $APP_SOURCE_FOLDER/
 # Clear Meteor build cache to ensure fresh compilation
 RUN rm -rf $APP_SOURCE_FOLDER/.meteor/local
 
-RUN bash $SCRIPTS_FOLDER/build-meteor-bundle.sh
+# Delete old package versions to allow Meteor 3.0 to resolve fresh versions
+RUN rm -f $APP_SOURCE_FOLDER/.meteor/versions
+
+# Build with --allow-incompatible-update for Meteor 3.0 upgrade
+RUN cd $APP_SOURCE_FOLDER && \
+    mkdir -p $APP_BUNDLE_FOLDER && \
+    TOOL_NODE_FLAGS=--max-old-space-size=8000 meteor build --allow-incompatible-update --directory $APP_BUNDLE_FOLDER --server-only
 
 
-# Use the specific version of Node expected by your Meteor release, per https://docs.meteor.com/changelog.html; this is expected for Meteor 2.0
-FROM node:14-alpine
+# Use the specific version of Node expected by your Meteor release, per https://docs.meteor.com/changelog.html; this is expected for Meteor 3.0
+FROM node:20-alpine
 
 ENV APP_BUNDLE_FOLDER /opt/bundle
 ENV SCRIPTS_FOLDER /docker
@@ -48,7 +54,7 @@ RUN bash $SCRIPTS_FOLDER/build-meteor-npm-dependencies.sh --build-from-source
 
 # Start another Docker stage, so that the final image doesn't contain the layer with the build dependencies
 # See previous FROM line; this must match
-FROM node:14-alpine
+FROM node:20-alpine
 
 ENV APP_BUNDLE_FOLDER /opt/bundle
 ENV SCRIPTS_FOLDER /docker

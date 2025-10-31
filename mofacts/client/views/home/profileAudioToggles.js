@@ -191,7 +191,7 @@ Template.profileAudioToggles.events({
     updateAudioPromptMode(event);
   },
 
-  'click #audioInputOn': function(event) {
+  'click #audioInputOn': async function(event) {
     console.log('audio input mode: ' + event.currentTarget.id);
     const audioInputEnabled = getAudioInputFromPage();
 
@@ -208,58 +208,69 @@ Template.profileAudioToggles.events({
     }
 
     //save the audio input mode to the user profile in mongodb
-    Meteor.call('saveAudioInputMode', audioInputEnabled, function(error) {
-      if (error) {
-        console.log('Error saving audio input mode', error);
-      }
-    });
+    try {
+      await Meteor.callAsync('saveAudioInputMode', audioInputEnabled);
+    } catch (error) {
+      console.log('Error saving audio input mode', error);
+    }
   },
 
-  'click #setupAPIKey': function(e) {
+  'click #setupAPIKey': async function(e) {
     //hide the modal
     $('speechAPIModal').modal('hide');
     e.preventDefault();
     $('#speechAPIModal').modal('show');// {backdrop: "static"}
-    Meteor.call('getUserSpeechAPIKey', function(error, key) {
+    try {
+      const key = await Meteor.callAsync('getUserSpeechAPIKey');
       $('#speechAPIKey').val(key);
-    });
+    } catch (error) {
+      console.log('Error getting user speech API key', error);
+    }
   },
 
-  'click #speechAPISubmit': function(e) {
+  'click #speechAPISubmit': async function(e) {
     const key = $('#speechAPIKey').val();
-    Meteor.call('saveUserSpeechAPIKey', key, function(error, serverReturn) {
+    try {
+      const serverReturn = await Meteor.callAsync('saveUserSpeechAPIKey', key);
       // Make sure to update our reactive session variable so the api key is
       // setup indicator updates
       checkAndSetSpeechAPIKeyIsSetup();
 
       $('#speechAPIModal').modal('hide');
 
-      if (error) {
-        console.log('Error saving speech api key', error);
-        alert('Your changes were not saved! ' + error);
-      } else {
-        console.log('Profile saved:', serverReturn);
-        // Clear any controls that shouldn't be kept around
-        $('.clearOnSave').val('');
-        alert('Your profile changes have been saved');
-      }
-    });
+      console.log('Profile saved:', serverReturn);
+      // Clear any controls that shouldn't be kept around
+      $('.clearOnSave').val('');
+      alert('Your profile changes have been saved');
+    } catch (error) {
+      // Make sure to update our reactive session variable so the api key is
+      // setup indicator updates
+      checkAndSetSpeechAPIKeyIsSetup();
+
+      $('#speechAPIModal').modal('hide');
+
+      console.log('Error saving speech api key', error);
+      alert('Your changes were not saved! ' + error);
+    }
   },
 
-  'click #speechAPIDelete': function(e) {
-    Meteor.call('deleteUserSpeechAPIKey', function(error) {
+  'click #speechAPIDelete': async function(e) {
+    try {
+      await Meteor.callAsync('deleteUserSpeechAPIKey');
       // Make sure to update our reactive session variable so the api key is
       // setup indicator updates
       checkAndSetSpeechAPIKeyIsSetup();
       $('#speechAPIModal').modal('hide');
-      if (error) {
-        console.log('Error deleting speech api key', error);
-        alert('Your changes were not saved! ' + error);
-      } else {
-        console.log('User speech api key deleted');
-        alert('Your profile changes have been saved');
-      }
-    });
+      console.log('User speech api key deleted');
+      alert('Your profile changes have been saved');
+    } catch (error) {
+      // Make sure to update our reactive session variable so the api key is
+      // setup indicator updates
+      checkAndSetSpeechAPIKeyIsSetup();
+      $('#speechAPIModal').modal('hide');
+      console.log('Error deleting speech api key', error);
+      alert('Your changes were not saved! ' + error);
+    }
   },
 
   'change #audioPromptQuestionVolume': function(event) {
@@ -298,17 +309,16 @@ Template.profileAudioToggles.helpers({
   },
 });
 
-function checkAndSetSpeechAPIKeyIsSetup() {
-  Meteor.call('isUserSpeechAPIKeySetup', function(err, data) {
-    if (err) {
-      console.log('Error getting whether speech api key is setup');
-    } else {
-      Session.set('speechAPIKeyIsSetup', data);
-    }
-  });
+async function checkAndSetSpeechAPIKeyIsSetup() {
+  try {
+    const data = await Meteor.callAsync('isUserSpeechAPIKeySetup');
+    Session.set('speechAPIKeyIsSetup', data);
+  } catch (err) {
+    console.log('Error getting whether speech api key is setup');
+  }
 }
 
-function updateAudioPromptMode(e){
+async function updateAudioPromptMode(e){
   console.log('audio prompt mode: ' + e.currentTarget.id);
   const audioPromptMode = getAudioPromptModeFromPage();
   Session.set('audioPromptFeedbackView', audioPromptMode);
@@ -328,14 +338,14 @@ function updateAudioPromptMode(e){
   }
   showHideAudioPromptGroupDependingOnAudioPromptMode(audioPromptMode);
   //save the audio prompt mode to the user profile in mongodb
-  Meteor.call('saveAudioPromptMode', audioPromptMode, function(error) {
-    if (error) {
-      console.log('Error saving audio prompt mode', error);
-    }
-  });
+  try {
+    await Meteor.callAsync('saveAudioPromptMode', audioPromptMode);
+  } catch (error) {
+    console.log('Error saving audio prompt mode', error);
+  }
 }
 
-export function warmupGoogleTTS() {
+export async function warmupGoogleTTS() {
   console.log('[TTS] 🔥 Warming up Google TTS API...');
   const startTime = performance.now();
 
@@ -349,25 +359,24 @@ export function warmupGoogleTTS() {
   // Make a dummy TTS request to establish the Meteor method connection
   // Use valid text instead of "." - Google TTS rejects punctuation-only input
   // Server will handle key lookup (user personal key or TDF key fallback)
-  Meteor.call('makeGoogleTTSApiCall',
-    Session.get('currentTdfId'),
-    'warmup', // Valid word for synthesis
-    1.0, // Default rate
-    0.0, // Volume 0 (silent warmup)
-    voice,
-    function(err, res) {
-      const elapsed = performance.now() - startTime;
-      if (err) {
-        console.log(`[TTS] 🔥 Warm-up failed (${elapsed.toFixed(0)}ms):`, err);
-        Session.set('ttsWarmedUp', false); // Allow retry on failure
-      } else {
-        console.log(`[TTS] 🔥 Warm-up complete (${elapsed.toFixed(0)}ms) - first trial TTS should be fast`);
-      }
-    }
-  );
+  try {
+    await Meteor.callAsync('makeGoogleTTSApiCall',
+      Session.get('currentTdfId'),
+      'warmup', // Valid word for synthesis
+      1.0, // Default rate
+      0.0, // Volume 0 (silent warmup)
+      voice
+    );
+    const elapsed = performance.now() - startTime;
+    console.log(`[TTS] 🔥 Warm-up complete (${elapsed.toFixed(0)}ms) - first trial TTS should be fast`);
+  } catch (err) {
+    const elapsed = performance.now() - startTime;
+    console.log(`[TTS] 🔥 Warm-up failed (${elapsed.toFixed(0)}ms):`, err);
+    Session.set('ttsWarmedUp', false); // Allow retry on failure
+  }
 }
 
-export function warmupGoogleSpeechRecognition() {
+export async function warmupGoogleSpeechRecognition() {
   // Check if already warmed up
   if (Session.get('srWarmedUp')) {
     console.log('[SR] Already warmed up, skipping');
@@ -407,19 +416,18 @@ export function warmupGoogleSpeechRecognition() {
   };
 
   // Make warmup call
-  Meteor.call('makeGoogleSpeechAPICall',
-    Session.get('currentTdfId'),
-    '', // Empty key - server will fetch TDF or user key
-    request,
-    ['warmup'], // Minimal answer grammar
-    function(err, res) {
-      const elapsed = performance.now() - startTime;
-      if (err) {
-        console.log(`[SR] 🔥 Warm-up failed (${elapsed.toFixed(0)}ms):`, err);
-        Session.set('srWarmedUp', false); // Allow retry on failure
-      } else {
-        console.log(`[SR] 🔥 Warm-up complete (${elapsed.toFixed(0)}ms) - first trial SR should be fast`);
-      }
-    }
-  );
+  try {
+    await Meteor.callAsync('makeGoogleSpeechAPICall',
+      Session.get('currentTdfId'),
+      '', // Empty key - server will fetch TDF or user key
+      request,
+      ['warmup'] // Minimal answer grammar
+    );
+    const elapsed = performance.now() - startTime;
+    console.log(`[SR] 🔥 Warm-up complete (${elapsed.toFixed(0)}ms) - first trial SR should be fast`);
+  } catch (err) {
+    const elapsed = performance.now() - startTime;
+    console.log(`[SR] 🔥 Warm-up failed (${elapsed.toFixed(0)}ms):`, err);
+    Session.set('srWarmedUp', false); // Allow retry on failure
+  }
 }

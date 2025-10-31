@@ -195,7 +195,7 @@ function defaultUnitEngine(curExperimentData) {
             //if(!this.cachedSyllables.data[answer]){
               clientConsole(1, 'no syllable data for that answer, throw error');
               const currentStimuliSetId = Session.get('currentStimuliSetId');
-              Meteor.call('updateStimSyllables', currentStimuliSetId, function(){});
+              Meteor.callAsync('updateStimSyllables', currentStimuliSetId);
               alert('Something went wrong generating hints. Please report this error to the administrator and restart your trial');
           // } else {
           //   //We assume no hints were generated initially, meaning the tdf didn't have hints to start.
@@ -1728,7 +1728,7 @@ function modelUnitEngine() {
       const practicetimer = Session.get('currentDeliveryParams').practicetimer;
 
       if (maxTrials > 0 && numTrialsSoFar >= maxTrials) {
-        Meteor.call('resetCurSessionTrialsCount', Meteor.userId(), Session.get('currentTdfId'))
+        Meteor.callAsync('resetCurSessionTrialsCount', Meteor.userId(), Session.get('currentTdfId'))
         return true;
       }
 

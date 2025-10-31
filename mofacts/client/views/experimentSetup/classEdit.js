@@ -139,9 +139,9 @@ Template.classEdit.events({
 
     if (isNewClass) {
       curClass.beginDate = new Date();
-      Meteor.call('addCourse', curClass, addEditClassCallback);
+      Meteor.callAsync('addCourse', curClass, addEditClassCallback);
     } else {
-      Meteor.call('editCourse', curClass, addEditClassCallback);
+      Meteor.callAsync('editCourse', curClass, addEditClassCallback);
     }
     updateSections();
   },

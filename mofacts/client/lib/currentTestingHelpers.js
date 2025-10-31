@@ -28,9 +28,10 @@ export {
 
 
 //function to get current theme from server and set the css variables
-function getCurrentTheme() {
-  let theme = Meteor.callAsync('getTheme', function(err, res) {
-    clientConsole(2, 'getCurrentTheme', err, res);
+async function getCurrentTheme() {
+  try {
+    const res = await Meteor.callAsync('getTheme');
+    clientConsole(2, 'getCurrentTheme', null, res);
     Session.set('curTheme', res);
     //set the css variables to the theme values
     themeProps = res.properties;
@@ -41,7 +42,9 @@ function getCurrentTheme() {
       document.documentElement.style.setProperty(propConverted, themeProps[prop]);
     }
     document.title = themeProps['themeName'];
-  });
+  } catch (err) {
+    clientConsole(2, 'getCurrentTheme', err, null);
+  }
 }
 
 // Given a user ID, return the "dummy" password that stands in for a blank

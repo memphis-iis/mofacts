@@ -18,14 +18,15 @@ Template.tabwarning.events({
     Session.set('ignoreBroadcastUntil', Date.now() + 2000); // Ignore for 2 seconds
 
     // Update server session
-    Meteor.callAsync('setUserSessionId', currentSessionId, currentSessionIdTimestamp, function(error) {
-      if (error) {
+    (async () => {
+      try {
+        await Meteor.callAsync('setUserSessionId', currentSessionId, currentSessionIdTimestamp);
+        console.log('Server session updated successfully');
+      } catch (error) {
         console.error('Error setting user session:', error);
         alert('Error taking over session: ' + error.message);
-        return;
       }
-      console.log('Server session updated successfully');
-    });
+    })();
 
     // Generate a DIFFERENT tab ID for the broadcast (not this tab's ID)
     const broadcastTabId = Math.random().toString(36).substr(2, 9);

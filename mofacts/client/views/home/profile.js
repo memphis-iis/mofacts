@@ -101,29 +101,28 @@ Template.profile.helpers({
 
 Template.profile.events({
   //Enable TDF
-  'click .enableTdf': function(event, instance) {
-      Meteor.call('toggleTdfPresence', event.target.tdfid, ENABLED, function(err, result) {
-        if (err) {
-          clientConsole(1, 'Error enabling TDF:', err);
-          alert('Error enabling TDF');
-        } else {
-          clientConsole(2, 'TDF enabled');
-          //update the enabledTdfs reactive var
-          const enabledTdfs = instance.enabledTdfs.get();
-          const tdfToEnable = enabledTdfs.find((tdf) => {
-            return tdf.tdfs.tutor.setspec._id === event.target.tdfid;
-          });
-          tdfToEnable.enabled = true;
-          instance.enabledTdfs.set(enabledTdfs);
-          //update the disabledTdfs reactive var
-          const disabledTdfs = instance.disabledTdfs.get();
-          const tdfToDisable = disabledTdfs.find((tdf) => {
-            return tdf.tdfs.tutor.setspec._id === event.target.tdfid;
-          });
-          tdfToDisable.enabled = false;
-          instance.disabledTdfs.set(disabledTdfs);
-        }
-      });
+  'click .enableTdf': async function(event, instance) {
+      try {
+        await Meteor.callAsync('toggleTdfPresence', event.target.tdfid, ENABLED);
+        clientConsole(2, 'TDF enabled');
+        //update the enabledTdfs reactive var
+        const enabledTdfs = instance.enabledTdfs.get();
+        const tdfToEnable = enabledTdfs.find((tdf) => {
+          return tdf.tdfs.tutor.setspec._id === event.target.tdfid;
+        });
+        tdfToEnable.enabled = true;
+        instance.enabledTdfs.set(enabledTdfs);
+        //update the disabledTdfs reactive var
+        const disabledTdfs = instance.disabledTdfs.get();
+        const tdfToDisable = disabledTdfs.find((tdf) => {
+          return tdf.tdfs.tutor.setspec._id === event.target.tdfid;
+        });
+        tdfToDisable.enabled = false;
+        instance.disabledTdfs.set(disabledTdfs);
+      } catch (err) {
+        clientConsole(1, 'Error enabling TDF:', err);
+        alert('Error enabling TDF');
+      }
   },
   //TDF Search
   'click #practiceTDFSearch': function(event, instance) {
@@ -322,7 +321,7 @@ function toggleTdfPresence(instance, mode) {
 
   clientConsole(2, 'toggleTdfPresence, mode:', mode, 'count:', tdfsToChange?.length || 0);
 
-  Meteor.call('toggleTdfPresence', tdfsToChange, mode);
+  Meteor.callAsync('toggleTdfPresence', tdfsToChange, mode);
   const remainingTdfs = [];
   const tdfsToUpdate = [];
   let tdfsInOtherModeState = [];
@@ -453,13 +452,14 @@ async function processAllTdfs(templateInstance, allTdfs) {
 
   $('#expDataDownloadContainer').html('');
 
-  Meteor.call('getContentGenerationAvailable', function(err, res) {
-    if (err) {
-      clientConsole(1, 'Error getting content generation availability:', err);
-    } else {
+  (async () => {
+    try {
+      const res = await Meteor.callAsync('getContentGenerationAvailable');
       Session.set('contentGenerationAvailable', res);
+    } catch (err) {
+      clientConsole(1, 'Error getting content generation availability:', err);
     }
-  });
+  })();
 
   // In experiment mode, they may be forced to a single tdf
   let experimentTarget = null;
@@ -623,14 +623,15 @@ async function processAllTdfs(templateInstance, allTdfs) {
   }
 
   if (isAdmin) {
-    Meteor.call('getTdfOwnersMap', tdfOwnerIds, function(err, res) {
-      if (err) {
-        clientConsole(1, 'Error getting TDF owners map:', err);
-      } else {
+    (async () => {
+      try {
+        const res = await Meteor.callAsync('getTdfOwnersMap', tdfOwnerIds);
         templateInstance.tdfOwnersMap.set(res);
         clientConsole(2, 'TDF owners map loaded, count:', Object.keys(res || {}).length);
+      } catch (err) {
+        clientConsole(1, 'Error getting TDF owners map:', err);
       }
-    });
+    })();
   }
 
   // Did we find something to auto-jump to?
@@ -799,17 +800,22 @@ async function selectTdf(currentTdfId, lessonName, currentStimuliSetId, ignoreOu
     // Check if the tdf or user has a speech api key defined, if not show the modal form
     // for them to input one.  If so, actually continue initializing web audio
     // and going to the practice set
-    Meteor.call('getUserSpeechAPIKey', function(error, key) {
-      Session.set('speechAPIKey', key);
-      const tdfKeyPresent = !!curTdfContent.tdfs.tutor.setspec.speechAPIKey;
-      if (!key && !tdfKeyPresent) {
-        clientConsole(2, 'speech api key not found, showing modal for user to input');
-        $('#speechAPIModal').modal('show');
-        continueToCard = false;
-      } else {
-        clientConsole(2, 'audio input enabled and key present, navigating to card and initializing audio input');
+    (async () => {
+      try {
+        const key = await Meteor.callAsync('getUserSpeechAPIKey');
+        Session.set('speechAPIKey', key);
+        const tdfKeyPresent = !!curTdfContent.tdfs.tutor.setspec.speechAPIKey;
+        if (!key && !tdfKeyPresent) {
+          clientConsole(2, 'speech api key not found, showing modal for user to input');
+          $('#speechAPIModal').modal('show');
+          continueToCard = false;
+        } else {
+          clientConsole(2, 'audio input enabled and key present, navigating to card and initializing audio input');
+        }
+      } catch (error) {
+        clientConsole(1, 'Error getting user speech API key:', error);
       }
-    });
+    })();
   } else {
     clientConsole(2, 'audio toggle not checked, navigating to card');
   }

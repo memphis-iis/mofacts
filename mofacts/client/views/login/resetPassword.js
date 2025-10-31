@@ -11,30 +11,37 @@ Template.resetPassword.onRendered(function() {
 // Template Events
 
 Template.resetPassword.events({
-  'click #sendSecret': function(event) {
+  'click #sendSecret': async function(event) {
       event.preventDefault();
       email = $('#email').val();
-      Meteor.call('sendPasswordResetEmail', email, function(err, res){
-          alert('If you have an account, an email was sent to you.');
-      });
+      try {
+        await Meteor.callAsync('sendPasswordResetEmail', email);
+        alert('If you have an account, an email was sent to you.');
+      } catch (err) {
+        console.log('Error sending password reset email:', err);
+      }
       $('#verifySecret').show();
       $('#sendPasswordEmail').hide();
   },
-  'click #verifySecretButton': function(event) {
+  'click #verifySecretButton': async function(event) {
     event.preventDefault();
     email = $('#email').val();
     secret = $('#secret').val();
-    Meteor.call('checkPasswordResetSecret', email, secret, function(err, res){
-        if(res == true){
-            $('#verifySecret').hide();
-            $('#resetPasswordForm').show();
-        } else {
-            alert('Your secret is incorrect.');
-            Router.go('/resetPassword');
-        }
-    });
-
-},
+    try {
+      const res = await Meteor.callAsync('checkPasswordResetSecret', email, secret);
+      if(res == true){
+        $('#verifySecret').hide();
+        $('#resetPasswordForm').show();
+      } else {
+        alert('Your secret is incorrect.');
+        Router.go('/resetPassword');
+      }
+    } catch (err) {
+      console.log('Error verifying reset secret:', err);
+      alert('Your secret is incorrect.');
+      Router.go('/resetPassword');
+    }
+  },
   'click #resetPasswordButton': function(event) {
     event.preventDefault();
     secret = $('#secret').val();
@@ -45,7 +52,7 @@ Template.resetPassword.events({
         alert("Passwords do not match.")
     } else {
         if(resetPassword.length > 5){
-            Meteor.call('resetPasswordWithSecret', email, secret, resetPassword);
+            Meteor.callAsync('resetPasswordWithSecret', email, secret, resetPassword);
             Router.go('/signin');
         }else{
             alert("Password must be at least 6 characters.");

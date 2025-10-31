@@ -308,14 +308,15 @@ Template.lessonSelect.helpers({
   
     if (isAdmin) {
       const templateInstance = this;
-      Meteor.call('getTdfOwnersMap', tdfOwnerIds, function(err, res) {
-        if (err) {
-          console.log(err);
-        } else {
+      (async () => {
+        try {
+          const res = await Meteor.callAsync('getTdfOwnersMap', tdfOwnerIds);
           templateInstance.tdfOwnersMap.set(res);
           console.log(templateInstance.tdfOwnersMap.get());
+        } catch (err) {
+          console.log(err);
         }
-      });
+      })();
     }
   
     // Did we find something to auto-jump to?
@@ -482,17 +483,22 @@ Template.lessonSelect.helpers({
       // Check if the tdf or user has a speech api key defined, if not show the modal form
       // for them to input one.  If so, actually continue initializing web audio
       // and going to the practice set
-      Meteor.call('getUserSpeechAPIKey', function(error, key) {
-        Session.set('speechAPIKey', key);
-        const tdfKeyPresent = !!curTdfContent.tdfs.tutor.setspec.speechAPIKey
-        if (!key && !tdfKeyPresent) {
-          console.log('speech api key not found, showing modal for user to input');
-          $('#speechAPIModal').modal('show');
-          continueToCard = false;
-        } else {
-          console.log('audio input enabled and key present, navigating to card and initializing audio input');
+      (async () => {
+        try {
+          const key = await Meteor.callAsync('getUserSpeechAPIKey');
+          Session.set('speechAPIKey', key);
+          const tdfKeyPresent = !!curTdfContent.tdfs.tutor.setspec.speechAPIKey
+          if (!key && !tdfKeyPresent) {
+            console.log('speech api key not found, showing modal for user to input');
+            $('#speechAPIModal').modal('show');
+            continueToCard = false;
+          } else {
+            console.log('audio input enabled and key present, navigating to card and initializing audio input');
+          }
+        } catch (error) {
+          console.log('Error getting user speech API key:', error);
         }
-      });
+      })();
     } else {
       console.log('audio toggle not checked, navigating to card');
     }

@@ -78,35 +78,36 @@ Template.userAdmin.events({
 
 
 
-    Meteor.callAsync('userAdminRoleChange', userId, roleAction, roleName, function(error, result) {
-      $('#userAdminModal').modal('hide');
-
-      let disp;
-      if (typeof error !== 'undefined') {
-        disp = 'Failed to handle request. Error:' + error;
-      } else {
-        disp = 'Action completed successfully';
+    (async () => {
+      try {
+        await Meteor.callAsync('userAdminRoleChange', userId, roleAction, roleName);
+        $('#userAdminModal').modal('hide');
+        const disp = 'Action completed successfully';
+        console.log(disp);
+        alert(disp);
+      } catch (error) {
+        $('#userAdminModal').modal('hide');
+        const disp = 'Failed to handle request. Error:' + error;
+        console.log(disp);
+        alert(disp);
       }
-      console.log(disp);
-      alert(disp);
-    });
+    })();
   },
 
-  //Impersonation 
-  'click .btn-impersonate' : function(event){
+  //Impersonation
+  'click .btn-impersonate' : async function(event){
     const btnTarget = $(event.currentTarget);
     const newUserId = _.trim(btnTarget.data('userid'));
-    Meteor.callAsync('impersonate', newUserId, function(error, result) {
-      if (error) {
-        console.log('Impersonation failed:', error);
-        alert('Impersonation failed:' + error);
-      } else {
-        console.log('Impersonation successful:', result._id);
-        Meteor.userId = function() { return result._id };
-        Meteor.user = function() { return result };
-        Router.go('/');
-      }
-    });
+    try {
+      const result = await Meteor.callAsync('impersonate', newUserId);
+      console.log('Impersonation successful:', result._id);
+      Meteor.userId = function() { return result._id };
+      Meteor.user = function() { return result };
+      Router.go('/');
+    } catch (error) {
+      console.log('Impersonation failed:', error);
+      alert('Impersonation failed:' + error);
+    }
   }
 
 });
@@ -120,15 +121,13 @@ function doFileUpload(fileElementSelector, fileDescrip) {
     const name = file.name;
     const fileReader = new FileReader();
 
-    fileReader.onload = function() {
+    fileReader.onload = async function() {
       console.log('Upload attempted for', name);
 
-      Meteor.callAsync('insertNewUsers', name, fileReader.result, function(error, result) {
+      try {
+        const result = await Meteor.callAsync('insertNewUsers', name, fileReader.result);
         console.log('result:' + JSON.stringify(result));
-        if (error) {
-          console.log('Critical failure saving ' + fileDescrip, error);
-          alert('There was a critical failure saving your ' + fileDescrip + ' file:' + error);
-        } else if (result.length > 0) {
+        if (result.length > 0) {
           console.log(fileDescrip + ' save failed', result);
           alert('The ' + fileDescrip + ' file was not saved: ' + JSON.stringify(result));
         } else {
@@ -141,7 +140,10 @@ function doFileUpload(fileElementSelector, fileDescrip) {
           console.log('newAllUsers:', newAllUsers, JSON.parse(JSON.stringify(Session.get('allUsers'))));
           Session.set('allUsers', newAllUsers);
         }
-      });
+      } catch (error) {
+        console.log('Critical failure saving ' + fileDescrip, error);
+        alert('There was a critical failure saving your ' + fileDescrip + ' file:' + error);
+      }
     };
 
     fileReader.readAsBinaryString(file);
