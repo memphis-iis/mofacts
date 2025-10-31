@@ -707,7 +707,7 @@ async function saveMediaFile(media, owner, stimSetId){
 }
 
 // Content Validation
-function validateStimAndTdf(tdfJson, stimJson, tdfFileName, stimFileName) {
+async function validateStimAndTdf(tdfJson, stimJson, tdfFileName, stimFileName) {
   // Check stimulus file structure
   if (!stimJson || !stimJson.setspec || !Array.isArray(stimJson.setspec.clusters)) {
     return { result: false, errmsg: `Stimulus file "${stimFileName}" missing clusters array.` };
@@ -741,14 +741,14 @@ function validateStimAndTdf(tdfJson, stimJson, tdfFileName, stimFileName) {
           }
         });
         //validate that audioSrc, imgSrc, and videoSrc are valid URLs or in DynamicAssets
-        ['audioSrc', 'imgSrc', 'videoSrc'].forEach(field => {
+        for (const field of ['audioSrc', 'imgSrc', 'videoSrc']) {
           if (stim.display[field]) {
             const url = stim.display[field];
             if (!url.startsWith('http') && !await DynamicAssets.collection.findOneAsync({name: url})) {
               return { result: false, errmsg: `Stim ${stimIdx} in cluster ${clusterIdx} has invalid display.${field}: ${url}.` };
             }
           }
-        });
+        }
       }
     }
   }
@@ -828,7 +828,7 @@ async function saveContentFile(type, filename, filecontents, owner, packagePath 
       const stimFileName = jsonContents.tutor.setspec.stimulusfile;
       const stimTdf = await Tdfs.findOneAsync({stimulusFileName: stimFileName});
       const stimJson = stimTdf ? stimTdf.rawStimuliFile : null;
-      const validation = validateStimAndTdf(jsonContents, stimJson, filename, stimFileName);
+      const validation = await validateStimAndTdf(jsonContents, stimJson, filename, stimFileName);
       if (!validation.result) {
         results.result = false;
         results.errmsg = validation.errmsg;
