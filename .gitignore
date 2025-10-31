@@ -33,3 +33,8 @@ db/mongodump.tar.gz
 **settings.json
 assets/settings.json
 .claude/settings.local.json
+
+# Backup files from async/await conversion
+*.bak
+*.backup
+*.v2
