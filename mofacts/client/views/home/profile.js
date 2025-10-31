@@ -1,3 +1,4 @@
+import {Roles} from 'meteor/alanning:roles';
 import {ReactiveVar} from 'meteor/reactive-var';
 import {haveMeteorUser} from '../../lib/currentTestingHelpers';
 import {getExperimentState, updateExperimentState} from '../experiment/card';
@@ -470,7 +471,7 @@ async function processAllTdfs(templateInstance, allTdfs) {
   const tdfTags = [];
   const disabledTdfs = [];
   const tdfOwnerIds = [];
-  const isAdmin = Roles.userIsInRole(user, ['admin']);
+  const isAdmin = (user && user.roles && (['admin']).some(role => user.roles.includes(role)));
 
   //Get all course tdfs
   const courseId = user.loginParams?.curClass?.courseId || null;

@@ -1,3 +1,4 @@
+import {Roles} from 'meteor/alanning:roles';
 import { ReactiveDict } from 'meteor/reactive-dict';
 import { Tracker } from 'meteor/tracker';
 import {
@@ -546,7 +547,7 @@ function restartMainCardTimeoutIfNecessary() {
 // Set a special timeout to handle simulation if necessary
 function checkSimulation() {
   if (!Session.get('runSimulation') ||
-        !Roles.userIsInRole(Meteor.user(), ['admin', 'teacher'])) {
+        !(Meteor.user() && Meteor.user().roles && (['admin', 'teacher']).some(role => Meteor.user().roles.includes(role)))) {
     return;
   }
 
@@ -5968,7 +5969,7 @@ async function processUserTimesLog() {
       if (engine.unitFinished()) {
         let lockoutMins = Session.get('currentDeliveryParams').lockoutminutes;
         user = Meteor.user();
-        isAdmin = Roles.userIsInRole(user, 'admin');
+        isAdmin = Roles.userIsInRoleAsync(user, 'admin');
         if (lockoutMins > 0 &&  !isAdmin) {
           let unitStartTimestamp = Session.get('currentUnitStartTime');
           if(Meteor.user().lockouts && Meteor.user().lockouts[Session.get('currentTdfId')] && 

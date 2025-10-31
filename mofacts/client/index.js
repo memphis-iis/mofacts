@@ -11,6 +11,7 @@ import {
 } from './lib/currentTestingHelpers';
 import DOMPurify from 'dompurify';
 import {warmupGoogleTTS, warmupGoogleSpeechRecognition} from './views/home/profileAudioToggles.js';
+import {Roles} from 'meteor/alanning:roles';
 
 // Security: HTML sanitization for user-generated content
 // Allow safe formatting tags but block scripts, iframes, and event handlers
@@ -39,6 +40,14 @@ if (location.protocol !== 'https:' && forceSSL) {
 }
 
 getCurrentTheme();
+
+// Register the isInRole helper for templates (Meteor 3.0 compatibility)
+// Check roles synchronously on client using user.roles array (reactively published)
+Template.registerHelper('isInRole', function(role) {
+  const user = Meteor.user();
+  if (!user || !user.roles) return false;
+  return user.roles.includes(role);
+});
 
 // Multi-tab detection: Generate unique ID for this tab
 const TAB_ID = Math.random().toString(36).substr(2, 9);

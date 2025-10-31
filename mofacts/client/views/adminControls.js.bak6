@@ -1,0 +1,281 @@
+import { getCurrentTheme } from '../lib/currentTestingHelpers'
+Template.adminControls.created = async function() {
+    try {
+        const verbosity = await Meteor.callAsync('getVerbosity');
+        console.log("Got verbosity: " + verbosity);
+        $(`#verbosityRadio${verbosity}`).prop('checked', true);
+    } catch (err) {
+        console.log("Error getting verbosity: " + err);
+    }
+
+    try {
+        const testLoginsEnabled = await Meteor.callAsync('getTestLogin');
+        console.log("Got testLoginsEnabled: " + testLoginsEnabled);
+        $(`#testLoginsCheckbox`).prop('checked', testLoginsEnabled);
+    } catch (err) {
+        console.log("Error getting testLoginsEnabled: " + err);
+    }
+};
+
+Template.adminControls.rendered = async function() {
+        //get client verbosity level
+        clientVerbosityLevel = DynamicSettings.findOne({key: 'clientVerbosityLevel'}).value.toString();
+        //if client verbosity level is not set, set it to 0
+        if (clientVerbosityLevel === undefined) {
+            clientVerbosityLevel = "0"
+            console.log("clientVerbosityLevel not set, setting to 0");
+            DynamicSettings.insert({key: 'clientVerbosityLevel', value: clientVerbosityLevel});
+        }
+        //set the name of the radio button to be checked
+        const name = `clientVerbosityRadio${clientVerbosityLevel}`;
+        console.log("clientVerbosityLevel: " + name);
+        //check the radio button
+        document.getElementById(name).checked = true;
+
+        // Load custom help page status
+        try {
+            const status = await Meteor.callAsync('getCustomHelpPageStatus');
+            if (status) {
+                Session.set('customHelpPageEnabled', status.enabled);
+                Session.set('customHelpPageUploadedAt', status.uploadedAt);
+            }
+        } catch (err) {
+            console.log("Error getting custom help page status:", err);
+        }
+    };
+
+Template.adminControls.helpers({
+    'serverStatus': function() {
+        (async () => {
+            try {
+                const res = await Meteor.callAsync('getServerStatus');
+                Session.set('serverStatus', res);
+            } catch (err) {
+                console.log("Error getting server status:", err);
+            }
+        })();
+        return Session.get('serverStatus');
+    },
+    'testLoginsEnabled': function() {
+        return DynamicSettings.findOne({key: 'testLoginsEnabled'}).value;
+    },
+    'currentTheme': function() {
+        return Session.get('curTheme');
+    },
+    'customHelpPageEnabled': function() {
+        return Session.get('customHelpPageEnabled') || false;
+    },
+    'customHelpPageUploadedAt': function() {
+        return Session.get('customHelpPageUploadedAt');
+    },
+    'formatDate': function(date) {
+        if (!date) return '';
+        return new Date(date).toLocaleString();
+    }
+});
+
+Template.adminControls.events({
+    'click .serverVerbosityRadio': function(event) {
+        console.log("verbosityRadio clicked");
+        const name = event.currentTarget.getAttribute('id');
+        const start = name.length - 1;
+        const verbosity = name.slice(start, name.length)
+        Meteor.callAsync('setVerbosity', verbosity);
+    },
+    'click .clientVerbosityRadio': function(event) {
+        console.log("verbosityRadio clicked");
+        let _id = DynamicSettings.findOne({key: 'clientVerbosityLevel'})._id;
+        const name = event.currentTarget.getAttribute('id');
+        const start = name.length - 1;
+        const verbosity = _.intval(name.slice(start, name.length))
+        DynamicSettings.update({_id: _id}, {$set: {value: verbosity}});
+    },
+    'click #testLoginsCheckbox': function(event) {
+        console.log("testLoginsCheckbox clicked");
+        let _id = DynamicSettings.findOne({key: 'testLoginsEnabled'})._id;
+        const testLoginsEnabled = $('#testLoginsCheckbox').prop('checked');
+        DynamicSettings.update({_id: _id}, {$set: {value: testLoginsEnabled}});  
+    },
+    'click #themeInitButton': async function(event) {
+        try {
+            const res = await Meteor.callAsync('toggleCustomTheme');
+            console.log("Toggled custom theme: " + res);
+            Session.set('curTheme', getCurrentTheme());
+        } catch (err) {
+            alert("Error toggling custom theme: " + err);
+        }
+    },
+    'click #themeResetButton': async function(event) {
+        try {
+            await Meteor.callAsync('initializeCustomTheme');
+            Session.set('curTheme', getCurrentTheme());
+        } catch (err) {
+            console.log("Error initializing custom theme:", err);
+        }
+    },
+    'input .currentThemeProp': function(event) {
+        //show unsaved change warning
+        $('#unsavedThemeChanges').attr('hidden', false).removeAttr('hidden');
+    },
+    'input .currentThemePropColor': function(event) {
+        const data_id = event.currentTarget.getAttribute('data-id');
+        const value = event.currentTarget.value;
+        //change the corresponding currentThemeProp value. we need to find a input with the same data-id and change its value
+        $(`.currentThemeProp[data-id=${data_id}]`).val(value);
+        //show unsaved change warning
+        $('#unsavedThemeChanges').attr('hidden', false).removeAttr('hidden');
+    },
+    'click #themeSaveButton': async function(event) {
+        //get all the currentThemeProp values and data-ids and put them in a json object [{data-id: value}]
+        const themeProps = [];
+        $('.currentThemeProp').each(function() {
+            console.log("currentThemeProp: " + $(this).data('id'), $(this).val());
+            themeProps.push({data_id: $(this).data('id'), value: $(this).val()});
+        });
+        console.log("themeProps: " + JSON.stringify(themeProps));
+        //call the setCustomThemeProperty method for each themeProp
+        for (const themeProp of themeProps) {
+            try {
+                const res = await Meteor.callAsync('setCustomThemeProperty', themeProp.data_id, themeProp.value);
+                console.log("Set custom theme property: " + res);
+            } catch (err) {
+                alert("Error setting custom theme property: " + err);
+            }
+        }
+        Session.set('curTheme', getCurrentTheme());
+    },
+    'click #updateStimDisplayTypeMap': async function(event) {
+        try {
+            const res = await Meteor.callAsync('updateStimDisplayTypeMap');
+            console.log("Cleared stim display type map: " + res);
+        } catch (err) {
+            alert("Error clearing stim display type map: " + err);
+        }
+    },
+    'change #logoUpload': function(event) {
+        const file = event.target.files[0];
+        if (file) {
+            // Validate file type
+            if (!file.type.startsWith('image/')) {
+                alert('Please select an image file');
+                return;
+            }
+            // Validate file size (max 2MB)
+            if (file.size > 2 * 1024 * 1024) {
+                alert('File size must be less than 2MB');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = async function(e) {
+                const base64Data = e.target.result;
+                try {
+                    await Meteor.callAsync('setCustomThemeProperty', 'logo_url', base64Data);
+                    console.log("Logo uploaded successfully");
+                    getCurrentTheme();
+                } catch (err) {
+                    alert("Error uploading logo: " + err);
+                }
+            };
+            reader.readAsDataURL(file);
+        }
+    },
+    'click #clearLogo': async function(event) {
+        if (confirm('Are you sure you want to clear the logo?')) {
+            try {
+                await Meteor.callAsync('setCustomThemeProperty', 'logo_url', '');
+                console.log("Logo cleared successfully");
+                $('#logoUpload').val('');
+                getCurrentTheme();
+            } catch (err) {
+                alert("Error clearing logo: " + err);
+            }
+        }
+    },
+
+    // Custom Help Page Upload
+    'click #uploadHelpFileButton': function(event) {
+        const fileInput = document.getElementById('helpFileUpload');
+        const file = fileInput.files[0];
+        const statusSpan = document.getElementById('helpFileUploadStatus');
+
+        if (!file) {
+            statusSpan.textContent = 'Please select a file first';
+            statusSpan.className = 'text-danger';
+            return;
+        }
+
+        // Validate file extension
+        if (!file.name.endsWith('.md')) {
+            statusSpan.textContent = 'Please select a markdown (.md) file';
+            statusSpan.className = 'text-danger';
+            return;
+        }
+
+        // Validate file size (1MB max)
+        if (file.size > 1048576) {
+            statusSpan.textContent = 'File size must be less than 1MB';
+            statusSpan.className = 'text-danger';
+            return;
+        }
+
+        statusSpan.textContent = 'Uploading...';
+        statusSpan.className = 'text-info';
+
+        // Read file as text
+        const reader = new FileReader();
+        reader.onload = async function(e) {
+            const markdownContent = e.target.result;
+
+            try {
+                await Meteor.callAsync('setCustomHelpPage', markdownContent);
+                statusSpan.textContent = 'Custom help page uploaded successfully!';
+                statusSpan.className = 'text-success';
+                fileInput.value = '';
+
+                // Update session to show status
+                try {
+                    const status = await Meteor.callAsync('getCustomHelpPageStatus');
+                    if (status) {
+                        Session.set('customHelpPageEnabled', status.enabled);
+                        Session.set('customHelpPageUploadedAt', status.uploadedAt);
+                    }
+                } catch (err) {
+                    console.log("Error getting help page status:", err);
+                }
+            } catch (err) {
+                statusSpan.textContent = 'Error: ' + err.message;
+                statusSpan.className = 'text-danger';
+            }
+        };
+
+        reader.onerror = function() {
+            statusSpan.textContent = 'Error reading file';
+            statusSpan.className = 'text-danger';
+        };
+
+        reader.readAsText(file);
+    },
+
+    'click #removeHelpFileButton': async function(event) {
+        if (confirm('Are you sure you want to remove the custom help page and revert to the wiki?')) {
+            const statusSpan = document.getElementById('helpFileUploadStatus');
+            statusSpan.textContent = 'Removing...';
+            statusSpan.className = 'text-info';
+
+            try {
+                await Meteor.callAsync('removeCustomHelpPage');
+                statusSpan.textContent = 'Custom help page removed. Now using wiki.';
+                statusSpan.className = 'text-success';
+
+                // Update session
+                Session.set('customHelpPageEnabled', false);
+                Session.set('customHelpPageUploadedAt', null);
+            } catch (err) {
+                statusSpan.textContent = 'Error: ' + err.message;
+                statusSpan.className = 'text-danger';
+            }
+        }
+    }
+});
+  

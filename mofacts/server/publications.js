@@ -1,3 +1,4 @@
+import {Roles} from 'meteor/alanning:roles';
 Meteor.publish('files.assets.all', function () {
     // Security: Filter assets based on user role and ownership
     if (!this.userId) {
@@ -5,7 +6,7 @@ Meteor.publish('files.assets.all', function () {
     }
 
     // Admins can see all assets
-    if (Roles.userIsInRole(this.userId, ['admin'])) {
+    if (await Roles.userIsInRoleAsync(this.userId, ['admin'])) {
         return DynamicAssets.collection.find();
     }
 
@@ -64,12 +65,12 @@ Meteor.publish('allTdfs', async function() {
     }
 
     // Admins can see all TDFs
-    if (Roles.userIsInRole(this.userId, ['admin'])) {
+    if (await Roles.userIsInRoleAsync(this.userId, ['admin'])) {
         return Tdfs.find();
     }
 
     // Teachers can see their own TDFs, TDFs they have access to, and public TDFs
-    if (Roles.userIsInRole(this.userId, ['teacher'])) {
+    if (await Roles.userIsInRoleAsync(this.userId, ['teacher'])) {
         return Tdfs.find({
             $or: [
                 { ownerId: this.userId },
@@ -107,7 +108,7 @@ Meteor.publish('ownedTdfs', function(ownerId) {
     }
 
     // Users can only query their own TDFs unless they're admin
-    if (ownerId !== this.userId && !Roles.userIsInRole(this.userId, ['admin'])) {
+    if (ownerId !== this.userId && !Roles.userIsInRoleAsync(this.userId, ['admin'])) {
         return this.ready(); // Return empty result
     }
 
@@ -131,11 +132,11 @@ Meteor.publish('tdfByExperimentTarget', async function(experimentTarget, experim
     }
 
     // Security: Filter results based on user role and permissions
-    if (Roles.userIsInRole(this.userId, ['admin'])) {
+    if (await Roles.userIsInRoleAsync(this.userId, ['admin'])) {
         return Tdfs.find(query);
     }
 
-    if (Roles.userIsInRole(this.userId, ['teacher'])) {
+    if (await Roles.userIsInRoleAsync(this.userId, ['teacher'])) {
         // Teachers can see their own TDFs, TDFs they have access to, and public TDFs
         query.$or = [
             { $and: [query, { ownerId: this.userId }] },
@@ -158,7 +159,7 @@ Meteor.publish('Assignments', function(courseId) {
 
 Meteor.publish('settings', function() {
     // Security: Only admins should see system settings
-    if (!this.userId || !Roles.userIsInRole(this.userId, ['admin'])) {
+    if (!this.userId || !Roles.userIsInRoleAsync(this.userId, ['admin'])) {
         return this.ready();
     }
     return DynamicSettings.find();

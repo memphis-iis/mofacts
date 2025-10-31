@@ -1,3 +1,4 @@
+import {Roles} from 'meteor/alanning:roles';
 Template.nav.events({
     'click #gearMenu': function(event) {
         event.preventDefault();
@@ -30,7 +31,7 @@ Template.nav.events({
     //     //check current users role, if admin or teacher
     //     //then go to progress page
     //     //else go to profile page
-    //     if (Roles.userIsInRole(Meteor.userId(), ['admin', 'teacher'])) {
+    //     if ((Meteor.userId() && Meteor.userId().roles && (['admin', 'teacher']).some(role => Meteor.userId().roles.includes(role)))) {
     //         Router.go('/studentReporting');
     //     } else {
     //       if (window.currentAudioObj) {

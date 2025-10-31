@@ -41,7 +41,7 @@ DynamicAssets = new FilesCollection({
       return 'Must be logged in to upload files';
     }
 
-    if (!Roles.userIsInRole(this.userId, ['admin', 'teacher'])) {
+    if (!Roles.userIsInRoleAsync(this.userId, ['admin', 'teacher'])) {
       return 'Only admins and teachers can upload files';
     }
 
@@ -85,6 +85,6 @@ GlobalExperimentStates.allow({
 
 DynamicSettings.allow({
   update: function(userId) {
-    return Roles.userIsInRole(userId, ['admin']);
+    return Roles.userIsInRoleAsync(userId, ['admin']);
   }
 });

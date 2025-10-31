@@ -1,3 +1,4 @@
+import {Roles} from 'meteor/alanning:roles';
 import {ReactiveVar} from 'meteor/reactive-var';
 import {haveMeteorUser} from '../../lib/currentTestingHelpers';
 import {getExperimentState, updateExperimentState} from '../experiment/card';
@@ -142,7 +143,7 @@ Template.lessonSelect.helpers({
     const tdfTags = [];
     const disabledTdfs = [];
     const tdfOwnerIds = [];
-    const isAdmin = Roles.userIsInRole(Meteor.user(), ['admin']);
+    const isAdmin = (Meteor.user() && Meteor.user().roles && (['admin']).some(role => Meteor.user().roles.includes(role)));
   
     //Get all course tdfs
     const courseId = Meteor.user().loginParams.curClass ? Meteor.user().loginParams.curClass.courseId : null;

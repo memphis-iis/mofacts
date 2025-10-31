@@ -1,3 +1,4 @@
+import {Roles} from 'meteor/alanning:roles';
 import {meteorCallAsync} from '..';
 import {displayify} from '../../common/globalHelpers';
 
@@ -121,7 +122,7 @@ Template.turkWorkflow.rendered = async function() {
   const allTdfs = await meteorCallAsync('getAllTdfs');
   let turkLogCount = 0; // Check all the valid TDF's
 
-  const isAdmin = Roles.userIsInRole(Meteor.user(), ['admin']);
+  const isAdmin = (Meteor.user() && Meteor.user().roles && (['admin']).some(role => Meteor.user().roles.includes(role)));
 
   allTdfs.forEach( function(tdf) {
     const tdfObject = tdf.content;

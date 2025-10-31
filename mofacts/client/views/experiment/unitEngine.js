@@ -1,3 +1,4 @@
+import {Roles} from 'meteor/alanning:roles';
 import {
   extractDelimFields,
   rangeVal,
@@ -1561,7 +1562,7 @@ async function modelUnitEngine() {
       updateCardAndStimData(cardIndex, whichStim);
 
       // only log this for teachers/admins
-      if (Roles.userIsInRole(Meteor.user(), ['admin', 'teacher'])) {
+      if ((Meteor.user() && Meteor.user().roles && (['admin', 'teacher']).some(role => Meteor.user().roles.includes(role)))) {
         clientConsole(1, '>>>BEGIN METRICS>>>>>>>\n',
         'Overall user stats => ',
             'total responses:', cardProbabilities.numQuestionsAnswered,
