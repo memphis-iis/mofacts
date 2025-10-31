@@ -40,7 +40,7 @@ following is true:
 import {serverConsole, decryptUserData, createAwsHmac} from './methods';
 
 
-(function() {
+const turk = (function() {
   // var TURK_URL = "https://mechanicalturk.amazonaws.com";
   // var SANDBOX_URL = "https://mechanicalturk.sandbox.amazonaws.com";
   const AWS = Npm.require('aws-sdk');
@@ -125,7 +125,7 @@ import {serverConsole, decryptUserData, createAwsHmac} from './methods';
     return response;
   }
 
-  turk = {
+  return {
     getAccountBalance: function(userProfile) {
       const req = {};
       validateUser(userProfile);
@@ -261,3 +261,5 @@ import {serverConsole, decryptUserData, createAwsHmac} from './methods';
 
   };
 })();
+
+export {turk};

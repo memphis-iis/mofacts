@@ -59,10 +59,10 @@ var defaultValues = {
     }
 };
 
-getFullConfig = function() {
+export function getFullConfig() {
     return _.extend({}, defaultValues, Meteor.settings);
 };
 
-getConfigProperty = function(name) {
+export function getConfigProperty(name) {
     return _.prop(getFullConfig(), name);
 };
