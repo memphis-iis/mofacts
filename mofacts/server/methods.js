@@ -1451,7 +1451,7 @@ async function setExperimentState(userId, TDFId, experimentStateId, newExperimen
   return TDFId;
 }
 
-function insertHiddenItem(userId, stimulusKC, tdfId) {
+async function insertHiddenItem(userId, stimulusKC, tdfId) {
   let unit = await ComponentStates.findOneAsync({userId: userId, TDFId: tdfId})
   let index = -1;
   if (unit) {
