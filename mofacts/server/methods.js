@@ -2834,16 +2834,6 @@ export const methods = {
     }
   },
 
-  createExperimentState: async function(curExperimentState) {
-    // REDUCED LOGGING: Only log TDF ID, not entire experiment state object
-    serverConsole('createExperimentState', curExperimentState.currentTdfId);
-    await GlobalExperimentStates.insertAsync({
-      userId: Meteor.userId(),
-      TDFId: curExperimentState.currentTdfId,
-      experimentState: curExperimentState
-    });
-  },
-
   getAltServerUrl: function() {
     return altServerUrl;
   },
