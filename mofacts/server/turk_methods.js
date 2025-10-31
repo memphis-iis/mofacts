@@ -191,7 +191,7 @@ Meteor.methods({
   turkGetAssignment: async function(assignid) {
     serverConsole('turkGetAssignment', assignid);
     try {
-      const usr = Meteor.user();
+      const usr = await Meteor.userAsync();
       if (!Roles.userIsInRoleAsync(usr, ['admin', 'teacher'])) {
         throw new Error('You are not authorized to do that');
       }
@@ -214,7 +214,7 @@ Meteor.methods({
   turkSendMessage: async function(workerid, msgtext) {
     serverConsole('turkSendMessage', workerid);
     try {
-      const usr = Meteor.user();
+      const usr = await Meteor.userAsync();
       if (!Roles.userIsInRoleAsync(usr, ['admin', 'teacher'])) {
         throw new Error('You are not authorized to do that');
       }
@@ -250,7 +250,7 @@ Meteor.methods({
     let requestParams = null; // Params used to make email send request
 
     try {
-      usr = Meteor.user();
+      usr = await Meteor.userAsync();
       if (!usr || !usr._id) {
         throw Meteor.Error('No current user');
       }
@@ -361,7 +361,7 @@ Meteor.methods({
     let ownerId; let turkid; // Needed for final work
 
     try {
-      const usr = Meteor.user();
+      const usr = await Meteor.userAsync();
       if (!Roles.userIsInRoleAsync(usr, ['admin', 'teacher'])) {
         throw new Error('You are not authorized to do that');
       }
@@ -470,7 +470,7 @@ Meteor.methods({
     let turkid; let ownerId; let tdfid; let unitnum; // Needed for final work
 
     try {
-      const usr = Meteor.user();
+      const usr = await Meteor.userAsync();
       if (!Roles.userIsInRoleAsync(usr, ['admin', 'teacher'])) {
         throw new Error('You are not authorized to do that');
       }
@@ -665,7 +665,7 @@ Meteor.methods({
             let ownerOK = false;
             if (!!tdf && typeof tdf.owner !== 'undefined') {
               // They must be the owner of the TDF
-              ownerOK = (Meteor.user()._id === tdf.owner);
+              ownerOK = (await Meteor.userAsync()._id === tdf.owner);
             }
     
             if (!ownerOK) {

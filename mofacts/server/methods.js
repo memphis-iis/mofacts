@@ -619,7 +619,7 @@ async function processPackageUpload(fileObj, owner, zipLink, emailToggle){
       } catch(e) {
         if(emailToggle){
           sendEmail(
-            Meteor.user().emails[0].address,
+            await Meteor.userAsync().emails[0].address,
             ownerEmail,
             "Package Upload Failed",
             "Package upload failed: " + e + " on file: " + filePath
@@ -643,7 +643,7 @@ async function processPackageUpload(fileObj, owner, zipLink, emailToggle){
     } catch(e) {
       if(emailToggle){
         sendEmail(
-          Meteor.user().emails[0].address,
+          await Meteor.userAsync().emails[0].address,
           ownerEmail,
           "Package Upload Failed",
           "Package upload failed at media upload: " + e + " on file: " + filePath
@@ -655,7 +655,7 @@ async function processPackageUpload(fileObj, owner, zipLink, emailToggle){
     serverConsole('Package upload completed with', results.length, 'results');
     if(emailToggle){
       sendEmail(
-        Meteor.user().emails[0].address,
+        await Meteor.userAsync().emails[0].address,
         ownerEmail,
         "Package Upload Successful",
         "Package upload successful: " + fileName
@@ -665,7 +665,7 @@ async function processPackageUpload(fileObj, owner, zipLink, emailToggle){
   } catch(e) {
       if(emailToggle){
         sendEmail(
-          Meteor.user().emails[0].address,
+          await Meteor.userAsync().emails[0].address,
           ownerEmail,
           "Package Upload Failed",
           "Package upload failed at initialization: " + e + " on file: " + filePath
@@ -812,7 +812,7 @@ async function saveContentFile(type, filename, filecontents, owner, packagePath 
   if (!type) throw new Error('Type required for File Save');
   if (!filename) throw new Error('Filename required for File Save');
   if (!filecontents) throw new Error('File Contents required for File Save');
-  let ownerId = owner ? owner : Meteor.user()._id;
+  let ownerId = owner ? owner : await Meteor.userAsync()._id;
   if (!ownerId) throw new Error('No user logged in - no file upload allowed');
   if (!Roles.userIsInRoleAsync(ownerId, ['admin', 'teacher'])) throw new Error('You are not authorized to upload files');
   if (type != 'tdf' && type != 'stim') throw new Error('Unknown file type not allowed: ' + type);
@@ -882,7 +882,7 @@ async function combineAndSaveContentFile(tdf, stim, owner) {
   if(owner){
     ownerId = owner;
   } else {
-    ownerId = Meteor.user()._id;
+    ownerId = await Meteor.userAsync()._id;
   }
   if (!ownerId) {
     throw new Error('No user logged in - no file upload allowed');
@@ -2679,7 +2679,8 @@ async function processAudioFilesForTDF(TDF){
 
 async function setUserLoginData(entryPoint, loginMode, curTeacher = undefined, curClass = undefined, assignedTdfs = undefined){
   serverConsole('setUserLoginData', entryPoint, loginMode, curTeacher, curClass, assignedTdfs);
-  let loginParams = Meteor.user().loginParams || {};
+  const user = await Meteor.userAsync();
+  let loginParams = user?.loginParams || {};
   loginParams.entryPoint = entryPoint;
   loginParams.curTeacher = curTeacher;
   loginParams.curClass = curClass;
@@ -2766,7 +2767,7 @@ export const methods = {
   },
 
   generateContent: function( percentage, stringArrayJsonOption, inputText ) {
-    if(Meteor.user() && Meteor.user().emails[0] || Meteor.isDevelopment){
+    if(await Meteor.userAsync() && await Meteor.userAsync().emails[0] || Meteor.isDevelopment){
       serverConsole('generateContent', percentage, stringArrayJsonOption, inputText);
       ClozeAPI.GetSelectClozePercentage(percentage, stringArrayJsonOption, null, inputText).then((result) => {
         serverConsole('result', result);
@@ -2787,7 +2788,7 @@ export const methods = {
         }
         file ? files = [file] : files = [];
         Email.send({
-          to: Meteor.user().emails[0].address,
+          to: await Meteor.userAsync().emails[0].address,
           from: ownerEmail,
           subject: subject,
           text: message,
@@ -2810,7 +2811,7 @@ export const methods = {
 
     serverConsole('removeTurkById', turkId, experimentId)
     await ScheduledTurkMessages.removeAsync({workerUserId: turkId, experiment: experimentId});
-    let lockout = Meteor.user().lockouts;
+    let lockout = await Meteor.userAsync().lockouts;
     lockout[experimentId].lockoutMinutes = Number.MAX_SAFE_INTEGER;
     await Meteor.users.updateAsync({_id: Meteor.userId()}, {$set: {lockouts: lockout}});
   },
@@ -3228,8 +3229,8 @@ export const methods = {
   },
 
   serverLog: function(data) {
-    if (Meteor.user()) {
-      const logData = 'User:' + Meteor.user()._id + ', log:' + data;
+    if (await Meteor.userAsync()) {
+      const logData = 'User:' + await Meteor.userAsync()._id + ', log:' + data;
       serverConsole(logData);
     }
   },
@@ -3400,7 +3401,7 @@ export const methods = {
     }
 
     // Security: Audit logging
-    const adminUser = Meteor.user();
+    const adminUser = await Meteor.userAsync();
     await AuditLog.insertAsync({
       action: 'impersonate',
       adminUserId: this.userId,
@@ -3434,7 +3435,7 @@ export const methods = {
   },
 
   clearLoginData: async function(){    
-    const user = Meteor.user();
+    const user = await Meteor.userAsync();
     if (!user) {
       throw new Meteor.Error(401, 'User must be logged in to clear login data');
     }
@@ -3452,7 +3453,7 @@ export const methods = {
       throw new Meteor.Error(401, 'Must be logged in');
     }
 
-    const user = Meteor.user();
+    const user = await Meteor.userAsync();
     if (!user.impersonating) {
       throw new Meteor.Error(400, 'Not currently impersonating');
     }
@@ -3486,7 +3487,7 @@ export const methods = {
       return false;
     }
 
-    const user = Meteor.user();
+    const user = await Meteor.userAsync();
     if (!user.impersonating || !user.impersonationExpires) {
       return false;
     }
@@ -3519,7 +3520,7 @@ export const methods = {
   },
 
   getUserSpeechAPIKey: function() {
-    const speechAPIKey = Meteor.user().speechAPIKey;
+    const speechAPIKey = await Meteor.userAsync().speechAPIKey;
     if (speechAPIKey) {
       return decryptData(speechAPIKey);
     } else {
@@ -3528,7 +3529,7 @@ export const methods = {
   },
 
   isUserSpeechAPIKeySetup: function() {
-    const speechAPIKey = Meteor.user().speechAPIKey;
+    const speechAPIKey = await Meteor.userAsync().speechAPIKey;
     return !!speechAPIKey;
   },
 
@@ -3628,7 +3629,7 @@ export const methods = {
   // or remove) vs roleName
   userAdminRoleChange: async function(targetUserId, roleAction, roleName) {
     serverConsole('userAdminRoleChange', targetUserId, roleAction, roleName);
-    const usr = Meteor.user();
+    const usr = await Meteor.userAsync();
     if (!Roles.userIsInRoleAsync(usr, ['admin'])) {
       throw new Error('You are not authorized to do that');
     }
@@ -3755,7 +3756,7 @@ export const methods = {
 
   // Let client code send console output up to server
   debugLog: function(logtxt) {
-    let usr = Meteor.user();
+    let usr = await Meteor.userAsync();
     if (!usr) {
       usr = '[No Current User]';
     } else {
@@ -4120,7 +4121,7 @@ const asyncMethods = {
   
   setLockoutTimeStamp: async function(lockoutTimeStamp, lockoutMinutes, currentUnitNumber, TDFId) {
     serverConsole('setLockoutTimeStamp', lockoutTimeStamp, lockoutMinutes, currentUnitNumber, TDFId);
-    let lockouts = Meteor.user().lockouts
+    let lockouts = await Meteor.userAsync().lockouts
     if(!lockouts) lockouts = {};
     if(!lockouts[TDFId]) lockouts[TDFId] = {};
     lockouts[TDFId].lockoutTimeStamp = lockoutTimeStamp;
@@ -4189,7 +4190,7 @@ const asyncMethods = {
     else if(!Roles.userIsInRoleAsync(Meteor.userId(), ['teacher', 'admin'])){
       throw new Meteor.Error('Unauthorized: You do not have permission to this data');
     }
-    return [Meteor.userId(), Meteor.user().secretKey]
+    return [Meteor.userId(), await Meteor.userAsync().secretKey]
   },
 
   resetCurSessionTrialsCount: async function(userId, TDFId) {
@@ -4297,7 +4298,7 @@ const asyncMethods = {
       data.aws_id = encryptData(data.aws_id);
       data.aws_secret_key = encryptData(data.aws_secret_key);
 
-      saveResult = userProfileSave(Meteor.user(), data);
+      saveResult = userProfileSave(await Meteor.userAsync(), data);
 
       // We test by reading the profile back and checking their
       // account balance
