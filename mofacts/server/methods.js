@@ -3808,7 +3808,7 @@ export const methods = {
     })
   },
 
-  getTdfOwnersMap: (ownerIds) => {
+  getTdfOwnersMap: async (ownerIds) => {
     const ownerMap = {};
     ownerIds.forEach(async (id) => {
       const foundUser = await Meteor.users.findOneAsync({_id: id});
