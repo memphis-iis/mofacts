@@ -16,11 +16,11 @@ writeUserLogEntries = async function(experimentId, objectsToLog, userId) {
   action['$push'][experimentId] = {$each: objectsToLog};
 
   await UserTimesLog.updateAsync( {userId: userId}, action, {upsert: true} );
-  logUserMetrics(userId, experimentId, objectsToLog);
+  await logUserMetrics(userId, experimentId, objectsToLog);
 };
 
 // Utility - update server-side metrics when we see an answer
-function logUserMetrics(userId, experimentKey, valsToCheck) {
+async function logUserMetrics(userId, experimentKey, valsToCheck) {
   // Gather the answers we should use to check
   const answers = valsToCheck.map((rec) =>(rec.action == 'answer' || rec.action == '[timeout]'));
 

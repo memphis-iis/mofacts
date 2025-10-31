@@ -696,7 +696,7 @@ async function saveMediaFile(media, owner, stimSetId){
   DynamicAssets.write(media.contents, {
     name: media.name,
     userId: owner,
-  }, (error, fileRef) => {
+  }, async (error, fileRef) => {
     if (error) {
       serverConsole(`File ${media.name} could not be uploaded`, error)
     } else {
