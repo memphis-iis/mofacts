@@ -4655,7 +4655,7 @@ Meteor.startup(async function() {
     });
   }
   //combine owner emails, teacher emails, and admin emails into one array
-  allEmails = [];
+  let allEmails = [];
   allEmails.push(ownerEmail);
   const teacherEmails = roles.teachers;
   allEmails = allEmails.concat(teacherEmails);
@@ -4663,8 +4663,8 @@ Meteor.startup(async function() {
   allEmails = allEmails.concat(adminEmails);
 
   //we also need to get the users in roles admin and teacher and send them an email
-  db_admins = await Meteor.users.find({roles: 'admin'}).fetchAsync();
-  db_teachers = await Meteor.users.find({roles: 'teacher'}).fetchAsync();
+  const db_admins = await Meteor.users.find({roles: 'admin'}).fetchAsync();
+  const db_teachers = await Meteor.users.find({roles: 'teacher'}).fetchAsync();
 
   //the emails are the username of the user
   for (const admin of db_admins){
