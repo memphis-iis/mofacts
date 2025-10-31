@@ -81,24 +81,19 @@ async function checkAndWarmupAudioIfNeeded() {
       Session.set('ttsWarmedUp', true);
 
       // Make async warmup call
-      const ttsPromise = new Promise((resolve, reject) => {
-        const startTime = performance.now();
-        Meteor.call('makeGoogleTTSApiCall',
-          Session.get('currentTdfId'),
-          'warmup',
-          1.0,
-          0.0,
-          function(error, result) {
-            if (error) {
-              clientConsole(2, '[TTS] Warmup failed:', error);
-              reject(error);
-            } else {
-              const duration = performance.now() - startTime;
-              clientConsole(2, `[TTS] ✅ Warmup complete in ${duration.toFixed(0)}ms`);
-              resolve(result);
-            }
-          }
-        );
+      const startTime = performance.now();
+      const ttsPromise = Meteor.callAsync('makeGoogleTTSApiCall',
+        Session.get('currentTdfId'),
+        'warmup',
+        1.0,
+        0.0
+      ).then(result => {
+        const duration = performance.now() - startTime;
+        clientConsole(2, `[TTS] ✅ Warmup complete in ${duration.toFixed(0)}ms`);
+        return result;
+      }).catch(error => {
+        clientConsole(2, '[TTS] Warmup failed:', error);
+        throw error;
       });
       promises.push(ttsPromise);
     }
@@ -113,22 +108,17 @@ async function checkAndWarmupAudioIfNeeded() {
       Session.set('srWarmedUp', true);
 
       // Make async warmup call
-      const srPromise = new Promise((resolve, reject) => {
-        const startTime = performance.now();
-        Meteor.call('makeGoogleSpeechAPICall',
-          Session.get('currentTdfId'),
-          'warmup',
-          function(error, result) {
-            if (error) {
-              clientConsole(2, '[SR] Warmup failed:', error);
-              reject(error);
-            } else {
-              const duration = performance.now() - startTime;
-              clientConsole(2, `[SR] ✅ Warmup complete in ${duration.toFixed(0)}ms`);
-              resolve(result);
-            }
-          }
-        );
+      const startTime2 = performance.now();
+      const srPromise = Meteor.callAsync('makeGoogleSpeechAPICall',
+        Session.get('currentTdfId'),
+        'warmup'
+      ).then(result => {
+        const duration = performance.now() - startTime2;
+        clientConsole(2, `[SR] ✅ Warmup complete in ${duration.toFixed(0)}ms`);
+        return result;
+      }).catch(error => {
+        clientConsole(2, '[SR] Warmup failed:', error);
+        throw error;
       });
       promises.push(srPromise);
     }
@@ -895,7 +885,7 @@ Template.card.events({
         $('#dialogueUserAnswer').val('');
         const dialogueContext = DialogueUtils.updateDialogueState(answer);
         clientConsole(2, 'getDialogFeedbackForAnswer - context created');
-        Meteor.call('getDialogFeedbackForAnswer', dialogueContext, dialogueLoop);
+        Meteor.callAsync('getDialogFeedbackForAnswer', dialogueContext, dialogueLoop);
       }
     }
   },
@@ -2900,7 +2890,7 @@ async function afterFeedbackCallback(trialEndTimeStamp, trialStartTimeStamp, isT
       answerLogRecord.CFStartLatency = startLatency;
       answerLogRecord.CFEndLatency = endLatency;
       answerLogRecord.CFFeedbackLatency = feedbackLatency;
-      Meteor.call('insertHistory', answerLogRecord);
+      Meteor.callAsync('insertHistory', answerLogRecord);
       updateExperimentState(newExperimentState, 'card.afterAnswerFeedbackCallback');
     } catch (e) {
       clientConsole(1, 'error writing history record:', e);
@@ -3110,7 +3100,7 @@ function getTrialTime(trialEndTimeStamp, trialStartTimeStamp, reviewEnd, testTyp
     const userAgent = navigator.userAgent;
     const logs = console.logs;
     const currentExperimentState = Session.get('currentExperimentState');
-    Meteor.call('sendUserErrorReport', curUser, errorDescription, curPage, sessionVars,
+    Meteor.callAsync('sendUserErrorReport', curUser, errorDescription, curPage, sessionVars,
         userAgent, logs, currentExperimentState);
     leavePage('/profile');
     return;
@@ -3428,7 +3418,7 @@ async function revisitUnit(unitNumber) {
   //if the current page is not instructions, then we need to log the revisitUnit action
   if(document.location.pathname != '/instructions'){
       logRecord = gatherAnswerLogRecord(Date.now(), Session.get('currentUnitStartTime'), 'revisitUnit', '', true, 'r', Session.get('currentDeliveryParams'), undefined, false);
-      Meteor.call('insertHistory', logRecord);
+      Meteor.callAsync('insertHistory', logRecord);
   }
   Session.set('questionIndex', 0);
   Session.set('clusterIndex', undefined);
@@ -3568,7 +3558,7 @@ async function unitIsFinished(reason) {
         rootTDFBoxed.conditionCounts[curConditionNumber] = rootTDFBoxed.conditionCounts[curConditionNumber] + 1;
         conditionCounts = rootTDFBoxed.conditionCounts;
         //update the rootTDF
-        Meteor.call('updateTdfConditionCounts', Session.get('currentRootTdfId'), conditionCounts);
+        Meteor.callAsync('updateTdfConditionCounts', Session.get('currentRootTdfId'), conditionCounts);
       }
     leaveTarget = '/instructions';
   } else {
@@ -3585,7 +3575,7 @@ async function unitIsFinished(reason) {
         rootTDFBoxed.conditionCounts[curConditionNumber] = rootTDFBoxed.conditionCounts[curConditionNumber] + 1;
         conditionCounts = rootTDFBoxes.completionCount;
         //update the rootTDF
-        Meteor.call('updateTdfConditionCounts', Session.get('currentRootTdfId'), conditionCounts);
+        Meteor.callAsync('updateTdfConditionCounts', Session.get('currentRootTdfId'), conditionCounts);
     }
 
     leaveTarget = '/profile';
@@ -4149,18 +4139,16 @@ function speakMessageIfAudioPromptFeedbackEnabled(msg, audioPromptSource) {
         Session.set('ttsRequested', true);
         clientConsole(2, '[SR] 🎤 TTS request started (ttsRequested=true)');
 
-        Meteor.call('makeGoogleTTSApiCall', Session.get('currentTdfId'), msg, audioPromptSpeakingRate, audioPromptVolume, audioPromptVoice, function(err, res) {
-          if(err){
-            clientConsole(2, '[SR]   ❌ TTS API error, NOT locking recording:', err);
-            Session.set('ttsRequested', false);
-            clientConsole(2, '[SR] 🎤 TTS request complete (error) (ttsRequested=false)');
-          }
-          else if(res == undefined){
-            clientConsole(2, '[SR]   ❌ TTS API returned undefined, NOT locking recording');
-            Session.set('ttsRequested', false);
-            clientConsole(2, '[SR] 🎤 TTS request complete (undefined) (ttsRequested=false)');
-          }
-          else{
+        (async () => {
+          try {
+            const res = await Meteor.callAsync('makeGoogleTTSApiCall', Session.get('currentTdfId'), msg, audioPromptSpeakingRate, audioPromptVolume, audioPromptVoice);
+
+            if(res == undefined){
+              clientConsole(2, '[SR]   ❌ TTS API returned undefined, NOT locking recording');
+              Session.set('ttsRequested', false);
+              clientConsole(2, '[SR] 🎤 TTS request complete (undefined) (ttsRequested=false)');
+            }
+            else{
             // FIX: Check if request is still active (timeout may have fired)
             if (!Session.get('ttsRequested')) {
               clientConsole(1, '[SR]   ⚠️ TTS audio received but request was already cancelled (timeout), ignoring');
@@ -4213,7 +4201,12 @@ function speakMessageIfAudioPromptFeedbackEnabled(msg, audioPromptSource) {
               synthesis.speak(utterance);
             });
           }
-        });
+          } catch (err) {
+            clientConsole(2, '[SR]   ❌ TTS API error, NOT locking recording:', err);
+            Session.set('ttsRequested', false);
+            clientConsole(2, '[SR] 🎤 TTS request complete (error) (ttsRequested=false)');
+          }
+        })();
         clientConsole(2, '[SR] Using Google TTS (async)');
       } else {
         // Native MDN Speech Synthesis (synchronous-ish, no API call)
@@ -4796,12 +4789,26 @@ async function processLINEAR16(data) {
     // Make the actual call to the google speech api with the audio data for transcription
     if (tdfSpeechAPIKey && tdfSpeechAPIKey != '') {
       clientConsole(2, '[SR] Using TDF-embedded API key');
-      Meteor.call('makeGoogleSpeechAPICall', Session.get('currentTdfId'), "", request, answerGrammar, (err, res) => speechAPICallback(err, res));
+      (async () => {
+        try {
+          const res = await Meteor.callAsync('makeGoogleSpeechAPICall', Session.get('currentTdfId'), "", request, answerGrammar);
+          speechAPICallback(null, res);
+        } catch (err) {
+          speechAPICallback(err, null);
+        }
+      })();
     // If we don't have a tdf provided speech api key load up the user key
     // NOTE: we shouldn't be able to get here if there is no user key
     } else {
       clientConsole(2, '[SR] Using user-provided API key');
-      Meteor.call('makeGoogleSpeechAPICall', Session.get('currentTdfId'), Session.get('speechAPIKey'), request, answerGrammar, (err, res) => speechAPICallback(err, res));
+      (async () => {
+        try {
+          const res = await Meteor.callAsync('makeGoogleSpeechAPICall', Session.get('currentTdfId'), Session.get('speechAPIKey'), request, answerGrammar);
+          speechAPICallback(null, res);
+        } catch (err) {
+          speechAPICallback(err, null);
+        }
+      })();
     }
   } else {
     clientConsole(2, '[SR] processLINEAR16 userAnswer not defined');
@@ -5067,7 +5074,7 @@ function speechAPICallback(err, data){
         const answer = DialogueUtils.getDialogueUserAnswerValue();
         const dialogueContext = DialogueUtils.updateDialogueState(answer);
         clientConsole(2, 'getDialogFeedbackForAnswer2', dialogueContext);
-        Meteor.call('getDialogFeedbackForAnswer', dialogueContext, dialogueLoop);
+        Meteor.callAsync('getDialogFeedbackForAnswer', dialogueContext, dialogueLoop);
       }
     } else {
       if (inUserForceCorrect) {
@@ -5272,10 +5279,10 @@ async function updateExperimentState(newState, codeCallLocation, unitEngineOverr
   }
   if(Object.keys(curExperimentState).length === 0){
     curExperimentState = Object.assign(JSON.parse(JSON.stringify(curExperimentState)), newState);
-    Meteor.call('createExperimentState', curExperimentState);
+    Meteor.callAsync('createExperimentState', curExperimentState);
   } else {
     curExperimentState = Object.assign(JSON.parse(JSON.stringify(curExperimentState)), newState);
-    Meteor.call('updateExperimentState', curExperimentState, curExperimentState.id);
+    Meteor.callAsync('updateExperimentState', curExperimentState, curExperimentState.id);
   }
   clientConsole(2, 'updateExperimentState', codeCallLocation, '\nnew:', curExperimentState);
   Session.set('currentExperimentState', curExperimentState);
@@ -5458,7 +5465,7 @@ async function resumeFromComponentState() {
         }
       }
 
-      Meteor.call('updateTdfConditionCounts', Session.get('currentRootTdfId'), conditionCounts);
+      Meteor.callAsync('updateTdfConditionCounts', Session.get('currentRootTdfId'), conditionCounts);
     }
 
     newExperimentState.conditionTdfId = conditionTdfId;
@@ -5800,7 +5807,7 @@ async function removeCardByUser() {
   let whichStim = engine.findCurrentCardInfo().whichStim;
   const userId = Meteor.userId();
   const tdfId = Session.get('currentTdfId');
-  Meteor.call('insertHiddenItem', userId, stims[whichStim].stimulusKC, tdfId)
+  Meteor.callAsync('insertHiddenItem', userId, stims[whichStim].stimulusKC, tdfId)
   let hiddenItems = Session.get('hiddenItems');
   hiddenItems.push(stims[whichStim].stimulusKC);
   
