@@ -1,24 +1,23 @@
 import { getCurrentTheme } from '../lib/currentTestingHelpers'
-Template.adminControls.created = function() {
-    Meteor.callAsync('getVerbosity', function(err, verbosity) {
-        if (err) {
-            console.log("Error getting verbosity: " + err);
-        } else {
-            console.log("Got verbosity: " + verbosity);
-            $(`#verbosityRadio${verbosity}`).prop('checked', true);
-        }
-    });
-    Meteor.callAsync('getTestLogin', function(err, testLoginsEnabled) {
-        if (err) {
-            console.log("Error getting testLoginsEnabled: " + err);
-        } else {
-            console.log("Got testLoginsEnabled: " + testLoginsEnabled);
-            $(`#testLoginsCheckbox`).prop('checked', testLoginsEnabled);
-        }
-    });
+Template.adminControls.created = async function() {
+    try {
+        const verbosity = await Meteor.callAsync('getVerbosity');
+        console.log("Got verbosity: " + verbosity);
+        $(`#verbosityRadio${verbosity}`).prop('checked', true);
+    } catch (err) {
+        console.log("Error getting verbosity: " + err);
+    }
+
+    try {
+        const testLoginsEnabled = await Meteor.callAsync('getTestLogin');
+        console.log("Got testLoginsEnabled: " + testLoginsEnabled);
+        $(`#testLoginsCheckbox`).prop('checked', testLoginsEnabled);
+    } catch (err) {
+        console.log("Error getting testLoginsEnabled: " + err);
+    }
 };
 
-Template.adminControls.rendered = function() {
+Template.adminControls.rendered = async function() {
         //get client verbosity level
         clientVerbosityLevel = DynamicSettings.findOne({key: 'clientVerbosityLevel'}).value.toString();
         //if client verbosity level is not set, set it to 0
@@ -34,19 +33,27 @@ Template.adminControls.rendered = function() {
         document.getElementById(name).checked = true;
 
         // Load custom help page status
-        Meteor.callAsync('getCustomHelpPageStatus', function(err, status) {
-            if (!err && status) {
+        try {
+            const status = await Meteor.callAsync('getCustomHelpPageStatus');
+            if (status) {
                 Session.set('customHelpPageEnabled', status.enabled);
                 Session.set('customHelpPageUploadedAt', status.uploadedAt);
             }
-        });
+        } catch (err) {
+            console.log("Error getting custom help page status:", err);
+        }
     };
 
 Template.adminControls.helpers({
     'serverStatus': function() {
-        Meteor.callAsync('getServerStatus', function(err, res) {
-            Session.set('serverStatus', res);
-        });
+        (async () => {
+            try {
+                const res = await Meteor.callAsync('getServerStatus');
+                Session.set('serverStatus', res);
+            } catch (err) {
+                console.log("Error getting server status:", err);
+            }
+        })();
         return Session.get('serverStatus');
     },
     'testLoginsEnabled': function() {
@@ -89,20 +96,22 @@ Template.adminControls.events({
         const testLoginsEnabled = $('#testLoginsCheckbox').prop('checked');
         DynamicSettings.update({_id: _id}, {$set: {value: testLoginsEnabled}});  
     },
-    'click #themeInitButton': function(event) {
-        Meteor.callAsync('toggleCustomTheme', function(err, res) {
-            if (err) {
-                alert("Error toggling custom theme: " + err);
-            } else {
-                console.log("Toggled custom theme: " + res);
-                Session.set('curTheme', getCurrentTheme());
-            }
-        });
-    },
-    'click #themeResetButton': function(event) {
-        Meteor.callAsync('initializeCustomTheme', function(err, res) {
+    'click #themeInitButton': async function(event) {
+        try {
+            const res = await Meteor.callAsync('toggleCustomTheme');
+            console.log("Toggled custom theme: " + res);
             Session.set('curTheme', getCurrentTheme());
-        });
+        } catch (err) {
+            alert("Error toggling custom theme: " + err);
+        }
+    },
+    'click #themeResetButton': async function(event) {
+        try {
+            await Meteor.callAsync('initializeCustomTheme');
+            Session.set('curTheme', getCurrentTheme());
+        } catch (err) {
+            console.log("Error initializing custom theme:", err);
+        }
     },
     'input .currentThemeProp': function(event) {
         //show unsaved change warning
@@ -116,7 +125,7 @@ Template.adminControls.events({
         //show unsaved change warning
         $('#unsavedThemeChanges').attr('hidden', false).removeAttr('hidden');
     },
-    'click #themeSaveButton': function(event) {
+    'click #themeSaveButton': async function(event) {
         //get all the currentThemeProp values and data-ids and put them in a json object [{data-id: value}]
         const themeProps = [];
         $('.currentThemeProp').each(function() {
@@ -125,25 +134,23 @@ Template.adminControls.events({
         });
         console.log("themeProps: " + JSON.stringify(themeProps));
         //call the setCustomThemeProperty method for each themeProp
-        themeProps.forEach(function(themeProp) {
-            Meteor.callAsync('setCustomThemeProperty', themeProp.data_id, themeProp.value, function(err, res) {
-                if (err) {
-                    alert("Error setting custom theme property: " + err);
-                } else {
-                    console.log("Set custom theme property: " + res);   
-                }
-            });
-        });
+        for (const themeProp of themeProps) {
+            try {
+                const res = await Meteor.callAsync('setCustomThemeProperty', themeProp.data_id, themeProp.value);
+                console.log("Set custom theme property: " + res);
+            } catch (err) {
+                alert("Error setting custom theme property: " + err);
+            }
+        }
         Session.set('curTheme', getCurrentTheme());
     },
-    'click #updateStimDisplayTypeMap': function(event) {
-        Meteor.callAsync('updateStimDisplayTypeMap', function(err, res) {
-            if (err) {
-                alert("Error clearing stim display type map: " + err);
-            } else {
-                console.log("Cleared stim display type map: " + res);
-            }
-        });
+    'click #updateStimDisplayTypeMap': async function(event) {
+        try {
+            const res = await Meteor.callAsync('updateStimDisplayTypeMap');
+            console.log("Cleared stim display type map: " + res);
+        } catch (err) {
+            alert("Error clearing stim display type map: " + err);
+        }
     },
     'change #logoUpload': function(event) {
         const file = event.target.files[0];
@@ -160,31 +167,29 @@ Template.adminControls.events({
             }
 
             const reader = new FileReader();
-            reader.onload = function(e) {
+            reader.onload = async function(e) {
                 const base64Data = e.target.result;
-                Meteor.callAsync('setCustomThemeProperty', 'logo_url', base64Data, function(err, res) {
-                    if (err) {
-                        alert("Error uploading logo: " + err);
-                    } else {
-                        console.log("Logo uploaded successfully");
-                        getCurrentTheme();
-                    }
-                });
+                try {
+                    await Meteor.callAsync('setCustomThemeProperty', 'logo_url', base64Data);
+                    console.log("Logo uploaded successfully");
+                    getCurrentTheme();
+                } catch (err) {
+                    alert("Error uploading logo: " + err);
+                }
             };
             reader.readAsDataURL(file);
         }
     },
-    'click #clearLogo': function(event) {
+    'click #clearLogo': async function(event) {
         if (confirm('Are you sure you want to clear the logo?')) {
-            Meteor.callAsync('setCustomThemeProperty', 'logo_url', '', function(err, res) {
-                if (err) {
-                    alert("Error clearing logo: " + err);
-                } else {
-                    console.log("Logo cleared successfully");
-                    $('#logoUpload').val('');
-                    getCurrentTheme();
-                }
-            });
+            try {
+                await Meteor.callAsync('setCustomThemeProperty', 'logo_url', '');
+                console.log("Logo cleared successfully");
+                $('#logoUpload').val('');
+                getCurrentTheme();
+            } catch (err) {
+                alert("Error clearing logo: " + err);
+            }
         }
     },
 
@@ -219,27 +224,29 @@ Template.adminControls.events({
 
         // Read file as text
         const reader = new FileReader();
-        reader.onload = function(e) {
+        reader.onload = async function(e) {
             const markdownContent = e.target.result;
 
-            Meteor.callAsync('setCustomHelpPage', markdownContent, function(err, res) {
-                if (err) {
-                    statusSpan.textContent = 'Error: ' + err.message;
-                    statusSpan.className = 'text-danger';
-                } else {
-                    statusSpan.textContent = 'Custom help page uploaded successfully!';
-                    statusSpan.className = 'text-success';
-                    fileInput.value = '';
+            try {
+                await Meteor.callAsync('setCustomHelpPage', markdownContent);
+                statusSpan.textContent = 'Custom help page uploaded successfully!';
+                statusSpan.className = 'text-success';
+                fileInput.value = '';
 
-                    // Update session to show status
-                    Meteor.callAsync('getCustomHelpPageStatus', function(err, status) {
-                        if (!err && status) {
-                            Session.set('customHelpPageEnabled', status.enabled);
-                            Session.set('customHelpPageUploadedAt', status.uploadedAt);
-                        }
-                    });
+                // Update session to show status
+                try {
+                    const status = await Meteor.callAsync('getCustomHelpPageStatus');
+                    if (status) {
+                        Session.set('customHelpPageEnabled', status.enabled);
+                        Session.set('customHelpPageUploadedAt', status.uploadedAt);
+                    }
+                } catch (err) {
+                    console.log("Error getting help page status:", err);
                 }
-            });
+            } catch (err) {
+                statusSpan.textContent = 'Error: ' + err.message;
+                statusSpan.className = 'text-danger';
+            }
         };
 
         reader.onerror = function() {
@@ -250,25 +257,24 @@ Template.adminControls.events({
         reader.readAsText(file);
     },
 
-    'click #removeHelpFileButton': function(event) {
+    'click #removeHelpFileButton': async function(event) {
         if (confirm('Are you sure you want to remove the custom help page and revert to the wiki?')) {
             const statusSpan = document.getElementById('helpFileUploadStatus');
             statusSpan.textContent = 'Removing...';
             statusSpan.className = 'text-info';
 
-            Meteor.callAsync('removeCustomHelpPage', function(err, res) {
-                if (err) {
-                    statusSpan.textContent = 'Error: ' + err.message;
-                    statusSpan.className = 'text-danger';
-                } else {
-                    statusSpan.textContent = 'Custom help page removed. Now using wiki.';
-                    statusSpan.className = 'text-success';
+            try {
+                await Meteor.callAsync('removeCustomHelpPage');
+                statusSpan.textContent = 'Custom help page removed. Now using wiki.';
+                statusSpan.className = 'text-success';
 
-                    // Update session
-                    Session.set('customHelpPageEnabled', false);
-                    Session.set('customHelpPageUploadedAt', null);
-                }
-            });
+                // Update session
+                Session.set('customHelpPageEnabled', false);
+                Session.set('customHelpPageUploadedAt', null);
+            } catch (err) {
+                statusSpan.textContent = 'Error: ' + err.message;
+                statusSpan.className = 'text-danger';
+            }
         }
     }
 });
