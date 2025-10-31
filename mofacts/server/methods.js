@@ -3720,7 +3720,7 @@ export const methods = {
 
       serverConsole("Found", matchingTdfs.length, "TDFs with packageFile containing:", packageAssetId);
 
-      matchingTdfs.forEach((TDF) => {
+      matchingTdfs.forEach(async (TDF) => {
         if(TDF && (Roles.userIsInRole(Meteor.userId(), ['admin']) || TDF.ownerId == Meteor.userId())){
           tdfId = TDF._id;
           await ComponentStates.removeAsync({TDFId: tdfId});
@@ -3803,14 +3803,14 @@ export const methods = {
       throw new Meteor.Error(403, 'Admin access required to toggle TDF visibility');
     }
 
-    tdfIds.forEach((tdfid) => {
+    tdfIds.forEach(async (tdfid) => {
       await Tdfs.updateAsync({_id: tdfid}, {$set: {visibility: mode}})
     })
   },
 
   getTdfOwnersMap: (ownerIds) => {
     const ownerMap = {};
-    ownerIds.forEach((id) => {
+    ownerIds.forEach(async (id) => {
       const foundUser = await Meteor.users.findOneAsync({_id: id});
       if (typeof(foundUser) != 'undefined') {
         ownerMap[id] = foundUser.username;
@@ -3833,12 +3833,12 @@ export const methods = {
     return await DynamicSettings.findOneAsync({key: 'testLoginsEnabled'}).value;
   },
 
-  getTdfsByOwnerId: (ownerId) => {
+  getTdfsByOwnerId: async (ownerId) => {
     const tdfs =  await Tdfs.find({'ownerId': ownerId}).fetchAsync();
     return tdfs || [];
   },
 
-  getStimsByOwnerId: (ownerId) => {
+  getStimsByOwnerId: async (ownerId) => {
     serverConsole('getStimsByOwnerId: ' + ownerId);
     const tdfs =  await Tdfs.find({'ownerId': ownerId}).fetchAsync();
     const stims = tdfs.stimuli;
