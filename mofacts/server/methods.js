@@ -221,7 +221,7 @@ Meteor.publish(null, function() {
   return defaultData;
 });
 
-Meteor.publish('allUsers', function() {
+Meteor.publish('allUsers', async function() {
   const opts = {
     fields: {username: 1},
   };

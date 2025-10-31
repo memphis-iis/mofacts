@@ -1,5 +1,5 @@
 import {Roles} from 'meteor/alanning:roles';
-Meteor.publish('files.assets.all', function () {
+Meteor.publish('files.assets.all', async function () {
     // Security: Filter assets based on user role and ownership
     if (!this.userId) {
         return this.ready(); // No data for unauthenticated users
