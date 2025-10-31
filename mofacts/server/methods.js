@@ -2799,7 +2799,7 @@ export const methods = {
     }
   },
 
-  removeTurkById: function(turkId, experimentId){
+  removeTurkById: async function(turkId, experimentId){
     // Security: User must be logged in and can only modify their own lockouts
     if (!this.userId) {
       throw new Meteor.Error(401, 'Must be logged in');
@@ -2815,17 +2815,17 @@ export const methods = {
     await Meteor.users.updateAsync({_id: Meteor.userId()}, {$set: {lockouts: lockout}});
   },
 
-  saveAudioPromptMode: function(audioPromptMode){
+  saveAudioPromptMode: async function(audioPromptMode){
     serverConsole('saveAudioPromptMode', audioPromptMode);
     await Meteor.users.updateAsync({_id: Meteor.userId()}, {$set: {audioPromptMode: audioPromptMode}});
   },
 
-  saveAudioInputMode: function(audioInputMode){
+  saveAudioInputMode: async function(audioInputMode){
     serverConsole('saveAudioInputMode', audioInputMode);
     await Meteor.users.updateAsync({_id: Meteor.userId()}, {$set: {audioInputMode: audioInputMode}});
   },
 
-  updateExperimentState: function(curExperimentState, experimentId) {
+  updateExperimentState: async function(curExperimentState, experimentId) {
     // REDUCED LOGGING: Only log TDF ID, not entire experiment state object
     serverConsole('updateExperimentState', curExperimentState.currentTdfId);
     if(experimentId) {
@@ -2835,7 +2835,7 @@ export const methods = {
     }
   },
 
-  createExperimentState: function(curExperimentState) {
+  createExperimentState: async function(curExperimentState) {
     // REDUCED LOGGING: Only log TDF ID, not entire experiment state object
     serverConsole('createExperimentState', curExperimentState.currentTdfId);
     await GlobalExperimentStates.insertAsync({
@@ -2870,7 +2870,7 @@ export const methods = {
     }
   },
 
-  resetAllSecretKeys: function() {
+  resetAllSecretKeys: async function() {
     if(Meteor.userId() && Roles.userIsInRole(Meteor.userId(), ['admin'])){
       serverConsole('resetting user secrets');
       const users = Meteor. await users.find({$or: [{roles: "teacher"}, {roles: "admin"}]}).fetchAsync();
@@ -2887,7 +2887,7 @@ export const methods = {
     return clozes;
   },
 
-  getSimpleFeedbackForAnswer: async function(userAnswer, correctAnswer) {
+  getSimpleFeedbackForAnswer: function(userAnswer, correctAnswer) {
     // eslint-disable-next-line new-cap
     const mongoResult = await ElaboratedFeedbackCache.findOneAsync({correctAnswer: correctAnswer});
     serverConsole('mongoResult', mongoResult);
@@ -2939,7 +2939,7 @@ export const methods = {
     sendEmail(to, from, subject, text);
   },
 
-  sendPasswordResetEmail: function(email){
+  sendPasswordResetEmail: async function(email){
     // Security: Validate input type
     check(email, String);
 
@@ -2969,7 +2969,7 @@ export const methods = {
     sendEmail(email,from,subject,text);
   },
 
-  checkPasswordResetSecret: function(email, secret){
+  checkPasswordResetSecret: async function(email, secret){
     userSecret = await Meteor.users.findOneAsync({username: email}).secret;
     if(userSecret == secret){
       return true;
@@ -2978,7 +2978,7 @@ export const methods = {
     }
   },
 
-  getAccessorsTDFID: function(TDFId){
+  getAccessorsTDFID: async function(TDFId){
     // Security: User must be logged in and either own the TDF or be an admin
     if (!this.userId) {
       throw new Meteor.Error(401, 'Must be logged in');
@@ -2997,7 +2997,7 @@ export const methods = {
     }
   },
 
-  getAccessors: function(TDFId){
+  getAccessors: async function(TDFId){
     // Security: User must be logged in and either own the TDF or be an admin
     if (!this.userId) {
       throw new Meteor.Error(401, 'Must be logged in');
@@ -3012,7 +3012,7 @@ export const methods = {
     return accessors;
   },
 
-  getAccessableTDFSForUser: function(userId){
+  getAccessableTDFSForUser: async function(userId){
     // Security: User must be logged in and can only access their own data unless admin
     if (!this.userId) {
       throw new Meteor.Error(401, 'Must be logged in');
@@ -3027,7 +3027,7 @@ export const methods = {
     return {accessableTDFs, TDFs};
   },
 
-  getAssignableTDFSForUser: function(userId){
+  getAssignableTDFSForUser: async function(userId){
     serverConsole('getAssignableTDFSForUser', userId);
     // get tdfs where ownerId is userId or .accessors array contains property with userId
     const assignableTDFs =  await Tdfs.find({$or: [{ownerId: userId}, {'accessors.userId': userId}]}).fetchAsync();
@@ -3035,7 +3035,7 @@ export const methods = {
     return assignableTDFs;
   },
 
-  assignAccessors: function(TDFId, accessors, revokedAccessors){
+  assignAccessors: async function(TDFId, accessors, revokedAccessors){
     // Security: User must be logged in and either own the TDF or be an admin
     if (!this.userId) {
       throw new Meteor.Error(401, 'Must be logged in');
@@ -3056,7 +3056,7 @@ export const methods = {
     await Meteor.users.updateAsync({'_id': {$in: revokedAccessors}}, {$pull: {'accessedTDFs': TDFId}}, {multi: true});
   },
 
-  transferDataOwnership: function(tdfId, newOwner){
+  transferDataOwnership: async function(tdfId, newOwner){
     // Security: User must be logged in and either own the TDF or be an admin
     if (!this.userId) {
       throw new Meteor.Error(401, 'Must be logged in');
@@ -3086,7 +3086,7 @@ export const methods = {
 
   // DEPRECATED: Old insecure password reset - kept for backward compatibility
   // Use requestPasswordReset and resetPasswordWithToken instead
-  resetPasswordWithSecret: function(email, secret, newPassword){
+  resetPasswordWithSecret: async function(email, secret, newPassword){
     // Security: Validate input types
     check(email, String);
     check(secret, String);
@@ -3104,7 +3104,7 @@ export const methods = {
   },
 
   // Security: New secure password reset - Step 1: Request reset token
-  requestPasswordReset: async function(email) {
+  requestPasswordReset: function(email) {
     check(email, String);
 
     // Rate limiting: Check recent reset requests
@@ -3155,7 +3155,7 @@ export const methods = {
   },
 
   // Security: New secure password reset - Step 2: Reset with token
-  resetPasswordWithToken: function(email, token, newPassword) {
+  resetPasswordWithToken: async function(email, token, newPassword) {
     check(email, String);
     check(token, String);
     check(newPassword, String);
@@ -3194,7 +3194,7 @@ export const methods = {
   },
 
   // Security: Clean up expired tokens (call this periodically via cron)
-  cleanupExpiredPasswordResetTokens: function() {
+  cleanupExpiredPasswordResetTokens: async function() {
     // Only admins can cleanup
     if (!this.userId || !Roles.userIsInRole(this.userId, ['admin'])) {
       throw new Meteor.Error(403, 'Admin access required');
@@ -3207,7 +3207,7 @@ export const methods = {
     serverConsole('Cleaned up', deleted, 'expired password reset tokens');
     return { deleted: deleted };
   },
-  sendUserErrorReport: function(userID, description, curPage, sessionVars, userAgent, logs, currentExperimentState) {
+  sendUserErrorReport: async function(userID, description, curPage, sessionVars, userAgent, logs, currentExperimentState) {
     const errorReport = {
       user: userID,
       description: description,
@@ -3222,7 +3222,7 @@ export const methods = {
     return await ErrorReports.insertAsync(errorReport);
   },
 
-  logUserAgentAndLoginTime: async function(userID, userAgent) {
+  logUserAgentAndLoginTime: function(userID, userAgent) {
     const loginTime = new Date();
     return await Meteor.users.updateAsync({_id: userID}, {$set: {status: {lastLogin: loginTime, userAgent: userAgent}}});
   },
@@ -3253,7 +3253,7 @@ export const methods = {
 
 
 
-  signUpUser: function(newUserName, newUserPassword, previousOK) {
+  signUpUser: async function(newUserName, newUserPassword, previousOK) {
     // Security: Validate input types
     check(newUserName, String);
     check(newUserPassword, String);
@@ -3362,7 +3362,7 @@ export const methods = {
     delete signUpLocks[newUserName];
   }
 },
-  populateSSOProfile: function(userId){
+  populateSSOProfile: async function(userId){
     // Security: Users can only populate their own profile unless admin
     if (!this.userId) {
       throw new Meteor.Error(401, 'Must be logged in');
@@ -3391,7 +3391,7 @@ export const methods = {
 
 
   //Impersonate User
-  impersonate: function(userId) {
+  impersonate: async function(userId) {
     check(userId, String);
 
     // Security: Authorization check
@@ -3443,7 +3443,7 @@ export const methods = {
     };
   },
 
-  clearLoginData: function(){    
+  clearLoginData: async function(){    
     const user = Meteor.user();
     if (!user) {
       throw new Meteor.Error(401, 'User must be logged in to clear login data');
@@ -3456,7 +3456,7 @@ export const methods = {
     await Meteor.users.updateAsync({_id: Meteor.userId()}, {$set: {loginParams: loginParams}});
   },
 
-  clearImpersonation: function(){
+  clearImpersonation: async function(){
     // Security: Authorization check
     if (!this.userId) {
       throw new Meteor.Error(401, 'Must be logged in');
@@ -3491,7 +3491,7 @@ export const methods = {
   },
 
   // Security: Check and clear expired impersonation sessions
-  checkImpersonationExpiry: function() {
+  checkImpersonationExpiry: async function() {
     if (!this.userId) {
       return false;
     }
@@ -3542,7 +3542,7 @@ export const methods = {
     return !!speechAPIKey;
   },
 
-  hasUserPersonalKeys: function() {
+  hasUserPersonalKeys: async function() {
     if (!this.userId) {
       return {hasSR: false, hasTTS: false};
     }
@@ -3556,7 +3556,7 @@ export const methods = {
     };
   },
 
-  saveUserSpeechAPIKey: function(key) {
+  saveUserSpeechAPIKey: async function(key) {
     key = encryptData(key);
     let result = true;
     let error = '';
@@ -3569,7 +3569,7 @@ export const methods = {
     }
   },
 
-  getTdfTTSAPIKey: function(tdfId){
+  getTdfTTSAPIKey: async function(tdfId){
     // Security: Users practicing a TDF can access its TTS API key
     if (!this.userId) {
       throw new Meteor.Error(401, 'Must be logged in');
@@ -3596,7 +3596,7 @@ export const methods = {
     return decryptData(tdf.content.tdfs.tutor.setspec.textToSpeechAPIKey);
   },
 
-  getTdfSpeechAPIKey: function(tdfId){
+  getTdfSpeechAPIKey: async function(tdfId){
     // Security: Users practicing a TDF can access its speech API key
     if (!this.userId) {
       throw new Meteor.Error(401, 'Must be logged in');
@@ -3624,19 +3624,19 @@ export const methods = {
   },
 
 
-  setUserSessionId: function(sessionId, sessionIdTimestamp) {
+  setUserSessionId: async function(sessionId, sessionIdTimestamp) {
     serverConsole('setUserSessionId', sessionId, sessionIdTimestamp)
     await Meteor.users.updateAsync({_id: Meteor.userId()}, {$set: {lastSessionId: sessionId, lastSessionIdTimestamp: sessionIdTimestamp}});
   },
 
-  deleteUserSpeechAPIKey: function() {
+  deleteUserSpeechAPIKey: async function() {
     const userID = Meteor.userId();
     await Meteor.users.updateAsync({_id: userID}, {$unset: {speechAPIKey: ''}});
   },
 
   // ONLY FOR ADMINS: for the given targetUserId, perform roleAction (add
   // or remove) vs roleName
-  userAdminRoleChange: function(targetUserId, roleAction, roleName) {
+  userAdminRoleChange: async function(targetUserId, roleAction, roleName) {
     serverConsole('userAdminRoleChange', targetUserId, roleAction, roleName);
     const usr = Meteor.user();
     if (!Roles.userIsInRole(usr, ['admin'])) {
@@ -3705,7 +3705,7 @@ export const methods = {
     return allErrors;
   },
 
-  deletePackageFile: function(packageId){
+  deletePackageFile: async function(packageId){
     serverConsole("Remove package:", packageId);
     //check if the user is an admin or owner of the TDF
     try{
@@ -3777,7 +3777,7 @@ export const methods = {
   },
   
 
-  removeAssetById: function(assetId) {
+  removeAssetById: async function(assetId) {
     // Security: User must be logged in and either own the asset or be an admin
     if (!this.userId) {
       throw new Meteor.Error(401, 'Must be logged in');
@@ -3794,7 +3794,7 @@ export const methods = {
     await DynamicAssets.removeAsync({_id: assetId});
   },
 
-  toggleTdfPresence: function(tdfIds, mode) {
+  toggleTdfPresence: async function(tdfIds, mode) {
     // Security: User must be logged in and be an admin to toggle TDF visibility
     if (!this.userId) {
       throw new Meteor.Error(401, 'Must be logged in');
@@ -3829,7 +3829,7 @@ export const methods = {
     return verbosityLevel
   },
 
-  getTestLogin: function() {
+  getTestLogin: async function() {
     return await DynamicSettings.findOneAsync({key: 'testLoginsEnabled'}).value;
   },
 
@@ -3849,7 +3849,7 @@ export const methods = {
     return stims || [];
   },
 
-  initializeCustomTheme: function(themeName) {
+  initializeCustomTheme: async function(themeName) {
     serverConsole('initializeCustomTheme');
     //This creates a theme key that contains an object with the theme name
     //and an empty object for the theme's properties
@@ -3878,7 +3878,7 @@ export const methods = {
     return theme;
   },
 
-  getTheme: function() {
+  getTheme: async function() {
     serverConsole('getTheme');
     ret = await DynamicSettings.findOneAsync({key: 'customTheme'}) 
     if(!ret || ret.value.enabled == false) {
@@ -3909,14 +3909,14 @@ export const methods = {
     return ret.value;
   },
 
-  setCustomThemeProperty: function(property, value) {
+  setCustomThemeProperty: async function(property, value) {
     //This sets the value of a property in the custom theme
     path = 'value.properties.' + property;
     serverConsole('setCustomThemeProperty', path, value);
     await DynamicSettings.updateAsync({key: 'customTheme'}, {$set: {[path]: value}});
   },
 
-  toggleCustomTheme: function() {
+  toggleCustomTheme: async function() {
     serverConsole('toggleCustomTheme');
     //This toggles the custom theme on or off
     let theme = await DynamicSettings.findOneAsync({key: 'customTheme'});
@@ -3931,7 +3931,7 @@ export const methods = {
   },
 
   // Custom Help Page Methods
-  setCustomHelpPage: function(markdownContent) {
+  setCustomHelpPage: async function(markdownContent) {
     serverConsole('setCustomHelpPage');
 
     // Verify user is admin
@@ -3959,7 +3959,7 @@ export const methods = {
     return {success: true};
   },
 
-  getCustomHelpPage: function() {
+  getCustomHelpPage: async function() {
     serverConsole('getCustomHelpPage');
 
     const customHelp = await DynamicSettings.findOneAsync({key: 'customHelpPage'});
@@ -3971,7 +3971,7 @@ export const methods = {
     return customHelp.value.markdownContent;
   },
 
-  removeCustomHelpPage: function() {
+  removeCustomHelpPage: async function() {
     serverConsole('removeCustomHelpPage');
 
     // Verify user is admin
@@ -3984,7 +3984,7 @@ export const methods = {
     return {success: true};
   },
 
-  getCustomHelpPageStatus: function() {
+  getCustomHelpPageStatus: async function() {
     serverConsole('getCustomHelpPageStatus');
 
     const customHelp = await DynamicSettings.findOneAsync({key: 'customHelpPage'});
@@ -4066,7 +4066,7 @@ const asyncMethods = {
     return users;
   },
   
-  makeGoogleTTSApiCall: async function(TDFId, message, audioPromptSpeakingRate, audioVolume, selectedVoice) {
+  makeGoogleTTSApiCall: function(TDFId, message, audioPromptSpeakingRate, audioVolume, selectedVoice) {
     let ttsAPIKey;
 
     // Try to get API key from multiple sources
@@ -4120,11 +4120,11 @@ const asyncMethods = {
     });
   },
 
-  getContentGenerationAvailable: async function(){
+  getContentGenerationAvailable: function(){
     return contentGenerationAvailable;
   },
   
-  setLockoutTimeStamp: async function(lockoutTimeStamp, lockoutMinutes, currentUnitNumber, TDFId) {
+  setLockoutTimeStamp: function(lockoutTimeStamp, lockoutMinutes, currentUnitNumber, TDFId) {
     serverConsole('setLockoutTimeStamp', lockoutTimeStamp, lockoutMinutes, currentUnitNumber, TDFId);
     let lockouts = Meteor.user().lockouts
     if(!lockouts) lockouts = {};
@@ -4135,7 +4135,7 @@ const asyncMethods = {
     await Meteor.users.updateAsync({_id: Meteor.userId()}, {$set: {lockouts: lockouts}});
   },
 
-  makeGoogleSpeechAPICall: async function(TDFId, speechAPIKey, request, answerGrammar){
+  makeGoogleSpeechAPICall: function(TDFId, speechAPIKey, request, answerGrammar){
     // FIX: Allow other methods to run while waiting for Google API (prevents blocking client methods)
     this.unblock();
 
@@ -4188,7 +4188,7 @@ const asyncMethods = {
       throw new Meteor.Error('google-speech-api-error', 'Error with Google SR API call: ' + error.message);
     }
   },
-  getUIDAndSecretForCurrentUser: async function(){
+  getUIDAndSecretForCurrentUser: function(){
     if(!Meteor.userId()){
       throw new Meteor.Error('Unauthorized: No user login');
     }
@@ -4217,12 +4217,12 @@ const asyncMethods = {
     await ComponentStates.updateAsync({_id: unit._id}, unit);
   },
 
-  updateTdfConditionCounts: async function(TDFId, conditionCounts) {
+  updateTdfConditionCounts: function(TDFId, conditionCounts) {
     serverConsole('updateTdfConditionCounts', TDFId, conditionCounts);
     await Tdfs.updateAsync({_id: TDFId}, {$set: {conditionCounts: conditionCounts}});
   },
 
-  resetTdfConditionCounts: async function(TDFId) {
+  resetTdfConditionCounts: function(TDFId) {
     serverConsole('resetTdfConditionCounts', TDFId);
     setspec = await Tdfs.findOneAsync({_id: TDFId}).content.tdfs.tutor.setspec;
     conditions = setspec.condition;
@@ -4233,7 +4233,7 @@ const asyncMethods = {
     await Tdfs.updateAsync({_id: TDFId}, {$set: {conditionCounts: conditionCounts}});
   },
   
-  updateStimSyllables: async function(stimuliSetId, stimuli = undefined) {
+  updateStimSyllables: function(stimuliSetId, stimuli = undefined) {
     serverConsole('updateStimSyllables', stimuliSetId);
     if(!stimuli){
       const tdf = await Tdfs.findOneAsync({ stimuliSetId: stimuliSetId });
@@ -4269,7 +4269,7 @@ const asyncMethods = {
     }
   },
 
-  getSymSpellCorrection: async function(userAnswer, s2, maxEditDistance = 1) {
+  getSymSpellCorrection: function(userAnswer, s2, maxEditDistance = 1) {
     serverConsole('getSymSpellCorrection', userAnswer, s2, maxEditDistance);
     let corrections; 
     if(userAnswer.split(' ').length == 1)
@@ -4289,7 +4289,7 @@ const asyncMethods = {
   // We provide a separate server method for user profile info - this is
   // mainly since we don't want some of this data just flowing around
   // between client and server
-  saveUserAWSData: async function(profileData) {
+  saveUserAWSData: function(profileData) {
     serverConsole('saveUserAWSData', displayify(profileData));
 
     let saveResult; let result; let errmsg; let acctBal;
@@ -4333,7 +4333,7 @@ const asyncMethods = {
 
   //handle file deletions
 
-  deleteAllFiles: async function(){
+  deleteAllFiles: function(){
     // Security: Require admin role to delete all files
     if (!this.userId || !Roles.userIsInRole(this.userId, ['admin'])) {
       throw new Meteor.Error(403, 'Admin access required to delete all files');
@@ -4386,7 +4386,7 @@ const asyncMethods = {
       throw new Meteor.Error('delete-failed', 'Failed to delete files: ' + error.message);
     }
   },
-  deleteStimFile: async function(stimSetId) {
+  deleteStimFile: function(stimSetId) {
     stimSetId = parseInt(stimSetId);
     let tdfs = await Tdfs.find({stimuliSetId: stimSetId, owner: Meteor.userId()}).fetchAsync();
     if(tdfs){
@@ -4704,7 +4704,7 @@ Meteor.startup(async function() {
 Router.route('/dynamic-assets/:tdfid?/:filetype?/:filename?', {
   name: 'dynamic-asset',
   where: 'server',
-  action: function() {
+  action: async function() {
     let filename = this.params.filename;
     let filetype = this.params.filetype; //should only be image or audio
     let path = this.url;
@@ -4948,7 +4948,7 @@ Router.route('clozeEditHistory', {
   name: 'server.clozeData',
   where: 'server',
   path: '/clozeEditHistory/:uid',
-  action: function() {
+  action: async function() {
     const userId = this.request.headers['x-user-id'];
     const loginToken = this.request.headers['x-auth-token'];
     const uid = this.params.uid;
