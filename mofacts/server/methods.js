@@ -250,7 +250,7 @@ function serverConsole(...args) {
   console.log.apply(this, disp);
 }
 
-function functionTimerWrapper(methods, asyncMethods)
+async function functionTimerWrapper(methods, asyncMethods)
 {
   const newMethods = _.reduce(Object.keys(methods), function(newMethods, method) {
     newMethods[method] = function() {
@@ -1609,7 +1609,7 @@ async function getStimDisplayTypeMap() {
   return stimDisplayTypeMap;
 }
 
-function getClassPerformanceByTDF(classId, tdfId, date=false) {
+async function getClassPerformanceByTDF(classId, tdfId, date=false) {
   serverConsole('getClassPerformanceByTDF', classId, tdfId, date);
   const sections =  await Sections.find({courseId: classId}).fetchAsync();
   const sectionIds = sections.map((section) => section._id);
@@ -1673,7 +1673,7 @@ function getClassPerformanceByTDF(classId, tdfId, date=false) {
   return [performanceMet, performanceNotMet];
 };
 
-function addUserDueDateException(userId, tdfId, classId, date){
+async function addUserDueDateException(userId, tdfId, classId, date){
   serverConsole('addUserDueDateException', userId, tdfId, date);
   exception = {
     tdfId: tdfId,
@@ -1715,7 +1715,7 @@ async function checkForUserException(userId, tdfId){
   return false;
 }
 
-function removeUserDueDateException(userId, tdfId){
+async function removeUserDueDateException(userId, tdfId){
   serverConsole('removeUserDueDateException', userId, tdfId);
   user = await Meteor.users.findOneAsync({_id: userId});
   if(user.dueDateExceptions){
@@ -2209,7 +2209,7 @@ function defaultUserProfile() {
   };
 }
 
-function sendErrorReportSummaries() {
+async function sendErrorReportSummaries() {
   serverConsole('sendErrorReportSummaries');
   const unsentErrorReports =  await ErrorReports.find({'emailed': false}).fetchAsync();
   if (unsentErrorReports.length > 0) {
@@ -2301,7 +2301,7 @@ function checkDriveSpace() {
 
 
 // Save the given user profile via "upsert" logic
-function userProfileSave(user, awsProfile) {
+async function userProfileSave(user, awsProfile) {
   serverConsole('userProfileSave', user._id, awsProfile);
   user.aws = awsProfile;
   const numUpdated = await Meteor.users.updateAsync(
@@ -2337,13 +2337,13 @@ async function createUserSecretKey(targetUserId){
   }
 }
 
-function updateUserSecretKey(targetUserId){
+async function updateUserSecretKey(targetUserId){
   if(Roles.userIsInRole(targetUserId, ['admin', 'teacher']))
     await Meteor.users.updateAsync({_id: targetUserId}, { $set: { secretKey: generateKey() }});
 }
 
 // Only removes secret key if the user is no longer an admin or teacher
-function removeUserSecretKey(targetUserId){
+async function removeUserSecretKey(targetUserId){
   if(!Roles.userIsInRole(targetUserId, ['admin', 'teacher']))
     await Meteor.users.updateAsync({_id: targetUserId}, { $set: { secretKey: '' }});
 }
@@ -2643,7 +2643,7 @@ async function upsertPackage(packageJSON, ownerId) {
   return {stimuliSetId: stimuliSetId}
 }
 
-function tdfUpdateConfirmed(updateObj, resetShuffleClusters = false){
+async function tdfUpdateConfirmed(updateObj, resetShuffleClusters = false){
   // REDUCED: Don't log entire update object
   serverConsole('tdfUpdateConfirmed for TDF:', updateObj.TDFId || 'unknown');
   await Tdfs.upsertAsync({_id: updateObj._id},{$set:updateObj});
@@ -2675,7 +2675,7 @@ async function processAudioFilesForTDF(TDF){
   return TDF
 }
 
-function setUserLoginData(entryPoint, loginMode, curTeacher = undefined, curClass = undefined, assignedTdfs = undefined){
+async function setUserLoginData(entryPoint, loginMode, curTeacher = undefined, curClass = undefined, assignedTdfs = undefined){
   serverConsole('setUserLoginData', entryPoint, loginMode, curTeacher, curClass, assignedTdfs);
   let loginParams = Meteor.user().loginParams || {};
   loginParams.entryPoint = entryPoint;
