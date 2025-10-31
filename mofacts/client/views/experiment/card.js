@@ -4099,7 +4099,7 @@ function stopUserInput() {
 // BEGIN WEB AUDIO section
 
 // Audio prompt/feedback
-function speakMessageIfAudioPromptFeedbackEnabled(msg, audioPromptSource) {
+async function speakMessageIfAudioPromptFeedbackEnabled(msg, audioPromptSource) {
   const userAudioPromptMode = Meteor.user().audioPromptMode;
   const tdfAudioPromptMode = Session.get('currentTdfFile')?.tdfs?.tutor?.setspec?.audioPromptMode;
 

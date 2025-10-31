@@ -346,7 +346,7 @@ async function signInNotify(landingPage = '/profile') {
     Router.go(landingPage);
 }
 
-function userPasswordCheck() {
+async function userPasswordCheck() {
   // Hide previous errors
   $('.errcheck').hide();
 
@@ -499,7 +499,7 @@ function testUserEnabled() {
   return _.chain(Meteor.settings).prop('public').prop('testLogin').value();
 }
 
-function testLogin() {
+async function testLogin() {
   clientConsole(2, 'TEST Login');
 
   // Just a sanity check

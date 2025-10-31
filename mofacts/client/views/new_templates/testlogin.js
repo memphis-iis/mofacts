@@ -76,7 +76,7 @@ Template.testLogin.helpers({
 // Implementation functions
 
 // Called after we have signed in
-function signinNotify(landingPage = '/profile') {
+async function signinNotify(landingPage = '/profile') {
   const curClass = Session.get('curClass');
   const curTeacher = Session.get('curTeacher');
   if(curTeacher && curClass){
@@ -111,7 +111,7 @@ function signinNotify(landingPage = '/profile') {
 
 
 
-function testLogin() {
+async function testLogin() {
   console.log('TEST Login');
 
   const testUserName = _.trim($('#signInUsername').val()).toUpperCase();

@@ -112,7 +112,7 @@ Template.userAdmin.events({
 
 });
 
-function doFileUpload(fileElementSelector, fileDescrip) {
+async function doFileUpload(fileElementSelector, fileDescrip) {
   let count = 0;
 
   _.each($(fileElementSelector).prop('files'), function(file) {

@@ -55,7 +55,7 @@ async function createScheduleUnit(curExperimentData) {
 }
 
 // Return an instance of the "base" engine
-function defaultUnitEngine(curExperimentData) {
+async function defaultUnitEngine(curExperimentData) {
   let stimClusters = [];
   const numQuestions = getStimCount();
   for (let i = 0; i < numQuestions; ++i) {
@@ -402,7 +402,7 @@ function emptyUnitEngine() {
 */
 
 // TODO: pass in all session variables possible
-function modelUnitEngine() {
+async function modelUnitEngine() {
   clientConsole(1, 'model unit engine created!!!');
   // Checked against practice seconds. Notice that we capture this on unit
   // creation, so if they leave in the middle of practice and come back to
@@ -1764,7 +1764,7 @@ function modelUnitEngine() {
 }
 
 // Aka assessment session
-function scheduleUnitEngine() {
+async function scheduleUnitEngine() {
   let schedule;
   function createSchedule(setspec, unitNumber, unit) {
     // First get the setting we'll use
