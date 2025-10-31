@@ -3666,10 +3666,10 @@ export const methods = {
     const targetUsername = _.prop(targetUser, 'username');
 
     if (roleAction === 'add') {
-      Roles.addUsersToRoles(targetUserId, [roleName]);
+      await Roles.addUsersToRolesAsync(targetUserId, [roleName]);
       createUserSecretKey(targetUserId);
     } else if (roleAction === 'remove') {
-      Roles.removeUsersFromRoles(targetUserId, [roleName]);
+      await Roles.removeUsersFromRolesAsync(targetUserId, [roleName]);
       removeUserSecretKey(targetUserId);
     } else {
       throw new Error('Serious logic error: please report this');
@@ -4465,22 +4465,14 @@ Meteor.startup(async function() {
 
   // Create roles if they don't exist (required in newer alanning:roles)
   // Must be done BEFORE any role assignments
-  try {
-    Roles.createRole('admin');
-  } catch (e) {
-    // Role already exists, that's fine
-  }
-  try {
-    Roles.createRole('teacher');
-  } catch (e) {
-    // Role already exists, that's fine
-  }
+  await Roles.createRoleAsync('admin', {unlessExists: true});
+  await Roles.createRoleAsync('teacher', {unlessExists: true});
 
   // Used below for ownership
   const adminUserId = _.prop(adminUser, '_id') || '';
   // adminUser should be in an admin role
   if (adminUserId) {
-    Roles.addUsersToRoles(adminUserId, 'admin');
+    await Roles.addUsersToRolesAsync(adminUserId, 'admin');
     serverConsole('Admin User Found ID:', adminUserId, 'with obj:', _.pick(adminUser, '_id', 'username', 'email'));
   } else {
     serverConsole('Admin user ID could not be found. adminUser=', displayify(adminUser || 'null'));
@@ -4493,27 +4485,27 @@ Meteor.startup(async function() {
 
   // Get user in roles and make sure they are added
   const roles = getConfigProperty('initRoles');
-  const roleAdd = function(memberName, roleName) {
+  const roleAdd = async function(memberName, roleName) {
     const requested = _.prop(roles, memberName) || [];
     serverConsole('Role', roleName, '- found', _.prop(requested, 'length'));
 
-    _.each(requested, function(username) {
+    for (const username of requested) {
       const user = findUserByName(username);
       if (!user) {
         serverConsole('Warning: user', username, 'role', roleName, 'request, but user not found');
-        return;
+        continue;
       }
-      Roles.addUsersToRoles(user._id, roleName);
+      await Roles.addUsersToRolesAsync(user._id, roleName);
       //if the role name is admin or teacher, create a secret key for the user
       if(roleName == 'admin' || roleName == 'teacher'){
         createUserSecretKey(user._id);
       }
       serverConsole('Added user', username, 'to role', roleName);
-    });
+    }
   };
 
-  roleAdd('admins', 'admin');
-  roleAdd('teachers', 'teacher');
+  await roleAdd('admins', 'admin');
+  await roleAdd('teachers', 'teacher');
   const ret =  await Tdfs.find().countAsync();
   if (ret == 0) loadStimsAndTdfsFromPrivate(adminUserId);
 
