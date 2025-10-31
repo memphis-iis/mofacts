@@ -2887,7 +2887,7 @@ export const methods = {
     return clozes;
   },
 
-  getSimpleFeedbackForAnswer: function(userAnswer, correctAnswer) {
+  getSimpleFeedbackForAnswer: async function(userAnswer, correctAnswer) {
     // eslint-disable-next-line new-cap
     const mongoResult = await ElaboratedFeedbackCache.findOneAsync({correctAnswer: correctAnswer});
     serverConsole('mongoResult', mongoResult);
@@ -3104,7 +3104,7 @@ export const methods = {
   },
 
   // Security: New secure password reset - Step 1: Request reset token
-  requestPasswordReset: function(email) {
+  requestPasswordReset: async function(email) {
     check(email, String);
 
     // Rate limiting: Check recent reset requests
@@ -3222,7 +3222,7 @@ export const methods = {
     return await ErrorReports.insertAsync(errorReport);
   },
 
-  logUserAgentAndLoginTime: function(userID, userAgent) {
+  logUserAgentAndLoginTime: async function(userID, userAgent) {
     const loginTime = new Date();
     return await Meteor.users.updateAsync({_id: userID}, {$set: {status: {lastLogin: loginTime, userAgent: userAgent}}});
   },
@@ -4066,7 +4066,7 @@ const asyncMethods = {
     return users;
   },
   
-  makeGoogleTTSApiCall: function(TDFId, message, audioPromptSpeakingRate, audioVolume, selectedVoice) {
+  makeGoogleTTSApiCall: async function(TDFId, message, audioPromptSpeakingRate, audioVolume, selectedVoice) {
     let ttsAPIKey;
 
     // Try to get API key from multiple sources
@@ -4124,7 +4124,7 @@ const asyncMethods = {
     return contentGenerationAvailable;
   },
   
-  setLockoutTimeStamp: function(lockoutTimeStamp, lockoutMinutes, currentUnitNumber, TDFId) {
+  setLockoutTimeStamp: async function(lockoutTimeStamp, lockoutMinutes, currentUnitNumber, TDFId) {
     serverConsole('setLockoutTimeStamp', lockoutTimeStamp, lockoutMinutes, currentUnitNumber, TDFId);
     let lockouts = Meteor.user().lockouts
     if(!lockouts) lockouts = {};
@@ -4135,7 +4135,7 @@ const asyncMethods = {
     await Meteor.users.updateAsync({_id: Meteor.userId()}, {$set: {lockouts: lockouts}});
   },
 
-  makeGoogleSpeechAPICall: function(TDFId, speechAPIKey, request, answerGrammar){
+  makeGoogleSpeechAPICall: async function(TDFId, speechAPIKey, request, answerGrammar){
     // FIX: Allow other methods to run while waiting for Google API (prevents blocking client methods)
     this.unblock();
 
@@ -4217,12 +4217,12 @@ const asyncMethods = {
     await ComponentStates.updateAsync({_id: unit._id}, unit);
   },
 
-  updateTdfConditionCounts: function(TDFId, conditionCounts) {
+  updateTdfConditionCounts: async function(TDFId, conditionCounts) {
     serverConsole('updateTdfConditionCounts', TDFId, conditionCounts);
     await Tdfs.updateAsync({_id: TDFId}, {$set: {conditionCounts: conditionCounts}});
   },
 
-  resetTdfConditionCounts: function(TDFId) {
+  resetTdfConditionCounts: async function(TDFId) {
     serverConsole('resetTdfConditionCounts', TDFId);
     setspec = await Tdfs.findOneAsync({_id: TDFId}).content.tdfs.tutor.setspec;
     conditions = setspec.condition;
@@ -4233,7 +4233,7 @@ const asyncMethods = {
     await Tdfs.updateAsync({_id: TDFId}, {$set: {conditionCounts: conditionCounts}});
   },
   
-  updateStimSyllables: function(stimuliSetId, stimuli = undefined) {
+  updateStimSyllables: async function(stimuliSetId, stimuli = undefined) {
     serverConsole('updateStimSyllables', stimuliSetId);
     if(!stimuli){
       const tdf = await Tdfs.findOneAsync({ stimuliSetId: stimuliSetId });
@@ -4289,7 +4289,7 @@ const asyncMethods = {
   // We provide a separate server method for user profile info - this is
   // mainly since we don't want some of this data just flowing around
   // between client and server
-  saveUserAWSData: function(profileData) {
+  saveUserAWSData: async function(profileData) {
     serverConsole('saveUserAWSData', displayify(profileData));
 
     let saveResult; let result; let errmsg; let acctBal;
@@ -4333,7 +4333,7 @@ const asyncMethods = {
 
   //handle file deletions
 
-  deleteAllFiles: function(){
+  deleteAllFiles: async function(){
     // Security: Require admin role to delete all files
     if (!this.userId || !Roles.userIsInRole(this.userId, ['admin'])) {
       throw new Meteor.Error(403, 'Admin access required to delete all files');
@@ -4386,7 +4386,7 @@ const asyncMethods = {
       throw new Meteor.Error('delete-failed', 'Failed to delete files: ' + error.message);
     }
   },
-  deleteStimFile: function(stimSetId) {
+  deleteStimFile: async function(stimSetId) {
     stimSetId = parseInt(stimSetId);
     let tdfs = await Tdfs.find({stimuliSetId: stimSetId, owner: Meteor.userId()}).fetchAsync();
     if(tdfs){
