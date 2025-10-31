@@ -3,31 +3,30 @@
  *   - Create an HMAC per Amazon standards
 */
 
+import {getConfigProperty} from '../siteConfig';
+
 // Note that this is correct and crypto should *not* be listed in our deps.
 // See https://github.com/meteor/meteor/issues/2050 for details
 var crypto = Npm.require('crypto');
 
-(function () { //Begin IIFE pattern
+// Parameters
+var algo = "aes256";
 
-    // Parameters
-    var algo = "aes256";
+export function encryptUserData(data) {
+    var key = getConfigProperty("protectionKey");
+    var cipher = crypto.createCipher(algo, key);
+    return cipher.update(data, 'utf8', 'hex') + cipher.final('hex');
+};
 
-    encryptUserData = function(data) {
-        var key = getConfigProperty("protectionKey");
-        var cipher = crypto.createCipher(algo, key);
-        return cipher.update(data, 'utf8', 'hex') + cipher.final('hex');
-    };
+export function decryptUserData(data) {
+    var key = getConfigProperty("protectionKey");
+    var decipher = crypto.createDecipher(algo, key);
+    return decipher.update(data, 'hex', 'utf8') + decipher.final('utf8');
+};
 
-    decryptUserData = function(data) {
-        var key = getConfigProperty("protectionKey");
-        var decipher = crypto.createDecipher(algo, key);
-        return decipher.update(data, 'hex', 'utf8') + decipher.final('utf8');
-    };
-
-    createAwsHmac = function(secretKey, dataString) {
-        return crypto
-            .createHmac('sha1', secretKey)
-            .update(dataString)
-            .digest('base64');
-    };
-})(); //end IIFE
+export function createAwsHmac(secretKey, dataString) {
+    return crypto
+        .createHmac('sha1', secretKey)
+        .update(dataString)
+        .digest('base64');
+};
