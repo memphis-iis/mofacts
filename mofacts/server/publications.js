@@ -26,8 +26,8 @@ Meteor.publish('ownedFiles', function() {
     return [Tdfs.find({'ownerId': Meteor.userId()})]
 });
 
-Meteor.publish('accessableFiles', function() {
-    const accessableFileIds = Meteor.users.findOne({_id: this.userId}).accessedTDFs;
+Meteor.publish('accessableFiles', async function() {
+    const accessableFileIds = (await Meteor.users.findOneAsync({_id: this.userId})).accessedTDFs;
     return Tdfs.find({_id: {$in: accessableFileIds}})
 });
 
@@ -57,7 +57,7 @@ Meteor.publish('currentTdf', function(tdfId) {
     }
 });
 
-Meteor.publish('allTdfs', function() {
+Meteor.publish('allTdfs', async function() {
     // Security: Filter TDFs based on user role and access permissions
     if (!this.userId) {
         return this.ready(); // No data for unauthenticated users
@@ -84,10 +84,10 @@ Meteor.publish('allTdfs', function() {
     // 2. TDFs they have practiced (have history for) - for progress reporting
 
     // Get TDF IDs the student has history for
-    const historicalTdfIds = Histories.find(
+    const historicalTdfIds = (await Histories.find(
         { userId: this.userId },
         { fields: { TDFId: 1 } }
-    ).fetch().map(h => h.TDFId);
+    ).fetchAsync()).map(h => h.TDFId);
 
     // Get unique TDF IDs
     const uniqueHistoricalTdfIds = [...new Set(historicalTdfIds)];
@@ -114,7 +114,7 @@ Meteor.publish('ownedTdfs', function(ownerId) {
     return Tdfs.find({'ownerId': ownerId});
 });
 
-Meteor.publish('tdfByExperimentTarget', function(experimentTarget, experimentConditions=undefined) {
+Meteor.publish('tdfByExperimentTarget', async function(experimentTarget, experimentConditions=undefined) {
     // Security: Require authentication
     if (!this.userId) {
         return this.ready();
@@ -146,7 +146,7 @@ Meteor.publish('tdfByExperimentTarget', function(experimentTarget, experimentCon
     }
 
     // Students can only see TDFs they have explicit access to
-    const user = Meteor.users.findOne(this.userId);
+    const user = await Meteor.users.findOneAsync(this.userId);
     const accessedTDFs = user?.accessedTDFs || [];
     query._id = { $in: accessedTDFs };
     return Tdfs.find(query);

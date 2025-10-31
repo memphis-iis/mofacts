@@ -83,7 +83,7 @@ async function getValuesOfStimTagList(stimuliSet, itemId, tagList) {
 // We return the number of records written
 async function createExperimentExport(expName, requestingUserId) {
   const userIsAdmin = Roles.userIsInRole(requestingUserId, 'admin');
-  const requestingUserName = Meteor.users.findOne({_id: requestingUserId}).username;
+  const requestingUserName = await Meteor.users.findOneAsync({_id: requestingUserId}).username;
   let record = '';
   const header = {};
   let expNames = [];  

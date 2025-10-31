@@ -15,7 +15,7 @@ writeUserLogEntries = function(experimentId, objectsToLog, userId) {
   const action = {$push: {}};
   action['$push'][experimentId] = {$each: objectsToLog};
 
-  UserTimesLog.update( {userId: userId}, action, {upsert: true} );
+  await UserTimesLog.updateAsync( {userId: userId}, action, {upsert: true} );
   logUserMetrics(userId, experimentId, objectsToLog);
 };
 
@@ -56,13 +56,13 @@ function logUserMetrics(userId, experimentKey, valsToCheck) {
     }
 
     for (let j = 0; j < action.length; ++j) {
-      UserMetrics.update({_id: userId}, action[j]);
+      await UserMetrics.updateAsync({_id: userId}, action[j]);
     }
   }
 }
 // Given a user ID (_id) and an experiment, return the corresponding tdfId (_id)
 async function userLogGetTdfId(userid, experiment) {
-  const userLog = UserTimesLog.findOne({userId: userid});
+  const userLog = await UserTimesLog.findOneAsync({userId: userid});
   let entries = [];
   if (userLog && userLog[experiment] && userLog[experiment].length) {
     entries = userLog[experiment];
@@ -117,7 +117,7 @@ async function sendScheduledTurkMessages() {
 
   while (true) {
     // Find next email to send
-    const nextJob = ScheduledTurkMessages.findOne({
+    const nextJob = await ScheduledTurkMessages.findOneAsync({
       'sent': '',
       'scheduled': {'$lte': now},
     });
@@ -131,7 +131,7 @@ async function sendScheduledTurkMessages() {
     let retval = null;
 
     try {
-      const ownerProfile = Meteor.users.findOne({_id: nextJob.ownerProfileId});
+      const ownerProfile = await Meteor.users.findOneAsync({_id: nextJob.ownerProfileId});
       if (!ownerProfile) {
         throw new Error('Could not find current user profile');
       }
@@ -162,7 +162,7 @@ async function sendScheduledTurkMessages() {
     // Mark the email sent, not matter what happened
     let markedRecord = null;
     try {
-      ScheduledTurkMessages.update(
+      await ScheduledTurkMessages.updateAsync(
           {'_id': nextJob._id},
           {'$set': {'sent': Date.now()}},
       );
@@ -263,7 +263,7 @@ Meteor.methods({
 
       ownerId = await getTdfOwner(experiment);
 
-      const ownerProfile = await Meteor.users.findOne({_id: ownerId});
+      const ownerProfile = await Meteor.users.findOneAsync({_id: ownerId});
       if (!ownerProfile) {
         throw new Meteor.Error('Could not find TDF owner profile for id \'' + ownerId + '\'');
       }
@@ -272,7 +272,7 @@ Meteor.methods({
         throw new Meteor.Error('Current TDF owner not set up for AWS/MTurk');
       }
 
-      const previouslyScheduledMessage = await ScheduledTurkMessages.findOne({ workerUserId: workerUserId, experiment: experiment, scheduled: { $gt: Date.now() } });
+      const previouslyScheduledMessage = await ScheduledTurkMessages.findOneAsync({ workerUserId: workerUserId, experiment: experiment, scheduled: { $gt: Date.now() } });
       if (!previouslyScheduledMessage) {
         subject = subject || _.trim('Message from ' + turkid + ' Profile Page');
         const msgtext = 'The lock out period has ended - you may continue.\n\n' + msgbody;
@@ -288,7 +288,7 @@ Meteor.methods({
         };
 
         serverConsole('Scheduling:', jobName, 'at', schedDate);
-        ScheduledTurkMessages.insert({
+        await ScheduledTurkMessages.insertAsync({
           'sent': '',
           'ownerId': ownerId,
           'scheduled': schedDate.getTime(),
@@ -366,14 +366,14 @@ Meteor.methods({
       }
       ownerId = usr._id;
 
-      const ownerProfile = Meteor.users.findOne({_id: ownerId});
+      const ownerProfile = await Meteor.users.findOneAsync({_id: ownerId});
       if (!ownerProfile) {
         throw new Error('Could not find your user profile');
       }
       if (!ownerProfile.aws || !ownerProfile.aws.have_aws_id || !ownerProfile.aws.have_aws_secret) {
         throw new Error('You are not set up for AWS/MTurk');
       }
-      turkid = _.chain(Meteor.users.findOne({'_id': workerUserId}))
+      turkid = _.chain(Meteor.users.findOneAsync({'_id': workerUserId}))
           .prop('username').trim()
           .value().toUpperCase();
       if (!turkid) {
@@ -475,7 +475,7 @@ Meteor.methods({
       }
       ownerId = usr._id;
 
-      const ownerProfile = Meteor.users.findOne({_id: ownerId});
+      const ownerProfile = await Meteor.users.findOneAsync({_id: ownerId});
       if (!ownerProfile) {
         throw new Error('Could not find your user profile');
       }
@@ -483,7 +483,7 @@ Meteor.methods({
         throw new Error('You are not set up for AWS/MTurk');
       }
 
-      turkid = _.chain(Meteor.users.findOne({'_id': workerUserId}))
+      turkid = _.chain(Meteor.users.findOneAsync({'_id': workerUserId}))
           .prop('username').trim()
           .value().toUpperCase();
       if (!turkid) {
@@ -503,7 +503,7 @@ Meteor.methods({
         throw new Error('Could not find the TDF for that user/experiment combination');
       }
 
-      const userLog = UserTimesLog.findOne({userId: workerUserId});
+      const userLog = await UserTimesLog.findOneAsync({userId: workerUserId});
       let userLogEntries = [];
       if (userLog && userLog[experiment] && userLog[experiment].length) {
         userLogEntries = userLog[experiment];
@@ -601,11 +601,11 @@ Meteor.methods({
     const records = [];
     let tdf = null;
 
-    const experimentUsers = await Meteor.users.find({"profile.loginMode": 'experiment'}).fetch();
+    const experimentUsers = await Meteor.users.find({"profile.loginMode": 'experiment'}).fetchAsync();
     const experimentUserIds = experimentUsers.map(function(user) { return user._id; });
-    const experimentUserComponentStates = await ComponentStates.find({userId: {$in: experimentUserIds}, TDFId: expTDFId}).fetch();
-    const experimentUserExperimentStates = await GlobalExperimentStates.find({userId: {$in: experimentUserIds}, TDFId: expTDFId}).fetch();
-    const userTimesLog = await UserTimesLog.find({}).fetch();
+    const experimentUserComponentStates = await ComponentStates.find({userId: {$in: experimentUserIds}, TDFId: expTDFId}).fetchAsync();
+    const experimentUserExperimentStates = await GlobalExperimentStates.find({userId: {$in: experimentUserIds}, TDFId: expTDFId}).fetchAsync();
+    const userTimesLog = await UserTimesLog.find({}).fetchAsync();
 
     for(const entry of experimentUserComponentStates) {
       const userRec = experimentUsers.find(function(user) {

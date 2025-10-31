@@ -116,15 +116,17 @@ const clozeGeneration = require('./lib/Process.js');
 
 const userIdToUsernames = {};
 const usernameToUserIds = {};
+// Note: This is top-level startup code, uses synchronous .map() which is still supported
+// Will be converted to async in Meteor.startup if needed for Meteor 3.0
 Meteor.users.find({}, {fields: {_id: 1, username: 1}, sort: [['username', 'asc']]}).map(function(user) {
   userIdToUsernames[user._id] = user.username;
   usernameToUserIds[user.username] = user._id;
 });
 
-function getUserIdforUsername(username) {
+async function getUserIdforUsername(username) {
   let userId = usernameToUserIds[username];
   if (!userId) {
-    const user = Meteor.users.findOne({username: username}).fetch();
+    const user = await Meteor.users.findOneAsync({username: username});
     userId = user._id;
     usernameToUserIds[username] = userId;
   }
@@ -193,9 +195,9 @@ function getMatchingDialogueCacheWordsForAnswer(answer) {
   }
 }
 
-function createExperimentState(curExperimentState) {
+async function createExperimentState(curExperimentState) {
   serverConsole('createExperimentState', curExperimentState, curExperimentState.currentTdfId);
-  GlobalExperimentStates.insert({
+  await GlobalExperimentStates.insertAsync({
     userId: Meteor.userId(),
     TDFId: curExperimentState.currentTdfId,
     experimentState: curExperimentState
@@ -320,7 +322,7 @@ function createAwsHmac(secretKey, dataString) {
 }
 
 async function getTdfById(TDFId) {
-  const tdf = Tdfs.findOne({_id: TDFId});
+  const tdf = await Tdfs.findOneAsync({_id: TDFId});
   return tdf;
 }
 
@@ -335,7 +337,7 @@ async function checkCongentGenerationAvailable() {
 
 async function getTdfByFileName(filename) {
   try {
-    const tdf = Tdfs.findOne({"content.fileName": filename});
+    const tdf = await Tdfs.findOneAsync({"content.fileName": filename});
     if (!tdf) {
       return null;
     }
@@ -351,7 +353,7 @@ async function getTdfByExperimentTarget(experimentTarget) {
   experimentTarget = experimentTarget.toLowerCase();
   try {
     serverConsole('getTdfByExperimentTarget:'+experimentTarget);
-    tdf = Tdfs.findOne({"content.tdfs.tutor.setspec.experimentTarget": experimentTarget});
+    tdf = await Tdfs.findOneAsync({"content.tdfs.tutor.setspec.experimentTarget": experimentTarget});
     return tdf;
   } catch (e) {
     serverConsole('getTdfByExperimentTarget ERROR,', experimentTarget, ',', e);
@@ -361,23 +363,23 @@ async function getTdfByExperimentTarget(experimentTarget) {
 
 async function getAllTdfs() {
   serverConsole('getAllTdfs');
-  const tdfs = Tdfs.find({}).fetch();
+  const tdfs = await Tdfs.find({}).fetchAsync();
   return tdfs;
 }
 
 async function updateProbabilityEstimates(TDFId, clusterProbs, individualStimProbs, relevantKCIds) {
   serverConsole('updateProbabilityEstimates', TDFId);
-  const probEstimates = ProbabilityEstimates.findOne({TDFId: TDFId})
+  const probEstimates = await ProbabilityEstimates.findOneAsync({TDFId: TDFId})
   if(probEstimates){
-    ProbabilityEstimates.update({_id: probEstimates._id}, {$set: {clusterProbs: clusterProbs, individualStimProbs: individualStimProbs, relevantKCIds: relevantKCIds}});
+    await ProbabilityEstimates.updateAsync({_id: probEstimates._id}, {$set: {clusterProbs: clusterProbs, individualStimProbs: individualStimProbs, relevantKCIds: relevantKCIds}});
   } else {
-    ProbabilityEstimates.insert({TDFId: TDFId, clusterProbs: clusterProbs, individualStimProbs: individualStimProbs, relevantKCIds: relevantKCIds});
+    await ProbabilityEstimates.insertAsync({TDFId: TDFId, clusterProbs: clusterProbs, individualStimProbs: individualStimProbs, relevantKCIds: relevantKCIds});
   }
 }
 
 async function updateSingleProbabilityEstimate(TDFId, KCId, probabilityEstimate) {
   serverConsole('updateSingleProbabilityEstimate', TDFId, KCId, probabilityEstimate);
-  const probEstimates = ProbabilityEstimates.findOne({TDFId: TDFId})
+  const probEstimates = await ProbabilityEstimates.findOneAsync({TDFId: TDFId})
   if(probEstimates){
     const clusterProbs = probEstimates.clusterProbs;
     const individualStimProbs = probEstimates.individualStimProbs;
@@ -393,13 +395,13 @@ async function updateSingleProbabilityEstimate(TDFId, KCId, probabilityEstimate)
     } else {
       individualStimProbs[KCId] = [probabilityEstimate];
     }
-    updateProbabilityEstimates(TDFId, clusterProbs, individualStimProbs, relevantKCIds);
+    await updateProbabilityEstimates(TDFId, clusterProbs, individualStimProbs, relevantKCIds);
   }
 }
 
 async function getProbabilityEstimatesByKCId(TDFId, relevantKCIds) {
   serverConsole('getProbabilityEstimatesByKCId', TDFId);
-  const probEstimates = await ProbabilityEstimates.findOne({TDFId: TDFId})
+  const probEstimates = await ProbabilityEstimates.findOneAsync({TDFId: TDFId})
 
   if(!probEstimates){
     //generate probability estimates then store them for future use
@@ -431,7 +433,7 @@ async function getProbabilityEstimatesByKCId(TDFId, relevantKCIds) {
         }
       }
     }
-    updateProbabilityEstimates(TDFId, clusterProbs, individualStimProbs, relevantKCIds);
+    await updateProbabilityEstimates(TDFId, clusterProbs, individualStimProbs, relevantKCIds);
     return { clusterProbs, individualStimProbs };
   }
   return probEstimates;
@@ -440,7 +442,7 @@ async function getProbabilityEstimatesByKCId(TDFId, relevantKCIds) {
 async function getResponseKCMap() {
   serverConsole('getResponseKCMap');
 
-  let responseKCStuff = await Tdfs.find().fetch();
+  let responseKCStuff = await Tdfs.find().fetchAsync();
   responseKCStuff = responseKCStuff.map(r => r.stimuli).flat();
   const responseKCMap = {};
   for (const row of responseKCStuff) {
@@ -460,7 +462,7 @@ async function getResponseKCMap() {
 async function getResponseKCMapForTdf(tdfId) {
   serverConsole('getResponseKCMapForTdf', tdfId);
 
-  const tdf = await Tdfs.findOne({_id: tdfId});
+  const tdf = await Tdfs.findOneAsync({_id: tdfId});
   if (!tdf || !tdf.stimuli) {
     serverConsole('getResponseKCMapForTdf: TDF not found or has no stimuli', tdfId);
     return {};
@@ -479,7 +481,7 @@ async function getResponseKCMapForTdf(tdfId) {
 }
 
 async function clearCurUnitProgress(userId, TDFId) {
-  let unit = ComponentStates.findOne({userId: userId, TDFId: TDFId});
+  let unit = await ComponentStates.findOneAsync({userId: userId, TDFId: TDFId});
   if(unit){
     for(let cardState in unit.cardStates){
       unit.cardStates[cardState].priorCorrect = 0;
@@ -499,7 +501,7 @@ async function clearCurUnitProgress(userId, TDFId) {
       unit.responseStates[responseState].totalPracticeDuration = 0;
       unit.responseStates[responseState].timesSeen = 0;
     }
-    ComponentStates.update({_id: unit._id}, unit);
+    await ComponentStates.updateAsync({_id: unit._id}, unit);
   }
 }
 
@@ -538,7 +540,7 @@ async function processPackageUpload(fileObj, owner, zipLink, emailToggle){
     throw new Meteor.Error(403, 'Only admins and teachers can upload packages');
   }
 
-  DynamicAssets.collection.update({_id: fileObj._id}, {$set: {'meta.link': zipLink}});
+  await DynamicAssets.collection.updateAsync({_id: fileObj._id}, {$set: {'meta.link': zipLink}});
   let path = fileObj.path;
   let results = [];
   let unzippedFiles
@@ -671,11 +673,11 @@ async function processPackageUpload(fileObj, owner, zipLink, emailToggle){
     throw new Meteor.Error('package upload failed at initialization: ' + e + ' on file: ' + filePath)
   } finally {
     for(const tdfFile of unzippedFiles.filter(f => f.type == 'tdf')) {
-      const tdf = await Tdfs.findOne({tdfFileName: tdfFile.name})
+      const tdf = await Tdfs.findOneAsync({tdfFileName: tdfFile.name})
       if (tdf.content.tdfs.tutor.unit) {
         processAudioFilesForTDF(tdf.content.tdfs).then((t) => {
           tdf.content.tdfs.tutor.unit = t.tutor.unit
-          Tdfs.upsert({_id: tdf._id}, tdf)
+          await Tdfs.upsertAsync({_id: tdf._id}, tdf)
         })
       }
     }
@@ -684,9 +686,9 @@ async function processPackageUpload(fileObj, owner, zipLink, emailToggle){
 
 async function saveMediaFile(media, owner, stimSetId){
   serverConsole("Uploading:", media.name);
-  const foundFile = DynamicAssets.collection.findOne({userId: owner, name: media.name})
+  const foundFile = await DynamicAssets.collection.findOneAsync({userId: owner, name: media.name})
   if(foundFile){
-    DynamicAssets.remove({_id: foundFile._id});
+    await DynamicAssets.removeAsync({_id: foundFile._id});
     serverConsole(`File ${media.name} already exists, overwritting.`);
   }
   else{
@@ -700,7 +702,7 @@ async function saveMediaFile(media, owner, stimSetId){
       serverConsole(`File ${media.name} could not be uploaded`, error)
     } else {
       const metadata = { link: DynamicAssets.link(fileRef), stimuliSetId: stimSetId, public: true }
-      DynamicAssets.collection.update({_id: fileRef._id}, {$set: {meta: metadata}});
+      await DynamicAssets.collection.updateAsync({_id: fileRef._id}, {$set: {meta: metadata}});
     }
   });
 }
@@ -743,7 +745,7 @@ function validateStimAndTdf(tdfJson, stimJson, tdfFileName, stimFileName) {
         ['audioSrc', 'imgSrc', 'videoSrc'].forEach(field => {
           if (stim.display[field]) {
             const url = stim.display[field];
-            if (!url.startsWith('http') && !DynamicAssets.collection.findOne({name: url})) {
+            if (!url.startsWith('http') && !await DynamicAssets.collection.findOneAsync({name: url})) {
               return { result: false, errmsg: `Stim ${stimIdx} in cluster ${clusterIdx} has invalid display.${field}: ${url}.` };
             }
           }
@@ -825,7 +827,7 @@ async function saveContentFile(type, filename, filecontents, owner, packagePath 
         return results;
       }
       const stimFileName = jsonContents.tutor.setspec.stimulusfile;
-      const stimTdf = Tdfs.findOne({stimulusFileName: stimFileName});
+      const stimTdf = await Tdfs.findOneAsync({stimulusFileName: stimFileName});
       const stimJson = stimTdf ? stimTdf.rawStimuliFile : null;
       const validation = validateStimAndTdf(jsonContents, stimJson, filename, stimFileName);
       if (!validation.result) {
@@ -994,7 +996,7 @@ async function getSourceSentences(stimuliSetId) {
 
 async function getAllCourses() {
   try {
-    let coursesRet = Courses.find().fetch();
+    let coursesRet =  await Courses.find().fetchAsync();
     const courses = [];
     for (const course of coursesRet) {
       courses.push(getCourse(course));
@@ -1048,13 +1050,13 @@ async function getAllCourseSections() {
 
 async function getCourseById(courseId) {
   serverConsole('getAllCoursesById:', courseId);
-  const course = Courses.findOne({courseId: courseId});
+  const course = await Courses.findOneAsync({courseId: courseId});
   return course;
 }
 
 async function getAllCoursesForInstructor(instructorId) {
   serverConsole('getAllCoursesForInstructor:', instructorId);
-  const courses = Courses.find({teacherUserId: instructorId, semester: curSemester}).fetch();
+  const courses =  await Courses.find({teacherUserId: instructorId, semester: curSemester}).fetchAsync();
   return courses;
 }
 
@@ -1115,10 +1117,10 @@ function getSetAMinusB(arrayA, arrayB) {
 
 async function updateUserAssignments(courseId) {
   serverConsole('updateUserAssignments', courseId);
-  const sections = await Sections.find({courseId: courseId}).fetch();
+  const sections = await Sections.find({courseId: courseId}).fetchAsync();
   const students = [];
   for (const section of sections) {
-    const studentsInSection = await SectionUserMap.find({sectionId: section._id}).fetch();
+    const studentsInSection = await SectionUserMap.find({sectionId: section._id}).fetchAsync();
     for(const student of studentsInSection){
       // REMOVED: Don't log every student in loop
       // serverConsole({studentId: student.userId, sectionId: section._id})
@@ -1130,9 +1132,9 @@ async function updateUserAssignments(courseId) {
     const assignedTDFs = await getTdfsAssignedToStudent(student.studentId, student.sectionId);
     // REDUCED: Don't log full objects, just counts
     // serverConsole('updating student', student, 'with new assignments', assignedTDFs);
-    const loginParams = Meteor.users.findOne({_id: student.studentId}).loginParams;
+    const loginParams = await Meteor.users.findOneAsync({_id: student.studentId}).loginParams;
     loginParams.assignedTDFs = assignedTDFs;
-    Meteor.users.update({_id: student.studentId}, {$set: {loginParams: loginParams}});
+    await Meteor.users.updateAsync({_id: student.studentId}, {$set: {loginParams: loginParams}});
   }
 }
 
@@ -1180,7 +1182,7 @@ async function editCourseAssignments(newCourseAssignment) {
     const tdfsAdded = getSetAMinusB(newTdfs, existingTdfs);
     const tdfsRemoved = getSetAMinusB(existingTdfs, newTdfs);
 
-    const tdfNamesAndIDs = Tdfs.find().fetch();
+    const tdfNamesAndIDs =  await Tdfs.find().fetchAsync();
     const tdfNameIDMap = {};
     for (const tdfNamesAndID of tdfNamesAndIDs) {
       tdfNameIDMap[tdfNamesAndID.content.fileName] = tdfNamesAndID._id;
@@ -1192,11 +1194,11 @@ async function editCourseAssignments(newCourseAssignment) {
       // REMOVED: Don't log 7 large arrays for every TDF in loop!
       // serverConsole('editCourseAssignments tdf:', tdfNamesAndIDs, TDFId, tdfName, tdfsAdded, tdfsRemoved,
       //     curCourseAssignments, existingTdfs, newTdfs);
-      Assignments.insert({courseId: newCourseAssignment.courseId, TDFId: TDFId});
+      await Assignments.insertAsync({courseId: newCourseAssignment.courseId, TDFId: TDFId});
     }
     for (const tdfName of tdfsRemoved) {
       const TDFId = tdfNameIDMap[tdfName];
-      Assignments.remove({courseId: newCourseAssignment.courseId, TDFId: TDFId});
+      await Assignments.removeAsync({courseId: newCourseAssignment.courseId, TDFId: TDFId});
     }
     updateUserAssignments(newCourseAssignment.courseId);
     return newCourseAssignment;
@@ -1247,8 +1249,8 @@ async function getTdfAssignmentsByCourseIdMap(instructorId) {
   }]).toArray();
   // REDUCED: Don't log entire array, just count
   serverConsole('Found', assignmentTdfFileNamesRet.length, 'assigned TDFs');
-  // const courses = Courses.find({teacherUserId: instructorId}).fetch();
-  // const assignments = Assignments.find().fetch();
+  // const courses =  await Courses.find({teacherUserId: instructorId}).fetchAsync();
+  // const assignments =  await Assignments.find().fetchAsync();
   // let assignmentTdfFileNamesRet = []
   // let assignedTDFId = []
 
@@ -1386,7 +1388,7 @@ async function getTdfNamesAssignedByInstructor(instructorID) {
 async function getTdfNamesByOwnerId(ownerId) {
   serverConsole('getTdfNamesByOwnerId', ownerId);
   try {
-    tdfs = Tdfs.find({ownerId: ownerId}).fetch();
+    tdfs =  await Tdfs.find({ownerId: ownerId}).fetchAsync();
     const ownedTdfFileNames = tdfs.map(tdf => tdf.content.fileName);
     // REDUCED: Don't log entire array, just count
     serverConsole('ownedTdfFileNames count:', ownedTdfFileNames.length);
@@ -1401,7 +1403,7 @@ async function getTdfNamesByAccessorId(accessorId) {
   serverConsole('getTdfNamesByAccessorId', accessorId);
   try {
     //find tdfs where accessors array contains accessorId
-    tdfs = Tdfs.find({accessors: accessorId}).fetch();
+    tdfs =  await Tdfs.find({accessors: accessorId}).fetchAsync();
     const accessibleTdfFileNames = tdfs.map(tdf => tdf.content.fileName);
     // REDUCED: Don't log entire array, just count
     serverConsole('accessibleTdfFileNames count:', accessibleTdfFileNames.length);
@@ -1415,12 +1417,12 @@ async function getTdfNamesByAccessorId(accessorId) {
 async function cleanExperimentStateDupes(experimentStates, idToKeep) {
   for(const eS of experimentStates){
     if(eS._id !== idToKeep)
-      GlobalExperimentStates.remove({_id: eS._id});
+      await GlobalExperimentStates.removeAsync({_id: eS._id});
   }
 }
 
 async function getExperimentState(userId, TDFId) { // by currentRootTDFId, not currentTdfId
-  const experimentStateRet = GlobalExperimentStates.find({userId: userId, TDFId: TDFId}).fetch();
+  const experimentStateRet =  await GlobalExperimentStates.find({userId: userId, TDFId: TDFId}).fetchAsync();
   const mergedExperimentState = {};
   //merge experiment states
   for(const experimentState of experimentStateRet){
@@ -1437,21 +1439,21 @@ async function getExperimentState(userId, TDFId) { // by currentRootTDFId, not c
 async function setExperimentState(userId, TDFId, experimentStateId, newExperimentState, where) { // by currentRootTDFId, not currentTdfId
   // REDUCED LOGGING: Only log essential info, not entire experiment state objects
   serverConsole('setExperimentState:', where, userId, TDFId);
-  const experimentStateRet = GlobalExperimentStates.findOne({_id: experimentStateId})
+  const experimentStateRet = await GlobalExperimentStates.findOneAsync({_id: experimentStateId})
   // serverConsole(experimentStateRet)
   // serverConsole(newExperimentState)
   if (experimentStateRet != null) {
     const updatedExperimentState = Object.assign(experimentStateRet.experimentState, newExperimentState);
-    GlobalExperimentStates.update({_id: experimentStateId}, {$set: {experimentState: updatedExperimentState}})
+    await GlobalExperimentStates.updateAsync({_id: experimentStateId}, {$set: {experimentState: updatedExperimentState}})
     return updatedExperimentState;
   }
-  GlobalExperimentStates.insert({userId: userId, TDFId: TDFId, experimentState: newExperimentState});
+  await GlobalExperimentStates.insertAsync({userId: userId, TDFId: TDFId, experimentState: newExperimentState});
 
   return TDFId;
 }
 
 function insertHiddenItem(userId, stimulusKC, tdfId) {
-  let unit = ComponentStates.findOne({userId: userId, TDFId: tdfId})
+  let unit = await ComponentStates.findOneAsync({userId: userId, TDFId: tdfId})
   let index = -1;
   if (unit) {
     index = unit.stimStates.findIndex(function(item){
@@ -1462,14 +1464,14 @@ function insertHiddenItem(userId, stimulusKC, tdfId) {
       return;
     } else {
       unit.stimStates[index].showItem = false;
-      ComponentStates.update({_id: unit._id}, {$set: {stimStates: unit.stimStates}});
+      await ComponentStates.updateAsync({_id: unit._id}, {$set: {stimStates: unit.stimStates}});
     }
   }
   
 }
 
 async function getUserLastFeedbackTypeFromHistory(tdfID) {
-  const userHistory =  Histories.findOne({TDFId: tdfID, userId: Meteor.userId}, {sort: {time: -1}})?.feedbackType
+  const userHistory =  await Histories.findOneAsync({TDFId: tdfID, userId: Meteor.userId}, {sort: {time: -1}})?.feedbackType
   let feedbackType = 'undefined';
   if( userHistory && userHistory.feedbackType ) {
     feedbackType = userHistory.feedbackType;
@@ -1485,26 +1487,26 @@ async function insertHistory(historyRecord) {
   historyRecord.recordedServerTime = (new Date()).getTime();
   // REMOVED: This logs the entire history record on EVERY trial answer - extremely verbose
   // serverConsole('insertHistory', historyRecord);
-  Histories.insert(historyRecord)
+  await Histories.insertAsync(historyRecord)
 }
 
 async function getLastTDFAccessed(userId) {
-  const lastExperimentStateUpdated = GlobalExperimentStates.findOne({userId: userId}, {sort: {"experimentState.lastActionTimeStamp": -1}, limit: 1});;
+  const lastExperimentStateUpdated = await GlobalExperimentStates.findOneAsync({userId: userId}, {sort: {"experimentState.lastActionTimeStamp": -1}, limit: 1});;
   const lastTDFId = lastExperimentStateUpdated.TDFId;
   return lastTDFId;
 }
 
 async function getHistoryByTDFID(TDFId) {
-  const history = Histories.find({TDFId: TDFId}).fetch();
+  const history =  await Histories.find({TDFId: TDFId}).fetchAsync();
   return history;
 }
 
 async function getUserRecentTDFs(userId) {
-  const history = Histories.find({userId: userId}, {sort: {time: -1}, limit: 5}).fetch();
+  const history =  await Histories.find({userId: userId}, {sort: {time: -1}, limit: 5}).fetchAsync();
   //get all tdfs that match the history
   const recentTDFs = [];
   for (const historyRecord of history) {
-    const tdf = Tdfs.findOne({_id: historyRecord.TDFId});
+    const tdf = await Tdfs.findOneAsync({_id: historyRecord.TDFId});
     recentTDFs.push(tdf);
   }
   return recentTDFs;
@@ -1514,25 +1516,25 @@ function getAllTeachers(southwestOnly=false) {
   const query = {'roles': 'teacher'};
   if (southwestOnly) query['username']=/southwest[.]tn[.]edu/i;
   serverConsole('getAllTeachers', query);
-  const allTeachers = Meteor.users.find(query).fetch();
+  const allTeachers = Meteor. await users.find(query).fetchAsync();
 
   return allTeachers;
 }
 
 async function addCourse(mycourse) {
   serverConsole('addCourse:' + JSON.stringify(mycourse));
-  const courseId = Courses.insert(mycourse);
+  const courseId = await Courses.insertAsync(mycourse);
   for (const sectionName of mycourse.sections) {
-    Sections.insert({courseId: courseId, sectionName: sectionName})
+    await Sections.insertAsync({courseId: courseId, sectionName: sectionName})
   }
   return courseId;
 }
 
 async function editCourse(mycourse) {
   serverConsole('editCourse:' + JSON.stringify(mycourse));
-  Courses.update({_id: mycourse._id}, mycourse);
+  await Courses.updateAsync({_id: mycourse._id}, mycourse);
   const newSections = mycourse.sections;
-  const curCourseSections = Sections.find({courseId: mycourse.courseId}).fetch()
+  const curCourseSections =  await Sections.find({courseId: mycourse.courseId}).fetchAsync()
   const oldSections = curCourseSections.map((section) => section.sectionName);
   serverConsole('old/new', oldSections, newSections);
 
@@ -1542,10 +1544,10 @@ async function editCourse(mycourse) {
   serverConsole('sectionsRemoved,', sectionsRemoved);
 
   for (const sectionName of sectionsAdded) {
-    Sections.insert({courseId: mycourse.courseId, sectionName: sectionName});
+    await Sections.insertAsync({courseId: mycourse.courseId, sectionName: sectionName});
   }
   for (const sectionName of sectionsRemoved) {
-    Sections.remove({courseId: mycourse.courseId, sectionName: sectionName});
+    await Sections.removeAsync({courseId: mycourse.courseId, sectionName: sectionName});
   }
 
   return mycourse.courseId;
@@ -1554,11 +1556,11 @@ async function editCourse(mycourse) {
 async function addUserToTeachersClass(userId, teacherID, sectionId) {
   serverConsole('addUserToTeachersClass', userId, teacherID, sectionId);
 
-  const existingMappingCount = SectionUserMap.find({sectionId: sectionId, userId: userId}).count();
+  const existingMappingCount =  await SectionUserMap.find({sectionId: sectionId, userId: userId}).countAsync();
   serverConsole('existingMapping', existingMappingCount);
   if (existingMappingCount == 0) {
     serverConsole('new user, inserting into section_user_mapping', [sectionId, userId]);
-    SectionUserMap.insert({sectionId: sectionId, userId: userId});
+    await SectionUserMap.insertAsync({sectionId: sectionId, userId: userId});
   }
 
   return true;
@@ -1566,7 +1568,7 @@ async function addUserToTeachersClass(userId, teacherID, sectionId) {
 
 async function updateStimDisplayTypeMap(){
   serverConsole('getStimDisplayTypeMap');
-  const tdfs = await Tdfs.find().fetch();
+  const tdfs = await Tdfs.find().fetchAsync();
   const items = tdfs.map((tdf) => tdf.stimuli).flat();
   let map = {};
   for(let item of items){
@@ -1610,23 +1612,23 @@ async function getStimDisplayTypeMap() {
 
 function getClassPerformanceByTDF(classId, tdfId, date=false) {
   serverConsole('getClassPerformanceByTDF', classId, tdfId, date);
-  const sections = Sections.find({courseId: classId}).fetch();
+  const sections =  await Sections.find({courseId: classId}).fetchAsync();
   const sectionIds = sections.map((section) => section._id);
-  const userIds = SectionUserMap.find({sectionId: {$in: sectionIds}}).fetch().map((user) => user.userId);
+  const userIds =  await SectionUserMap.find({sectionId: {$in: sectionIds}}).fetchAsync().map((user) => user.userId);
   const performanceMet = [];
   const performanceNotMet = [];
   if(!date){
     curDate = new Date();
     date = curDate.getTime();
   }
-  const res1 = Histories.find({userId: {$in: userIds}, TDFId: tdfId, levelUnitType: {$ne: "Instruction"}}).fetch();
+  const res1 =  await Histories.find({userId: {$in: userIds}, TDFId: tdfId, levelUnitType: {$ne: "Instruction"}}).fetchAsync();
   for(let history of res1){
     var outcome = 0;
     if(history.outcome === "correct"){
       outcome = 1;
     }
     var exception = false;
-    var exceptions = Meteor.users.findOne({_id: history.userId}).dueDateExceptions || [];
+    var exceptions = await Meteor.users.findOneAsync({_id: history.userId}).dueDateExceptions || [];
     var exceptionRawDate = false;
     if(exceptions.findIndex((item) => item.tdfId == tdfId && item.classId == classId) !== -1){
       var exceptionRaw = exceptions.find((item) => item.tdfId == tdfId && item.classId == classId).date;
@@ -1642,7 +1644,7 @@ function getClassPerformanceByTDF(classId, tdfId, date=false) {
         });
         index = performanceMet.length - 1;
       }
-      performanceMet[index].username = Meteor.users.findOne({_id: history.userId}).username;
+      performanceMet[index].username = await Meteor.users.findOneAsync({_id: history.userId}).username;
       performanceMet[index].count  = performanceMet[index].count + 1;
       performanceMet[index].numCorrect = performanceMet[index].numCorrect + outcome || outcome;
       performanceMet[index].numIncorrect = performanceMet[index].numIncorrect + (1 - outcome) || outcome;
@@ -1659,7 +1661,7 @@ function getClassPerformanceByTDF(classId, tdfId, date=false) {
         });
         index = performanceNotMet.length - 1;
       }
-      performanceNotMet[index].username = Meteor.users.findOne({_id: history.userId}).username;
+      performanceNotMet[index].username = await Meteor.users.findOneAsync({_id: history.userId}).username;
       performanceNotMet[index].count  = performanceNotMet[index].count + 1;
       performanceNotMet[index].numCorrect = performanceNotMet[index].numCorrect + outcome || outcome;
       performanceNotMet[index].numIncorrect = performanceNotMet[index].numIncorrect + (1 - outcome) || outcome;
@@ -1679,20 +1681,20 @@ function addUserDueDateException(userId, tdfId, classId, date){
     classId: classId,
     date: date,
   }
-  user = Meteor.users.findOne({_id: userId});
+  user = await Meteor.users.findOneAsync({_id: userId});
   if(user.dueDateExceptions){
     user.dueDateExceptions.push(exception);
   }
   else{
     user.dueDateExceptions = [exception];
   }
-  Meteor.users.update({_id: userId}, user);
+  await Meteor.users.updateAsync({_id: userId}, user);
 }
 
 async function checkForTDFData(tdfId){
   const userId = Meteor.userId();
   serverConsole('checkForTDFData', tdfId, userId);
-  const tdf = Histories.findOne({TDFId: tdfId, userId: userId, $and: [ {levelUnitType: {$ne: "schedule"}}, {levelUnitType: {$ne: "Instruction"}} ] });
+  const tdf = await Histories.findOneAsync({TDFId: tdfId, userId: userId, $and: [ {levelUnitType: {$ne: "schedule"}}, {levelUnitType: {$ne: "Instruction"}} ] });
   if(tdf){
     return true;
   }
@@ -1701,7 +1703,7 @@ async function checkForTDFData(tdfId){
 
 async function checkForUserException(userId, tdfId){
   serverConsole('checkForUserException', userId, tdfId);
-  user = Meteor.users.findOne({_id: userId});
+  user = await Meteor.users.findOneAsync({_id: userId});
   if(user.dueDateExceptions){
     var exceptions = user.dueDateExceptions;
     var exception = exceptions.find((item) => item.tdfId == tdfId);
@@ -1716,7 +1718,7 @@ async function checkForUserException(userId, tdfId){
 
 function removeUserDueDateException(userId, tdfId){
   serverConsole('removeUserDueDateException', userId, tdfId);
-  user = Meteor.users.findOne({_id: userId});
+  user = await Meteor.users.findOneAsync({_id: userId});
   if(user.dueDateExceptions){
     exceptionIndex = user.dueDateExceptions.findIndex((item) => item.tdfId == tdfId);
     if(exceptionIndex > -1){
@@ -1725,7 +1727,7 @@ function removeUserDueDateException(userId, tdfId){
       serverConsole('removeUserDueDateException ERROR, no exception found', userId, tdfId);
     }
   }
-  Meteor.users.update({_id: userId}, user);
+  await Meteor.users.updateAsync({_id: userId}, user);
 }
 
 async function getListOfStimTags(tdfFileName) {
@@ -1793,7 +1795,7 @@ async function getStimuliSetByFileName(stimulusFileName) {
 }
 
 async function getStimuliSetIdByFilename(stimFilename) {
-  idRet = Tdfs.findOne({stimulusFileName: stimFilename});
+  idRet = await Tdfs.findOneAsync({stimulusFileName: stimFilename});
   const stimuliSetId = idRet ? idRet.stimuliSetId : null;
   return stimuliSetId;
 }
@@ -1819,7 +1821,7 @@ async function getStimSetFromLearningSessionByClusterList(stimuliSetId, clusterL
 async function getStudentPerformanceByIdAndTDFId(userId, TDFId, stimIds=null) {
   serverConsole('getStudentPerformanceByIdAndTDFId', userId, TDFId, stimIds);
 
-  const componentState = await ComponentStates.findOne({userId: userId, TDFId: TDFId});
+  const componentState = await ComponentStates.findOneAsync({userId: userId, TDFId: TDFId});
   if (!componentState) return null;
   
   const studentPerformance = {
@@ -1915,14 +1917,14 @@ async function getStudentPerformanceByIdAndTDFIdFromHistory(userId, TDFId, retur
   const studentPerformance = await Histories.rawCollection().aggregate(query).toArray();
   if (!studentPerformance[0]) return null;
 
-  studentPerformance[0].totalStimCount = await ComponentStates.find({userId: userId, TDFId: TDFId, componentType: 'stimulus'}).count();
+  studentPerformance[0].totalStimCount = await ComponentStates.find({userId: userId, TDFId: TDFId, componentType: 'stimulus'}).countAsync();
   return studentPerformance[0];
 }
 
 //get most recent history record for a student given a tdfid, cluster index, and stimulus index. All we want is the outcome
 async function getStudentPerformanceByStimulus(userId, TDFId, clusterIndex, stimulusIndex) {
   serverConsole('getStudentPerformanceByStimulus', userId, TDFId, clusterIndex, stimulusIndex);
-  const history = Histories.findOne({userId: userId, TDFId: TDFId, clusterIndex: clusterIndex, stimulusIndex: stimulusIndex}, {sort: {time: -1}});
+  const history = await Histories.findOneAsync({userId: userId, TDFId: TDFId, clusterIndex: clusterIndex, stimulusIndex: stimulusIndex}, {sort: {time: -1}});
   return history ? history.outcome : null;
 }
 
@@ -1931,7 +1933,7 @@ async function getStudentPerformanceByStimulus(userId, TDFId, clusterIndex, stim
 async function getNumDroppedItemsByUserIDAndTDFId(userId, TDFId){
   //used to grab a limited sample of the student's performance
   serverConsole('getNumDroppedItemsByUserIDAndTDFId', userId, TDFId);
-  const count = Histories.find({userId: userId, TDFId: TDFId, CFItemRemoved: true, levelUnitType: 'model'}).count();
+  const count =  await Histories.find({userId: userId, TDFId: TDFId, CFItemRemoved: true, levelUnitType: 'model'}).countAsync();
   return count;
 }
 
@@ -1939,15 +1941,15 @@ async function getStudentPerformanceForClassAndTdfId(instructorId, date=null) {
   let studentPerformanceRet = [];
   let hist;
   if(date){
-    hist = Histories.find({levelUnitType: "model", recordedServerTime: {$lt: date}}).fetch();
+    hist =  await Histories.find({levelUnitType: "model", recordedServerTime: {$lt: date}}).fetchAsync();
   }
   else {
-    hist = Histories.find({levelUnitType: "model"}).fetch();
+    hist =  await Histories.find({levelUnitType: "model"}).fetchAsync();
   }
 
-  const courses = Courses.find({teacherUserId: instructorId}).fetch();
-  const sections = Sections.find({courseId: {$in: courses.map(x => x._id)}}).fetch();
-  const userMap = SectionUserMap.find().fetch();
+  const courses =  await Courses.find({teacherUserId: instructorId}).fetchAsync();
+  const sections = await Sections.find({courseId: {$in: courses.map(x => x._id)}}).fetchAsync();
+  const userMap =  await SectionUserMap.find().fetchAsync();
 
   for(let history of hist){
     let sectionsRet = userMap.filter(u => u.userId == history.userId); //find all the sections that the user is in
@@ -1997,8 +1999,8 @@ async function getStudentPerformanceForClassAndTdfId(instructorId, date=null) {
     let {courseId, userId, TDFId, correct, incorrect, totalPracticeDuration} = studentPerformance;
     let studentUsername = userIdToUsernames[userId];
     if (!studentUsername) {
-      serverConsole(Meteor.users.findOne({_id: userId}).username + ', ' + userId);
-      studentUsername = Meteor.users.findOne({_id: userId}).username;
+      serverConsole(await Meteor.users.findOneAsync({_id: userId}).username + ', ' + userId);
+      studentUsername = await Meteor.users.findOneAsync({_id: userId}).username;
       userIdToUsernames[userId] = studentUsername;
     }
 
@@ -2055,14 +2057,14 @@ async function getStudentPerformanceForClassAndTdfId(instructorId, date=null) {
 
 async function getTdfIDsAndDisplaysAttemptedByUserId(userId, onlyWithLearningSessions=true) {
   // First try GlobalExperimentStates, then fall back to Histories for older data
-  let tdfRet = GlobalExperimentStates.find({userId: userId}).fetch();
+  let tdfRet =  await GlobalExperimentStates.find({userId: userId}).fetchAsync();
 
   // If no data in GlobalExperimentStates, check Histories
   if (tdfRet.length === 0) {
-    const historyTdfIds = Histories.find(
+    const historyTdfIds = await Histories.find(
       {userId: userId, levelUnitType: 'model'},
       {fields: {TDFId: 1}, sort: {recordedServerTime: -1}}
-    ).fetch();
+    ).fetchAsync();
 
     // Get unique TDF IDs from history
     const uniqueTdfIds = [...new Set(historyTdfIds.map(h => h.TDFId))];
@@ -2105,13 +2107,13 @@ async function getTdfIDsAndDisplaysAttemptedByUserId(userId, onlyWithLearningSes
 async function getSimpleTdfStats(userId, tdfId) {
 
   // Get all history for this user and TDF (excluding instructions and assessments)
-  const history = Histories.find({
+  const history = await Histories.find({
     userId: userId,
     TDFId: tdfId,
     levelUnitType: 'model'
   }, {
     sort: { recordedServerTime: 1 }
-  }).fetch();
+  }).fetchAsync();
 
   if (history.length === 0) {
     return null;
@@ -2210,7 +2212,7 @@ function defaultUserProfile() {
 
 function sendErrorReportSummaries() {
   serverConsole('sendErrorReportSummaries');
-  const unsentErrorReports = ErrorReports.find({'emailed': false}).fetch();
+  const unsentErrorReports =  await ErrorReports.find({'emailed': false}).fetchAsync();
   if (unsentErrorReports.length > 0) {
     let sentErrorReports = new Set();
     // eslint-disable-next-line guard-for-in
@@ -2222,7 +2224,7 @@ function sendErrorReportSummaries() {
       // eslint-disable-next-line guard-for-in
       for (const index2 in unsentErrorReports) {
         const unsentErrorReport = unsentErrorReports[index2];
-        const userWhoReportedError = Meteor.users.findOne({_id: unsentErrorReport.user});
+        const userWhoReportedError = await Meteor.users.findOneAsync({_id: unsentErrorReport.user});
         const userWhoReportedErrorUsername = userWhoReportedError ? userWhoReportedError.username : 'UNKNOWN';
         //make a nice email body for the user who reported the error
         textIndividual = 'Hi ' + userWhoReportedErrorUsername + ', \n\n' +
@@ -2254,7 +2256,7 @@ function sendErrorReportSummaries() {
         catch (err) {
           serverConsole(err);
         }
-        ErrorReports.update({_id: unsentErrorReport._id}, {$set: {'emailed': true}});
+        await ErrorReports.updateAsync({_id: unsentErrorReport._id}, {$set: {'emailed': true}});
       }
       try {
         sendEmail(admin, from, subject, text);
@@ -2303,7 +2305,7 @@ function checkDriveSpace() {
 function userProfileSave(user, awsProfile) {
   serverConsole('userProfileSave', user._id, awsProfile);
   user.aws = awsProfile;
-  const numUpdated = Meteor.users.update(
+  const numUpdated = await Meteor.users.updateAsync(
     { _id: user._id },
     { $set: { aws: user.aws } },
     { multi: false }
@@ -2329,22 +2331,22 @@ function generateKey(size = 32, format = 'base64') {
   return buffer.toString(format);
 }
 
-//only if we dont already have a secret for this user. 
-function createUserSecretKey(targetUserId){
-  if(!Meteor.users.findOne({_id: targetUserId}).secretKey){
-    Meteor.users.update({_id: targetUserId}, { $set: { secretKey: generateKey() }});
+//only if we dont already have a secret for this user.
+async function createUserSecretKey(targetUserId){
+  if(!(await Meteor.users.findOneAsync({_id: targetUserId})).secretKey){
+    await Meteor.users.updateAsync({_id: targetUserId}, { $set: { secretKey: generateKey() }});
   }
 }
 
 function updateUserSecretKey(targetUserId){
   if(Roles.userIsInRole(targetUserId, ['admin', 'teacher']))
-    Meteor.users.update({_id: targetUserId}, { $set: { secretKey: generateKey() }});
+    await Meteor.users.updateAsync({_id: targetUserId}, { $set: { secretKey: generateKey() }});
 }
 
 // Only removes secret key if the user is no longer an admin or teacher
 function removeUserSecretKey(targetUserId){
   if(!Roles.userIsInRole(targetUserId, ['admin', 'teacher']))
-    Meteor.users.update({_id: targetUserId}, { $set: { secretKey: '' }});
+    await Meteor.users.updateAsync({_id: targetUserId}, { $set: { secretKey: '' }});
 }
 
 // Return the user object matching the user. We use Meteor's provided search
@@ -2387,7 +2389,7 @@ async function upsertStimFile(stimulusFileName, stimJSON, ownerId, packagePath =
     packagePath = packagePath.split('/')[0];
   }
   const responseKCMap = await getResponseKCMap();
-  let stimuliSetId = Tdfs.findOne({"content.tdfs.tutor.setspec.stimulusfile": stimulusFileName})?.stimuliSetId
+  let stimuliSetId = await Tdfs.findOneAsync({"content.tdfs.tutor.setspec.stimulusfile": stimulusFileName})?.stimuliSetId
   if (!stimuliSetId) {
     stimuliSetId = nextStimuliSetId;
     nextStimuliSetId += 1;
@@ -2412,7 +2414,7 @@ async function upsertStimFile(stimulusFileName, stimJSON, ownerId, packagePath =
     stim.syllables = curAnswerSylls;
     formattedStims.push(stim);
   }
-  Tdfs.upsert({"content.tdfs.tutor.setspec.stimulusfile": stimulusFileName}, {$set: {
+  await Tdfs.upsertAsync({"content.tdfs.tutor.setspec.stimulusfile": stimulusFileName}, {$set: {
     stimulusFileName: stimulusFileName,
     stimuliSetId: stimuliSetId, 
     rawStimuliFile: stimJSON, //raw stimuli
@@ -2449,7 +2451,7 @@ async function upsertTDFFile(tdfFilename, tdfJSON, ownerId, packagePath = null) 
     for(const tip of tips){
       if(tip.split('<img').length > 1){
         const imageName = tip.split('<img')[1].split('src="')[1].split('"')[0];
-        const image = await DynamicAssets.findOne({userId: ownerId, name: imageName});
+        const image = await DynamicAssets.findOneAsync({userId: ownerId, name: imageName});
         if(image){
           const imageLink = image.link();
           newFormatttedTips.push(tip.replace(imageName, imageLink));
@@ -2505,7 +2507,7 @@ async function upsertTDFFile(tdfFilename, tdfJSON, ownerId, packagePath = null) 
   //create a new array the length of the number of conditions, fill it with 0
   tdfJSONtoUpsert.tdfs.tutor.setspec.condition ? conditionCounts = new Array(tdfJSONtoUpsert.tdfs.tutor.setspec.condition.length).fill(0) : conditionCounts = [];
   
-  Tdfs.upsert({_id: prev._id}, {$set: {
+  await Tdfs.upsertAsync({_id: prev._id}, {$set: {
     path: packagePath,
     content: tdfJSONtoUpsert,
     ownerId: ownerId,
@@ -2544,7 +2546,7 @@ async function upsertPackage(packageJSON, ownerId) {
     for(const tip of tips){
       if(tip.split('<img').length > 1){
         const imageName = tip.split('<img')[1].split('src="')[1].split('"')[0];
-        const image = await DynamicAssets.findOne({userId: ownerId, name: imageName});
+        const image = await DynamicAssets.findOneAsync({userId: ownerId, name: imageName});
         if(image){
           const imageLink = image.link();
           newFormatttedTips.push(tip.replace(imageName, imageLink));
@@ -2624,7 +2626,7 @@ async function upsertPackage(packageJSON, ownerId) {
   //create a new array the length of the number of conditions, fill it with 0
   tdfJSONtoUpsert.tdfs.tutor.setspec.condition ? conditionCounts = new Array(tdfJSONtoUpsert.tdfs.tutor.setspec.condition.length).fill(0) : conditionCounts = [];
 
-  Tdfs.upsert({"content.fileName": packageJSON.fileName}, {$set: {
+  await Tdfs.upsertAsync({"content.fileName": packageJSON.fileName}, {$set: {
     tdfFileName: packageJSON.fileName,
     content: tdfJSONtoUpsert,
     ownerId: ownerId,
@@ -2645,12 +2647,12 @@ async function upsertPackage(packageJSON, ownerId) {
 function tdfUpdateConfirmed(updateObj, resetShuffleClusters = false){
   // REDUCED: Don't log entire update object
   serverConsole('tdfUpdateConfirmed for TDF:', updateObj.TDFId || 'unknown');
-  Tdfs.upsert({_id: updateObj._id},{$set:updateObj});
+  await Tdfs.upsertAsync({_id: updateObj._id},{$set:updateObj});
   if(resetShuffleClusters){
-    const expStatses = GlobalExperimentStates.find({TDFId: updateObj._id}).fetch();
+    const expStatses =  await GlobalExperimentStates.find({TDFId: updateObj._id}).fetchAsync();
     for(let expState of expStatses){
       expState.experimentState.clusterMapping = [];
-      GlobalExperimentStates.update({_id: expStats._id}, {$set: {experimentState: expState}});
+      await GlobalExperimentStates.updateAsync({_id: expStats._id}, {$set: {experimentState: expState}});
     }
   }
 }
@@ -2663,7 +2665,7 @@ async function processAudioFilesForTDF(TDF){
       if (srcValues.length > 0) {
         for(const src of srcValues) {
           if(!src.includes('http')) {
-            const audio = await DynamicAssets.findOne({name: src});
+            const audio = await DynamicAssets.findOneAsync({name: src});
             const link = audio.link();
             TDF.tutor.unit[unitIdx].unitinstructions = unit.unitinstructions.replace(src, link)
           }
@@ -2682,7 +2684,7 @@ function setUserLoginData(entryPoint, loginMode, curTeacher = undefined, curClas
   loginParams.curClass = curClass;
   loginParams.loginMode = loginMode;
   loginParams.assignedTdfs = assignedTdfs;
-  Meteor.users.update({_id: Meteor.userId()}, {$set: {loginParams: loginParams}});
+  await Meteor.users.updateAsync({_id: Meteor.userId()}, {$set: {loginParams: loginParams}});
 }
 
 async function loadStimsAndTdfsFromPrivate(adminUserId) {
@@ -2808,27 +2810,27 @@ export const methods = {
     }
 
     serverConsole('removeTurkById', turkId, experimentId)
-    ScheduledTurkMessages.remove({workerUserId: turkId, experiment: experimentId});
+    await ScheduledTurkMessages.removeAsync({workerUserId: turkId, experiment: experimentId});
     let lockout = Meteor.user().lockouts;
     lockout[experimentId].lockoutMinutes = Number.MAX_SAFE_INTEGER;
-    Meteor.users.update({_id: Meteor.userId()}, {$set: {lockouts: lockout}});
+    await Meteor.users.updateAsync({_id: Meteor.userId()}, {$set: {lockouts: lockout}});
   },
 
   saveAudioPromptMode: function(audioPromptMode){
     serverConsole('saveAudioPromptMode', audioPromptMode);
-    Meteor.users.update({_id: Meteor.userId()}, {$set: {audioPromptMode: audioPromptMode}});
+    await Meteor.users.updateAsync({_id: Meteor.userId()}, {$set: {audioPromptMode: audioPromptMode}});
   },
 
   saveAudioInputMode: function(audioInputMode){
     serverConsole('saveAudioInputMode', audioInputMode);
-    Meteor.users.update({_id: Meteor.userId()}, {$set: {audioInputMode: audioInputMode}});
+    await Meteor.users.updateAsync({_id: Meteor.userId()}, {$set: {audioInputMode: audioInputMode}});
   },
 
   updateExperimentState: function(curExperimentState, experimentId) {
     // REDUCED LOGGING: Only log TDF ID, not entire experiment state object
     serverConsole('updateExperimentState', curExperimentState.currentTdfId);
     if(experimentId) {
-      GlobalExperimentStates.update({_id: experimentId}, {$set: {experimentState: curExperimentState}});
+      await GlobalExperimentStates.updateAsync({_id: experimentId}, {$set: {experimentState: curExperimentState}});
     } else {
       createExperimentState(curExperimentState)
     }
@@ -2837,7 +2839,7 @@ export const methods = {
   createExperimentState: function(curExperimentState) {
     // REDUCED LOGGING: Only log TDF ID, not entire experiment state object
     serverConsole('createExperimentState', curExperimentState.currentTdfId);
-    GlobalExperimentStates.insert({
+    await GlobalExperimentStates.insertAsync({
       userId: Meteor.userId(),
       TDFId: curExperimentState.currentTdfId,
       experimentState: curExperimentState
@@ -2872,7 +2874,7 @@ export const methods = {
   resetAllSecretKeys: function() {
     if(Meteor.userId() && Roles.userIsInRole(Meteor.userId(), ['admin'])){
       serverConsole('resetting user secrets');
-      const users = Meteor.users.find({$or: [{roles: "teacher"}, {roles: "admin"}]}).fetch();
+      const users = Meteor. await users.find({$or: [{roles: "teacher"}, {roles: "admin"}]}).fetchAsync();
       for(user of users){
         serverConsole(`resetting user secret for ${user._id}`)
         updateUserSecretKey(user._id);
@@ -2888,7 +2890,7 @@ export const methods = {
 
   getSimpleFeedbackForAnswer: async function(userAnswer, correctAnswer) {
     // eslint-disable-next-line new-cap
-    const mongoResult = await ElaboratedFeedbackCache.findOne({correctAnswer: correctAnswer});
+    const mongoResult = await ElaboratedFeedbackCache.findOneAsync({correctAnswer: correctAnswer});
     serverConsole('mongoResult', mongoResult);
     if(mongoResult && mongoResult.userAnswers && mongoResult.userAnswers[userAnswer])
       return mongoResult.userAnswers[userAnswer];
@@ -2907,7 +2909,7 @@ export const methods = {
           const refutationalFeedback = result.fields[0].Feedback || result.fields[0].feedback;
           if (typeof(refutationalFeedback) != 'undefined' && refutationalFeedback != null) {
             userAnswers[userAnswer] = refutationalFeedback;
-            ElaboratedFeedbackCache.upsert(id, {$set: {correctAnswer: correctAnswer, userAnswers: userAnswers}});
+            await ElaboratedFeedbackCache.upsertAsync(id, {$set: {correctAnswer: correctAnswer, userAnswers: userAnswers}});
           }
         }
       });
@@ -2948,11 +2950,11 @@ export const methods = {
     var length = 5;
     var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     var charactersLength = characters.length;
-    Meteor.users.findOne({username: email})
+    await Meteor.users.findOneAsync({username: email})
     for ( var i = 0; i < length; i++ ) {
       secret += characters.charAt(Math.floor(Math.random() * charactersLength));
     }  
-    Meteor.users.update({username: email},{
+    await Meteor.users.updateAsync({username: email},{
       $set:{
         secret: secret
       }
@@ -2969,7 +2971,7 @@ export const methods = {
   },
 
   checkPasswordResetSecret: function(email, secret){
-    userSecret = Meteor.users.findOne({username: email}).secret;
+    userSecret = await Meteor.users.findOneAsync({username: email}).secret;
     if(userSecret == secret){
       return true;
     } else {
@@ -2983,7 +2985,7 @@ export const methods = {
       throw new Meteor.Error(401, 'Must be logged in');
     }
 
-    const tdf = Tdfs.findOne({_id: TDFId});
+    const tdf = await Tdfs.findOneAsync({_id: TDFId});
     if(tdf){
       // Check if user is owner or admin
       if (tdf.ownerId !== this.userId && !Roles.userIsInRole(this.userId, ['admin', 'teacher'])) {
@@ -3002,12 +3004,12 @@ export const methods = {
       throw new Meteor.Error(401, 'Must be logged in');
     }
 
-    const tdf = Tdfs.findOne({_id: TDFId});
+    const tdf = await Tdfs.findOneAsync({_id: TDFId});
     if (tdf && tdf.ownerId !== this.userId && !Roles.userIsInRole(this.userId, ['admin', 'teacher'])) {
       throw new Meteor.Error(403, 'Access denied');
     }
 
-    const accessors = Meteor.users.find({'accessedTDFs': TDFId}).fetch();
+    const accessors = Meteor. await users.find({'accessedTDFs': TDFId}).fetchAsync();
     return accessors;
   },
 
@@ -3021,15 +3023,15 @@ export const methods = {
     }
 
     serverConsole('getAccessableTDFSForUser', userId);
-    const accessableTDFs = Meteor.users.findOne({_id: userId}).accessedTDFs || [];
-    const TDFs = Tdfs.find({_id: {$in: accessableTDFs}}).fetch();
+    const accessableTDFs = await Meteor.users.findOneAsync({_id: userId}).accessedTDFs || [];
+    const TDFs =  await Tdfs.find({_id: {$in: accessableTDFs}}).fetchAsync();
     return {accessableTDFs, TDFs};
   },
 
   getAssignableTDFSForUser: function(userId){
     serverConsole('getAssignableTDFSForUser', userId);
     // get tdfs where ownerId is userId or .accessors array contains property with userId
-    const assignableTDFs = Tdfs.find({$or: [{ownerId: userId}, {'accessors.userId': userId}]}).fetch();
+    const assignableTDFs =  await Tdfs.find({$or: [{ownerId: userId}, {'accessors.userId': userId}]}).fetchAsync();
     serverConsole('assignableTDFs', assignableTDFs);
     return assignableTDFs;
   },
@@ -3040,7 +3042,7 @@ export const methods = {
       throw new Meteor.Error(401, 'Must be logged in');
     }
 
-    const tdf = Tdfs.findOne({_id: TDFId});
+    const tdf = await Tdfs.findOneAsync({_id: TDFId});
     if (!tdf) {
       throw new Meteor.Error(404, 'TDF not found');
     }
@@ -3049,10 +3051,10 @@ export const methods = {
     }
 
     serverConsole('assignAccessors', TDFId, accessors, revokedAccessors)
-    Tdfs.update({_id: TDFId}, {$set: {'accessors': accessors}});
+    await Tdfs.updateAsync({_id: TDFId}, {$set: {'accessors': accessors}});
     const userIds = accessors.map((x) => x.userId);
-    Meteor.users.update({'_id': {$in: userIds}}, {$addToSet: {'accessedTDFs': TDFId}}, {multi: true});
-    Meteor.users.update({'_id': {$in: revokedAccessors}}, {$pull: {'accessedTDFs': TDFId}}, {multi: true});
+    await Meteor.users.updateAsync({'_id': {$in: userIds}}, {$addToSet: {'accessedTDFs': TDFId}}, {multi: true});
+    await Meteor.users.updateAsync({'_id': {$in: revokedAccessors}}, {$pull: {'accessedTDFs': TDFId}}, {multi: true});
   },
 
   transferDataOwnership: function(tdfId, newOwner){
@@ -3063,7 +3065,7 @@ export const methods = {
 
     //set the Tdf owner
     serverConsole('transferDataOwnership',tdfId,newOwner);
-    tdf = Tdfs.findOne({_id: tdfId});
+    tdf = await Tdfs.findOneAsync({_id: tdfId});
     if(!tdf){
       serverConsole('TDF not found');
       return "TDF not found";
@@ -3077,7 +3079,7 @@ export const methods = {
     }
 
     tdf.ownerId = newOwner._id;
-    Tdfs.upsert({_id: tdfId}, tdf);
+    await Tdfs.upsertAsync({_id: tdfId}, tdf);
     serverConsole(tdf);
     serverConsole('transfer ' + tdfId + "to" + newOwner);
     return "success";
@@ -3091,7 +3093,7 @@ export const methods = {
     check(secret, String);
     check(newPassword, String);
 
-    user = Meteor.users.findOne({username: email});
+    user = await Meteor.users.findOneAsync({username: email});
     userId = user._id;
     userSecret = user.secret;
     if(secret == userSecret){
@@ -3103,21 +3105,21 @@ export const methods = {
   },
 
   // Security: New secure password reset - Step 1: Request reset token
-  requestPasswordReset: function(email) {
+  requestPasswordReset: async function(email) {
     check(email, String);
 
     // Rate limiting: Check recent reset requests
-    const recentResets = PasswordResetTokens.find({
+    const recentResets = await PasswordResetTokens.find({
       email: email,
       createdAt: {$gt: new Date(Date.now() - 60000)} // Last minute
-    }).count();
+    }).countAsync();
 
     if (recentResets >= 3) {
       throw new Meteor.Error('rate-limit', 'Too many reset requests. Please wait a minute.');
     }
 
     // Find user
-    const user = Meteor.users.findOne({username: email});
+    const user = await Meteor.users.findOneAsync({username: email});
     if (!user) {
       // Security: Don't reveal if email exists
       serverConsole('Password reset requested for non-existent email:', email);
@@ -3132,7 +3134,7 @@ export const methods = {
 
     // Store hashed token with expiration (1 hour)
     const expiresAt = new Date(Date.now() + 3600000); // 1 hour
-    PasswordResetTokens.insert({
+    await PasswordResetTokens.insertAsync({
       email: email,
       userId: user._id,
       tokenHash: tokenHash,
@@ -3171,7 +3173,7 @@ export const methods = {
     const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
 
     // Find valid token
-    const resetRecord = PasswordResetTokens.findOne({
+    const resetRecord = await PasswordResetTokens.findOneAsync({
       email: email,
       tokenHash: tokenHash,
       used: false,
@@ -3183,7 +3185,7 @@ export const methods = {
     }
 
     // Mark token as used
-    PasswordResetTokens.update({_id: resetRecord._id}, {$set: {used: true, usedAt: new Date()}});
+    await PasswordResetTokens.updateAsync({_id: resetRecord._id}, {$set: {used: true, usedAt: new Date()}});
 
     // Reset the password
     Accounts.setPassword(resetRecord.userId, newPassword);
@@ -3199,7 +3201,7 @@ export const methods = {
       throw new Meteor.Error(403, 'Admin access required');
     }
 
-    const deleted = PasswordResetTokens.remove({
+    const deleted = await PasswordResetTokens.removeAsync({
       expiresAt: {$lt: new Date()}
     });
 
@@ -3218,16 +3220,16 @@ export const methods = {
       currentExperimentState: currentExperimentState,
       emailed: false,
     };
-    return ErrorReports.insert(errorReport);
+    return await ErrorReports.insertAsync(errorReport);
   },
 
-  logUserAgentAndLoginTime: function(userID, userAgent) {
+  logUserAgentAndLoginTime: async function(userID, userAgent) {
     const loginTime = new Date();
-    return Meteor.users.update({_id: userID}, {$set: {status: {lastLogin: loginTime, userAgent: userAgent}}});
+    return await Meteor.users.updateAsync({_id: userID}, {$set: {status: {lastLogin: loginTime, userAgent: userAgent}}});
   },
 
-  insertClozeEditHistory: function(history) {
-    ClozeEditHistory.insert(history);
+  insertClozeEditHistory: async function(history) {
+    await ClozeEditHistory.insertAsync(history);
   },
 
   getClozesAndSentencesForText: function(rawText) {
@@ -3318,7 +3320,7 @@ export const methods = {
         // Wait for user to be available in the DB before proceeding
         let user = null, attempts = 0;
         while (!user && attempts < 10) {
-          user = Meteor.users.findOne({ _id: createdId });
+          user = await Meteor.users.findOneAsync({ _id: createdId });
           if (!user) {
             Meteor._sleepForMs(50);
             attempts++;
@@ -3371,7 +3373,7 @@ export const methods = {
     }
 
     //check if the user has a service profile
-    const user = Meteor.users.findOne(userId);
+    const user = await Meteor.users.findOneAsync(userId);
     if(user && user.services){
       //if the user has a service profile, populate the user profile with the service profile
       const service = Object.keys(user.services)[0];
@@ -3382,7 +3384,7 @@ export const methods = {
         //also get refresh token
         'refreshToken': serviceProfile.refreshToken
       };
-      Meteor.users.update(userId, {$set: {profile: profile, username: serviceProfile.mail}});
+      await Meteor.users.updateAsync(userId, {$set: {profile: profile, username: serviceProfile.mail}});
       return "success: " + serviceProfile.mail;
     }
     return "failure";
@@ -3403,14 +3405,14 @@ export const methods = {
     }
 
     // Verify target user exists
-    const targetUser = Meteor.users.findOne(userId);
+    const targetUser = await Meteor.users.findOneAsync(userId);
     if (!targetUser) {
       throw new Meteor.Error(404, 'User not found');
     }
 
     // Security: Audit logging
     const adminUser = Meteor.user();
-    AuditLog.insert({
+    await AuditLog.insertAsync({
       action: 'impersonate',
       adminUserId: this.userId,
       adminUsername: adminUser.username || adminUser.emails?.[0]?.address,
@@ -3423,7 +3425,7 @@ export const methods = {
 
     // Security: Set impersonation with timeout (1 hour)
     const expiration = new Date(Date.now() + 3600000); // 1 hour
-    Meteor.users.update({_id: this.userId}, {
+    await Meteor.users.updateAsync({_id: this.userId}, {
       $set: {
         impersonating: true,
         impersonatedUserId: userId,
@@ -3452,7 +3454,7 @@ export const methods = {
     loginParams.curTeacher = null;
     loginParams.curClass = null;
     loginParams.loginMode = null;
-    Meteor.users.update({_id: Meteor.userId()}, {$set: {loginParams: loginParams}});
+    await Meteor.users.updateAsync({_id: Meteor.userId()}, {$set: {loginParams: loginParams}});
   },
 
   clearImpersonation: function(){
@@ -3467,7 +3469,7 @@ export const methods = {
     }
 
     // Security: Audit logging
-    AuditLog.insert({
+    await AuditLog.insertAsync({
       action: 'end_impersonation',
       adminUserId: this.userId,
       adminUsername: user.username || user.emails?.[0]?.address,
@@ -3477,7 +3479,7 @@ export const methods = {
     });
 
     // Clear impersonation fields
-    Meteor.users.update({_id: this.userId}, {
+    await Meteor.users.updateAsync({_id: this.userId}, {
       $unset: {
         impersonating: "",
         impersonatedUserId: "",
@@ -3503,7 +3505,7 @@ export const methods = {
     // Check if impersonation has expired
     if (new Date() > user.impersonationExpires) {
       // Automatically clear expired impersonation
-      AuditLog.insert({
+      await AuditLog.insertAsync({
         action: 'impersonation_auto_expired',
         adminUserId: this.userId,
         adminUsername: user.username || user.emails?.[0]?.address,
@@ -3512,7 +3514,7 @@ export const methods = {
         expiredAt: user.impersonationExpires
       });
 
-      Meteor.users.update({_id: this.userId}, {
+      await Meteor.users.updateAsync({_id: this.userId}, {
         $unset: {
           impersonating: "",
           impersonatedUserId: "",
@@ -3545,7 +3547,7 @@ export const methods = {
     if (!this.userId) {
       return {hasSR: false, hasTTS: false};
     }
-    const user = Meteor.users.findOne({_id: this.userId});
+    const user = await Meteor.users.findOneAsync({_id: this.userId});
     if (!user) {
       return {hasSR: false, hasTTS: false};
     }
@@ -3564,7 +3566,7 @@ export const methods = {
       result = false;
       error = 'User not found';
     } else {
-      Meteor.users.upsert({_id: user}, {$set: {speechAPIKey: key}});
+      await Meteor.users.upsertAsync({_id: user}, {$set: {speechAPIKey: key}});
     }
   },
 
@@ -3574,7 +3576,7 @@ export const methods = {
       throw new Meteor.Error(401, 'Must be logged in');
     }
 
-    const tdf = Tdfs.findOne({_id: tdfId});
+    const tdf = await Tdfs.findOneAsync({_id: tdfId});
     if(!tdf){
       return '';
     }
@@ -3586,7 +3588,7 @@ export const methods = {
     const isOwner = tdf.ownerId === this.userId;
     const isAdminOrTeacher = Roles.userIsInRole(this.userId, ['admin', 'teacher']);
     const isUserSelectTdf = tdf.content?.tdfs?.tutor?.setspec?.userselect === 'true';
-    const hasHistory = Histories.findOne({ userId: this.userId, TDFId: tdfId });
+    const hasHistory = await Histories.findOneAsync({ userId: this.userId, TDFId: tdfId });
 
     if (!isOwner && !isAdminOrTeacher && !isUserSelectTdf && !hasHistory) {
       throw new Meteor.Error(403, 'Access denied to TDF API keys');
@@ -3601,7 +3603,7 @@ export const methods = {
       throw new Meteor.Error(401, 'Must be logged in');
     }
 
-    const tdf = Tdfs.findOne({_id: tdfId});
+    const tdf = await Tdfs.findOneAsync({_id: tdfId});
     if(!tdf){
       return '';
     }
@@ -3613,7 +3615,7 @@ export const methods = {
     const isOwner = tdf.ownerId === this.userId;
     const isAdminOrTeacher = Roles.userIsInRole(this.userId, ['admin', 'teacher']);
     const isUserSelectTdf = tdf.content?.tdfs?.tutor?.setspec?.userselect === 'true';
-    const hasHistory = Histories.findOne({ userId: this.userId, TDFId: tdfId });
+    const hasHistory = await Histories.findOneAsync({ userId: this.userId, TDFId: tdfId });
 
     if (!isOwner && !isAdminOrTeacher && !isUserSelectTdf && !hasHistory) {
       throw new Meteor.Error(403, 'Access denied to TDF API keys');
@@ -3625,12 +3627,12 @@ export const methods = {
 
   setUserSessionId: function(sessionId, sessionIdTimestamp) {
     serverConsole('setUserSessionId', sessionId, sessionIdTimestamp)
-    Meteor.users.update({_id: Meteor.userId()}, {$set: {lastSessionId: sessionId, lastSessionIdTimestamp: sessionIdTimestamp}});
+    await Meteor.users.updateAsync({_id: Meteor.userId()}, {$set: {lastSessionId: sessionId, lastSessionIdTimestamp: sessionIdTimestamp}});
   },
 
   deleteUserSpeechAPIKey: function() {
     const userID = Meteor.userId();
-    Meteor.users.update({_id: userID}, {$unset: {speechAPIKey: ''}});
+    await Meteor.users.updateAsync({_id: userID}, {$unset: {speechAPIKey: ''}});
   },
 
   // ONLY FOR ADMINS: for the given targetUserId, perform roleAction (add
@@ -3656,7 +3658,7 @@ export const methods = {
       throw new Error('Invalid: unknown requested role');
     }
 
-    const targetUser = Meteor.users.findOne({_id: targetUserId});
+    const targetUser = await Meteor.users.findOneAsync({_id: targetUserId});
     if (!targetUser) {
       throw new Error('Invalid: could not find that user');
     }
@@ -3714,7 +3716,7 @@ export const methods = {
       const packageAssetId = packageFileName.split('.').shift(); // Get ID before .zip
 
       // Find all TDFs that contain this package ID anywhere in their packageFile field
-      const allTdfs = Tdfs.find({}).fetch();
+      const allTdfs =  await Tdfs.find({}).fetchAsync();
       const matchingTdfs = allTdfs.filter(tdf => tdf.packageFile && tdf.packageFile.includes(packageAssetId));
 
       serverConsole("Found", matchingTdfs.length, "TDFs with packageFile containing:", packageAssetId);
@@ -3722,18 +3724,18 @@ export const methods = {
       matchingTdfs.forEach((TDF) => {
         if(TDF && (Roles.userIsInRole(Meteor.userId(), ['admin']) || TDF.ownerId == Meteor.userId())){
           tdfId = TDF._id;
-          ComponentStates.remove({TDFId: tdfId});
-          Assignments.remove({TDFId: tdfId});
-          Histories.remove({TDFId: tdfId});
-          GlobalExperimentStates.remove({TDFId: tdfId});
-          Tdfs.remove({_id: tdfId});
+          await ComponentStates.removeAsync({TDFId: tdfId});
+          await Assignments.removeAsync({TDFId: tdfId});
+          await Histories.removeAsync({TDFId: tdfId});
+          await GlobalExperimentStates.removeAsync({TDFId: tdfId});
+          await Tdfs.removeAsync({_id: tdfId});
           deletedCount++;
           //iterate through TDF.stimuli
           for (const stim of TDF.stimuli) {
             asset = stim.imageStimulus || stim.audioStimulus || stim.videoStimulus || false;
             if (asset) {
               //remove asset
-              DynamicAssets.remove({"name": asset}, function(err, result){
+              await DynamicAssets.removeAsync({"name": asset}, function(err, result){
                 if(err){
                   serverConsole(err);
                 } else {
@@ -3747,9 +3749,9 @@ export const methods = {
 
       // Also delete the package file itself from DynamicAssets
       serverConsole("Removing package asset with ID:", packageAssetId);
-      const packageAsset = DynamicAssets.findOne({_id: packageAssetId});
+      const packageAsset = await DynamicAssets.findOneAsync({_id: packageAssetId});
       if (packageAsset) {
-        DynamicAssets.remove({_id: packageAssetId});
+        await DynamicAssets.removeAsync({_id: packageAssetId});
         serverConsole("Package file removed from DynamicAssets");
       } else {
         serverConsole("Package file not found in DynamicAssets (may have been deleted already)");
@@ -3782,7 +3784,7 @@ export const methods = {
       throw new Meteor.Error(401, 'Must be logged in');
     }
 
-    const asset = DynamicAssets.findOne({_id: assetId});
+    const asset = await DynamicAssets.findOneAsync({_id: assetId});
     if (!asset) {
       throw new Meteor.Error(404, 'Asset not found');
     }
@@ -3790,7 +3792,7 @@ export const methods = {
       throw new Meteor.Error(403, 'Can only delete your own assets');
     }
 
-    DynamicAssets.remove({_id: assetId});
+    await DynamicAssets.removeAsync({_id: assetId});
   },
 
   toggleTdfPresence: function(tdfIds, mode) {
@@ -3803,14 +3805,14 @@ export const methods = {
     }
 
     tdfIds.forEach((tdfid) => {
-      Tdfs.update({_id: tdfid}, {$set: {visibility: mode}})
+      await Tdfs.updateAsync({_id: tdfid}, {$set: {visibility: mode}})
     })
   },
 
   getTdfOwnersMap: (ownerIds) => {
     const ownerMap = {};
     ownerIds.forEach((id) => {
-      const foundUser = Meteor.users.findOne({_id: id});
+      const foundUser = await Meteor.users.findOneAsync({_id: id});
       if (typeof(foundUser) != 'undefined') {
         ownerMap[id] = foundUser.username;
       }
@@ -3829,20 +3831,20 @@ export const methods = {
   },
 
   getTestLogin: function() {
-    return DynamicSettings.findOne({key: 'testLoginsEnabled'}).value;
+    return await DynamicSettings.findOneAsync({key: 'testLoginsEnabled'}).value;
   },
 
   getTdfsByOwnerId: (ownerId) => {
-    const tdfs = Tdfs.find({'ownerId': ownerId}).fetch();
+    const tdfs =  await Tdfs.find({'ownerId': ownerId}).fetchAsync();
     return tdfs || [];
   },
 
   getStimsByOwnerId: (ownerId) => {
     serverConsole('getStimsByOwnerId: ' + ownerId);
-    const tdfs = Tdfs.find({'ownerId': ownerId}).fetch();
+    const tdfs =  await Tdfs.find({'ownerId': ownerId}).fetchAsync();
     const stims = tdfs.stimuli;
     for(let stim of stims) {
-      let lessonName = Tdfs.findOne({stimuliSetId: stim.stimuliSetId}).content.tdfs.tutor.setspec.lessonname
+      let lessonName = await Tdfs.findOneAsync({stimuliSetId: stim.stimuliSetId}).content.tdfs.tutor.setspec.lessonname
       stim.lessonName = lessonName
     }
     return stims || [];
@@ -3873,13 +3875,13 @@ export const methods = {
       signInDescription: 'A web-based adaptive learning system that uses spaced practice and retrieval to help you learn and retain information more effectively. Sign in to access your personalized learning experience.'
     };
     //This inserts the theme into the database, or updates it if it already exists
-    DynamicSettings.upsert({key: 'customTheme'}, {$set: {value: theme}});
+    await DynamicSettings.upsertAsync({key: 'customTheme'}, {$set: {value: theme}});
     return theme;
   },
 
   getTheme: function() {
     serverConsole('getTheme');
-    ret = DynamicSettings.findOne({key: 'customTheme'}) 
+    ret = await DynamicSettings.findOneAsync({key: 'customTheme'}) 
     if(!ret || ret.value.enabled == false) {
       return {
         themeName: 'MoFaCTS',
@@ -3912,20 +3914,20 @@ export const methods = {
     //This sets the value of a property in the custom theme
     path = 'value.properties.' + property;
     serverConsole('setCustomThemeProperty', path, value);
-    DynamicSettings.update({key: 'customTheme'}, {$set: {[path]: value}});
+    await DynamicSettings.updateAsync({key: 'customTheme'}, {$set: {[path]: value}});
   },
 
   toggleCustomTheme: function() {
     serverConsole('toggleCustomTheme');
     //This toggles the custom theme on or off
-    let theme = DynamicSettings.findOne({key: 'customTheme'});
+    let theme = await DynamicSettings.findOneAsync({key: 'customTheme'});
     if(!theme) {
       Meteor.call('initializeCustomTheme', 'Custom Theme');
     } else {
       theme = theme.value;
       theme.enabled = !theme.enabled;
       serverConsole('custom theme enabled:', theme.enabled);
-      DynamicSettings.update({key: 'customTheme'}, {$set: {'value.enabled': theme.enabled}});
+      await DynamicSettings.updateAsync({key: 'customTheme'}, {$set: {'value.enabled': theme.enabled}});
     }
   },
 
@@ -3950,7 +3952,7 @@ export const methods = {
       uploadedBy: this.userId
     };
 
-    DynamicSettings.upsert(
+    await DynamicSettings.upsertAsync(
       {key: 'customHelpPage'},
       {$set: {value: helpPageData}}
     );
@@ -3961,7 +3963,7 @@ export const methods = {
   getCustomHelpPage: function() {
     serverConsole('getCustomHelpPage');
 
-    const customHelp = DynamicSettings.findOne({key: 'customHelpPage'});
+    const customHelp = await DynamicSettings.findOneAsync({key: 'customHelpPage'});
 
     if (!customHelp || !customHelp.value || !customHelp.value.enabled) {
       return null;
@@ -3978,7 +3980,7 @@ export const methods = {
       throw new Meteor.Error('unauthorized', 'Only admins can remove custom help page');
     }
 
-    DynamicSettings.remove({key: 'customHelpPage'});
+    await DynamicSettings.removeAsync({key: 'customHelpPage'});
 
     return {success: true};
   },
@@ -3986,7 +3988,7 @@ export const methods = {
   getCustomHelpPageStatus: function() {
     serverConsole('getCustomHelpPageStatus');
 
-    const customHelp = DynamicSettings.findOne({key: 'customHelpPage'});
+    const customHelp = await DynamicSettings.findOneAsync({key: 'customHelpPage'});
 
     if (!customHelp || !customHelp.value || !customHelp.value.enabled) {
       return {
@@ -4032,14 +4034,14 @@ const asyncMethods = {
   checkForUserException, getTdfById, checkForTDFData,
 
   getOutcomesForAdaptiveLearning: async function(userId, TDFId) {
-    const history = Histories.find({userId: userId, TDFId: TDFId}, {fields: {KCId: 1, outcome: 1}, $sort: { recordedServerTime: -1 }}).fetch();
+    const history =  await Histories.find({userId: userId, TDFId: TDFId}, {fields: {KCId: 1, outcome: 1}, $sort: { recordedServerTime: -1 }}).fetchAsync();
     let outcomes = {};
     for(let h of history){
       if(h.KCId)
         outcomes[h.KCId % 1000] = h.outcome == 'correct'
     }
     // need to convert to cluster stim set
-    const tdf = Tdfs.findOne({_id: TDFId});
+    const tdf = await Tdfs.findOneAsync({_id: TDFId});
     const stimSet = tdf.stimuli;
     const clusterStimSet = {};
     for(const stim of stimSet){
@@ -4056,11 +4058,11 @@ const asyncMethods = {
   },
 
   getUsersByExperimentId: async function(experimentId){
-    const messages = ScheduledTurkMessages.find({experiment: experimentId}).fetch();
+    const messages =  await ScheduledTurkMessages.find({experiment: experimentId}).fetchAsync();
     const userIds = messages.map(x => x.workerUserId);
     let users = []
     for (const u of userIds){
-      users.push({userId: u, userName: Meteor.users.findOne({_id: u}).username})
+      users.push({userId: u, userName: (await Meteor.users.findOneAsync({_id: u})).username})
     }
     return users;
   },
@@ -4083,7 +4085,7 @@ const asyncMethods = {
       // 2. Fallback to user's personal TTS API key (if field exists)
       if (!ttsAPIKey) {
         try {
-          const user = Meteor.users.findOne({_id: this.userId});
+          const user = await Meteor.users.findOneAsync({_id: this.userId});
           if (user && user.ttsAPIKey) {
             ttsAPIKey = decryptData(user.ttsAPIKey);
             serverConsole('Using user personal API key for TTS');
@@ -4131,7 +4133,7 @@ const asyncMethods = {
     lockouts[TDFId].lockoutTimeStamp = lockoutTimeStamp;
     lockouts[TDFId].lockoutMinutes = lockoutMinutes;
     lockouts[TDFId].currentLockoutUnit = currentUnitNumber;
-    Meteor.users.update({_id: Meteor.userId()}, {$set: {lockouts: lockouts}});
+    await Meteor.users.updateAsync({_id: Meteor.userId()}, {$set: {lockouts: lockouts}});
   },
 
   makeGoogleSpeechAPICall: async function(TDFId, speechAPIKey, request, answerGrammar){
@@ -4198,7 +4200,7 @@ const asyncMethods = {
   },
 
   resetCurSessionTrialsCount: async function(userId, TDFId) {
-    let unit = ComponentStates.findOne({userId: userId, TDFId: TDFId});
+    let unit = await ComponentStates.findOneAsync({userId: userId, TDFId: TDFId});
     if(unit) {
       for(let cardState in unit.cardStates){
         unit.cardStates[cardState].curSessionPriorCorrect = 0;
@@ -4213,29 +4215,29 @@ const asyncMethods = {
         unit.responseStates[responseState].curSessionPriorIncorrect = 0;
       }
     }
-    ComponentStates.update({_id: unit._id}, unit);
+    await ComponentStates.updateAsync({_id: unit._id}, unit);
   },
 
   updateTdfConditionCounts: async function(TDFId, conditionCounts) {
     serverConsole('updateTdfConditionCounts', TDFId, conditionCounts);
-    Tdfs.update({_id: TDFId}, {$set: {conditionCounts: conditionCounts}});
+    await Tdfs.updateAsync({_id: TDFId}, {$set: {conditionCounts: conditionCounts}});
   },
 
   resetTdfConditionCounts: async function(TDFId) {
     serverConsole('resetTdfConditionCounts', TDFId);
-    setspec = Tdfs.findOne({_id: TDFId}).content.tdfs.tutor.setspec;
+    setspec = await Tdfs.findOneAsync({_id: TDFId}).content.tdfs.tutor.setspec;
     conditions = setspec.condition;
     conditionCounts = {};
     for(let condition in conditions){
       conditionCounts[condition] = 0;
     }
-    Tdfs.update({_id: TDFId}, {$set: {conditionCounts: conditionCounts}});
+    await Tdfs.updateAsync({_id: TDFId}, {$set: {conditionCounts: conditionCounts}});
   },
   
   updateStimSyllables: async function(stimuliSetId, stimuli = undefined) {
     serverConsole('updateStimSyllables', stimuliSetId);
     if(!stimuli){
-      const tdf = await Tdfs.findOne({ stimuliSetId: stimuliSetId });
+      const tdf = await Tdfs.findOneAsync({ stimuliSetId: stimuliSetId });
       stimuli = tdf.stimuli
     }
     if (stimuli) {
@@ -4262,7 +4264,7 @@ const asyncMethods = {
           stimuli[i].syllables = syllableArray;
         }
       }
-      Tdfs.update({'stimuliSetId': stimuliSetId}, {$set: {'stimuli': stimuli}}, {multi: true});
+      await Tdfs.updateAsync({'stimuliSetId': stimuliSetId}, {$set: {'stimuli': stimuli}}, {multi: true});
       serverConsole('after updateStimSyllables');
       serverConsole(stimuliSetId);
     }
@@ -4307,7 +4309,7 @@ const asyncMethods = {
       // We test by reading the profile back and checking their
       // account balance
       const res = await turk.getAccountBalance(
-          Meteor.users.findOne({_id: Meteor.userId()}),
+          await Meteor.users.findOneAsync({_id: Meteor.userId()}),
       );
 
       if (!res) {
@@ -4342,7 +4344,7 @@ const asyncMethods = {
       serverConsole('delete all uploaded files');
 
       // Delete all TDFs first
-      const tdfs = Tdfs.find({}).fetch();
+      const tdfs =  await Tdfs.find({}).fetchAsync();
       serverConsole("TDFs to remove: " + tdfs.length);
       let tdfsRemoved = 0;
 
@@ -4350,12 +4352,12 @@ const asyncMethods = {
         try {
           const tdfId = tdf._id;
           // Remove related data
-          ComponentStates.remove({TDFId: tdfId});
-          Assignments.remove({TDFId: tdfId});
-          Histories.remove({TDFId: tdfId});
-          GlobalExperimentStates.remove({TDFId: tdfId});
+          await ComponentStates.removeAsync({TDFId: tdfId});
+          await Assignments.removeAsync({TDFId: tdfId});
+          await Histories.removeAsync({TDFId: tdfId});
+          await GlobalExperimentStates.removeAsync({TDFId: tdfId});
           // Remove the TDF itself
-          Tdfs.remove({_id: tdfId});
+          await Tdfs.removeAsync({_id: tdfId});
           tdfsRemoved++;
           serverConsole('removed TDF ' + tdfId);
         } catch (tdfError) {
@@ -4364,14 +4366,14 @@ const asyncMethods = {
       }
 
       // Delete all assets
-      const files = DynamicAssets.find({}).fetch();
+      const files =  await DynamicAssets.find({}).fetchAsync();
       serverConsole("Asset files to remove: " + files.length);
       let filesRemoved = 0;
 
       for(let file of files){
         try {
           serverConsole('removing file ' + file._id);
-          DynamicAssets.remove({_id: file._id});
+          await DynamicAssets.removeAsync({_id: file._id});
           filesRemoved++;
         } catch (fileError) {
           serverConsole('Error removing file ' + file._id + ':', fileError);
@@ -4387,17 +4389,17 @@ const asyncMethods = {
   },
   deleteStimFile: async function(stimSetId) {
     stimSetId = parseInt(stimSetId);
-    let tdfs = Tdfs.find({stimuliSetId: stimSetId, owner: Meteor.userId()}).fetch();
+    let tdfs = await Tdfs.find({stimuliSetId: stimSetId, owner: Meteor.userId()}).fetchAsync();
     if(tdfs){
       serverConsole(tdfs);
       for(let tdf of tdfs) {
         tdfId = tdf._id;
-        GlobalExperimentStates.remove({TDFId: tdfId});
-        ComponentStates.remove({TDFId: tdfId});
-        Assignments.remove({TDFId: tdfId});
-        Histories.remove({TDFId: tdfId});
+        await GlobalExperimentStates.removeAsync({TDFId: tdfId});
+        await ComponentStates.removeAsync({TDFId: tdfId});
+        await Assignments.removeAsync({TDFId: tdfId});
+        await Histories.removeAsync({TDFId: tdfId});
       }
-      Tdfs.remove({stimuliSetId: stimSetId});
+      await Tdfs.removeAsync({stimuliSetId: stimSetId});
       res = "Stim and related TDFS deleted.";
       return res;
     } else {
@@ -4421,22 +4423,22 @@ Meteor.startup(async function() {
     next();
   });
 
-  highestStimuliSetId = Tdfs.findOne({}, {sort: {stimuliSetId: -1}, limit: 1 });
-  nextEventId = Histories.findOne({}, {limit: 1, sort: {eventId: -1}})?.eventId + 1 || 1;
+  highestStimuliSetId = await Tdfs.findOneAsync({}, {sort: {stimuliSetId: -1}, limit: 1 });
+  nextEventId = await Histories.findOneAsync({}, {limit: 1, sort: {eventId: -1}})?.eventId + 1 || 1;
   nextStimuliSetId = highestStimuliSetId && highestStimuliSetId.stimuliSetId ? parseInt(highestStimuliSetId.stimuliSetId) + 1 : 1;
-  DynamicSettings.upsert({key: 'clientVerbosityLevel'}, {$set: {value: 1}});
-  DynamicSettings.upsert({key: 'testLoginsEnabled'}, {$set: {value: false}});
+  await DynamicSettings.upsertAsync({key: 'clientVerbosityLevel'}, {$set: {value: 1}});
+  await DynamicSettings.upsertAsync({key: 'testLoginsEnabled'}, {$set: {value: false}});
 
 
   // Let anyone looking know what config is in effect
   serverConsole('Log Notice (from siteConfig):', getConfigProperty('logNotice'));
 
   // Force our OAuth settings to be current
-  ServiceConfiguration.configurations.remove({'service': 'google'});
+  await ServiceConfiguration.configurations.removeAsync({'service': 'google'});
   serverConsole('Removed Google service config - rewriting now');
 
   const google = getConfigProperty('google');
-  ServiceConfiguration.configurations.insert({
+  await ServiceConfiguration.configurations.insertAsync({
     'service': 'google',
     'clientId': _.prop(google, 'clientId'),
     'secret': _.prop(google, 'secret'),
@@ -4445,7 +4447,7 @@ Meteor.startup(async function() {
 
   if(Meteor.settings.microsoft) {
     //add microsoft service config
-    ServiceConfiguration.configurations.upsert({service: 'microsoft'}, {
+    await ServiceConfiguration.configurations.upsertAsync({service: 'microsoft'}, {
       $set: {
         loginStyle: 'redirect',
         clientId: Meteor.settings.microsoft.clientId,
@@ -4512,7 +4514,7 @@ Meteor.startup(async function() {
 
   roleAdd('admins', 'admin');
   roleAdd('teachers', 'teacher');
-  const ret = Tdfs.find().count();
+  const ret =  await Tdfs.find().countAsync();
   if (ret == 0) loadStimsAndTdfsFromPrivate(adminUserId);
 
   // Make sure we create a default user profile record when a new OAuth user
@@ -4669,8 +4671,8 @@ Meteor.startup(async function() {
   allEmails = allEmails.concat(adminEmails);
 
   //we also need to get the users in roles admin and teacher and send them an email
-  db_admins = Meteor.users.find({roles: 'admin'}).fetch();
-  db_teachers = Meteor.users.find({roles: 'teacher'}).fetch();
+  db_admins = Meteor. await users.find({roles: 'admin'}).fetchAsync();
+  db_teachers = Meteor. await users.find({roles: 'teacher'}).fetchAsync();
 
   //the emails are the username of the user
   for (const admin of db_admins){
@@ -4800,7 +4802,7 @@ Router.route('data-by-teacher', {
       return;
     }
 
-    const user = Meteor.users.findOne({'_id': uid});
+    const user = await Meteor.users.findOneAsync({'_id': uid});
     let userName = user.username;
     // eslint-disable-next-line no-useless-escape
     userName = userName.replace('/[/\\?%*:|"<>\s]/g', '_');
@@ -4839,7 +4841,7 @@ Router.route('data-by-class', {
       response.end('Unauthorized');
       return;
     }
-    else if (Meteor.users.findOne({_id: userId}).secretKey != loginToken){
+    else if (await Meteor.users.findOneAsync({_id: userId}).secretKey != loginToken){
       response.writeHead(403);
       response.end('Unauthorized');
       return;
@@ -4904,7 +4906,7 @@ Router.route('data-by-file', {
       response.writeHead('403');
       response.end();
     }
-    else if (Meteor.users.findOne({_id: userId}).secretKey != loginToken){
+    else if (await Meteor.users.findOneAsync({_id: userId}).secretKey != loginToken){
       response.writeHead(403);
       response.end('Unauthorized');
       return;
@@ -4927,7 +4929,7 @@ Router.route('data-by-file', {
       'File-Name': fileName
     });
 
-    const tdf = Tdfs.findOne({"content.fileName": exp});
+    const tdf = await Tdfs.findOneAsync({"content.fileName": exp});
 
     if (tdf && tdf.content.tdfs.tutor.setspec.condition) {
       const experiments = tdf.content.tdfs.tutor.setspec.condition;
@@ -4957,7 +4959,7 @@ Router.route('clozeEditHistory', {
       response.writeHead('403');
       response.end();
     }
-    else if (Meteor.users.findOne({_id: userId}).secretKey != loginToken){
+    else if (await Meteor.users.findOneAsync({_id: userId}).secretKey != loginToken){
       response.writeHead(403);
       response.end('Unauthorized');
       return;
