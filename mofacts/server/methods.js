@@ -2894,7 +2894,7 @@ export const methods = {
     if(mongoResult && mongoResult.userAnswers && mongoResult.userAnswers[userAnswer])
       return mongoResult.userAnswers[userAnswer];
     else {
-      ElaboratedFeedback.GenerateFeedback(userAnswer, correctAnswer).then((result) => {
+      ElaboratedFeedback.GenerateFeedback(userAnswer, correctAnswer).then(async (result) => {
         let userAnswers = {};
         let id = '';
         if(mongoResult){
