@@ -2756,9 +2756,7 @@ function getSyllablesForWord(word) {
 }
 
 export const methods = {
-  getMatchingDialogueCacheWordsForAnswer, getUserIdforUsername, getClassPerformanceByTDF, 
-
-  removeUserDueDateException, insertHiddenItem, setUserLoginData, addUserDueDateException, createExperimentState,
+  getMatchingDialogueCacheWordsForAnswer,
     
   getMeteorSettingsPublic: function(settings) {
     //passes back current public settings
@@ -4009,7 +4007,11 @@ export const methods = {
 const asyncMethods = {
   getAllTdfs, getTdfByFileName, getTdfByExperimentTarget, getTdfIDsAndDisplaysAttemptedByUserId,
 
-  getAllTeachers, getStimDisplayTypeMap, getStimuliSetById, getSourceSentences, updateStimDisplayTypeMap,
+  getAllTeachers, getUserIdforUsername, getClassPerformanceByTDF, createExperimentState,
+
+  removeUserDueDateException, insertHiddenItem, setUserLoginData, addUserDueDateException,
+
+  getStimDisplayTypeMap, getStimuliSetById, getSourceSentences, updateStimDisplayTypeMap,
 
   getAllCourses, getAllCourseSections, getAllCoursesForInstructor, getAllCourseAssignmentsForInstructor,
 
