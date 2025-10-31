@@ -675,10 +675,9 @@ async function processPackageUpload(fileObj, owner, zipLink, emailToggle){
     for(const tdfFile of unzippedFiles.filter(f => f.type == 'tdf')) {
       const tdf = await Tdfs.findOneAsync({tdfFileName: tdfFile.name})
       if (tdf.content.tdfs.tutor.unit) {
-        processAudioFilesForTDF(tdf.content.tdfs).then((t) => {
-          tdf.content.tdfs.tutor.unit = t.tutor.unit
-          await Tdfs.upsertAsync({_id: tdf._id}, tdf)
-        })
+        const t = await processAudioFilesForTDF(tdf.content.tdfs);
+        tdf.content.tdfs.tutor.unit = t.tutor.unit
+        await Tdfs.upsertAsync({_id: tdf._id}, tdf)
       }
     }
   }

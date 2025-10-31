@@ -6,7 +6,7 @@ export {sendScheduledTurkMessages};
 **/
 
 
-writeUserLogEntries = function(experimentId, objectsToLog, userId) {
+writeUserLogEntries = async function(experimentId, objectsToLog, userId) {
   if (!userId) {
     throw new Meteor.Error('No valid user ID found for User Log Entry');
   }
