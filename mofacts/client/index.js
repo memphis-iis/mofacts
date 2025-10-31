@@ -124,7 +124,7 @@ async function checkUserSession(){
 
       // We reconnected and no other tab took over - claim the session
       const currentSessionIdTimestamp = Date.now();
-      Meteor.call('setUserSessionId', currentSessionId, currentSessionIdTimestamp);
+      Meteor.callAsync('setUserSessionId', currentSessionId, currentSessionIdTimestamp);
       Session.set('lastSessionIdTimestamp', currentSessionIdTimestamp);
 
     } else if (lastSessionId !== currentSessionId && lastSessionIdTimestampClient < lastSessionIdTimestampServer) {
@@ -137,7 +137,7 @@ async function checkUserSession(){
   } else {
     // First time in this session - initialize
     const currentSessionIdTimestamp = Date.now();
-    Meteor.call('setUserSessionId', currentSessionId, currentSessionIdTimestamp);
+    Meteor.callAsync('setUserSessionId', currentSessionId, currentSessionIdTimestamp);
     Session.set('lastSessionId', currentSessionId);
     Session.set('lastSessionIdTimestamp', currentSessionIdTimestamp);
 
@@ -237,7 +237,7 @@ Accounts.onLogin(function() {
 
       // Check if the user has a profile with an email, first name, and last name
       if (!user.profile.username) {
-        Meteor.call('populateSSOProfile', Meteor.userId(), function(error, result) {
+        Meteor.callAsync('populateSSOProfile', Meteor.userId(), function(error, result) {
           if (error) {
             clientConsole(1, 'populateSSOProfile error:', error);
           } else {
@@ -273,7 +273,7 @@ Meteor.startup(function() {
     if (!user) return; // Wait for user to load
 
     // Check if user has personal API keys
-    Meteor.call('hasUserPersonalKeys', function(err, keys) {
+    Meteor.callAsync('hasUserPersonalKeys', function(err, keys) {
       if (err) {
         console.log('[Warmup] Error checking personal keys:', err);
         return;
@@ -405,15 +405,15 @@ Template.DefaultLayout.events({
     const userAgent = navigator.userAgent;
     const logs = console.logs;
     const currentExperimentState = Session.get('currentExperimentState');
-    Meteor.call('sendUserErrorReport', curUser, errorDescription, curPage, sessionVars,
+    Meteor.callAsync('sendUserErrorReport', curUser, errorDescription, curPage, sessionVars,
         userAgent, logs, currentExperimentState);
     $('#errorReportingModal').modal('hide');
     $('#errorDescription').val('');
   },
 
   'click #logoutButton': function(event) {
-    Meteor.call('clearImpersonation',Meteor.userId());
-    Meteor.call('clearLoginData');
+    Meteor.callAsync('clearImpersonation',Meteor.userId());
+    Meteor.callAsync('clearLoginData');
     Session.set('curUnitInstructionsSeen', undefined);
     Session.set('curSectionId', undefined);
     event.preventDefault();

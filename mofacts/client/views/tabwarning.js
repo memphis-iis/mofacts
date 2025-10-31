@@ -18,7 +18,7 @@ Template.tabwarning.events({
     Session.set('ignoreBroadcastUntil', Date.now() + 2000); // Ignore for 2 seconds
 
     // Update server session
-    Meteor.call('setUserSessionId', currentSessionId, currentSessionIdTimestamp, function(error) {
+    Meteor.callAsync('setUserSessionId', currentSessionId, currentSessionIdTimestamp, function(error) {
       if (error) {
         console.error('Error setting user session:', error);
         alert('Error taking over session: ' + error.message);

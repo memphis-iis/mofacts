@@ -64,7 +64,7 @@ Template.userAdmin.events({
 
   'click #resetAllSecretKeys': function(event) {
     event.preventDefault();
-    Meteor.call('resetAllSecretKeys');
+    Meteor.callAsync('resetAllSecretKeys');
   },
 
   // Need admin and teacher buttons
@@ -78,7 +78,7 @@ Template.userAdmin.events({
 
 
 
-    Meteor.call('userAdminRoleChange', userId, roleAction, roleName, function(error, result) {
+    Meteor.callAsync('userAdminRoleChange', userId, roleAction, roleName, function(error, result) {
       $('#userAdminModal').modal('hide');
 
       let disp;
@@ -96,7 +96,7 @@ Template.userAdmin.events({
   'click .btn-impersonate' : function(event){
     const btnTarget = $(event.currentTarget);
     const newUserId = _.trim(btnTarget.data('userid'));
-    Meteor.call('impersonate', newUserId, function(error, result) {
+    Meteor.callAsync('impersonate', newUserId, function(error, result) {
       if (error) {
         console.log('Impersonation failed:', error);
         alert('Impersonation failed:' + error);
@@ -123,7 +123,7 @@ function doFileUpload(fileElementSelector, fileDescrip) {
     fileReader.onload = function() {
       console.log('Upload attempted for', name);
 
-      Meteor.call('insertNewUsers', name, fileReader.result, function(error, result) {
+      Meteor.callAsync('insertNewUsers', name, fileReader.result, function(error, result) {
         console.log('result:' + JSON.stringify(result));
         if (error) {
           console.log('Critical failure saving ' + fileDescrip, error);

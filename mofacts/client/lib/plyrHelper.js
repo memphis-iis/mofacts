@@ -502,7 +502,7 @@ class PlayerController {
       'hintLevel': 0,
       'entryPoint': Meteor.user().loginParams.entryPoint
     };
-    Meteor.call('insertHistory', answerLogRecord);
+    Meteor.callAsync('insertHistory', answerLogRecord);
   }
 
   async playVideo() {

@@ -1,6 +1,6 @@
 import { getCurrentTheme } from '../lib/currentTestingHelpers'
 Template.adminControls.created = function() {
-    Meteor.call('getVerbosity', function(err, verbosity) {
+    Meteor.callAsync('getVerbosity', function(err, verbosity) {
         if (err) {
             console.log("Error getting verbosity: " + err);
         } else {
@@ -8,7 +8,7 @@ Template.adminControls.created = function() {
             $(`#verbosityRadio${verbosity}`).prop('checked', true);
         }
     });
-    Meteor.call('getTestLogin', function(err, testLoginsEnabled) {
+    Meteor.callAsync('getTestLogin', function(err, testLoginsEnabled) {
         if (err) {
             console.log("Error getting testLoginsEnabled: " + err);
         } else {
@@ -34,7 +34,7 @@ Template.adminControls.rendered = function() {
         document.getElementById(name).checked = true;
 
         // Load custom help page status
-        Meteor.call('getCustomHelpPageStatus', function(err, status) {
+        Meteor.callAsync('getCustomHelpPageStatus', function(err, status) {
             if (!err && status) {
                 Session.set('customHelpPageEnabled', status.enabled);
                 Session.set('customHelpPageUploadedAt', status.uploadedAt);
@@ -44,7 +44,7 @@ Template.adminControls.rendered = function() {
 
 Template.adminControls.helpers({
     'serverStatus': function() {
-        Meteor.call('getServerStatus', function(err, res) {
+        Meteor.callAsync('getServerStatus', function(err, res) {
             Session.set('serverStatus', res);
         });
         return Session.get('serverStatus');
@@ -73,7 +73,7 @@ Template.adminControls.events({
         const name = event.currentTarget.getAttribute('id');
         const start = name.length - 1;
         const verbosity = name.slice(start, name.length)
-        Meteor.call('setVerbosity', verbosity);
+        Meteor.callAsync('setVerbosity', verbosity);
     },
     'click .clientVerbosityRadio': function(event) {
         console.log("verbosityRadio clicked");
@@ -90,7 +90,7 @@ Template.adminControls.events({
         DynamicSettings.update({_id: _id}, {$set: {value: testLoginsEnabled}});  
     },
     'click #themeInitButton': function(event) {
-        Meteor.call('toggleCustomTheme', function(err, res) {
+        Meteor.callAsync('toggleCustomTheme', function(err, res) {
             if (err) {
                 alert("Error toggling custom theme: " + err);
             } else {
@@ -100,7 +100,7 @@ Template.adminControls.events({
         });
     },
     'click #themeResetButton': function(event) {
-        Meteor.call('initializeCustomTheme', function(err, res) {
+        Meteor.callAsync('initializeCustomTheme', function(err, res) {
             Session.set('curTheme', getCurrentTheme());
         });
     },
@@ -126,7 +126,7 @@ Template.adminControls.events({
         console.log("themeProps: " + JSON.stringify(themeProps));
         //call the setCustomThemeProperty method for each themeProp
         themeProps.forEach(function(themeProp) {
-            Meteor.call('setCustomThemeProperty', themeProp.data_id, themeProp.value, function(err, res) {
+            Meteor.callAsync('setCustomThemeProperty', themeProp.data_id, themeProp.value, function(err, res) {
                 if (err) {
                     alert("Error setting custom theme property: " + err);
                 } else {
@@ -137,7 +137,7 @@ Template.adminControls.events({
         Session.set('curTheme', getCurrentTheme());
     },
     'click #updateStimDisplayTypeMap': function(event) {
-        Meteor.call('updateStimDisplayTypeMap', function(err, res) {
+        Meteor.callAsync('updateStimDisplayTypeMap', function(err, res) {
             if (err) {
                 alert("Error clearing stim display type map: " + err);
             } else {
@@ -162,7 +162,7 @@ Template.adminControls.events({
             const reader = new FileReader();
             reader.onload = function(e) {
                 const base64Data = e.target.result;
-                Meteor.call('setCustomThemeProperty', 'logo_url', base64Data, function(err, res) {
+                Meteor.callAsync('setCustomThemeProperty', 'logo_url', base64Data, function(err, res) {
                     if (err) {
                         alert("Error uploading logo: " + err);
                     } else {
@@ -176,7 +176,7 @@ Template.adminControls.events({
     },
     'click #clearLogo': function(event) {
         if (confirm('Are you sure you want to clear the logo?')) {
-            Meteor.call('setCustomThemeProperty', 'logo_url', '', function(err, res) {
+            Meteor.callAsync('setCustomThemeProperty', 'logo_url', '', function(err, res) {
                 if (err) {
                     alert("Error clearing logo: " + err);
                 } else {
@@ -222,7 +222,7 @@ Template.adminControls.events({
         reader.onload = function(e) {
             const markdownContent = e.target.result;
 
-            Meteor.call('setCustomHelpPage', markdownContent, function(err, res) {
+            Meteor.callAsync('setCustomHelpPage', markdownContent, function(err, res) {
                 if (err) {
                     statusSpan.textContent = 'Error: ' + err.message;
                     statusSpan.className = 'text-danger';
@@ -232,7 +232,7 @@ Template.adminControls.events({
                     fileInput.value = '';
 
                     // Update session to show status
-                    Meteor.call('getCustomHelpPageStatus', function(err, status) {
+                    Meteor.callAsync('getCustomHelpPageStatus', function(err, status) {
                         if (!err && status) {
                             Session.set('customHelpPageEnabled', status.enabled);
                             Session.set('customHelpPageUploadedAt', status.uploadedAt);
@@ -256,7 +256,7 @@ Template.adminControls.events({
             statusSpan.textContent = 'Removing...';
             statusSpan.className = 'text-info';
 
-            Meteor.call('removeCustomHelpPage', function(err, res) {
+            Meteor.callAsync('removeCustomHelpPage', function(err, res) {
                 if (err) {
                     statusSpan.textContent = 'Error: ' + err.message;
                     statusSpan.className = 'text-danger';

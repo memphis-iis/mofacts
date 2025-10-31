@@ -29,7 +29,7 @@ export {
 
 //function to get current theme from server and set the css variables
 function getCurrentTheme() {
-  let theme = Meteor.call('getTheme', function(err, res) {
+  let theme = Meteor.callAsync('getTheme', function(err, res) {
     clientConsole(2, 'getCurrentTheme', err, res);
     Session.set('curTheme', res);
     //set the css variables to the theme values

@@ -26,7 +26,7 @@ function turkLogRefresh(exp) {
 
   $('#turkModal').modal('show');
 
-  Meteor.call('turkUserLogStatus', exp, function(error, result) {
+  Meteor.callAsync('turkUserLogStatus', exp, function(error, result) {
     $('#turkModal').modal('hide');
 
     if (typeof error !== 'undefined') {
@@ -164,7 +164,7 @@ Template.turkWorkflow.events({
     const assignid = $('#turk-assignid').val();
     $('#turk-assign-results').text('Working on ' + assignid);
     $('#turkModal').modal('show');
-    Meteor.call('turkGetAssignment', assignid, function(error, result) {
+    Meteor.callAsync('turkGetAssignment', assignid, function(error, result) {
       $('#turkModal').modal('hide');
       let disp;
       if (typeof error !== 'undefined') {
@@ -223,7 +223,7 @@ Template.turkWorkflow.events({
     event.preventDefault();
     const turkId = $("#user-select").val();
     const TDFId = $("#experiment-select").val()
-    Meteor.call('removeTurkById', turkId, TDFId)
+    Meteor.callAsync('removeTurkById', turkId, TDFId)
   },
 
   // Admin/Teachers - send Turk message
@@ -233,7 +233,7 @@ Template.turkWorkflow.events({
     const msgtext = $('#turk-msg').val();
     console.log('Sending to', workerid, 'Msg:', msgtext);
     $('#turkModal').modal('show');
-    Meteor.call('turkSendMessage', workerid, msgtext, function(error, result) {
+    Meteor.callAsync('turkSendMessage', workerid, msgtext, function(error, result) {
       $('#turkModal').modal('hide');
       let disp;
       if (typeof error !== 'undefined') {
@@ -281,7 +281,7 @@ Template.turkWorkflow.events({
     const msg = 'Thank you for participating';
 
     $('#turkModal').modal('show');
-    Meteor.call('turkPay', rec.userId, expId, msg, function(error, result) {
+    Meteor.callAsync('turkPay', rec.userId, expId, msg, function(error, result) {
       $('#turkModal').modal('hide');
 
       rec.turkpayDetails = {
@@ -330,7 +330,7 @@ Template.turkWorkflow.events({
 
     $('#turkModal').modal('show');
 
-    Meteor.call('turkBonus', rec.userId, expFile, expId, function(error, result) {
+    Meteor.callAsync('turkBonus', rec.userId, expFile, expId, function(error, result) {
       $('#turkModal').modal('hide');
 
       rec.turkbonusDetails = {
