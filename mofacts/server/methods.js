@@ -4491,7 +4491,7 @@ Meteor.startup(async function() {
 
     for (const username of requested) {
       const user = findUserByName(username);
-      if (!user) {
+      if (!user || !user._id) {
         serverConsole('Warning: user', username, 'role', roleName, 'request, but user not found');
         continue;
       }
