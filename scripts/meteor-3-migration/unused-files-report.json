@@ -1,0 +1,898 @@
+{
+  "unused": [
+    {
+      "path": "db\\initFixtures.js",
+      "reason": "No references found"
+    },
+    {
+      "path": "find-unused-files.js",
+      "reason": "No references found"
+    },
+    {
+      "path": "mofacts\\client\\lib\\audioRecorder.js",
+      "reason": "No references found"
+    },
+    {
+      "path": "mofacts\\client\\lib\\plugins.js",
+      "reason": "No references found"
+    },
+    {
+      "path": "mofacts\\client\\views\\about.html",
+      "reason": "Templates about not referenced"
+    },
+    {
+      "path": "mofacts\\client\\views\\new_templates\\experimentSettings.html",
+      "reason": "Templates experimentSettings not referenced"
+    },
+    {
+      "path": "mofacts\\client\\views\\new_templates\\testlogin.js",
+      "reason": "No references found"
+    },
+    {
+      "path": "mofacts\\client\\views\\probabilityFunctions.js",
+      "reason": "No references found"
+    },
+    {
+      "path": "mofacts\\client\\views\\test.html",
+      "reason": "Templates test not referenced"
+    },
+    {
+      "path": "mofacts\\client\\views\\versionInfo.js",
+      "reason": "No references found"
+    },
+    {
+      "path": "mofacts\\collections.app-test.js",
+      "reason": "No references found"
+    },
+    {
+      "path": "mofacts\\mobile-config.js",
+      "reason": "No references found"
+    },
+    {
+      "path": "mofacts\\server\\lib\\LemmInflect.js",
+      "reason": "No references found"
+    },
+    {
+      "path": "mofacts\\server\\lib\\SpellingCorrector.js",
+      "reason": "No references found"
+    },
+    {
+      "path": "mofacts\\server\\lib\\Triples.js",
+      "reason": "No references found"
+    },
+    {
+      "path": "mofacts\\server\\lib\\XMLHttpRequest.js",
+      "reason": "No references found"
+    },
+    {
+      "path": "mofacts\\server\\methods.test.js",
+      "reason": "No references found"
+    },
+    {
+      "path": "reset_database.js",
+      "reason": "No references found"
+    },
+    {
+      "path": "scripts\\load-testing\\mofacts-load-testing.perf.js",
+      "reason": "No references found"
+    },
+    {
+      "path": "scripts\\load-testing\\mofacts-load-testing.perf.js_compiled.js",
+      "reason": "No references found"
+    },
+    {
+      "path": "scripts\\mongoQueries\\renameTdfField.js",
+      "reason": "No references found"
+    },
+    {
+      "path": "scripts\\mongoQueries\\reportStudentsWhoDidTdfByClass.js",
+      "reason": "No references found"
+    },
+    {
+      "path": "test\\simple-video-test.js",
+      "reason": "No references found"
+    },
+    {
+      "path": "test\\video-checkpoint.test.js",
+      "reason": "No references found"
+    },
+    {
+      "path": "test_phonetic.html",
+      "reason": "Templates  not referenced"
+    }
+  ],
+  "used": [
+    {
+      "path": "mofacts\\.deploy\\test\\test.js",
+      "reason": "Referenced in db\\initFixtures.js"
+    },
+    {
+      "path": "mofacts\\client\\index.html",
+      "reason": "Entry point or core file"
+    },
+    {
+      "path": "mofacts\\client\\index.js",
+      "reason": "Entry point or core file"
+    },
+    {
+      "path": "mofacts\\client\\lib\\cookies.js",
+      "reason": "Referenced in mofacts\\client\\lib\\router.js"
+    },
+    {
+      "path": "mofacts\\client\\lib\\currentTestingHelpers.js",
+      "reason": "Referenced in mofacts\\client\\index.js"
+    },
+    {
+      "path": "mofacts\\client\\lib\\gauge.js",
+      "reason": "Referenced in mofacts\\client\\views\\new_templates\\studentReporting.js"
+    },
+    {
+      "path": "mofacts\\client\\lib\\hark.js",
+      "reason": "Referenced in mofacts\\client\\views\\experiment\\card.js"
+    },
+    {
+      "path": "mofacts\\client\\lib\\plyrHelper.js",
+      "reason": "Referenced in mofacts\\client\\lib\\sessionUtils.js"
+    },
+    {
+      "path": "mofacts\\client\\lib\\router.js",
+      "reason": "Referenced in mofacts\\client\\index.js"
+    },
+    {
+      "path": "mofacts\\client\\lib\\sessionUtils.js",
+      "reason": "Referenced in mofacts\\client\\index.js"
+    },
+    {
+      "path": "mofacts\\client\\views\\adminControls.html",
+      "reason": "Template 'adminControls' is referenced"
+    },
+    {
+      "path": "mofacts\\client\\views\\adminControls.js",
+      "reason": "Referenced in mofacts\\client\\index.js"
+    },
+    {
+      "path": "mofacts\\client\\views\\experiment\\adaptiveQuestionLogic.js",
+      "reason": "Referenced in mofacts\\client\\views\\experiment\\unitEngine.js"
+    },
+    {
+      "path": "mofacts\\client\\views\\experiment\\answerAssess.js",
+      "reason": "Referenced in mofacts\\client\\views\\experiment\\card.js"
+    },
+    {
+      "path": "mofacts\\client\\views\\experiment\\card.html",
+      "reason": "Template 'card' is referenced"
+    },
+    {
+      "path": "mofacts\\client\\views\\experiment\\card.js",
+      "reason": "Referenced in mofacts\\client\\index.js"
+    },
+    {
+      "path": "mofacts\\client\\views\\experiment\\dialogueUtils.js",
+      "reason": "Referenced in mofacts\\client\\index.js"
+    },
+    {
+      "path": "mofacts\\client\\views\\experiment\\inputF.html",
+      "reason": "Template 'inputF' is referenced"
+    },
+    {
+      "path": "mofacts\\client\\views\\experiment\\inputF.js",
+      "reason": "Referenced in mofacts\\client\\views\\experiment\\inputF.html"
+    },
+    {
+      "path": "mofacts\\client\\views\\experiment\\instructions.html",
+      "reason": "Template 'instructions' is referenced"
+    },
+    {
+      "path": "mofacts\\client\\views\\experiment\\instructions.js",
+      "reason": "Referenced in db\\initFixtures.js"
+    },
+    {
+      "path": "mofacts\\client\\views\\experiment\\multiTdfSelect.html",
+      "reason": "Template 'multiTdfSelect' is referenced"
+    },
+    {
+      "path": "mofacts\\client\\views\\experiment\\multiTdfSelect.js",
+      "reason": "Referenced in mofacts\\client\\lib\\router.js"
+    },
+    {
+      "path": "mofacts\\client\\views\\experiment\\unitEngine.js",
+      "reason": "Referenced in mofacts\\client\\views\\experiment\\card.js"
+    },
+    {
+      "path": "mofacts\\client\\views\\experimentReporting\\dataDownload.html",
+      "reason": "Template 'dataDownload' is referenced"
+    },
+    {
+      "path": "mofacts\\client\\views\\experimentReporting\\dataDownload.js",
+      "reason": "Referenced in mofacts\\client\\index.js"
+    },
+    {
+      "path": "mofacts\\client\\views\\experimentReporting\\instructorReporting.html",
+      "reason": "Template 'instructorReporting' is referenced"
+    },
+    {
+      "path": "mofacts\\client\\views\\experimentReporting\\instructorReporting.js",
+      "reason": "Referenced in mofacts\\client\\index.js"
+    },
+    {
+      "path": "mofacts\\client\\views\\experimentSetup\\classEdit.html",
+      "reason": "Template 'classEdit' is referenced"
+    },
+    {
+      "path": "mofacts\\client\\views\\experimentSetup\\classEdit.js",
+      "reason": "Referenced in mofacts\\client\\index.js"
+    },
+    {
+      "path": "mofacts\\client\\views\\experimentSetup\\contentGeneration.html",
+      "reason": "Template 'contentGeneration' is referenced"
+    },
+    {
+      "path": "mofacts\\client\\views\\experimentSetup\\contentGeneration.js",
+      "reason": "Referenced in mofacts\\client\\index.js"
+    },
+    {
+      "path": "mofacts\\client\\views\\experimentSetup\\contentUpload.html",
+      "reason": "Template 'contentUpload' is referenced"
+    },
+    {
+      "path": "mofacts\\client\\views\\experimentSetup\\contentUpload.js",
+      "reason": "Referenced in mofacts\\client\\index.js"
+    },
+    {
+      "path": "mofacts\\client\\views\\experimentSetup\\tdfAssignmentEdit.html",
+      "reason": "Template 'tdfAssignmentEdit' is referenced"
+    },
+    {
+      "path": "mofacts\\client\\views\\experimentSetup\\tdfAssignmentEdit.js",
+      "reason": "Referenced in mofacts\\client\\index.js"
+    },
+    {
+      "path": "mofacts\\client\\views\\home\\profile.html",
+      "reason": "Template 'profile' is referenced"
+    },
+    {
+      "path": "mofacts\\client\\views\\home\\profile.js",
+      "reason": "Referenced in mofacts\\client\\index.js"
+    },
+    {
+      "path": "mofacts\\client\\views\\home\\profileAudioToggles.html",
+      "reason": "Template 'profileAudioToggles' is referenced"
+    },
+    {
+      "path": "mofacts\\client\\views\\home\\profileAudioToggles.js",
+      "reason": "Referenced in mofacts\\client\\index.js"
+    },
+    {
+      "path": "mofacts\\client\\views\\home\\profileDebugToggles.html",
+      "reason": "Template 'profileDebugToggles' is referenced"
+    },
+    {
+      "path": "mofacts\\client\\views\\home\\profileDebugToggles.js",
+      "reason": "Referenced in mofacts\\client\\views\\home\\profileDebugToggles.html"
+    },
+    {
+      "path": "mofacts\\client\\views\\home\\profileDialogueToggles.html",
+      "reason": "Template 'profileDialogueToggles' is referenced"
+    },
+    {
+      "path": "mofacts\\client\\views\\home\\profileDialogueToggles.js",
+      "reason": "Referenced in mofacts\\client\\lib\\currentTestingHelpers.js"
+    },
+    {
+      "path": "mofacts\\client\\views\\home\\profileSouthwest.html",
+      "reason": "Template 'profileSouthwest' is referenced"
+    },
+    {
+      "path": "mofacts\\client\\views\\home\\profileSouthwest.js",
+      "reason": "Referenced in mofacts\\client\\lib\\router.js"
+    },
+    {
+      "path": "mofacts\\client\\views\\login\\resetPassword.html",
+      "reason": "Template 'resetPassword' is referenced"
+    },
+    {
+      "path": "mofacts\\client\\views\\login\\resetPassword.js",
+      "reason": "Referenced in mofacts\\client\\lib\\router.js"
+    },
+    {
+      "path": "mofacts\\client\\views\\new_templates\\curPageNumbers.html",
+      "reason": "Template 'curPageNumbers' is referenced"
+    },
+    {
+      "path": "mofacts\\client\\views\\new_templates\\curStudentPerformance.html",
+      "reason": "Template 'curStudentPerformance' is referenced"
+    },
+    {
+      "path": "mofacts\\client\\views\\new_templates\\curStudentPerformance.js",
+      "reason": "Referenced in mofacts\\client\\index.js"
+    },
+    {
+      "path": "mofacts\\client\\views\\new_templates\\experimentSettings.js",
+      "reason": "Referenced in mofacts\\client\\lib\\router.js"
+    },
+    {
+      "path": "mofacts\\client\\views\\new_templates\\footer.html",
+      "reason": "Template 'footer' is referenced"
+    },
+    {
+      "path": "mofacts\\client\\views\\new_templates\\help.html",
+      "reason": "Template 'help' is referenced"
+    },
+    {
+      "path": "mofacts\\client\\views\\new_templates\\help.js",
+      "reason": "Referenced in mofacts\\client\\index.js"
+    },
+    {
+      "path": "mofacts\\client\\views\\new_templates\\learningDashboard.html",
+      "reason": "Template 'learningDashboard' is referenced"
+    },
+    {
+      "path": "mofacts\\client\\views\\new_templates\\learningDashboard.js",
+      "reason": "Referenced in mofacts\\client\\lib\\router.js"
+    },
+    {
+      "path": "mofacts\\client\\views\\new_templates\\lessonSelect.html",
+      "reason": "Template 'lessonSelect' is referenced"
+    },
+    {
+      "path": "mofacts\\client\\views\\new_templates\\lessonSelect.js",
+      "reason": "Referenced in mofacts\\client\\lib\\router.js"
+    },
+    {
+      "path": "mofacts\\client\\views\\new_templates\\navigation.html",
+      "reason": "Template 'nav' is referenced"
+    },
+    {
+      "path": "mofacts\\client\\views\\new_templates\\navigation.js",
+      "reason": "Referenced in mofacts\\client\\views\\new_templates\\navigation.html"
+    },
+    {
+      "path": "mofacts\\client\\views\\new_templates\\signIn.html",
+      "reason": "Template 'signIn' is referenced"
+    },
+    {
+      "path": "mofacts\\client\\views\\new_templates\\signIn.js",
+      "reason": "Referenced in mofacts\\client\\lib\\router.js"
+    },
+    {
+      "path": "mofacts\\client\\views\\new_templates\\signUp.html",
+      "reason": "Template 'signUp' is referenced"
+    },
+    {
+      "path": "mofacts\\client\\views\\new_templates\\signUp.js",
+      "reason": "Referenced in mofacts\\client\\lib\\router.js"
+    },
+    {
+      "path": "mofacts\\client\\views\\new_templates\\studentReporting.html",
+      "reason": "Template 'studentReporting' is referenced"
+    },
+    {
+      "path": "mofacts\\client\\views\\new_templates\\studentReporting.js",
+      "reason": "Referenced in mofacts\\client\\lib\\router.js"
+    },
+    {
+      "path": "mofacts\\client\\views\\new_templates\\testlogin.html",
+      "reason": "Template 'testLogin' is referenced"
+    },
+    {
+      "path": "mofacts\\client\\views\\tabwarning.html",
+      "reason": "Template 'tabwarning' is referenced"
+    },
+    {
+      "path": "mofacts\\client\\views\\tabwarning.js",
+      "reason": "Referenced in mofacts\\client\\index.js"
+    },
+    {
+      "path": "mofacts\\client\\views\\test.js",
+      "reason": "Referenced in db\\initFixtures.js"
+    },
+    {
+      "path": "mofacts\\client\\views\\turkWorkflow.html",
+      "reason": "Template 'turkWorkflow' is referenced"
+    },
+    {
+      "path": "mofacts\\client\\views\\turkWorkflow.js",
+      "reason": "Referenced in mofacts\\client\\index.js"
+    },
+    {
+      "path": "mofacts\\client\\views\\userAdmin.html",
+      "reason": "Template 'userAdmin' is referenced"
+    },
+    {
+      "path": "mofacts\\client\\views\\userAdmin.js",
+      "reason": "Referenced in mofacts\\client\\index.js"
+    },
+    {
+      "path": "mofacts\\common\\Collections.js",
+      "reason": "Entry point or core file"
+    },
+    {
+      "path": "mofacts\\common\\Definitions.js",
+      "reason": "Entry point or core file"
+    },
+    {
+      "path": "mofacts\\common\\DynamicTdfGenerator.js",
+      "reason": "Referenced in mofacts\\client\\views\\experimentSetup\\contentGeneration.js"
+    },
+    {
+      "path": "mofacts\\common\\globalHelpers.js",
+      "reason": "Entry point or core file"
+    },
+    {
+      "path": "mofacts\\packages\\mofacts-accounts-microsoft\\client\\microsoft.js",
+      "reason": "Referenced in mofacts\\client\\views\\new_templates\\signIn.js"
+    },
+    {
+      "path": "mofacts\\packages\\mofacts-accounts-microsoft\\package.js",
+      "reason": "Entry point or core file"
+    },
+    {
+      "path": "mofacts\\packages\\mofacts-accounts-microsoft\\server\\microsoft.js",
+      "reason": "Referenced in mofacts\\client\\views\\new_templates\\signIn.js"
+    },
+    {
+      "path": "mofacts\\packages\\mofacts-microsoft-oauth\\client\\microsoft.js",
+      "reason": "Referenced in mofacts\\client\\views\\new_templates\\signIn.js"
+    },
+    {
+      "path": "mofacts\\packages\\mofacts-microsoft-oauth\\package.js",
+      "reason": "Entry point or core file"
+    },
+    {
+      "path": "mofacts\\packages\\mofacts-microsoft-oauth\\server\\microsoft.js",
+      "reason": "Referenced in mofacts\\client\\views\\new_templates\\signIn.js"
+    },
+    {
+      "path": "mofacts\\public\\lib\\audioRecorderWorker.js",
+      "reason": "Referenced in mofacts\\client\\lib\\audioRecorder.js"
+    },
+    {
+      "path": "mofacts\\server\\conversions\\convert.js",
+      "reason": "Referenced in mofacts\\server\\methods.js"
+    },
+    {
+      "path": "mofacts\\server\\experiment_times.js",
+      "reason": "Referenced in mofacts\\server\\methods.js"
+    },
+    {
+      "path": "mofacts\\server\\lib\\AllenNLP.js",
+      "reason": "Referenced in mofacts\\server\\lib\\ClozeAPI.js"
+    },
+    {
+      "path": "mofacts\\server\\lib\\BigInt\\n.js",
+      "reason": "Referenced in db\\initFixtures.js"
+    },
+    {
+      "path": "mofacts\\server\\lib\\BigInt\\z.js",
+      "reason": "Referenced in mofacts\\client\\lib\\gauge.js"
+    },
+    {
+      "path": "mofacts\\server\\lib\\CachedElaboratedFeedback.js",
+      "reason": "Referenced in mofacts\\server\\lib\\TutorialDialogue.js"
+    },
+    {
+      "path": "mofacts\\server\\lib\\ClozeAPI.js",
+      "reason": "Referenced in mofacts\\server\\lib\\Process.js"
+    },
+    {
+      "path": "mofacts\\server\\lib\\DefinitionalFeedback.js",
+      "reason": "Referenced in mofacts\\server\\lib\\CachedElaboratedFeedback.js"
+    },
+    {
+      "path": "mofacts\\server\\lib\\DependencyCollapser.js",
+      "reason": "Referenced in mofacts\\server\\lib\\AllenNLP.js"
+    },
+    {
+      "path": "mofacts\\server\\lib\\ElaboratedFeedback.js",
+      "reason": "Referenced in mofacts\\server\\lib\\CachedElaboratedFeedback.js"
+    },
+    {
+      "path": "mofacts\\server\\lib\\fable-library.2.10.2\\Array.js",
+      "reason": "Referenced in mofacts\\server\\lib\\AllenNLP.js"
+    },
+    {
+      "path": "mofacts\\server\\lib\\fable-library.2.10.2\\Async.js",
+      "reason": "Referenced in mofacts\\server\\lib\\Fable.SimpleHttp.2.4.0\\Http.js"
+    },
+    {
+      "path": "mofacts\\server\\lib\\fable-library.2.10.2\\AsyncBuilder.js",
+      "reason": "Referenced in mofacts\\server\\lib\\fable-library.2.10.2\\Async.js"
+    },
+    {
+      "path": "mofacts\\server\\lib\\fable-library.2.10.2\\BigInt.js",
+      "reason": "Referenced in mofacts\\server\\lib\\Thoth.Json.3.3.0\\Decode.js"
+    },
+    {
+      "path": "mofacts\\server\\lib\\fable-library.2.10.2\\Date.js",
+      "reason": "Referenced in mofacts\\client\\lib\\sessionUtils.js"
+    },
+    {
+      "path": "mofacts\\server\\lib\\fable-library.2.10.2\\DateOffset.js",
+      "reason": "Referenced in mofacts\\server\\lib\\Thoth.Json.3.3.0\\Decode.js"
+    },
+    {
+      "path": "mofacts\\server\\lib\\fable-library.2.10.2\\Decimal.js",
+      "reason": "Referenced in mofacts\\server\\lib\\BigInt\\z.js"
+    },
+    {
+      "path": "mofacts\\server\\lib\\fable-library.2.10.2\\Double.js",
+      "reason": "Referenced in mofacts\\server\\lib\\fable-library.2.10.2\\Reflection.js"
+    },
+    {
+      "path": "mofacts\\server\\lib\\fable-library.2.10.2\\Event.js",
+      "reason": "Referenced in mofacts\\server\\lib\\fable-library.2.10.2\\Timer.js"
+    },
+    {
+      "path": "mofacts\\server\\lib\\fable-library.2.10.2\\Int32.js",
+      "reason": "Referenced in mofacts\\server\\lib\\BigInt\\z.js"
+    },
+    {
+      "path": "mofacts\\server\\lib\\fable-library.2.10.2\\List.js",
+      "reason": "Referenced in mofacts\\client\\views\\experiment\\card.js"
+    },
+    {
+      "path": "mofacts\\server\\lib\\fable-library.2.10.2\\Long.js",
+      "reason": "Referenced in mofacts\\server\\lib\\BigInt\\n.js"
+    },
+    {
+      "path": "mofacts\\server\\lib\\fable-library.2.10.2\\Map.js",
+      "reason": "Referenced in mofacts\\client\\views\\adminControls.html"
+    },
+    {
+      "path": "mofacts\\server\\lib\\fable-library.2.10.2\\MutableMap.js",
+      "reason": "Referenced in mofacts\\server\\lib\\fable-library.2.10.2\\Map.js"
+    },
+    {
+      "path": "mofacts\\server\\lib\\fable-library.2.10.2\\MutableSet.js",
+      "reason": "Referenced in mofacts\\server\\lib\\fable-library.2.10.2\\Set.js"
+    },
+    {
+      "path": "mofacts\\server\\lib\\fable-library.2.10.2\\Observable.js",
+      "reason": "Referenced in mofacts\\server\\lib\\fable-library.2.10.2\\Event.js"
+    },
+    {
+      "path": "mofacts\\server\\lib\\fable-library.2.10.2\\Option.js",
+      "reason": "Referenced in mofacts\\server\\lib\\AllenNLP.js"
+    },
+    {
+      "path": "mofacts\\server\\lib\\fable-library.2.10.2\\Reflection.js",
+      "reason": "Referenced in mofacts\\server\\lib\\AllenNLP.js"
+    },
+    {
+      "path": "mofacts\\server\\lib\\fable-library.2.10.2\\RegExp.js",
+      "reason": "Referenced in mofacts\\server\\lib\\AllenNLP.js"
+    },
+    {
+      "path": "mofacts\\server\\lib\\fable-library.2.10.2\\Seq.js",
+      "reason": "Referenced in mofacts\\server\\lib\\AllenNLP.js"
+    },
+    {
+      "path": "mofacts\\server\\lib\\fable-library.2.10.2\\Set.js",
+      "reason": "Referenced in mofacts\\client\\lib\\currentTestingHelpers.js"
+    },
+    {
+      "path": "mofacts\\server\\lib\\fable-library.2.10.2\\String.js",
+      "reason": "Referenced in mofacts\\client\\lib\\currentTestingHelpers.js"
+    },
+    {
+      "path": "mofacts\\server\\lib\\fable-library.2.10.2\\Timer.js",
+      "reason": "Referenced in mofacts\\client\\views\\experiment\\card.js"
+    },
+    {
+      "path": "mofacts\\server\\lib\\fable-library.2.10.2\\TimeSpan.js",
+      "reason": "Referenced in mofacts\\server\\lib\\Thoth.Json.3.3.0\\Decode.js"
+    },
+    {
+      "path": "mofacts\\server\\lib\\fable-library.2.10.2\\Types.js",
+      "reason": "Referenced in mofacts\\server\\lib\\AllenNLP.js"
+    },
+    {
+      "path": "mofacts\\server\\lib\\fable-library.2.10.2\\Util.js",
+      "reason": "Referenced in mofacts\\server\\lib\\AllenNLP.js"
+    },
+    {
+      "path": "mofacts\\server\\lib\\fable-library.2.3.11\\Array.js",
+      "reason": "Referenced in mofacts\\server\\lib\\AllenNLP.js"
+    },
+    {
+      "path": "mofacts\\server\\lib\\fable-library.2.3.11\\Async.js",
+      "reason": "Referenced in mofacts\\server\\lib\\Fable.SimpleHttp.2.4.0\\Http.js"
+    },
+    {
+      "path": "mofacts\\server\\lib\\fable-library.2.3.11\\AsyncBuilder.js",
+      "reason": "Referenced in mofacts\\server\\lib\\fable-library.2.10.2\\Async.js"
+    },
+    {
+      "path": "mofacts\\server\\lib\\fable-library.2.3.11\\BigInt.js",
+      "reason": "Referenced in mofacts\\server\\lib\\Thoth.Json.3.3.0\\Decode.js"
+    },
+    {
+      "path": "mofacts\\server\\lib\\fable-library.2.3.11\\Date.js",
+      "reason": "Referenced in mofacts\\client\\lib\\sessionUtils.js"
+    },
+    {
+      "path": "mofacts\\server\\lib\\fable-library.2.3.11\\DateOffset.js",
+      "reason": "Referenced in mofacts\\server\\lib\\Thoth.Json.3.3.0\\Decode.js"
+    },
+    {
+      "path": "mofacts\\server\\lib\\fable-library.2.3.11\\Decimal.js",
+      "reason": "Referenced in mofacts\\server\\lib\\BigInt\\z.js"
+    },
+    {
+      "path": "mofacts\\server\\lib\\fable-library.2.3.11\\Int32.js",
+      "reason": "Referenced in mofacts\\server\\lib\\BigInt\\z.js"
+    },
+    {
+      "path": "mofacts\\server\\lib\\fable-library.2.3.11\\List.js",
+      "reason": "Referenced in mofacts\\client\\views\\experiment\\card.js"
+    },
+    {
+      "path": "mofacts\\server\\lib\\fable-library.2.3.11\\Long.js",
+      "reason": "Referenced in mofacts\\server\\lib\\BigInt\\n.js"
+    },
+    {
+      "path": "mofacts\\server\\lib\\fable-library.2.3.11\\Map.js",
+      "reason": "Referenced in mofacts\\client\\views\\adminControls.html"
+    },
+    {
+      "path": "mofacts\\server\\lib\\fable-library.2.3.11\\Option.js",
+      "reason": "Referenced in mofacts\\server\\lib\\AllenNLP.js"
+    },
+    {
+      "path": "mofacts\\server\\lib\\fable-library.2.3.11\\Reflection.js",
+      "reason": "Referenced in mofacts\\server\\lib\\AllenNLP.js"
+    },
+    {
+      "path": "mofacts\\server\\lib\\fable-library.2.3.11\\RegExp.js",
+      "reason": "Referenced in mofacts\\server\\lib\\AllenNLP.js"
+    },
+    {
+      "path": "mofacts\\server\\lib\\fable-library.2.3.11\\Seq.js",
+      "reason": "Referenced in mofacts\\server\\lib\\AllenNLP.js"
+    },
+    {
+      "path": "mofacts\\server\\lib\\fable-library.2.3.11\\Set.js",
+      "reason": "Referenced in mofacts\\client\\lib\\currentTestingHelpers.js"
+    },
+    {
+      "path": "mofacts\\server\\lib\\fable-library.2.3.11\\String.js",
+      "reason": "Referenced in mofacts\\client\\lib\\currentTestingHelpers.js"
+    },
+    {
+      "path": "mofacts\\server\\lib\\fable-library.2.3.11\\TimeSpan.js",
+      "reason": "Referenced in mofacts\\server\\lib\\Thoth.Json.3.3.0\\Decode.js"
+    },
+    {
+      "path": "mofacts\\server\\lib\\fable-library.2.3.11\\Types.js",
+      "reason": "Referenced in mofacts\\server\\lib\\AllenNLP.js"
+    },
+    {
+      "path": "mofacts\\server\\lib\\fable-library.2.3.11\\Util.js",
+      "reason": "Referenced in mofacts\\server\\lib\\AllenNLP.js"
+    },
+    {
+      "path": "mofacts\\server\\lib\\fable-library.2.8.4\\Array.js",
+      "reason": "Referenced in mofacts\\server\\lib\\AllenNLP.js"
+    },
+    {
+      "path": "mofacts\\server\\lib\\fable-library.2.8.4\\Async.js",
+      "reason": "Referenced in mofacts\\server\\lib\\Fable.SimpleHttp.2.4.0\\Http.js"
+    },
+    {
+      "path": "mofacts\\server\\lib\\fable-library.2.8.4\\AsyncBuilder.js",
+      "reason": "Referenced in mofacts\\server\\lib\\fable-library.2.10.2\\Async.js"
+    },
+    {
+      "path": "mofacts\\server\\lib\\fable-library.2.8.4\\BigInt.js",
+      "reason": "Referenced in mofacts\\server\\lib\\Thoth.Json.3.3.0\\Decode.js"
+    },
+    {
+      "path": "mofacts\\server\\lib\\fable-library.2.8.4\\Date.js",
+      "reason": "Referenced in mofacts\\client\\lib\\sessionUtils.js"
+    },
+    {
+      "path": "mofacts\\server\\lib\\fable-library.2.8.4\\DateOffset.js",
+      "reason": "Referenced in mofacts\\server\\lib\\Thoth.Json.3.3.0\\Decode.js"
+    },
+    {
+      "path": "mofacts\\server\\lib\\fable-library.2.8.4\\Decimal.js",
+      "reason": "Referenced in mofacts\\server\\lib\\BigInt\\z.js"
+    },
+    {
+      "path": "mofacts\\server\\lib\\fable-library.2.8.4\\Event.js",
+      "reason": "Referenced in mofacts\\server\\lib\\fable-library.2.10.2\\Timer.js"
+    },
+    {
+      "path": "mofacts\\server\\lib\\fable-library.2.8.4\\Int32.js",
+      "reason": "Referenced in mofacts\\server\\lib\\BigInt\\z.js"
+    },
+    {
+      "path": "mofacts\\server\\lib\\fable-library.2.8.4\\List.js",
+      "reason": "Referenced in mofacts\\client\\views\\experiment\\card.js"
+    },
+    {
+      "path": "mofacts\\server\\lib\\fable-library.2.8.4\\Long.js",
+      "reason": "Referenced in mofacts\\server\\lib\\BigInt\\n.js"
+    },
+    {
+      "path": "mofacts\\server\\lib\\fable-library.2.8.4\\Map.js",
+      "reason": "Referenced in mofacts\\client\\views\\adminControls.html"
+    },
+    {
+      "path": "mofacts\\server\\lib\\fable-library.2.8.4\\MutableMap.js",
+      "reason": "Referenced in mofacts\\server\\lib\\fable-library.2.10.2\\Map.js"
+    },
+    {
+      "path": "mofacts\\server\\lib\\fable-library.2.8.4\\MutableSet.js",
+      "reason": "Referenced in mofacts\\server\\lib\\fable-library.2.10.2\\MutableSet.js"
+    },
+    {
+      "path": "mofacts\\server\\lib\\fable-library.2.8.4\\Observable.js",
+      "reason": "Referenced in mofacts\\server\\lib\\fable-library.2.10.2\\Event.js"
+    },
+    {
+      "path": "mofacts\\server\\lib\\fable-library.2.8.4\\Option.js",
+      "reason": "Referenced in mofacts\\server\\lib\\AllenNLP.js"
+    },
+    {
+      "path": "mofacts\\server\\lib\\fable-library.2.8.4\\Reflection.js",
+      "reason": "Referenced in mofacts\\server\\lib\\AllenNLP.js"
+    },
+    {
+      "path": "mofacts\\server\\lib\\fable-library.2.8.4\\RegExp.js",
+      "reason": "Referenced in mofacts\\server\\lib\\AllenNLP.js"
+    },
+    {
+      "path": "mofacts\\server\\lib\\fable-library.2.8.4\\Seq.js",
+      "reason": "Referenced in mofacts\\server\\lib\\AllenNLP.js"
+    },
+    {
+      "path": "mofacts\\server\\lib\\fable-library.2.8.4\\Set.js",
+      "reason": "Referenced in mofacts\\client\\lib\\currentTestingHelpers.js"
+    },
+    {
+      "path": "mofacts\\server\\lib\\fable-library.2.8.4\\String.js",
+      "reason": "Referenced in mofacts\\client\\lib\\currentTestingHelpers.js"
+    },
+    {
+      "path": "mofacts\\server\\lib\\fable-library.2.8.4\\Timer.js",
+      "reason": "Referenced in mofacts\\client\\views\\experiment\\card.js"
+    },
+    {
+      "path": "mofacts\\server\\lib\\fable-library.2.8.4\\TimeSpan.js",
+      "reason": "Referenced in mofacts\\server\\lib\\Thoth.Json.3.3.0\\Decode.js"
+    },
+    {
+      "path": "mofacts\\server\\lib\\fable-library.2.8.4\\Types.js",
+      "reason": "Referenced in mofacts\\server\\lib\\AllenNLP.js"
+    },
+    {
+      "path": "mofacts\\server\\lib\\fable-library.2.8.4\\Util.js",
+      "reason": "Referenced in mofacts\\server\\lib\\AllenNLP.js"
+    },
+    {
+      "path": "mofacts\\server\\lib\\Fable.Fetch.2.2.0\\Fetch.js",
+      "reason": "Referenced in mofacts\\server\\lib\\AllenNLP.js"
+    },
+    {
+      "path": "mofacts\\server\\lib\\Fable.Promise.2.0.0\\Promise.js",
+      "reason": "Referenced in mofacts\\server\\lib\\AllenNLP.js"
+    },
+    {
+      "path": "mofacts\\server\\lib\\Fable.Promise.2.0.0\\PromiseImpl.js",
+      "reason": "Referenced in mofacts\\server\\lib\\AllenNLP.js"
+    },
+    {
+      "path": "mofacts\\server\\lib\\Fable.Promise.2.1.0\\Promise.js",
+      "reason": "Referenced in mofacts\\server\\lib\\AllenNLP.js"
+    },
+    {
+      "path": "mofacts\\server\\lib\\Fable.Promise.2.1.0\\PromiseImpl.js",
+      "reason": "Referenced in mofacts\\server\\lib\\AllenNLP.js"
+    },
+    {
+      "path": "mofacts\\server\\lib\\Fable.SimpleHttp.2.4.0\\Http.js",
+      "reason": "Referenced in mofacts\\server\\lib\\Process.js"
+    },
+    {
+      "path": "mofacts\\server\\lib\\Fable.SimpleHttp.2.4.0\\Types.js",
+      "reason": "Referenced in mofacts\\server\\lib\\AllenNLP.js"
+    },
+    {
+      "path": "mofacts\\server\\lib\\lib\\big.js",
+      "reason": "Referenced in mofacts\\server\\lib\\fable-library.2.10.2\\Decimal.js"
+    },
+    {
+      "path": "mofacts\\server\\lib\\lib\\long.js",
+      "reason": "Referenced in mofacts\\server\\lib\\fable-library.2.10.2\\Long.js"
+    },
+    {
+      "path": "mofacts\\server\\lib\\LongformQA.js",
+      "reason": "Referenced in mofacts\\server\\lib\\ElaboratedFeedback.js"
+    },
+    {
+      "path": "mofacts\\server\\lib\\Paraphrase.js",
+      "reason": "Referenced in mofacts\\server\\lib\\ClozeAPI.js"
+    },
+    {
+      "path": "mofacts\\server\\lib\\Process.js",
+      "reason": "Referenced in mofacts\\server\\lib\\ElaboratedFeedback.js"
+    },
+    {
+      "path": "mofacts\\server\\lib\\protection.js",
+      "reason": "Referenced in mofacts\\server\\lib\\WordFrequency.js"
+    },
+    {
+      "path": "mofacts\\server\\lib\\QuestionGenerator.js",
+      "reason": "Referenced in mofacts\\server\\lib\\TutorialDialogue.js"
+    },
+    {
+      "path": "mofacts\\server\\lib\\Thoth.Fetch.2.0.0\\Fetch.js",
+      "reason": "Referenced in mofacts\\server\\lib\\AllenNLP.js"
+    },
+    {
+      "path": "mofacts\\server\\lib\\Thoth.Json.3.3.0\\Decode.js",
+      "reason": "Referenced in mofacts\\server\\lib\\AllenNLP.js"
+    },
+    {
+      "path": "mofacts\\server\\lib\\Thoth.Json.3.3.0\\Encode.js",
+      "reason": "Referenced in mofacts\\server\\lib\\ClozeAPI.js"
+    },
+    {
+      "path": "mofacts\\server\\lib\\Thoth.Json.3.3.0\\Types.js",
+      "reason": "Referenced in mofacts\\server\\lib\\AllenNLP.js"
+    },
+    {
+      "path": "mofacts\\server\\lib\\Thoth.Json.4.0.0\\Decode.js",
+      "reason": "Referenced in mofacts\\server\\lib\\AllenNLP.js"
+    },
+    {
+      "path": "mofacts\\server\\lib\\Thoth.Json.4.0.0\\Encode.js",
+      "reason": "Referenced in mofacts\\server\\lib\\ClozeAPI.js"
+    },
+    {
+      "path": "mofacts\\server\\lib\\Thoth.Json.4.0.0\\Types.js",
+      "reason": "Referenced in mofacts\\server\\lib\\AllenNLP.js"
+    },
+    {
+      "path": "mofacts\\server\\lib\\TutorialDialogue.js",
+      "reason": "Referenced in mofacts\\client\\views\\experiment\\dialogueUtils.js"
+    },
+    {
+      "path": "mofacts\\server\\lib\\Wikifier.js",
+      "reason": "Referenced in mofacts\\server\\lib\\ElaboratedFeedback.js"
+    },
+    {
+      "path": "mofacts\\server\\lib\\WordFrequency.js",
+      "reason": "Referenced in mofacts\\server\\lib\\ClozeAPI.js"
+    },
+    {
+      "path": "mofacts\\server\\methods.js",
+      "reason": "Entry point or core file"
+    },
+    {
+      "path": "mofacts\\server\\orm.js",
+      "reason": "Referenced in mofacts\\client\\index.js"
+    },
+    {
+      "path": "mofacts\\server\\protection.js",
+      "reason": "Referenced in mofacts\\server\\lib\\WordFrequency.js"
+    },
+    {
+      "path": "mofacts\\server\\publications.js",
+      "reason": "Referenced in mofacts\\client\\views\\about.html"
+    },
+    {
+      "path": "mofacts\\server\\siteConfig.js",
+      "reason": "Referenced in mofacts\\server\\methods.js"
+    },
+    {
+      "path": "mofacts\\server\\turk.js",
+      "reason": "Referenced in mofacts\\client\\views\\turkWorkflow.js"
+    },
+    {
+      "path": "mofacts\\server\\turk_methods.js",
+      "reason": "Referenced in mofacts\\server\\methods.js"
+    }
+  ]
+}
