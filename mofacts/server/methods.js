@@ -2695,7 +2695,7 @@ async function loadStimsAndTdfsFromPrivate(adminUserId) {
       return fn.indexOf('.json') >= 0;
     });
     for (const filename of stimFilenames) {
-      const data = Assets.getText('stims/' + filename);
+      const data = await Assets.getTextAsync('stims/' + filename);
       const json = JSON.parse(data);
       await upsertStimFile(filename, json, adminUserId);
     }
@@ -2705,7 +2705,7 @@ async function loadStimsAndTdfsFromPrivate(adminUserId) {
         return fn.indexOf('.json') >= 0;
       });
       for (let filename of tdfFilenames) {
-        const data = Assets.getText('tdf/' + filename);
+        const data = await Assets.getTextAsync('tdf/' + filename);
         const json = JSON.parse(data);
         filename = filename.replace('.json', curSemester + '.json');
         const rec = {'fileName': filename, 'tdfs': json, 'ownerId': adminUserId, 'source': 'repo'};
@@ -4682,13 +4682,13 @@ Meteor.startup(async function() {
 
   //email admin that the server has restarted
   for (const emailaddr of allEmails){
-    const versionFile = Assets.getText('versionInfo.json')
+    const versionFile = await Assets.getTextAsync('versionInfo.json')
     const version = JSON.parse(versionFile);
     const rootUrl = Meteor.settings.ROOT_URL;
-    server = Meteor.absoluteUrl().split('//')[1];
+    let server = Meteor.absoluteUrl().split('//')[1];
     server = server.substring(0, server.length - 1);
-    subject = `MoFaCTs Deployed on ${server}`;
-    text = `The server has restarted.\nServer: ${server}\nVersion: ${JSON.stringify(version, null, 2)}`;
+    const subject = `MoFaCTs Deployed on ${server}`;
+    const text = `The server has restarted.\nServer: ${server}\nVersion: ${JSON.stringify(version, null, 2)}`;
     sendEmail(emailaddr, ownerEmail, subject, text)
   }
   
