@@ -665,7 +665,7 @@ Meteor.methods({
             let ownerOK = false;
             if (!!tdf && typeof tdf.owner !== 'undefined') {
               // They must be the owner of the TDF
-              ownerOK = (await Meteor.userAsync()._id === tdf.owner);
+              ownerOK = ((await Meteor.userAsync())._id === tdf.owner);
             }
     
             if (!ownerOK) {

@@ -2766,8 +2766,9 @@ export const methods = {
     return Meteor.settings.public;
   },
 
-  generateContent: function( percentage, stringArrayJsonOption, inputText ) {
-    if(await Meteor.userAsync() && await Meteor.userAsync().emails[0] || Meteor.isDevelopment){
+  generateContent: async function( percentage, stringArrayJsonOption, inputText ) {
+    const user = await Meteor.userAsync();
+    if((user && user.emails[0]) || Meteor.isDevelopment){
       serverConsole('generateContent', percentage, stringArrayJsonOption, inputText);
       ClozeAPI.GetSelectClozePercentage(percentage, stringArrayJsonOption, null, inputText).then((result) => {
         serverConsole('result', result);
@@ -3228,7 +3229,7 @@ export const methods = {
     return clozeGeneration.GetClozeAPI(null, null, null, rawText);
   },
 
-  serverLog: function(data) {
+  serverLog: async function(data) {
     if (await Meteor.userAsync()) {
       const logData = 'User:' + await Meteor.userAsync()._id + ', log:' + data;
       serverConsole(logData);
@@ -3519,7 +3520,7 @@ export const methods = {
     return false; // Impersonation still active
   },
 
-  getUserSpeechAPIKey: function() {
+  getUserSpeechAPIKey: async function() {
     const speechAPIKey = await Meteor.userAsync().speechAPIKey;
     if (speechAPIKey) {
       return decryptData(speechAPIKey);
@@ -3528,7 +3529,7 @@ export const methods = {
     }
   },
 
-  isUserSpeechAPIKeySetup: function() {
+  isUserSpeechAPIKeySetup: async function() {
     const speechAPIKey = await Meteor.userAsync().speechAPIKey;
     return !!speechAPIKey;
   },
@@ -3755,7 +3756,7 @@ export const methods = {
   },
 
   // Let client code send console output up to server
-  debugLog: function(logtxt) {
+  debugLog: async function(logtxt) {
     let usr = await Meteor.userAsync();
     if (!usr) {
       usr = '[No Current User]';
