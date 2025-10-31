@@ -1011,7 +1011,7 @@ async function getAllCourses() {
 async function getAllCourseSections() {
   try {
     serverConsole('getAllCourseSections');
-    ret =  await Courses.rawCollection().aggregate([
+    const ret =  await Courses.rawCollection().aggregate([
       {
         $match: {semester: curSemester}
       },
@@ -3869,7 +3869,7 @@ export const methods = {
 
   getTheme: async function() {
     serverConsole('getTheme');
-    ret = await DynamicSettings.findOneAsync({key: 'customTheme'}) 
+    const ret = await DynamicSettings.findOneAsync({key: 'customTheme'}) 
     if(!ret || ret.value.enabled == false) {
       return {
         themeName: 'MoFaCTS',
