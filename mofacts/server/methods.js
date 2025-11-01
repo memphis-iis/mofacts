@@ -4185,7 +4185,7 @@ const asyncMethods = {
       throw new Meteor.Error('google-speech-api-error', 'Error with Google SR API call: ' + error.message);
     }
   },
-  getUIDAndSecretForCurrentUser: function(){
+  getUIDAndSecretForCurrentUser: async function(){
     if(!Meteor.userId()){
       throw new Meteor.Error('Unauthorized: No user login');
     }
