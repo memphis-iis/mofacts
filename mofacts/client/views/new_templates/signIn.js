@@ -291,8 +291,9 @@ Template.signIn.events({
         });
 
         if (Session.get('debugging')) {
-          const currentUser = Meteor.users.findOne({_id: Meteor.userId()}).username;
-          clientConsole(2, '[GOOGLE-LOGIN] ' + currentUser + ' was logged in successfully! Current route is ', Router.current().route.getName());
+          const currentUser = Meteor.users.findOne({_id: Meteor.userId()});
+          const username = currentUser?.username || Meteor.userId();
+          clientConsole(2, '[GOOGLE-LOGIN] ' + username + ' was logged in successfully! Current route is ', Router.current().route.getName());
           Meteor.callAsync('debugLog', 'Sign in was successful');
         }
 
