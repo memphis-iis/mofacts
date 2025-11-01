@@ -4,6 +4,7 @@ import {sessionCleanUp} from '../../lib/sessionUtils';
 import {displayify} from '../../../common/globalHelpers';
 import {selectTdf} from '../home/profile'
 import {routeToSignin} from '../../lib/router';
+import {ServiceConfiguration} from 'meteor/service-configuration';
 
 
 Template.signIn.onRendered(async function() {
@@ -132,6 +133,15 @@ Template.signIn.events({
     clientConsole(2, '[MS-LOGIN] Current loginMode:', Session.get('loginMode'));
     clientConsole(2, '[MS-LOGIN] Current user:', Meteor.userId());
 
+    // Check if OAuth service configuration is ready
+    const msConfig = ServiceConfiguration.configurations.findOne({service: 'microsoft'});
+    if (!msConfig) {
+      clientConsole(1, '[MS-LOGIN] ERROR: OAuth service configuration not ready yet!');
+      alert('OAuth configuration is still loading. Please wait a moment and try again.');
+      return;
+    }
+    clientConsole(2, '[MS-LOGIN] OAuth config found:', !!msConfig);
+
     //set the login mode to microsoft
     Session.set('loginMode', 'microsoft');
 
@@ -250,6 +260,16 @@ Template.signIn.events({
     clientConsole(2, '[GOOGLE-LOGIN] Google Login Button Clicked');
     clientConsole(2, '[GOOGLE-LOGIN] Current loginMode:', Session.get('loginMode'));
     clientConsole(2, '[GOOGLE-LOGIN] Current user:', Meteor.userId());
+
+    // Check if OAuth service configuration is ready
+    const googleConfig = ServiceConfiguration.configurations.findOne({service: 'google'});
+    if (!googleConfig) {
+      clientConsole(1, '[GOOGLE-LOGIN] ERROR: OAuth service configuration not ready yet!');
+      alert('OAuth configuration is still loading. Please wait a moment and try again.');
+      $('#signInButton').prop('disabled', false);
+      return;
+    }
+    clientConsole(2, '[GOOGLE-LOGIN] OAuth config found:', !!googleConfig);
 
     // Set the login mode to google
     Session.set('loginMode', 'google');
@@ -386,7 +406,14 @@ Template.signIn.helpers({
   'checkSectionExists': (sectionName) => sectionName != undefined && sectionName.length > 0,
 
   'institutions': () => Session.get('institutions'),
-  
+
+  'oauthConfigReady': function() {
+    // Check if OAuth service configurations are loaded
+    const googleConfig = ServiceConfiguration.configurations.findOne({service: 'google'});
+    const msConfig = ServiceConfiguration.configurations.findOne({service: 'microsoft'});
+    return !!(googleConfig && msConfig);
+  },
+
 });
 
 // //////////////////////////////////////////////////////////////////////////
