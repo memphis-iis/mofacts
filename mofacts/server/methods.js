@@ -4435,16 +4435,18 @@ Meteor.startup(async function() {
   serverConsole('Log Notice (from siteConfig):', getConfigProperty('logNotice'));
 
   // Force our OAuth settings to be current
-  await ServiceConfiguration.configurations.removeAsync({'service': 'google'});
-  serverConsole('Removed Google service config - rewriting now');
-
+  serverConsole('Configuring Google OAuth service...');
   const google = getConfigProperty('google');
-  await ServiceConfiguration.configurations.insertAsync({
-    'service': 'google',
-    'clientId': _.prop(google, 'clientId'),
-    'secret': _.prop(google, 'secret'),
-  });
-  serverConsole('Rewrote Google service config');
+  await ServiceConfiguration.configurations.upsertAsync(
+    {service: 'google'},
+    {
+      $set: {
+        clientId: _.prop(google, 'clientId'),
+        secret: _.prop(google, 'secret'),
+      }
+    }
+  );
+  serverConsole('Google OAuth service configured');
 
   if(Meteor.settings.microsoft) {
     serverConsole('Configuring Microsoft OAuth service...');
