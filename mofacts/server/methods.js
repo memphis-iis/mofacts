@@ -215,7 +215,7 @@ Meteor.publish(null, function() {
   // The default data published to everyone - all TDF's and stims, and the
   // user data (user times log and user record) for them
   const defaultData = [
-    Meteor.users.find({_id: userId}, {fields: {roles: 1, username: 1, profile: 1}}),
+    Meteor.users.find({_id: userId}, {fields: {roles: 1, username: 1, profile: 1, loginParams: 1}}),
   ];
 
   return defaultData;
