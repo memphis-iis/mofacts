@@ -192,7 +192,7 @@ Meteor.methods({
     serverConsole('turkGetAssignment', assignid);
     try {
       const usr = await Meteor.userAsync();
-      if (!Roles.userIsInRoleAsync(usr, ['admin', 'teacher'])) {
+      if (!await Roles.userIsInRoleAsync(usr, ['admin', 'teacher'])) {
         throw new Error('You are not authorized to do that');
       }
 
@@ -215,7 +215,7 @@ Meteor.methods({
     serverConsole('turkSendMessage', workerid);
     try {
       const usr = await Meteor.userAsync();
-      if (!Roles.userIsInRoleAsync(usr, ['admin', 'teacher'])) {
+      if (!await Roles.userIsInRoleAsync(usr, ['admin', 'teacher'])) {
         throw new Error('You are not authorized to do that');
       }
 
@@ -362,7 +362,7 @@ Meteor.methods({
 
     try {
       const usr = await Meteor.userAsync();
-      if (!Roles.userIsInRoleAsync(usr, ['admin', 'teacher'])) {
+      if (!await Roles.userIsInRoleAsync(usr, ['admin', 'teacher'])) {
         throw new Error('You are not authorized to do that');
       }
       ownerId = usr._id;
@@ -471,7 +471,7 @@ Meteor.methods({
 
     try {
       const usr = await Meteor.userAsync();
-      if (!Roles.userIsInRoleAsync(usr, ['admin', 'teacher'])) {
+      if (!await Roles.userIsInRoleAsync(usr, ['admin', 'teacher'])) {
         throw new Error('You are not authorized to do that');
       }
       ownerId = usr._id;

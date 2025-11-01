@@ -534,11 +534,11 @@ async function processPackageUpload(fileObj, owner, zipLink, emailToggle){
     throw new Meteor.Error(401, 'Must be logged in to upload packages');
   }
 
-  if (owner !== this.userId && !Roles.userIsInRoleAsync(this.userId, ['admin'])) {
+  if (owner !== this.userId && !await Roles.userIsInRoleAsync(this.userId, ['admin'])) {
     throw new Meteor.Error(403, 'Can only upload packages for yourself unless admin');
   }
 
-  if (!Roles.userIsInRoleAsync(this.userId, ['admin', 'teacher'])) {
+  if (!await Roles.userIsInRoleAsync(this.userId, ['admin', 'teacher'])) {
     throw new Meteor.Error(403, 'Only admins and teachers can upload packages');
   }
 
@@ -814,7 +814,7 @@ async function saveContentFile(type, filename, filecontents, owner, packagePath 
   if (!filecontents) throw new Error('File Contents required for File Save');
   let ownerId = owner ? owner : await Meteor.userAsync()._id;
   if (!ownerId) throw new Error('No user logged in - no file upload allowed');
-  if (!Roles.userIsInRoleAsync(ownerId, ['admin', 'teacher'])) throw new Error('You are not authorized to upload files');
+  if (!await Roles.userIsInRoleAsync(ownerId, ['admin', 'teacher'])) throw new Error('You are not authorized to upload files');
   if (type != 'tdf' && type != 'stim') throw new Error('Unknown file type not allowed: ' + type);
 
   try {
@@ -887,7 +887,7 @@ async function combineAndSaveContentFile(tdf, stim, owner) {
   if (!ownerId) {
     throw new Error('No user logged in - no file upload allowed');
   }
-  if (!Roles.userIsInRoleAsync(ownerId, ['admin', 'teacher'])) {
+  if (!await Roles.userIsInRoleAsync(ownerId, ['admin', 'teacher'])) {
     throw new Error('You are not authorized to upload files');
   }
 
@@ -2346,7 +2346,7 @@ async function updateUserSecretKey(targetUserId){
 
 // Only removes secret key if the user is no longer an admin or teacher
 async function removeUserSecretKey(targetUserId){
-  if(!Roles.userIsInRoleAsync(targetUserId, ['admin', 'teacher']))
+  if(!await Roles.userIsInRoleAsync(targetUserId, ['admin', 'teacher']))
     await Meteor.users.updateAsync({_id: targetUserId}, { $set: { secretKey: '' }});
 }
 
@@ -2807,7 +2807,7 @@ export const methods = {
     if (!this.userId) {
       throw new Meteor.Error(401, 'Must be logged in');
     }
-    if (turkId !== this.userId && !Roles.userIsInRoleAsync(this.userId, ['admin'])) {
+    if (turkId !== this.userId && !await Roles.userIsInRoleAsync(this.userId, ['admin'])) {
       throw new Meteor.Error(403, 'Can only modify your own lockouts');
     }
 
@@ -2864,7 +2864,7 @@ export const methods = {
   },
 
   resetAllSecretKeys: async function() {
-    if(Meteor.userId() && Roles.userIsInRoleAsync(Meteor.userId(), ['admin'])){
+    if(Meteor.userId() && await Roles.userIsInRoleAsync(Meteor.userId(), ['admin'])){
       serverConsole('resetting user secrets');
       const users = await Meteor.users.find({$or: [{roles: "teacher"}, {roles: "admin"}]}).fetchAsync();
       for(user of users){
@@ -2980,7 +2980,7 @@ export const methods = {
     const tdf = await Tdfs.findOneAsync({_id: TDFId});
     if(tdf){
       // Check if user is owner or admin
-      if (tdf.ownerId !== this.userId && !Roles.userIsInRoleAsync(this.userId, ['admin', 'teacher'])) {
+      if (tdf.ownerId !== this.userId && !await Roles.userIsInRoleAsync(this.userId, ['admin', 'teacher'])) {
         throw new Meteor.Error(403, 'Access denied');
       }
       const accessors = tdf.accessors || [];
@@ -2997,7 +2997,7 @@ export const methods = {
     }
 
     const tdf = await Tdfs.findOneAsync({_id: TDFId});
-    if (tdf && tdf.ownerId !== this.userId && !Roles.userIsInRoleAsync(this.userId, ['admin', 'teacher'])) {
+    if (tdf && tdf.ownerId !== this.userId && !await Roles.userIsInRoleAsync(this.userId, ['admin', 'teacher'])) {
       throw new Meteor.Error(403, 'Access denied');
     }
 
@@ -3010,7 +3010,7 @@ export const methods = {
     if (!this.userId) {
       throw new Meteor.Error(401, 'Must be logged in');
     }
-    if (userId !== this.userId && !Roles.userIsInRoleAsync(this.userId, ['admin', 'teacher'])) {
+    if (userId !== this.userId && !await Roles.userIsInRoleAsync(this.userId, ['admin', 'teacher'])) {
       throw new Meteor.Error(403, 'Can only access your own TDFs');
     }
 
@@ -3038,7 +3038,7 @@ export const methods = {
     if (!tdf) {
       throw new Meteor.Error(404, 'TDF not found');
     }
-    if (tdf.ownerId !== this.userId && !Roles.userIsInRoleAsync(this.userId, ['admin', 'teacher'])) {
+    if (tdf.ownerId !== this.userId && !await Roles.userIsInRoleAsync(this.userId, ['admin', 'teacher'])) {
       throw new Meteor.Error(403, 'Only TDF owner or admin can assign accessors');
     }
 
@@ -3066,7 +3066,7 @@ export const methods = {
     }
 
     // Check if user is current owner or admin
-    if (tdf.ownerId !== this.userId && !Roles.userIsInRoleAsync(this.userId, ['admin'])) {
+    if (tdf.ownerId !== this.userId && !await Roles.userIsInRoleAsync(this.userId, ['admin'])) {
       throw new Meteor.Error(403, 'Only current owner or admin can transfer ownership');
     }
 
@@ -3189,7 +3189,7 @@ export const methods = {
   // Security: Clean up expired tokens (call this periodically via cron)
   cleanupExpiredPasswordResetTokens: async function() {
     // Only admins can cleanup
-    if (!this.userId || !Roles.userIsInRoleAsync(this.userId, ['admin'])) {
+    if (!this.userId || !await Roles.userIsInRoleAsync(this.userId, ['admin'])) {
       throw new Meteor.Error(403, 'Admin access required');
     }
 
@@ -3360,7 +3360,7 @@ export const methods = {
     if (!this.userId) {
       throw new Meteor.Error(401, 'Must be logged in');
     }
-    if (userId !== this.userId && !Roles.userIsInRoleAsync(this.userId, ['admin'])) {
+    if (userId !== this.userId && !await Roles.userIsInRoleAsync(this.userId, ['admin'])) {
       throw new Meteor.Error(403, 'Can only populate your own SSO profile');
     }
 
@@ -3392,7 +3392,7 @@ export const methods = {
       throw new Meteor.Error(401, 'Must be logged in');
     }
 
-    if (!Roles.userIsInRoleAsync(this.userId, ['admin'])) {
+    if (!await Roles.userIsInRoleAsync(this.userId, ['admin'])) {
       throw new Meteor.Error(403, 'Admin access required');
     }
 
@@ -3578,7 +3578,7 @@ export const methods = {
     // 2. User is admin/teacher
     // 3. TDF is accessible to this user (has userselect=true or user has history with it)
     const isOwner = tdf.ownerId === this.userId;
-    const isAdminOrTeacher = Roles.userIsInRoleAsync(this.userId, ['admin', 'teacher']);
+    const isAdminOrTeacher = await Roles.userIsInRoleAsync(this.userId, ['admin', 'teacher']);
     const isUserSelectTdf = tdf.content?.tdfs?.tutor?.setspec?.userselect === 'true';
     const hasHistory = await Histories.findOneAsync({ userId: this.userId, TDFId: tdfId });
 
@@ -3605,7 +3605,7 @@ export const methods = {
     // 2. User is admin/teacher
     // 3. TDF is accessible to this user (has userselect=true or user has history with it)
     const isOwner = tdf.ownerId === this.userId;
-    const isAdminOrTeacher = Roles.userIsInRoleAsync(this.userId, ['admin', 'teacher']);
+    const isAdminOrTeacher = await Roles.userIsInRoleAsync(this.userId, ['admin', 'teacher']);
     const isUserSelectTdf = tdf.content?.tdfs?.tutor?.setspec?.userselect === 'true';
     const hasHistory = await Histories.findOneAsync({ userId: this.userId, TDFId: tdfId });
 
@@ -3632,7 +3632,7 @@ export const methods = {
   userAdminRoleChange: async function(targetUserId, roleAction, roleName) {
     serverConsole('userAdminRoleChange', targetUserId, roleAction, roleName);
     const usr = await Meteor.userAsync();
-    if (!Roles.userIsInRoleAsync(usr, ['admin'])) {
+    if (!await Roles.userIsInRoleAsync(usr, ['admin'])) {
       throw new Error('You are not authorized to do that');
     }
 
@@ -3714,7 +3714,7 @@ export const methods = {
       serverConsole("Found", matchingTdfs.length, "TDFs with packageFile containing:", packageAssetId);
 
       matchingTdfs.forEach(async (TDF) => {
-        if(TDF && (Roles.userIsInRoleAsync(Meteor.userId(), ['admin']) || TDF.ownerId == Meteor.userId())){
+        if(TDF && (await Roles.userIsInRoleAsync(Meteor.userId(), ['admin']) || TDF.ownerId == Meteor.userId())){
           tdfId = TDF._id;
           await ComponentStates.removeAsync({TDFId: tdfId});
           await Assignments.removeAsync({TDFId: tdfId});
@@ -3780,7 +3780,7 @@ export const methods = {
     if (!asset) {
       throw new Meteor.Error(404, 'Asset not found');
     }
-    if (asset.userId !== this.userId && !Roles.userIsInRoleAsync(this.userId, ['admin'])) {
+    if (asset.userId !== this.userId && !await Roles.userIsInRoleAsync(this.userId, ['admin'])) {
       throw new Meteor.Error(403, 'Can only delete your own assets');
     }
 
@@ -3792,7 +3792,7 @@ export const methods = {
     if (!this.userId) {
       throw new Meteor.Error(401, 'Must be logged in');
     }
-    if (!Roles.userIsInRoleAsync(this.userId, ['admin'])) {
+    if (!await Roles.userIsInRoleAsync(this.userId, ['admin'])) {
       throw new Meteor.Error(403, 'Admin access required to toggle TDF visibility');
     }
 
@@ -3928,7 +3928,7 @@ export const methods = {
     serverConsole('setCustomHelpPage');
 
     // Verify user is admin
-    if (!Roles.userIsInRoleAsync(this.userId, ['admin'])) {
+    if (!await Roles.userIsInRoleAsync(this.userId, ['admin'])) {
       throw new Meteor.Error('unauthorized', 'Only admins can set custom help page');
     }
 
@@ -3968,7 +3968,7 @@ export const methods = {
     serverConsole('removeCustomHelpPage');
 
     // Verify user is admin
-    if (!Roles.userIsInRoleAsync(this.userId, ['admin'])) {
+    if (!await Roles.userIsInRoleAsync(this.userId, ['admin'])) {
       throw new Meteor.Error('unauthorized', 'Only admins can remove custom help page');
     }
 
@@ -4189,7 +4189,7 @@ const asyncMethods = {
     if(!Meteor.userId()){
       throw new Meteor.Error('Unauthorized: No user login');
     }
-    else if(!Roles.userIsInRoleAsync(Meteor.userId(), ['teacher', 'admin'])){
+    else if(!await Roles.userIsInRoleAsync(Meteor.userId(), ['teacher', 'admin'])){
       throw new Meteor.Error('Unauthorized: You do not have permission to this data');
     }
     return [Meteor.userId(), await Meteor.userAsync().secretKey]
@@ -4332,7 +4332,7 @@ const asyncMethods = {
 
   deleteAllFiles: async function(){
     // Security: Require admin role to delete all files
-    if (!this.userId || !Roles.userIsInRoleAsync(this.userId, ['admin'])) {
+    if (!this.userId || !await Roles.userIsInRoleAsync(this.userId, ['admin'])) {
       throw new Meteor.Error(403, 'Admin access required to delete all files');
     }
 
