@@ -4682,13 +4682,11 @@ Meteor.startup(async function() {
 
   //email admin that the server has restarted
   for (const emailaddr of allEmails){
-    const versionFile = await Assets.getTextAsync('versionInfo.json')
-    const version = JSON.parse(versionFile);
     const rootUrl = Meteor.settings.ROOT_URL;
     let server = Meteor.absoluteUrl().split('//')[1];
     server = server.substring(0, server.length - 1);
     const subject = `MoFaCTs Deployed on ${server}`;
-    const text = `The server has restarted.\nServer: ${server}\nVersion: ${JSON.stringify(version, null, 2)}`;
+    const text = `The server has restarted.\nServer: ${server}`;
     sendEmail(emailaddr, ownerEmail, subject, text)
   }
   
