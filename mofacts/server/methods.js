@@ -4447,6 +4447,7 @@ Meteor.startup(async function() {
   serverConsole('Rewrote Google service config');
 
   if(Meteor.settings.microsoft) {
+    serverConsole('Configuring Microsoft OAuth service...');
     //add microsoft service config
     await ServiceConfiguration.configurations.upsertAsync({service: 'microsoft'}, {
       $set: {
@@ -4458,6 +4459,9 @@ Meteor.startup(async function() {
         refreshToken: true,
       },
     });
+    serverConsole('Microsoft OAuth service configured');
+  } else {
+    serverConsole('WARNING: No Microsoft OAuth configuration found in settings');
   }
 
   // Figure out the "prime admin" (owner of repo TDF/stim files)

@@ -7,6 +7,9 @@ import {routeToSignin} from '../../lib/router';
 
 
 Template.signIn.onRendered(async function() {
+  // CRITICAL: Subscribe to OAuth service configuration for Google/Microsoft login
+  this.subscribe('meteor.loginServiceConfiguration');
+
   if (Session.get('loginMode') !== 'experiment') {
     clientConsole(2, 'password signin, setting login mode');
     Session.set('loginMode', 'password');
