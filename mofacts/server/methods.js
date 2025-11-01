@@ -4579,6 +4579,9 @@ Meteor.startup(async function() {
         'address': email,
         'verified': true,
       }];
+      // Set profile.username so client doesn't try to call populateSSOProfile
+      user.profile = user.profile || {};
+      user.profile.username = email;
     }
 
     serverConsole(`[ACCOUNTS] Creating new ${serviceName} user:`, dispUsr(user));
