@@ -4416,8 +4416,7 @@ Meteor.startup(async function() {
     res.setHeader('X-XSS-Protection', '1; mode=block');
     res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
     res.setHeader('Permissions-Policy', 'geolocation=(), microphone=(self)');
-    // Allow OAuth popup windows to communicate back (required for Meteor 3.0)
-    res.setHeader('Cross-Origin-Opener-Policy', 'same-origin-allow-popups');
+    // DO NOT set Cross-Origin-Opener-Policy - it breaks OAuth popup communication
     next();
   });
 
@@ -4496,7 +4495,7 @@ Meteor.startup(async function() {
       await Roles.addUsersToRolesAsync(user._id, roleName);
       //if the role name is admin or teacher, create a secret key for the user
       if(roleName == 'admin' || roleName == 'teacher'){
-        createUserSecretKey(user._id);
+        await createUserSecretKey(user._id);
       }
       serverConsole('Added user', username, 'to role', roleName);
     }
