@@ -4416,6 +4416,8 @@ Meteor.startup(async function() {
     res.setHeader('X-XSS-Protection', '1; mode=block');
     res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
     res.setHeader('Permissions-Policy', 'geolocation=(), microphone=(self)');
+    // Allow OAuth popup windows to communicate back (required for Meteor 3.0)
+    res.setHeader('Cross-Origin-Opener-Policy', 'same-origin-allow-popups');
     next();
   });
 
