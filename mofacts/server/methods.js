@@ -2674,14 +2674,28 @@ async function processAudioFilesForTDF(TDF){
 
 async function setUserLoginData(entryPoint, loginMode, curTeacher = undefined, curClass = undefined, assignedTdfs = undefined){
   serverConsole('setUserLoginData', entryPoint, loginMode, curTeacher, curClass, assignedTdfs);
+  const userId = Meteor.userId();
+  serverConsole('setUserLoginData userId:', userId);
+
+  if (!userId) {
+    throw new Meteor.Error('not-authorized', 'Must be logged in to set login data');
+  }
+
   const user = await Meteor.userAsync();
+  serverConsole('setUserLoginData found user:', !!user, 'username:', user?.username);
+
   let loginParams = user?.loginParams || {};
   loginParams.entryPoint = entryPoint;
   loginParams.curTeacher = curTeacher;
   loginParams.curClass = curClass;
   loginParams.loginMode = loginMode;
   loginParams.assignedTdfs = assignedTdfs;
-  await Meteor.users.updateAsync({_id: Meteor.userId()}, {$set: {loginParams: loginParams}});
+
+  serverConsole('setUserLoginData updating with loginParams:', loginParams);
+  const result = await Meteor.users.updateAsync({_id: userId}, {$set: {loginParams: loginParams}});
+  serverConsole('setUserLoginData update result:', result);
+
+  return result;
 }
 
 async function loadStimsAndTdfsFromPrivate(adminUserId) {
