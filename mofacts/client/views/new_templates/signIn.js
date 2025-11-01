@@ -157,30 +157,42 @@ Template.signIn.events({
         } else {
           clientConsole(2, '[MS-LOGIN] Login successful!');
 
-          // CRITICAL: Initialize loginParams just like Google login does
+          // Set loginParams on server and wait for DDP sync
           clientConsole(2, '[MS-LOGIN] Calling setUserLoginData...');
-          await meteorCallAsync('setUserLoginData', `direct`, Session.get('loginMode'));
+          try {
+            await meteorCallAsync('setUserLoginData', `direct`, Session.get('loginMode'));
+            clientConsole(2, '[MS-LOGIN] setUserLoginData completed on server');
+          } catch (error) {
+            clientConsole(1, '[MS-LOGIN] setUserLoginData failed:', error);
+            alert('Failed to save login data: ' + error.message);
+            return;
+          }
 
-          // CRITICAL: Wait for loginParams to actually appear in client-side user object
-          // There's a race between the server updating the user document and the client
-          // receiving the updated data via DDP. We must wait for it before routing.
-          clientConsole(2, '[MS-LOGIN] Waiting for loginParams to be set on client...');
-          await new Promise((resolve) => {
+          // Wait for loginParams to sync to client (with proper timeout handling)
+          clientConsole(2, '[MS-LOGIN] Waiting for loginParams to sync to client...');
+          const loginParamsFound = await new Promise((resolve) => {
             const checkLoginParams = Tracker.autorun((computation) => {
               const user = Meteor.user();
               if (user && user.loginParams) {
-                clientConsole(2, '[MS-LOGIN] loginParams detected on client:', user.loginParams);
+                clientConsole(2, '[MS-LOGIN] loginParams synced to client:', user.loginParams);
                 computation.stop();
-                resolve();
+                resolve(true);
               }
             });
-            // Timeout after 5 seconds
+            // Timeout after 10 seconds (increased from 5)
             setTimeout(() => {
               checkLoginParams.stop();
-              clientConsole(2, '[MS-LOGIN] Timeout waiting for loginParams, routing anyway...');
-              resolve();
-            }, 5000);
+              clientConsole(1, '[MS-LOGIN] TIMEOUT waiting for loginParams!');
+              resolve(false);
+            }, 10000);
           });
+
+          if (!loginParamsFound) {
+            clientConsole(1, '[MS-LOGIN] Login failed - loginParams never synced');
+            alert('Login failed: Session data not synchronized. Please try again.');
+            Meteor.logout();
+            return;
+          }
 
           clientConsole(2, '[MS-LOGIN] Calling logUserAgentAndLoginTime...');
           Meteor.callAsync('logUserAgentAndLoginTime', Meteor.userId(), navigator.userAgent);
@@ -188,8 +200,9 @@ Template.signIn.events({
           clientConsole(2, '[MS-LOGIN] Logging out other clients...');
           Meteor.logoutOtherClients();
 
-          clientConsole(2, '[MS-LOGIN] Routing to / (will redirect to profile after loginParams check)');
-          Router.go('/');
+          // Route to /profile like password login does (NOT to / which logs out users without loginParams)
+          clientConsole(2, '[MS-LOGIN] Routing to /profile');
+          Router.go('/profile');
         }
       } catch (error) {
         clientConsole(1, '[MS-LOGIN] FATAL ERROR in callback:', error);
@@ -265,30 +278,42 @@ Template.signIn.events({
 
         clientConsole(2, '[GOOGLE-LOGIN] Login successful!');
 
-        // CRITICAL: Initialize loginParams just like Microsoft login does
+        // Set loginParams on server and wait for DDP sync
         clientConsole(2, '[GOOGLE-LOGIN] Calling setUserLoginData...');
-        await meteorCallAsync('setUserLoginData', `direct`, Session.get('loginMode'));
+        try {
+          await meteorCallAsync('setUserLoginData', `direct`, Session.get('loginMode'));
+          clientConsole(2, '[GOOGLE-LOGIN] setUserLoginData completed on server');
+        } catch (error) {
+          clientConsole(1, '[GOOGLE-LOGIN] setUserLoginData failed:', error);
+          alert('Failed to save login data: ' + error.message);
+          return;
+        }
 
-        // CRITICAL: Wait for loginParams to actually appear in client-side user object
-        // There's a race between the server updating the user document and the client
-        // receiving the updated data via DDP. We must wait for it before routing.
-        clientConsole(2, '[GOOGLE-LOGIN] Waiting for loginParams to be set on client...');
-        await new Promise((resolve) => {
+        // Wait for loginParams to sync to client (with proper timeout handling)
+        clientConsole(2, '[GOOGLE-LOGIN] Waiting for loginParams to sync to client...');
+        const loginParamsFound = await new Promise((resolve) => {
           const checkLoginParams = Tracker.autorun((computation) => {
             const user = Meteor.user();
             if (user && user.loginParams) {
-              clientConsole(2, '[GOOGLE-LOGIN] loginParams detected on client:', user.loginParams);
+              clientConsole(2, '[GOOGLE-LOGIN] loginParams synced to client:', user.loginParams);
               computation.stop();
-              resolve();
+              resolve(true);
             }
           });
-          // Timeout after 5 seconds
+          // Timeout after 10 seconds (increased from 5)
           setTimeout(() => {
             checkLoginParams.stop();
-            clientConsole(2, '[GOOGLE-LOGIN] Timeout waiting for loginParams, routing anyway...');
-            resolve();
-          }, 5000);
+            clientConsole(1, '[GOOGLE-LOGIN] TIMEOUT waiting for loginParams!');
+            resolve(false);
+          }, 10000);
         });
+
+        if (!loginParamsFound) {
+          clientConsole(1, '[GOOGLE-LOGIN] Login failed - loginParams never synced');
+          alert('Login failed: Session data not synchronized. Please try again.');
+          Meteor.logout();
+          return;
+        }
 
         if (Session.get('debugging')) {
           const currentUser = Meteor.users.findOne({_id: Meteor.userId()});
@@ -303,8 +328,9 @@ Template.signIn.events({
         clientConsole(2, '[GOOGLE-LOGIN] Logging out other clients...');
         Meteor.logoutOtherClients();
 
-        clientConsole(2, '[GOOGLE-LOGIN] Routing to / (will redirect to profile after loginParams check)');
-        Router.go('/');
+        // Route to /profile like password login does (NOT to / which logs out users without loginParams)
+        clientConsole(2, '[GOOGLE-LOGIN] Routing to /profile');
+        Router.go('/profile');
       } catch (error) {
         clientConsole(1, '[GOOGLE-LOGIN] FATAL ERROR in callback:', error);
         clientConsole(1, '[GOOGLE-LOGIN] Error stack:', error.stack);
@@ -445,8 +471,18 @@ async function userPasswordCheck() {
                 true
             );
           }
+
+          try {
+            await meteorCallAsync('setUserLoginData', 'direct', Session.get('loginMode'));
+            clientConsole(2, '[EXPERIMENT-LOGIN] setUserLoginData completed');
+          } catch (error) {
+            clientConsole(1, '[EXPERIMENT-LOGIN] setUserLoginData failed:', error);
+            alert('Failed to save login data: ' + error.message);
+            $('#signInButton').prop('disabled', false);
+            return;
+          }
+
           signInNotify(false);
-          await meteorCallAsync('setUserLoginData', 'direct', Session.get('loginMode'));
         }
       });
 
@@ -495,8 +531,18 @@ async function userPasswordCheck() {
                   true
               );
             }
+
+            try {
+              await meteorCallAsync('setUserLoginData', 'direct', Session.get('loginMode'));
+              clientConsole(2, '[EXPERIMENT-LOGIN-2] setUserLoginData completed');
+            } catch (error) {
+              clientConsole(1, '[EXPERIMENT-LOGIN-2] setUserLoginData failed:', error);
+              alert('Failed to save login data: ' + error.message);
+              $('#signInButton').prop('disabled', false);
+              return;
+            }
+
             signInNotify(false);
-            await meteorCallAsync('setUserLoginData', 'direct', Session.get('loginMode'));
           }
         });
         } catch (error) {
@@ -537,8 +583,19 @@ async function userPasswordCheck() {
         $('#signInButton').prop('disabled', false);
         return;
       }
+
+      // Set loginParams BEFORE routing to ensure data is ready
+      try {
+        await meteorCallAsync('setUserLoginData', 'direct', Session.get('loginMode'));
+        clientConsole(2, '[PASSWORD-LOGIN] setUserLoginData completed');
+      } catch (error) {
+        clientConsole(1, '[PASSWORD-LOGIN] setUserLoginData failed:', error);
+        alert('Failed to save login data: ' + error.message);
+        $('#signInButton').prop('disabled', false);
+        return;
+      }
+
       signInNotify();
-      await meteorCallAsync('setUserLoginData', 'direct', Session.get('loginMode'));
     }
   });
 }
