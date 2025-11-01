@@ -2768,6 +2768,7 @@ export const methods = {
 
   generateContent: async function( percentage, stringArrayJsonOption, inputText ) {
     const user = await Meteor.userAsync();
+    const userEmail = user?.emails[0]?.address;
     if((user && user.emails[0]) || Meteor.isDevelopment){
       serverConsole('generateContent', percentage, stringArrayJsonOption, inputText);
       ClozeAPI.GetSelectClozePercentage(percentage, stringArrayJsonOption, null, inputText).then((result) => {
@@ -2789,7 +2790,7 @@ export const methods = {
         }
         file ? files = [file] : files = [];
         Email.send({
-          to: await Meteor.userAsync().emails[0].address,
+          to: userEmail,
           from: ownerEmail,
           subject: subject,
           text: message,
