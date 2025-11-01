@@ -2674,17 +2674,22 @@ async function processAudioFilesForTDF(TDF){
 
 async function setUserLoginData(entryPoint, loginMode, curTeacher = undefined, curClass = undefined, assignedTdfs = undefined){
   serverConsole('setUserLoginData', entryPoint, loginMode, curTeacher, curClass, assignedTdfs);
-  const userId = Meteor.userId();
+  // eslint-disable-next-line no-invalid-this
+  const userId = this.userId;
   serverConsole('setUserLoginData userId:', userId);
 
   if (!userId) {
     throw new Meteor.Error('not-authorized', 'Must be logged in to set login data');
   }
 
-  const user = await Meteor.userAsync();
+  const user = await Meteor.users.findOneAsync({_id: userId});
   serverConsole('setUserLoginData found user:', !!user, 'username:', user?.username);
 
-  let loginParams = user?.loginParams || {};
+  if (!user) {
+    throw new Meteor.Error('user-not-found', 'User document not found');
+  }
+
+  let loginParams = user.loginParams || {};
   loginParams.entryPoint = entryPoint;
   loginParams.curTeacher = curTeacher;
   loginParams.curClass = curClass;

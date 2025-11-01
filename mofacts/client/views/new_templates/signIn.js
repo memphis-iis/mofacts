@@ -170,6 +170,30 @@ Template.signIn.events({
         } else {
           clientConsole(2, '[MS-LOGIN] Login successful!');
 
+          // CRITICAL: Wait for Meteor.userId() to be set before calling server method
+          clientConsole(2, '[MS-LOGIN] Waiting for userId to be set...');
+          const userIdReady = await new Promise((resolve) => {
+            const checkUserId = Tracker.autorun((computation) => {
+              if (Meteor.userId()) {
+                clientConsole(2, '[MS-LOGIN] userId is set:', Meteor.userId());
+                computation.stop();
+                resolve(true);
+              }
+            });
+            setTimeout(() => {
+              checkUserId.stop();
+              clientConsole(1, '[MS-LOGIN] TIMEOUT waiting for userId!');
+              resolve(false);
+            }, 5000);
+          });
+
+          if (!userIdReady) {
+            clientConsole(1, '[MS-LOGIN] Login failed - userId never set');
+            alert('Login failed: User session not established. Please try again.');
+            Meteor.logout();
+            return;
+          }
+
           // Set loginParams on server and wait for DDP sync
           clientConsole(2, '[MS-LOGIN] Calling setUserLoginData...');
           try {
@@ -300,6 +324,30 @@ Template.signIn.events({
         }
 
         clientConsole(2, '[GOOGLE-LOGIN] Login successful!');
+
+        // CRITICAL: Wait for Meteor.userId() to be set before calling server method
+        clientConsole(2, '[GOOGLE-LOGIN] Waiting for userId to be set...');
+        const userIdReady = await new Promise((resolve) => {
+          const checkUserId = Tracker.autorun((computation) => {
+            if (Meteor.userId()) {
+              clientConsole(2, '[GOOGLE-LOGIN] userId is set:', Meteor.userId());
+              computation.stop();
+              resolve(true);
+            }
+          });
+          setTimeout(() => {
+            checkUserId.stop();
+            clientConsole(1, '[GOOGLE-LOGIN] TIMEOUT waiting for userId!');
+            resolve(false);
+          }, 5000);
+        });
+
+        if (!userIdReady) {
+          clientConsole(1, '[GOOGLE-LOGIN] Login failed - userId never set');
+          alert('Login failed: User session not established. Please try again.');
+          Meteor.logout();
+          return;
+        }
 
         // Set loginParams on server and wait for DDP sync
         clientConsole(2, '[GOOGLE-LOGIN] Calling setUserLoginData...');
