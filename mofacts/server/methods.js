@@ -118,12 +118,7 @@ const clozeGeneration = require('./lib/Process.js');
 
 const userIdToUsernames = {};
 const usernameToUserIds = {};
-// Note: This is top-level startup code, uses synchronous .map() which is still supported
-// Will be converted to async in Meteor.startup if needed for Meteor 3.0
-Meteor.users.find({}, {fields: {_id: 1, username: 1}, sort: [['username', 'asc']]}).map(function(user) {
-  userIdToUsernames[user._id] = user.username;
-  usernameToUserIds[user.username] = user._id;
-});
+// Username cache will be populated in Meteor.startup (async in Meteor 3.0)
 
 async function getUserIdforUsername(username) {
   let userId = usernameToUserIds[username];
@@ -3676,7 +3671,7 @@ export const methods = {
     };
   },
 
-  insertNewUsers: function(filename, filecontents) {
+  insertNewUsers: async function(filename, filecontents) {
     serverConsole('insertNewUsers: ' + filename);
     const allErrors = [];
     let rows = Papa.parse(filecontents).data;
@@ -3688,11 +3683,12 @@ export const methods = {
       const username = row[0];
       const password = row[1];
       serverConsole('username: ' + username + ', password: ' + password);
-      Meteor.call('signUpUser', username, password, true, function(error, result) {
-        if (error) {
-          allErrors.push({username: error});
-        }
-      });
+      try {
+        await Meteor.callAsync('signUpUser', username, password, true);
+      } catch (error) {
+        serverConsole('Error creating user ' + username + ':', error);
+        allErrors.push({username: username, error: error.message});
+      }
     }
     serverConsole('allErrors: ' + JSON.stringify(allErrors));
     return allErrors;
@@ -3727,13 +3723,12 @@ export const methods = {
             asset = stim.imageStimulus || stim.audioStimulus || stim.videoStimulus || false;
             if (asset) {
               //remove asset
-              await DynamicAssets.removeAsync({"name": asset}, function(err, result){
-                if(err){
-                  serverConsole(err);
-                } else {
-                  serverConsole("Asset removed: ", asset);
-                }
-              });
+              try {
+                await DynamicAssets.removeAsync({"name": asset});
+                serverConsole("Asset removed: ", asset);
+              } catch (err) {
+                serverConsole("Error removing asset:", err);
+              }
             }
           }
         }
@@ -4419,6 +4414,15 @@ Meteor.startup(async function() {
     // DO NOT set Cross-Origin-Opener-Policy - it breaks OAuth popup communication
     next();
   });
+
+  // Initialize username cache (Meteor 3.0 async pattern)
+  serverConsole('Initializing username cache...');
+  const users = await Meteor.users.find({}, {fields: {_id: 1, username: 1}, sort: [['username', 'asc']]}).fetchAsync();
+  for (const user of users) {
+    userIdToUsernames[user._id] = user.username;
+    usernameToUserIds[user.username] = user._id;
+  }
+  serverConsole('Username cache initialized with ' + users.length + ' users');
 
   highestStimuliSetId = await Tdfs.findOneAsync({}, {sort: {stimuliSetId: -1}, limit: 1 });
   nextEventId = await Histories.findOneAsync({}, {limit: 1, sort: {eventId: -1}})?.eventId + 1 || 1;
