@@ -231,7 +231,12 @@ Template.signIn.events({
     Meteor.logout();
     $('#signInButton').prop('disabled', true);
     event.preventDefault();
-    clientConsole(2, 'Google Login Proceeding');
+    clientConsole(2, '[GOOGLE-LOGIN] Google Login Button Clicked');
+    clientConsole(2, '[GOOGLE-LOGIN] Current loginMode:', Session.get('loginMode'));
+    clientConsole(2, '[GOOGLE-LOGIN] Current user:', Meteor.userId());
+
+    // Set the login mode to google
+    Session.set('loginMode', 'google');
 
     const options = {
       requestOfflineToken: true,
@@ -240,27 +245,70 @@ Template.signIn.events({
     };
 
     Meteor.loginWithGoogle(options, async function(err) {
-      if(!Session.get('curClass')){
-        //If we are not in a class and we log in, we need to disable embedded API keys.
-        Session.set('useEmbeddedAPIKeys', false);
-      }
-      if (err) {
-        $('#signInButton').prop('disabled', false);
-        // error handling
-        clientConsole(1, 'Could not log in with Google', err);
-        throw new Meteor.Error(Accounts.LoginCancelledError.numericError, 'Error');
-      }
+      try {
+        clientConsole(2, '[GOOGLE-LOGIN] Callback invoked!');
+        clientConsole(2, '[GOOGLE-LOGIN] Error:', err);
+        clientConsole(2, '[GOOGLE-LOGIN] User after login:', Meteor.userId());
+        clientConsole(2, '[GOOGLE-LOGIN] User object:', Meteor.user());
 
-      // Made it!
-      if (Session.get('debugging')) {
-        const currentUser = Meteor.users.findOne({_id: Meteor.userId()}).username;
-        clientConsole(2, currentUser + ' was logged in successfully! Current route is ', Router.current().route.getName());
-        Meteor.callAsync('debugLog', 'Sign in was successful');
+        if(!Session.get('curClass')){
+          //If we are not in a class and we log in, we need to disable embedded API keys.
+          Session.set('useEmbeddedAPIKeys', false);
+        }
+        if (err) {
+          $('#signInButton').prop('disabled', false);
+          // error handling
+          clientConsole(1, '[GOOGLE-LOGIN] Login Error:', err);
+          clientConsole(1, '[GOOGLE-LOGIN] Error details:', JSON.stringify(err, null, 2));
+          throw new Meteor.Error(Accounts.LoginCancelledError.numericError, 'Error');
+        }
+
+        clientConsole(2, '[GOOGLE-LOGIN] Login successful!');
+
+        // CRITICAL: Initialize loginParams just like Microsoft login does
+        clientConsole(2, '[GOOGLE-LOGIN] Calling setUserLoginData...');
+        await meteorCallAsync('setUserLoginData', `direct`, Session.get('loginMode'));
+
+        // CRITICAL: Wait for loginParams to actually appear in client-side user object
+        // There's a race between the server updating the user document and the client
+        // receiving the updated data via DDP. We must wait for it before routing.
+        clientConsole(2, '[GOOGLE-LOGIN] Waiting for loginParams to be set on client...');
+        await new Promise((resolve) => {
+          const checkLoginParams = Tracker.autorun((computation) => {
+            const user = Meteor.user();
+            if (user && user.loginParams) {
+              clientConsole(2, '[GOOGLE-LOGIN] loginParams detected on client:', user.loginParams);
+              computation.stop();
+              resolve();
+            }
+          });
+          // Timeout after 5 seconds
+          setTimeout(() => {
+            checkLoginParams.stop();
+            clientConsole(2, '[GOOGLE-LOGIN] Timeout waiting for loginParams, routing anyway...');
+            resolve();
+          }, 5000);
+        });
+
+        if (Session.get('debugging')) {
+          const currentUser = Meteor.users.findOne({_id: Meteor.userId()}).username;
+          clientConsole(2, '[GOOGLE-LOGIN] ' + currentUser + ' was logged in successfully! Current route is ', Router.current().route.getName());
+          Meteor.callAsync('debugLog', 'Sign in was successful');
+        }
+
+        clientConsole(2, '[GOOGLE-LOGIN] Calling logUserAgentAndLoginTime...');
+        Meteor.callAsync('logUserAgentAndLoginTime', Meteor.userId(), navigator.userAgent);
+
+        clientConsole(2, '[GOOGLE-LOGIN] Logging out other clients...');
+        Meteor.logoutOtherClients();
+
+        clientConsole(2, '[GOOGLE-LOGIN] Routing to / (will redirect to profile after loginParams check)');
+        Router.go('/');
+      } catch (error) {
+        clientConsole(1, '[GOOGLE-LOGIN] FATAL ERROR in callback:', error);
+        clientConsole(1, '[GOOGLE-LOGIN] Error stack:', error.stack);
+        alert('Google login failed: ' + error.message);
       }
-      Meteor.callAsync('logUserAgentAndLoginTime', Meteor.userId(), navigator.userAgent);
-      await meteorCallAsync('setUserLoginData', `direct`, Session.get('loginMode'));
-      Meteor.logoutOtherClients();
-      Router.go('/profile');
     });
   },
   'click #experimentSignin': function(event) {
