@@ -174,7 +174,7 @@ if((navigator.userAgent.indexOf("Opera") || navigator.userAgent.indexOf('OPR')) 
 }
 
 export {redoCardImage, meteorCallAsync};
-let verbosityLevel = 1;
+let verbosityLevel = 2;
 const meteorCallAsync = Promise.promisify(Meteor.call);
 
 function loadClientSettings() {
