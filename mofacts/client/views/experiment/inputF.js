@@ -42,7 +42,7 @@ Template.inputForceCorrect.rendered = function() {
 Template.inputForceCorrect.helpers({
   'fontSizeClass': function() {
     const params = Session.get('currentDeliveryParams');
-    return params ? 'h' + params.fontsize.toString() : 'h2'; // Bootstrap classes, default h2
+    return params && params.fontsize ? 'h' + params.fontsize.toString() : 'h2'; // Bootstrap classes, default h2
   },
 
   'getFontSizeStyle': function() {

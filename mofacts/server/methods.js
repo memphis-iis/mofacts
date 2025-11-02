@@ -4447,6 +4447,34 @@ const asyncMethods = {
       return res;
     }
   },
+
+  // ComponentStates methods for Meteor 3 compatibility
+  insertComponentState: async function(componentState) {
+    const userId = this.userId;
+    if (!userId) {
+      throw new Meteor.Error('not-authorized', 'Must be logged in to insert component state');
+    }
+    if (componentState.userId !== userId) {
+      throw new Meteor.Error('not-authorized', 'Cannot insert component state for another user');
+    }
+    return await ComponentStates.insertAsync(componentState);
+  },
+
+  updateComponentState: async function(selector, modifier) {
+    const userId = this.userId;
+    if (!userId) {
+      throw new Meteor.Error('not-authorized', 'Must be logged in to update component state');
+    }
+    // Verify the selector targets this user's documents
+    const doc = await ComponentStates.findOneAsync(selector);
+    if (!doc) {
+      throw new Meteor.Error('not-found', 'Component state not found');
+    }
+    if (doc.userId !== userId) {
+      throw new Meteor.Error('not-authorized', 'Cannot update component state for another user');
+    }
+    return await ComponentStates.updateAsync(selector, modifier);
+  },
 }
 
 // Server-side startup logic

@@ -172,16 +172,18 @@ Template.signIn.events({
       // We just need to wait for it to sync to the client via DDP
       clientConsole(2, '[MS-LOGIN] Waiting for loginParams to sync from server...');
       const loginParamsFound = await new Promise((resolve) => {
+        let timeoutId;
         const checkLoginParams = Tracker.autorun((computation) => {
           const user = Meteor.user();
           if (user && user.loginParams) {
             clientConsole(2, '[MS-LOGIN] loginParams synced to client:', user.loginParams);
             computation.stop();
+            clearTimeout(timeoutId);
             resolve(true);
           }
         });
         // Timeout after 5 seconds (should be fast since server sets it immediately)
-        setTimeout(() => {
+        timeoutId = setTimeout(() => {
           checkLoginParams.stop();
           clientConsole(1, '[MS-LOGIN] TIMEOUT waiting for loginParams!');
           resolve(false);
@@ -283,16 +285,18 @@ Template.signIn.events({
       // We just need to wait for it to sync to the client via DDP
       clientConsole(2, '[GOOGLE-LOGIN] Waiting for loginParams to sync from server...');
       const loginParamsFound = await new Promise((resolve) => {
+        let timeoutId;
         const checkLoginParams = Tracker.autorun((computation) => {
           const user = Meteor.user();
           if (user && user.loginParams) {
             clientConsole(2, '[GOOGLE-LOGIN] loginParams synced to client:', user.loginParams);
             computation.stop();
+            clearTimeout(timeoutId);
             resolve(true);
           }
         });
         // Timeout after 5 seconds (should be fast since server sets it immediately)
-        setTimeout(() => {
+        timeoutId = setTimeout(() => {
           checkLoginParams.stop();
           clientConsole(1, '[GOOGLE-LOGIN] TIMEOUT waiting for loginParams!');
           resolve(false);

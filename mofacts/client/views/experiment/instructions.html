@@ -72,30 +72,4 @@
             </div>
         {{/if}}
     </div>
-
-<script>
-// Attach globally for instructions pages
-const observer = new MutationObserver(() => {
-    attachAudioListeners();
-});
-observer.observe(document.body, { childList: true, subtree: true });
-
-function attachAudioListeners() {
-    document.querySelectorAll('.play-btn:not([data-listener-attached])').forEach(btn => {
-        const audId = btn.getAttribute('data-audio-id');
-        if (audId) {
-            const aud = document.getElementById(audId);
-            if (aud) {
-                btn.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    aud.currentTime = 0;
-                    aud.play().catch(console.error);
-                });
-                btn.setAttribute('data-listener-attached', 'true'); // Prevent duplicates
-            }
-        }
-    });
-}
-</script>
-
 </template>

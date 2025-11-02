@@ -268,6 +268,37 @@ Meteor.startup(function() {
   Session.set('debugging', true);
   sessionCleanUp();
 
+  // Suppress "logged out by server" errors for expired resume tokens during startup
+  // This is a normal occurrence when the app restarts or tokens expire
+  const originalConsoleError = console.error;
+  console.error = function(...args) {
+    const message = args.join(' ');
+    // Suppress "logged out by server" token expiration errors
+    if (message.includes("You've been logged out by the server") ||
+        message.includes("Error logging in with token")) {
+      // Silently ignore - this is just an expired resume token on startup
+      return;
+    }
+    // Log all other errors normally
+    originalConsoleError.apply(console, args);
+  };
+
+  // Restore original console.error after 5 seconds (after startup login attempts complete)
+  setTimeout(() => {
+    console.error = originalConsoleError;
+  }, 5000);
+
+  // Also handle via Accounts API
+  Accounts.onLoginFailure(function(error) {
+    if (error && error.error === 403 && error.reason &&
+        error.reason.includes("You've been logged out by the server")) {
+      // Silently ignore - this is just an expired resume token on startup
+      return;
+    }
+    // Log other login failures normally (using original console.error)
+    originalConsoleError('Login failure:', error);
+  });
+
   // Initialize multi-tab detection
   initTabDetection();
 
@@ -517,16 +548,20 @@ Template.registerHelper('isLoggedIn', function() {
   return Meteor.userId() !== null;
 });
 Template.registerHelper('showPerformanceDetails', function() {
+  const curModule = Session.get('curModule');
   const type = getTestType();
   clientConsole(2, 'showPerformanceDetails type:', type);
   const uiSettings = Session.get('curTdfUISettings');
-  if(Session.get('curModule') == 'instructions') return false;
+
+  // Only show performance details on card module
+  if(curModule !== 'card') return false;
+
   if(type == "s" && uiSettings.displayPerformanceDuringStudy) return true;
   if(type == "s" && !uiSettings.displayPerformanceDuringStudy) return false;
   if(Session.get('isVideoSession')) return false;
   if(type == "t" && uiSettings.displayPerformanceDuringTrial) return true;
   if(type == "t" && !uiSettings.displayPerformanceDuringTrial) return false;
-  return ((Session.get('curModule') == 'card' || Session.get('curModule') !== 'instructions') && Session.get('scoringEnabled') && Session.get('unitType') != 'schedule');
+  return (Session.get('scoringEnabled') && Session.get('unitType') != 'schedule');
 });
 Template.registerHelper('showPageNumbers', function() {
   return Session.get('showPageNumbers');

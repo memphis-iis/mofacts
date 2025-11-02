@@ -459,12 +459,50 @@ Template.instructions.helpers({
 });
 
 Template.instructions.rendered = function() {
+  const instance = this;
+
   // Make sure lockout interval timer is running
   lockoutKick();
+
   // Add event handlers for inline audio elements after DOM is ready
   Meteor.defer(() => {
     setupInlineAudioHandlers();
+
+    // Set up MutationObserver to handle dynamically added audio elements
+    const attachAudioListeners = () => {
+      document.querySelectorAll('.play-btn:not([data-listener-attached])').forEach(btn => {
+        const audId = btn.getAttribute('data-audio-id');
+        if (audId) {
+          const aud = document.getElementById(audId);
+          if (aud) {
+            btn.addEventListener('click', (e) => {
+              e.preventDefault();
+              aud.currentTime = 0;
+              aud.play().catch(console.error);
+            });
+            btn.setAttribute('data-listener-attached', 'true'); // Prevent duplicates
+          }
+        }
+      });
+    };
+
+    // Create and store observer on template instance for cleanup
+    instance.audioObserver = new MutationObserver(() => {
+      attachAudioListeners();
+    });
+    instance.audioObserver.observe(document.body, { childList: true, subtree: true });
+
+    // Attach to any existing elements
+    attachAudioListeners();
   });
+};
+
+Template.instructions.destroyed = function() {
+  // Clean up MutationObserver when template is destroyed
+  if (this.audioObserver) {
+    this.audioObserver.disconnect();
+    this.audioObserver = null;
+  }
 };
 
 // Function to set up inline audio click handlers

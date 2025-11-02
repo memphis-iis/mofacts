@@ -863,13 +863,14 @@ Template.card.events({
     handleUserInput(e, 'keypress');
   },
 
-  'click #removeQuestion': function(e) {
+  'click #removeQuestion': async function(e) {
     // check if the question was already reported.
     // This button only needs to fire if the user hasnt answered the question already.
-    if(!Session.get('wasReportedForRemoval'))
-      removeCardByUser();
-      Session.set('wasReportedForRemoval', true)
-      afterAnswerFeedbackCallback(Date.now(), trialStartTimestamp, 'removal', "", false, false, false);
+    if(!Session.get('wasReportedForRemoval')) {
+      await removeCardByUser();
+      Session.set('wasReportedForRemoval', true);
+      await afterAnswerFeedbackCallback(Date.now(), trialStartTimestamp, 'removal', "", false, false, false);
+    }
   },
 
   'click #dialogueIntroExit': function() {
@@ -1091,7 +1092,8 @@ Template.card.helpers({
   },
 
   'isImpersonating': function(){
-    return Meteor.user() ? Meteor.user().profile.impersonating : false;
+    const user = Meteor.user();
+    return user && user.profile ? user.profile.impersonating : false;
   },
 
   'displayFeedback': () => Session.get('displayFeedback') && Session.get('currentDeliveryParams').allowFeedbackTypeSelect,
@@ -2891,8 +2893,8 @@ async function afterFeedbackCallback(trialEndTimeStamp, trialStartTimeStamp, isT
       answerLogRecord.CFStartLatency = startLatency;
       answerLogRecord.CFEndLatency = endLatency;
       answerLogRecord.CFFeedbackLatency = feedbackLatency;
-      Meteor.callAsync('insertHistory', answerLogRecord);
-      updateExperimentState(newExperimentState, 'card.afterAnswerFeedbackCallback');
+      await Meteor.callAsync('insertHistory', answerLogRecord);
+      await updateExperimentState(newExperimentState, 'card.afterAnswerFeedbackCallback');
     } catch (e) {
       clientConsole(1, 'error writing history record:', e);
       throw new Error('error inserting history/updating state:', e);
@@ -3191,7 +3193,12 @@ function gatherAnswerLogRecord(trialEndTimeStamp, trialStartTimeStamp, source, u
   const correctAnswer = temp[0];
   const whichHintLevel = parseInt(Session.get('hintLevel')) || 0;
 
-  const filledInDisplay = JSON.parse(JSON.stringify(Session.get('currentDisplay')));
+  const currentDisplayRaw = Session.get('currentDisplay');
+  if (!currentDisplayRaw) {
+    clientConsole(1, 'ERROR: currentDisplay is undefined in gatherAnswerLogRecord');
+    return {};
+  }
+  const filledInDisplay = JSON.parse(JSON.stringify(currentDisplayRaw));
   let hintsDisplayed = "";
   let hintIndeces = null;
    
@@ -3450,7 +3457,7 @@ async function revisitUnit(unitNumber) {
   };
 
   //update the experiment state
-  updateExperimentState(newExperimentState, 'revisitUnit');
+  await updateExperimentState(newExperimentState, 'revisitUnit');
 
 
   let leaveTarget;
@@ -3474,6 +3481,10 @@ async function unitIsFinished(reason) {
   clearCardTimeout();
 
   const curTdf = Session.get('currentTdfFile');
+  if (!curTdf) {
+    clientConsole(1, 'ERROR: currentTdfFile not found in session');
+    return;
+  }
   const adaptive = curTdf.tdfs.tutor.unit[Session.get('currentUnitNumber')].adaptive
   const adaptiveLogic = curTdf.tdfs.tutor.unit[Session.get('currentUnitNumber')].adaptiveLogic
   let curUnitNum = Session.get('currentUnitNumber');
@@ -3557,9 +3568,9 @@ async function unitIsFinished(reason) {
         const curConditionNumber = setspec.condition.indexOf(curConditionFileName);
         //increment the completion count for the current condition
         rootTDFBoxed.conditionCounts[curConditionNumber] = rootTDFBoxed.conditionCounts[curConditionNumber] + 1;
-        conditionCounts = rootTDFBoxed.conditionCounts;
+        const conditionCounts = rootTDFBoxed.conditionCounts;
         //update the rootTDF
-        Meteor.callAsync('updateTdfConditionCounts', Session.get('currentRootTdfId'), conditionCounts);
+        await Meteor.callAsync('updateTdfConditionCounts', Session.get('currentRootTdfId'), conditionCounts);
       }
     leaveTarget = '/instructions';
   } else {
@@ -3574,9 +3585,9 @@ async function unitIsFinished(reason) {
         //get the condition number from the rootTDF
         const curConditionNumber = setspec.condition.indexOf(curConditionFileName);
         rootTDFBoxed.conditionCounts[curConditionNumber] = rootTDFBoxed.conditionCounts[curConditionNumber] + 1;
-        conditionCounts = rootTDFBoxes.completionCount;
+        const conditionCounts = rootTDFBoxed.conditionCounts;
         //update the rootTDF
-        Meteor.callAsync('updateTdfConditionCounts', Session.get('currentRootTdfId'), conditionCounts);
+        await Meteor.callAsync('updateTdfConditionCounts', Session.get('currentRootTdfId'), conditionCounts);
     }
 
     leaveTarget = '/profile';
@@ -3722,7 +3733,7 @@ async function prepareCard() {
   // Session.set('buttonTrial', undefined); // REMOVED - causes Blaze re-render delay
   Session.set('buttonList', []);
   $('#helpButton').prop("disabled",false);
-  if (engine.unitFinished()) {
+  if (await engine.unitFinished()) {
     unitIsFinished('Unit Engine');
   } else if (Session.get('isVideoSession')) {
     let indices = Session.get('engineIndices');
@@ -3797,7 +3808,7 @@ async function newQuestionHandler() {
     const clozeQuestionFilledIn = Answers.clozeStudy(currentDisplay.clozeText, experimentState.currentAnswer);
     currentDisplay.clozeText = clozeQuestionFilledIn;
     const newExperimentState = {currentDisplayEngine: currentDisplay};
-    updateExperimentState(newExperimentState, 'card.newQuestionHandler');
+    await updateExperimentState(newExperimentState, 'card.newQuestionHandler');
     experimentState.currentDisplayEngine = currentDisplay;
   }
 
@@ -3829,9 +3840,14 @@ function startQuestionTimeout() {
   if (delayMs < 1) {
     throw new Error('Could not find appropriate question timeout');
   }
-  
+
   // We do this little shuffle of session variables so the display will update all at the same time
-  const currentDisplayEngine = Session.get('currentExperimentState').currentDisplayEngine;
+  const currentExperimentState = Session.get('currentExperimentState');
+  if (!currentExperimentState) {
+    clientConsole(1, 'ERROR: currentExperimentState not found in startQuestionTimeout');
+    return;
+  }
+  const currentDisplayEngine = currentExperimentState.currentDisplayEngine;
 
   // displayReady is toggled false→true for each trial to control CSS opacity transitions
   // With CSS wrapper approach, DOM stays in place - only visibility changes via .trial-hidden class
@@ -3844,8 +3860,10 @@ function startQuestionTimeout() {
   Session.set('trialStartTimestamp', trialStartTimestamp);
   registerTimeout('readyPrompt', () => {
     const beginQuestionAndInitiateUserInputBound = beginQuestionAndInitiateUserInput.bind(null, delayMs, deliveryParams);
+    const state = Session.get('currentExperimentState');
+    const clozeQuestionParts = state ? state.clozeQuestionParts : undefined;
     const pipeline = checkAndDisplayTwoPartQuestion.bind(null,
-        deliveryParams, currentDisplayEngine, Session.get('currentExperimentState').clozeQuestionParts, beginQuestionAndInitiateUserInputBound);
+        deliveryParams, currentDisplayEngine, clozeQuestionParts, beginQuestionAndInitiateUserInputBound);
     checkAndDisplayPrestimulus(deliveryParams, pipeline);
   }, readyPromptTimeout, 'Ready prompt display time');
   countdownInterval = registerInterval('readyPromptCountdown', () => {
@@ -3918,10 +3936,21 @@ async function checkAndDisplayTwoPartQuestion(deliveryParams, currentDisplayEngi
   clientConsole(2, '[SM] checkAndDisplayTwoPartQuestion called in state:', currentTrialState);
 
   Session.set('currentDisplay', currentDisplayEngine);
-  Session.get('currentExperimentState').clozeQuestionParts = closeQuestionParts;
+  const currentExperimentState = Session.get('currentExperimentState');
+  if (!currentExperimentState) {
+    clientConsole(1, 'ERROR: currentExperimentState not found in session');
+    nextStageCb();
+    return;
+  }
+  currentExperimentState.clozeQuestionParts = closeQuestionParts;
 
   const handleTwoPartQuestion = () => {
-    const questionPart2 = Session.get('currentExperimentState').currentQuestionPart2;
+    const currentExperimentState = Session.get('currentExperimentState');
+    if (!currentExperimentState) {
+      nextStageCb();
+      return;
+    }
+    const questionPart2 = currentExperimentState.currentQuestionPart2;
     if (!questionPart2) {
       nextStageCb();
       return;
@@ -3932,7 +3961,10 @@ async function checkAndDisplayTwoPartQuestion(deliveryParams, currentDisplayEngi
     registerTimeout('twoPartQuestionDelay', () => {
       clientConsole(2, '[SM] Displaying question part 2');
       Session.set('currentDisplay', {'text': questionPart2});
-      Session.get('currentExperimentState').currentQuestionPart2 = undefined;
+      const state = Session.get('currentExperimentState');
+      if (state) {
+        state.currentQuestionPart2 = undefined;
+      }
       redoCardImage();
       nextStageCb();
     }, initialViewDelay, 'Two-part question initial view delay (TDF parameter)');
@@ -3978,6 +4010,11 @@ async function checkAndDisplayTwoPartQuestion(deliveryParams, currentDisplayEngi
 function beginQuestionAndInitiateUserInput(delayMs, deliveryParams) {
   firstKeypressTimestamp = 0;
   const currentDisplay = Session.get('currentDisplay');
+
+  if (!currentDisplay) {
+    clientConsole(1, 'ERROR: currentDisplay is undefined in beginQuestionAndInitiateUserInput');
+    return;
+  }
 
   if (currentDisplay.audioSrc) {
     const timeuntilaudio = deliveryParams.timeuntilaudio;
@@ -4788,28 +4825,20 @@ async function processLINEAR16(data) {
       tdfSpeechAPIKey = '';
     }
     // Make the actual call to the google speech api with the audio data for transcription
-    if (tdfSpeechAPIKey && tdfSpeechAPIKey != '') {
-      clientConsole(2, '[SR] Using TDF-embedded API key');
-      (async () => {
-        try {
-          const res = await Meteor.callAsync('makeGoogleSpeechAPICall', Session.get('currentTdfId'), "", request, answerGrammar);
-          speechAPICallback(null, res);
-        } catch (err) {
-          speechAPICallback(err, null);
-        }
-      })();
-    // If we don't have a tdf provided speech api key load up the user key
-    // NOTE: we shouldn't be able to get here if there is no user key
-    } else {
-      clientConsole(2, '[SR] Using user-provided API key');
-      (async () => {
-        try {
-          const res = await Meteor.callAsync('makeGoogleSpeechAPICall', Session.get('currentTdfId'), Session.get('speechAPIKey'), request, answerGrammar);
-          speechAPICallback(null, res);
-        } catch (err) {
-          speechAPICallback(err, null);
-        }
-      })();
+    try {
+      let res;
+      if (tdfSpeechAPIKey && tdfSpeechAPIKey != '') {
+        clientConsole(2, '[SR] Using TDF-embedded API key');
+        res = await Meteor.callAsync('makeGoogleSpeechAPICall', Session.get('currentTdfId'), "", request, answerGrammar);
+      } else {
+        // If we don't have a tdf provided speech api key load up the user key
+        // NOTE: we shouldn't be able to get here if there is no user key
+        clientConsole(2, '[SR] Using user-provided API key');
+        res = await Meteor.callAsync('makeGoogleSpeechAPICall', Session.get('currentTdfId'), Session.get('speechAPIKey'), request, answerGrammar);
+      }
+      speechAPICallback(null, res);
+    } catch (err) {
+      speechAPICallback(err, null);
     }
   } else {
     clientConsole(2, '[SR] processLINEAR16 userAnswer not defined');
@@ -5280,10 +5309,10 @@ async function updateExperimentState(newState, codeCallLocation, unitEngineOverr
   }
   if(Object.keys(curExperimentState).length === 0){
     curExperimentState = Object.assign(JSON.parse(JSON.stringify(curExperimentState)), newState);
-    Meteor.callAsync('createExperimentState', curExperimentState);
+    await Meteor.callAsync('createExperimentState', curExperimentState);
   } else {
     curExperimentState = Object.assign(JSON.parse(JSON.stringify(curExperimentState)), newState);
-    Meteor.callAsync('updateExperimentState', curExperimentState, curExperimentState.id);
+    await Meteor.callAsync('updateExperimentState', curExperimentState, curExperimentState.id);
   }
   clientConsole(2, 'updateExperimentState', codeCallLocation, '\nnew:', curExperimentState);
   Session.set('currentExperimentState', curExperimentState);
@@ -5381,17 +5410,17 @@ async function resumeFromComponentState() {
         newExperimentState.conditionNote = 'Selected from ' + _.display(setspec.condition.length) + ' conditions';
         clientConsole(2, 'Exp Condition', conditionTdfId, newExperimentState.conditionNote);
       } else {
-        conditionCounts = rootTDFBoxed.conditionCounts;
+        let conditionCounts = rootTDFBoxed.conditionCounts;
         if(setspec.loadbalancing == "max"){
           //we check the conditionCounts and select randomly from the conditions with a count less than the max
           let max = 0;
           let maxConditions = [];
-          for(condition in setspec.condition){
+          for(const condition in setspec.condition){
             if(conditionCounts[condition] > max){
               max = conditionCounts[condition];
             }
           }
-          for(condition in setspec.condition){
+          for(const condition in setspec.condition){
             if(conditionCounts[condition] < max){
               maxConditions.push(setspec.condition[condition]);
             }
@@ -5417,12 +5446,12 @@ async function resumeFromComponentState() {
           //we check the conditionCounts and select randomly from the conditions with a count equal to the min
           let min = 1000000000;
           let minConditions = [];
-          for(condition in setspec.condition){
+          for(const condition in setspec.condition){
             if(conditionCounts[condition] < min){
               min = conditionCounts[condition];
             }
           }
-          for(condition in setspec.condition){
+          for(const condition in setspec.condition){
             if(conditionCounts[condition] == min){
               minConditions.push(setspec.condition[condition]);
             }
@@ -5455,22 +5484,22 @@ async function resumeFromComponentState() {
     if (setspec.countcompletion == "beginning") {
       //reload the conditionCounts from the rootTDF
       rootTDFBoxed = Tdfs.findOne({_id: Session.get('currentRootTdfId')});
-      conditionCounts = rootTDFBoxed.conditionCounts;
-      conditions = rootTDF.tdfs.tutor.setspec.condition;
+      const conditionCounts = rootTDFBoxed.conditionCounts;
+      const conditions = rootTDF.tdfs.tutor.setspec.condition;
       //iterate the conditionCounts for the condition we selected
-      conditionFileName = Tdfs.findOne({_id: conditionTdfId}).content.fileName;
-      for(condition in conditions){
+      const conditionFileName = Tdfs.findOne({_id: conditionTdfId}).content.fileName;
+      for(const condition in conditions){
         if(conditions[condition] == conditionFileName){
           conditionCounts[condition] = conditionCounts[condition] + 1;
           break;
         }
       }
 
-      Meteor.callAsync('updateTdfConditionCounts', Session.get('currentRootTdfId'), conditionCounts);
+      await Meteor.callAsync('updateTdfConditionCounts', Session.get('currentRootTdfId'), conditionCounts);
     }
 
     newExperimentState.conditionTdfId = conditionTdfId;
-    updateExperimentState(newExperimentState, 'setExpCondition');
+    await updateExperimentState(newExperimentState, 'setExpCondition');
   }
 
     if (!conditionTdfId) {
@@ -5626,8 +5655,8 @@ async function resumeFromComponentState() {
     Session.set('questionIndex', 0);
     newExperimentState.questionIndex = 0;
   }
-  
-  updateExperimentState(newExperimentState, 'card.resumeFromComponentState');
+
+  await updateExperimentState(newExperimentState, 'card.resumeFromComponentState');
 
   //custom settings for user interface
   //we get the current settings from the tdf file's setspec
@@ -5924,7 +5953,7 @@ async function processUserTimesLog() {
     Session.set('currentDeliveryParams', getCurrentDeliveryParams());
     Session.set('scoringEnabled', Session.get('currentDeliveryParams').scoringEnabled);
 
-    updateExperimentState(newExperimentState, 'card.processUserTimesLog');
+    await updateExperimentState(newExperimentState, 'card.processUserTimesLog');
     await engine.loadComponentStates();
 
     // If we make it here, then we know we won't need a resume until something
@@ -5966,7 +5995,7 @@ async function processUserTimesLog() {
       // If we get this far and the unit engine thinks the unit is finished,
       // we might need to stick with the instructions *IF AND ONLY IF* the
       // lockout period hasn't finished (which prepareCard won't handle)
-      if (engine.unitFinished()) {
+      if (await engine.unitFinished()) {
         let lockoutMins = Session.get('currentDeliveryParams').lockoutminutes;
         user = Meteor.user();
         isAdmin = Roles.userIsInRoleAsync(user, 'admin');

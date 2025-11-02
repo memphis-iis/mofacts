@@ -25,7 +25,9 @@ export {createScheduleUnit, createModelUnit, createEmptyUnit};
 const blank = '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
 
 async function create(func, curExperimentData) {
-  const engine = _.extend(defaultUnitEngine(curExperimentData), func());
+  const baseEngine = await defaultUnitEngine(curExperimentData);
+  const engineExtension = await func();
+  const engine = _.extend(baseEngine, engineExtension);
   await engine.init();
   return engine;
 }
@@ -145,16 +147,16 @@ async function defaultUnitEngine(curExperimentData) {
           nextChar = reconstructedAnswer.length;
         }
       }
-      
-      clozeAnswerParts = clozeAnswer.split(' ');
-      for(let part of clozeAnswerParts.length){
-        if(part == 0 && hintLevel > 0){
-          clozeAnswerParts[part] = clozeAnswerParts[part].replace(/([_]+[ ]?)+/, `<u>${blank}</u>`);
+
+      const clozeAnswerParts = clozeAnswer.split(' ');
+      for(let i = 0; i < clozeAnswerParts.length; i++){
+        if(i == 0 && hintLevel > 0){
+          clozeAnswerParts[i] = clozeAnswerParts[i].replace(/([_]+[ ]?)+/, `<u>${blank}</u>`);
         }
         else{
-          clozeAnswerParts[part] = clozeAnswerParts[part].replace(/([_]+[ ]?)+/, `<u>${blank + blank}</u>`);
+          clozeAnswerParts[i] = clozeAnswerParts[i].replace(/([_]+[ ]?)+/, `<u>${blank + blank}</u>`);
         }
-        clientConsole(2, part);
+        clientConsole(2, i);
       }
       clozeAnswer = clozeAnswerParts.join(' ');
       // eslint-disable-next-line prefer-const
@@ -178,7 +180,7 @@ async function defaultUnitEngine(curExperimentData) {
       return {clozeQuestion, clozeMissingSyllables, clozeQuestionParts, hintLevel, reconstructedAnswer};
     },
 
-    setUpCardQuestionSyllables: function(currentQuestion, currentQuestionPart2,
+    setUpCardQuestionSyllables: async function(currentQuestion, currentQuestionPart2,
         currentStimAnswer, probFunctionParameters, hintLevel, curQuestionSyllables) {
       clientConsole(1, 'setUpCardQuestionSyllables: ', currentQuestion, currentQuestionPart2,
           currentStimAnswer, probFunctionParameters);
@@ -196,7 +198,7 @@ async function defaultUnitEngine(curExperimentData) {
             //if(!this.cachedSyllables.data[answer]){
               clientConsole(1, 'no syllable data for that answer, throw error');
               const currentStimuliSetId = Session.get('currentStimuliSetId');
-              Meteor.callAsync('updateStimSyllables', currentStimuliSetId);
+              await Meteor.callAsync('updateStimSyllables', currentStimuliSetId);
               alert('Something went wrong generating hints. Please report this error to the administrator and restart your trial');
           // } else {
           //   //We assume no hints were generated initially, meaning the tdf didn't have hints to start.
@@ -302,7 +304,7 @@ async function defaultUnitEngine(curExperimentData) {
         currentAnswerSyllables,
         clozeQuestionParts,
         currentAnswer,
-      } = this.setUpCardQuestionSyllables(currentQuestion, currentQuestionPart2, currentStimAnswer,
+      } = await this.setUpCardQuestionSyllables(currentQuestion, currentQuestionPart2, currentStimAnswer,
           probFunctionParameters, whichHintLevel, cluster.stims[whichStim].syllables);
       
       clientConsole(1, 'HintLevel: setUpCardQuestionAndAnswerGlobals',whichHintLevel);  
@@ -314,9 +316,9 @@ async function defaultUnitEngine(curExperimentData) {
         curStim.hintLevel = 0;
         //check for tdf hints enabled
         const currentTdfFile = Tdfs.findOne({_id: Session.get('currentTdfId')});
-        tdfHintsEnabled = currentTdfFile.content.tdfs.tutor.setspec.hintsEnabled == "true";
+        const tdfHintsEnabled = currentTdfFile.content.tdfs.tutor.setspec.hintsEnabled == "true";
         //check for stim hints enabled
-        stimHintsEnabled = currentDisplay.hintsEnabled;
+        const stimHintsEnabled = currentDisplay.hintsEnabled;
         //if both are enabled, use hints
         if (tdfHintsEnabled && stimHintsEnabled) {
           curStim.hintLevel = whichHintLevel;
@@ -692,9 +694,10 @@ async function modelUnitEngine() {
       const tdfDebugLog=[];
       const unitNumber = Session.get('currentUnitNumber');
       const curTdf = Tdfs.findOne({_id: Session.get('currentTdfId')});
-      const unitTypeParams = curTdf.content.tdfs.tutor.unit[unitNumber].assessmentsession || curTdf.content.tdfs.tutor.unit[unitNumber].learningsession;  
+      const unitTypeParams = curTdf.content.tdfs.tutor.unit[unitNumber].assessmentsession || curTdf.content.tdfs.tutor.unit[unitNumber].learningsession;
+      let clusterList;
       unitTypeParams ? clusterList = unitTypeParams.clusterlist : clusterList = false;
-      unitClusterList = [];
+      const unitClusterList = [];
       if(!clusterList){ clientConsole(2, 'no clusterlist found for unit ' + unitNumber); }
       clusterList.split(' ').forEach(
         value => {
@@ -708,7 +711,7 @@ async function modelUnitEngine() {
           }
         }
       );
-      for (clusterIndex of unitClusterList) {
+      for (const clusterIndex of unitClusterList) {
         const card = cardProbabilities.cards[clusterIndex];
         const stimCluster = stimClusters[clusterIndex];
         for (let stimIndex = 0; stimIndex < card.stims.length; stimIndex++) {
@@ -767,9 +770,9 @@ async function modelUnitEngine() {
       
       // Store parameters in an object for easy logging/debugging
       const p = {};
-      
+
       // Probability Functions
-      pFunc = {};
+      const pFunc = {};
       pFunc.testFunction = function() {
         clientConsole(2, "testing probability function");
       }
@@ -1180,18 +1183,26 @@ async function modelUnitEngine() {
           componentStates.responseStates.push(responseState);
         else
           componentStates.responseStates[responseIndex] = responseState;
-        ComponentStates.update(componentStates._id, {$set: {
-          cardStates: componentStates.cardStates, 
-          stimStates: componentStates.stimStates, 
+        Meteor.callAsync('updateComponentState', {_id: componentStates._id}, {$set: {
+          cardStates: componentStates.cardStates,
+          stimStates: componentStates.stimStates,
           responseStates: componentStates.responseStates
-        }});
+        }}).catch(error => {
+          clientConsole(1, '[ComponentStates] Update failed:', error);
+        });
       } else {
-        ComponentStates.insert({
+        const insertDoc = {
           userId: userId,
           TDFId: TDFId,
           cardStates: [cardState],
           stimStates: [stimState],
           responseStates: [responseState]
+        };
+        clientConsole(1, '[ComponentStates] Attempting insert with userId:', userId, 'currentUserId:', Meteor.userId());
+        Meteor.callAsync('insertComponentState', insertDoc).then(result => {
+          clientConsole(2, '[ComponentStates] Insert succeeded:', result);
+        }).catch(error => {
+          clientConsole(1, '[ComponentStates] Insert failed:', error);
         });
       }
     },
@@ -1284,9 +1295,18 @@ async function modelUnitEngine() {
       }
       let cstate = ComponentStates.findOne({userId: userId, TDFId: TDFId});
       if (cstate) {
-        ComponentStates.update({_id: cstate._id}, {$set: {cardStates, stimStates, responseStates}});
+        clientConsole(2, '[ComponentStates] Sync - Updating existing state');
+        Meteor.callAsync('updateComponentState', {_id: cstate._id}, {$set: {cardStates, stimStates, responseStates}}).catch(error => {
+          clientConsole(1, '[ComponentStates] Sync - Update failed:', error);
+        });
       } else {
-        ComponentStates.insert({userId, TDFId, cardStates, stimStates, responseStates});
+        const insertDoc = {userId, TDFId, cardStates, stimStates, responseStates};
+        clientConsole(1, '[ComponentStates] Sync - Attempting insert with userId:', userId, 'currentUserId:', Meteor.userId());
+        Meteor.callAsync('insertComponentState', insertDoc).then(result => {
+          clientConsole(2, '[ComponentStates] Sync - Insert succeeded:', result);
+        }).catch(error => {
+          clientConsole(1, '[ComponentStates] Sync - Insert failed:', error);
+        });
       }
     },
     loadComponentStates: async function() {// componentStates [{},{}]
@@ -1455,6 +1475,7 @@ async function modelUnitEngine() {
       const hiddenItems = Session.get('hiddenItems');
       const cards = cardProbabilities.cards;
       const currentDeliveryParams = Session.get('currentDeliveryParams');
+      let indices;
       switch (this.unitMode) {
         case 'thresholdCeiling':
           indices = selectCardAndHintBelowOptimalProbability(cards, hiddenItems, currentDeliveryParams);
@@ -1606,7 +1627,7 @@ async function modelUnitEngine() {
 
       try {
         this.saveComponentStatesSync();
-        updateExperimentState(newExperimentState, 'unitEngine.modelUnitEngine.selectNextCard', curExperimentState);
+        await updateExperimentState(newExperimentState, 'unitEngine.modelUnitEngine.selectNextCard', curExperimentState);
       } catch (e) {
         clientConsole(1, 'error in select next card server calls:', e);
         throw new Error('error in select next card server calls:', e);
@@ -1720,7 +1741,7 @@ async function modelUnitEngine() {
       this.saveSingleComponentState(stim, card, resp);
     },
 
-    unitFinished: function() {
+    unitFinished: async function() {
       const session = this.curUnit.learningsession || this.curUnit.videosession;
       const minSecs = session.displayminseconds || 0;
       const maxSecs = session.displaymaxseconds || 0;
@@ -1729,7 +1750,7 @@ async function modelUnitEngine() {
       const practicetimer = Session.get('currentDeliveryParams').practicetimer;
 
       if (maxTrials > 0 && numTrialsSoFar >= maxTrials) {
-        Meteor.callAsync('resetCurSessionTrialsCount', Meteor.userId(), Session.get('currentTdfId'))
+        await Meteor.callAsync('resetCurSessionTrialsCount', Meteor.userId(), Session.get('currentTdfId'))
         return true;
       }
 
@@ -2156,7 +2177,7 @@ async function scheduleUnitEngine() {
           'whichStim:', curStimIndex,
       );
 
-      updateExperimentState(newExperimentState, 'question', curExperimentState);
+      await updateExperimentState(newExperimentState, 'question', curExperimentState);
     },
 
     findCurrentCardInfo: function() {

@@ -67,10 +67,20 @@ DynamicAssets = new FilesCollection({
 
 ComponentStates.allow({
   update: function(userId, doc, fieldNames, modifier) {
+    if (!userId || !doc.userId) {
+      console.log('[ComponentStates] Update denied: missing userId', {userId, docUserId: doc.userId});
+      return false;
+    }
     return userId === doc.userId;
   },
   insert: function(userId, doc) {
-    return userId === doc.userId;
+    if (!userId || !doc.userId) {
+      console.log('[ComponentStates] Insert denied: missing userId', {userId, docUserId: doc.userId});
+      return false;
+    }
+    const allowed = userId === doc.userId;
+    console.log('[ComponentStates] Insert attempt:', {userId, docUserId: doc.userId, allowed});
+    return allowed;
   }
 });
 

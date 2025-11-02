@@ -366,7 +366,9 @@ function toggleTdfPresence(instance, mode) {
 Session.set('speechAPIKey', null);
 
 Template.profile.rendered = async function() {
-  sessionCleanUp();
+  // sessionCleanUp() removed - it's already called in selectTdf() at the right time
+  // Calling it here causes problems because rendered() can fire multiple times
+  // due to reactivity, clearing session variables while card.js is using them
   await checkUserSession()
   Session.set('showSpeechAPISetup', true);
 

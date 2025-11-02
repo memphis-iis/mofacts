@@ -628,6 +628,10 @@ Router.route('/card', {
         setspec.speechIgnoreOutOfGrammarResponses.toLowerCase() == 'true' : false;
         const speechOutOfGrammarFeedback = setspec.speechOutOfGrammarFeedback ?
         setspec.speechOutOfGrammarFeedback : 'Response not in answer set';
+
+        // Render a loading template while selectTdf processes
+        this.render('customLoading');
+
         await selectTdf(
           tdfId,
           setspec.lessonname,
@@ -637,9 +641,12 @@ Router.route('/card', {
           'User button click',
           tdf.content.isMultiTdf,
           false,
-          setspec, 
+          setspec,
           false,
           true);
+      } else {
+        // No TDF found, redirect to home
+        this.redirect('/');
       }
     } else {
       this.subscribe('files.assets.all').wait();
@@ -696,7 +703,10 @@ Router.route('/instructions', {
       const instructionsq = unit.unitinstructionsquestion ? unit.unitinstructionsquestion.trim() : undefined;
       if (!txt && !pic && !instructionsq && !lockout) {
         clientConsole(2, 'Instructions empty: skipping', displayify(unit));
+        // Call this.next() to prevent Iron Router warning, then redirect
+        this.next();
         instructContinue();
+        return;
       } else {
         this.next();
       }

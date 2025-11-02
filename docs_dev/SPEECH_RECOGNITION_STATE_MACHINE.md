@@ -215,7 +215,6 @@ Meteor.call('makeGoogleSpeechAPICall', tdfId, apiKey, request, answerGrammar,
 
 **Problem identified:**
 - If `speechAPICallback()` never fires, stays stuck in "waiting for transcription"
-- No timeout handler on the Meteor.call
 - User sees "waiting for transcription" until trial times out
 
 ---
@@ -555,27 +554,6 @@ These don't cause reactivity conflicts and genuinely improve performance.
 
 ## PREVIOUS RECOMMENDATIONS (LOWER PRIORITY)
 
-### Fix 4: Add Timeout to Meteor.call ✅ **HIGH PRIORITY**
-
-```javascript
-// Add timeout parameter (30 seconds)
-Meteor.call('makeGoogleSpeechAPICall',
-  Session.get('currentTdfId'),
-  Session.get('speechAPIKey'),
-  request,
-  answerGrammar,
-  {timeout: 30000}, // ← ADD THIS
-  (err, res) => {
-    if (err && err.error === 'timeout') {
-      console.error('Speech API timeout after 30s');
-      speechAPICallback('timeout', {error: 'API call timed out'});
-    } else {
-      speechAPICallback(err, res);
-    }
-  }
-);
-```
-
 ### Fix 2: Add Client-Side Failsafe ✅ **MEDIUM PRIORITY**
 
 ```javascript
@@ -621,7 +599,6 @@ function makeAPICallWithRetry(request, answerGrammar) {
 
 Check `mofacts/server/methods.js` for `makeGoogleSpeechAPICall`:
 - Add try/catch around Google API call
-- Add timeout to HTTP request
 - Log all errors properly
 - Return error to client instead of silently failing
 
@@ -791,8 +768,7 @@ When `inFeedback` changes:
 2. **Test with console open** - look for missing callback logs
 3. **Check Network tab** - verify DDP method call completes
 4. **Verify API key** - test with known-good key
-5. **Add timeout** - implement Fix 1 above (highest priority)
-6. **Test on different networks** - rule out network issues
+5. **Test on different networks** - rule out network issues
 
 ---
 
