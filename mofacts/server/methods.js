@@ -351,7 +351,7 @@ async function getTdfByExperimentTarget(experimentTarget) {
   experimentTarget = experimentTarget.toLowerCase();
   try {
     serverConsole('getTdfByExperimentTarget:'+experimentTarget);
-    tdf = await Tdfs.findOneAsync({"content.tdfs.tutor.setspec.experimentTarget": experimentTarget});
+    const tdf = await Tdfs.findOneAsync({"content.tdfs.tutor.setspec.experimentTarget": experimentTarget});
     return tdf;
   } catch (e) {
     serverConsole('getTdfByExperimentTarget ERROR,', experimentTarget, ',', e);
@@ -2470,7 +2470,7 @@ async function upsertTDFFile(tdfFilename, tdfJSON, ownerId, packagePath = null) 
   if(newFormatttedTips.length > 0){
     Tdf.tutor.setspec.tips = newFormatttedTips;
   }
-  tdfJSON = {'fileName': tdfFilename, 'tdfs': Tdf, 'ownerId': ownerId, 'source': 'upload'};
+  const tdfJSON = {'fileName': tdfFilename, 'tdfs': Tdf, 'ownerId': ownerId, 'source': 'upload'};
   let tdfJSONtoUpsert;
   if (prev && prev._id) {
     formattedStims = prev.formattedStims;
@@ -3759,7 +3759,7 @@ export const methods = {
 
       matchingTdfs.forEach(async (TDF) => {
         if(TDF && (await Roles.userIsInRoleAsync(Meteor.userId(), ['admin']) || TDF.ownerId == Meteor.userId())){
-          tdfId = TDF._id;
+          const tdfId = TDF._id;
           await ComponentStates.removeAsync({TDFId: tdfId});
           await Assignments.removeAsync({TDFId: tdfId});
           await Histories.removeAsync({TDFId: tdfId});
@@ -3768,7 +3768,7 @@ export const methods = {
           deletedCount++;
           //iterate through TDF.stimuli
           for (const stim of TDF.stimuli) {
-            asset = stim.imageStimulus || stim.audioStimulus || stim.videoStimulus || false;
+            const asset = stim.imageStimulus || stim.audioStimulus || stim.videoStimulus || false;
             if (asset) {
               //remove asset
               try {
