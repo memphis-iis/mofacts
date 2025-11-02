@@ -592,7 +592,7 @@ async function processPackageUpload(fileObj, owner, zipLink, emailToggle){
     serverConsole('Unzipped', unzippedFiles.length, 'files');
     const stimFileName = unzippedFiles.filter(f => f.type == 'stim')[0].name;
     const results = await new Promise(async (resolve, reject) => {
-      res = [];
+      const res = [];
       try {
         for(const tdf of unzippedFiles.filter(f => f.type == 'tdf')){
           const stim = unzippedFiles.find(f => f.name == tdf.contents.tutor.setspec.stimulusfile);
