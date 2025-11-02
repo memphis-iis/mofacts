@@ -672,7 +672,7 @@ async function processPackageUpload(fileObj, owner, zipLink, emailToggle){
   } finally {
     for(const tdfFile of unzippedFiles.filter(f => f.type == 'tdf')) {
       const tdf = await Tdfs.findOneAsync({tdfFileName: tdfFile.name})
-      if (tdf.content.tdfs.tutor.unit) {
+      if (tdf && tdf.content && tdf.content.tdfs && tdf.content.tdfs.tutor && tdf.content.tdfs.tutor.unit) {
         const t = await processAudioFilesForTDF(tdf.content.tdfs);
         tdf.content.tdfs.tutor.unit = t.tutor.unit
         await Tdfs.upsertAsync({_id: tdf._id}, tdf)
@@ -1792,7 +1792,7 @@ async function getStimuliSetByFileName(stimulusFileName) {
 }
 
 async function getStimuliSetIdByFilename(stimFilename) {
-  idRet = await Tdfs.findOneAsync({stimulusFileName: stimFilename});
+  const idRet = await Tdfs.findOneAsync({stimulusFileName: stimFilename});
   const stimuliSetId = idRet ? idRet.stimuliSetId : null;
   return stimuliSetId;
 }
@@ -2555,7 +2555,7 @@ async function upsertPackage(packageJSON, ownerId) {
   if(newFormatttedTips.length > 0){
     Tdf.tutor.setspec.tips = newFormatttedTips;
   }
-  tdfJSON = {'fileName': packageJSON.fileName, 'tdfs': Tdf, 'ownerId': ownerId, 'source': 'upload'};
+  const tdfJSON = {'fileName': packageJSON.fileName, 'tdfs': Tdf, 'ownerId': ownerId, 'source': 'upload'};
   let formattedStims = [];
   serverConsole('getAssociatedStimSetIdForStimFile', stimulusFileName, stimuliSetId);
   const oldStimFormat = {
