@@ -691,17 +691,26 @@ async function saveMediaFile(media, owner, stimSetId){
   else{
     serverConsole(`File ${media.name} doesn't exist, uploading`)
   }
-  DynamicAssets.write(media.contents, {
-    name: media.name,
-    userId: owner,
-  }, async (error, fileRef) => {
-    if (error) {
-      serverConsole(`File ${media.name} could not be uploaded`, error)
-    } else {
-      const metadata = { link: DynamicAssets.link(fileRef), stimuliSetId: stimSetId, public: true }
-      await DynamicAssets.collection.updateAsync({_id: fileRef._id}, {$set: {meta: metadata}});
-    }
-  });
+
+  try {
+    // METEOR 3 FIX: Use writeAsync instead of write callback
+    const fileRef = await DynamicAssets.writeAsync(media.contents, {
+      fileName: media.name,
+      userId: owner,
+      meta: {
+        stimuliSetId: stimSetId,
+        public: true
+      }
+    });
+
+    const link = DynamicAssets.link(fileRef);
+    await DynamicAssets.collection.updateAsync({_id: fileRef._id}, {$set: {'meta.link': link}});
+    serverConsole(`File ${media.name} uploaded successfully`);
+    return fileRef;
+  } catch (error) {
+    serverConsole(`File ${media.name} could not be uploaded`, error);
+    throw error;
+  }
 }
 
 // Content Validation
