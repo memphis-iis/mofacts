@@ -1,4 +1,5 @@
 import {Roles} from 'meteor/alanning:roles';
+import {ServiceConfiguration} from 'meteor/service-configuration';
 // @ts-nocheck
 import {DynamicTdfGenerator} from '../common/DynamicTdfGenerator';
 import {curSemester, ALL_TDFS, KC_MULTIPLE} from '../common/Definitions';
@@ -4501,6 +4502,86 @@ Meteor.startup(async function() {
   } else {
     serverConsole('WARNING: No Microsoft OAuth configuration found in settings');
   }
+
+  // METEOR 3 FIX: Set up Accounts.onLogin hook to handle OAuth loginParams
+  // This runs on the server AFTER successful authentication, so this.userId is guaranteed to be set
+  // This solves the DDP race condition where client has userId but server method calls fail
+  Accounts.onLogin(async (loginInfo) => {
+    serverConsole('[ACCOUNTS.ONLOGIN] Login detected:', {
+      type: loginInfo.type,
+      userId: loginInfo.user?._id,
+      methodName: loginInfo.methodName,
+      allowed: loginInfo.allowed
+    });
+
+    if (!loginInfo.user || !loginInfo.allowed) {
+      return;
+    }
+
+    const userId = loginInfo.user._id;
+    const userEmail = _.chain(loginInfo.user.emails).first().prop('address').value() ||
+                      loginInfo.user.email ||
+                      loginInfo.user.username;
+
+    serverConsole('[ACCOUNTS.ONLOGIN] Processing login for user:', userId, 'email:', userEmail);
+
+    // Check if this user should be assigned roles based on initRoles settings
+    const initRoles = getConfigProperty('initRoles');
+    if (initRoles && userEmail) {
+      const admins = _.prop(initRoles, 'admins') || [];
+      const teachers = _.prop(initRoles, 'teachers') || [];
+
+      // Check if user email is in admins list
+      if (admins.includes(userEmail)) {
+        serverConsole('[ACCOUNTS.ONLOGIN] User', userEmail, 'found in initRoles.admins - assigning admin role');
+        try {
+          await Roles.addUsersToRolesAsync(userId, 'admin');
+          await createUserSecretKey(userId);
+          serverConsole('[ACCOUNTS.ONLOGIN] Admin role assigned successfully to', userEmail);
+        } catch (err) {
+          serverConsole('[ACCOUNTS.ONLOGIN] ERROR assigning admin role:', err);
+        }
+      }
+
+      // Check if user email is in teachers list
+      if (teachers.includes(userEmail)) {
+        serverConsole('[ACCOUNTS.ONLOGIN] User', userEmail, 'found in initRoles.teachers - assigning teacher role');
+        try {
+          await Roles.addUsersToRolesAsync(userId, 'teacher');
+          await createUserSecretKey(userId);
+          serverConsole('[ACCOUNTS.ONLOGIN] Teacher role assigned successfully to', userEmail);
+        } catch (err) {
+          serverConsole('[ACCOUNTS.ONLOGIN] ERROR assigning teacher role:', err);
+        }
+      }
+    }
+
+    // Only auto-set loginParams for OAuth logins (google, microsoft)
+    // Password logins have their own flow that sets more specific parameters
+    const isOAuthLogin = loginInfo.type === 'google' || loginInfo.type === 'microsoft';
+
+    if (isOAuthLogin) {
+      const loginMode = loginInfo.type; // 'google' or 'microsoft'
+
+      serverConsole('[ACCOUNTS.ONLOGIN] Setting OAuth loginParams for user:', userId, 'mode:', loginMode);
+
+      // Set basic loginParams for OAuth logins
+      // This runs synchronously on the server, so no DDP race condition
+      try {
+        await Meteor.users.updateAsync({_id: userId}, {
+          $set: {
+            'loginParams.entryPoint': 'direct',
+            'loginParams.loginMode': loginMode,
+            'loginParams.lastLoginTime': new Date()
+          }
+        });
+        serverConsole('[ACCOUNTS.ONLOGIN] loginParams set successfully for user:', userId);
+      } catch (err) {
+        serverConsole('[ACCOUNTS.ONLOGIN] ERROR setting loginParams:', err);
+      }
+    }
+  });
+  serverConsole('Accounts.onLogin hook registered for OAuth handling and role assignment');
 
   // Figure out the "prime admin" (owner of repo TDF/stim files)
   // Note that we accept username or email and then find the ID
