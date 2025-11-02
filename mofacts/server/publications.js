@@ -101,14 +101,15 @@ Meteor.publish('allTdfs', async function() {
     });
 });
 
-Meteor.publish('ownedTdfs', function(ownerId) {
+Meteor.publish('ownedTdfs', async function(ownerId) {
     // Security: Only allow users to query their own TDFs or if they're admin
     if (!this.userId) {
         return this.ready();
     }
 
     // Users can only query their own TDFs unless they're admin
-    if (ownerId !== this.userId && !Roles.userIsInRoleAsync(this.userId, ['admin'])) {
+    // METEOR 3 FIX: await the async Roles.userIsInRoleAsync() call
+    if (ownerId !== this.userId && !(await Roles.userIsInRoleAsync(this.userId, ['admin']))) {
         return this.ready(); // Return empty result
     }
 
@@ -157,9 +158,10 @@ Meteor.publish('Assignments', function(courseId) {
     return Assignments.find({courseId: courseId});
 });
 
-Meteor.publish('settings', function() {
+Meteor.publish('settings', async function() {
     // Security: Only admins should see system settings
-    if (!this.userId || !Roles.userIsInRoleAsync(this.userId, ['admin'])) {
+    // METEOR 3 FIX: await the async Roles.userIsInRoleAsync() call
+    if (!this.userId || !(await Roles.userIsInRoleAsync(this.userId, ['admin']))) {
         return this.ready();
     }
     return DynamicSettings.find();

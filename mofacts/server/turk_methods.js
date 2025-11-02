@@ -374,7 +374,9 @@ Meteor.methods({
       if (!ownerProfile.aws || !ownerProfile.aws.have_aws_id || !ownerProfile.aws.have_aws_secret) {
         throw new Error('You are not set up for AWS/MTurk');
       }
-      turkid = _.chain(Meteor.users.findOneAsync({'_id': workerUserId}))
+      // METEOR 3 FIX: await the Promise before chaining Underscore methods
+      const workerUser = await Meteor.users.findOneAsync({'_id': workerUserId});
+      turkid = _.chain(workerUser)
           .prop('username').trim()
           .value().toUpperCase();
       if (!turkid) {
@@ -484,7 +486,9 @@ Meteor.methods({
         throw new Error('You are not set up for AWS/MTurk');
       }
 
-      turkid = _.chain(Meteor.users.findOneAsync({'_id': workerUserId}))
+      // METEOR 3 FIX: await the Promise before chaining Underscore methods
+      const workerUser = await Meteor.users.findOneAsync({'_id': workerUserId});
+      turkid = _.chain(workerUser)
           .prop('username').trim()
           .value().toUpperCase();
       if (!turkid) {

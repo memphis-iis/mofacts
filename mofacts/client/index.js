@@ -43,10 +43,14 @@ getCurrentTheme();
 
 // Register the isInRole helper for templates (Meteor 3.0 compatibility)
 // Check roles synchronously on client using user.roles array (reactively published)
+// Supports comma-separated role lists (e.g., 'admin,teacher')
 Template.registerHelper('isInRole', function(role) {
   const user = Meteor.user();
   if (!user || !user.roles) return false;
-  return user.roles.includes(role);
+
+  // Support comma-separated roles like 'admin,teacher'
+  const rolesToCheck = role.split(',').map(r => r.trim());
+  return rolesToCheck.some(r => user.roles.includes(r));
 });
 
 // Multi-tab detection: Generate unique ID for this tab

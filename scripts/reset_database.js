@@ -1,6 +1,15 @@
-// MongoDB commands to reset the database
-// Run with: meteor mongo < reset_database.js
-// Or copy/paste into meteor mongo shell
+// ============================================================================
+// WARNING: DESTRUCTIVE OPERATION - THIS WILL DELETE ALL DATA FROM COLLECTIONS
+// ============================================================================
+// This script permanently deletes data from multiple collections.
+// Use ONLY in development or when you explicitly want to wipe the database.
+//
+// DO NOT RUN THIS ON PRODUCTION!
+//
+// Usage:
+//   meteor mongo < reset_database.js
+//   OR copy/paste into meteor mongo shell
+// ============================================================================
 
 print("=== Before Deletion ===");
 print("TDFs:", db.tdfs.count());

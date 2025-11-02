@@ -7,9 +7,13 @@ import {routeToSignin} from '../../lib/router';
 import {ServiceConfiguration} from 'meteor/service-configuration';
 
 
-Template.signIn.onRendered(async function() {
+Template.signIn.onCreated(function() {
   // CRITICAL: Subscribe to OAuth service configuration for Google/Microsoft login
-  this.subscribe('meteor.loginServiceConfiguration');
+  // Store subscription handle so we can check if it's ready
+  this.oauthConfigSub = this.subscribe('meteor.loginServiceConfiguration');
+});
+
+Template.signIn.onRendered(async function() {
 
   if (Session.get('loginMode') !== 'experiment') {
     clientConsole(2, 'password signin, setting login mode');
@@ -164,20 +168,9 @@ Template.signIn.events({
         Session.set('useEmbeddedAPIKeys', false);
       }
 
-      // Set loginParams on server
-      clientConsole(2, '[MS-LOGIN] Calling setUserLoginData...');
-      try {
-        await meteorCallAsync('setUserLoginData', `direct`, Session.get('loginMode'));
-        clientConsole(2, '[MS-LOGIN] setUserLoginData completed on server');
-      } catch (error) {
-        clientConsole(1, '[MS-LOGIN] setUserLoginData failed:', error);
-        alert('Failed to save login data: ' + error.message);
-        Meteor.logout();
-        return;
-      }
-
-      // Wait for loginParams to sync to client
-      clientConsole(2, '[MS-LOGIN] Waiting for loginParams to sync to client...');
+      // METEOR 3 FIX: Server-side Accounts.onLogin hook automatically sets loginParams
+      // We just need to wait for it to sync to the client via DDP
+      clientConsole(2, '[MS-LOGIN] Waiting for loginParams to sync from server...');
       const loginParamsFound = await new Promise((resolve) => {
         const checkLoginParams = Tracker.autorun((computation) => {
           const user = Meteor.user();
@@ -187,12 +180,12 @@ Template.signIn.events({
             resolve(true);
           }
         });
-        // Timeout after 10 seconds
+        // Timeout after 5 seconds (should be fast since server sets it immediately)
         setTimeout(() => {
           checkLoginParams.stop();
           clientConsole(1, '[MS-LOGIN] TIMEOUT waiting for loginParams!');
           resolve(false);
-        }, 10000);
+        }, 5000);
       });
 
       if (!loginParamsFound) {
@@ -286,21 +279,9 @@ Template.signIn.events({
         Session.set('useEmbeddedAPIKeys', false);
       }
 
-      // Set loginParams on server
-      clientConsole(2, '[GOOGLE-LOGIN] Calling setUserLoginData...');
-      try {
-        await meteorCallAsync('setUserLoginData', `direct`, Session.get('loginMode'));
-        clientConsole(2, '[GOOGLE-LOGIN] setUserLoginData completed on server');
-      } catch (error) {
-        clientConsole(1, '[GOOGLE-LOGIN] setUserLoginData failed:', error);
-        alert('Failed to save login data: ' + error.message);
-        Meteor.logout();
-        $('#signInButton').prop('disabled', false);
-        return;
-      }
-
-      // Wait for loginParams to sync to client
-      clientConsole(2, '[GOOGLE-LOGIN] Waiting for loginParams to sync to client...');
+      // METEOR 3 FIX: Server-side Accounts.onLogin hook automatically sets loginParams
+      // We just need to wait for it to sync to the client via DDP
+      clientConsole(2, '[GOOGLE-LOGIN] Waiting for loginParams to sync from server...');
       const loginParamsFound = await new Promise((resolve) => {
         const checkLoginParams = Tracker.autorun((computation) => {
           const user = Meteor.user();
@@ -310,12 +291,12 @@ Template.signIn.events({
             resolve(true);
           }
         });
-        // Timeout after 10 seconds
+        // Timeout after 5 seconds (should be fast since server sets it immediately)
         setTimeout(() => {
           checkLoginParams.stop();
           clientConsole(1, '[GOOGLE-LOGIN] TIMEOUT waiting for loginParams!');
           resolve(false);
-        }, 10000);
+        }, 5000);
       });
 
       if (!loginParamsFound) {
@@ -391,13 +372,6 @@ Template.signIn.helpers({
   'checkSectionExists': (sectionName) => sectionName != undefined && sectionName.length > 0,
 
   'institutions': () => Session.get('institutions'),
-
-  'oauthConfigReady': function() {
-    // Check if OAuth service configurations are loaded
-    const googleConfig = ServiceConfiguration.configurations.findOne({service: 'google'});
-    const msConfig = ServiceConfiguration.configurations.findOne({service: 'microsoft'});
-    return !!(googleConfig && msConfig);
-  },
 
 });
 
@@ -512,68 +486,68 @@ async function userPasswordCheck() {
 
       // Experiment mode - we create a user if one isn't already there. We
       // Call sign up - specifying that a duplicate user is OK
-      (async () => {
+      try {
+        await Meteor.callAsync('signUpUser', newUsername, newPassword, true);
+
+        // Everything was OK if we make it here - now we init the session,
+        // login, and proceed to the profile screen
+        sessionCleanUp();
+
+        // METEOR 3 FIX: Use promisified version instead of callback
+        const loginWithPasswordAsync = Meteor.promisify(Meteor.loginWithPassword);
+
         try {
-          await Meteor.callAsync('signUpUser', newUsername, newPassword, true);
+          await loginWithPasswordAsync(newUsername, newPassword);
 
-          // Everything was OK if we make it here - now we init the session,
-          // login, and proceed to the profile screen
+          let experimentTarget = Session.get('experimentTarget');
+          if (experimentTarget) experimentTarget = experimentTarget.toLowerCase();
+          let foundExpTarget = await meteorCallAsync('getTdfByExperimentTarget', experimentTarget);
+          const setspec = foundExpTarget.content.tdfs.tutor.setspec ? foundExpTarget.content.tdfs.tutor.setspec : null;
+          const ignoreOutOfGrammarResponses = setspec.speechIgnoreOutOfGrammarResponses ?
+          setspec.speechIgnoreOutOfGrammarResponses.toLowerCase() == 'true' : false;
+          const speechOutOfGrammarFeedback = setspec.speechOutOfGrammarFeedback ?
+          setspec.speechOutOfGrammarFeedback : 'Response not in answer set';
 
-          sessionCleanUp();
-
-        Meteor.loginWithPassword(newUsername, newPassword, async function(error) {
-          if (typeof error !== 'undefined') {
-            clientConsole(1, 'ERROR: The user was not logged in on experiment sign in?', newUsername, 'Error:', error);
-            alert('It appears that you couldn\'t be logged in as ' + newUsername);
-            $('#signInButton').prop('disabled', false);
-          } else {
-            let experimentTarget = Session.get('experimentTarget');
-            if (experimentTarget) experimentTarget = experimentTarget.toLowerCase();
-            let foundExpTarget = await meteorCallAsync('getTdfByExperimentTarget', experimentTarget);
-            const setspec = foundExpTarget.content.tdfs.tutor.setspec ? foundExpTarget.content.tdfs.tutor.setspec : null;
-            const ignoreOutOfGrammarResponses = setspec.speechIgnoreOutOfGrammarResponses ?
-            setspec.speechIgnoreOutOfGrammarResponses.toLowerCase() == 'true' : false;
-            const speechOutOfGrammarFeedback = setspec.speechOutOfGrammarFeedback ?
-            setspec.speechOutOfGrammarFeedback : 'Response not in answer set';
-
-            if (foundExpTarget) {
-              selectTdf(
-                  foundExpTarget._id,
-                  setspec.lessonname,
-                  foundExpTarget.stimuliSetId,
-                  ignoreOutOfGrammarResponses,
-                  speechOutOfGrammarFeedback,
-                  'Auto-selected by experiment target ' + experimentTarget,
-                  foundExpTarget.content.isMultiTdf,
-                  false,
-                  setspec,
-                  true
-              );
-            }
-
-            try {
-              await meteorCallAsync('setUserLoginData', 'direct', Session.get('loginMode'));
-              clientConsole(2, '[EXPERIMENT-LOGIN-2] setUserLoginData completed');
-            } catch (error) {
-              clientConsole(1, '[EXPERIMENT-LOGIN-2] setUserLoginData failed:', error);
-              alert('Failed to save login data: ' + error.message);
-              $('#signInButton').prop('disabled', false);
-              return;
-            }
-
-            signInNotify(false);
+          if (foundExpTarget) {
+            selectTdf(
+                foundExpTarget._id,
+                setspec.lessonname,
+                foundExpTarget.stimuliSetId,
+                ignoreOutOfGrammarResponses,
+                speechOutOfGrammarFeedback,
+                'Auto-selected by experiment target ' + experimentTarget,
+                foundExpTarget.content.isMultiTdf,
+                false,
+                setspec,
+                true
+            );
           }
-        });
+
+          try {
+            await meteorCallAsync('setUserLoginData', 'direct', Session.get('loginMode'));
+            clientConsole(2, '[EXPERIMENT-LOGIN-2] setUserLoginData completed');
+          } catch (error) {
+            clientConsole(1, '[EXPERIMENT-LOGIN-2] setUserLoginData failed:', error);
+            alert('Failed to save login data: ' + error.message);
+            $('#signInButton').prop('disabled', false);
+            return;
+          }
+
+          signInNotify(false);
         } catch (error) {
-          const errorMsgs = [error];
-          clientConsole(1, 'Experiment user login errors:', displayify(errorMsgs));
-          $('#serverErrors')
-              .html(errorMsgs.join('<br>'))
-              .show();
+          clientConsole(1, 'ERROR: The user was not logged in on experiment sign in?', newUsername, 'Error:', error);
+          alert('It appears that you couldn\'t be logged in as ' + newUsername);
           $('#signInButton').prop('disabled', false);
-          return;
         }
-      })();
+      } catch (error) {
+        const errorMsgs = [error];
+        clientConsole(1, 'Experiment user login errors:', displayify(errorMsgs));
+        $('#serverErrors')
+            .html(errorMsgs.join('<br>'))
+            .show();
+        $('#signInButton').prop('disabled', false);
+        return;
+      }
 
       // No more processing
       return;
@@ -648,61 +622,63 @@ async function testLogin() {
 
   const testPassword = blankPassword(testUserName);
 
-  (async () => {
-    try {
-      await Meteor.callAsync('signUpUser', testUserName, testPassword, true);
+  try {
+    await Meteor.callAsync('signUpUser', testUserName, testPassword, true);
 
-      Meteor.callAsync('clearImpersonation');
-      sessionCleanUp();
+    Meteor.callAsync('clearImpersonation');
+    sessionCleanUp();
 
     // Note that we force Meteor to think we have a user name so that
     // it doesn't try it as an email - this let's you test email-like
     // users, which you can promote to admin or teacher
-    Meteor.loginWithPassword({'username': testUserName}, testPassword, async function(error) {
-      if (typeof error !== 'undefined') {
-        clientConsole(1, 'ERROR: The user was not logged in on TEST sign in?', testUserName, 'Error:', error);
-        alert('It appears that you couldn\'t be logged in as ' + testUserName);
-        $('#testSignInButton').prop('disabled', false);
-      } else {
-        if (Session.get('debugging')) {
-          const currentUser = Meteor.users.findOne({_id: Meteor.userId()}).username;
-          clientConsole(2, currentUser + ' was test logged in successfully! Current route is ', Router.current().route.getName());
-          Meteor.callAsync('debugLog', 'TEST Sign in was successful - YOU SHOULD NOT SEE THIS IN PRODUCTION');
-        }
-        Meteor.callAsync('logUserAgentAndLoginTime', Meteor.userId(), navigator.userAgent);
-        const curClass = Session.get('curClass');
-        const curTeacher = Session.get('curTeacher');
-        if(curTeacher && curClass){
-          try {
-            const result = await Meteor.callAsync('addUserToTeachersClass', Meteor.userId(), curTeacher._id, curClass.sectionId);
-            clientConsole(2, 'addUserToTeachersClass result: ' + result);
-            let sectionName = "";
-            if(curClass.sectionName){
-              sectionName = "/" + curClass.sectionName;
-            }
-            const asignedTDFIds = await meteorCallAsync('getTdfsAssignedToStudent', Meteor.userId(), curClass.sectionId)
-            const entryPoint = `${curTeacher.username}/${curClass.courseName + sectionName}`
-            await meteorCallAsync('setUserLoginData', entryPoint, Session.get('loginMode'), curTeacher, curClass, asignedTDFIds);
-          } catch (err) {
-            clientConsole(1, 'error adding user to teacher class: ' + err);
-            alert(err);
-            return;
-          }
-        } else {
-          await meteorCallAsync('setUserLoginData', 'direct', Session.get('loginMode'));
-        }
-        Meteor.logoutOtherClients();
-        Router.go('/profile');
+
+    // METEOR 3 FIX: Use promisified version instead of callback
+    const loginWithPasswordAsync = Meteor.promisify(Meteor.loginWithPassword);
+
+    try {
+      await loginWithPasswordAsync({'username': testUserName}, testPassword);
+
+      if (Session.get('debugging')) {
+        const currentUser = Meteor.users.findOne({_id: Meteor.userId()}).username;
+        clientConsole(2, currentUser + ' was test logged in successfully! Current route is ', Router.current().route.getName());
+        Meteor.callAsync('debugLog', 'TEST Sign in was successful - YOU SHOULD NOT SEE THIS IN PRODUCTION');
       }
-    });
+      Meteor.callAsync('logUserAgentAndLoginTime', Meteor.userId(), navigator.userAgent);
+      const curClass = Session.get('curClass');
+      const curTeacher = Session.get('curTeacher');
+      if(curTeacher && curClass){
+        try {
+          const result = await Meteor.callAsync('addUserToTeachersClass', Meteor.userId(), curTeacher._id, curClass.sectionId);
+          clientConsole(2, 'addUserToTeachersClass result: ' + result);
+          let sectionName = "";
+          if(curClass.sectionName){
+            sectionName = "/" + curClass.sectionName;
+          }
+          const asignedTDFIds = await meteorCallAsync('getTdfsAssignedToStudent', Meteor.userId(), curClass.sectionId)
+          const entryPoint = `${curTeacher.username}/${curClass.courseName + sectionName}`
+          await meteorCallAsync('setUserLoginData', entryPoint, Session.get('loginMode'), curTeacher, curClass, asignedTDFIds);
+        } catch (err) {
+          clientConsole(1, 'error adding user to teacher class: ' + err);
+          alert(err);
+          return;
+        }
+      } else {
+        await meteorCallAsync('setUserLoginData', 'direct', Session.get('loginMode'));
+      }
+      Meteor.logoutOtherClients();
+      Router.go('/profile');
     } catch (error) {
-      const errorMsgs = [error];
-      const errorText = displayify(errorMsgs);
-      clientConsole(1, 'Experiment user login errors:', errorText);
-      alert('Experiment user login errors:', errorText);
+      clientConsole(1, 'ERROR: The user was not logged in on TEST sign in?', testUserName, 'Error:', error);
+      alert('It appears that you couldn\'t be logged in as ' + testUserName);
       $('#testSignInButton').prop('disabled', false);
     }
-  })();
+  } catch (error) {
+    const errorMsgs = [error];
+    const errorText = displayify(errorMsgs);
+    clientConsole(1, 'Test user login errors:', errorText);
+    alert('Test user login errors: ' + errorText);
+    $('#testSignInButton').prop('disabled', false);
+  }
 }
 
 

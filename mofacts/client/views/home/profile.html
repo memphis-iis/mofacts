@@ -8,9 +8,6 @@
                 Impersonation Mode. Nothing will be logged. Log out to reset.
         </div>
         {{/if}}
-        {{#unless isInRole 'admin,teacher'}}
-            {{> studentReporting}}
-        {{/unless}}
 
         {{#if isInRole 'admin,teacher'}}
 

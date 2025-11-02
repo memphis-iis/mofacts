@@ -434,33 +434,6 @@ Router.route('/profile', {
   },
 });
 
-Router.route('/lessonSelect', {
-  name: 'client.lessonSelect',
-  waitOn: function() {
-    let assignedTdfs = Meteor.user()?.loginParams?.assignedTdfs;
-    let curCourseId = Meteor.user()?.loginParams?.curClass?.courseId || 'undefined'
-    let allSubscriptions = [
-      Meteor.subscribe('allUserExperimentState', assignedTdfs)
-    ];
-    if (curCourseId != undefined)
-      allSubscriptions.push(Meteor.subscribe('Assignments', curCourseId));
-    if ((Meteor.user() && Meteor.user().roles && (['admin']).some(role => Meteor.user().roles.includes(role))))
-      allSubscriptions.push(Meteor.subscribe('allUsers'));
-    if (assignedTdfs === undefined || assignedTdfs === 'all')
-      allSubscriptions.push(Meteor.subscribe('allTdfs'));
-    else 
-      allSubscriptions.push(Meteor.subscribe('currentTdf', assignedTdfs));
-    return allSubscriptions;
-  },
-  action: function() {
-    if (Meteor.user()) {
-      this.render('lessonSelect');
-    } else {
-      this.redirect('/');
-    }
-  },
-});
-
 Router.route('/classEdit',{
   action: async function(){
   if(Meteor.user()){

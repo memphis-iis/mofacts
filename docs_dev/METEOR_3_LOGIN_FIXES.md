@@ -171,18 +171,35 @@ Good rate limiting already in place:
 
 ---
 
+## All Fixes Completed! ✅
+
+**All login methods have been fixed to use Meteor 3 best practices:**
+
+1. ✅ **Google OAuth** - Fixed using `Meteor.promisify()` (signIn.js:248-348)
+2. ✅ **Microsoft OAuth** - Fixed using `Meteor.promisify()` (signIn.js:129-218)
+3. ✅ **Standard password login** - Fixed using `Meteor.promisify()` (signIn.js:579-620)
+4. ✅ **Experiment login (with password)** - Fixed using `Meteor.promisify()` (signIn.js:456-508)
+5. ✅ **Experiment login (without password)** - Fixed using `Meteor.promisify()` (signIn.js:509-580)
+6. ✅ **Test user login** - Fixed using `Meteor.promisify()` (signIn.js:631-708)
+7. ✅ **Sign up + auto-login** - Fixed using `Meteor.promisify()` + added Router.go('/profile') (signUp.js:46-83)
+
+### Additional Improvements
+
+- **Removed unnecessary IIFE wrappers** - Made code cleaner and more readable
+- **Added missing Router.go('/profile')** in signUp.js - Users now properly navigate after signup
+- **Consistent error handling** - All login methods now use try/catch for proper async error handling
+- **Fixed typo** - Changed "pofile" to "profile" in signUp.js comment
+
 ## Recommended Next Steps
 
-1. **Fix remaining `loginWithPassword` calls** (4 instances in signIn.js, 1 in signUp.js)
-2. **Add Router.go('/profile')** to signUp.js after successful login
-3. **Test all login flows**:
+**Test all login flows**:
    - Google OAuth ✅ (Fixed)
    - Microsoft OAuth ✅ (Fixed)
-   - Standard password login ⚠️ (Needs fix)
-   - Experiment login (with password) ⚠️ (Needs fix)
-   - Experiment login (without password) ⚠️ (Needs fix)
-   - Test user login ⚠️ (Needs fix)
-   - Sign up + auto-login ⚠️ (Needs fix)
+   - Standard password login ✅ (Fixed)
+   - Experiment login (with password) ✅ (Fixed)
+   - Experiment login (without password) ✅ (Fixed)
+   - Test user login ✅ (Fixed)
+   - Sign up + auto-login ✅ (Fixed + Router added)
 
 4. **Consider creating a shared login utility**:
    ```javascript
