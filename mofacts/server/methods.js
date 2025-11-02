@@ -1624,7 +1624,7 @@ async function getClassPerformanceByTDF(classId, tdfId, date=false) {
   const performanceMet = [];
   const performanceNotMet = [];
   if(!date){
-    curDate = new Date();
+    const curDate = new Date();
     date = curDate.getTime();
   }
   const res1 =  await Histories.find({userId: {$in: userIds}, TDFId: tdfId, levelUnitType: {$ne: "Instruction"}}).fetchAsync();
@@ -1714,8 +1714,8 @@ async function checkForUserException(userId, tdfId){
     var exceptions = user.dueDateExceptions;
     var exception = exceptions.find((item) => item.tdfId == tdfId);
     if(exception){
-      exceptionDate = new Date(exception.date);
-      exceptionDateReadable = exceptionDate.toLocaleDateString();
+      const exceptionDate = new Date(exception.date);
+      const exceptionDateReadable = exceptionDate.toLocaleDateString();
       return exceptionDateReadable;
     }
   }
@@ -2233,7 +2233,7 @@ async function sendErrorReportSummaries() {
         const userWhoReportedError = await Meteor.users.findOneAsync({_id: unsentErrorReport.user});
         const userWhoReportedErrorUsername = userWhoReportedError ? userWhoReportedError.username : 'UNKNOWN';
         //make a nice email body for the user who reported the error
-        textIndividual = 'Hi ' + userWhoReportedErrorUsername + ', \n\n' +
+        const textIndividual = 'Hi ' + userWhoReportedErrorUsername + ', \n\n' +
                           'Thank you for reporting an error on ' + thisServerUrl + '. ' +
                           'We have received your error report and will investigate it. ' +
                           'If you have any additional information that you think might be helpful, ' +
@@ -2253,8 +2253,8 @@ async function sendErrorReportSummaries() {
         try{
           //check if user has an email address
           if (userWhoReportedError.emails && userWhoReportedError.emails.length > 0 ) {
-            toIndividual = userWhoReportedError.emails[0].address + ', ' + admin;
-          subjectIndividual = 'Mofacts Error Report - ' + thisServerUrl;
+            const toIndividual = userWhoReportedError.emails[0].address + ', ' + admin;
+          const subjectIndividual = 'Mofacts Error Report - ' + thisServerUrl;
           sentErrorReports.add(unsentErrorReport._id);
           sendEmail(toIndividual, admin, subjectIndividual, textIndividual);
           }
@@ -2280,6 +2280,7 @@ async function sendErrorReportSummaries() {
 //function to check drive space and send email if it is low
 function checkDriveSpace() {
   serverConsole('checkDriveSpace');
+  let diskusage;
   try {
     diskusage = Npm.require('diskusage');
   } catch (err) {
@@ -3004,7 +3005,8 @@ export const methods = {
   },
 
   checkPasswordResetSecret: async function(email, secret){
-    userSecret = await Meteor.users.findOneAsync({username: email}).secret;
+    const user = await Meteor.users.findOneAsync({username: email});
+    const userSecret = user?.secret;
     if(userSecret == secret){
       return true;
     } else {
@@ -4296,7 +4298,7 @@ const asyncMethods = {
           catch (e) {
             serverConsole('error fetching syllables for ' + answer + ': ' + JSON.stringify(e));
             syllableArray = [answer];
-            syllableGenerationError = e;
+            const syllableGenerationError = e;
           }
           stimuli[i].syllables = syllableArray;
         }
