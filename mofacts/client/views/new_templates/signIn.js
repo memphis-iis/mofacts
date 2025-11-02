@@ -126,7 +126,7 @@ Template.signIn.events({
     //set the useEmbeddedAPIKeys session variable to false
     Session.set('useEmbeddedAPIKeys', false);
   },
-  'click #signInWithMicrosoftSSO': function(event) {
+  'click #signInWithMicrosoftSSO': async function(event) {
     //login with the Accounts service microsoft
     event.preventDefault();
     clientConsole(2, '[MS-LOGIN] Microsoft Login Button Clicked');
@@ -145,108 +145,76 @@ Template.signIn.events({
     //set the login mode to microsoft
     Session.set('loginMode', 'microsoft');
 
-    clientConsole(2, '[MS-LOGIN] Initiating Meteor.loginWithMicrosoft...');
-    Meteor.loginWithMicrosoft({
-      loginStyle: 'popup',
-      requestOfflineToken: true,
-      requestPermissions: ['User.Read'],
-    }, async function(err) {
-      try {
-        clientConsole(2, '[MS-LOGIN] Callback invoked!');
-        clientConsole(2, '[MS-LOGIN] Error:', err);
-        clientConsole(2, '[MS-LOGIN] User after login:', Meteor.userId());
-        clientConsole(2, '[MS-LOGIN] User object:', Meteor.user());
+    // METEOR 3 FIX: Use promisified version instead of callback
+    const loginWithMicrosoftAsync = Meteor.promisify(Meteor.loginWithMicrosoft);
 
-        //if we are not in a class and we log in, we need to disable embedded API keys.
-        if(!Session.get('curClass')){
-          Session.set('useEmbeddedAPIKeys', false);
-        }
-        if (err) {
-          // error handling
-          clientConsole(1, '[MS-LOGIN] Login Error:', err);
-          clientConsole(1, '[MS-LOGIN] Error details:', JSON.stringify(err, null, 2));
-          $('#signInButton').prop('disabled', false);
-          return;
-        } else {
-          clientConsole(2, '[MS-LOGIN] Login successful!');
+    try {
+      clientConsole(2, '[MS-LOGIN] Initiating Meteor.loginWithMicrosoft...');
+      await loginWithMicrosoftAsync({
+        loginStyle: 'popup',
+        requestOfflineToken: true,
+        requestPermissions: ['User.Read'],
+      });
 
-          // CRITICAL: Wait for Meteor.userId() to be set before calling server method
-          clientConsole(2, '[MS-LOGIN] Waiting for userId to be set...');
-          const userIdReady = await new Promise((resolve) => {
-            const checkUserId = Tracker.autorun((computation) => {
-              if (Meteor.userId()) {
-                clientConsole(2, '[MS-LOGIN] userId is set:', Meteor.userId());
-                computation.stop();
-                resolve(true);
-              }
-            });
-            setTimeout(() => {
-              checkUserId.stop();
-              clientConsole(1, '[MS-LOGIN] TIMEOUT waiting for userId!');
-              resolve(false);
-            }, 5000);
-          });
+      clientConsole(2, '[MS-LOGIN] Login successful!');
+      clientConsole(2, '[MS-LOGIN] User after login:', Meteor.userId());
 
-          if (!userIdReady) {
-            clientConsole(1, '[MS-LOGIN] Login failed - userId never set');
-            alert('Login failed: User session not established. Please try again.');
-            Meteor.logout();
-            return;
-          }
-
-          // Set loginParams on server and wait for DDP sync
-          clientConsole(2, '[MS-LOGIN] Calling setUserLoginData...');
-          try {
-            await meteorCallAsync('setUserLoginData', `direct`, Session.get('loginMode'));
-            clientConsole(2, '[MS-LOGIN] setUserLoginData completed on server');
-          } catch (error) {
-            clientConsole(1, '[MS-LOGIN] setUserLoginData failed:', error);
-            alert('Failed to save login data: ' + error.message);
-            return;
-          }
-
-          // Wait for loginParams to sync to client (with proper timeout handling)
-          clientConsole(2, '[MS-LOGIN] Waiting for loginParams to sync to client...');
-          const loginParamsFound = await new Promise((resolve) => {
-            const checkLoginParams = Tracker.autorun((computation) => {
-              const user = Meteor.user();
-              if (user && user.loginParams) {
-                clientConsole(2, '[MS-LOGIN] loginParams synced to client:', user.loginParams);
-                computation.stop();
-                resolve(true);
-              }
-            });
-            // Timeout after 10 seconds (increased from 5)
-            setTimeout(() => {
-              checkLoginParams.stop();
-              clientConsole(1, '[MS-LOGIN] TIMEOUT waiting for loginParams!');
-              resolve(false);
-            }, 10000);
-          });
-
-          if (!loginParamsFound) {
-            clientConsole(1, '[MS-LOGIN] Login failed - loginParams never synced');
-            alert('Login failed: Session data not synchronized. Please try again.');
-            Meteor.logout();
-            return;
-          }
-
-          clientConsole(2, '[MS-LOGIN] Calling logUserAgentAndLoginTime...');
-          Meteor.callAsync('logUserAgentAndLoginTime', Meteor.userId(), navigator.userAgent);
-
-          clientConsole(2, '[MS-LOGIN] Logging out other clients...');
-          Meteor.logoutOtherClients();
-
-          // Route to /profile like password login does (NOT to / which logs out users without loginParams)
-          clientConsole(2, '[MS-LOGIN] Routing to /profile');
-          Router.go('/profile');
-        }
-      } catch (error) {
-        clientConsole(1, '[MS-LOGIN] FATAL ERROR in callback:', error);
-        clientConsole(1, '[MS-LOGIN] Error stack:', error.stack);
-        alert('Microsoft login failed: ' + error.message);
+      //if we are not in a class and we log in, we need to disable embedded API keys.
+      if(!Session.get('curClass')){
+        Session.set('useEmbeddedAPIKeys', false);
       }
-    });
+
+      // Set loginParams on server
+      clientConsole(2, '[MS-LOGIN] Calling setUserLoginData...');
+      try {
+        await meteorCallAsync('setUserLoginData', `direct`, Session.get('loginMode'));
+        clientConsole(2, '[MS-LOGIN] setUserLoginData completed on server');
+      } catch (error) {
+        clientConsole(1, '[MS-LOGIN] setUserLoginData failed:', error);
+        alert('Failed to save login data: ' + error.message);
+        Meteor.logout();
+        return;
+      }
+
+      // Wait for loginParams to sync to client
+      clientConsole(2, '[MS-LOGIN] Waiting for loginParams to sync to client...');
+      const loginParamsFound = await new Promise((resolve) => {
+        const checkLoginParams = Tracker.autorun((computation) => {
+          const user = Meteor.user();
+          if (user && user.loginParams) {
+            clientConsole(2, '[MS-LOGIN] loginParams synced to client:', user.loginParams);
+            computation.stop();
+            resolve(true);
+          }
+        });
+        // Timeout after 10 seconds
+        setTimeout(() => {
+          checkLoginParams.stop();
+          clientConsole(1, '[MS-LOGIN] TIMEOUT waiting for loginParams!');
+          resolve(false);
+        }, 10000);
+      });
+
+      if (!loginParamsFound) {
+        clientConsole(1, '[MS-LOGIN] WARNING: loginParams never synced, but continuing anyway');
+      }
+
+      clientConsole(2, '[MS-LOGIN] Calling logUserAgentAndLoginTime...');
+      Meteor.callAsync('logUserAgentAndLoginTime', Meteor.userId(), navigator.userAgent);
+
+      clientConsole(2, '[MS-LOGIN] Logging out other clients...');
+      Meteor.logoutOtherClients();
+
+      // Route to /profile like password login does
+      clientConsole(2, '[MS-LOGIN] Routing to /profile');
+      Router.go('/profile');
+
+    } catch (error) {
+      clientConsole(1, '[MS-LOGIN] Login Error:', error);
+      clientConsole(1, '[MS-LOGIN] Error details:', JSON.stringify(error, null, 2));
+      alert('Microsoft login failed: ' + error.message);
+      $('#signInButton').prop('disabled', false);
+    }
   },
   'click #courseLink': function(event) {
     event.preventDefault();
@@ -277,10 +245,9 @@ Template.signIn.events({
       userPasswordCheck();
     }
   },
-  'click #signInButtonOAuth': function(event) {
-    Meteor.logout();
-    $('#signInButton').prop('disabled', true);
+  'click #signInButtonOAuth': async function(event) {
     event.preventDefault();
+    $('#signInButton').prop('disabled', true);
     clientConsole(2, '[GOOGLE-LOGIN] Google Login Button Clicked');
     clientConsole(2, '[GOOGLE-LOGIN] Current loginMode:', Session.get('loginMode'));
     clientConsole(2, '[GOOGLE-LOGIN] Current user:', Meteor.userId());
@@ -304,110 +271,80 @@ Template.signIn.events({
       loginStyle: 'popup',
     };
 
-    Meteor.loginWithGoogle(options, async function(err) {
-      try {
-        clientConsole(2, '[GOOGLE-LOGIN] Callback invoked!');
-        clientConsole(2, '[GOOGLE-LOGIN] Error:', err);
-        clientConsole(2, '[GOOGLE-LOGIN] User after login:', Meteor.userId());
-        clientConsole(2, '[GOOGLE-LOGIN] User object:', Meteor.user());
+    // METEOR 3 FIX: Use promisified version instead of callback
+    const loginWithGoogleAsync = Meteor.promisify(Meteor.loginWithGoogle);
 
-        if(!Session.get('curClass')){
-          //If we are not in a class and we log in, we need to disable embedded API keys.
-          Session.set('useEmbeddedAPIKeys', false);
-        }
-        if (err) {
-          $('#signInButton').prop('disabled', false);
-          // error handling
-          clientConsole(1, '[GOOGLE-LOGIN] Login Error:', err);
-          clientConsole(1, '[GOOGLE-LOGIN] Error details:', JSON.stringify(err, null, 2));
-          throw new Meteor.Error(Accounts.LoginCancelledError.numericError, 'Error');
-        }
+    try {
+      clientConsole(2, '[GOOGLE-LOGIN] Initiating Meteor.loginWithGoogle...');
+      await loginWithGoogleAsync(options);
 
-        clientConsole(2, '[GOOGLE-LOGIN] Login successful!');
+      clientConsole(2, '[GOOGLE-LOGIN] Login successful!');
+      clientConsole(2, '[GOOGLE-LOGIN] User after login:', Meteor.userId());
 
-        // CRITICAL: Wait for Meteor.userId() to be set before calling server method
-        clientConsole(2, '[GOOGLE-LOGIN] Waiting for userId to be set...');
-        const userIdReady = await new Promise((resolve) => {
-          const checkUserId = Tracker.autorun((computation) => {
-            if (Meteor.userId()) {
-              clientConsole(2, '[GOOGLE-LOGIN] userId is set:', Meteor.userId());
-              computation.stop();
-              resolve(true);
-            }
-          });
-          setTimeout(() => {
-            checkUserId.stop();
-            clientConsole(1, '[GOOGLE-LOGIN] TIMEOUT waiting for userId!');
-            resolve(false);
-          }, 5000);
-        });
-
-        if (!userIdReady) {
-          clientConsole(1, '[GOOGLE-LOGIN] Login failed - userId never set');
-          alert('Login failed: User session not established. Please try again.');
-          Meteor.logout();
-          return;
-        }
-
-        // Set loginParams on server and wait for DDP sync
-        clientConsole(2, '[GOOGLE-LOGIN] Calling setUserLoginData...');
-        try {
-          await meteorCallAsync('setUserLoginData', `direct`, Session.get('loginMode'));
-          clientConsole(2, '[GOOGLE-LOGIN] setUserLoginData completed on server');
-        } catch (error) {
-          clientConsole(1, '[GOOGLE-LOGIN] setUserLoginData failed:', error);
-          alert('Failed to save login data: ' + error.message);
-          return;
-        }
-
-        // Wait for loginParams to sync to client (with proper timeout handling)
-        clientConsole(2, '[GOOGLE-LOGIN] Waiting for loginParams to sync to client...');
-        const loginParamsFound = await new Promise((resolve) => {
-          const checkLoginParams = Tracker.autorun((computation) => {
-            const user = Meteor.user();
-            if (user && user.loginParams) {
-              clientConsole(2, '[GOOGLE-LOGIN] loginParams synced to client:', user.loginParams);
-              computation.stop();
-              resolve(true);
-            }
-          });
-          // Timeout after 10 seconds (increased from 5)
-          setTimeout(() => {
-            checkLoginParams.stop();
-            clientConsole(1, '[GOOGLE-LOGIN] TIMEOUT waiting for loginParams!');
-            resolve(false);
-          }, 10000);
-        });
-
-        if (!loginParamsFound) {
-          clientConsole(1, '[GOOGLE-LOGIN] Login failed - loginParams never synced');
-          alert('Login failed: Session data not synchronized. Please try again.');
-          Meteor.logout();
-          return;
-        }
-
-        if (Session.get('debugging')) {
-          const currentUser = Meteor.users.findOne({_id: Meteor.userId()});
-          const username = currentUser?.username || Meteor.userId();
-          clientConsole(2, '[GOOGLE-LOGIN] ' + username + ' was logged in successfully! Current route is ', Router.current().route.getName());
-          Meteor.callAsync('debugLog', 'Sign in was successful');
-        }
-
-        clientConsole(2, '[GOOGLE-LOGIN] Calling logUserAgentAndLoginTime...');
-        Meteor.callAsync('logUserAgentAndLoginTime', Meteor.userId(), navigator.userAgent);
-
-        clientConsole(2, '[GOOGLE-LOGIN] Logging out other clients...');
-        Meteor.logoutOtherClients();
-
-        // Route to /profile like password login does (NOT to / which logs out users without loginParams)
-        clientConsole(2, '[GOOGLE-LOGIN] Routing to /profile');
-        Router.go('/profile');
-      } catch (error) {
-        clientConsole(1, '[GOOGLE-LOGIN] FATAL ERROR in callback:', error);
-        clientConsole(1, '[GOOGLE-LOGIN] Error stack:', error.stack);
-        alert('Google login failed: ' + error.message);
+      if(!Session.get('curClass')){
+        //If we are not in a class and we log in, we need to disable embedded API keys.
+        Session.set('useEmbeddedAPIKeys', false);
       }
-    });
+
+      // Set loginParams on server
+      clientConsole(2, '[GOOGLE-LOGIN] Calling setUserLoginData...');
+      try {
+        await meteorCallAsync('setUserLoginData', `direct`, Session.get('loginMode'));
+        clientConsole(2, '[GOOGLE-LOGIN] setUserLoginData completed on server');
+      } catch (error) {
+        clientConsole(1, '[GOOGLE-LOGIN] setUserLoginData failed:', error);
+        alert('Failed to save login data: ' + error.message);
+        Meteor.logout();
+        $('#signInButton').prop('disabled', false);
+        return;
+      }
+
+      // Wait for loginParams to sync to client
+      clientConsole(2, '[GOOGLE-LOGIN] Waiting for loginParams to sync to client...');
+      const loginParamsFound = await new Promise((resolve) => {
+        const checkLoginParams = Tracker.autorun((computation) => {
+          const user = Meteor.user();
+          if (user && user.loginParams) {
+            clientConsole(2, '[GOOGLE-LOGIN] loginParams synced to client:', user.loginParams);
+            computation.stop();
+            resolve(true);
+          }
+        });
+        // Timeout after 10 seconds
+        setTimeout(() => {
+          checkLoginParams.stop();
+          clientConsole(1, '[GOOGLE-LOGIN] TIMEOUT waiting for loginParams!');
+          resolve(false);
+        }, 10000);
+      });
+
+      if (!loginParamsFound) {
+        clientConsole(1, '[GOOGLE-LOGIN] WARNING: loginParams never synced, but continuing anyway');
+      }
+
+      if (Session.get('debugging')) {
+        const currentUser = Meteor.users.findOne({_id: Meteor.userId()});
+        const username = currentUser?.username || Meteor.userId();
+        clientConsole(2, '[GOOGLE-LOGIN] ' + username + ' was logged in successfully! Current route is ', Router.current().route.getName());
+        Meteor.callAsync('debugLog', 'Sign in was successful');
+      }
+
+      clientConsole(2, '[GOOGLE-LOGIN] Calling logUserAgentAndLoginTime...');
+      Meteor.callAsync('logUserAgentAndLoginTime', Meteor.userId(), navigator.userAgent);
+
+      clientConsole(2, '[GOOGLE-LOGIN] Logging out other clients...');
+      Meteor.logoutOtherClients();
+
+      // Route to /profile like password login does
+      clientConsole(2, '[GOOGLE-LOGIN] Routing to /profile');
+      Router.go('/profile');
+
+    } catch (error) {
+      clientConsole(1, '[GOOGLE-LOGIN] Login Error:', error);
+      clientConsole(1, '[GOOGLE-LOGIN] Error details:', JSON.stringify(error, null, 2));
+      alert('Google login failed: ' + error.message);
+      $('#signInButton').prop('disabled', false);
+    }
   },
   'click #experimentSignin': function(event) {
     event.preventDefault();
@@ -520,49 +457,53 @@ async function userPasswordCheck() {
       sessionCleanUp();
       Session.set('experimentPasswordRequired', true);
       clientConsole(2, 'username:' + newUsername + ',password:' + newPassword);
-      Meteor.loginWithPassword(newUsername, newPassword, async function(error) {
-        if (typeof error !== 'undefined') {
-          clientConsole(1, 'ERROR: The user was not logged in on experiment sign in?', newUsername, 'Error:', error);
-          alert('It appears that you couldn\'t be logged in as ' + newUsername);
-          $('#signInButton').prop('disabled', false);
-        } else {
-          let experimentTarget = Session.get('experimentTarget');
-          if (experimentTarget) experimentTarget = experimentTarget.toLowerCase();
-          let foundExpTarget = await meteorCallAsync('getTdfByExperimentTarget', experimentTarget);
-          const setspec = foundExpTarget.content.tdfs.tutor.setspec ? foundExpTarget.content.tdfs.tutor.setspec : null;
-          const ignoreOutOfGrammarResponses = setspec.speechIgnoreOutOfGrammarResponses ?
-          setspec.speechIgnoreOutOfGrammarResponses.toLowerCase() == 'true' : false;
-          const speechOutOfGrammarFeedback = setspec.speechOutOfGrammarFeedback ?
-          setspec.speechOutOfGrammarFeedback : 'Response not in answer set';
 
-          if (foundExpTarget) {
-            selectTdf(
-                foundExpTarget._id,
-                setspec.lessonname,
-                foundExpTarget.stimuliSetId,
-                ignoreOutOfGrammarResponses,
-                speechOutOfGrammarFeedback,
-                'Auto-selected by experiment target ' + experimentTarget,
-                foundExpTarget.content.isMultiTdf,
-                false,
-                setspec,
-                true
-            );
-          }
+      // METEOR 3 FIX: Use promisified version instead of callback
+      const loginWithPasswordAsync = Meteor.promisify(Meteor.loginWithPassword);
 
-          try {
-            await meteorCallAsync('setUserLoginData', 'direct', Session.get('loginMode'));
-            clientConsole(2, '[EXPERIMENT-LOGIN] setUserLoginData completed');
-          } catch (error) {
-            clientConsole(1, '[EXPERIMENT-LOGIN] setUserLoginData failed:', error);
-            alert('Failed to save login data: ' + error.message);
-            $('#signInButton').prop('disabled', false);
-            return;
-          }
+      try {
+        await loginWithPasswordAsync(newUsername, newPassword);
 
-          signInNotify(false);
+        let experimentTarget = Session.get('experimentTarget');
+        if (experimentTarget) experimentTarget = experimentTarget.toLowerCase();
+        let foundExpTarget = await meteorCallAsync('getTdfByExperimentTarget', experimentTarget);
+        const setspec = foundExpTarget.content.tdfs.tutor.setspec ? foundExpTarget.content.tdfs.tutor.setspec : null;
+        const ignoreOutOfGrammarResponses = setspec.speechIgnoreOutOfGrammarResponses ?
+        setspec.speechIgnoreOutOfGrammarResponses.toLowerCase() == 'true' : false;
+        const speechOutOfGrammarFeedback = setspec.speechOutOfGrammarFeedback ?
+        setspec.speechOutOfGrammarFeedback : 'Response not in answer set';
+
+        if (foundExpTarget) {
+          selectTdf(
+              foundExpTarget._id,
+              setspec.lessonname,
+              foundExpTarget.stimuliSetId,
+              ignoreOutOfGrammarResponses,
+              speechOutOfGrammarFeedback,
+              'Auto-selected by experiment target ' + experimentTarget,
+              foundExpTarget.content.isMultiTdf,
+              false,
+              setspec,
+              true
+          );
         }
-      });
+
+        try {
+          await meteorCallAsync('setUserLoginData', 'direct', Session.get('loginMode'));
+          clientConsole(2, '[EXPERIMENT-LOGIN] setUserLoginData completed');
+        } catch (error) {
+          clientConsole(1, '[EXPERIMENT-LOGIN] setUserLoginData failed:', error);
+          alert('Failed to save login data: ' + error.message);
+          $('#signInButton').prop('disabled', false);
+          return;
+        }
+
+        signInNotify(false);
+      } catch (error) {
+        clientConsole(1, 'ERROR: The user was not logged in on experiment sign in?', newUsername, 'Error:', error);
+        alert('It appears that you couldn\'t be logged in as ' + newUsername);
+        $('#signInButton').prop('disabled', false);
+      }
 
       return;
     } else {
@@ -640,42 +581,46 @@ async function userPasswordCheck() {
   }
 
   // If we're here, we're NOT in experimental mode
-  Meteor.loginWithPassword(newUsername, newPassword, async function(error) {
+  // METEOR 3 FIX: Use promisified version instead of callback
+  const loginWithPasswordAsync = Meteor.promisify(Meteor.loginWithPassword);
+
+  try {
+    await loginWithPasswordAsync(newUsername, newPassword);
+
     if(!Session.get('curClass')){
       //If we are not in a class and we log in, we need to disable embedded API keys.
       Session.set('useEmbeddedAPIKeys', false);
     }
-    if (typeof error !== 'undefined') {
-      clientConsole(1, 'Login error: ' + error);
-      $('#invalidLogin').show();
-      alert('Your username or password was incorrect. Please try again.');
+
+    if (newPassword === blankPassword(newUsername)) {
+      // So now we know it's NOT experiment mode and they've logged in
+      // with a blank password. Currently this is someone who's
+      // managed to figure out to use the "normal" login flow. Tell
+      // them the "correct" way to use the system.
+      clientConsole(2, 'Detected non-experimental login for turk ID', newUsername);
+      alert('This login page is not for Mechanical Turk workers. Please use the link provided with your HIT');
       $('#signInButton').prop('disabled', false);
-    } else {
-      if (newPassword === blankPassword(newUsername)) {
-        // So now we know it's NOT experiment mode and they've logged in
-        // with a blank password. Currently this is someone who's
-        // managed to figure out to use the "normal" login flow. Tell
-        // them the "correct" way to use the system.
-        clientConsole(2, 'Detected non-experimental login for turk ID', newUsername);
-        alert('This login page is not for Mechanical Turk workers. Please use the link provided with your HIT');
-        $('#signInButton').prop('disabled', false);
-        return;
-      }
-
-      // Set loginParams BEFORE routing to ensure data is ready
-      try {
-        await meteorCallAsync('setUserLoginData', 'direct', Session.get('loginMode'));
-        clientConsole(2, '[PASSWORD-LOGIN] setUserLoginData completed');
-      } catch (error) {
-        clientConsole(1, '[PASSWORD-LOGIN] setUserLoginData failed:', error);
-        alert('Failed to save login data: ' + error.message);
-        $('#signInButton').prop('disabled', false);
-        return;
-      }
-
-      signInNotify();
+      return;
     }
-  });
+
+    // Set loginParams BEFORE routing to ensure data is ready
+    try {
+      await meteorCallAsync('setUserLoginData', 'direct', Session.get('loginMode'));
+      clientConsole(2, '[PASSWORD-LOGIN] setUserLoginData completed');
+    } catch (error) {
+      clientConsole(1, '[PASSWORD-LOGIN] setUserLoginData failed:', error);
+      alert('Failed to save login data: ' + error.message);
+      $('#signInButton').prop('disabled', false);
+      return;
+    }
+
+    signInNotify();
+  } catch (error) {
+    clientConsole(1, 'Login error: ' + error);
+    $('#invalidLogin').show();
+    alert('Your username or password was incorrect. Please try again.');
+    $('#signInButton').prop('disabled', false);
+  }
 }
 
 

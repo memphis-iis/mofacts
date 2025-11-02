@@ -2673,12 +2673,29 @@ async function processAudioFilesForTDF(TDF){
 }
 
 async function setUserLoginData(entryPoint, loginMode, curTeacher = undefined, curClass = undefined, assignedTdfs = undefined){
-  serverConsole('setUserLoginData', entryPoint, loginMode, curTeacher, curClass, assignedTdfs);
+  serverConsole('setUserLoginData called with:', entryPoint, loginMode, curTeacher, curClass, assignedTdfs);
+
   // eslint-disable-next-line no-invalid-this
-  const userId = this.userId;
-  serverConsole('setUserLoginData userId:', userId);
+  let userId = this.userId;
+  serverConsole('setUserLoginData initial userId:', userId);
+
+  // METEOR 3 FIX: In Meteor 3, there's a DDP sync race where client-side userId is set
+  // but server-side this.userId is still null. Retry a few times to wait for sync.
+  if (!userId) {
+    serverConsole('setUserLoginData: userId not set yet, waiting for DDP sync...');
+    for (let i = 0; i < 10; i++) {
+      await new Promise(resolve => setTimeout(resolve, 100)); // Wait 100ms
+      // eslint-disable-next-line no-invalid-this
+      userId = this.userId;
+      if (userId) {
+        serverConsole('setUserLoginData: userId set after', (i + 1) * 100, 'ms:', userId);
+        break;
+      }
+    }
+  }
 
   if (!userId) {
+    serverConsole('setUserLoginData ERROR: userId still not set after retry');
     throw new Meteor.Error('not-authorized', 'Must be logged in to set login data');
   }
 
