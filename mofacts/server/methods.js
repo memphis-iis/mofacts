@@ -2512,8 +2512,8 @@ async function upsertTDFFile(tdfFilename, tdfJSON, ownerId, packagePath = null) 
     }
   }
   //create a new array the length of the number of conditions, fill it with 0
-  tdfJSONtoUpsert.tdfs.tutor.setspec.condition ? conditionCounts = new Array(tdfJSONtoUpsert.tdfs.tutor.setspec.condition.length).fill(0) : conditionCounts = [];
-  
+  const conditionCounts = tdfJSONtoUpsert.tdfs.tutor.setspec.condition ? new Array(tdfJSONtoUpsert.tdfs.tutor.setspec.condition.length).fill(0) : [];
+
   await Tdfs.upsertAsync({_id: prev._id}, {$set: {
     path: packagePath,
     content: tdfJSONtoUpsert,
@@ -2631,7 +2631,7 @@ async function upsertPackage(packageJSON, ownerId) {
     }
   }
   //create a new array the length of the number of conditions, fill it with 0
-  tdfJSONtoUpsert.tdfs.tutor.setspec.condition ? conditionCounts = new Array(tdfJSONtoUpsert.tdfs.tutor.setspec.condition.length).fill(0) : conditionCounts = [];
+  const conditionCounts = tdfJSONtoUpsert.tdfs.tutor.setspec.condition ? new Array(tdfJSONtoUpsert.tdfs.tutor.setspec.condition.length).fill(0) : [];
 
   await Tdfs.upsertAsync({"content.fileName": packageJSON.fileName}, {$set: {
     tdfFileName: packageJSON.fileName,
@@ -4264,9 +4264,10 @@ const asyncMethods = {
 
   resetTdfConditionCounts: async function(TDFId) {
     serverConsole('resetTdfConditionCounts', TDFId);
-    setspec = await Tdfs.findOneAsync({_id: TDFId}).content.tdfs.tutor.setspec;
-    conditions = setspec.condition;
-    conditionCounts = {};
+    const tdf = await Tdfs.findOneAsync({_id: TDFId});
+    const setspec = tdf.content.tdfs.tutor.setspec;
+    const conditions = setspec.condition;
+    const conditionCounts = {};
     for(let condition in conditions){
       conditionCounts[condition] = 0;
     }
