@@ -2470,7 +2470,7 @@ async function upsertTDFFile(tdfFilename, tdfJSON, ownerId, packagePath = null) 
   if(newFormatttedTips.length > 0){
     Tdf.tutor.setspec.tips = newFormatttedTips;
   }
-  const tdfJSON = {'fileName': tdfFilename, 'tdfs': Tdf, 'ownerId': ownerId, 'source': 'upload'};
+  tdfJSON = {'fileName': tdfFilename, 'tdfs': Tdf, 'ownerId': ownerId, 'source': 'upload'};
   let tdfJSONtoUpsert;
   if (prev && prev._id) {
     formattedStims = prev.formattedStims;
