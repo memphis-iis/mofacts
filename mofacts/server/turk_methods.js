@@ -1,5 +1,6 @@
 import {Roles} from 'meteor/alanning:roles';
 import {getTdfById, getTdfByFileName, serverConsole, getTdfByExperimentTarget} from './methods';
+import {turk} from './turk';
 import {displayify} from '../common/globalHelpers';
 
 export {sendScheduledTurkMessages};

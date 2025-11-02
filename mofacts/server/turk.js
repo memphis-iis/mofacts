@@ -37,7 +37,7 @@ following is true:
 ******************************************************************************
 **/
 
-import {serverConsole, decryptUserData, createAwsHmac} from './methods';
+import {serverConsole, decryptData, createAwsHmac} from './methods';
 
 
 const turk = (function() {
@@ -67,8 +67,8 @@ const turk = (function() {
   function getClient(userProfile) {
     validateUser(userProfile);
     return new AWS.MTurk({
-      accessKeyId: decryptUserData(userProfile.aws.aws_id),
-      secretAccessKey: decryptUserData(userProfile.aws.aws_secret_key),
+      accessKeyId: decryptData(userProfile.aws.aws_id),
+      secretAccessKey: decryptData(userProfile.aws.aws_secret_key),
       region: 'us-east-1',
     });
   }
@@ -85,7 +85,7 @@ const turk = (function() {
 
     // Actual request data from default + requestParams
     const req = _.extend({
-      'AWSAccessKeyId': decryptUserData(userProfile.aws.aws_id),
+      'AWSAccessKeyId': decryptData(userProfile.aws.aws_id),
       'Service': 'AWSMechanicalTurkRequester',
       'Timestamp': new Date(Date.now()).toISOString(),
       'Operation': '',
@@ -99,7 +99,7 @@ const turk = (function() {
 
     // Add HMAC signature for request from the fields as defined by AWS
     const sigSrc = [req.Service, req.Operation, req.Timestamp].join('');
-    req.Signature = createAwsHmac(decryptUserData(userProfile.aws.aws_secret_key), sigSrc);
+    req.Signature = createAwsHmac(decryptData(userProfile.aws.aws_secret_key), sigSrc);
 
     serverConsole('About to send AWS MechTurk request', url, JSON.stringify(req, null, 2));
 
