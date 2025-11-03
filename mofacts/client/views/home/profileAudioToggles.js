@@ -1,5 +1,53 @@
 // Set up input sensitivity range to display/hide when audio input is enabled/disabled
 
+// Default audio settings
+const DEFAULT_AUDIO_SETTINGS = {
+  audioPromptMode: 'silent',
+  audioPromptQuestionVolume: 0,
+  audioPromptQuestionSpeakingRate: 1,
+  audioPromptVoice: 'en-US-Standard-A',
+  audioPromptFeedbackVolume: 0,
+  audioPromptFeedbackSpeakingRate: 1,
+  audioPromptFeedbackVoice: 'en-US-Standard-A',
+  audioInputMode: false,
+  audioInputSensitivity: 60,
+};
+
+// Get user's audio settings with fallbacks to defaults
+function getUserAudioSettings() {
+  const user = Meteor.user();
+  if (!user) return DEFAULT_AUDIO_SETTINGS;
+
+  // Use audioSettings if available, otherwise fall back to legacy fields
+  if (user.audioSettings) {
+    return { ...DEFAULT_AUDIO_SETTINGS, ...user.audioSettings };
+  }
+
+  // Legacy fallback: construct from individual fields
+  return {
+    ...DEFAULT_AUDIO_SETTINGS,
+    audioPromptMode: user.audioPromptMode || DEFAULT_AUDIO_SETTINGS.audioPromptMode,
+    audioInputMode: user.audioInputMode || DEFAULT_AUDIO_SETTINGS.audioInputMode,
+  };
+}
+
+// Save a single audio setting to database (updates entire audioSettings object)
+async function saveAudioSettingToDatabase(settingKey, settingValue) {
+  try {
+    // Get current settings
+    const currentSettings = getUserAudioSettings();
+
+    // Update the specific setting
+    currentSettings[settingKey] = settingValue;
+
+    // Save entire settings object
+    await Meteor.callAsync('saveAudioSettings', currentSettings);
+  } catch (error) {
+    console.error('Error saving audio setting:', error);
+    alert('Failed to save audio settings: ' + error.message);
+  }
+}
+
 const showHideAudioEnabledGroup = function(show) {
   if (show) {
     $('.audioEnabledGroup').show();
@@ -32,14 +80,9 @@ function getAudioPromptModeFromPage() {
   }
 }
 
-function setAudioPromptQuestionVolumeOnPage(audioVolume) {
-  //Google's TTS API uses decibles to alter audio, the range is -96 to 16. 0 is 
-  document.getElementById('audioPromptQuestionVolume').value = audioVolume;
-}
-
-function setAudioPromptFeedbackVolumeOnPage(audioVolume) {
-  document.getElementById('audioPromptFeedbackVolume').value = audioVolume;
-
+function setAudioPromptVolumeOnPage(audioVolume) {
+  //Google's TTS API uses decibels to alter audio, the range is -96 to 16. 0 is default
+  document.getElementById('audioPromptVolume').value = audioVolume;
 }
 
 function disableUnsupportedFeatures(isSafari){
@@ -94,34 +137,15 @@ function showHideheadphonesSuggestedDiv(show) {
 }
 
 function showHideAudioPromptGroupDependingOnAudioPromptMode(audioPromptMode) {
-  const audioPromptFeedbackGroup = $('.audioPromptFeedbackGroup');
-  const audioPromptQuestionGroup = $('.audioPromptQuestionGroup');
-  switch (audioPromptMode) {
-    case 'feedback':
-      audioPromptFeedbackGroup.show();
-      audioPromptFeedbackGroup.addClass('flow');
-      audioPromptQuestionGroup.removeClass('flow');
-      audioPromptQuestionGroup.hide();
-      break;
-    case 'question':
-      audioPromptQuestionGroup.show();
-      audioPromptQuestionGroup.addClass('flow');
-      audioPromptFeedbackGroup.removeClass('flow');
-      audioPromptFeedbackGroup.hide();
-      break;
-    case 'all':
-      audioPromptFeedbackGroup.show();
-      audioPromptFeedbackGroup.addClass('flow');
-      audioPromptQuestionGroup.show();
-      audioPromptQuestionGroup.addClass('flow');
-      break;
-    case 'silent':
-    default:
-      audioPromptFeedbackGroup.removeClass('flow');
-      audioPromptFeedbackGroup.hide();
-      audioPromptQuestionGroup.removeClass('flow');
-      audioPromptQuestionGroup.hide();
-      break;
+  const audioPromptSharedGroup = $('.audioPromptSharedGroup');
+
+  // Show shared controls if any audio mode is enabled
+  if (audioPromptMode !== 'silent') {
+    audioPromptSharedGroup.show();
+    audioPromptSharedGroup.addClass('flow');
+  } else {
+    audioPromptSharedGroup.removeClass('flow');
+    audioPromptSharedGroup.hide();
   }
 }
 
@@ -131,16 +155,37 @@ Template.profileAudioToggles.rendered = function() {
   });
 
   $('#audioModal').on('shown.bs.modal', function() {
-    const audioInputEnabled = Meteor.user().audioInputMode
-    const audioPromptMode = Meteor.user().audioPromptMode || 'silent';
-    setAudioInputOnPage(audioInputEnabled);
-    setAudioPromptModeOnPage(audioPromptMode);
-    showHideAudioPromptGroupDependingOnAudioPromptMode(audioPromptMode);
-    setAudioPromptQuestionVolumeOnPage(Session.get('audioPromptQuestionVolume'));
-    setAudioPromptFeedbackVolumeOnPage(Session.get('audioPromptFeedbackVolume'));
-    showHideAudioInputGroup(audioInputEnabled);
-    showHideAudioEnabledGroup(audioPromptMode != 'silent' || audioInputEnabled);
-    const showHeadphonesSuggestedDiv = audioPromptMode != 'silent' && audioInputEnabled;
+    // Load settings from unified audioSettings object
+    const settings = getUserAudioSettings();
+
+    // Set toggle states
+    setAudioInputOnPage(settings.audioInputMode);
+    setAudioPromptModeOnPage(settings.audioPromptMode);
+    showHideAudioPromptGroupDependingOnAudioPromptMode(settings.audioPromptMode);
+
+    // Set all control values (use first available value for shared controls)
+    const volume = settings.audioPromptQuestionVolume || settings.audioPromptFeedbackVolume || 0;
+    const speakingRate = settings.audioPromptQuestionSpeakingRate || settings.audioPromptFeedbackSpeakingRate || 1;
+    const voice = settings.audioPromptVoice || settings.audioPromptFeedbackVoice || 'en-US-Standard-A';
+
+    setAudioPromptVolumeOnPage(volume);
+    document.getElementById('audioPromptSpeakingRate').value = speakingRate;
+    document.getElementById('audioPromptVoice').value = voice;
+    document.getElementById('audioInputSensitivity').value = settings.audioInputSensitivity;
+
+    // Update Session variables for backward compatibility (set both to same values)
+    Session.set('audioPromptQuestionVolume', volume);
+    Session.set('audioPromptFeedbackVolume', volume);
+    Session.set('audioPromptQuestionSpeakingRate', speakingRate);
+    Session.set('audioPromptFeedbackSpeakingRate', speakingRate);
+    Session.set('audioPromptVoice', voice);
+    Session.set('audioPromptFeedbackVoice', voice);
+    Session.set('audioInputSensitivity', settings.audioInputSensitivity);
+
+    // Show/hide appropriate groups
+    showHideAudioInputGroup(settings.audioInputMode);
+    showHideAudioEnabledGroup(settings.audioPromptMode != 'silent' || settings.audioInputMode);
+    const showHeadphonesSuggestedDiv = settings.audioPromptMode != 'silent' && settings.audioInputMode;
     showHideheadphonesSuggestedDiv(showHeadphonesSuggestedDiv);
   });
 
@@ -155,31 +200,8 @@ Template.profileAudioToggles.rendered = function() {
 
   disableUnsupportedFeatures(Session.get('isSafari'));
 
-  // Restore range/label values from prior page loads
-  const audioInputSensitivityView = Session.get('audioInputSensitivityView');
-  if (audioInputSensitivityView) {
-    document.getElementById('audioInputSensitivity').value = audioInputSensitivityView;
-  }
-
-  const audioPromptFeedbackSpeakingRateView = Session.get('audioPromptFeedbackSpeakingRateView');
-  if (audioPromptFeedbackSpeakingRateView) {
-    document.getElementById('audioPromptFeedbackSpeakingRate').value = audioPromptFeedbackSpeakingRateView;
-  }
-
-  const audioPromptQuestionSpeakingRateView = Session.get('audioPromptQuestionSpeakingRateView');
-  if (audioPromptQuestionSpeakingRateView) {
-    document.getElementById('audioPromptQuestionSpeakingRate').value = audioPromptQuestionSpeakingRateView;
-  }
-
-  const audioPromptVoiceView = Session.get('audioPromptVoiceView');
-  if (audioPromptVoiceView) {
-    document.getElementById('audioPromptVoice').value = audioPromptVoiceView;
-  }
-
-  const audioPromptFeedbackVoiceView = Session.get('audioPromptFeedbackVoiceView');
-  if (audioPromptFeedbackVoiceView) {
-    document.getElementById('audioPromptFeedbackVoice').value = audioPromptFeedbackVoiceView;
-  }
+  // Settings are now loaded from database when modal opens (see $('#audioModal').on('shown.bs.modal') above)
+  // No need to restore from Session variables here
 };
 
 Template.profileAudioToggles.events({
@@ -192,7 +214,6 @@ Template.profileAudioToggles.events({
   },
 
   'click #audioInputOn': async function(event) {
-    console.log('audio input mode: ' + event.currentTarget.id);
     const audioInputEnabled = getAudioInputFromPage();
 
     const showHeadphonesSuggestedDiv = (getAudioPromptModeFromPage() != 'silent') && audioInputEnabled;
@@ -207,12 +228,8 @@ Template.profileAudioToggles.events({
       warmupGoogleSpeechRecognition();
     }
 
-    //save the audio input mode to the user profile in mongodb
-    try {
-      await Meteor.callAsync('saveAudioInputMode', audioInputEnabled);
-    } catch (error) {
-      console.log('Error saving audio input mode', error);
-    }
+    //save the audio input mode to the user profile using unified settings
+    await saveAudioSettingToDatabase('audioInputMode', audioInputEnabled);
   },
 
   'click #setupAPIKey': async function(e) {
@@ -273,22 +290,59 @@ Template.profileAudioToggles.events({
     }
   },
 
-  'change #audioPromptQuestionVolume': function(event) {
-    Session.set('audioPromptQuestionVolume', event.currentTarget.value);
+  'change #audioPromptVolume': async function(event) {
+    const value = parseFloat(event.currentTarget.value);
+    // Set both session variables to the same value for backward compatibility
+    Session.set('audioPromptQuestionVolume', value);
+    Session.set('audioPromptFeedbackVolume', value);
+
+    // Save both to database
+    const currentSettings = getUserAudioSettings();
+    currentSettings.audioPromptQuestionVolume = value;
+    currentSettings.audioPromptFeedbackVolume = value;
+    await Meteor.callAsync('saveAudioSettings', currentSettings);
   },
 
-  'change #audioPromptFeedbackVolume': function(event) {
-    Session.set('audioPromptFeedbackVolume', event.currentTarget.value)
+  'change #audioPromptSpeakingRate': async function(event) {
+    const value = parseFloat(event.currentTarget.value);
+    // Set both session variables to the same value for backward compatibility
+    Session.set('audioPromptQuestionSpeakingRate', value);
+    Session.set('audioPromptFeedbackSpeakingRate', value);
+    Session.set('audioPromptQuestionSpeakingRateView', value);
+    Session.set('audioPromptFeedbackSpeakingRateView', value);
+
+    // Save both to database
+    const currentSettings = getUserAudioSettings();
+    currentSettings.audioPromptQuestionSpeakingRate = value;
+    currentSettings.audioPromptFeedbackSpeakingRate = value;
+    await Meteor.callAsync('saveAudioSettings', currentSettings);
+  },
+
+  'change #audioPromptVoice': async function(event) {
+    const value = event.currentTarget.value;
+    // Set both voice variables to the same value for simplicity
+    Session.set('audioPromptVoice', value);
+    Session.set('audioPromptVoiceView', value);
+    Session.set('audioPromptFeedbackVoice', value);
+    Session.set('audioPromptFeedbackVoiceView', value);
+
+    // Save both to database for backward compatibility
+    const currentSettings = getUserAudioSettings();
+    currentSettings.audioPromptVoice = value;
+    currentSettings.audioPromptFeedbackVoice = value;
+    await Meteor.callAsync('saveAudioSettings', currentSettings);
+  },
+
+  'change #audioInputSensitivity': async function(event) {
+    const value = parseInt(event.currentTarget.value);
+    Session.set('audioInputSensitivity', value);
+    Session.set('audioInputSensitivityView', value);
+    await saveAudioSettingToDatabase('audioInputSensitivity', value);
   },
 
   'click #audioPromptVoiceTest': function(event) {
+    event.preventDefault();
     const voice = document.getElementById('audioPromptVoice').value;
-    const audioObj = new Audio(`https://cloud.google.com/text-to-speech/docs/audio/${voice}.wav`);
-    audioObj.play();
-  },
-
-  'click #audioPromptFeedbackVoiceTest': function(event) {
-    const voice = document.getElementById('audioPromptFeedbackVoice').value;
     const audioObj = new Audio(`https://cloud.google.com/text-to-speech/docs/audio/${voice}.wav`);
     audioObj.play();
   }
@@ -319,14 +373,13 @@ async function checkAndSetSpeechAPIKeyIsSetup() {
 }
 
 async function updateAudioPromptMode(e){
-  console.log('audio prompt mode: ' + e.currentTarget.id);
   const audioPromptMode = getAudioPromptModeFromPage();
+
   Session.set('audioPromptFeedbackView', audioPromptMode);
   //if toggle is on, show the warning, else hide it
   if (e.currentTarget.checked){
     $('.audioEnabledGroup').show();
     $('#audio-modal-dialog').addClass('modal-expanded');
-    console.log('showing audio enabled group');
 
     // FIX: Warm up Google TTS API when user enables audio prompts
     // This eliminates the 8-9 second cold start delay on first trial
@@ -334,15 +387,11 @@ async function updateAudioPromptMode(e){
   } else if(audioPromptMode == 'silent' && !getAudioInputFromPage()){
     $('.audioEnabledGroup').hide();
     $('#audio-modal-dialog').removeClass('modal-expanded');
-    console.log('hiding audio enabled group');
   }
   showHideAudioPromptGroupDependingOnAudioPromptMode(audioPromptMode);
-  //save the audio prompt mode to the user profile in mongodb
-  try {
-    await Meteor.callAsync('saveAudioPromptMode', audioPromptMode);
-  } catch (error) {
-    console.log('Error saving audio prompt mode', error);
-  }
+
+  //save the audio prompt mode to the user profile using unified settings
+  await saveAudioSettingToDatabase('audioPromptMode', audioPromptMode);
 }
 
 export async function warmupGoogleTTS() {

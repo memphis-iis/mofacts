@@ -268,6 +268,13 @@ Meteor.startup(function() {
   Session.set('debugging', true);
   sessionCleanUp();
 
+  // Subscribe to user audio settings so they're available on the client
+  Tracker.autorun(function() {
+    if (Meteor.userId()) {
+      Meteor.subscribe('userAudioSettings');
+    }
+  });
+
   // Suppress "logged out by server" errors for expired resume tokens during startup
   // This is a normal occurrence when the app restarts or tokens expire
   const originalConsoleError = console.error;

@@ -2871,6 +2871,52 @@ export const methods = {
     await Meteor.users.updateAsync({_id: Meteor.userId()}, {$set: {audioInputMode: audioInputMode}});
   },
 
+  // Unified audio settings save method
+  saveAudioSettings: async function(audioSettings) {
+    // Security: User must be logged in
+    if (!this.userId) {
+      throw new Meteor.Error(401, 'Must be logged in to save audio settings');
+    }
+
+    // Define default values
+    const DEFAULT_AUDIO_SETTINGS = {
+      audioPromptMode: 'silent',
+      audioPromptQuestionVolume: 0,
+      audioPromptQuestionSpeakingRate: 1,
+      audioPromptVoice: 'en-US-Standard-A',
+      audioPromptFeedbackVolume: 0,
+      audioPromptFeedbackSpeakingRate: 1,
+      audioPromptFeedbackVoice: 'en-US-Standard-A',
+      audioInputMode: false,
+      audioInputSensitivity: 60,
+    };
+
+    // Merge provided settings with defaults
+    const settingsToSave = { ...DEFAULT_AUDIO_SETTINGS, ...audioSettings };
+
+    // Save to user.audioSettings object
+    await Meteor.users.updateAsync(
+      {_id: this.userId},
+      {$set: {audioSettings: settingsToSave}}
+    );
+
+    // Also update legacy fields for backward compatibility
+    if (settingsToSave.audioPromptMode !== undefined) {
+      await Meteor.users.updateAsync(
+        {_id: this.userId},
+        {$set: {audioPromptMode: settingsToSave.audioPromptMode}}
+      );
+    }
+    if (settingsToSave.audioInputMode !== undefined) {
+      await Meteor.users.updateAsync(
+        {_id: this.userId},
+        {$set: {audioInputMode: settingsToSave.audioInputMode}}
+      );
+    }
+
+    return { success: true };
+  },
+
   updateExperimentState: async function(curExperimentState, experimentId) {
     // REDUCED LOGGING: Only log TDF ID, not entire experiment state object
     serverConsole('updateExperimentState', curExperimentState.currentTdfId);

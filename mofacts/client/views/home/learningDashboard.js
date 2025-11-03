@@ -520,16 +520,21 @@ async function selectTdf(currentTdfId, lessonName, currentStimuliSetId, ignoreOu
     feedbackType = setspec.feedbackType;
     audioPromptFeedbackVoice = setspec.audioPromptFeedbackVoice || 'en-US-Standard-A';
   } else {
-    audioPromptMode = Meteor.user().audioPromptMode;
-    audioInputEnabled = Meteor.user().audioInputMode;
-    audioPromptFeedbackSpeakingRate = document.getElementById('audioPromptFeedbackSpeakingRate').value;
-    audioPromptQuestionSpeakingRate = document.getElementById('audioPromptQuestionSpeakingRate').value;
-    audioPromptVoice = document.getElementById('audioPromptVoice').value;
-    audioInputSensitivity = document.getElementById('audioInputSensitivity').value;
-    audioPromptQuestionVolume = document.getElementById('audioPromptQuestionVolume').value;
-    audioPromptFeedbackVolume = document.getElementById('audioPromptFeedbackVolume').value;
+    const user = Meteor.user();
+    audioPromptMode = user?.audioPromptMode;
+    audioInputEnabled = user?.audioInputMode;
+
+    // Load from user's audioSettings if available, otherwise use defaults
+    const audioSettings = user?.audioSettings || {};
+    audioPromptFeedbackSpeakingRate = audioSettings.audioPromptFeedbackSpeakingRate || 1;
+    audioPromptQuestionSpeakingRate = audioSettings.audioPromptQuestionSpeakingRate || 1;
+    audioPromptVoice = audioSettings.audioPromptVoice || 'en-US-Standard-A';
+    audioInputSensitivity = audioSettings.audioInputSensitivity || 60;
+    audioPromptQuestionVolume = audioSettings.audioPromptQuestionVolume || 0;
+    audioPromptFeedbackVolume = audioSettings.audioPromptFeedbackVolume || 0;
+    audioPromptFeedbackVoice = audioSettings.audioPromptFeedbackVoice || 'en-US-Standard-A';
+
     feedbackType = GlobalExperimentStates.findOne({userId: Meteor.userId(), TDFId: currentTdfId})?.experimentState?.feedbackType || null;
-    audioPromptFeedbackVoice = document.getElementById('audioPromptFeedbackVoice').value;
     if (feedbackType)
       Session.set('feedbackTypeFromHistory', feedbackType.feedbacktype);
     else

@@ -166,3 +166,21 @@ Meteor.publish('settings', async function() {
     }
     return DynamicSettings.find();
 });
+
+// Publish user's audio settings
+Meteor.publish('userAudioSettings', function() {
+    if (!this.userId) {
+        return this.ready();
+    }
+
+    return Meteor.users.find(
+        { _id: this.userId },
+        {
+            fields: {
+                audioSettings: 1,
+                audioPromptMode: 1,  // Legacy field for backward compatibility
+                audioInputMode: 1     // Legacy field for backward compatibility
+            }
+        }
+    );
+});
