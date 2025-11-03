@@ -4191,7 +4191,7 @@ const asyncMethods = {
       return await makeHTTPSrequest(options, request).then((data, error) => {
         if(error)
           throw new Meteor.Error('tts-api-error', 'Error with Google TTS API call: ' + error);
-        response = JSON.parse(data.toString('utf-8'))
+        const response = JSON.parse(data.toString('utf-8'))
         return response.audioContent;
       });
     } catch (error) {
