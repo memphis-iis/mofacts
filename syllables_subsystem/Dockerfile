@@ -1,5 +1,5 @@
-# Set the base image to Alpine Linux
-FROM openjdk:8-jre-alpine
+# Set the base image to Alpine Linux with Eclipse Temurin JRE 8
+FROM eclipse-temurin:8-jre-alpine
 
 # Set the working directory to /app
 WORKDIR /app
