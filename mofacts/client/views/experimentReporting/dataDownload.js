@@ -74,7 +74,11 @@ Template.dataDownload.helpers({
       });
     }
 
-    dataDownloads = Session.get('allTdfs').map(function(tdf) {
+    const allTdfs = Tdfs.find().fetch();
+    if (!allTdfs || allTdfs.length === 0) {
+      return [];
+    }
+    dataDownloads = allTdfs.map(function(tdf) {
       const name = tdf.content.tdfs.tutor.setspec.lessonname ? tdf.content.tdfs.tutor.setspec.lessonname : 'NO NAME';
       tdf.disp = name;
 

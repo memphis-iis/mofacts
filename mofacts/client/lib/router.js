@@ -185,7 +185,6 @@ defaultBehaviorRoutes = [
 
 const restrictedRoutes = [
   'multiTdfSelect',
-  'dataDownload',
   'profileEdit',
   'userAdmin',
   'contentGeneration',
@@ -273,6 +272,22 @@ Router.route('/studentReporting', {
     routeName = 'studentReporting';
     Session.set('curModule', routeName.toLowerCase());
     this.render(routeName);
+  }
+})
+
+
+Router.route('/dataDownload', {
+  name: 'client.dataDownload',
+  waitOn: function() {
+    return [Meteor.subscribe('allTdfs', 'all')];
+  },
+  action: function() {
+    if(Meteor.user()){
+      Session.set('curModule', 'dataDownload');
+      this.render('dataDownload');
+    } else {
+      this.redirect('/');
+    }
   }
 })
 
