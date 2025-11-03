@@ -4139,7 +4139,7 @@ const asyncMethods = {
     return users;
   },
   
-  makeGoogleTTSApiCall: async function(TDFId, message, audioPromptSpeakingRate, audioVolume, selectedVoice) {
+  makeGoogleTTSApiCall: async function(TDFId, message, audioPromptSpeakingRate, audioVolume, selectedVoice = 'en-US-Standard-A') {
     try {
       serverConsole('[TTS] makeGoogleTTSApiCall called:', {TDFId, message, audioPromptSpeakingRate, audioVolume, selectedVoice});
       let ttsAPIKey;

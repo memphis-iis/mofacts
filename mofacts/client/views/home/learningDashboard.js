@@ -315,12 +315,12 @@ async function checkAndWarmupAudioIfNeeded() {
 
       // Make async warmup call
       const startTime = performance.now();
+      // Note: Match 2.16 behavior - don't pass voice param in warmup, let server use default
       const ttsPromise = Meteor.callAsync('makeGoogleTTSApiCall',
         Session.get('currentTdfId'),
         'warmup',
         1.0,
-        0.0,
-        'en-US-Standard-A'  // voice parameter
+        0.0
       ).then(result => {
         const duration = performance.now() - startTime;
         console.log(`[TTS] ✅ Warmup complete in ${duration.toFixed(0)}ms`);
