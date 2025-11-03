@@ -306,7 +306,7 @@ async function checkAndWarmupAudioIfNeeded() {
 
   // Check TTS warmup (Scenario 2: TDF has embedded key)
   if (currentTdfFile.tdfs?.tutor?.setspec?.textToSpeechAPIKey) {
-    const audioPromptMode = user.audioPromptMode;
+    const audioPromptMode = user.audioSettings?.audioPromptMode;
     if (audioPromptMode && audioPromptMode !== 'silent' && !Session.get('ttsWarmedUp')) {
       console.log('[TTS] TDF has embedded key, warming up before first trial (Scenario 2)');
 
@@ -521,11 +521,11 @@ async function selectTdf(currentTdfId, lessonName, currentStimuliSetId, ignoreOu
     audioPromptFeedbackVoice = setspec.audioPromptFeedbackVoice || 'en-US-Standard-A';
   } else {
     const user = Meteor.user();
-    audioPromptMode = user?.audioPromptMode;
-    audioInputEnabled = user?.audioInputMode;
 
     // Load from user's audioSettings if available, otherwise use defaults
     const audioSettings = user?.audioSettings || {};
+    audioPromptMode = audioSettings.audioPromptMode || 'silent';
+    audioInputEnabled = audioSettings.audioInputMode || false;
     audioPromptFeedbackSpeakingRate = audioSettings.audioPromptFeedbackSpeakingRate || 1;
     audioPromptQuestionSpeakingRate = audioSettings.audioPromptQuestionSpeakingRate || 1;
     audioPromptVoice = audioSettings.audioPromptVoice || 'en-US-Standard-A';

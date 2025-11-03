@@ -331,7 +331,7 @@ Meteor.startup(function() {
         console.log('[Warmup] Personal keys check:', keys);
 
         // Warm up TTS if user has personal TTS key AND TTS is enabled
-        if (keys.hasTTS && user.audioPromptMode && user.audioPromptMode !== 'silent') {
+        if (keys.hasTTS && user.audioSettings?.audioPromptMode && user.audioSettings?.audioPromptMode !== 'silent') {
           if (!Session.get('ttsWarmedUp')) {
             console.log('[TTS] User has personal key, warming up immediately (Scenario 1)');
             warmupGoogleTTS();
@@ -339,7 +339,7 @@ Meteor.startup(function() {
         }
 
         // Warm up SR if user has personal SR key AND SR is enabled
-        if (keys.hasSR && user.audioInputMode) {
+        if (keys.hasSR && user.audioSettings?.audioInputMode) {
           if (!Session.get('srWarmedUp')) {
             console.log('[SR] User has personal key, warming up immediately (Scenario 1)');
             warmupGoogleSpeechRecognition();

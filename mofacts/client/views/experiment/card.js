@@ -74,7 +74,7 @@ async function checkAndWarmupAudioIfNeeded() {
 
   // Check TTS warmup (Scenario 2: TDF has embedded key)
   if (currentTdfFile.tdfs?.tutor?.setspec?.textToSpeechAPIKey) {
-    const audioPromptMode = user.audioPromptMode;
+    const audioPromptMode = user.audioSettings?.audioPromptMode;
     if (audioPromptMode && audioPromptMode !== 'silent' && !Session.get('ttsWarmedUp')) {
       clientConsole(2, '[TTS] TDF has embedded key, warming up before first trial (Scenario 2)');
 
@@ -779,7 +779,7 @@ async function initCard() {
   // 1. User must have toggled SR icon on (audioInputMode)
   // 2. TDF must have audioInputEnabled='true'
   // 3. Must have API key (either user key or TDF key)
-  const userAudioToggled = Meteor.user().audioInputMode || false;
+  const userAudioToggled = Meteor.user()?.audioSettings?.audioInputMode || false;
   const tdfAudioEnabled = Session.get('currentTdfFile').tdfs.tutor.setspec.audioInputEnabled === 'true';
   let audioInputEnabled = userAudioToggled && tdfAudioEnabled;
 
@@ -1970,7 +1970,7 @@ async function preloadStimuliFiles() {
 
 function checkUserAudioConfigCompatability(){
   // Check if TTS would actually be enabled based on both user preference AND TDF settings
-  const userAudioPromptMode = Meteor.user().audioPromptMode;
+  const userAudioPromptMode = Meteor.user()?.audioSettings?.audioPromptMode;
   const tdfAudioPromptMode = Session.get('currentTdfFile')?.tdfs?.tutor?.setspec?.audioPromptMode;
   const tdfSupportsAudioPrompts = tdfAudioPromptMode && tdfAudioPromptMode !== 'silent';
   const userWantsAudioPrompts = userAudioPromptMode && userAudioPromptMode !== 'silent';
@@ -4139,7 +4139,7 @@ function stopUserInput() {
 
 // Audio prompt/feedback
 async function speakMessageIfAudioPromptFeedbackEnabled(msg, audioPromptSource) {
-  const userAudioPromptMode = Meteor.user().audioPromptMode;
+  const userAudioPromptMode = Meteor.user()?.audioSettings?.audioPromptMode;
   const tdfAudioPromptMode = Session.get('currentTdfFile')?.tdfs?.tutor?.setspec?.audioPromptMode;
 
   // TTS should only activate if:
@@ -5266,7 +5266,7 @@ function startUserMedia(stream) {
 }
 
 function startRecording() {
-  if (recorder && !Session.get('recordingLocked') && Meteor.user().audioInputMode) {
+  if (recorder && !Session.get('recordingLocked') && Meteor.user()?.audioSettings?.audioInputMode) {
     Session.set('recording', true);
     recorder.record();
     clientConsole(2, '[SR] RECORDING START');

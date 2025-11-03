@@ -2894,25 +2894,11 @@ export const methods = {
     // Merge provided settings with defaults
     const settingsToSave = { ...DEFAULT_AUDIO_SETTINGS, ...audioSettings };
 
-    // Save to user.audioSettings object
+    // Save to user.audioSettings object only (single source of truth)
     await Meteor.users.updateAsync(
       {_id: this.userId},
       {$set: {audioSettings: settingsToSave}}
     );
-
-    // Also update top-level fields for backward compatibility and UI toggles
-    if (settingsToSave.audioPromptMode !== undefined) {
-      await Meteor.users.updateAsync(
-        {_id: this.userId},
-        {$set: {audioPromptMode: settingsToSave.audioPromptMode}}
-      );
-    }
-    if (settingsToSave.audioInputMode !== undefined) {
-      await Meteor.users.updateAsync(
-        {_id: this.userId},
-        {$set: {audioInputMode: settingsToSave.audioInputMode}}
-      );
-    }
 
     return { success: true };
   },
