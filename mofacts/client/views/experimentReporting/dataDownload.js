@@ -9,6 +9,7 @@ const sitePath = Meteor.isDevelopment? window.location.origin : `https://${windo
 Template.dataDownload.onCreated(async function() {
   this.selectedTeacherId = new ReactiveVar(null);
   this.selectedClassId = new ReactiveVar(null);
+  this.accessableFiles = new ReactiveVar([]);
 });
 
 Template.dataDownload.onRendered(async function() {
@@ -23,6 +24,21 @@ Template.dataDownload.onRendered(async function() {
   Session.set('classesByInstructorId', classesByInstructorId);
   const allTeachers = await meteorCallAsync('getAllTeachers');
   Session.set('allUsersWithTeacherRole', allTeachers);
+
+  // Load accessible files once on render
+  try {
+    const result = await Meteor.callAsync('getAccessableTDFSForUser', Meteor.userId());
+    console.log('[DataDownload] Loaded accessible files:', result);
+    const accessableFiles = result.TDFs?.map(function(tdf) {
+      const name = tdf.content.tdfs.tutor.setspec.lessonname ? tdf.content.tdfs.tutor.setspec.lessonname : 'NO NAME';
+      tdf.disp = name;
+      return tdf;
+    }) || [];
+    this.accessableFiles.set(accessableFiles);
+  } catch (err) {
+    console.error('[DataDownload] Failed to load accessible files:', err);
+    this.accessableFiles.set([]);
+  }
 });
 
 Template.dataDownload.helpers({
@@ -133,22 +149,7 @@ Template.dataDownload.helpers({
     return Meteor.user() ? Meteor.user().username : false;
   },
   'accessableFiles': function() {
-    (async () => {
-      try {
-        const result = await Meteor.callAsync('getAccessableTDFSForUser', Meteor.userId());
-        console.log(result);
-        const dataDownloads = result.TDFs?.map(function(tdf) {
-          const name = tdf.content.tdfs.tutor.setspec.lessonname ? tdf.content.tdfs.tutor.setspec.lessonname : 'NO NAME';
-          tdf.disp = name;
-
-          return tdf;
-        });
-        Session.set('accessableFiles', dataDownloads);
-      } catch (err) {
-        console.log(err);
-      }
-    })();
-    return Session.get('accessableFiles') || [];
+    return Template.instance().accessableFiles.get();
   },
 });
 
