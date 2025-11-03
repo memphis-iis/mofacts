@@ -4140,57 +4140,64 @@ const asyncMethods = {
   },
   
   makeGoogleTTSApiCall: async function(TDFId, message, audioPromptSpeakingRate, audioVolume, selectedVoice) {
-    let ttsAPIKey;
+    try {
+      serverConsole('[TTS] makeGoogleTTSApiCall called:', {TDFId, message, audioPromptSpeakingRate, audioVolume, selectedVoice});
+      let ttsAPIKey;
 
-    // Try to get API key from multiple sources
-    if (this.userId) {
-      // 1. Try TDF API key first (preferred)
-      try {
-        ttsAPIKey = await methods.getTdfTTSAPIKey.call(this, TDFId);
-        if (ttsAPIKey) {
-          serverConsole('Using TDF API key for TTS');
-        }
-      } catch(err) {
-        serverConsole('Could not access TDF TTS key:', err.message);
-      }
-
-      // 2. Fallback to user's personal TTS API key (if field exists)
-      if (!ttsAPIKey) {
+      // Try to get API key from multiple sources
+      if (this.userId) {
+        // 1. Try TDF API key first (preferred)
         try {
-          const user = await Meteor.users.findOneAsync({_id: this.userId});
-          if (user && user.ttsAPIKey) {
-            ttsAPIKey = decryptData(user.ttsAPIKey);
-            serverConsole('Using user personal API key for TTS');
+          ttsAPIKey = await methods.getTdfTTSAPIKey.call(this, TDFId);
+          if (ttsAPIKey) {
+            serverConsole('Using TDF API key for TTS');
           }
         } catch(err) {
-          serverConsole('Could not access user TTS key:', err.message);
+          serverConsole('Could not access TDF TTS key:', err.message);
+        }
+
+        // 2. Fallback to user's personal TTS API key (if field exists)
+        if (!ttsAPIKey) {
+          try {
+            const user = await Meteor.users.findOneAsync({_id: this.userId});
+            if (user && user.ttsAPIKey) {
+              ttsAPIKey = decryptData(user.ttsAPIKey);
+              serverConsole('Using user personal API key for TTS');
+            }
+          } catch(err) {
+            serverConsole('Could not access user TTS key:', err.message);
+          }
         }
       }
-    }
 
-    if (!ttsAPIKey) {
-      throw new Meteor.Error('no-api-key', 'No TTS API key available');
-    }
-
-    const request = JSON.stringify({
-      input: {text: message},
-      voice: {languageCode: 'en-US', 'name': selectedVoice},
-      audioConfig: {audioEncoding: 'MP3', speakingRate: audioPromptSpeakingRate, volumeGainDb: audioVolume},
-    });
-    const options = {
-      hostname: 'texttospeech.googleapis.com',
-      path: '/v1/text:synthesize?key=' + ttsAPIKey,
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json; charset=utf-8'
+      if (!ttsAPIKey) {
+        serverConsole('[TTS] ERROR: No API key available');
+        throw new Meteor.Error('no-api-key', 'No TTS API key available');
       }
+
+      const request = JSON.stringify({
+        input: {text: message},
+        voice: {languageCode: 'en-US', 'name': selectedVoice},
+        audioConfig: {audioEncoding: 'MP3', speakingRate: audioPromptSpeakingRate, volumeGainDb: audioVolume},
+      });
+      const options = {
+        hostname: 'texttospeech.googleapis.com',
+        path: '/v1/text:synthesize?key=' + ttsAPIKey,
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json; charset=utf-8'
+        }
+      }
+      return await makeHTTPSrequest(options, request).then((data, error) => {
+        if(error)
+          throw new Meteor.Error('tts-api-error', 'Error with Google TTS API call: ' + error);
+        response = JSON.parse(data.toString('utf-8'))
+        return response.audioContent;
+      });
+    } catch (error) {
+      serverConsole('[TTS] ERROR in makeGoogleTTSApiCall:', error);
+      throw error;
     }
-    return await makeHTTPSrequest(options, request).then((data, error) => {
-      if(error)
-        throw new Meteor.Error('Error with Google TTS API call: ' + error);
-      response = JSON.parse(data.toString('utf-8'))
-      return response.audioContent;
-    });
   },
 
   getContentGenerationAvailable: function(){

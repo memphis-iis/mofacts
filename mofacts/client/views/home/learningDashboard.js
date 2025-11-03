@@ -326,7 +326,11 @@ async function checkAndWarmupAudioIfNeeded() {
         console.log(`[TTS] ✅ Warmup complete in ${duration.toFixed(0)}ms`);
         return result;
       }).catch(error => {
-        console.log('[TTS] Warmup failed:', error);
+        console.log('[TTS] Warmup failed:');
+        console.log('  Error:', error.error);
+        console.log('  Reason:', error.reason);
+        console.log('  Message:', error.message);
+        console.log('  Details:', error.details);
         // Don't re-throw - let Promise.allSettled handle it
         throw error;
       });
