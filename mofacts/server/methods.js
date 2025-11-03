@@ -1395,7 +1395,7 @@ async function getTdfNamesAssignedByInstructor(instructorID) {
 async function getTdfNamesByOwnerId(ownerId) {
   serverConsole('getTdfNamesByOwnerId', ownerId);
   try {
-    tdfs =  await Tdfs.find({ownerId: ownerId}).fetchAsync();
+    const tdfs =  await Tdfs.find({ownerId: ownerId}).fetchAsync();
     const ownedTdfFileNames = tdfs.map(tdf => tdf.content.fileName);
     // REDUCED: Don't log entire array, just count
     serverConsole('ownedTdfFileNames count:', ownedTdfFileNames.length);
@@ -1410,7 +1410,7 @@ async function getTdfNamesByAccessorId(accessorId) {
   serverConsole('getTdfNamesByAccessorId', accessorId);
   try {
     //find tdfs where accessors array contains accessorId
-    tdfs =  await Tdfs.find({accessors: accessorId}).fetchAsync();
+    const tdfs =  await Tdfs.find({accessors: accessorId}).fetchAsync();
     const accessibleTdfFileNames = tdfs.map(tdf => tdf.content.fileName);
     // REDUCED: Don't log entire array, just count
     serverConsole('accessibleTdfFileNames count:', accessibleTdfFileNames.length);
@@ -1761,6 +1761,10 @@ async function getListOfStimTagsByTDFFileNames(TDFFileNames){
 
   for (const TDFFileName of TDFFileNames){
     const TDF = await getTdfByFileName(TDFFileName);
+    if (!TDF) {
+      serverConsole('getListOfStimTagsByTDFFileNames: TDF not found for', TDFFileName);
+      continue; // Skip this TDF if not found
+    }
     const stimSetId = TDF.stimuliSetId;
     const stims = await getStimuliSetById(stimSetId);
 
