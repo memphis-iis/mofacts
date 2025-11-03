@@ -2900,20 +2900,6 @@ export const methods = {
       {$set: {audioSettings: settingsToSave}}
     );
 
-    // Also update legacy fields for backward compatibility
-    if (settingsToSave.audioPromptMode !== undefined) {
-      await Meteor.users.updateAsync(
-        {_id: this.userId},
-        {$set: {audioPromptMode: settingsToSave.audioPromptMode}}
-      );
-    }
-    if (settingsToSave.audioInputMode !== undefined) {
-      await Meteor.users.updateAsync(
-        {_id: this.userId},
-        {$set: {audioInputMode: settingsToSave.audioInputMode}}
-      );
-    }
-
     return { success: true };
   },
 

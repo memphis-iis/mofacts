@@ -18,17 +18,9 @@ function getUserAudioSettings() {
   const user = Meteor.user();
   if (!user) return DEFAULT_AUDIO_SETTINGS;
 
-  // Use audioSettings if available, otherwise fall back to legacy fields
-  if (user.audioSettings) {
-    return { ...DEFAULT_AUDIO_SETTINGS, ...user.audioSettings };
-  }
-
-  // Legacy fallback: construct from individual fields
-  return {
-    ...DEFAULT_AUDIO_SETTINGS,
-    audioPromptMode: user.audioPromptMode || DEFAULT_AUDIO_SETTINGS.audioPromptMode,
-    audioInputMode: user.audioInputMode || DEFAULT_AUDIO_SETTINGS.audioInputMode,
-  };
+  // audioSettings should always exist (initialized by server publication)
+  // Merge with defaults to handle any missing fields
+  return { ...DEFAULT_AUDIO_SETTINGS, ...(user.audioSettings || {}) };
 }
 
 // Save a single audio setting to database (updates entire audioSettings object)

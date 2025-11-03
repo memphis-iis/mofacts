@@ -168,18 +168,46 @@ Meteor.publish('settings', async function() {
 });
 
 // Publish user's audio settings
-Meteor.publish('userAudioSettings', function() {
+Meteor.publish('userAudioSettings', async function() {
     if (!this.userId) {
         return this.ready();
+    }
+
+    // Ensure audioSettings exists, initialize from legacy fields if needed
+    const user = await Meteor.users.findOneAsync({ _id: this.userId }, { fields: { audioSettings: 1, audioPromptMode: 1, audioInputMode: 1 } });
+
+    if (!user.audioSettings) {
+        const DEFAULT_AUDIO_SETTINGS = {
+            audioPromptMode: 'silent',
+            audioPromptQuestionVolume: 0,
+            audioPromptQuestionSpeakingRate: 1,
+            audioPromptVoice: 'en-US-Standard-A',
+            audioPromptFeedbackVolume: 0,
+            audioPromptFeedbackSpeakingRate: 1,
+            audioPromptFeedbackVoice: 'en-US-Standard-A',
+            audioInputMode: false,
+            audioInputSensitivity: 60,
+        };
+
+        // Initialize from legacy fields if they exist
+        const initialSettings = {
+            ...DEFAULT_AUDIO_SETTINGS,
+            audioPromptMode: user.audioPromptMode || DEFAULT_AUDIO_SETTINGS.audioPromptMode,
+            audioInputMode: user.audioInputMode || DEFAULT_AUDIO_SETTINGS.audioInputMode,
+        };
+
+        // Save initialized settings
+        await Meteor.users.updateAsync(
+            { _id: this.userId },
+            { $set: { audioSettings: initialSettings } }
+        );
     }
 
     return Meteor.users.find(
         { _id: this.userId },
         {
             fields: {
-                audioSettings: 1,
-                audioPromptMode: 1,  // Legacy field for backward compatibility
-                audioInputMode: 1     // Legacy field for backward compatibility
+                audioSettings: 1
             }
         }
     );

@@ -521,11 +521,11 @@ async function selectTdf(currentTdfId, lessonName, currentStimuliSetId, ignoreOu
     audioPromptFeedbackVoice = setspec.audioPromptFeedbackVoice || 'en-US-Standard-A';
   } else {
     const user = Meteor.user();
-    audioPromptMode = user?.audioPromptMode;
-    audioInputEnabled = user?.audioInputMode;
 
-    // Load from user's audioSettings if available, otherwise use defaults
+    // Load from user's audioSettings - all audio settings should be in this object
     const audioSettings = user?.audioSettings || {};
+    audioPromptMode = audioSettings.audioPromptMode || 'silent';
+    audioInputEnabled = audioSettings.audioInputMode || false;
     audioPromptFeedbackSpeakingRate = audioSettings.audioPromptFeedbackSpeakingRate || 1;
     audioPromptQuestionSpeakingRate = audioSettings.audioPromptQuestionSpeakingRate || 1;
     audioPromptVoice = audioSettings.audioPromptVoice || 'en-US-Standard-A';
