@@ -44,43 +44,43 @@ exports.GetClozeAPI = GetClozeAPI;
 exports.DoSimpleComputation = DoSimpleComputation;
 exports.badSentenceRegex = exports.endpoints = exports.TextRequest = exports.DocumentRequest = exports.SentenceRequest = exports.InternalAPI = exports.Clozable = exports.DocumentAnnotation = exports.SentenceAnnotation = exports.SentenceCoreference = exports.CoreferenceResult = exports.DependencyParseResult = exports.SRLResult = exports.SRLVerb = exports.ClozeAPI = exports.ClozableAPI = exports.SentenceAPI = exports.Endpoints = void 0;
 
-var _PromiseImpl = require("./Fable.Promise.2.0.0/PromiseImpl");
+var _PromiseImpl = require("./Fable.Promise.2.1.0/PromiseImpl");
 
-var _Promise = require("./Fable.Promise.2.0.0/Promise");
+var _Promise = require("./Fable.Promise.2.1.0/Promise");
 
-var _Types = require("./fable-library.2.3.11/Types");
+var _Types = require("./fable-library.2.10.2/Types");
 
-var _Reflection = require("./fable-library.2.3.11/Reflection");
+var _Reflection = require("./fable-library.2.10.2/Reflection");
 
-var _Decode = require("./Thoth.Json.3.3.0/Decode");
+var _Decode = require("./Thoth.Json.4.0.0/Decode");
 
-var _Encode = require("./Thoth.Json.3.3.0/Encode");
+var _Encode = require("./Thoth.Json.4.0.0/Encode");
 
 var _Http = require("./Fable.SimpleHttp.2.4.0/Http");
 
 var _Types2 = require("./Fable.SimpleHttp.2.4.0/Types");
 
-var _AsyncBuilder = require("./fable-library.2.3.11/AsyncBuilder");
+var _AsyncBuilder = require("./fable-library.2.10.2/AsyncBuilder");
 
-var _Async = require("./fable-library.2.3.11/Async");
+var _Async = require("./fable-library.2.10.2/Async");
 
-var _Seq = require("./fable-library.2.3.11/Seq");
+var _Seq = require("./fable-library.2.10.2/Seq");
 
-var _RegExp = require("./fable-library.2.3.11/RegExp");
+var _RegExp = require("./fable-library.2.10.2/RegExp");
 
 var transliteration = _interopRequireWildcard(require("transliteration"));
 
-var _Array = require("./fable-library.2.3.11/Array");
+var _Array = require("./fable-library.2.10.2/Array");
 
-var _String = require("./fable-library.2.3.11/String");
+var _String = require("./fable-library.2.10.2/String");
 
-var _Util = require("./fable-library.2.3.11/Util");
+var _Util = require("./fable-library.2.10.2/Util");
 
-var _Map = require("./fable-library.2.3.11/Map");
+var _Map = require("./fable-library.2.10.2/Map");
 
 var _WordFrequency = require("./WordFrequency");
 
-var _List = require("./fable-library.2.3.11/List");
+var _List = require("./fable-library.2.10.2/List");
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = Object.defineProperty && Object.getOwnPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : {}; if (desc.get || desc.set) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } } newObj.default = obj; return newObj; } }
 
@@ -288,7 +288,7 @@ exports.endpoints = endpoints;
 
 function PostAPI(input$$1, endpoint) {
   return (0, _Async.startAsPromise)(_AsyncBuilder.singleton.Delay(function () {
-    var requestData = (0, _Encode.Auto$$$toString$$59982D9A)(4, input$$1, null, null, {
+    var requestData = (0, _Encode.Auto$$$toString$$5A41365E)(4, input$$1, null, null, {
       ResolveType() {
         return _Reflection.obj;
       }
@@ -378,7 +378,7 @@ function GetAcronymMap(input$$16) {
   }) : (0, _Map.empty)({
     Compare: _Util.comparePrimitives
   });
-  return (0, _Encode.Auto$$$toString$$59982D9A)(4, acronymMap, null, null, {
+  return (0, _Encode.Auto$$$toString$$5A41365E)(4, acronymMap, null, null, {
     ResolveType() {
       return (0, _Reflection.type)("Microsoft.FSharp.Collections.FSharpMap`2", [_Reflection.string, _Reflection.string]);
     }
@@ -390,7 +390,7 @@ function GetNLP(input$$18) {
   return (0, _Promise.PromiseBuilder$$Run$$212F1D4B)(_PromiseImpl.promise, (0, _Promise.PromiseBuilder$$Delay$$62FBFDE1)(_PromiseImpl.promise, function () {
     return GetSentences(CleanText(input$$18)).then(function a$$1($arg$$5) {
       console.log("$arg$$5!!!:" + JSON.stringify($arg$$5));
-      return (0, _Decode.Auto$$$unsafeFromString$$Z33228D48)($arg$$5[1], null, null, {
+      return (0, _Decode.Auto$$$unsafeFromString$$Z5CB6BD)($arg$$5[1], null, null, {
         ResolveType() {
           return (0, _Reflection.array)(_Reflection.string);
         }
@@ -402,7 +402,7 @@ function GetNLP(input$$18) {
         return tuple$$2[1];
       }).then(function (_arg2) {
         const corJson = _arg2;
-        const cor = (0, _Decode.Auto$$$unsafeFromString$$Z33228D48)(corJson, null, null, {
+        const cor = (0, _Decode.Auto$$$unsafeFromString$$Z5CB6BD)(corJson, null, null, {
           ResolveType() {
             return CoreferenceResult$reflection();
           }
@@ -424,13 +424,13 @@ function GetNLP(input$$18) {
             const sentenceAnnotations = (0, _Array.ofSeq)((0, _Seq.delay)(function () {
               let wordIndexOffset = 0;
               return (0, _Seq.collect)(function (i$$1) {
-                const srl = (0, _Decode.Auto$$$unsafeFromString$$Z33228D48)(srlJsons[i$$1], null, null, {
+                const srl = (0, _Decode.Auto$$$unsafeFromString$$Z5CB6BD)(srlJsons[i$$1], null, null, {
                   ResolveType() {
                     return SRLResult$reflection();
                   }
 
                 });
-                const dep = (0, _Decode.Auto$$$unsafeFromString$$Z33228D48)(depJsons[i$$1], null, null, {
+                const dep = (0, _Decode.Auto$$$unsafeFromString$$Z5CB6BD)(depJsons[i$$1], null, null, {
                   ResolveType() {
                     return DependencyParseResult$reflection();
                   }
@@ -457,7 +457,7 @@ function GetNLP(input$$18) {
               }, (0, _Seq.rangeNumber)(0, 1, sentences$$1.length - 1));
             }), Array);
             const documentAnnotation = new DocumentAnnotation(sentenceAnnotations, cor);
-            return Promise.resolve([1, (0, _Encode.Auto$$$toString$$59982D9A)(4, documentAnnotation, null, null, {
+            return Promise.resolve([1, (0, _Encode.Auto$$$toString$$5A41365E)(4, documentAnnotation, null, null, {
               ResolveType() {
                 return DocumentAnnotation$reflection();
               }
@@ -515,7 +515,7 @@ function GetModifiedNPClozable(sen$$1, startInit, stopInit, head, traceInit) {
   (0, _Array.addRangeInPlace)(traceInit, trace);
 
   if (startInit < 0 ? true : stopInit >= sen$$1.srl.words.length) {
-    trace.push("CRITICAL: invalid clozable parameters for " + (0, _Encode.Auto$$$toString$$59982D9A)(4, sen$$1, null, null, {
+    trace.push("CRITICAL: invalid clozable parameters for " + (0, _Encode.Auto$$$toString$$5A41365E)(4, sen$$1, null, null, {
       ResolveType() {
         return SentenceAnnotation$reflection();
       }
@@ -655,7 +655,7 @@ function GetInternalAPI(nlpJsonOption, input$$24) {
       return tuple$$10[1];
     }))).then(function (_arg1$$4) {
       const nlp = _arg1$$4;
-      const da$$1 = (0, _Decode.Auto$$$unsafeFromString$$Z33228D48)(nlp, null, null, {
+      const da$$1 = (0, _Decode.Auto$$$unsafeFromString$$Z5CB6BD)(nlp, null, null, {
         ResolveType() {
           return DocumentAnnotation$reflection();
         }
@@ -664,7 +664,7 @@ function GetInternalAPI(nlpJsonOption, input$$24) {
       const clozables = (0, _Array.map)(function mapping$$16(ra) {
         return ra.slice();
       }, (0, _Array.map)(GetClozable, da$$1.sentences, Array), Array);
-      return Promise.resolve([1, (0, _Encode.Auto$$$toString$$59982D9A)(4, new InternalAPI(da$$1.sentences, da$$1.coreference, clozables), null, null, {
+      return Promise.resolve([1, (0, _Encode.Auto$$$toString$$5A41365E)(4, new InternalAPI(da$$1.sentences, da$$1.coreference, clozables), null, null, {
         ResolveType() {
           return InternalAPI$reflection();
         }
@@ -710,7 +710,7 @@ function GetClozeAPI(nlpOption, sentenceCountOption, itemCountOption, input$$27)
     }).then(function (_arg1$$5) {
       const internalAPIJson = _arg1$$5;
       console.log("internalAPIJson!!!:" + JSON.stringify(internalAPIJson));
-      const internalAPI = (0, _Decode.Auto$$$unsafeFromString$$Z33228D48)(internalAPIJson, null, null, {
+      const internalAPI = (0, _Decode.Auto$$$unsafeFromString$$Z5CB6BD)(internalAPIJson, null, null, {
         ResolveType() {
           return InternalAPI$reflection();
         }
@@ -822,7 +822,7 @@ function GetClozeAPI(nlpOption, sentenceCountOption, itemCountOption, input$$27)
         }
 
       });
-      const acronymMap$$1 = (0, _Decode.Auto$$$unsafeFromString$$Z33228D48)(GetAcronymMap(input$$27), null, null, {
+      const acronymMap$$1 = (0, _Decode.Auto$$$unsafeFromString$$Z5CB6BD)(GetAcronymMap(input$$27), null, null, {
         ResolveType() {
           return (0, _Reflection.type)("Microsoft.FSharp.Collections.FSharpMap`2", [_Reflection.string, _Reflection.string]);
         }
@@ -854,7 +854,7 @@ function GetClozeAPI(nlpOption, sentenceCountOption, itemCountOption, input$$27)
           sentences$$6.push(new SentenceAPI(sa$$10.sen, (0, _Util.structuralHash)(sa$$10), false));
         }
       }, internalAPI.sentences);
-      return Promise.resolve([1, (0, _Encode.Auto$$$toString$$59982D9A)(4, new ClozeAPI(sentences$$6.slice(), clozes.slice()), null, null, {
+      return Promise.resolve([1, (0, _Encode.Auto$$$toString$$5A41365E)(4, new ClozeAPI(sentences$$6.slice(), clozes.slice()), null, null, {
         ResolveType() {
           return ClozeAPI$reflection();
         }

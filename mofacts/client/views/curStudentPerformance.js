@@ -7,6 +7,6 @@ import {
     getStimCluster,
     getAllCurrentStimAnswers,
     getTestType,
-  } from '../../lib/currentTestingHelpers';
+  } from '../lib/currentTestingHelpers';
 
   

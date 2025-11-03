@@ -3,8 +3,8 @@
 **Created:** October 29, 2025
 **Status:** Planned
 **Files:**
-- `mofacts/client/views/new_templates/learningDashboard.html`
-- `mofacts/client/views/new_templates/learningDashboard.js`
+- `mofacts/client/views/home/learningDashboard.html`
+- `mofacts/client/views/home/learningDashboard.js`
 - `mofacts/public/styles/classic.css`
 
 **Bootstrap Version:** 5.2.3 (confirmed - supports `.gap-2` utility and full collapse API)
@@ -260,7 +260,7 @@ And your app already has:
 
 ### 4.2 HTML Structure
 
-**File:** `mofacts/client/views/new_templates/learningDashboard.html`
+**File:** `mofacts/client/views/home/learningDashboard.html`
 
 #### Strategy: Dual Structure
 
@@ -433,7 +433,7 @@ Maintain existing `<table>` for desktop, add parallel `<div>` structure for mobi
 
 ### 4.3 JavaScript Implementation
 
-**File:** `mofacts/client/views/new_templates/learningDashboard.js`
+**File:** `mofacts/client/views/home/learningDashboard.js`
 
 **Good News: NO Custom JavaScript Needed!**
 
@@ -514,7 +514,7 @@ But these are **NOT required** for basic functionality.
 
 #### 1. ✅ Search/Filter Implementation - VERIFIED EFFICIENT
 
-**Current Implementation:** [learningDashboard.js:45-71](../mofacts/client/views/new_templates/learningDashboard.js#L45-L71)
+**Current Implementation:** [learningDashboard.js:45-71](../mofacts/client/views/home/learningDashboard.js#L45-L71)
 
 **Architecture:**
 - **Type:** Client-side filtering using Meteor ReactiveVar

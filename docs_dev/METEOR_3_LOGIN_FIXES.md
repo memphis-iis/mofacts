@@ -11,7 +11,7 @@ Meteor 3's async architecture causes OAuth and password login callbacks to be un
 ## Issues Found & Fixed
 
 ### ✅ 1. OAuth Logins (Google & Microsoft) - FIXED
-**Files**: `mofacts/client/views/new_templates/signIn.js`
+**Files**: `mofacts/client/views/login/signIn.js`
 
 **Before (Broken)**:
 ```javascript
@@ -76,7 +76,7 @@ Same issue PLUS missing Router.go() after successful login
 
 ### ⚠️ 3. SignUp Missing Router Navigation - NEEDS FIXING
 
-**File**: `mofacts/client/views/new_templates/signUp.js:57-73`
+**File**: `mofacts/client/views/login/signUp.js:57-73`
 
 **Issue**: After successful signup and login, user isn't routed anywhere. They're stuck on the signup page.
 
