@@ -1789,7 +1789,7 @@ async function getStimuliSetById(stimuliSetId) {
 }
 
 async function getStimuliSetByFileName(stimulusFileName) {
-  return Tdfs.rawCollection.aggregate([
+  return Tdfs.rawCollection().aggregate([
     {
       $match: { stimulusFileName: stimulusFileName }
     }, {
@@ -4529,7 +4529,7 @@ Meteor.methods(functionTimerWrapper(methods, asyncMethods));
 
 Meteor.startup(async function() {
   // Security: Add security headers to all HTTP responses
-  WebApp.connectHandlers.use((req, res, next) => {
+  WebApp.handlers.use((req, res, next) => {
     res.setHeader('X-Frame-Options', 'DENY');
     res.setHeader('X-Content-Type-Options', 'nosniff');
     res.setHeader('X-XSS-Protection', '1; mode=block');
@@ -4829,7 +4829,7 @@ Meteor.startup(async function() {
   })
 
   // Create any helpful indexes for queries we run
-  ScheduledTurkMessages.rawCollection().createIndex({'sent': 1, 'scheduled': 1});
+  await ScheduledTurkMessages.rawCollection().createIndex({'sent': 1, 'scheduled': 1});
 
   // Start up synched cron background jobs
   SyncedCron.start();
