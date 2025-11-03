@@ -74,7 +74,7 @@ async function checkAndWarmupAudioIfNeeded() {
 
   // Check TTS warmup (Scenario 2: TDF has embedded key)
   if (currentTdfFile.tdfs?.tutor?.setspec?.textToSpeechAPIKey) {
-    const audioPromptMode = user.audioSettings?.audioPromptMode || 'silent';
+    const audioPromptMode = user.audioPromptMode;
     if (audioPromptMode && audioPromptMode !== 'silent' && !Session.get('ttsWarmedUp')) {
       clientConsole(2, '[TTS] TDF has embedded key, warming up before first trial (Scenario 2)');
 
@@ -1970,7 +1970,7 @@ async function preloadStimuliFiles() {
 
 function checkUserAudioConfigCompatability(){
   // Check if TTS would actually be enabled based on both user preference AND TDF settings
-  const userAudioPromptMode = Meteor.user()?.audioSettings?.audioPromptMode || 'silent';
+  const userAudioPromptMode = Meteor.user().audioPromptMode;
   const tdfAudioPromptMode = Session.get('currentTdfFile')?.tdfs?.tutor?.setspec?.audioPromptMode;
   const tdfSupportsAudioPrompts = tdfAudioPromptMode && tdfAudioPromptMode !== 'silent';
   const userWantsAudioPrompts = userAudioPromptMode && userAudioPromptMode !== 'silent';
@@ -4139,7 +4139,7 @@ function stopUserInput() {
 
 // Audio prompt/feedback
 async function speakMessageIfAudioPromptFeedbackEnabled(msg, audioPromptSource) {
-  const userAudioPromptMode = Meteor.user()?.audioSettings?.audioPromptMode || 'silent';
+  const userAudioPromptMode = Meteor.user().audioPromptMode;
   const tdfAudioPromptMode = Session.get('currentTdfFile')?.tdfs?.tutor?.setspec?.audioPromptMode;
 
   // TTS should only activate if:

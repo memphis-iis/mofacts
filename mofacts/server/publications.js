@@ -196,10 +196,14 @@ Meteor.publish('userAudioSettings', async function() {
             audioInputMode: user.audioInputMode || DEFAULT_AUDIO_SETTINGS.audioInputMode,
         };
 
-        // Save initialized settings
+        // Save initialized settings (both audioSettings object and top-level fields)
         await Meteor.users.updateAsync(
             { _id: this.userId },
-            { $set: { audioSettings: initialSettings } }
+            { $set: {
+                audioSettings: initialSettings,
+                audioPromptMode: initialSettings.audioPromptMode,
+                audioInputMode: initialSettings.audioInputMode
+            } }
         );
     }
 
@@ -207,7 +211,9 @@ Meteor.publish('userAudioSettings', async function() {
         { _id: this.userId },
         {
             fields: {
-                audioSettings: 1
+                audioSettings: 1,
+                audioPromptMode: 1,
+                audioInputMode: 1
             }
         }
     );
