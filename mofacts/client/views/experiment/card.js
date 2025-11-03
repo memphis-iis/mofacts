@@ -699,13 +699,14 @@ Template.card.onCreated(function() {
   // FIX: Use Tracker.nonreactive to prevent cascade invalidation on unrelated state changes
   template.autorun(function() {
     // Explicitly track only the dependencies we care about
-    const userAudioToggled = Meteor.user()?.audioInputMode;
+    const userAudioToggled = Meteor.user()?.audioSettings?.audioInputMode;
     const tdfFile = Session.get('currentTdfFile');
 
     // Compute in a non-reactive context to prevent cascade
     Tracker.nonreactive(function() {
       const tdfAudioEnabled = tdfFile?.tdfs?.tutor?.setspec?.audioInputEnabled === 'true';
       audioInputModeEnabled = (userAudioToggled || false) && tdfAudioEnabled;
+      clientConsole(2, '[Card] Reactive SR icon update - userAudioToggled:', userAudioToggled, 'audioInputModeEnabled:', audioInputModeEnabled);
     });
   });
 
@@ -782,6 +783,7 @@ async function initCard() {
   const userAudioToggled = Meteor.user()?.audioSettings?.audioInputMode || false;
   const tdfAudioEnabled = Session.get('currentTdfFile').tdfs.tutor.setspec.audioInputEnabled === 'true';
   let audioInputEnabled = userAudioToggled && tdfAudioEnabled;
+  clientConsole(2, '[Card] SR Icon Check - userAudioToggled:', userAudioToggled, 'tdfAudioEnabled:', tdfAudioEnabled, 'audioInputEnabled:', audioInputEnabled);
 
   if (audioInputEnabled) {
     // Check for API key availability

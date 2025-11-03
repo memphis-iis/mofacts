@@ -314,24 +314,21 @@ async function checkAndWarmupAudioIfNeeded() {
       Session.set('ttsWarmedUp', true);
 
       // Make async warmup call
-      const ttsPromise = new Promise((resolve, reject) => {
-        const startTime = performance.now();
-        Meteor.callAsync('makeGoogleTTSApiCall',
-          Session.get('currentTdfId'),
-          'warmup',
-          1.0,
-          0.0,
-          function(error, result) {
-            if (error) {
-              console.log('[TTS] Warmup failed:', error);
-              reject(error);
-            } else {
-              const duration = performance.now() - startTime;
-              console.log(`[TTS] ✅ Warmup complete in ${duration.toFixed(0)}ms`);
-              resolve(result);
-            }
-          }
-        );
+      const startTime = performance.now();
+      const ttsPromise = Meteor.callAsync('makeGoogleTTSApiCall',
+        Session.get('currentTdfId'),
+        'warmup',
+        1.0,
+        0.0,
+        'en-US-Standard-A'  // voice parameter
+      ).then(result => {
+        const duration = performance.now() - startTime;
+        console.log(`[TTS] ✅ Warmup complete in ${duration.toFixed(0)}ms`);
+        return result;
+      }).catch(error => {
+        console.log('[TTS] Warmup failed:', error);
+        // Don't re-throw - let Promise.allSettled handle it
+        throw error;
       });
       promises.push(ttsPromise);
     }
@@ -371,25 +368,20 @@ async function checkAndWarmupAudioIfNeeded() {
       };
 
       // Make async warmup call
-      const srPromise = new Promise((resolve, reject) => {
-        const startTime = performance.now();
-        Meteor.callAsync('makeGoogleSpeechAPICall',
-          Session.get('currentTdfId'),
-          '', // Empty key - server will fetch TDF or user key
-          request,
-          ['warmup'], // Minimal answer grammar
-          function(error, result) {
-            if (error) {
-              console.log('[SR] Warmup failed:', error);
-              Session.set('srWarmedUp', false); // Allow retry on failure
-              reject(error);
-            } else {
-              const duration = performance.now() - startTime;
-              console.log(`[SR] ✅ Warmup complete in ${duration.toFixed(0)}ms`);
-              resolve(result);
-            }
-          }
-        );
+      const startTime = performance.now();
+      const srPromise = Meteor.callAsync('makeGoogleSpeechAPICall',
+        Session.get('currentTdfId'),
+        '', // Empty key - server will fetch TDF or user key
+        request,
+        ['warmup'] // Minimal answer grammar
+      ).then(result => {
+        const duration = performance.now() - startTime;
+        console.log(`[SR] ✅ Warmup complete in ${duration.toFixed(0)}ms`);
+        return result;
+      }).catch(error => {
+        console.log('[SR] Warmup failed:', error);
+        Session.set('srWarmedUp', false); // Allow retry on failure
+        throw error;
       });
       promises.push(srPromise);
 
@@ -524,8 +516,10 @@ async function selectTdf(currentTdfId, lessonName, currentStimuliSetId, ignoreOu
 
     // Load from user's audioSettings if available, otherwise use defaults
     const audioSettings = user?.audioSettings || {};
+    console.log('[Dashboard] audioSettings:', audioSettings);
     audioPromptMode = audioSettings.audioPromptMode || 'silent';
     audioInputEnabled = audioSettings.audioInputMode || false;
+    console.log('[Dashboard] audioPromptMode:', audioPromptMode, 'audioInputEnabled:', audioInputEnabled);
     audioPromptFeedbackSpeakingRate = audioSettings.audioPromptFeedbackSpeakingRate || 1;
     audioPromptQuestionSpeakingRate = audioSettings.audioPromptQuestionSpeakingRate || 1;
     audioPromptVoice = audioSettings.audioPromptVoice || 'en-US-Standard-A';
