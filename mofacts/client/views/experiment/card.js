@@ -3724,9 +3724,10 @@ async function prepareCard() {
   }
 
   Session.set('submmissionLock', false);
-  // DON'T clear currentDisplay - keep old stimulus so it's visible during fade
-  // It will be swapped to new content in checkAndDisplayTwoPartQuestion
-  // Session.set('currentDisplay', {}); // REMOVED - prevents empty flash
+  // CRITICAL: Clear currentDisplay WHILE INVISIBLE (opacity=0) to remove old image
+  // This prevents the old image from briefly appearing when new content is set
+  // The sequence is: fade out old image → clear while invisible → set new image while invisible → fade in new image
+  Session.set('currentDisplay', {});
 
   // DON'T set buttonTrial to undefined - causes input to flash/paint late
   // It will be updated with correct value in newQuestionHandler()
