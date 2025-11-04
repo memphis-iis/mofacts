@@ -3,13 +3,6 @@ Template.userAdmin.created = function() {
 };
 
 Template.userAdmin.rendered = function() {
-  // Init the modal dialog
-  $('#userAdminModal').modal({
-    'backdrop': 'static',
-    'keyboard': false,
-    'show': false,
-  });
-
   Meteor.subscribe('allUsers');
 };
 
@@ -33,10 +26,20 @@ Template.userAdmin.helpers({
       user.teacher = false;
       user.admin = false;
       if(user.roles){
-        if(user.roles.indexOf('teacher') !== -1){
+        // Handle both old array format and new object format with groups
+        let rolesArray = [];
+        if(Array.isArray(user.roles)){
+          // Old format: roles = ['admin', 'teacher']
+          rolesArray = user.roles;
+        } else if(typeof user.roles === 'object' && user.roles.__global_roles__){
+          // New format: roles = { __global_roles__: ['admin', 'teacher'] }
+          rolesArray = user.roles.__global_roles__;
+        }
+
+        if(rolesArray.indexOf('teacher') !== -1){
           user.teacher = true;
         }
-        if(user.roles.indexOf('admin') !== -1){
+        if(rolesArray.indexOf('admin') !== -1){
           user.admin = true;
         }
       }
@@ -75,17 +78,18 @@ Template.userAdmin.events({
     const roleAction = _.trim(btnTarget.data('roleaction'));
     const roleName = _.trim(btnTarget.data('rolename'));
 
+    console.log('Requesting role change:', {userId, roleAction, roleName});
+
     try {
-      await Meteor.callAsync('userAdminRoleChange', userId, roleAction, roleName);
-      $('#userAdminModal').modal('hide');
+      const result = await Meteor.callAsync('userAdminRoleChange', userId, roleAction, roleName);
+      console.log('Server response:', result);
 
-      // No need to manually refresh - Meteor reactivity handles it automatically!
+      // Check the user's roles after the update
+      const updatedUser = Meteor.users.findOne({_id: userId});
+      console.log('Updated user roles:', updatedUser?.roles);
 
-      const disp = 'Action completed successfully';
-      console.log(disp);
-      alert(disp);
+      console.log('Action completed successfully');
     } catch (error) {
-      $('#userAdminModal').modal('hide');
       const disp = 'Failed to handle request. Error:' + error;
       console.log(disp);
       alert(disp);

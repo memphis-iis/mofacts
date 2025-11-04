@@ -3795,10 +3795,12 @@ export const methods = {
     serverConsole('Before role change - User roles:', targetUser.roles);
 
     if (roleAction === 'add') {
-      await Roles.addUsersToRolesAsync(targetUserId, [roleName]);
+      // Use null as the group parameter to add to global roles
+      await Roles.addUsersToRolesAsync(targetUserId, [roleName], null);
       await createUserSecretKey(targetUserId);
     } else if (roleAction === 'remove') {
-      await Roles.removeUsersFromRolesAsync(targetUserId, [roleName]);
+      // Use null as the group parameter to remove from global roles
+      await Roles.removeUsersFromRolesAsync(targetUserId, [roleName], null);
       await removeUserSecretKey(targetUserId);
     } else {
       throw new Error('Serious logic error: please report this');
@@ -3807,6 +3809,10 @@ export const methods = {
     // Verify the role was actually added/removed
     const updatedUser = await Meteor.users.findOneAsync({_id: targetUserId});
     serverConsole('After role change - User roles:', updatedUser.roles);
+
+    // Also check with Roles API
+    const hasRole = await Roles.userIsInRoleAsync(targetUserId, roleName);
+    serverConsole('Role check via Roles API:', roleName, hasRole);
 
     return {
       'RESULT': 'SUCCESS',
@@ -4045,9 +4051,30 @@ export const methods = {
 
   setCustomThemeProperty: async function(property, value) {
     //This sets the value of a property in the custom theme
-    path = 'value.properties.' + property;
+
+    // Note: Authorization handled by UI - only admins can access admin controls
+    // Additional server-side check for safety
+    if (!this.userId) {
+      throw new Meteor.Error('not-logged-in', 'Must be logged in to modify theme');
+    }
+
+    const path = 'value.properties.' + property;
     serverConsole('setCustomThemeProperty', path, value);
-    await DynamicSettings.updateAsync({key: 'customTheme'}, {$set: {[path]: value}});
+
+    try {
+      // Update the property
+      await DynamicSettings.updateAsync({key: 'customTheme'}, {$set: {[path]: value}});
+
+      // If updating themeName, also update the top-level themeName for consistency
+      if (property === 'themeName') {
+        await DynamicSettings.updateAsync({key: 'customTheme'}, {$set: {'value.themeName': value}});
+      }
+
+      return {success: true, property, value};
+    } catch (error) {
+      serverConsole('Error setting theme property:', error);
+      throw new Meteor.Error('update-failed', 'Failed to update theme property: ' + error.message);
+    }
   },
 
   toggleCustomTheme: async function() {
