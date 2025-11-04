@@ -3794,13 +3794,26 @@ export const methods = {
 
     serverConsole('Before role change - User roles:', targetUser.roles);
 
+    // Directly manipulate the roles array like onCreateUser does
+    // This matches the format used when creating new users (see line 4905-4911)
+    let currentRoles = targetUser.roles || [];
+    if (!Array.isArray(currentRoles)) {
+      // Handle old format if roles is an object
+      currentRoles = [];
+    }
+
     if (roleAction === 'add') {
-      // Use null as the group parameter to add to global roles
-      await Roles.addUsersToRolesAsync(targetUserId, [roleName], null);
+      if (!currentRoles.includes(roleName)) {
+        currentRoles.push(roleName);
+        await Meteor.users.updateAsync({_id: targetUserId}, {$set: {roles: currentRoles}});
+      }
       await createUserSecretKey(targetUserId);
     } else if (roleAction === 'remove') {
-      // Use null as the group parameter to remove from global roles
-      await Roles.removeUsersFromRolesAsync(targetUserId, [roleName], null);
+      const index = currentRoles.indexOf(roleName);
+      if (index !== -1) {
+        currentRoles.splice(index, 1);
+        await Meteor.users.updateAsync({_id: targetUserId}, {$set: {roles: currentRoles}});
+      }
       await removeUserSecretKey(targetUserId);
     } else {
       throw new Error('Serious logic error: please report this');
@@ -3809,10 +3822,6 @@ export const methods = {
     // Verify the role was actually added/removed
     const updatedUser = await Meteor.users.findOneAsync({_id: targetUserId});
     serverConsole('After role change - User roles:', updatedUser.roles);
-
-    // Also check with Roles API
-    const hasRole = await Roles.userIsInRoleAsync(targetUserId, roleName);
-    serverConsole('Role check via Roles API:', roleName, hasRole);
 
     return {
       'RESULT': 'SUCCESS',
