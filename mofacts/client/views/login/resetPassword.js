@@ -1,5 +1,3 @@
-import { Route53RecoveryCluster } from "../../../node_modules/aws-sdk/index";
-
 Template.resetPassword.onRendered(function() {
   if (Session.get('loginMode') !== 'experiment') {
     console.log('password signin, setting login mode');

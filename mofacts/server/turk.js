@@ -38,12 +38,21 @@ following is true:
 **/
 
 import {serverConsole, decryptData, createAwsHmac} from './methods';
+import {
+  MTurkClient,
+  GetAccountBalanceCommand,
+  ListHITsCommand,
+  ListAssignmentsForHITCommand,
+  ApproveAssignmentCommand,
+  GetAssignmentCommand,
+  NotifyWorkersCommand,
+  SendBonusCommand
+} from '@aws-sdk/client-mturk';
 
 
 const turk = (function() {
   // var TURK_URL = "https://mechanicalturk.amazonaws.com";
   // var SANDBOX_URL = "https://mechanicalturk.sandbox.amazonaws.com";
-  const AWS = Npm.require('aws-sdk');
   // var TURK_URL = "https://mturk-requester.us-east-1.amazonaws.com";
   // var SANDBOX_URL = "https://mturk-requester-sandbox.us-east-1.amazonaws.com";
 
@@ -66,9 +75,11 @@ const turk = (function() {
 
   function getClient(userProfile) {
     validateUser(userProfile);
-    return new AWS.MTurk({
-      accessKeyId: decryptData(userProfile.aws.aws_id),
-      secretAccessKey: decryptData(userProfile.aws.aws_secret_key),
+    return new MTurkClient({
+      credentials: {
+        accessKeyId: decryptData(userProfile.aws.aws_id),
+        secretAccessKey: decryptData(userProfile.aws.aws_secret_key),
+      },
       region: 'us-east-1',
     });
   }
@@ -126,20 +137,20 @@ const turk = (function() {
   }
 
   return {
-    getAccountBalance: function(userProfile) {
+    getAccountBalance: async function(userProfile) {
       const req = {};
       validateUser(userProfile);
 
       const client = getClient(userProfile);
 
-      const res = client.getAccountBalance(req).promise();
+      const res = await client.send(new GetAccountBalanceCommand(req));
 
       return res;
     },
 
     // Required parameters: none
     // Optional parameters: SortProperty, SortDirection
-    getAvailableHITs: function(userProfile) {
+    getAvailableHITs: async function(userProfile) {
       const req = {
         'MaxResults': 99,
       };
@@ -149,113 +160,114 @@ const turk = (function() {
       const hitlist = [];
       let rejected = 0;
 
-      return client.listHITs(req).promise().then(function(data) {
-        data.HITs.forEach(function(hit) {
-          const max = hit.MaxAssignments;
-          const pend = hit.NumberOfAssignmentsPending;
-          const avail = hit.NumberOfAssignmentsAvailable;
-          const complete = hit.NumberOfAssignmentsCompleted;
+      const data = await client.send(new ListHITsCommand(req));
+      data.HITs.forEach(function(hit) {
+        const max = hit.MaxAssignments;
+        const pend = hit.NumberOfAssignmentsPending;
+        const avail = hit.NumberOfAssignmentsAvailable;
+        const complete = hit.NumberOfAssignmentsCompleted;
 
-          if (max < 0 || pend < 0 || avail < 0 || complete < 0) {
-            serverConsole('Something wrong with this HIT\'s stats - including for safety. hit was', hit);
-            hitlist.push(hit.HITId);
-          } else if (pend > 0 || avail > 0 || complete < max) {
-            hitlist.push(hit.HITId);
-          } else {
-            rejected +=1;
-          }
-        });
-        serverConsole('Searched HITs returning', hitlist.length, 'as possible, rejected', rejected);
-        return hitlist;
+        if (max < 0 || pend < 0 || avail < 0 || complete < 0) {
+          serverConsole('Something wrong with this HIT\'s stats - including for safety. hit was', hit);
+          hitlist.push(hit.HITId);
+        } else if (pend > 0 || avail > 0 || complete < max) {
+          hitlist.push(hit.HITId);
+        } else {
+          rejected +=1;
+        }
       });
+      serverConsole('Searched HITs returning', hitlist.length, 'as possible, rejected', rejected);
+      return hitlist;
     },
 
     // Required parameters: HITId
     // Optional parameters: AssignmentStatus
-    getAssignmentsForHIT: function(userProfile, hitId) {
+    getAssignmentsForHIT: async function(userProfile, hitId) {
       const req = {'HITId': hitId};
 
       const client = getClient(userProfile);
 
-      return client.listAssignmentsForHIT(req).promise().then(function(res) {
-        const assignlist = [];
-        res.Assignments.forEach(function(assignment) {
-          assignlist.push(assignment);
-        });
-        return assignlist;
+      const res = await client.send(new ListAssignmentsForHITCommand(req));
+      const assignlist = [];
+      res.Assignments.forEach(function(assignment) {
+        assignlist.push(assignment);
       });
+      return assignlist;
     },
 
     // Required parameters: AssignmentId
     // Optional parameters: RequesterFeedback
-    approveAssignment: function(userProfile, requestParams) {
-      const req = _.extend({
-        'AssignmentId': '',
-        'RequesterFeedback': '',
-      }, requestParams);
+    approveAssignment: async function(userProfile, requestParams) {
+      const req = {
+        'AssignmentId': requestParams.AssignmentId || '',
+        'RequesterFeedback': requestParams.RequesterFeedback || '',
+      };
 
       const client = getClient(userProfile);
 
-      return client.approveAssignment(req).promise().then(function(res) {
+      try {
+        await client.send(new ApproveAssignmentCommand(req));
         return {'Successful': 'true'}; // MTurk has stopped sending response details back for this operation, so we'll just put something here
-      }, function(err) {
+      } catch (err) {
         throw {
           'errmsg': 'Assignment Approval failed',
           'response': err,
         };
-      });
+      }
     },
 
     // Required parameters: AssignmentId
     // Pretty raw - currently only used for tracking/debugging on profile
     // page of our admins.
-    getAssignment: function(userProfile, requestParams) {
-      const req = _.extend({}, requestParams);
+    getAssignment: async function(userProfile, requestParams) {
+      const req = {...requestParams};
 
       const client = getClient(userProfile);
 
-      return client.getAssignment(req).promise();
+      return await client.send(new GetAssignmentCommand(req));
     },
 
     // Required parameters: Subject, MessageText, WorkerId
-    notifyWorker: function(userProfile, requestParams) {
+    notifyWorker: async function(userProfile, requestParams) {
       const req = {
         'Subject': requestParams.Subject,
         'MessageText': requestParams.MessageText,
         'WorkerIds': [requestParams.WorkerId],
       };
       serverConsole('Sending request to Mechanical Turk', req);
-      client = getClient(userProfile);
+      const client = getClient(userProfile);
 
-      return client.notifyWorkers(req).promise().then(function(res) {
+      try {
+        await client.send(new NotifyWorkersCommand(req));
         return {'Successful': 'true'}; // see approveAssignment
-      }, function(err) {
+      } catch (err) {
         throw {
           'errmsg': 'Worker Notification failed',
           'response': err,
         };
-      });
+      }
     },
 
     // Required parameters: WorkerId, AssignmentId, Reason
-    grantBonus: function(userProfile, amount, requestParams) {
-      const req = _.extend({
+    grantBonus: async function(userProfile, amount, requestParams) {
+      const req = {
         'BonusAmount': amount,
-        'WorkerId': '',
-        'AssignmentId': '',
-        'Reason': '',
-      });
+        'WorkerId': requestParams.WorkerId || '',
+        'AssignmentId': requestParams.AssignmentId || '',
+        'Reason': requestParams.Reason || '',
+      };
 
       const client = getClient(userProfile);
 
-      client.sendBonus(req).promise().then(function(res) {
+      try {
+        await client.send(new SendBonusCommand(req));
         return {'Successful': 'true'};
-      }, function(err) {
+      } catch (err) {
         throw {
           'errmsg': 'Bonus Granting failed',
           'response': err,
         };
-      });
+      }
     },
 
 

@@ -2,7 +2,6 @@ import {meteorCallAsync} from '../..';
 import {haveMeteorUser} from '../../lib/currentTestingHelpers';
 import {selectTdf} from './profile';
 import {routeToSignin} from '../../lib/router';
-import { Route53RecoveryCluster } from '../../../node_modules/aws-sdk/index';
 
 Template.profileSouthwest.helpers({
   username: function() {

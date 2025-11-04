@@ -8,9 +8,9 @@
     "test": "tests"
   },
   "dependencies": {
+    "@aws-sdk/client-mturk": "^3.709.0",
     "@babel/runtime": "^7.25.6",
     "@sinonjs/referee-sinon": "^12.0.0",
-    "aws-sdk": "^2.1467.0",
     "babel-runtime": "^6.26.0",
     "bluebird": "^3.7.2",
     "core-js": "^2.5.7",
