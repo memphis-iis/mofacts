@@ -1938,6 +1938,63 @@ function preloadImages() {
   return Promise.all(imageLoadPromises);
 }
 
+// Wait for the DOM image element to be fully loaded and ready to paint
+// This ensures images are displayed when fading in, not after
+function waitForDOMImageReady() {
+  return new Promise((resolve) => {
+    const currentDisplay = Session.get('currentDisplay');
+
+    // Only wait if this is an image card
+    if (!currentDisplay || !currentDisplay.imgSrc) {
+      resolve();
+      return;
+    }
+
+    // Find the stimulus image element in the DOM
+    const imgElement = document.querySelector('.stimulus-image');
+
+    if (!imgElement) {
+      clientConsole(2, '[Image UX] No image element found in DOM, skipping wait');
+      resolve();
+      return;
+    }
+
+    // If image is already complete (loaded and decoded), resolve immediately
+    if (imgElement.complete && imgElement.naturalHeight !== 0) {
+      clientConsole(2, '[Image UX] Image already loaded and ready');
+      resolve();
+      return;
+    }
+
+    clientConsole(2, '[Image UX] Waiting for image to be fully loaded before fade-in...');
+
+    // Set up timeout fallback (max 500ms wait)
+    const timeoutId = setTimeout(() => {
+      clientConsole(1, '[Image UX] Image load timeout after 500ms, proceeding anyway');
+      imgElement.removeEventListener('load', onLoad);
+      imgElement.removeEventListener('error', onError);
+      resolve();
+    }, 500);
+
+    const onLoad = () => {
+      clearTimeout(timeoutId);
+      imgElement.removeEventListener('error', onError);
+      clientConsole(2, '[Image UX] Image loaded successfully, ready for fade-in');
+      resolve();
+    };
+
+    const onError = () => {
+      clearTimeout(timeoutId);
+      imgElement.removeEventListener('load', onLoad);
+      clientConsole(1, '[Image UX] Image failed to load, proceeding with fade-in anyway');
+      resolve();
+    };
+
+    imgElement.addEventListener('load', onLoad);
+    imgElement.addEventListener('error', onError);
+  });
+}
+
 function getCurrentStimDisplaySources(filterPropertyName='clozeStimulus') {
   const displaySrcs = [];
   const stims = Session.get('currentStimuliSet');
@@ -3981,7 +4038,7 @@ async function checkAndDisplayTwoPartQuestion(deliveryParams, currentDisplayEngi
     // Before this fix: displayReady=true triggered CSS fade-in while Blaze was still updating
     // .trial-input-hidden class, causing input field to flash/repaint mid-transition
     // After: Blaze completes DOM updates → THEN fade-in starts with final layout already set
-    requestAnimationFrame(() => {
+    requestAnimationFrame(async () => {
       // FLICKER FIX: Set input disabled state AND focus BEFORE fade-in starts
       // All state changes happen while opacity=0 (invisible), eliminating visible flicker
       const isButtonTrial = Session.get('buttonTrial');
@@ -4000,6 +4057,10 @@ async function checkAndDisplayTwoPartQuestion(deliveryParams, currentDisplayEngi
         $('#multipleChoiceContainer button').prop('disabled', false);
         inputDisabled = false;
       }
+
+      // IMAGE UX FIX: Wait for image to be fully loaded and painted before fading in
+      // This prevents the image box from fading in empty and then showing the image after
+      await waitForDOMImageReady();
 
       beginFadeIn('Question fade-in');
       registerTimeout('questionFadeIn', () => {
