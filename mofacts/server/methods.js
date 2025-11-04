@@ -2553,7 +2553,6 @@ async function processAudioFilesForTDF(TDF, ownerId){
           if(!src.includes('http')) {
             console.log('fetching link for file:', src, 'with ownerId:', ownerId)
             const audio = await DynamicAssets.findOne({userId: ownerId, name: src});
-            console.log("audio:", audio)
             if (audio) {
               const link = audio.link();
               TDF.tutor.unit[unitIdx].unitinstructions = unit.unitinstructions.replace(src, link)
