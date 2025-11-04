@@ -40,15 +40,7 @@ Template.help.rendered = async function() {
     let markdown;
 
     // First, check for custom help page
-    const customHelp = await new Promise((resolve, reject) => {
-      Meteor.callAsync('getCustomHelpPage', (error, result) => {
-        if (error) {
-          reject(error);
-        } else {
-          resolve(result);
-        }
-      });
-    });
+    const customHelp = await Meteor.callAsync('getCustomHelpPage');
 
     if (customHelp) {
       // Use custom help markdown
