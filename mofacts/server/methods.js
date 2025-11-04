@@ -42,6 +42,8 @@ export {
 // brackets instead of dot notation - that's because we prefer square brackets
 // for creating some MongoDB queries
 const SymSpell = require('node-symspell')
+const Hypher = require('hypher');
+const english = require('hyphenation.en-us');
 const fs = Npm.require('fs');
 const https = require('https')
 const { randomBytes } = require('crypto')
@@ -70,8 +72,12 @@ if (process.env.METEOR_SETTINGS_WORKAROUND) {
 //   process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = 0;
 //   serverConsole('dev environment, allow insecure tls');
 // }
-// if Meteor settings specifies a syllableURL, use it. Otherwise check if Meteor.isProduction and use the appropriate URL, otherwise use the dev URL
-const syllableURL = Meteor.settings.syllableURL ? Meteor.settings.syllableURL : Meteor.isProduction ? 'http://syllables:4567/syllables/' : 'http://localhost:4567/syllables/';
+
+// Initialize hypher for syllable splitting (replaces syllables.jar microservice)
+const hyphenator = new Hypher(english);
+
+// DEPRECATED: Syllable service replaced with hypher library
+// const syllableURL = Meteor.settings.syllableURL ? Meteor.settings.syllableURL : Meteor.isProduction ? 'http://syllables:4567/syllables/' : 'http://localhost:4567/syllables/';
 
 
 
@@ -2840,10 +2846,15 @@ async function makeHTTPSrequest(options, request, timeoutMs = 30000){
 }
 
 function getSyllablesForWord(word) {
-  const syllablesURL = baseSyllableURL + word;
-  const result = HTTP.call('GET', syllablesURL);
-  const syllableArray = result.content.replace(/\[|\]/g, '').split(',').map((x) => x.trim());
-  return syllableArray;
+  // Use hypher library for syllable splitting (replaces syllables.jar microservice)
+  try {
+    const syllableArray = hyphenator.hyphenate(word);
+    return syllableArray;
+  } catch (e) {
+    serverConsole('error splitting syllables for ' + word + ': ' + JSON.stringify(e));
+    // Fallback to whole word if hyphenation fails
+    return [word];
+  }
 }
 
 export const methods = {
@@ -3781,15 +3792,21 @@ export const methods = {
 
     const targetUsername = _.prop(targetUser, 'username');
 
+    serverConsole('Before role change - User roles:', targetUser.roles);
+
     if (roleAction === 'add') {
       await Roles.addUsersToRolesAsync(targetUserId, [roleName]);
-      createUserSecretKey(targetUserId);
+      await createUserSecretKey(targetUserId);
     } else if (roleAction === 'remove') {
       await Roles.removeUsersFromRolesAsync(targetUserId, [roleName]);
-      removeUserSecretKey(targetUserId);
+      await removeUserSecretKey(targetUserId);
     } else {
       throw new Error('Serious logic error: please report this');
     }
+
+    // Verify the role was actually added/removed
+    const updatedUser = await Meteor.users.findOneAsync({_id: targetUserId});
+    serverConsole('After role change - User roles:', updatedUser.roles);
 
     return {
       'RESULT': 'SUCCESS',
@@ -4362,6 +4379,19 @@ const asyncMethods = {
     await Tdfs.updateAsync({_id: TDFId}, {$set: {conditionCounts: conditionCounts}});
   },
   
+  // TEST METHOD: Simple syllable splitting test (can be called from browser console)
+  testSyllableSplitting: function(words = ['computer', 'mali', 'malawi', 'beautiful', 'hyphenation']) {
+    serverConsole('=== Testing Syllable Splitting with hypher ===');
+    const results = {};
+    words.forEach(word => {
+      const syllables = getSyllablesForWord(word);
+      results[word] = syllables;
+      serverConsole(`${word} => [${syllables.join(', ')}]`);
+    });
+    serverConsole('=== Test Complete ===');
+    return results;
+  },
+
   updateStimSyllables: async function(stimuliSetId, stimuli = undefined) {
     serverConsole('updateStimSyllables', stimuliSetId);
     if(!stimuli){

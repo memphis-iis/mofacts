@@ -20,6 +20,8 @@
     "expect": "^29.7.0",
     "hark": "^1.2.3",
     "http": "0.0.1-security",
+    "hyphenation.en-us": "^0.2.1",
+    "hypher": "^0.2.5",
     "isomorphic-fetch": "^3.0.0",
     "marked": "^12.0.0",
     "meteor-node-stubs": "^1.2.5",

@@ -21,13 +21,11 @@ services:
       - '3000:3000'
     depends_on:
       - mongodb
-      - syllables
     environment:
       ROOT_URL: https://staging.optimallearning.org
       MONGO_URL: mongodb://mongodb:27017/MoFACT
       PORT: 3000
-      SYLLABLES_URL: http://syllables:4567
-      WAIT_HOSTS: mongo:27017 syllables:4567
+      WAIT_HOSTS: mongo:27017
       METEOR_SETTINGS_WORKAROUND: '/mofactsAssets/settings.json'
     networks:
       - mofacts
@@ -42,17 +40,6 @@ services:
       - '27017:27017'
     networks:
       - mofacts
-
-  syllables:
-    image: ppavlikmemphis/mofacts-syllables
-    build:
-      context: ../../syllables_subsystem
-      dockerfile: Dockerfile
-    ports:
-      - '4567:4567'
-    networks:
-      - mofacts
-
 
 volumes:
   data:
