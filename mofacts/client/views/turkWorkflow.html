@@ -74,17 +74,17 @@
                             <table class="table table-striped table-bordered">
                                 <thead>
                                     <tr>
-                                        <th>User MongoDB ID</th>
-                                        <th>User Name (Turk)</th>
-                                        <th>Email Sched</th>
-                                        <th>Correct</th>
-                                        <th>Approval</th>
-                                        <th>Email Sent</th>
-                                        <th>Last Unit</th>
-                                        <th>Last Action</th>
-                                        <th>Q Seen</th>
-                                        <th>A Given</th>
-                                        <th>Bonus</th>
+                                        <th class="table-col-narrow">User MongoDB ID</th>
+                                        <th class="table-col-narrow">User Name (Turk)</th>
+                                        <th class="table-col-small">Email Sched</th>
+                                        <th class="table-col-icon text-center">Correct</th>
+                                        <th class="table-col-small">Approval</th>
+                                        <th class="table-col-small">Email Sent</th>
+                                        <th class="table-col-icon text-center">Last Unit</th>
+                                        <th class="table-col-narrow">Last Action</th>
+                                        <th class="table-col-icon text-center">Q Seen</th>
+                                        <th class="table-col-icon text-center">A Given</th>
+                                        <th class="table-col-small">Bonus</th>
                                     </tr>
                                 </thead>
 
@@ -104,7 +104,7 @@
                                     Email not scheduled
                                     {{/if}}
                                 </td>
-                                <td>{{answersCorrect}}</td>
+                                <td class="text-center">{{answersCorrect}}</td>
                                 <td>
                                     {{#if needPay}}
                                         <button type="button"
@@ -132,10 +132,10 @@
                                     Email not sent
                                     {{/if}}
                                 </td>
-                                <td>{{lastUnitSeen}}</td>
+                                <td class="text-center">{{lastUnitSeen}}</td>
                                 <td>{{lastAction}}</td>
-                                <td>{{questionsSeen}}</td>
-                                <td>{{answersSeen}}</td>
+                                <td class="text-center">{{questionsSeen}}</td>
+                                <td class="text-center">{{answersSeen}}</td>
                                 <td>
                                     {{#if needBonus}}
                                         <button type="button" class="btn btn-fix btn-primary btn-xs btn-bonus-action" data-idx="{{idx}}">

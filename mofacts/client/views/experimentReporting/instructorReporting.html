@@ -56,12 +56,12 @@
           <table class="table table-striped table-bordered">
             <thead>
               <tr>
-                <th>Student</th>
-                <th>% Correct</th>
-                <th>Count</th>
-                <th>Total Time (min)</th>
-                <th>Exceptions</th>
-                <th>Actions</th>
+                <th class="table-col-medium">Student</th>
+                <th class="table-col-narrow text-center">% Correct</th>
+                <th class="table-col-narrow text-center">Count</th>
+                <th class="table-col-narrow text-center">Total Time (min)</th>
+                <th class="table-col-small">Exceptions</th>
+                <th class="table-col-small">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -76,9 +76,9 @@
             {{#each curClassStudentPerformance}}
               <tr id="{{this.userId}}">
                 <td><a onclick="navigateToStudentReporting('{{this.username}}')">{{this.username}}</a></td>
-                <td>{{this.percentCorrect}}</td>
-                <td>{{this.count}}</td>
-                <td>{{this.totalTimeMins}}</td>
+                <td class="text-center">{{this.percentCorrect}}</td>
+                <td class="text-center">{{this.count}}</td>
+                <td class="text-center">{{this.totalTimeMins}}</td>
                 <td>
                   {{#if this.exception}}
                     {{this.exception}}
@@ -105,9 +105,9 @@
               {{#each curClassStudentPerformanceAfterFilter}}
               <tr>
                 <td><a onclick="navigateToStudentReporting('{{this.username}}')">{{this.username}}</a></td>
-                <td>{{this.percentCorrect}}</td>
-                <td>{{this.count}}</td>
-                <td>{{this.totalTimeMins}}</td>
+                <td class="text-center">{{this.percentCorrect}}</td>
+                <td class="text-center">{{this.count}}</td>
+                <td class="text-center">{{this.totalTimeMins}}</td>
                 <td>
                   {{#if this.exception}}
                     <span style="color: red">{{this.exception}}</span>
@@ -130,9 +130,9 @@
           <tfoot id="classReportingTotal">
             <tr>
               <td>Totals</td>
-              <td>{{curClassPerformance.percentCorrect}}</td>
-              <td>{{curClassPerformance.count}}</td>
-              <td>{{curClassPerformance.totalTimeMins}}</td>
+              <td class="text-center">{{curClassPerformance.percentCorrect}}</td>
+              <td class="text-center">{{curClassPerformance.count}}</td>
+              <td class="text-center">{{curClassPerformance.totalTimeMins}}</td>
               <td></td>
               <td></td>
             </tr>

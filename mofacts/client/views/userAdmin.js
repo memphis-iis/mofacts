@@ -2,8 +2,6 @@ Template.userAdmin.created = function() {
   Session.set('filter', '@gmail.com');
 };
 
-Session.set('allUsers', undefined);
-
 Template.userAdmin.rendered = function() {
   // Init the modal dialog
   $('#userAdminModal').modal({
@@ -12,23 +10,24 @@ Template.userAdmin.rendered = function() {
     'show': false,
   });
 
-  Meteor.subscribe('allUsers', function() {
-    Session.set('allUsers', Meteor.users.find({}, {fields: {username: 1, roles:1}, sort: [['username', 'asc']]}).fetch());
-  });
+  Meteor.subscribe('allUsers');
 };
 
 Template.userAdmin.helpers({
   userRoleEditList: function() {
-    const allUsers = Session.get('allUsers') || [];
-    filter = Session.get('filter');
-    //filter out users that don't match the filter 
-    userList = allUsers.filter(function(user) {
+    // Reactively get users from Meteor.users collection (not Session)
+    const allUsers = Meteor.users.find({}, {sort: {username: 1}}).fetch();
+    const filter = Session.get('filter');
+
+    //filter out users that don't match the filter
+    let userList = allUsers.filter(function(user) {
       if(user.username){
         return user.username.indexOf(filter) !== -1;
       } else {
         return false;
       }
     });
+
     //iterate through the list. if roles contains teacher, set .teacher to true. if roles contains admin, set .admin to true
     userList.forEach(function(user) {
       user.teacher = false;
@@ -68,7 +67,7 @@ Template.userAdmin.events({
   },
 
   // Need admin and teacher buttons
-  'click .btn-user-change': function(event) {
+  'click .btn-user-change': async function(event) {
     event.preventDefault();
 
     const btnTarget = $(event.currentTarget);
@@ -76,22 +75,21 @@ Template.userAdmin.events({
     const roleAction = _.trim(btnTarget.data('roleaction'));
     const roleName = _.trim(btnTarget.data('rolename'));
 
+    try {
+      await Meteor.callAsync('userAdminRoleChange', userId, roleAction, roleName);
+      $('#userAdminModal').modal('hide');
 
+      // No need to manually refresh - Meteor reactivity handles it automatically!
 
-    (async () => {
-      try {
-        await Meteor.callAsync('userAdminRoleChange', userId, roleAction, roleName);
-        $('#userAdminModal').modal('hide');
-        const disp = 'Action completed successfully';
-        console.log(disp);
-        alert(disp);
-      } catch (error) {
-        $('#userAdminModal').modal('hide');
-        const disp = 'Failed to handle request. Error:' + error;
-        console.log(disp);
-        alert(disp);
-      }
-    })();
+      const disp = 'Action completed successfully';
+      console.log(disp);
+      alert(disp);
+    } catch (error) {
+      $('#userAdminModal').modal('hide');
+      const disp = 'Failed to handle request. Error:' + error;
+      console.log(disp);
+      alert(disp);
+    }
   },
 
   //Impersonation
@@ -136,9 +134,7 @@ async function doFileUpload(fileElementSelector, fileDescrip) {
           // Now we can clear the selected file
           $(fileElementSelector).val('');
           $(fileElementSelector).parent().find('.file-info').html('');
-          const newAllUsers = Meteor.users.find({}, {fields: {username: 1}, sort: [['username', 'asc']]}).fetch();
-          console.log('newAllUsers:', newAllUsers, JSON.parse(JSON.stringify(Session.get('allUsers'))));
-          Session.set('allUsers', newAllUsers);
+          // No need to manually refresh - Meteor reactivity handles it automatically!
         }
       } catch (error) {
         console.log('Critical failure saving ' + fileDescrip, error);

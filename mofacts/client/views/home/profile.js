@@ -95,6 +95,26 @@ Template.profile.helpers({
   isImpersonating: function(){
     return Meteor.user() ? Meteor.user().impersonating : false;
   },
+  // Check if user is only a teacher (not admin)
+  isTeacherOnly: function() {
+    const user = Meteor.user();
+    if (!user || !user.roles) return false;
+    return user.roles.includes('teacher') && !user.roles.includes('admin');
+  },
+
+  // Check if user is only an admin (not teacher)
+  isAdminOnly: function() {
+    const user = Meteor.user();
+    if (!user || !user.roles) return false;
+    return user.roles.includes('admin') && !user.roles.includes('teacher');
+  },
+
+  // Check if user has both admin and teacher roles
+  isBothRoles: function() {
+    const user = Meteor.user();
+    if (!user || !user.roles) return false;
+    return user.roles.includes('admin') && user.roles.includes('teacher');
+  },
 });
 
 // //////////////////////////////////////////////////////////////////////////

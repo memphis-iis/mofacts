@@ -71,8 +71,75 @@ Template.adminControls.helpers({
     'formatDate': function(date) {
         if (!date) return '';
         return new Date(date).toLocaleString();
+    },
+    'getContrastInfo': function(fgProp, bgProp) {
+        const theme = Session.get('curTheme');
+        if (!theme || !theme.properties) return null;
+
+        const fg = theme.properties[fgProp];
+        const bg = theme.properties[bgProp];
+
+        if (!fg || !bg) return null;
+
+        const ratio = calculateContrastRatio(fg, bg);
+        const level = ratio >= 7 ? 'AAA' : ratio >= 4.5 ? 'AA' : 'Fail';
+        const badgeClass = ratio >= 7 ? 'success' : ratio >= 4.5 ? 'warning' : 'danger';
+
+        return {
+            ratio: ratio.toFixed(1),
+            level: level,
+            badgeClass: badgeClass,
+            passes: ratio >= 4.5
+        };
     }
 });
+
+// Contrast calculation helper functions
+function hexToRgb(hex) {
+    // Remove # if present
+    hex = hex.replace(/^#/, '');
+
+    // Handle short form (e.g., #fff)
+    if (hex.length === 3) {
+        hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2];
+    }
+
+    const bigint = parseInt(hex, 16);
+    return {
+        r: (bigint >> 16) & 255,
+        g: (bigint >> 8) & 255,
+        b: bigint & 255
+    };
+}
+
+function relativeLuminance(rgb) {
+    const rsRGB = rgb.r / 255;
+    const gsRGB = rgb.g / 255;
+    const bsRGB = rgb.b / 255;
+
+    const r = rsRGB <= 0.03928 ? rsRGB / 12.92 : Math.pow((rsRGB + 0.055) / 1.055, 2.4);
+    const g = gsRGB <= 0.03928 ? gsRGB / 12.92 : Math.pow((gsRGB + 0.055) / 1.055, 2.4);
+    const b = bsRGB <= 0.03928 ? bsRGB / 12.92 : Math.pow((bsRGB + 0.055) / 1.055, 2.4);
+
+    return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+}
+
+function calculateContrastRatio(fgHex, bgHex) {
+    try {
+        const fgRgb = hexToRgb(fgHex);
+        const bgRgb = hexToRgb(bgHex);
+
+        const fgLum = relativeLuminance(fgRgb);
+        const bgLum = relativeLuminance(bgRgb);
+
+        const lighter = Math.max(fgLum, bgLum);
+        const darker = Math.min(fgLum, bgLum);
+
+        return (lighter + 0.05) / (darker + 0.05);
+    } catch (e) {
+        return 0;
+    }
+}
 
 Template.adminControls.events({
     'click .serverVerbosityRadio': function(event) {

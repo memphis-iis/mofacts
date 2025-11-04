@@ -311,8 +311,8 @@ input[type="range"]::-webkit-slider-thumb {
 
 /* Special button styles */
 #signInButtonOAuth {
-    /* use google's blue for outline with white background */
-    border: 1px solid #4285f4;
+    /* Use accent color for brand consistency */
+    border: 1px solid var(--accent-color);
     background-color: var(--background-color) !important;
     color: var(--text-color);
 }
@@ -438,6 +438,26 @@ input[type="range"]::-webkit-slider-thumb {
 .admin-subsection {
     margin-top: clamp(1.5rem, 3vh, 2rem);
     margin-bottom: clamp(1rem, 2vh, 1.5rem);
+}
+
+/* Theme section grouping - visually separates theme configuration groups */
+.theme-section {
+    background-color: var(--neutral-color);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: var(--border-radius);
+    padding: clamp(1rem, 2vh, 1.5rem);
+    margin-top: clamp(1rem, 2vh, 1.5rem);
+    margin-bottom: clamp(1rem, 2vh, 1.5rem);
+}
+
+.theme-section-header {
+    margin-top: 0;
+    margin-bottom: clamp(0.75rem, 1.5vh, 1rem);
+    font-size: clamp(1rem, 2.5vw, 1.1rem);
+    font-weight: 600;
+    color: var(--text-color);
+    border-bottom: 2px solid var(--accent-color);
+    padding-bottom: 0.5rem;
 }
 
 /* Admin table wrapper - provides consistent card styling */
@@ -854,7 +874,8 @@ tfoot tf, .table tfoot tf, .table tfoot td, .table tfoot th {
 }
 
 .overlearning-text {
-    color: #585858;
+    color: var(--text-color);
+    opacity: 0.6; /* Muted effect while respecting theme */
 }
 
 .overlearning-button {
@@ -975,9 +996,14 @@ tfoot tf, .table tfoot tf, .table tfoot td, .table tfoot th {
     transition: opacity var(--transition-fast) ease-in-out;
 }
 
-/* Skeleton loader for initial render */
+/* Skeleton loader for initial render - theme-aware gradient */
 .skeleton-loader {
-    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background: linear-gradient(
+        90deg,
+        color-mix(in srgb, var(--background-color) 95%, var(--text-color) 5%) 25%,
+        color-mix(in srgb, var(--background-color) 90%, var(--text-color) 10%) 50%,
+        color-mix(in srgb, var(--background-color) 95%, var(--text-color) 5%) 75%
+    );
     background-size: 200% 100%;
     animation: skeleton-loading 1.5s ease-in-out infinite;
     border-radius: var(--border-radius-sm);
@@ -1337,6 +1363,11 @@ tfoot tf, .table tfoot tf, .table tfoot td, .table tfoot th {
   }
 }
 
+/* Warning icon - uses theme alert color */
+.warning-icon {
+  stroke: var(--alert-color);
+}
+
 /* Desktop: Traditional table (overrides mobile defaults) */
 @media (min-width: 992px) {
   .learning-dashboard-table {
@@ -1346,4 +1377,66 @@ tfoot tf, .table tfoot tf, .table tfoot td, .table tfoot th {
   .learning-dashboard-cards {
     display: none;
   }
+}
+
+/* ===== ROLE-BASED BUTTON COLORS ===== */
+/* Teacher role buttons - Blue theme (educational, instructional) */
+.btn-role-teacher {
+    background-color: #4A90E2 !important;
+    border-color: #3A7BC8 !important;
+    color: #FFFFFF !important;
+}
+
+.btn-role-teacher:hover {
+    background-color: #3A7BC8 !important;
+    border-color: #2A6BAE !important;
+}
+
+/* Admin role buttons - Orange theme (control, administrative) */
+.btn-role-admin {
+    background-color: #E67E22 !important;
+    border-color: #D35400 !important;
+    color: #FFFFFF !important;
+}
+
+.btn-role-admin:hover {
+    background-color: #D35400 !important;
+    border-color: #BA4A00 !important;
+}
+
+/* Shared buttons - Use theme's default button color (green) */
+.btn-role-shared {
+    background-color: var(--button-color) !important;
+    border-color: var(--success-color) !important;
+    color: var(--primary-button-text-color) !important;
+}
+
+.btn-role-shared:hover {
+    background-color: var(--success-color) !important;
+    border-color: var(--success-color) !important;
+}
+
+/* Profile page role separators - labeled horizontal dividers */
+.profile-separator {
+    margin: 1.5rem 0;
+    border: 0;
+    border-top: 2px solid var(--text-color);
+    opacity: 0.3;
+    position: relative;
+    overflow: visible;
+}
+
+.profile-separator[data-label]::after {
+    content: attr(data-label);
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: var(--background-color);
+    padding: 0 1rem;
+    color: var(--text-color);
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
 }

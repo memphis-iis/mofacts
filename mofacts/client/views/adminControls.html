@@ -53,210 +53,275 @@
                         Theme Name:
                     </div>
                     <div class="col">
-                        <input type="text" class="currentThemeProp" value="{{currentTheme.properties.themeName}}" data-id="themeName">    
-                    </div>
-                    <div class="col text-end">
-                        Background Color:
-                    </div>
-                    <div class="col">
-                        <input type="text" class="currentThemeProp" value="{{currentTheme.properties.background_color}}" data-id="background_color">
-                        <input type="color" class="currentThemePropColor" value="{{currentTheme.properties.background_color}}" data-id="background_color">
-                    </div>
-                    <div class="col text-end">
-                        Navigation Text Color:
-                    </div>
-                    <div class="col">
-                        <input type="text" class="currentThemeProp" value="{{currentTheme.properties.navbar_text_color}}" data-id="navbar_text_color">
-                        <input type="color" class="currentThemePropColor" value="{{currentTheme.properties.navbar_text_color}}" data-id="navbar_text_color">
-                    </div>
-                    <div class="col text-end">
-                        Accent Color:
-                    </div>
-                    <div class="col">
-                        <input type="text" class="currentThemeProp" value="{{currentTheme.properties.accent_color}}" data-id="accent_color">
-                        <input type="color" class="currentThemePropColor" value="{{currentTheme.properties.accent_color}}" data-id="accent_color">
-                    </div>
-                    <div class="col text-end">
-                        Primary Button Color:
-                    </div>
-                    <div class="col">
-                        <input type="text" class="currentThemeProp" value="{{currentTheme.properties.button_color}}" data-id="button_color">
-                        <input type="color" class="currentThemePropColor" value="{{currentTheme.properties.button_color}}" data-id="button_color">
-                    </div>
-                    <div class="col text-end">
-                        Button Hover Color:
-                    </div>
-                    <div class="col">
-                        <input type="text" class="currentThemeProp" value="{{currentTheme.properties.success_color}}" data-id="success_color">
-                        <input type="color" class="currentThemePropColor" value="{{currentTheme.properties.success_color}}" data-id="success_color">
-                    </div>
-                    <div class="col text-end">
-                        Primary Button Text Color:
-                    </div>
-                    <div class="col">
-                        <input type="text" class="currentThemeProp" value="{{currentTheme.properties.primary_button_text_color}}" data-id="primary_button_text_color">
-                        <input type="color" class="currentThemePropColor" value="{{currentTheme.properties.primary_button_text_color}}" data-id="primary_button_text_color">
-                    </div>
-                    <div class="col text-end">
-                        Secondary Button and Menu Color:
-                    </div>
-                    <div class="col">
-                        <input type="text" class="currentThemeProp" value="{{currentTheme.properties.secondary_color}}" data-id="secondary_color">
-                        <input type="color" class="currentThemePropColor" value="{{currentTheme.properties.secondary_color}}" data-id="secondary_color">
-                    </div>
-                    <div class="col text-end">
-                        Secondary Button Text and Menu Item Color:
-                    </div>
-                    <div class="col">
-                        <input type="text" class="currentThemeProp" value="{{currentTheme.properties.secondary_text_color}}" data-id="secondary_text_color">
-                        <input type="color" class="currentThemePropColor" value="{{currentTheme.properties.secondary_text_color}}" data-id="secondary_text_color">
-                    </div>
-                    <div class="col text-end">
-                        Alert Color:
-                    </div>
-                    <div class="col">
-                        <input type="text" class="currentThemeProp" value="{{currentTheme.properties.alert_color}}" data-id="alert_color">
-                        <input type="color" class="currentThemePropColor" value="{{currentTheme.properties.alert_color}}" data-id="alert_color">  
-                    </div>
-                    <div class="col text-end">
-                        Body Text Color:
-                    </div>
-                    <div class="col">
-                        <input type="text" class="currentThemeProp" value="{{currentTheme.properties.text_color}}" data-id="text_color">
-                        <input type="color" class="currentThemePropColor" value="{{currentTheme.properties.text_color}}" data-id="text_color">
-                    </div>
-                    <div class="col text-end">
-                        Audio Alert Color
-                    </div>
-                    <div class="col">
-                        <input type="text" class="currentThemeProp" value="{{currentTheme.properties.audio_alert_color}}" data-id="audio_alert_color">
-                        <input type="color" class="currentThemePropColor" value="{{currentTheme.properties.audio_alert_color}}" data-id="audio_alert_color">
-                    </div>
-                    <div class="col text-end">
-                        Top Bar / Neutral Color:
-                    </div>
-                    <div class="col">
-                        <input type="text" class="currentThemeProp" value="{{currentTheme.properties.neutral_color}}" data-id="neutral_color">
-                        <input type="color" class="currentThemePropColor" value="{{currentTheme.properties.neutral_color}}" data-id="neutral_color">
-                    </div>
-                    <div class="col text-end">
-                        Navbar Text Color:
-                    </div>
-                    <div class="col">
-                        <input type="text" class="currentThemeProp" value="{{currentTheme.properties.navbar_text_color}}" data-id="navbar_text_color">
-                        <input type="color" class="currentThemePropColor" value="{{currentTheme.properties.navbar_text_color}}" data-id="navbar_text_color">
-                    </div>
-                    <div class="col text-end">
-                        Transition Speed - Instant (ms):
-                    </div>
-                    <div class="col">
-                        <input type="number" class="currentThemeProp form-control" value="{{currentTheme.properties.transition_instant}}" data-id="transition_instant" min="0" max="500" step="10" placeholder="10">
-                        <small class="form-text text-muted">
-                            <strong>Default: 10ms</strong> - Near-instant (accessibility fallback, reduced motion mode)
-                        </small>
-                    </div>
-                    <div class="col text-end">
-                        Transition Speed - Fast (ms):
-                    </div>
-                    <div class="col">
-                        <input type="number" class="currentThemeProp form-control" value="{{currentTheme.properties.transition_fast}}" data-id="transition_fast" min="0" max="500" step="10" placeholder="100">
-                        <small class="form-text text-muted">
-                            <strong>Default: 100ms</strong> - Quick transitions<br>
-                            <em>Used for:</em> Buttons, hovers, input fields, progress bars, countdown timers, feedback displays
-                        </small>
-                    </div>
-                    <div class="col text-end">
-                        Transition Speed - Smooth (ms):
-                    </div>
-                    <div class="col">
-                        <input type="number" class="currentThemeProp form-control" value="{{currentTheme.properties.transition_smooth}}" data-id="transition_smooth" min="0" max="1000" step="50" placeholder="200">
-                        <small class="form-text text-muted">
-                            <strong>Default: 200ms</strong> - Main content transitions<br>
-                            <em>Used for:</em> Trial card fades, modal animations, major content changes
-                        </small>
-                    </div>
-                    <div class="col text-end">
-
-                        Logo:
-                    </div>
-                    <div class="col">
-                        <input type="file" class="form-control" id="logoUpload" accept="image/*">
-                        {{#if currentTheme.properties.logo_url}}
-                        <button type="button" id="clearLogo" class="btn btn-secondary btn-sm" style="margin-top: 0.5rem;">Clear Logo</button>
-                        <div style="margin-top: 0.5rem;">
-                            <img src="{{currentTheme.properties.logo_url}}" alt="Logo preview" class="img-thumbnail" style="max-width: 200px;">
-                        </div>
-                        {{/if}}
+                        <input type="text" class="currentThemeProp" value="{{currentTheme.properties.themeName}}" data-id="themeName">
                     </div>
                 </div>
-                <div class="row row-cols-2">
-                    <div class="col text-end">
-                        Sign In Description:
+
+                <!-- Main Layout & Text -->
+                <div class="theme-section">
+                    <h5 class="theme-section-header">Main Layout & Text</h5>
+                    <div class="row row-cols-2">
+                        <div class="col text-end">
+                            Page Background Color:
+                        </div>
+                        <div class="col">
+                            <input type="text" class="currentThemeProp" value="{{currentTheme.properties.background_color}}" data-id="background_color">
+                            <input type="color" class="currentThemePropColor" value="{{currentTheme.properties.background_color}}" data-id="background_color">
+                        </div>
+                        <div class="col text-end">
+                            Body Text Color:
+                        </div>
+                        <div class="col">
+                            <input type="text" class="currentThemeProp" value="{{currentTheme.properties.text_color}}" data-id="text_color">
+                            <input type="color" class="currentThemePropColor" value="{{currentTheme.properties.text_color}}" data-id="text_color">
+                            {{#with (getContrastInfo "text_color" "background_color")}}
+                                <small class="form-text {{#unless passes}}text-warning{{/unless}}">
+                                    Contrast: <strong>{{ratio}}:1</strong>
+                                    <span class="badge bg-{{badgeClass}}">{{#if passes}}✓{{else}}⚠{{/if}} WCAG {{level}}</span>
+                                </small>
+                            {{/with}}
+                        </div>
+                        <div class="col text-end">
+                            Top Navigation Bar Background:
+                        </div>
+                        <div class="col">
+                            <input type="text" class="currentThemeProp" value="{{currentTheme.properties.neutral_color}}" data-id="neutral_color">
+                            <input type="color" class="currentThemePropColor" value="{{currentTheme.properties.neutral_color}}" data-id="neutral_color">
+                        </div>
+                        <div class="col text-end">
+                            Navigation Bar Text Color:
+                        </div>
+                        <div class="col">
+                            <input type="text" class="currentThemeProp" value="{{currentTheme.properties.navbar_text_color}}" data-id="navbar_text_color">
+                            <input type="color" class="currentThemePropColor" value="{{currentTheme.properties.navbar_text_color}}" data-id="navbar_text_color">
+                            {{#with (getContrastInfo "navbar_text_color" "neutral_color")}}
+                                <small class="form-text {{#unless passes}}text-warning{{/unless}}">
+                                    Contrast: <strong>{{ratio}}:1</strong>
+                                    <span class="badge bg-{{badgeClass}}">{{#if passes}}✓{{else}}⚠{{/if}} WCAG {{level}}</span>
+                                </small>
+                            {{/with}}
+                        </div>
                     </div>
-                    <div class="col">
-                        <textarea class="form-control currentThemeProp" rows="3" data-id="signInDescription">{{currentTheme.properties.signInDescription}}</textarea>
+                </div>
+
+                <!-- Buttons & Interactive -->
+                <div class="theme-section">
+                    <h5 class="theme-section-header">Buttons & Interactive Elements</h5>
+                    <div class="row row-cols-2">
+                        <div class="col text-end">
+                            Primary Button Background:
+                        </div>
+                        <div class="col">
+                            <input type="text" class="currentThemeProp" value="{{currentTheme.properties.button_color}}" data-id="button_color">
+                            <input type="color" class="currentThemePropColor" value="{{currentTheme.properties.button_color}}" data-id="button_color">
+                        </div>
+                        <div class="col text-end">
+                            Primary Button Text Color:
+                        </div>
+                        <div class="col">
+                            <input type="text" class="currentThemeProp" value="{{currentTheme.properties.primary_button_text_color}}" data-id="primary_button_text_color">
+                            <input type="color" class="currentThemePropColor" value="{{currentTheme.properties.primary_button_text_color}}" data-id="primary_button_text_color">
+                            {{#with (getContrastInfo "primary_button_text_color" "button_color")}}
+                                <small class="form-text {{#unless passes}}text-warning{{/unless}}">
+                                    Contrast: <strong>{{ratio}}:1</strong>
+                                    <span class="badge bg-{{badgeClass}}">{{#if passes}}✓{{else}}⚠{{/if}} WCAG {{level}}</span>
+                                </small>
+                            {{/with}}
+                        </div>
+                        <div class="col text-end">
+                            Button Hover Color:
+                        </div>
+                        <div class="col">
+                            <input type="text" class="currentThemeProp" value="{{currentTheme.properties.success_color}}" data-id="success_color">
+                            <input type="color" class="currentThemePropColor" value="{{currentTheme.properties.success_color}}" data-id="success_color">
+                            <small class="form-text text-muted">
+                                Used when hovering over buttons and for success messages
+                            </small>
+                        </div>
+                        <div class="col text-end">
+                            Accent Color (highlights, links):
+                        </div>
+                        <div class="col">
+                            <input type="text" class="currentThemeProp" value="{{currentTheme.properties.accent_color}}" data-id="accent_color">
+                            <input type="color" class="currentThemePropColor" value="{{currentTheme.properties.accent_color}}" data-id="accent_color">
+                            <small class="form-text text-muted">
+                                Used for highlights, active states, and emphasis
+                            </small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Menus & Secondary -->
+                <div class="theme-section">
+                    <h5 class="theme-section-header">Menus & Secondary Elements</h5>
+                    <div class="row row-cols-2">
+                        <div class="col text-end">
+                            Secondary Button/Menu Background:
+                        </div>
+                        <div class="col">
+                            <input type="text" class="currentThemeProp" value="{{currentTheme.properties.secondary_color}}" data-id="secondary_color">
+                            <input type="color" class="currentThemePropColor" value="{{currentTheme.properties.secondary_color}}" data-id="secondary_color">
+                        </div>
+                        <div class="col text-end">
+                            Secondary Button/Menu Text:
+                        </div>
+                        <div class="col">
+                            <input type="text" class="currentThemeProp" value="{{currentTheme.properties.secondary_text_color}}" data-id="secondary_text_color">
+                            <input type="color" class="currentThemePropColor" value="{{currentTheme.properties.secondary_text_color}}" data-id="secondary_text_color">
+                            {{#with (getContrastInfo "secondary_text_color" "secondary_color")}}
+                                <small class="form-text {{#unless passes}}text-warning{{/unless}}">
+                                    Contrast: <strong>{{ratio}}:1</strong>
+                                    <span class="badge bg-{{badgeClass}}">{{#if passes}}✓{{else}}⚠{{/if}} WCAG {{level}}</span>
+                                </small>
+                            {{/with}}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Alerts & Feedback -->
+                <div class="theme-section">
+                    <h5 class="theme-section-header">Alerts & Feedback</h5>
+                    <div class="row row-cols-2">
+                        <div class="col text-end">
+                            Alert/Error Color:
+                        </div>
+                        <div class="col">
+                            <input type="text" class="currentThemeProp" value="{{currentTheme.properties.alert_color}}" data-id="alert_color">
+                            <input type="color" class="currentThemePropColor" value="{{currentTheme.properties.alert_color}}" data-id="alert_color">
+                            <small class="form-text text-muted">
+                                Used for error messages and warnings
+                            </small>
+                        </div>
+                        <div class="col text-end">
+                            Audio Alert Color:
+                        </div>
+                        <div class="col">
+                            <input type="text" class="currentThemeProp" value="{{currentTheme.properties.audio_alert_color}}" data-id="audio_alert_color">
+                            <input type="color" class="currentThemePropColor" value="{{currentTheme.properties.audio_alert_color}}" data-id="audio_alert_color">
+                            <small class="form-text text-muted">
+                                Indicator shown on audio playback button
+                            </small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Animation -->
+                <div class="theme-section">
+                    <h5 class="theme-section-header">Animation Speeds</h5>
+                    <div class="row row-cols-2">
+                        <div class="col text-end">
+                            Transition Speed - Instant (ms):
+                        </div>
+                        <div class="col">
+                            <input type="number" class="currentThemeProp form-control" value="{{currentTheme.properties.transition_instant}}" data-id="transition_instant" min="0" max="500" step="10" placeholder="10">
+                            <small class="form-text text-muted">
+                                <strong>Default: 10ms</strong> - Near-instant (accessibility fallback, reduced motion mode)
+                            </small>
+                        </div>
+                        <div class="col text-end">
+                            Transition Speed - Fast (ms):
+                        </div>
+                        <div class="col">
+                            <input type="number" class="currentThemeProp form-control" value="{{currentTheme.properties.transition_fast}}" data-id="transition_fast" min="0" max="500" step="10" placeholder="100">
+                            <small class="form-text text-muted">
+                                <strong>Default: 100ms</strong> - Quick transitions<br>
+                                <em>Used for:</em> Buttons, hovers, input fields, progress bars, countdown timers, feedback displays
+                            </small>
+                        </div>
+                        <div class="col text-end">
+                            Transition Speed - Smooth (ms):
+                        </div>
+                        <div class="col">
+                            <input type="number" class="currentThemeProp form-control" value="{{currentTheme.properties.transition_smooth}}" data-id="transition_smooth" min="0" max="1000" step="50" placeholder="200">
+                            <small class="form-text text-muted">
+                                <strong>Default: 200ms</strong> - Main content transitions<br>
+                                <em>Used for:</em> Trial card fades, modal animations, major content changes
+                            </small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Branding -->
+                <div class="theme-section">
+                    <h5 class="theme-section-header">Branding Assets</h5>
+                    <div class="row row-cols-2">
+                        <div class="col text-end">
+                            Logo:
+                        </div>
+                        <div class="col">
+                            <input type="file" class="form-control" id="logoUpload" accept="image/*">
+                            <small class="form-text text-muted">
+                                Max file size: 2MB. Recommended: PNG or SVG with transparent background
+                            </small>
+                            {{#if currentTheme.properties.logo_url}}
+                            <button type="button" id="clearLogo" class="btn btn-secondary btn-sm" style="margin-top: 0.5rem;">Clear Logo</button>
+                            <div style="margin-top: 0.5rem;">
+                                <img src="{{currentTheme.properties.logo_url}}" alt="Logo preview" class="img-thumbnail" style="max-width: 200px;">
+                            </div>
+                            {{/if}}
+                        </div>
+                        <div class="col text-end">
+                            Sign In Description:
+                        </div>
+                        <div class="col">
+                            <textarea class="form-control currentThemeProp" rows="3" data-id="signInDescription">{{currentTheme.properties.signInDescription}}</textarea>
+                            <small class="form-text text-muted">
+                                Custom text displayed on the login page
+                            </small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Custom Help Page -->
+                <div class="theme-section">
+                    <h5 class="theme-section-header">Custom Help Page</h5>
+                    <div class="row">
+                        <div class="col-12">
+                            <p class="text-muted mb-3">
+                                Upload a custom markdown (.md) file to replace the default wiki help page.
+                                Students will see your custom content instead of the GitHub wiki.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-8 offset-md-2">
+                            <div class="mb-3">
+                                <label for="helpFileUpload" class="form-label">Choose Markdown File (.md)</label>
+                                <input type="file" class="form-control" id="helpFileUpload" accept=".md">
+                                <small class="form-text text-muted">Maximum file size: 1MB</small>
+                            </div>
+                            {{#if customHelpPageEnabled}}
+                            <div class="alert alert-success mb-3">
+                                <strong>✓ Custom help page is active</strong>
+                                {{#if customHelpPageUploadedAt}}
+                                <br>
+                                <small>Uploaded: {{formatDate customHelpPageUploadedAt}}</small>
+                                {{/if}}
+                            </div>
+                            {{/if}}
+                            <div class="d-grid gap-2">
+                                <button type="button" id="uploadHelpFileButton" class="btn btn-primary">
+                                    Upload Custom Help File
+                                </button>
+                                {{#if customHelpPageEnabled}}
+                                <button type="button" id="removeHelpFileButton" class="btn btn-outline-danger">
+                                    Remove Custom Help & Use Default Wiki
+                                </button>
+                                {{/if}}
+                            </div>
+                            <div class="mt-2 text-center">
+                                <span id="helpFileUploadStatus" class="text-muted"></span>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 {{else}}
-                <div class="row">    
+                <div class="row">
                     <div class="col text-center">
                         <button type="button" id="themeInitButton" class="btn btn-fixed">Enable Custom Theme</button>
                     </div>
                 </div>
                 {{/if}}
-            </div>
-
-            <div class="admin-section">
-                <div class="row text-center">
-                    <h4>Custom Help Page</h4>
-                </div>
-                <div class="row mt-3">
-                    <div class="col-12">
-                        <p class="text-center">
-                            Upload a custom markdown (.md) file to replace the default wiki help page.
-                            Students will see your custom content instead of the GitHub wiki.
-                        </p>
-                    </div>
-                </div>
-                <div class="row mt-3">
-                    <div class="col-md-6 offset-md-3">
-                        <div class="mb-3">
-                            <label for="helpFileUpload" class="form-label">Choose Markdown File (.md)</label>
-                            <input type="file" class="form-control" id="helpFileUpload" accept=".md">
-                            <div class="form-text">Maximum file size: 1MB</div>
-                        </div>
-                    </div>
-                </div>
-                {{#if customHelpPageEnabled}}
-                <div class="row mt-2">
-                    <div class="col text-center">
-                        <div class="alert alert-info d-inline-block mb-0 py-2 px-4">
-                            <strong>Custom help page is active</strong>
-                            {{#if customHelpPageUploadedAt}}
-                            <br>
-                            <small>Uploaded: {{formatDate customHelpPageUploadedAt}}</small>
-                            {{/if}}
-                        </div>
-                    </div>
-                </div>
-                {{/if}}
-                <div class="row mt-2">
-                    <div class="col text-center">
-                        <button type="button" id="uploadHelpFileButton" class="btn btn-fixed btn-primary">
-                            Upload Custom Help File
-                        </button>
-                        {{#if customHelpPageEnabled}}
-                        <button type="button" id="removeHelpFileButton" class="btn btn-fixed btn-danger ms-2">
-                            Remove Custom Help & Use Wiki
-                        </button>
-                        {{/if}}
-                    </div>
-                </div>
-                <div class="row mt-2">
-                    <div class="col-12 text-center">
-                        <span id="helpFileUploadStatus" class="text-muted"></span>
-                    </div>
-                </div>
             </div>
 
             <div class="admin-section">

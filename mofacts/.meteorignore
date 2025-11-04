@@ -1,0 +1,5 @@
+# Exclude server-only packages from client bundle
+node_modules/aws-sdk/
+
+# Exclude standalone Node.js utility scripts
+scripts/
