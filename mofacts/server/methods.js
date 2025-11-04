@@ -3666,7 +3666,8 @@ export const methods = {
       throw new Meteor.Error(403, 'Access denied to TDF API keys');
     }
 
-    return decryptData(tdf.content.tdfs.tutor.setspec.textToSpeechAPIKey);
+    const apiKey = tdf.content?.tdfs?.tutor?.setspec?.textToSpeechAPIKey;
+    return apiKey ? decryptData(apiKey) : '';
   },
 
   getTdfSpeechAPIKey: async function(tdfId){
@@ -3693,7 +3694,8 @@ export const methods = {
       throw new Meteor.Error(403, 'Access denied to TDF API keys');
     }
 
-    return decryptData(tdf.content.tdfs.tutor.setspec.speechAPIKey);
+    const apiKey = tdf.content?.tdfs?.tutor?.setspec?.speechAPIKey;
+    return apiKey ? decryptData(apiKey) : '';
   },
 
 
