@@ -478,7 +478,7 @@ input[type="range"]::-webkit-slider-thumb {
 }
 
 .table-responsive table{
-    min-width: 100%;
+    min-width: 700px; /* Ensure table has minimum width before scrolling */
     margin-bottom: 0; /* Remove default Bootstrap margin */
 }
 
@@ -486,7 +486,7 @@ input[type="range"]::-webkit-slider-thumb {
 .table {
     width: 100%;
     border-collapse: collapse;
-    table-layout: fixed; /* Predictable column behavior */
+    table-layout: auto; /* Allow columns to grow with content */
 }
 
 /* Table cell base styling - applies to all cells */
@@ -595,7 +595,7 @@ tfoot tf, .table tfoot tf, .table tfoot td, .table tfoot th {
 
 .table-col-medium {
     width: 30%;
-    min-width: 150px;
+    min-width: 200px; /* Increased to accommodate multiple action buttons */
 }
 
 .table-col-large {
@@ -605,6 +605,12 @@ tfoot tf, .table tfoot tf, .table tfoot td, .table tfoot th {
 
 .table-col-auto {
     width: auto;
+}
+
+/* Action column utility - prevents button wrapping */
+.table-col-actions {
+    white-space: nowrap;
+    vertical-align: middle;
 }
 
 /* Text alignment utilities */

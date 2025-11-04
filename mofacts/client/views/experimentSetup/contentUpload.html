@@ -27,7 +27,7 @@
                         <thead>
                             <tr>
                                 <th class="table-col-large">Summary</th>
-                                <th class="table-col-medium">Action</th>
+                                <th class="table-col-medium table-col-actions">Action</th>
                             </tr>
                         </thead>
                     <tbody>
@@ -94,7 +94,7 @@
                                         </div>
                                     </div>
                                 </td>
-                                <td>
+                                <td class="table-col-actions">
                                     {{#if packageFileLink}}
                                         {{#if this.hasAPIKeys}}
                                         
@@ -124,7 +124,7 @@
                                         <button id="transfer-btn" value="{{_id}}" class="btn-icon"><span class="fa fa-exchange" aria-hidden="true"></span></button>
                                     {{/if}}
                                 </td>
-                                <td>
+                                <td class="table-col-actions">
                                     {{#if this.hasAPIKeys}}
                                     
                                     {{else}}
