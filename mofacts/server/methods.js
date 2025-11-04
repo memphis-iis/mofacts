@@ -292,25 +292,67 @@ async function functionTimerAsync(f, args) {
 }
 
 const crypto = Npm.require('crypto');
-// Parameters
-const algo = 'aes256';
+// Parameters - updated for Node 22 compatibility
+const algo = 'aes-256-cbc';
+
+// Node 22 removed crypto.createCipher/createDecipher (deprecated in Node 10)
+// We need to use createCipheriv/createDecipheriv with explicit IV
 
 function encryptData(data) {
-  //encrypt using crypto
-  const cipher = crypto.createCipher(algo, Meteor.settings.encryptionKey);
-  let crypted
-  crypted = cipher.update(data, 'utf8', 'hex');
+  // New encryption format with IV (Node 22 compatible)
+  const key = crypto.scryptSync(Meteor.settings.encryptionKey, 'salt', 32);
+  const iv = crypto.randomBytes(16);
+  const cipher = crypto.createCipheriv(algo, key, iv);
+  let crypted = cipher.update(data, 'utf8', 'hex');
   crypted += cipher.final('hex');
-  return crypted;
+  return iv.toString('hex') + ':' + crypted; // Prepend IV
 }
 
 function decryptData(data) {
-  //decrypt using crypto
-  const decipher = crypto.createDecipher(algo, Meteor.settings.encryptionKey);
-  let dec
-  dec = decipher.update(data, 'hex', 'utf8');
-  dec += decipher.final('utf8');
-  return dec;
+  if (!data) return '';
+
+  // Check if this is new format (has IV) or legacy format
+  if (data.includes(':')) {
+    // New format with IV
+    const parts = data.split(':');
+    const iv = Buffer.from(parts[0], 'hex');
+    const encryptedData = parts[1];
+    const key = crypto.scryptSync(Meteor.settings.encryptionKey, 'salt', 32);
+    const decipher = crypto.createDecipheriv(algo, key, iv);
+    let dec = decipher.update(encryptedData, 'hex', 'utf8');
+    dec += decipher.final('utf8');
+    return dec;
+  } else {
+    // Legacy format - need to use EVP_BytesToKey (what old createDecipher used)
+    // This provides backwards compatibility with existing encrypted data
+    const key = evpBytesToKey(Meteor.settings.encryptionKey);
+    const decipher = crypto.createDecipheriv('aes-256-cbc', key.key, key.iv);
+    decipher.setAutoPadding(true);
+    let dec = decipher.update(data, 'hex', 'utf8');
+    dec += decipher.final('utf8');
+    return dec;
+  }
+}
+
+// EVP_BytesToKey implementation for backwards compatibility with old crypto.createDecipher
+// This is what Node.js used internally before removing createCipher/createDecipher
+function evpBytesToKey(password, keyLen = 32, ivLen = 16) {
+  const md5Hashes = [];
+  let digest = Buffer.from('');
+  let totalLen = 0;
+
+  while (totalLen < keyLen + ivLen) {
+    const toHash = Buffer.concat([digest, Buffer.from(password, 'binary')]);
+    digest = crypto.createHash('md5').update(toHash).digest();
+    md5Hashes.push(digest);
+    totalLen += digest.length;
+  }
+
+  const result = Buffer.concat(md5Hashes);
+  return {
+    key: result.slice(0, keyLen),
+    iv: result.slice(keyLen, keyLen + ivLen)
+  };
 }
 
 function createAwsHmac(secretKey, dataString) {
