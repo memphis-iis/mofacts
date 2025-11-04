@@ -51,9 +51,9 @@
                 <table class="table table-striped table-bordered">
                     <thead>
                     <tr>
-                        <th scope="col">Lesson Name</th>
-                        <th scope="col">File Name</th>
-                        <th scope="col" style="text-align: right;" class="col-4 justify-content-end"></th>
+                        <th scope="col" class="table-col-large">Lesson Name</th>
+                        <th scope="col" class="table-col-medium">File Name</th>
+                        <th scope="col" class="table-col-icon text-center">Download</th>
                     </tr>
                     </thead>
                 <tbody>
@@ -61,12 +61,10 @@
                     <tr>
                         <th scope="row">{{this.content.tdfs.tutor.setspec.lessonname}}</th>
                         <td>{{this.content.fileName}}</td>
-                        <td style="text-align: right;">
-                            <div class="col-2" style="display: inline-block">
-                                <button class="btn-icon" type="button" id="dataDownloadLink" data-fileName="{{this.content.fileName}}" aria-expanded="false">
-                                    <span class="fa fa-download"></span>
-                                </button>
-                            </div>
+                        <td class="text-center">
+                            <button class="btn-icon" type="button" id="dataDownloadLink" data-fileName="{{this.content.fileName}}" aria-expanded="false">
+                                <span class="fa fa-download"></span>
+                            </button>
                         </td>
                     </tr>
                 {{/each}}
@@ -74,12 +72,10 @@
                 <tr>
                     <th scope="row">{{this.content.tdfs.tutor.setspec.lessonname}}</th>
                     <td>{{this.content.fileName}}</td>
-                    <td style="text-align: right;">
-                        <div class="col-2" style="display: inline-block">
-                            <button class="btn-icon" type="button" id="dataDownloadLink" data-fileName="{{this.content.fileName}}" aria-expanded="false">
-                                <span class="fa fa-download"></span>
-                            </button>
-                        </div>
+                    <td class="text-center">
+                        <button class="btn-icon" type="button" id="dataDownloadLink" data-fileName="{{this.content.fileName}}" aria-expanded="false">
+                            <span class="fa fa-download"></span>
+                        </button>
                     </td>
                 </tr>
                 {{/each}}

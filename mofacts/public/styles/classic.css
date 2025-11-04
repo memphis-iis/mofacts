@@ -466,6 +466,15 @@ input[type="range"]::-webkit-slider-thumb {
 .table {
     width: 100%;
     border-collapse: collapse;
+    table-layout: fixed; /* Predictable column behavior */
+}
+
+/* Table cell base styling - applies to all cells */
+.table th,
+.table td {
+    white-space: normal;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
 }
 
 /* Table header styling */
@@ -482,6 +491,7 @@ thead th {
     border-bottom: 2px solid var(--accent-color);
     font-size: 1rem;
     font-weight: 700;
+    vertical-align: middle;
 }
 
 /* First header cell gets left radius */
@@ -504,7 +514,8 @@ tbody tr:hover {
     background-color: rgba(0, 0, 0, 0.02);
 }
 
-tbody td {
+tbody td,
+tbody th {
     padding: clamp(8px, 1.5vh, 12px) clamp(12px, 2vw, 16px);
     vertical-align: top;
 }
@@ -543,6 +554,50 @@ tfoot tf, .table tfoot tf, .table tfoot td, .table tfoot th {
 /* Light table header variant */
 .table-light {
     background-color: rgba(0, 0, 0, 0.05);
+}
+
+/* ===== TABLE UTILITY CLASSES ===== */
+/* Column width utilities - use these classes on <th> or <td> elements */
+.table-col-icon {
+    width: 10%;
+    min-width: 60px;
+}
+
+.table-col-narrow {
+    width: 15%;
+    min-width: 80px;
+}
+
+.table-col-small {
+    width: 20%;
+    min-width: 120px;
+}
+
+.table-col-medium {
+    width: 30%;
+    min-width: 150px;
+}
+
+.table-col-large {
+    width: 40%;
+    min-width: 200px;
+}
+
+.table-col-auto {
+    width: auto;
+}
+
+/* Text alignment utilities */
+.text-left {
+    text-align: left !important;
+}
+
+.text-center {
+    text-align: center !important;
+}
+
+.text-right {
+    text-align: right !important;
 }
 /* ===== NAVIGATION & FOOTER ===== */
 .navbar{
