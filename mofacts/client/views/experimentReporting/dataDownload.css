@@ -5,3 +5,35 @@
 .downloadLegend {
     padding-top: 20px;
 }
+
+.admin-table-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.admin-table-wrapper .table {
+    min-width: 500px;
+    margin-bottom: 0;
+}
+
+.admin-table-wrapper .table th,
+.admin-table-wrapper .table td {
+    white-space: normal;
+    word-wrap: break-word;
+    vertical-align: middle;
+}
+
+.admin-table-wrapper .table thead th:nth-child(1) {
+    min-width: 150px;
+    width: 40%;
+}
+
+.admin-table-wrapper .table thead th:nth-child(2) {
+    min-width: 120px;
+    width: 40%;
+}
+
+.admin-table-wrapper .table thead th:nth-child(3) {
+    min-width: 80px;
+    width: 20%;
+}
