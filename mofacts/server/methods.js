@@ -616,7 +616,7 @@ async function processPackageUpload(fileObj, owner, zipLink, emailToggle){
       } catch(e) {
         if(emailToggle){
           sendEmail(
-            await Meteor.userAsync().emails[0].address,
+            (await Meteor.userAsync()).emails[0].address,
             ownerEmail,
             "Package Upload Failed",
             "Package upload failed: " + e + " on file: " + filePath
@@ -640,7 +640,7 @@ async function processPackageUpload(fileObj, owner, zipLink, emailToggle){
     } catch(e) {
       if(emailToggle){
         sendEmail(
-          await Meteor.userAsync().emails[0].address,
+          (await Meteor.userAsync()).emails[0].address,
           ownerEmail,
           "Package Upload Failed",
           "Package upload failed at media upload: " + e + " on file: " + filePath
@@ -652,7 +652,7 @@ async function processPackageUpload(fileObj, owner, zipLink, emailToggle){
     serverConsole('Package upload completed with', results.length, 'results');
     if(emailToggle){
       sendEmail(
-        await Meteor.userAsync().emails[0].address,
+        (await Meteor.userAsync()).emails[0].address,
         ownerEmail,
         "Package Upload Successful",
         "Package upload successful: " + fileName
@@ -662,7 +662,7 @@ async function processPackageUpload(fileObj, owner, zipLink, emailToggle){
   } catch(e) {
       if(emailToggle){
         sendEmail(
-          await Meteor.userAsync().emails[0].address,
+          (await Meteor.userAsync()).emails[0].address,
           ownerEmail,
           "Package Upload Failed",
           "Package upload failed at initialization: " + e + " on file: " + filePath
@@ -818,7 +818,7 @@ async function saveContentFile(type, filename, filecontents, owner, packagePath 
   if (!type) throw new Error('Type required for File Save');
   if (!filename) throw new Error('Filename required for File Save');
   if (!filecontents) throw new Error('File Contents required for File Save');
-  let ownerId = owner ? owner : await Meteor.userAsync()._id;
+  let ownerId = owner ? owner : (await Meteor.userAsync())._id;
   if (!ownerId) throw new Error('No user logged in - no file upload allowed');
   if (!await Roles.userIsInRoleAsync(ownerId, ['admin', 'teacher'])) throw new Error('You are not authorized to upload files');
   if (type != 'tdf' && type != 'stim') throw new Error('Unknown file type not allowed: ' + type);
@@ -888,7 +888,7 @@ async function combineAndSaveContentFile(tdf, stim, owner) {
   if(owner){
     ownerId = owner;
   } else {
-    ownerId = await Meteor.userAsync()._id;
+    ownerId = (await Meteor.userAsync())._id;
   }
   if (!ownerId) {
     throw new Error('No user logged in - no file upload allowed');
@@ -2860,7 +2860,7 @@ export const methods = {
 
     serverConsole('removeTurkById', turkId, experimentId)
     await ScheduledTurkMessages.removeAsync({workerUserId: turkId, experiment: experimentId});
-    let lockout = await Meteor.userAsync().lockouts;
+    let lockout = (await Meteor.userAsync()).lockouts;
     lockout[experimentId].lockoutMinutes = Number.MAX_SAFE_INTEGER;
     await Meteor.users.updateAsync({_id: Meteor.userId()}, {$set: {lockouts: lockout}});
   },
@@ -3312,7 +3312,7 @@ export const methods = {
 
   serverLog: async function(data) {
     if (await Meteor.userAsync()) {
-      const logData = 'User:' + await Meteor.userAsync()._id + ', log:' + data;
+      const logData = 'User:' + (await Meteor.userAsync())._id + ', log:' + data;
       serverConsole(logData);
     }
   },
@@ -3602,7 +3602,7 @@ export const methods = {
   },
 
   getUserSpeechAPIKey: async function() {
-    const speechAPIKey = await Meteor.userAsync().speechAPIKey;
+    const speechAPIKey = (await Meteor.userAsync()).speechAPIKey;
     if (speechAPIKey) {
       return decryptData(speechAPIKey);
     } else {
@@ -3611,7 +3611,7 @@ export const methods = {
   },
 
   isUserSpeechAPIKeySetup: async function() {
-    const speechAPIKey = await Meteor.userAsync().speechAPIKey;
+    const speechAPIKey = (await Meteor.userAsync()).speechAPIKey;
     return !!speechAPIKey;
   },
 
@@ -4210,7 +4210,7 @@ const asyncMethods = {
   
   setLockoutTimeStamp: async function(lockoutTimeStamp, lockoutMinutes, currentUnitNumber, TDFId) {
     serverConsole('setLockoutTimeStamp', lockoutTimeStamp, lockoutMinutes, currentUnitNumber, TDFId);
-    let lockouts = await Meteor.userAsync().lockouts
+    let lockouts = (await Meteor.userAsync()).lockouts
     if(!lockouts) lockouts = {};
     if(!lockouts[TDFId]) lockouts[TDFId] = {};
     lockouts[TDFId].lockoutTimeStamp = lockoutTimeStamp;
@@ -4279,7 +4279,7 @@ const asyncMethods = {
     else if(!await Roles.userIsInRoleAsync(Meteor.userId(), ['teacher', 'admin'])){
       throw new Meteor.Error('Unauthorized: You do not have permission to this data');
     }
-    return [Meteor.userId(), await Meteor.userAsync().secretKey]
+    return [Meteor.userId(), (await Meteor.userAsync()).secretKey]
   },
 
   resetCurSessionTrialsCount: async function(userId, TDFId) {
