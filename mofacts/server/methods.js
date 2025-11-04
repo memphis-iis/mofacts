@@ -72,9 +72,9 @@ let nextEventId = 1;
 let stimDisplayTypeMap = {};
 
 // How large the distance between two words can be to be considered a match. Larger values result in a slower search. Defualt is 2.
-const maxEditDistance = Meteor.settings.SymSpell.maxEditDistance ? parseInt(Meteor.settings.SymSpell.maxEditDistance) : 2;
+const maxEditDistance = Meteor.settings.SymSpell?.maxEditDistance ? parseInt(Meteor.settings.SymSpell.maxEditDistance) : 2;
 // How big the prefix used for indexing is. Larger values will be result in a faster search, but will use more memory. Default is 7.
-const prefixLength = Meteor.settings.SymSpell.prefixLength ? parseInt(Meteor.settings.SymSpell.prefixLength) : 7;
+const prefixLength = Meteor.settings.SymSpell?.prefixLength ? parseInt(Meteor.settings.SymSpell.prefixLength) : 7;
 const symSpell = new SymSpell(maxEditDistance, prefixLength);
 //get the path to the dictionary in /public/dictionaries
 symSpell.loadDictionary(Meteor.settings.frequencyDictionaryLocation, 0, 1);
@@ -522,6 +522,49 @@ async function processPackageUpload(fileObj, owner, zipLink, emailToggle){
     }
     serverConsole('unzippedFiles', unzippedFiles);
     const stimFileName = unzippedFiles.filter(f => f.type == 'stim')[0].name;
+    
+    // First, get or determine the stimSetId early for asset uploads
+    let stimSetId = await getStimuliSetIdByFilename(stimFileName);
+    if (!stimSetId) {
+      // We need to determine this before processing assets
+      const stimFiles = unzippedFiles.filter(f => f.type == 'stim');
+      if (stimFiles.length > 0) {
+        const tempStimFile = stimFiles[0];
+        // Check if TDF already exists to get existing stimSetId
+        const tdfFiles = unzippedFiles.filter(f => f.type == 'tdf');
+        if (tdfFiles.length > 0) {
+          const existingTdf = await getTdfByFileName(tdfFiles[0].name);
+          if (existingTdf && existingTdf.stimuliSetId) {
+            stimSetId = existingTdf.stimuliSetId;
+          } else {
+            stimSetId = nextStimuliSetId;
+            nextStimuliSetId += 1;
+          }
+        }
+      }
+    }
+    
+    // Upload media assets FIRST, before processing TDFs and Stims
+    try {
+      serverConsole('Uploading media assets before processing TDFs/Stims...');
+      for(const media of unzippedFiles.filter(f => f.type == 'media')){
+        await saveMediaFile(media, owner, stimSetId);
+      }
+      serverConsole('Media assets uploaded successfully');
+    } catch(e) {
+      if(emailToggle){
+        sendEmail(
+          Meteor.user().emails[0].address,
+          ownerEmail,
+          "Package Upload Failed",
+          "Package upload failed at media upload: " + e + " on file: " + filePath
+        )
+      }
+      serverConsole('2 processPackageUpload ERROR,', path, ',', e + ' on file: ' + filePath);
+      throw new Meteor.Error('package upload failed at media upload: ' + e + ' on file: ' + filePath)
+    }
+    
+    // Now process TDFs and Stims with assets already available
     const results = await new Promise(async (resolve, reject) => {
       res = [];
       try {
@@ -558,26 +601,51 @@ async function processPackageUpload(fileObj, owner, zipLink, emailToggle){
       }
     });
   
-    let stimSetId;
-    if(results && results[0] && results[0].data && results[0].data.stimuliSetId)
+    // Update stimSetId from results if it was generated
+    if(results && results[0] && results[0].data && results[0].data.stimuliSetId) {
       stimSetId = results[0].data.stimuliSetId;
-    if (!stimSetId) stimSetId = await getStimuliSetIdByFilename(stimFileName);
-    try {
-      for(const media of unzippedFiles.filter(f => f.type == 'media')){
-        await saveMediaFile(media, owner, stimSetId);
-      }
-    } catch(e) {
-      if(emailToggle){
-        sendEmail(
-          Meteor.user().emails[0].address,
-          ownerEmail,
-          "Package Upload Failed",
-          "Package upload failed at media upload: " + e + " on file: " + filePath
-        )
-      }
-      serverConsole('2 processPackageUpload ERROR,', path, ',', e + ' on file: ' + filePath);
-      throw new Meteor.Error('package upload failed at media upload: ' + e + ' on file: ' + filePath)
     }
+    
+    // Process audio files for TDFs AFTER all assets and TDFs are uploaded
+    // This needs to happen after both audio files are uploaded to database AND TDF files are saved
+    // since processAudioFilesForTDF retroactively updates TDFs with links to audio files
+    try {
+      serverConsole('Processing audio files for TDFs after upload completion...');
+      
+      // Add a small delay to ensure all database operations are fully committed
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      // Debug: Check what assets are actually in the database
+      const allAssets = await DynamicAssets.find({userId: owner}).fetch();
+      serverConsole('Assets available for owner', owner, ':', allAssets.map(a => a.name));
+      
+      const audioProcessingPromises = [];
+      for(const tdfFile of unzippedFiles.filter(f => f.type == 'tdf')) {
+        const tdf = await Tdfs.findOne({tdfFileName: tdfFile.name});
+        if (tdf && tdf.content && tdf.content.tdfs && tdf.content.tdfs.tutor && tdf.content.tdfs.tutor.unit) {
+          serverConsole('Processing audio for TDF:', tdfFile.name);
+          const audioPromise = processAudioFilesForTDF(tdf.content.tdfs, owner).then((processedTdf) => {
+            tdf.content.tdfs.tutor.unit = processedTdf.tutor.unit;
+            return Tdfs.upsert({_id: tdf._id}, tdf);
+          }).catch((error) => {
+            serverConsole('Error processing audio files for TDF:', tdfFile.name, error);
+            // Don't let audio processing errors break the entire upload
+            return null;
+          });
+          audioProcessingPromises.push(audioPromise);
+        }
+      }
+      
+      // Wait for all audio processing to complete
+      if (audioProcessingPromises.length > 0) {
+        await Promise.all(audioProcessingPromises);
+        serverConsole('Audio processing completed for all TDFs');
+      }
+    } catch (error) {
+      serverConsole('Audio processing failed, but upload continues:', error);
+      // Don't let audio processing errors break the upload
+    }
+    
     serverConsole('results', results);
     if(emailToggle){
       sendEmail(
@@ -599,16 +667,6 @@ async function processPackageUpload(fileObj, owner, zipLink, emailToggle){
       }
     serverConsole('3 processPackageUpload ERROR,', path, ',', e + ' on file: ' + filePath);
     throw new Meteor.Error('package upload failed at initialization: ' + e + ' on file: ' + filePath)
-  } finally {
-    for(const tdfFile of unzippedFiles.filter(f => f.type == 'tdf')) {
-      const tdf = await Tdfs.findOne({tdfFileName: tdfFile.name})
-      if (tdf.content.tdfs.tutor.unit) {
-        processAudioFilesForTDF(tdf.content.tdfs).then((t) => {
-          tdf.content.tdfs.tutor.unit = t.tutor.unit
-          Tdfs.upsert({_id: tdf._id}, tdf)
-        })
-      }
-    }
   }
 }
 
@@ -622,16 +680,22 @@ async function saveMediaFile(media, owner, stimSetId){
   else{
     serverConsole(`File ${media.name} doesn't exist, uploading`)
   }
-  DynamicAssets.write(media.contents, {
-    name: media.name,
-    userId: owner,
-  }, (error, fileRef) => {
-    if (error) {
-      serverConsole(`File ${media.name} could not be uploaded`, error)
-    } else {
-      const metadata = { link: DynamicAssets.link(fileRef), stimuliSetId: stimSetId }
-      DynamicAssets.collection.update({_id: fileRef._id}, {$set: {meta: metadata}});
-    }
+  
+  return new Promise((resolve, reject) => {
+    DynamicAssets.write(media.contents, {
+      name: media.name,
+      userId: owner,
+    }, (error, fileRef) => {
+      if (error) {
+        serverConsole(`File ${media.name} could not be uploaded`, error);
+        reject(error);
+      } else {
+        const metadata = { link: DynamicAssets.link(fileRef), stimuliSetId: stimSetId };
+        DynamicAssets.collection.update({_id: fileRef._id}, {$set: {meta: metadata}});
+        serverConsole(`File ${media.name} uploaded successfully`);
+        resolve(fileRef);
+      }
+    });
   });
 }
 
@@ -2479,7 +2543,7 @@ function tdfUpdateConfirmed(updateObj, resetShuffleClusters = false){
   }
 }
 
-async function processAudioFilesForTDF(TDF){
+async function processAudioFilesForTDF(TDF, ownerId){
   for (const unitIdx in TDF.tutor.unit){
     const unit = TDF.tutor.unit[unitIdx]
     if (unit && unit.unitinstructions) {
@@ -2487,9 +2551,14 @@ async function processAudioFilesForTDF(TDF){
       if (srcValues.length > 0) {
         for(const src of srcValues) {
           if(!src.includes('http')) {
-            const audio = await DynamicAssets.findOne({name: src});
-            const link = audio.link();
-            TDF.tutor.unit[unitIdx].unitinstructions = unit.unitinstructions.replace(src, link)
+            console.log('fetching link for file:', src, 'with ownerId:', ownerId)
+            const audio = await DynamicAssets.findOne({userId: ownerId, name: src});
+            if (audio) {
+              const link = audio.link();
+              TDF.tutor.unit[unitIdx].unitinstructions = unit.unitinstructions.replace(src, link)
+            } else {
+              console.log('Audio file not found in DynamicAssets:', src, 'for userId:', ownerId);
+            }
           }
         }
       }
