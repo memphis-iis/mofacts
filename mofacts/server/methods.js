@@ -4056,7 +4056,9 @@ export const methods = {
       admin_button_color: '#F5B57C',
       admin_button_text_color: '#000000',
       admin_button_hover_color: '#E0A366',
-      logo_url: '',
+      logo_url: '/images/brain-logo.png',
+      favicon_16_url: '/images/favicon-16x16.png',
+      favicon_32_url: '/images/favicon-32x32.png',
       signInDescription: 'A web-based adaptive learning system that uses spaced practice and retrieval to help you learn and retain information more effectively. Sign in to access your personalized learning experience.'
     };
     //This inserts the theme into the database, or updates it if it already exists
@@ -4096,7 +4098,9 @@ export const methods = {
           admin_button_color: '#F5B57C',
           admin_button_text_color: '#000000',
           admin_button_hover_color: '#E0A366',
-          logo_url: '',
+          logo_url: '/images/brain-logo.png',
+          favicon_16_url: '/images/favicon-16x16.png',
+          favicon_32_url: '/images/favicon-32x32.png',
           signInDescription: 'A web-based adaptive learning system that uses spaced practice and retrieval to help you learn and retain information more effectively. Sign in to access your personalized learning experience.',
           transition_instant: '10ms',
           transition_fast: '100ms',
@@ -4128,10 +4132,93 @@ export const methods = {
         await DynamicSettings.updateAsync({key: 'customTheme'}, {$set: {'value.themeName': value}});
       }
 
+      // If updating logo_url, auto-generate favicons
+      if (property === 'logo_url' && value && value.startsWith('data:image')) {
+        try {
+          const favicons = await Meteor.callAsync('generateFaviconsFromLogo', value);
+          if (favicons.favicon_16) {
+            await DynamicSettings.updateAsync({key: 'customTheme'}, {$set: {'value.properties.favicon_16_url': favicons.favicon_16}});
+          }
+          if (favicons.favicon_32) {
+            await DynamicSettings.updateAsync({key: 'customTheme'}, {$set: {'value.properties.favicon_32_url': favicons.favicon_32}});
+          }
+          serverConsole('Auto-generated favicons from logo');
+        } catch (error) {
+          serverConsole('Warning: Failed to auto-generate favicons:', error.message);
+          // Don't throw - logo upload should still succeed even if favicon generation fails
+        }
+      }
+
       return {success: true, property, value};
     } catch (error) {
       serverConsole('Error setting theme property:', error);
       throw new Meteor.Error('update-failed', 'Failed to update theme property: ' + error.message);
+    }
+  },
+
+  generateFaviconsFromLogo: async function(logoDataUrl) {
+    // Generate 16x16 and 32x32 favicons from a logo data URL
+    if (!this.userId) {
+      throw new Meteor.Error('not-logged-in', 'Must be logged in to generate favicons');
+    }
+
+    const { exec } = require('child_process');
+    const { promisify } = require('util');
+    const execAsync = promisify(exec);
+    const fs = require('fs').promises;
+    const path = require('path');
+    const os = require('os');
+
+    try {
+      // Extract base64 data from data URL
+      const matches = logoDataUrl.match(/^data:image\/(\w+);base64,(.+)$/);
+      if (!matches) {
+        throw new Meteor.Error('invalid-format', 'Invalid image data URL format');
+      }
+
+      const imageType = matches[1];
+      const base64Data = matches[2];
+      const imageBuffer = Buffer.from(base64Data, 'base64');
+
+      // Create temporary directory for processing
+      const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), 'favicon-'));
+      const inputPath = path.join(tmpDir, `logo.${imageType}`);
+      const favicon16Path = path.join(tmpDir, 'favicon-16.png');
+      const favicon32Path = path.join(tmpDir, 'favicon-32.png');
+
+      try {
+        // Write input image
+        await fs.writeFile(inputPath, imageBuffer);
+
+        // Generate 16x16 favicon
+        await execAsync(`convert "${inputPath}" -resize 16x16 -background transparent -flatten "${favicon16Path}"`);
+
+        // Generate 32x32 favicon
+        await execAsync(`convert "${inputPath}" -resize 32x32 -background transparent -flatten "${favicon32Path}"`);
+
+        // Read generated favicons
+        const favicon16Buffer = await fs.readFile(favicon16Path);
+        const favicon32Buffer = await fs.readFile(favicon32Path);
+
+        // Convert to data URLs
+        const favicon16DataUrl = `data:image/png;base64,${favicon16Buffer.toString('base64')}`;
+        const favicon32DataUrl = `data:image/png;base64,${favicon32Buffer.toString('base64')}`;
+
+        return {
+          favicon_16: favicon16DataUrl,
+          favicon_32: favicon32DataUrl
+        };
+      } finally {
+        // Clean up temporary files
+        try {
+          await fs.rm(tmpDir, { recursive: true, force: true });
+        } catch (cleanupError) {
+          serverConsole('Warning: Failed to clean up temp directory:', cleanupError.message);
+        }
+      }
+    } catch (error) {
+      serverConsole('Error generating favicons:', error);
+      throw new Meteor.Error('favicon-generation-failed', 'Failed to generate favicons: ' + error.message);
     }
   },
 

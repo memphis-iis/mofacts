@@ -3,11 +3,11 @@
         <div class="row justify-content-center mt-3">
             <!-- Left: Description and Form -->
             <div class="col-md-5 col-12">
-                <h2 class="mt-0">
+                <h2 class="mt-0 d-flex align-items-center">
                     {{#if currentTheme.properties.logo_url}}
-                        <img src="{{currentTheme.properties.logo_url}}" alt="Logo" class="me-3 align-middle" style="height: 40px;">
+                        <img src="{{currentTheme.properties.logo_url}}" alt="Logo" style="height: 40px; margin-right: 10px;">
                     {{/if}}
-                    {{currentTheme.properties.themeName}}
+                    <span>{{currentTheme.properties.themeName}}</span>
                 </h2>
                 <p class="mt-3 lh-base">
                     {{currentTheme.properties.signInDescription}}

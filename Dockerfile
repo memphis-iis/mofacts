@@ -71,13 +71,24 @@ ENV METEOR_SETTINGS_WORKAROUND /mofactsAssets/settings.json
 # Install OS runtime dependencies
 RUN apk --no-cache add \
 	bash \
-	ca-certificates
+	ca-certificates \
+	imagemagick
 
 # Copy in entrypoint with the built and installed dependencies from the previous image
 COPY --from=1 $SCRIPTS_FOLDER $SCRIPTS_FOLDER/
 
 # Copy in app bundle with the built and installed dependencies from the previous image
 COPY --from=1 $APP_BUNDLE_FOLDER/bundle $APP_BUNDLE_FOLDER/bundle/
+
+# Generate favicons from the brain logo if it exists
+RUN if [ -f $APP_BUNDLE_FOLDER/bundle/programs/web.browser/app/images/brain-logo.png ]; then \
+      cd $APP_BUNDLE_FOLDER/bundle/programs/web.browser/app/images && \
+      convert brain-logo.png -resize 32x32 -background transparent -flatten favicon-32x32.png && \
+      convert brain-logo.png -resize 16x16 -background transparent -flatten favicon-16x16.png && \
+      echo "Favicons generated from brain-logo.png"; \
+    else \
+      echo "Warning: brain-logo.png not found, favicons not generated"; \
+    fi
 
 # Remove unnecessary platform-specific SWC binaries to reduce image size
 RUN rm -rf $APP_BUNDLE_FOLDER/bundle/programs/server/npm/node_modules/@swc/core-darwin* \

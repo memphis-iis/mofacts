@@ -116,8 +116,17 @@ Template.theme.events({
             Session.set('curTheme', theme);
         }
 
-        //show unsaved change warning
-        $('#unsavedThemeChanges').attr('hidden', false).removeAttr('hidden');
+        // Auto-save with debounce (wait 1 second after user stops typing)
+        clearTimeout(window.themeSaveTimeout);
+        window.themeSaveTimeout = setTimeout(async () => {
+            try {
+                await Meteor.callAsync('setCustomThemeProperty', data_id, value);
+                console.log(`Auto-saved ${data_id}: ${value}`);
+            } catch (err) {
+                console.error(`Error auto-saving ${data_id}:`, err);
+                alert(`Error saving ${data_id}: ${err}`);
+            }
+        }, 1000);
     },
     'input .currentThemePropColor': function(event) {
         const data_id = event.currentTarget.getAttribute('data-id');
@@ -132,27 +141,16 @@ Template.theme.events({
             Session.set('curTheme', theme);
         }
 
-        //show unsaved change warning
-        $('#unsavedThemeChanges').attr('hidden', false).removeAttr('hidden');
-    },
-    'click #themeSaveButton': async function(event) {
-        //get all the currentThemeProp values and data-ids and put them in a json object [{data-id: value}]
-        const themeProps = [];
-        $('.currentThemeProp').each(function() {
-            console.log("currentThemeProp: " + $(this).data('id'), $(this).val());
-            themeProps.push({data_id: $(this).data('id'), value: $(this).val()});
-        });
-        console.log("themeProps: " + JSON.stringify(themeProps));
-        //call the setCustomThemeProperty method for each themeProp
-        for (const themeProp of themeProps) {
+        // Auto-save immediately for color picker (no debounce needed)
+        (async () => {
             try {
-                const res = await Meteor.callAsync('setCustomThemeProperty', themeProp.data_id, themeProp.value);
-                console.log("Set custom theme property: " + res);
+                await Meteor.callAsync('setCustomThemeProperty', data_id, value);
+                console.log(`Auto-saved ${data_id}: ${value}`);
             } catch (err) {
-                alert("Error setting custom theme property: " + err);
+                console.error(`Error auto-saving ${data_id}:`, err);
+                alert(`Error saving ${data_id}: ${err}`);
             }
-        }
-        Session.set('curTheme', getCurrentTheme());
+        })();
     },
     'change #logoUpload': function(event) {
         const file = event.target.files[0];
@@ -191,6 +189,86 @@ Template.theme.events({
                 getCurrentTheme();
             } catch (err) {
                 alert("Error clearing logo: " + err);
+            }
+        }
+    },
+    'change #favicon16Upload': function(event) {
+        const file = event.target.files[0];
+        if (file) {
+            // Validate file type
+            if (!file.type.startsWith('image/')) {
+                alert('Please select an image file');
+                return;
+            }
+            // Validate file size (max 2MB)
+            if (file.size > 2 * 1024 * 1024) {
+                alert('File size must be less than 2MB');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = async function(e) {
+                const base64Data = e.target.result;
+                try {
+                    await Meteor.callAsync('setCustomThemeProperty', 'favicon_16_url', base64Data);
+                    console.log("16x16 favicon uploaded successfully");
+                    getCurrentTheme();
+                } catch (err) {
+                    alert("Error uploading 16x16 favicon: " + err);
+                }
+            };
+            reader.readAsDataURL(file);
+        }
+    },
+    'click #clearFavicon16': async function(event) {
+        if (confirm('Are you sure you want to clear the 16x16 favicon?')) {
+            try {
+                await Meteor.callAsync('setCustomThemeProperty', 'favicon_16_url', '/images/favicon-16x16.png');
+                console.log("16x16 favicon reset to default");
+                $('#favicon16Upload').val('');
+                getCurrentTheme();
+            } catch (err) {
+                alert("Error clearing 16x16 favicon: " + err);
+            }
+        }
+    },
+    'change #favicon32Upload': function(event) {
+        const file = event.target.files[0];
+        if (file) {
+            // Validate file type
+            if (!file.type.startsWith('image/')) {
+                alert('Please select an image file');
+                return;
+            }
+            // Validate file size (max 2MB)
+            if (file.size > 2 * 1024 * 1024) {
+                alert('File size must be less than 2MB');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = async function(e) {
+                const base64Data = e.target.result;
+                try {
+                    await Meteor.callAsync('setCustomThemeProperty', 'favicon_32_url', base64Data);
+                    console.log("32x32 favicon uploaded successfully");
+                    getCurrentTheme();
+                } catch (err) {
+                    alert("Error uploading 32x32 favicon: " + err);
+                }
+            };
+            reader.readAsDataURL(file);
+        }
+    },
+    'click #clearFavicon32': async function(event) {
+        if (confirm('Are you sure you want to clear the 32x32 favicon?')) {
+            try {
+                await Meteor.callAsync('setCustomThemeProperty', 'favicon_32_url', '/images/favicon-32x32.png');
+                console.log("32x32 favicon reset to default");
+                $('#favicon32Upload').val('');
+                getCurrentTheme();
+            } catch (err) {
+                alert("Error clearing 32x32 favicon: " + err);
             }
         }
     },

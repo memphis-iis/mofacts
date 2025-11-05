@@ -238,6 +238,38 @@ function redoCardImage() {
 
   $('#cardQuestionImg').css('height', heightStr).css('width', widthStr);
 }
+
+// Helper function to update or create favicon link elements
+function updateFaviconLink(rel, sizes, href) {
+  // Find or create the favicon link element
+  let selector = `link[rel="${rel}"][type="image/png"]`;
+  if (sizes) {
+    selector = `link[rel="${rel}"][sizes="${sizes}"]`;
+  } else {
+    // For the default favicon without sizes attribute, find the one without sizes
+    selector = `link[rel="${rel}"][type="image/png"]:not([sizes])`;
+  }
+
+  let link = document.querySelector(selector);
+
+  if (link) {
+    // Update existing link
+    link.href = href;
+    clientConsole(2, `Updated favicon ${sizes || 'default'} to:`, href.substring(0, 50) + '...');
+  } else {
+    // Create new link element if it doesn't exist
+    link = document.createElement('link');
+    link.rel = rel;
+    if (sizes) {
+      link.sizes = sizes;
+    }
+    link.type = 'image/png';
+    link.href = href;
+    document.head.appendChild(link);
+    clientConsole(2, `Created favicon ${sizes || 'default'}:`, href.substring(0, 50) + '...');
+  }
+}
+
 //change the theme of the page onlogin
 Accounts.onLogin(function() {
   // Use Tracker to wait for user data to be fully loaded
@@ -355,6 +387,27 @@ Meteor.startup(function() {
 
   // SCENARIO 2: Warmup with TDF keys before first trial
   // This is handled in card.js checkAndWarmupAudioIfNeeded() function
+
+  // Reactive favicon updating - updates favicon links when theme changes
+  Tracker.autorun(() => {
+    const theme = Session.get('curTheme');
+    if (theme && theme.properties) {
+      // Update 16x16 favicon
+      if (theme.properties.favicon_16_url) {
+        updateFaviconLink('icon', '16x16', theme.properties.favicon_16_url);
+      }
+
+      // Update 32x32 favicon
+      if (theme.properties.favicon_32_url) {
+        updateFaviconLink('icon', '32x32', theme.properties.favicon_32_url);
+      }
+
+      // Update default favicon (logo fallback)
+      if (theme.properties.logo_url) {
+        updateFaviconLink('icon', null, theme.properties.logo_url);
+      }
+    }
+  });
 
 });
 
