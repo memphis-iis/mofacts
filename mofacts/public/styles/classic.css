@@ -1388,40 +1388,52 @@ tfoot tf, .table tfoot tf, .table tfoot td, .table tfoot th {
 }
 
 /* ===== ROLE-BASED BUTTON COLORS ===== */
-/* Teacher role buttons - Blue theme (educational, instructional) */
+/* Main Menu buttons - Theme-configurable (visible to all users) */
+.btn-role-main {
+    background-color: var(--main-button-color) !important;
+    border-color: var(--main-button-color) !important;
+    color: var(--main-button-text-color) !important;
+}
+
+.btn-role-main:hover {
+    background-color: var(--main-button-hover-color) !important;
+    border-color: var(--main-button-hover-color) !important;
+}
+
+/* Teacher Functions buttons - Theme-configurable */
 .btn-role-teacher {
-    background-color: #4A90E2 !important;
-    border-color: #3A7BC8 !important;
-    color: #FFFFFF !important;
+    background-color: var(--teacher-button-color) !important;
+    border-color: var(--teacher-button-color) !important;
+    color: var(--teacher-button-text-color) !important;
 }
 
 .btn-role-teacher:hover {
-    background-color: #3A7BC8 !important;
-    border-color: #2A6BAE !important;
+    background-color: var(--teacher-button-hover-color) !important;
+    border-color: var(--teacher-button-hover-color) !important;
 }
 
-/* Admin role buttons - Orange theme (control, administrative) */
-.btn-role-admin {
-    background-color: #E67E22 !important;
-    border-color: #D35400 !important;
-    color: #FFFFFF !important;
-}
-
-.btn-role-admin:hover {
-    background-color: #D35400 !important;
-    border-color: #BA4A00 !important;
-}
-
-/* Shared buttons - Use theme's default button color (green) */
+/* Shared Functions buttons - Theme-configurable (teachers & admins) */
 .btn-role-shared {
-    background-color: var(--button-color) !important;
-    border-color: var(--success-color) !important;
-    color: var(--primary-button-text-color) !important;
+    background-color: var(--shared-button-color) !important;
+    border-color: var(--shared-button-color) !important;
+    color: var(--shared-button-text-color) !important;
 }
 
 .btn-role-shared:hover {
-    background-color: var(--success-color) !important;
-    border-color: var(--success-color) !important;
+    background-color: var(--shared-button-hover-color) !important;
+    border-color: var(--shared-button-hover-color) !important;
+}
+
+/* Admin Functions buttons - Theme-configurable */
+.btn-role-admin {
+    background-color: var(--admin-button-color) !important;
+    border-color: var(--admin-button-color) !important;
+    color: var(--admin-button-text-color) !important;
+}
+
+.btn-role-admin:hover {
+    background-color: var(--admin-button-hover-color) !important;
+    border-color: var(--admin-button-hover-color) !important;
 }
 
 /* Profile page role separators - labeled horizontal dividers */

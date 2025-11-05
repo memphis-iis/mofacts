@@ -1,5 +1,6 @@
 import { getCurrentTheme } from '../lib/currentTestingHelpers'
-Template.adminControls.created = async function() {
+
+Template.adminControls.onCreated(async function() {
     try {
         const verbosity = await Meteor.callAsync('getVerbosity');
         console.log("Got verbosity: " + verbosity);
@@ -15,9 +16,17 @@ Template.adminControls.created = async function() {
     } catch (err) {
         console.log("Error getting testLoginsEnabled: " + err);
     }
-};
 
-Template.adminControls.rendered = async function() {
+    try {
+        const serverStatus = await Meteor.callAsync('getServerStatus');
+        console.log("Got server status:", serverStatus);
+        Session.set('serverStatus', serverStatus);
+    } catch (err) {
+        console.log("Error getting server status:", err);
+    }
+});
+
+Template.adminControls.onRendered(async function() {
         //get client verbosity level
         clientVerbosityLevel = DynamicSettings.findOne({key: 'clientVerbosityLevel'}).value.toString();
         //if client verbosity level is not set, set it to 0
@@ -42,19 +51,16 @@ Template.adminControls.rendered = async function() {
         } catch (err) {
             console.log("Error getting custom help page status:", err);
         }
-    };
+    });
 
 Template.adminControls.helpers({
     'serverStatus': function() {
-        (async () => {
-            try {
-                const res = await Meteor.callAsync('getServerStatus');
-                Session.set('serverStatus', res);
-            } catch (err) {
-                console.log("Error getting server status:", err);
-            }
-        })();
-        return Session.get('serverStatus');
+        return Session.get('serverStatus') || {
+            diskSpacePercent: 'Loading...',
+            remainingSpace: 'Loading...',
+            diskSpace: 'Loading...',
+            diskSpaceUsed: 'Loading...'
+        };
     },
     'testLoginsEnabled': function() {
         return DynamicSettings.findOne({key: 'testLoginsEnabled'}).value;
@@ -181,6 +187,16 @@ Template.adminControls.events({
         }
     },
     'input .currentThemeProp': function(event) {
+        const data_id = event.currentTarget.getAttribute('data-id');
+        const value = event.currentTarget.value;
+
+        // Update session to trigger reactive contrast recalculation
+        const theme = Session.get('curTheme');
+        if (theme && theme.properties) {
+            theme.properties[data_id] = value;
+            Session.set('curTheme', theme);
+        }
+
         //show unsaved change warning
         $('#unsavedThemeChanges').attr('hidden', false).removeAttr('hidden');
     },
@@ -189,6 +205,14 @@ Template.adminControls.events({
         const value = event.currentTarget.value;
         //change the corresponding currentThemeProp value. we need to find a input with the same data-id and change its value
         $(`.currentThemeProp[data-id=${data_id}]`).val(value);
+
+        // Update session to trigger reactive contrast recalculation
+        const theme = Session.get('curTheme');
+        if (theme && theme.properties) {
+            theme.properties[data_id] = value;
+            Session.set('curTheme', theme);
+        }
+
         //show unsaved change warning
         $('#unsavedThemeChanges').attr('hidden', false).removeAttr('hidden');
     },

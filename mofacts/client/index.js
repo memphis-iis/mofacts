@@ -10,7 +10,7 @@ import {
   getCurrentTheme
 } from './lib/currentTestingHelpers';
 import DOMPurify from 'dompurify';
-import {warmupGoogleTTS, warmupGoogleSpeechRecognition} from './views/home/profileAudioToggles.js';
+import {warmupGoogleTTS, warmupGoogleSpeechRecognition} from './views/audioSettings.js';
 import {Roles} from 'meteor/alanning:roles';
 
 // Security: HTML sanitization for user-generated content
@@ -406,7 +406,7 @@ Template.DefaultLayout.events({
     if (window.currentAudioObj) {
       window.currentAudioObj.pause();
     }
-    Router.go('/profile');
+    Router.go('/home');
   },
 
 

@@ -923,7 +923,7 @@ Template.card.events({
   },
   'click #overlearningButton': function(event) {
     event.preventDefault();
-    leavePage('/profile');
+    leavePage('/home');
   },
 
   'click .multipleChoiceButton': function(event) {
@@ -1021,7 +1021,7 @@ Template.card.events({
       leavePage(routeToSignin);
     } else {
       // "regular" logged-in user - go back to home page
-      leavePage('/profile');
+      leavePage('/home');
     }
   },
 
@@ -2022,8 +2022,8 @@ async function preloadStimuliFiles() {
     clientConsole(2, 'Non image type detected');
   }
 
-  // TTS warm-up is now done in profileAudioToggles.js when user enables audio prompts
-  // This gives better UX because the delay happens when clicking the sound icon,
+  // TTS warm-up is now done in audioSettings.js when user enables audio prompts
+  // This gives better UX because the delay happens when accessing audio settings,
   // not during unit initialization where it would block trial 1 from appearing
 }
 
@@ -2040,7 +2040,7 @@ function checkUserAudioConfigCompatability(){
   if (curStimHasImageDisplayType() && ((audioPromptMode == 'all' || audioPromptMode == 'question'))) {
     clientConsole(1, 'PANIC: Unable to process TTS for image response', Session.get('currentRootTdfId'));
     alert('Question reading not supported on this TDF. Please disable and try again.');
-    leavePage('/profile');
+    leavePage('/home');
   }
 }
 
@@ -2235,7 +2235,7 @@ function playCurrentSound(onEndCallback) {
     catch (e) {
       console.error('Error getting audio file: ' + e);
       alert('Could not load audio file: ' + currentAudioSrc + '. ')
-      Router.go('/profile')
+      Router.go('/home')
     }
   }
   let currentSound = new Audio(currentAudioSrc);
@@ -2978,7 +2978,7 @@ async function afterFeedbackCallback(trialEndTimeStamp, trialStartTimeStamp, isT
 
       if (threshold > 0 && timeoutsSeen >= threshold) {
         clientConsole(2, 'Hit timeout threshold', threshold, 'Quitting');
-        leavePage('/profile');
+        leavePage('/home');
         return; // We are totally done
       }
     }
@@ -3164,7 +3164,7 @@ function getTrialTime(trialEndTimeStamp, trialStartTimeStamp, reviewEnd, testTyp
     const currentExperimentState = Session.get('currentExperimentState');
     Meteor.callAsync('sendUserErrorReport', curUser, errorDescription, curPage, sessionVars,
         userAgent, logs, currentExperimentState);
-    leavePage('/profile');
+    leavePage('/home');
     return;
   }
   // Don't count test type trials in progress reporting
@@ -3615,7 +3615,7 @@ async function unitIsFinished(reason) {
         if (!rootTDFBoxed) {
           clientConsole(1, 'Could not find root TDF:', Session.get('currentRootTdfId'));
           alert('Unfortunately, the root TDF could not be loaded. Please contact your administrator.');
-          leavePage('/profile');
+          leavePage('/home');
           return;
         }
       }
@@ -5423,7 +5423,7 @@ async function resumeFromComponentState() {
     if (!rootTDFBoxed) {
       clientConsole(1, 'PANIC: Unable to load the root TDF for learning', Session.get('currentRootTdfId'));
       alert('Unfortunately, the root TDF could not be loaded. Please contact your administrator.');
-      leavePage('/profile');
+      leavePage('/home');
       return;
     }
   }
@@ -5432,7 +5432,7 @@ async function resumeFromComponentState() {
   if (!rootTDF) {
     clientConsole(2, 'PANIC: Root TDF has no content', Session.get('currentRootTdfId'));
     alert('Unfortunately, something is broken and this lesson cannot continue');
-    leavePage('/profile');
+    leavePage('/home');
     return;
   }
   const setspec = rootTDF.tdfs.tutor.setspec;
@@ -5465,7 +5465,7 @@ async function resumeFromComponentState() {
           if (!conditionTdf) {
             clientConsole(1, 'Could not find condition TDF:', randomConditionFileName);
             alert('Unfortunately, the experiment condition TDF could not be found. Please contact your administrator.');
-            leavePage('/profile');
+            leavePage('/home');
             return;
           }
         }
@@ -5501,7 +5501,7 @@ async function resumeFromComponentState() {
             if (!conditionTdf) {
               clientConsole(1, 'Could not find condition TDF:', randomConditionFileName);
               alert('Unfortunately, the experiment condition TDF could not be found. Please contact your administrator.');
-              leavePage('/profile');
+              leavePage('/home');
               return;
             }
           }
@@ -5532,7 +5532,7 @@ async function resumeFromComponentState() {
             if (!conditionTdf) {
               clientConsole(1, 'Could not find condition TDF:', randomConditionFileName);
               alert('Unfortunately, the experiment condition TDF could not be found. Please contact your administrator.');
-              leavePage('/profile');
+              leavePage('/home');
               return;
             }
           }
@@ -5541,7 +5541,7 @@ async function resumeFromComponentState() {
       } else {
         clientConsole(2, 'Invalid loadbalancing parameter');
         alert('Unfortunately, something is broken and this lesson cannot continue');
-        leavePage('/profile');
+        leavePage('/home');
         return;
       }
     }
@@ -5569,7 +5569,7 @@ async function resumeFromComponentState() {
     if (!conditionTdfId) {
       clientConsole(2, 'No experimental condition could be selected!');
       alert('Unfortunately, something is broken and this lesson cannot continue');
-      leavePage('/profile');
+      leavePage('/home');
       return;
     } 
 
@@ -5583,7 +5583,7 @@ async function resumeFromComponentState() {
       if (!curTdf) {
         clientConsole(1, 'Could not find condition TDF by ID:', conditionTdfId);
         alert('Unfortunately, the experiment condition TDF could not be loaded. Please contact your administrator.');
-        leavePage('/profile');
+        leavePage('/home');
         return;
       }
     }
@@ -5700,7 +5700,7 @@ async function resumeFromComponentState() {
   //if this unit number is greater than the number of units in the tdf, we need to send the user to the profile page
   if(curExperimentState.currentUnitNumber > curTdf.content.tdfs.tutor.unit.length - 1){
     alert('You have completed all the units in this lesson.');
-    leavePage('/profile');
+    leavePage('/home');
   }
 
   const curTdfUnit = curTdf.content.tdfs.tutor.unit[Session.get('currentUnitNumber')];
@@ -6006,7 +6006,7 @@ async function processUserTimesLog() {
       leavePage(routeToSignin);
     } else {
       // "Normal" user - they just go back to their root page
-      leavePage('/profile');
+      leavePage('/home');
     }
   } else {
     await resetEngine(Session.get('currentUnitNumber'));

@@ -1,9 +1,15 @@
 <template name="profileSouthwest">
   <script defer src="https://use.fontawesome.com/releases/v5.0.9/js/all.js" integrity="sha384-8iPTk2s/jMVj81dnzb/iFR2sdA7u06vHJyyLlAd4snFpCl/SnyUjRrbdJsw1pGIl" crossorigin="anonymous"></script>
     <div class="container">
-      <div>
-        {{>profileAudioToggles}}
+      <!-- Link to Audio Settings Page -->
+      <div class="card mb-3">
+          <div class="card-body">
+              <h5 class="card-title"><i class="fa fa-volume-up me-2"></i>Audio Settings</h5>
+              <p class="card-text">Configure text-to-speech and speech recognition settings.</p>
+              <a href="/audioSettings" class="btn btn-primary">Go to Audio Settings</a>
+          </div>
       </div>
+
       {{#if class}}
       <legend class="text-center">
           Course: {{class.coursename}}

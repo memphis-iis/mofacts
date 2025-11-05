@@ -151,6 +151,145 @@
                     </div>
                 </div>
 
+                <!-- Home Page Role Buttons -->
+                <div class="theme-section">
+                    <h5 class="theme-section-header">Home Page Role-Based Button Colors</h5>
+                    <div class="row row-cols-2">
+                        <div class="col text-end">
+                            Main Menu Button Background:
+                        </div>
+                        <div class="col">
+                            <input type="text" class="currentThemeProp" value="{{currentTheme.properties.main_button_color}}" data-id="main_button_color">
+                            <input type="color" class="currentThemePropColor" value="{{currentTheme.properties.main_button_color}}" data-id="main_button_color">
+                            <small class="form-text text-muted">
+                                Main Menu buttons (visible to all users)
+                            </small>
+                        </div>
+                        <div class="col text-end">
+                            Main Menu Button Text:
+                        </div>
+                        <div class="col">
+                            <input type="text" class="currentThemeProp" value="{{currentTheme.properties.main_button_text_color}}" data-id="main_button_text_color">
+                            <input type="color" class="currentThemePropColor" value="{{currentTheme.properties.main_button_text_color}}" data-id="main_button_text_color">
+                            {{#with (getContrastInfo "main_button_text_color" "main_button_color")}}
+                                <small class="form-text {{#unless passes}}text-warning{{/unless}}">
+                                    Contrast: <strong>{{ratio}}:1</strong>
+                                    <span class="badge bg-{{badgeClass}}">{{#if passes}}✓{{else}}⚠{{/if}} WCAG {{level}}</span>
+                                </small>
+                            {{/with}}
+                        </div>
+                        <div class="col text-end">
+                            Main Menu Button Hover:
+                        </div>
+                        <div class="col">
+                            <input type="text" class="currentThemeProp" value="{{currentTheme.properties.main_button_hover_color}}" data-id="main_button_hover_color">
+                            <input type="color" class="currentThemePropColor" value="{{currentTheme.properties.main_button_hover_color}}" data-id="main_button_hover_color">
+                            <small class="form-text text-muted">
+                                Darker shade for hover effect
+                            </small>
+                        </div>
+                        <div class="col text-end">
+                            Teacher Functions Button Background:
+                        </div>
+                        <div class="col">
+                            <input type="text" class="currentThemeProp" value="{{currentTheme.properties.teacher_button_color}}" data-id="teacher_button_color">
+                            <input type="color" class="currentThemePropColor" value="{{currentTheme.properties.teacher_button_color}}" data-id="teacher_button_color">
+                            <small class="form-text text-muted">
+                                Teacher Functions buttons
+                            </small>
+                        </div>
+                        <div class="col text-end">
+                            Teacher Functions Button Text:
+                        </div>
+                        <div class="col">
+                            <input type="text" class="currentThemeProp" value="{{currentTheme.properties.teacher_button_text_color}}" data-id="teacher_button_text_color">
+                            <input type="color" class="currentThemePropColor" value="{{currentTheme.properties.teacher_button_text_color}}" data-id="teacher_button_text_color">
+                            {{#with (getContrastInfo "teacher_button_text_color" "teacher_button_color")}}
+                                <small class="form-text {{#unless passes}}text-warning{{/unless}}">
+                                    Contrast: <strong>{{ratio}}:1</strong>
+                                    <span class="badge bg-{{badgeClass}}">{{#if passes}}✓{{else}}⚠{{/if}} WCAG {{level}}</span>
+                                </small>
+                            {{/with}}
+                        </div>
+                        <div class="col text-end">
+                            Teacher Functions Button Hover:
+                        </div>
+                        <div class="col">
+                            <input type="text" class="currentThemeProp" value="{{currentTheme.properties.teacher_button_hover_color}}" data-id="teacher_button_hover_color">
+                            <input type="color" class="currentThemePropColor" value="{{currentTheme.properties.teacher_button_hover_color}}" data-id="teacher_button_hover_color">
+                            <small class="form-text text-muted">
+                                Darker shade for hover effect
+                            </small>
+                        </div>
+                        <div class="col text-end">
+                            Shared Functions Button Background:
+                        </div>
+                        <div class="col">
+                            <input type="text" class="currentThemeProp" value="{{currentTheme.properties.shared_button_color}}" data-id="shared_button_color">
+                            <input type="color" class="currentThemePropColor" value="{{currentTheme.properties.shared_button_color}}" data-id="shared_button_color">
+                            <small class="form-text text-muted">
+                                Shared Functions buttons (teachers & admins)
+                            </small>
+                        </div>
+                        <div class="col text-end">
+                            Shared Functions Button Text:
+                        </div>
+                        <div class="col">
+                            <input type="text" class="currentThemeProp" value="{{currentTheme.properties.shared_button_text_color}}" data-id="shared_button_text_color">
+                            <input type="color" class="currentThemePropColor" value="{{currentTheme.properties.shared_button_text_color}}" data-id="shared_button_text_color">
+                            {{#with (getContrastInfo "shared_button_text_color" "shared_button_color")}}
+                                <small class="form-text {{#unless passes}}text-warning{{/unless}}">
+                                    Contrast: <strong>{{ratio}}:1</strong>
+                                    <span class="badge bg-{{badgeClass}}">{{#if passes}}✓{{else}}⚠{{/if}} WCAG {{level}}</span>
+                                </small>
+                            {{/with}}
+                        </div>
+                        <div class="col text-end">
+                            Shared Functions Button Hover:
+                        </div>
+                        <div class="col">
+                            <input type="text" class="currentThemeProp" value="{{currentTheme.properties.shared_button_hover_color}}" data-id="shared_button_hover_color">
+                            <input type="color" class="currentThemePropColor" value="{{currentTheme.properties.shared_button_hover_color}}" data-id="shared_button_hover_color">
+                            <small class="form-text text-muted">
+                                Darker shade for hover effect
+                            </small>
+                        </div>
+                        <div class="col text-end">
+                            Admin Functions Button Background:
+                        </div>
+                        <div class="col">
+                            <input type="text" class="currentThemeProp" value="{{currentTheme.properties.admin_button_color}}" data-id="admin_button_color">
+                            <input type="color" class="currentThemePropColor" value="{{currentTheme.properties.admin_button_color}}" data-id="admin_button_color">
+                            <small class="form-text text-muted">
+                                Admin Functions buttons
+                            </small>
+                        </div>
+                        <div class="col text-end">
+                            Admin Functions Button Text:
+                        </div>
+                        <div class="col">
+                            <input type="text" class="currentThemeProp" value="{{currentTheme.properties.admin_button_text_color}}" data-id="admin_button_text_color">
+                            <input type="color" class="currentThemePropColor" value="{{currentTheme.properties.admin_button_text_color}}" data-id="admin_button_text_color">
+                            {{#with (getContrastInfo "admin_button_text_color" "admin_button_color")}}
+                                <small class="form-text {{#unless passes}}text-warning{{/unless}}">
+                                    Contrast: <strong>{{ratio}}:1</strong>
+                                    <span class="badge bg-{{badgeClass}}">{{#if passes}}✓{{else}}⚠{{/if}} WCAG {{level}}</span>
+                                </small>
+                            {{/with}}
+                        </div>
+                        <div class="col text-end">
+                            Admin Functions Button Hover:
+                        </div>
+                        <div class="col">
+                            <input type="text" class="currentThemeProp" value="{{currentTheme.properties.admin_button_hover_color}}" data-id="admin_button_hover_color">
+                            <input type="color" class="currentThemePropColor" value="{{currentTheme.properties.admin_button_hover_color}}" data-id="admin_button_hover_color">
+                            <small class="form-text text-muted">
+                                Darker shade for hover effect
+                            </small>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Menus & Secondary -->
                 <div class="theme-section">
                     <h5 class="theme-section-header">Menus & Secondary Elements</h5>

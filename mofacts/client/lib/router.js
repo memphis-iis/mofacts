@@ -3,7 +3,7 @@ import {haveMeteorUser} from '../lib/currentTestingHelpers';
 import {instructContinue, unitHasLockout} from '../views/experiment/instructions';
 import {Cookie} from './cookies';
 import {displayify} from '../../common/globalHelpers';
-import {selectTdf} from '../views/home/profile';
+import {selectTdf} from '../views/home/home';
 import {sessionCleanUp} from '../lib/sessionUtils';
 import {clientConsole} from '../index';
 import {Roles} from 'meteor/alanning:roles';
@@ -246,9 +246,9 @@ Router.route('/testLogin', {
 Router.route('/signup', {
   name: 'client.signUp',
   action: function() {
-    //if the user is logged in, redirect to profile, otherwise render signup
+    //if the user is logged in, redirect to home, otherwise render signup
     if(Meteor.userId()){
-      Router.go('/profile');
+      Router.go('/home');
     } else {
       this.render('signUp');
     }
@@ -327,6 +327,18 @@ Router.route('/help', {
   }
 })
 
+Router.route('/audioSettings', {
+  name: 'client.audioSettings',
+  action: function() {
+    if (Meteor.user()) {
+      Session.set('curModule', 'audioSettings');
+      this.render('audioSettings');
+    } else {
+      this.redirect('/');
+    }
+  }
+})
+
 Router.route('/', {
   name: 'client.index',
   waitOn: function() {
@@ -341,10 +353,10 @@ Router.route('/', {
     }
 
     if(Meteor.user() && Meteor.user().loginParams && Meteor.user().loginParams.loginMode != 'experiment'){
-      // Check if user is admin or teacher, redirect to profile
+      // Check if user is admin or teacher, redirect to home
       // Otherwise redirect to learning dashboard for students
       if ((Meteor.user() && Meteor.user().roles && (['admin', 'teacher']).some(role => Meteor.user().roles.includes(role)))) {
-        this.redirect('/profile');
+        this.redirect('/home');
       } else {
         this.redirect('/learningDashboard');
       }
@@ -391,8 +403,8 @@ Router.route('/adminControls', {
   }
 })
 
-Router.route('/profile', {
-  name: 'client.profile',
+Router.route('/home', {
+  name: 'client.home',
   waitOn: function() {
     let assignedTdfs =  'undefined';
     if(Meteor.user() && Meteor.user().loginParams && Meteor.user().loginParams.assignedTdfs){
@@ -432,7 +444,7 @@ Router.route('/profile', {
 
       if (loginMode === 'southwest') {
         Session.set('curModule', 'profileSouthwest');
-        this.render('/profile');
+        this.render('profileSouthwest');
       } else if (loginMode === 'experiment') {
         Cookie.set('isExperiment', '0', 1); // 1 day
         Cookie.set('experimentTarget', '', 1);
@@ -440,13 +452,21 @@ Router.route('/profile', {
         Session.set('curModule', 'signinoauth');
         this.redirect('/signIn');
       } else { // Normal login mode
-        Session.set('curModule', 'profile');
-        this.render('profile');
+        Session.set('curModule', 'home');
+        this.render('home');
       }
     } else {
       this.redirect('/');
     }
   },
+});
+
+// Legacy redirect: /profile -> /home
+Router.route('/profile', {
+  name: 'client.profile',
+  action: function() {
+    this.redirect('/home');
+  }
 });
 
 Router.route('/classEdit',{

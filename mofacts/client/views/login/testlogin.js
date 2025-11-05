@@ -2,7 +2,7 @@ import {meteorCallAsync} from '../..';
 import {blankPassword} from '../../lib/currentTestingHelpers';
 import {sessionCleanUp} from '../../lib/sessionUtils';
 import {displayify} from '../../../common/globalHelpers';
-import {selectTdf} from '../home/profile'
+import {selectTdf} from '../home/home'
 import {routeToSignin} from '../../lib/router';
 
 
@@ -148,7 +148,7 @@ async function testLogin() {
           Meteor.callAsync('logUserAgentAndLoginTime', Meteor.userId(), navigator.userAgent);
           await meteorCallAsync('setUserLoginData', 'direct', Session.get('loginMode'));
           Meteor.logoutOtherClients();
-          Router.go('/profile');
+          Router.go('/home');
         }
       });
     } catch (error) {

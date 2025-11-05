@@ -1,6 +1,6 @@
 import {meteorCallAsync} from '../..';
 import {haveMeteorUser} from '../../lib/currentTestingHelpers';
-import {selectTdf} from './profile';
+import {selectTdf} from './home';
 import {routeToSignin} from '../../lib/router';
 
 Template.profileSouthwest.helpers({

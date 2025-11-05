@@ -13,7 +13,7 @@ export {selectTdf};
 /**
  * Set up state variables for profile page
  */
-Template.profile.created = function() {
+Template.home.created = function() {
   this.showTdfs = new ReactiveVar(false);
   this.enabledTdfs = new ReactiveVar([]);
   this.recentTdfs = new ReactiveVar([]);
@@ -29,7 +29,7 @@ Template.profile.created = function() {
 // //////////////////////////////////////////////////////////////////////////
 // Template storage and helpers
 
-Template.profile.helpers({
+Template.home.helpers({
   username: function() {
     if (!haveMeteorUser()) {
       routeToSignin();
@@ -120,7 +120,7 @@ Template.profile.helpers({
 // //////////////////////////////////////////////////////////////////////////
 // Template Events
 
-Template.profile.events({
+Template.home.events({
   //Enable TDF
   'click .enableTdf': async function(event, instance) {
       try {
@@ -259,6 +259,29 @@ Template.profile.events({
     window.open('https://github.com/memphis-iis/mofacts/wiki', '_blank');
   },
 
+  // MAIN MENU Button Handlers (for all users)
+  'click #myLessonsButton': function(event) {
+    event.preventDefault();
+    Router.go('/learningDashboard');
+  },
+
+  'click #audioSettingsButton': function(event) {
+    event.preventDefault();
+    Router.go('/audioSettings');
+  },
+
+  'click #helpButton': function(event) {
+    event.preventDefault();
+    Router.go('/help');
+  },
+
+  'click #logoutButton': function(event) {
+    event.preventDefault();
+    Meteor.logout(function() {
+      Router.go('/');
+    });
+  },
+
   'click #tdfPracticeBtn': function(event, instance) {
     const showTdfs = instance.showTdfs.get();
     instance.showTdfs.set(!showTdfs);
@@ -390,7 +413,7 @@ function toggleTdfPresence(instance, mode) {
 // speech API key
 Session.set('speechAPIKey', null);
 
-Template.profile.rendered = async function() {
+Template.home.rendered = async function() {
   // sessionCleanUp() removed - it's already called in selectTdf() at the right time
   // Calling it here causes problems because rendered() can fire multiple times
   // due to reactivity, clearing session variables while card.js is using them
@@ -418,23 +441,31 @@ Template.profile.rendered = async function() {
 };
 
 /**
- * Measures all admin menu buttons and sets them to the width of the longest one
+ * Measures all home page menu buttons and sets them to the width of the longest one
  */
 function uniformSizeAdminButtons() {
   const adminButtons = $('.btn-fixed').filter(function() {
-    // Only target buttons in the admin menu (those with specific admin button IDs)
+    // Target all menu buttons including Main Menu and role-specific buttons
     const id = $(this).attr('id');
     return id && (
+      // Main Menu buttons (everyone)
+      id === 'myLessonsButton' ||
+      id === 'audioSettingsButton' ||
+      id === 'helpButton' ||
+      id === 'logoutButton' ||
+      // Teacher Functions buttons
       id === 'instructorReportingButton' ||
-      id === 'adminControlsBtn' ||
-      id === 'mechTurkButton' ||
-      id === 'contentUploadButton' ||
-      id === 'dataDownloadButton' ||
-      id === 'userAdminButton' ||
       id === 'classEditButton' ||
       id === 'tdfAssignmentEditButton' ||
+      // Shared Functions buttons
+      id === 'contentUploadButton' ||
+      id === 'dataDownloadButton' ||
       id === 'wikiProfileButton' ||
-      id === 'contentGenerationButton'
+      id === 'contentGenerationButton' ||
+      // Admin Functions buttons
+      id === 'adminControlsBtn' ||
+      id === 'mechTurkButton' ||
+      id === 'userAdminButton'
     );
   });
 

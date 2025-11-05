@@ -51,6 +51,6 @@ Template.tabwarning.events({
 
     // Redirect immediately (don't wait for callback)
     console.log('Redirecting to /profile');
-    Router.go('/profile');
+    Router.go('/home');
   }
 });

@@ -2,7 +2,7 @@ import {meteorCallAsync, clientConsole} from '../..';
 import {blankPassword} from '../../lib/currentTestingHelpers';
 import {sessionCleanUp} from '../../lib/sessionUtils';
 import {displayify} from '../../../common/globalHelpers';
-import {selectTdf} from '../home/profile'
+import {selectTdf} from '../home/home'
 import {routeToSignin} from '../../lib/router';
 import {ServiceConfiguration} from 'meteor/service-configuration';
 
@@ -202,7 +202,7 @@ Template.signIn.events({
 
       // Route to /profile like password login does
       clientConsole(2, '[MS-LOGIN] Routing to /profile');
-      Router.go('/profile');
+      Router.go('/home');
 
     } catch (error) {
       clientConsole(1, '[MS-LOGIN] Login Error:', error);
@@ -322,7 +322,7 @@ Template.signIn.events({
 
       // Route to /profile like password login does
       clientConsole(2, '[GOOGLE-LOGIN] Routing to /profile');
-      Router.go('/profile');
+      Router.go('/home');
 
     } catch (error) {
       clientConsole(1, '[GOOGLE-LOGIN] Login Error:', error);
@@ -670,7 +670,7 @@ async function testLogin() {
         await meteorCallAsync('setUserLoginData', 'direct', Session.get('loginMode'));
       }
       Meteor.logoutOtherClients();
-      Router.go('/profile');
+      Router.go('/home');
     } catch (error) {
       clientConsole(1, 'ERROR: The user was not logged in on TEST sign in?', testUserName, 'Error:', error);
       alert('It appears that you couldn\'t be logged in as ' + testUserName);

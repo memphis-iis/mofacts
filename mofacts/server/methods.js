@@ -2976,8 +2976,9 @@ export const methods = {
 
   getServerStatus: function() {
     try {
-      diskusage = Npm.require('diskusage');
-      const path = "/"
+      // Try diskusage package first
+      const diskusage = Npm.require('diskusage');
+      const path = "/";
       let info = diskusage.checkSync(path);
       let diskSpaceTotal = info.total;
       let diskSpaceUsed = info.total - info.free;
@@ -2990,8 +2991,32 @@ export const methods = {
       remainingSpace = (remainingSpace / 1000000000).toFixed(2);
       return {diskSpacePercent: driveSpaceUsedPercent, remainingSpace: remainingSpace, diskSpace: diskSpaceTotal, diskSpaceUsed: diskSpaceUsed};
     } catch (error) {
-      console.error('Error getting server disk usage:', error.message);
-      return {diskSpacePercent: 'N/A', remainingSpace: 'N/A', diskSpace: 'N/A', diskSpaceUsed: 'N/A', error: 'Disk usage module not available'};
+      console.error('Error getting server disk usage with diskusage package:', error.message);
+
+      // Fallback to using df command (works better in Docker)
+      try {
+        const { execSync } = Npm.require('child_process');
+        const output = execSync('df -k /').toString();
+        const lines = output.trim().split('\n');
+        if (lines.length >= 2) {
+          const parts = lines[1].split(/\s+/);
+          const diskSpaceTotal = parseInt(parts[1]) * 1024; // Convert KB to bytes
+          const diskSpaceUsed = parseInt(parts[2]) * 1024;
+          const remainingSpace = parseInt(parts[3]) * 1024;
+          const driveSpaceUsedPercent = (diskSpaceUsed / diskSpaceTotal) * 100;
+
+          return {
+            diskSpacePercent: driveSpaceUsedPercent.toFixed(2),
+            remainingSpace: (remainingSpace / 1000000000).toFixed(2),
+            diskSpace: (diskSpaceTotal / 1000000000).toFixed(2),
+            diskSpaceUsed: (diskSpaceUsed / 1000000000).toFixed(2)
+          };
+        }
+      } catch (dfError) {
+        console.error('Error getting disk usage with df command:', dfError.message);
+      }
+
+      return {diskSpacePercent: 'N/A', remainingSpace: 'N/A', diskSpace: 'N/A', diskSpaceUsed: 'N/A', error: 'Disk usage unavailable'};
     }
   },
 
@@ -4019,6 +4044,18 @@ export const methods = {
       navbar_text_color: '#000000',
       neutral_color: '#ffffff',
       alert_color: '#ff0000',
+      main_button_color: '#7FC89E',
+      main_button_text_color: '#000000',
+      main_button_hover_color: '#6BB089',
+      teacher_button_color: '#7CB8F5',
+      teacher_button_text_color: '#000000',
+      teacher_button_hover_color: '#6AA5E0',
+      shared_button_color: '#7BC5D3',
+      shared_button_text_color: '#000000',
+      shared_button_hover_color: '#68B0BD',
+      admin_button_color: '#F5B57C',
+      admin_button_text_color: '#000000',
+      admin_button_hover_color: '#E0A366',
       logo_url: '',
       signInDescription: 'A web-based adaptive learning system that uses spaced practice and retrieval to help you learn and retain information more effectively. Sign in to access your personalized learning experience.'
     };
@@ -4047,6 +4084,18 @@ export const methods = {
           navbar_text_color: '#000000',
           neutral_color: '#ffffff',
           alert_color: '#ff0000',
+          main_button_color: '#7FC89E',
+          main_button_text_color: '#000000',
+          main_button_hover_color: '#6BB089',
+          teacher_button_color: '#7CB8F5',
+          teacher_button_text_color: '#000000',
+          teacher_button_hover_color: '#6AA5E0',
+          shared_button_color: '#7BC5D3',
+          shared_button_text_color: '#000000',
+          shared_button_hover_color: '#68B0BD',
+          admin_button_color: '#F5B57C',
+          admin_button_text_color: '#000000',
+          admin_button_hover_color: '#E0A366',
           logo_url: '',
           signInDescription: 'A web-based adaptive learning system that uses spaced practice and retrieval to help you learn and retain information more effectively. Sign in to access your personalized learning experience.',
           transition_instant: '10ms',

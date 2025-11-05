@@ -1,0 +1,93 @@
+<!-- MAIN home template - Unified home page for all users -->
+<template name="home">
+
+    <div class="container" style="margin-top: 1rem;">
+
+        {{#if isImpersonating}}
+        <div class='text-center alert alert-warning'>
+                Impersonation Mode. Nothing will be logged. Log out to reset.
+        </div>
+        {{/if}}
+
+        <div id="adminButtonContainer" class="row justify-content-center g-3 page-loading" style="max-width: 900px; margin: 0 auto;">
+
+            <!-- MAIN MENU Section (Everyone) -->
+            <div class="col-12"><hr class="profile-separator" data-label="Main Menu"></div>
+
+            <div class="col-lg-3 col-md-4 col-sm-6 col-12">
+                <button type="button" id="myLessonsButton" class="btn btn-fixed btn-role-main mx-auto d-block">My Lessons</button>
+            </div>
+
+            <div class="col-lg-3 col-md-4 col-sm-6 col-12">
+                <button type="button" id="audioSettingsButton" class="btn btn-fixed btn-role-main mx-auto d-block">Audio Settings</button>
+            </div>
+
+            <div class="col-lg-3 col-md-4 col-sm-6 col-12">
+                <button type="button" id="helpButton" class="btn btn-fixed btn-role-main mx-auto d-block">Help</button>
+            </div>
+
+            <div class="col-lg-3 col-md-4 col-sm-6 col-12">
+                <button type="button" id="logoutButton" class="btn btn-fixed btn-role-main mx-auto d-block">Logout</button>
+            </div>
+
+            <!-- TEACHER FUNCTIONS Section (Teachers only) -->
+            {{#if isInRole 'teacher'}}
+            <div class="col-12"><hr class="profile-separator" data-label="Teacher Functions"></div>
+
+            <div class="col-lg-3 col-md-4 col-sm-6 col-12">
+                <button type="button" id="classEditButton" class="btn btn-fixed btn-role-teacher mx-auto d-block">Class Management</button>
+            </div>
+
+            <div class="col-lg-3 col-md-4 col-sm-6 col-12">
+                <button type="button" id="instructorReportingButton" class="btn btn-fixed btn-role-teacher mx-auto d-block">Instructor Reporting</button>
+            </div>
+
+            <div class="col-lg-3 col-md-4 col-sm-6 col-12">
+                <button type="button" id="tdfAssignmentEditButton" class="btn btn-fixed btn-role-teacher mx-auto d-block">Chapter Assignments</button>
+            </div>
+            {{/if}}
+
+            <!-- SHARED FUNCTIONS Section (Teachers and Admins) -->
+            {{#if isInRole 'teacher,admin'}}
+            <div class="col-12"><hr class="profile-separator" data-label="Shared Functions"></div>
+
+            <div class="col-lg-3 col-md-4 col-sm-6 col-12">
+                <button type="button" id="contentUploadButton" class="btn btn-fixed btn-role-shared mx-auto d-block">Content Management</button>
+            </div>
+
+            <div class="col-lg-3 col-md-4 col-sm-6 col-12">
+                <button type="button" id="dataDownloadButton" class="btn btn-fixed btn-role-shared mx-auto d-block">Download User Data</button>
+            </div>
+
+            <div class="col-lg-3 col-md-4 col-sm-6 col-12">
+                <button type="button" id="wikiProfileButton" class="btn btn-fixed btn-role-shared mx-auto d-block">Wiki</button>
+            </div>
+
+            {{#if contentGenerationAvailable}}
+            <div class="col-lg-3 col-md-4 col-sm-6 col-12">
+                <button type="button" id="contentGenerationButton" class="btn btn-fixed btn-role-shared mx-auto d-block">Content Generation</button>
+            </div>
+            {{/if}}
+            {{/if}}
+
+            <!-- ADMIN FUNCTIONS Section (Admins only) -->
+            {{#if isInRole 'admin'}}
+            <div class="col-12"><hr class="profile-separator" data-label="Admin Functions"></div>
+
+            <div class="col-lg-3 col-md-4 col-sm-6 col-12">
+                <button id="adminControlsBtn" class="btn btn-fixed btn-role-admin mx-auto d-block" type="button">Admin Control Panel</button>
+            </div>
+
+            <div class="col-lg-3 col-md-4 col-sm-6 col-12">
+                <button type="button" id="userAdminButton" class="btn btn-fixed btn-role-admin mx-auto d-block">User Admin</button>
+            </div>
+
+            <div class="col-lg-3 col-md-4 col-sm-6 col-12">
+                <button type="button" id="mechTurkButton" class="btn btn-fixed btn-role-admin mx-auto d-block">Mechanical Turk</button>
+            </div>
+            {{/if}}
+
+        </div>
+
+    </div>
+</template>

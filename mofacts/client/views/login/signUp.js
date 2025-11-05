@@ -68,7 +68,7 @@ Template.signUp.events({
         Meteor.logoutOtherClients();
 
         // MISSING FIX: Route to profile after successful signup and login
-        Router.go('/profile');
+        Router.go('/home');
       } catch (error) {
         // This means that we have an issue of some kind - but there's
         // nothing that we can do? We'll just fall thru for now since
@@ -112,6 +112,6 @@ Template.signUp.events({
 Template.signUp.onRendered(function() {
   //check if the user is already logged in
   if (Meteor.userId()) {
-    Router.go('/profile');
+    Router.go('/home');
   }
 });

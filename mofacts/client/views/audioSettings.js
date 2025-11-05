@@ -120,11 +120,8 @@ function setAudioInputOnPage(audioInputEnabled) {
 function showHideheadphonesSuggestedDiv(show) {
   if (show) {
     $('#headphonesSuggestedDiv').show();
-    //change the modal height to accomodate the new content
-    $('.modal-dialog').addClass('modal-expanded');
   } else {
     $('#headphonesSuggestedDiv').hide();
-    $('.modal-dialog').removeClass('modal-expanded');
   }
 }
 
@@ -141,45 +138,44 @@ function showHideAudioPromptGroupDependingOnAudioPromptMode(audioPromptMode) {
   }
 }
 
-Template.profileAudioToggles.rendered = function() {
+Template.audioSettings.onRendered(function() {
+  // Set up speech API modal
   $('#speechAPIModal').on('shown.bs.modal', function() {
     $('#speechAPIKey').focus();
   });
 
-  $('#audioModal').on('shown.bs.modal', function() {
-    // Load settings from unified audioSettings object
-    const settings = getUserAudioSettings();
+  // Load settings from database on page load (not modal open)
+  const settings = getUserAudioSettings();
 
-    // Set toggle states
-    setAudioInputOnPage(settings.audioInputMode);
-    setAudioPromptModeOnPage(settings.audioPromptMode);
-    showHideAudioPromptGroupDependingOnAudioPromptMode(settings.audioPromptMode);
+  // Set toggle states
+  setAudioInputOnPage(settings.audioInputMode);
+  setAudioPromptModeOnPage(settings.audioPromptMode);
+  showHideAudioPromptGroupDependingOnAudioPromptMode(settings.audioPromptMode);
 
-    // Set all control values (use first available value for shared controls)
-    const volume = settings.audioPromptQuestionVolume || settings.audioPromptFeedbackVolume || 0;
-    const speakingRate = settings.audioPromptQuestionSpeakingRate || settings.audioPromptFeedbackSpeakingRate || 1;
-    const voice = settings.audioPromptVoice || settings.audioPromptFeedbackVoice || 'en-US-Standard-A';
+  // Set all control values (use first available value for shared controls)
+  const volume = settings.audioPromptQuestionVolume || settings.audioPromptFeedbackVolume || 0;
+  const speakingRate = settings.audioPromptQuestionSpeakingRate || settings.audioPromptFeedbackSpeakingRate || 1;
+  const voice = settings.audioPromptVoice || settings.audioPromptFeedbackVoice || 'en-US-Standard-A';
 
-    setAudioPromptVolumeOnPage(volume);
-    document.getElementById('audioPromptSpeakingRate').value = speakingRate;
-    document.getElementById('audioPromptVoice').value = voice;
-    document.getElementById('audioInputSensitivity').value = settings.audioInputSensitivity;
+  setAudioPromptVolumeOnPage(volume);
+  document.getElementById('audioPromptSpeakingRate').value = speakingRate;
+  document.getElementById('audioPromptVoice').value = voice;
+  document.getElementById('audioInputSensitivity').value = settings.audioInputSensitivity;
 
-    // Update Session variables for backward compatibility (set both to same values)
-    Session.set('audioPromptQuestionVolume', volume);
-    Session.set('audioPromptFeedbackVolume', volume);
-    Session.set('audioPromptQuestionSpeakingRate', speakingRate);
-    Session.set('audioPromptFeedbackSpeakingRate', speakingRate);
-    Session.set('audioPromptVoice', voice);
-    Session.set('audioPromptFeedbackVoice', voice);
-    Session.set('audioInputSensitivity', settings.audioInputSensitivity);
+  // Update Session variables for backward compatibility (set both to same values)
+  Session.set('audioPromptQuestionVolume', volume);
+  Session.set('audioPromptFeedbackVolume', volume);
+  Session.set('audioPromptQuestionSpeakingRate', speakingRate);
+  Session.set('audioPromptFeedbackSpeakingRate', speakingRate);
+  Session.set('audioPromptVoice', voice);
+  Session.set('audioPromptFeedbackVoice', voice);
+  Session.set('audioInputSensitivity', settings.audioInputSensitivity);
 
-    // Show/hide appropriate groups
-    showHideAudioInputGroup(settings.audioInputMode);
-    showHideAudioEnabledGroup(settings.audioPromptMode != 'silent' || settings.audioInputMode);
-    const showHeadphonesSuggestedDiv = settings.audioPromptMode != 'silent' && settings.audioInputMode;
-    showHideheadphonesSuggestedDiv(showHeadphonesSuggestedDiv);
-  });
+  // Show/hide appropriate groups
+  showHideAudioInputGroup(settings.audioInputMode);
+  showHideAudioEnabledGroup(settings.audioPromptMode != 'silent' || settings.audioInputMode);
+  const showHeadphonesSuggestedDiv = settings.audioPromptMode != 'silent' && settings.audioInputMode;
+  showHideheadphonesSuggestedDiv(showHeadphonesSuggestedDiv);
 
   checkAndSetSpeechAPIKeyIsSetup();
 
@@ -191,12 +187,14 @@ Template.profileAudioToggles.rendered = function() {
   });
 
   disableUnsupportedFeatures(Session.get('isSafari'));
+});
 
-  // Settings are now loaded from database when modal opens (see $('#audioModal').on('shown.bs.modal') above)
-  // No need to restore from Session variables here
-};
+Template.audioSettings.events({
+  'click .back-btn'(event) {
+    event.preventDefault();
+    Router.go('profile'); // Return to home page
+  },
 
-Template.profileAudioToggles.events({
   'click #audioPromptQuestionOn': function(event) {
     updateAudioPromptMode(event);
   },
@@ -340,7 +338,7 @@ Template.profileAudioToggles.events({
   }
 });
 
-Template.profileAudioToggles.helpers({
+Template.audioSettings.helpers({
   showSpeechAPISetup: function() {
     //check if Session variable useEmbeddedAPIKey is set
     if(Session.get('useEmbeddedAPIKeys')){
@@ -371,14 +369,12 @@ async function updateAudioPromptMode(e){
   //if toggle is on, show the warning, else hide it
   if (e.currentTarget.checked){
     $('.audioEnabledGroup').show();
-    $('#audio-modal-dialog').addClass('modal-expanded');
 
     // FIX: Warm up Google TTS API when user enables audio prompts
     // This eliminates the 8-9 second cold start delay on first trial
     warmupGoogleTTS();
   } else if(audioPromptMode == 'silent' && !getAudioInputFromPage()){
     $('.audioEnabledGroup').hide();
-    $('#audio-modal-dialog').removeClass('modal-expanded');
   }
   showHideAudioPromptGroupDependingOnAudioPromptMode(audioPromptMode);
 

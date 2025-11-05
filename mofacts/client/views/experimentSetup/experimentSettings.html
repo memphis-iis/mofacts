@@ -3,9 +3,18 @@
         Experiment Settings
     </h3>
     {{#if isInRole 'admin'}}
-    {{>profileDebugToggles}}  
-    {{>adminControls}}  
+    {{>profileDebugToggles}}
+    {{>adminControls}}
     {{/if}}
-    {{>profileAudioToggles}}
+
+    <!-- Link to Audio Settings Page -->
+    <div class="card mb-3">
+        <div class="card-body">
+            <h5 class="card-title"><i class="fa fa-volume-up me-2"></i>Audio Settings</h5>
+            <p class="card-text">Configure text-to-speech and speech recognition settings.</p>
+            <a href="/audioSettings" class="btn btn-primary">Go to Audio Settings</a>
+        </div>
+    </div>
+
     {{>setTheme}}
 </template>
