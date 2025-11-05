@@ -11,7 +11,7 @@
           <!-- Text-to-Speech Section -->
           <section class="mb-4">
             <div class="d-flex align-items-center mb-3">
-              <i class="fa fa-headphones fa-lg text-primary me-2"></i>
+              <i class="fa fa-headphones text-primary me-2" style="font-size: 1.25rem;"></i>
               <h5 class="mb-0">Text-to-Speech</h5>
             </div>
             <p class="text-muted small mb-3">Choose what {{currentTheme.properties.themeName}} reads aloud during practice.</p>
@@ -41,10 +41,6 @@
           <div class="audioPromptSharedGroup" style="display: none;">
             <div class="card border bg-light">
               <div class="card-body">
-                <div class="alert alert-success border-success mb-3" role="alert">
-                  <i class="fa fa-info-circle"></i> <strong>Note:</strong> Requires lessons with <i class="fa fa-headphones"></i> icon. Headphones recommended for best experience.
-                </div>
-
                 <div class="row g-3">
                   <div class="col-md-4">
                     <label for="audioPromptVolume" class="form-label fw-semibold">
@@ -101,9 +97,9 @@
           </div>
 
           <!-- Speech Recognition Section -->
-          <section class="mb-4">
+          <section class="mb-4 mt-5">
             <div class="d-flex align-items-center mb-3">
-              <i class="fa fa-microphone fa-lg text-danger me-2"></i>
+              <i class="fa fa-microphone text-danger me-2" style="font-size: 1.25rem;"></i>
               <h5 class="mb-0">Speech Recognition</h5>
             </div>
             <p class="text-muted small mb-3">Speak your answers instead of typing them.</p>
@@ -119,15 +115,6 @@
                 </div>
 
                 <div class="audioInputGroup" style="display: none;">
-                  <div class="alert alert-info border-info mb-3" role="alert">
-                    <div class="d-flex align-items-start">
-                      <i class="fa fa-microphone fa-2x me-3"></i>
-                      <div>
-                        <strong>Requirements:</strong> Lessons with <i class="fa fa-microphone"></i> icon. Works best with headphones in a quiet environment.
-                      </div>
-                    </div>
-                  </div>
-
                   <label for="audioInputSensitivity" class="form-label fw-semibold">
                     <i class="fa fa-sliders me-1"></i>Microphone Sensitivity
                   </label>
@@ -155,11 +142,6 @@
               </div>
             </div>
           </section>
-
-          <!-- Combined Audio Warning -->
-          <div id="headphonesSuggestedDiv" class="alert alert-warning border-warning" style="display: none;" role="alert">
-            <i class="fa fa-lightbulb"></i> <strong>Tip:</strong> Using both text-to-speech and voice input together? Headphones are strongly recommended to prevent audio feedback.
-          </div>
 
         </div>
       </div>
