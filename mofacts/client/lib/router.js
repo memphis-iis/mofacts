@@ -403,6 +403,18 @@ Router.route('/adminControls', {
   }
 })
 
+Router.route('/theme', {
+  name: 'client.theme',
+  action: function() {
+    if(Meteor.user() && (Meteor.user() && Meteor.user().roles && (['admin']).some(role => Meteor.user().roles.includes(role)))){
+      Session.set('curModule', 'theme');
+      this.render('theme');
+    } else {
+      this.redirect('/');
+    }
+  }
+})
+
 Router.route('/home', {
   name: 'client.home',
   waitOn: function() {

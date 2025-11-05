@@ -190,11 +190,6 @@ Template.audioSettings.onRendered(function() {
 });
 
 Template.audioSettings.events({
-  'click .back-btn'(event) {
-    event.preventDefault();
-    Router.go('profile'); // Return to home page
-  },
-
   'click #audioPromptQuestionOn': function(event) {
     updateAudioPromptMode(event);
   },

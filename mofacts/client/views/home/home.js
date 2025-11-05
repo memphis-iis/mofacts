@@ -239,6 +239,11 @@ Template.home.events({
     Router.go('/adminControls');
   },
 
+  'click #themeButton': function(event) {
+    event.preventDefault();
+    Router.go('/theme');
+  },
+
   'click #tdfAssignmentEditButton': function(event) {
     event.preventDefault();
     Router.go('/tdfAssignmentEdit');
@@ -465,7 +470,8 @@ function uniformSizeAdminButtons() {
       // Admin Functions buttons
       id === 'adminControlsBtn' ||
       id === 'mechTurkButton' ||
-      id === 'userAdminButton'
+      id === 'userAdminButton' ||
+      id === 'themeButton'
     );
   });
 
