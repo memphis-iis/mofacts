@@ -87,13 +87,6 @@ body {
     width: 100%;
 }
 
-/* Card container - fluid but centered with max-width to prevent overflow */
-#cardContainer .container-fluid {
-    max-width: 1200px;
-    margin-left: auto;
-    margin-right: auto;
-}
-
 /* General Styles */
 h1{
     font-weight: 800;
@@ -134,8 +127,9 @@ p{
     margin-bottom: clamp(0.5rem, 1vh, 0.75rem);
 }
 
-a{
-    color: var(--accent-color)
+/* Content links - use accent color for text links */
+a.content-link {
+    color: var(--accent-color);
 }
 
 /* ===== CONTAINERS ===== */
@@ -1170,8 +1164,8 @@ tfoot tf, .table tfoot tf, .table tfoot td, .table tfoot th {
         touch-action: manipulation;
     }
 
-    /* Larger tap targets for icons/links */
-    a {
+    /* Larger tap targets for content links */
+    a.content-link {
         min-width: 44px;
         min-height: 44px;
         display: inline-flex;
@@ -1453,4 +1447,5 @@ tfoot tf, .table tfoot tf, .table tfoot td, .table tfoot th {
     font-size: 0.9rem;
     text-transform: uppercase;
     letter-spacing: 0.05em;
+    text-align: center;
 }

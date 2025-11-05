@@ -74,7 +74,7 @@ Template.help.rendered = async function() {
     document.getElementById('helpContent').innerHTML = `
       <div class="alert alert-warning">
         <p>Unable to load help content. Please try again later or visit our
-        <a href="https://github.com/memphis-iis/mofacts/wiki/Student-Overview" target="_blank">online help guide</a>.</p>
+        <a href="https://github.com/memphis-iis/mofacts/wiki/Student-Overview" target="_blank" class="content-link">online help guide</a>.</p>
       </div>
     `;
     // Ensure body styles from offcanvas are cleared before fade-in

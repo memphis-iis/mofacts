@@ -254,6 +254,11 @@ Template.profile.events({
     Router.go('/contentGeneration');
   },
 
+  'click #wikiProfileButton': function(event) {
+    event.preventDefault();
+    window.open('https://github.com/memphis-iis/mofacts/wiki', '_blank');
+  },
+
   'click #tdfPracticeBtn': function(event, instance) {
     const showTdfs = instance.showTdfs.get();
     instance.showTdfs.set(!showTdfs);
@@ -428,7 +433,7 @@ function uniformSizeAdminButtons() {
       id === 'userAdminButton' ||
       id === 'classEditButton' ||
       id === 'tdfAssignmentEditButton' ||
-      id === 'wikiButton' ||
+      id === 'wikiProfileButton' ||
       id === 'contentGenerationButton'
     );
   });
