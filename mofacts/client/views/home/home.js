@@ -866,27 +866,13 @@ async function selectTdf(currentTdfId, lessonName, currentStimuliSetId, ignoreOu
   let continueToCard = true;
 
   if (audioEnabled) {
-    // Check if the tdf or user has a speech api key defined, if not show the modal form
-    // for them to input one.  If so, actually continue initializing web audio
-    // and going to the practice set
-    (async () => {
-      try {
-        const key = await Meteor.callAsync('getUserSpeechAPIKey');
-        Session.set('speechAPIKey', key);
-        const tdfKeyPresent = !!curTdfContent.tdfs.tutor.setspec.speechAPIKey;
-        if (!key && !tdfKeyPresent) {
-          clientConsole(2, 'speech api key not found, showing modal for user to input');
-          $('#speechAPIModal').modal('show');
-          continueToCard = false;
-        } else {
-          clientConsole(2, 'audio input enabled and key present, navigating to card and initializing audio input');
-        }
-      } catch (error) {
-        clientConsole(1, 'Error getting user speech API key:', error);
-      }
-    })();
-  } else {
-    clientConsole(2, 'audio toggle not checked, navigating to card');
+    // Fetch speech API key if available (from user settings or TDF)
+    try {
+      const key = await Meteor.callAsync('getUserSpeechAPIKey');
+      Session.set('speechAPIKey', key);
+    } catch (error) {
+      clientConsole(1, 'Error getting user speech API key:', error);
+    }
   }
 
   // Go directly to the card session - which will decide whether or

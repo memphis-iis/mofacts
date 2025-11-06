@@ -41,7 +41,9 @@ async function getCurrentTheme() {
       clientConsole(2, propConverted, themeProps[prop]);
       document.documentElement.style.setProperty(propConverted, themeProps[prop]);
     }
-    document.title = themeProps['themeName'];
+    const titleValue = themeProps['themeName'] || res.themeName || 'MoFaCTS';
+    clientConsole(2, 'Setting document.title to:', titleValue, 'from themeProps:', themeProps['themeName'], 'or res.themeName:', res.themeName);
+    document.title = titleValue;
   } catch (err) {
     clientConsole(2, 'getCurrentTheme', err, null);
   }
