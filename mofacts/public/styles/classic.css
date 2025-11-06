@@ -721,16 +721,16 @@ tfoot tf, .table tfoot tf, .table tfoot td, .table tfoot th {
     align-items: center;
 }
 
-/* Navbar alignment options */
-.navbar-align-left {
+/* Navbar alignment options - Override Bootstrap's default space-between */
+.navbar > .container-fluid.navbar-align-left {
     justify-content: flex-start;
 }
 
-.navbar-align-center {
+.navbar > .container-fluid.navbar-align-center {
     justify-content: center;
 }
 
-.navbar-align-right {
+.navbar > .container-fluid.navbar-align-right {
     justify-content: flex-end;
 }
 

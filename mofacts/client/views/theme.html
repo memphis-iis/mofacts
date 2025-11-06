@@ -12,12 +12,12 @@
                     </div>
                 </div>
 
-                <div class="row row-cols-2 mb-3">
-                    <div class="col text-end">
-                        Theme Name:
+                <div class="row mb-3 align-items-center">
+                    <div class="col-auto">
+                        <label for="themeName" class="form-label mb-0">Theme Name:</label>
                     </div>
-                    <div class="col">
-                        <input type="text" class="currentThemeProp form-control" value="{{currentTheme.properties.themeName}}" data-id="themeName">
+                    <div class="col-auto">
+                        <input type="text" id="themeName" class="currentThemeProp form-control" value="{{currentTheme.properties.themeName}}" data-id="themeName" style="width: 250px;">
                     </div>
                 </div>
 
@@ -70,9 +70,9 @@
                         </div>
                         <div class="col">
                             <select class="currentThemeProp form-select" data-id="navbar_alignment">
-                                <option value="left" {{#if (eq currentTheme.properties.navbar_alignment "left")}}selected{{/if}}>Left</option>
-                                <option value="center" {{#if (eq currentTheme.properties.navbar_alignment "center")}}selected{{/if}}>Center</option>
-                                <option value="right" {{#if (eq currentTheme.properties.navbar_alignment "right")}}selected{{/if}}>Right</option>
+                                <option value="left" {{navbarAlignmentAttrs "left"}}>Left</option>
+                                <option value="center" {{navbarAlignmentAttrs "center"}}>Center</option>
+                                <option value="right" {{navbarAlignmentAttrs "right"}}>Right</option>
                             </select>
                         </div>
                     </div>

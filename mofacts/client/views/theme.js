@@ -46,6 +46,11 @@ Template.theme.helpers({
             badgeClass: badgeClass,
             passes: ratio >= 4.5
         };
+    },
+    'navbarAlignmentAttrs': function(value) {
+        const theme = Session.get('curTheme');
+        const currentAlignment = theme?.properties?.navbar_alignment;
+        return currentAlignment === value ? { selected: true } : {};
     }
 });
 
@@ -109,12 +114,22 @@ Template.theme.events({
         const data_id = event.currentTarget.getAttribute('data-id');
         const value = event.currentTarget.value;
 
-        // Update session to trigger reactive contrast recalculation
+        // Update session to trigger reactive updates - create new object for reactivity
         const theme = Session.get('curTheme');
         if (theme && theme.properties) {
-            theme.properties[data_id] = value;
-            Session.set('curTheme', theme);
+            const updatedTheme = {
+                ...theme,
+                properties: {
+                    ...theme.properties,
+                    [data_id]: value
+                }
+            };
+            Session.set('curTheme', updatedTheme);
         }
+
+        // Apply CSS variable immediately for instant preview
+        const propConverted = '--' + data_id.replace(/_/g, '-');
+        document.documentElement.style.setProperty(propConverted, value);
 
         // Auto-save with debounce (wait 1 second after user stops typing)
         clearTimeout(window.themeSaveTimeout);
@@ -134,14 +149,57 @@ Template.theme.events({
         //change the corresponding currentThemeProp value. we need to find a input with the same data-id and change its value
         $(`.currentThemeProp[data-id=${data_id}]`).val(value);
 
-        // Update session to trigger reactive contrast recalculation
+        // Update session to trigger reactive updates - create new object for reactivity
         const theme = Session.get('curTheme');
         if (theme && theme.properties) {
-            theme.properties[data_id] = value;
-            Session.set('curTheme', theme);
+            const updatedTheme = {
+                ...theme,
+                properties: {
+                    ...theme.properties,
+                    [data_id]: value
+                }
+            };
+            Session.set('curTheme', updatedTheme);
         }
 
+        // Apply CSS variable immediately for instant visual feedback
+        const propConverted = '--' + data_id.replace(/_/g, '-');
+        document.documentElement.style.setProperty(propConverted, value);
+
         // Auto-save immediately for color picker (no debounce needed)
+        (async () => {
+            try {
+                await Meteor.callAsync('setCustomThemeProperty', data_id, value);
+                console.log(`Auto-saved ${data_id}: ${value}`);
+            } catch (err) {
+                console.error(`Error auto-saving ${data_id}:`, err);
+                alert(`Error saving ${data_id}: ${err}`);
+            }
+        })();
+    },
+    'change .currentThemeProp': function(event) {
+        // Handle change events for select dropdowns and other elements that don't fire input events
+        const data_id = event.currentTarget.getAttribute('data-id');
+        const value = event.currentTarget.value;
+
+        // Update session to trigger reactive updates - create new object for reactivity
+        const theme = Session.get('curTheme');
+        if (theme && theme.properties) {
+            const updatedTheme = {
+                ...theme,
+                properties: {
+                    ...theme.properties,
+                    [data_id]: value
+                }
+            };
+            Session.set('curTheme', updatedTheme);
+        }
+
+        // Apply CSS variable immediately for instant visual feedback
+        const propConverted = '--' + data_id.replace(/_/g, '-');
+        document.documentElement.style.setProperty(propConverted, value);
+
+        // Auto-save immediately for dropdowns
         (async () => {
             try {
                 await Meteor.callAsync('setCustomThemeProperty', data_id, value);
