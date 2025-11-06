@@ -1,4 +1,4 @@
-import { getCurrentTheme } from '../lib/currentTestingHelpers'
+// PHASE 1.5: Removed unused getCurrentTheme import - now uses reactive subscription
 
 Template.adminControls.onCreated(async function() {
     try {

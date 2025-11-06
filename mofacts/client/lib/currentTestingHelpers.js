@@ -5,6 +5,8 @@ import {isEmpty} from '../../common/globalHelpers';
 import {getCurrentClusterAndStimIndices} from '../views/experiment/card';
 import { _ } from 'core-js';
 import { clientConsole } from '../index';
+import { Tracker } from 'meteor/tracker';
+import { Session } from 'meteor/session';
 export {
   blankPassword,
   extractDelimFields,
@@ -27,26 +29,109 @@ export {
 };
 
 
-//function to get current theme from server and set the css variables
-async function getCurrentTheme() {
-  try {
-    const res = await Meteor.callAsync('getTheme');
-    clientConsole(2, 'getCurrentTheme', null, res);
-    Session.set('curTheme', res);
-    //set the css variables to the theme values
-    themeProps = res.properties;
+// ===== PHASE 1.5 OPTIMIZATION: Theme Subscription =====
+// Subscribe to theme publication and set up reactive updates
+// This replaces the old method call pattern with reactive publications
+
+// Helper function to apply theme CSS properties
+function applyThemeCSSProperties(themeData) {
+  if (!themeData) {
+    clientConsole(2, 'applyThemeCSSProperties - no theme data');
+    return;
+  }
+
+  clientConsole(2, 'applyThemeCSSProperties', themeData);
+
+  // Store in session for backward compatibility
+  Session.set('curTheme', themeData);
+
+  // Apply CSS variables
+  const themeProps = themeData.properties;
+  if (themeProps) {
     for (let prop in themeProps) {
-      //add -- to the front of the property name and convert _ to -
-      propConverted = '--' + prop.replace(/_/g, '-');
+      // Add -- to the front of the property name and convert _ to -
+      const propConverted = '--' + prop.replace(/_/g, '-');
       clientConsole(2, propConverted, themeProps[prop]);
       document.documentElement.style.setProperty(propConverted, themeProps[prop]);
     }
-    const titleValue = themeProps['themeName'] || res.themeName || 'MoFaCTS';
-    clientConsole(2, 'Setting document.title to:', titleValue, 'from themeProps:', themeProps['themeName'], 'or res.themeName:', res.themeName);
-    document.title = titleValue;
-  } catch (err) {
-    clientConsole(2, 'getCurrentTheme', err, null);
   }
+
+  // Set document title
+  const titleValue = themeProps?.themeName || themeData.themeName || 'MoFaCTS';
+  clientConsole(2, 'Setting document.title to:', titleValue);
+  document.title = titleValue;
+}
+
+// Get default theme (used when no custom theme exists)
+function getDefaultTheme() {
+  return {
+    themeName: 'MoFaCTS',
+    properties: {
+      themeName: 'MoFaCTS',
+      background_color: '#F2F2F2',
+      text_color: '#000000',
+      button_color: '#7ed957',
+      primary_button_text_color: '#000000',
+      accent_color: '#7ed957',
+      secondary_color: '#d9d9d9',
+      secondary_text_color: '#000000',
+      audio_alert_color: '#06723e',
+      success_color: '#00cc00',
+      navbar_text_color: '#000000',
+      navbar_alignment: 'left',
+      neutral_color: '#ffffff',
+      alert_color: '#ff0000',
+      main_button_color: '#7FC89E',
+      main_button_text_color: '#000000',
+      main_button_hover_color: '#6BB089',
+      teacher_button_color: '#7CB8F5',
+      teacher_button_text_color: '#000000',
+      teacher_button_hover_color: '#6AA5E0',
+      shared_button_color: '#7BC5D3',
+      shared_button_text_color: '#000000',
+      shared_button_hover_color: '#68B0BD',
+      admin_button_color: '#F5B57C',
+      admin_button_text_color: '#000000',
+      admin_button_hover_color: '#E0A366',
+      logo_url: '/images/brain-logo.png',
+      favicon_16_url: '/images/favicon-16x16.png',
+      favicon_32_url: '/images/favicon-32x32.png',
+      signInDescription: 'A web-based adaptive learning system that uses spaced practice and retrieval to help you learn and retain information more effectively. Sign in to access your personalized learning experience.',
+      transition_instant: '10ms',
+      transition_fast: '100ms',
+      transition_smooth: '200ms'
+    }
+  };
+}
+
+// Subscribe to theme and set up reactive autorun
+// This function should be called once on app startup
+function getCurrentTheme() {
+  clientConsole(2, 'getCurrentTheme - setting up theme subscription');
+
+  // Subscribe to theme publication
+  Meteor.subscribe('theme');
+
+  // Set up reactive autorun to apply theme whenever it changes
+  Tracker.autorun(() => {
+    clientConsole(2, 'getCurrentTheme - autorun triggered');
+
+    const themeSetting = DynamicSettings.findOne({key: 'customTheme'});
+    let themeData;
+
+    if (themeSetting && themeSetting.value && themeSetting.value.enabled !== false) {
+      // Use custom theme
+      themeData = themeSetting.value;
+      clientConsole(2, 'getCurrentTheme - using custom theme');
+    } else {
+      // Use default theme
+      themeData = getDefaultTheme();
+      clientConsole(2, 'getCurrentTheme - using default theme');
+    }
+
+    // Apply theme CSS properties
+    applyThemeCSSProperties(themeData);
+  });
 }
 
 // Given a user ID, return the "dummy" password that stands in for a blank

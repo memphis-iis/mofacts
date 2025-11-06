@@ -1,4 +1,14 @@
 import {Roles} from 'meteor/alanning:roles';
+
+// ===== PHASE 1.5 OPTIMIZATION: Theme Publication =====
+// Publish theme settings reactively instead of using method calls
+// This allows clients to get automatic updates when theme changes
+Meteor.publish('theme', function() {
+    // Theme is public data - available to all users (even unauthenticated)
+    // This is safe because theme only contains visual styling, no sensitive data
+    return DynamicSettings.find({key: 'customTheme'});
+});
+
 Meteor.publish('files.assets.all', async function () {
     // Security: Filter assets based on user role and ownership
     if (!this.userId) {

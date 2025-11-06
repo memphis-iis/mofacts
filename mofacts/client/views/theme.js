@@ -105,7 +105,8 @@ Template.theme.events({
     'click #themeResetButton': async function(event) {
         try {
             await Meteor.callAsync('initializeCustomTheme', 'MoFaCTS');
-            Session.set('curTheme', getCurrentTheme());
+            // PHASE 1.5: No need to call getCurrentTheme() - reactive subscription handles it
+            // The Tracker.autorun in getCurrentTheme will detect the theme change automatically
         } catch (err) {
             console.log("Error initializing custom theme:", err);
         }
@@ -260,7 +261,7 @@ Template.theme.events({
                         await Meteor.callAsync('setCustomThemeProperty', 'favicon_16_url', favicon16Data);
 
                         console.log("Logo uploaded successfully with auto-generated favicons");
-                        getCurrentTheme();
+                        // PHASE 1.5: No need to call getCurrentTheme() - reactive subscription handles it
                     } catch (err) {
                         alert("Error uploading logo: " + err);
                     }
@@ -276,7 +277,7 @@ Template.theme.events({
                 await Meteor.callAsync('setCustomThemeProperty', 'logo_url', '');
                 console.log("Logo cleared successfully");
                 $('#logoUpload').val('');
-                getCurrentTheme();
+                // PHASE 1.5: No need to call getCurrentTheme() - reactive subscription handles it
             } catch (err) {
                 alert("Error clearing logo: " + err);
             }

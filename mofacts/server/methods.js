@@ -87,6 +87,12 @@ let nextStimuliSetId;
 let nextEventId = 1;
 let stimDisplayTypeMap = {};
 
+// ===== PHASE 1 OPTIMIZATION: Response KC Map Caching =====
+// Cache for getResponseKCMap to avoid repeatedly loading all TDFs
+let responseKCMapCache = null;
+let responseKCMapTimestamp = null;
+const RESPONSE_KC_MAP_CACHE_TTL = 3600000; // 1 hour in milliseconds
+
 // How large the distance between two words can be to be considered a match. Larger values result in a slower search. Defualt is 2.
 const maxEditDistance = Meteor.settings.SymSpell?.maxEditDistance ? parseInt(Meteor.settings.SymSpell.maxEditDistance) : 2;
 // How big the prefix used for indexing is. Larger values will be result in a faster search, but will use more memory. Default is 7.
@@ -486,8 +492,18 @@ async function getProbabilityEstimatesByKCId(TDFId, relevantKCIds) {
   return probEstimates;
 }
 
+// ===== PHASE 1 OPTIMIZATION: Cached version of getResponseKCMap =====
 async function getResponseKCMap() {
-  serverConsole('getResponseKCMap');
+  const now = Date.now();
+
+  // Return cached version if valid (less than 1 hour old)
+  if (responseKCMapCache && responseKCMapTimestamp && (now - responseKCMapTimestamp) < RESPONSE_KC_MAP_CACHE_TTL) {
+    serverConsole('getResponseKCMap - using cache (age: ' + Math.round((now - responseKCMapTimestamp) / 1000 / 60) + ' minutes)');
+    return responseKCMapCache;
+  }
+
+  // Build fresh cache
+  serverConsole('getResponseKCMap - building fresh cache (loading all TDFs)');
 
   let responseKCStuff = await Tdfs.find().fetchAsync();
   responseKCStuff = responseKCStuff.map(r => r.stimuli).flat();
@@ -501,7 +517,22 @@ async function getResponseKCMap() {
       responseKCMap[answerText] = responsekc;
     }
   }
+
+  // Update cache
+  responseKCMapCache = responseKCMap;
+  responseKCMapTimestamp = now;
+  serverConsole('getResponseKCMap - cache updated');
+
   return responseKCMap;
+}
+
+// ===== PHASE 1 OPTIMIZATION: Cache Invalidation =====
+function invalidateResponseKCMapCache() {
+  if (responseKCMapCache) {
+    serverConsole('invalidateResponseKCMapCache - cache cleared');
+  }
+  responseKCMapCache = null;
+  responseKCMapTimestamp = null;
 }
 
 // Optimized version that only fetches responseKC mappings for a single TDF
@@ -727,6 +758,9 @@ async function processPackageUpload(fileObj, owner, zipLink, emailToggle){
         await Tdfs.upsertAsync({_id: tdf._id}, tdf)
       }
     }
+
+    // PHASE 1 OPTIMIZATION: Invalidate cache after package upload completes
+    invalidateResponseKCMapCache();
   }
 }
 
@@ -2481,6 +2515,10 @@ async function upsertStimFile(stimulusFileName, stimJSON, ownerId, packagePath =
     stimuli: formattedStims, //formatted stimuli for use in the app
   }}, {multi: true});
   Meteor.call('updateStimSyllables', stimuliSetId, formattedStims)
+
+  // PHASE 1 OPTIMIZATION: Invalidate cache when stimuli are updated
+  invalidateResponseKCMapCache();
+
   return stimuliSetId
 }
 
@@ -3930,6 +3968,9 @@ export const methods = {
         serverConsole("Package file not found in DynamicAssets (may have been deleted already)");
       }
 
+      // PHASE 1 OPTIMIZATION: Invalidate cache after TDFs are deleted
+      invalidateResponseKCMapCache();
+
       return "Package removed: " + deletedCount + " TDF(s) deleted";
     } catch (e) {
       serverConsole(e);
@@ -4067,8 +4108,10 @@ export const methods = {
     return theme;
   },
 
+  // PHASE 1.5 DEPRECATION: This method is deprecated in favor of 'theme' publication
+  // Kept for backward compatibility - new code should use Meteor.subscribe('theme')
   getTheme: async function() {
-    serverConsole('getTheme');
+    serverConsole('getTheme [DEPRECATED - use theme publication instead]');
     const ret = await DynamicSettings.findOneAsync({key: 'customTheme'}) 
     if(!ret || ret.value.enabled == false) {
       return {

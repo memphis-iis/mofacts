@@ -39,7 +39,10 @@ if (location.protocol !== 'https:' && forceSSL) {
   location.href = location.href.replace(/^http:/, 'https:');
 }
 
-getCurrentTheme();
+// PHASE 1.5: Initialize theme subscription after Meteor is ready
+Meteor.startup(() => {
+  getCurrentTheme();
+});
 
 // Register the isInRole helper for templates (Meteor 3.0 compatibility)
 // Check roles synchronously on client using user.roles array (reactively published)
