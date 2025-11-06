@@ -104,7 +104,7 @@ function calculateContrastRatio(fgHex, bgHex) {
 Template.theme.events({
     'click #themeResetButton': async function(event) {
         try {
-            await Meteor.callAsync('initializeCustomTheme');
+            await Meteor.callAsync('initializeCustomTheme', 'MoFaCTS');
             Session.set('curTheme', getCurrentTheme());
         } catch (err) {
             console.log("Error initializing custom theme:", err);
