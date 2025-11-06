@@ -11,9 +11,50 @@ Template.signIn.onCreated(function() {
   // CRITICAL: Subscribe to OAuth service configuration for Google/Microsoft login
   // Store subscription handle so we can check if it's ready
   this.oauthConfigSub = this.subscribe('meteor.loginServiceConfiguration');
+
+  // Track if we're in the process of logging in to prevent flash on re-renders
+  this.isLoggingIn = new ReactiveVar(false);
+});
+
+Template.signIn.onDestroyed(function() {
+  // CRITICAL: Immediately hide the signIn template when it's being destroyed
+  // This prevents the flash where the signIn screen is briefly visible after login
+  // while the route transition to /home is still in progress
+  const container = document.querySelector('.container');
+  if (container) {
+    // Remove the fade-in class and force immediate hide
+    container.classList.remove('page-loaded');
+    container.classList.add('page-loading');
+    // Use inline style as final enforcement (overrides any CSS)
+    container.style.opacity = '0';
+    container.style.pointerEvents = 'none';
+    // Also set display none for complete removal from layout
+    container.style.display = 'none';
+  }
 });
 
 Template.signIn.onRendered(async function() {
+  const template = this;
+
+  // CRITICAL: Check if user is already logged in OR in the process of logging in
+  // If true, hide immediately to prevent flash
+  const userLoggedIn = Meteor.userId() && Meteor.user()?.loginParams?.loginMode !== 'experiment';
+  const currentlyLoggingIn = template.isLoggingIn.get();
+
+  if(userLoggedIn || currentlyLoggingIn){
+    clientConsole(2, "User logged in or logging in, hiding signIn template", {userLoggedIn, currentlyLoggingIn})
+    // Immediately and permanently hide to prevent flash
+    const container = document.querySelector('.container');
+    if (container) {
+      container.style.display = 'none';
+      container.style.visibility = 'hidden';
+    }
+    if(userLoggedIn) {
+      Router.go("/profile");
+      return; // Exit early - don't load teachers or do anything else
+    }
+    return; // Exit early if logging in
+  }
 
   if (Session.get('loginMode') !== 'experiment') {
     clientConsole(2, 'password signin, setting login mode');
@@ -24,11 +65,6 @@ Template.signIn.onRendered(async function() {
 
     clientConsole(2, 'got teachers');
     Session.set('teachers', verifiedTeachers);
-  }
-  // CRITICAL: Check loginParams exists before accessing loginMode
-  if(Meteor.userId() && Meteor.user().loginParams && Meteor.user().loginParams.loginMode !== 'experiment'){
-    clientConsole(2, "already logged in")
-    Router.go("/profile");
   }
   const allCourseSections = await meteorCallAsync('getAllCourseSections');
   const classesByInstructorId = {};
@@ -51,10 +87,14 @@ Template.signIn.onRendered(async function() {
   }
 
   // Trigger fade-in now that page is ready (prevents layout shift)
+  // BUT: Don't fade in if user is already logged in (prevents flash during login redirect)
   const container = document.querySelector('.container.page-loading');
-  if (container) {
+  if (container && !Meteor.userId()) {
     container.classList.remove('page-loading');
     container.classList.add('page-loaded');
+  } else if (container && Meteor.userId()) {
+    // User is logged in - keep it hidden to prevent flash
+    container.style.display = 'none';
   }
 });
 
@@ -130,9 +170,18 @@ Template.signIn.events({
     //set the useEmbeddedAPIKeys session variable to false
     Session.set('useEmbeddedAPIKeys', false);
   },
-  'click #signInWithMicrosoftSSO': async function(event) {
+  'click #signInWithMicrosoftSSO': async function(event, template) {
     //login with the Accounts service microsoft
     event.preventDefault();
+
+    // CRITICAL: Set logging in flag and hide container immediately to prevent flash
+    template.isLoggingIn.set(true);
+    const container = document.querySelector('.container');
+    if (container) {
+      container.style.display = 'none';
+      container.style.visibility = 'hidden';
+    }
+
     clientConsole(2, '[MS-LOGIN] Microsoft Login Button Clicked');
     clientConsole(2, '[MS-LOGIN] Current loginMode:', Session.get('loginMode'));
     clientConsole(2, '[MS-LOGIN] Current user:', Meteor.userId());
@@ -240,9 +289,18 @@ Template.signIn.events({
       userPasswordCheck();
     }
   },
-  'click #signInButtonOAuth': async function(event) {
+  'click #signInButtonOAuth': async function(event, template) {
     event.preventDefault();
     $('#signInButton').prop('disabled', true);
+
+    // CRITICAL: Set logging in flag and hide container immediately to prevent flash
+    template.isLoggingIn.set(true);
+    const container = document.querySelector('.container');
+    if (container) {
+      container.style.display = 'none';
+      container.style.visibility = 'hidden';
+    }
+
     clientConsole(2, '[GOOGLE-LOGIN] Google Login Button Clicked');
     clientConsole(2, '[GOOGLE-LOGIN] Current loginMode:', Session.get('loginMode'));
     clientConsole(2, '[GOOGLE-LOGIN] Current user:', Meteor.userId());
