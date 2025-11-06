@@ -721,6 +721,19 @@ tfoot tf, .table tfoot tf, .table tfoot td, .table tfoot th {
     align-items: center;
 }
 
+/* Navbar alignment options */
+.navbar-align-left {
+    justify-content: flex-start;
+}
+
+.navbar-align-center {
+    justify-content: center;
+}
+
+.navbar-align-right {
+    justify-content: flex-end;
+}
+
 /* ===== OFFCANVAS MENU ===== */
 .offcanvas {
     background-color: var(--secondary-color);

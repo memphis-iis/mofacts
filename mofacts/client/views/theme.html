@@ -65,6 +65,16 @@
                                 </small>
                             {{/with}}
                         </div>
+                        <div class="col text-end">
+                            Navigation Bar Alignment:
+                        </div>
+                        <div class="col">
+                            <select class="currentThemeProp form-select" data-id="navbar_alignment">
+                                <option value="left" {{#if (eq currentTheme.properties.navbar_alignment "left")}}selected{{/if}}>Left</option>
+                                <option value="center" {{#if (eq currentTheme.properties.navbar_alignment "center")}}selected{{/if}}>Center</option>
+                                <option value="right" {{#if (eq currentTheme.properties.navbar_alignment "right")}}selected{{/if}}>Right</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
 

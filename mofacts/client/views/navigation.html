@@ -1,6 +1,6 @@
 <template name="nav">
 <nav class="navbar bg-light">
-  <div class="container-fluid">
+  <div class="container-fluid navbar-align-{{currentTheme.properties.navbar_alignment}}">
     {{#unless isInTrial}}
     <a class="navbar-brand home-link" href="#" style="cursor: pointer;">
       {{#if currentTheme.properties.logo_url}}
