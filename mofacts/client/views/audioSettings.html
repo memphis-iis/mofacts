@@ -106,35 +106,57 @@
 
             <div class="card border">
               <div class="card-body">
-                <div class="form-check form-switch mb-3">
-                  <input class="form-check-input" type="checkbox" role="switch" id="audioInputOn">
-                  <label class="form-check-label ms-2" for="audioInputOn">
-                    <strong>Enable voice input</strong>
-                    <br><small class="text-muted">Answer questions by speaking</small>
-                  </label>
+                <div class="row align-items-start mb-3">
+                  <div class="col-12 col-md-6">
+                    <div class="form-check form-switch">
+                      <input class="form-check-input" type="checkbox" role="switch" id="audioInputOn">
+                      <label class="form-check-label ms-2" for="audioInputOn">
+                        <strong>Enable voice input</strong>
+                        <br><small class="text-muted">Answer questions by speaking</small>
+                      </label>
+                    </div>
+                  </div>
+
+                  <div class="col-12 col-md-6 audioInputGroup" style="display: none;">
+                    <label for="audioInputSensitivity" class="form-label fw-semibold mb-1">
+                      <i class="fa fa-sliders me-1"></i>Microphone Sensitivity
+                    </label>
+                    <input type="range" class="form-range" id="audioInputSensitivity" value="60" step="1" min="0" max="100">
+                    <div class="d-flex justify-content-between">
+                      <small class="text-muted">Noisy Room</small>
+                      <small class="text-muted">Quiet Room</small>
+                    </div>
+                  </div>
                 </div>
 
                 <div class="audioInputGroup" style="display: none;">
-                  <label for="audioInputSensitivity" class="form-label fw-semibold">
-                    <i class="fa fa-sliders me-1"></i>Microphone Sensitivity
-                  </label>
-                  <input type="range" class="form-range" id="audioInputSensitivity" value="60" step="1" min="0" max="100">
-                  <div class="d-flex justify-content-between">
-                    <small class="text-muted">Noisy Room</small>
-                    <small class="text-muted">Quiet Room</small>
-                  </div>
-
                   {{#if showSpeechAPISetup}}
-                    <div class="mt-3">
+                    <div class="border-top pt-3">
+                      <h6 class="mb-3">
+                        <i class="fa fa-key me-2"></i>Google Speech API Key
+                      </h6>
+                      <p class="text-muted small mb-2">
+                        To use speech recognition, you need a Google Speech API key.
+                        <a href="https://support.google.com/cloud/answer/6158862?hl=en" target="_blank">Learn how to get one <i class="fa fa-external-link-alt fa-xs"></i></a>
+                      </p>
+
                       {{#if speechAPIKeyIsSetup}}
-                        <div class="alert alert-success border-success mb-0" role="alert">
-                          <i class="fa fa-check-circle"></i> Speech API key configured
+                        <div class="alert alert-success border-success mb-2" role="alert">
+                          <i class="fa fa-check-circle"></i> Speech API key is configured
                         </div>
-                      {{else}}
-                        <div class="alert alert-warning border-warning mb-0" role="alert">
-                          <i class="fa fa-exclamation-triangle"></i> Speech API key not configured.
-                          <a href="#" id="setupAPIKey" class="alert-link">Click here to set up</a>
-                        </div>
+                      {{/if}}
+
+                      <div class="input-group mb-2">
+                        <input type="text" class="form-control" id="speechAPIKey" placeholder="Enter your API key">
+                        <button id="speechAPISubmit" type="button" class="btn btn-primary">
+                          <i class="fa fa-save"></i> Save
+                        </button>
+                      </div>
+
+                      {{#if speechAPIKeyIsSetup}}
+                        <button id="speechAPIDelete" type="button" class="btn btn-outline-danger btn-sm">
+                          <i class="fa fa-trash"></i> Delete Key
+                        </button>
                       {{/if}}
                     </div>
                   {{/if}}
@@ -143,42 +165,6 @@
             </div>
           </section>
 
-        </div>
-      </div>
-    </div>
-  </div>
-</template>
-
-<!-- Speech API Key Setup Modal (separate from audio settings) -->
-<template name="speechAPIModal">
-  <div class="modal fade" id="speechAPIModal" tabindex="-1" aria-labelledby="speechAPIModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content">
-        <div class="modal-header border-bottom">
-          <h5 class="modal-title" id="speechAPIModalLabel">
-            <i class="fa fa-key me-2"></i>Speech API Key Setup
-          </h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          <p class="text-muted">To use speech recognition, you need a Google Speech API key.</p>
-          <p>
-            <strong>Instructions:</strong> Enable the Google Speech API and generate an API key by following
-            <a href="https://support.google.com/cloud/answer/6158862?hl=en" target="_blank" class="alert-link">these instructions <i class="fa fa-external-link-alt fa-sm"></i></a>.
-          </p>
-          <div class="mt-3">
-            <label for="speechAPIKey" class="form-label fw-semibold">Google Speech API Key:</label>
-            <input type="text" class="form-control" id="speechAPIKey" placeholder="Enter your API key">
-          </div>
-        </div>
-        <div class="modal-footer border-top">
-          <button id="speechAPIDelete" type="button" class="btn btn-outline-danger me-auto">
-            <i class="fa fa-trash"></i> Delete Key
-          </button>
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-          <button id="speechAPISubmit" type="button" class="btn btn-primary">
-            <i class="fa fa-save"></i> Save Key
-          </button>
         </div>
       </div>
     </div>

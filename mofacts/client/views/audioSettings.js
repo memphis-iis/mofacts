@@ -1,5 +1,17 @@
 // Set up input sensitivity range to display/hide when audio input is enabled/disabled
 
+// Update range slider fill color based on value
+function updateRangeSliderFill(slider) {
+  const value = slider.value;
+  const min = slider.min || 0;
+  const max = slider.max || 100;
+  const percentage = ((value - min) / (max - min)) * 100;
+
+  // Create gradient that shows filled portion in success color
+  const successColor = getComputedStyle(document.documentElement).getPropertyValue('--success-color').trim();
+  slider.style.background = `linear-gradient(to right, ${successColor} 0%, ${successColor} ${percentage}%, #ddd ${percentage}%, #ddd 100%)`;
+}
+
 // Default audio settings
 const DEFAULT_AUDIO_SETTINGS = {
   audioPromptMode: 'silent',
@@ -138,13 +150,8 @@ function showHideAudioPromptGroupDependingOnAudioPromptMode(audioPromptMode) {
   }
 }
 
-Template.audioSettings.onRendered(function() {
-  // Set up speech API modal
-  $('#speechAPIModal').on('shown.bs.modal', function() {
-    $('#speechAPIKey').focus();
-  });
-
-  // Load settings from database on page load (not modal open)
+Template.audioSettings.onRendered(async function() {
+  // Load settings from database on page load
   const settings = getUserAudioSettings();
 
   // Set toggle states
@@ -162,6 +169,10 @@ Template.audioSettings.onRendered(function() {
   document.getElementById('audioPromptVoice').value = voice;
   document.getElementById('audioInputSensitivity').value = settings.audioInputSensitivity;
 
+  // Initialize range slider fills
+  updateRangeSliderFill(document.getElementById('audioPromptVolume'));
+  updateRangeSliderFill(document.getElementById('audioInputSensitivity'));
+
   // Update Session variables for backward compatibility (set both to same values)
   Session.set('audioPromptQuestionVolume', volume);
   Session.set('audioPromptFeedbackVolume', volume);
@@ -178,6 +189,18 @@ Template.audioSettings.onRendered(function() {
   showHideheadphonesSuggestedDiv(showHeadphonesSuggestedDiv);
 
   checkAndSetSpeechAPIKeyIsSetup();
+
+  // Load API key if it exists
+  if (Session.get('showSpeechAPISetup')) {
+    try {
+      const key = await Meteor.callAsync('getUserSpeechAPIKey');
+      if (key) {
+        $('#speechAPIKey').val(key);
+      }
+    } catch (error) {
+      console.log('Error loading speech API key', error);
+    }
+  }
 
   // Note: TTS warmup on hot code reload is now handled in index.js Meteor.startup
   // This ensures it runs even if the user is already in a practice session
@@ -217,19 +240,6 @@ Template.audioSettings.events({
     await saveAudioSettingToDatabase('audioInputMode', audioInputEnabled);
   },
 
-  'click #setupAPIKey': async function(e) {
-    //hide the modal
-    $('speechAPIModal').modal('hide');
-    e.preventDefault();
-    $('#speechAPIModal').modal('show');// {backdrop: "static"}
-    try {
-      const key = await Meteor.callAsync('getUserSpeechAPIKey');
-      $('#speechAPIKey').val(key);
-    } catch (error) {
-      console.log('Error getting user speech API key', error);
-    }
-  },
-
   'click #speechAPISubmit': async function(e) {
     const key = $('#speechAPIKey').val();
     try {
@@ -238,18 +248,12 @@ Template.audioSettings.events({
       // setup indicator updates
       checkAndSetSpeechAPIKeyIsSetup();
 
-      $('#speechAPIModal').modal('hide');
-
       console.log('Profile saved:', serverReturn);
-      // Clear any controls that shouldn't be kept around
-      $('.clearOnSave').val('');
-      alert('Your profile changes have been saved');
+      alert('Speech API key has been saved');
     } catch (error) {
       // Make sure to update our reactive session variable so the api key is
       // setup indicator updates
       checkAndSetSpeechAPIKeyIsSetup();
-
-      $('#speechAPIModal').modal('hide');
 
       console.log('Error saving speech api key', error);
       alert('Your changes were not saved! ' + error);
@@ -262,21 +266,26 @@ Template.audioSettings.events({
       // Make sure to update our reactive session variable so the api key is
       // setup indicator updates
       checkAndSetSpeechAPIKeyIsSetup();
-      $('#speechAPIModal').modal('hide');
+      $('#speechAPIKey').val('');
       console.log('User speech api key deleted');
-      alert('Your profile changes have been saved');
+      alert('Speech API key has been deleted');
     } catch (error) {
       // Make sure to update our reactive session variable so the api key is
       // setup indicator updates
       checkAndSetSpeechAPIKeyIsSetup();
-      $('#speechAPIModal').modal('hide');
       console.log('Error deleting speech api key', error);
       alert('Your changes were not saved! ' + error);
     }
   },
 
+  'input #audioPromptVolume': function(event) {
+    updateRangeSliderFill(event.currentTarget);
+  },
+
   'change #audioPromptVolume': async function(event) {
     const value = parseFloat(event.currentTarget.value);
+    updateRangeSliderFill(event.currentTarget);
+
     // Set both session variables to the same value for backward compatibility
     Session.set('audioPromptQuestionVolume', value);
     Session.set('audioPromptFeedbackVolume', value);
@@ -318,8 +327,14 @@ Template.audioSettings.events({
     await Meteor.callAsync('saveAudioSettings', currentSettings);
   },
 
+  'input #audioInputSensitivity': function(event) {
+    updateRangeSliderFill(event.currentTarget);
+  },
+
   'change #audioInputSensitivity': async function(event) {
     const value = parseInt(event.currentTarget.value);
+    updateRangeSliderFill(event.currentTarget);
+
     Session.set('audioInputSensitivity', value);
     Session.set('audioInputSensitivityView', value);
     await saveAudioSettingToDatabase('audioInputSensitivity', value);
