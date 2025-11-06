@@ -9,6 +9,45 @@ Meteor.publish('theme', function() {
     return DynamicSettings.find({key: 'customTheme'});
 });
 
+// ===== PHASE 1.7: User History Publication =====
+// Publish user's practice history for dashboard statistics
+// Security: Only publishes user's own history with sparse fields
+// This eliminates N+1 query pattern in learning dashboard
+Meteor.publish('userHistory', function(tdfId) {
+    // Security check - must be authenticated
+    if (!this.userId) {
+        return this.ready();
+    }
+
+    // Query parameters - only user's own history
+    const query = {
+        userId: this.userId,
+        levelUnitType: 'model'
+    };
+
+    // If tdfId provided, filter by specific TDF
+    if (tdfId) {
+        query.TDFId = tdfId;
+    }
+
+    // Sparse fields - only what dashboard needs for stats calculation
+    // This reduces data transfer and client memory usage
+    const fields = {
+        userId: 1,
+        TDFId: 1,
+        outcome: 1,
+        CFEndLatency: 1,
+        CFFeedbackLatency: 1,
+        itemId: 1,
+        CFStimFileIndex: 1,
+        problemName: 1,
+        recordedServerTime: 1,
+        levelUnitType: 1
+    };
+
+    return Histories.find(query, { fields });
+});
+
 Meteor.publish('files.assets.all', async function () {
     // Security: Filter assets based on user role and ownership
     if (!this.userId) {

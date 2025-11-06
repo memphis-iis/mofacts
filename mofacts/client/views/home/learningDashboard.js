@@ -1,6 +1,6 @@
 import {Roles} from 'meteor/alanning:roles';
 import {ReactiveVar} from 'meteor/reactive-var';
-import {haveMeteorUser} from '../../lib/currentTestingHelpers';
+import {haveMeteorUser, computeTdfStats} from '../../lib/currentTestingHelpers';
 import {getExperimentState, updateExperimentState} from '../experiment/card';
 import {DISABLED, ENABLED, MODEL_UNIT, SCHEDULE_UNIT} from '../../../common/Definitions';
 import {meteorCallAsync} from '../..';
@@ -127,12 +127,30 @@ Template.learningDashboard.rendered = async function() {
   const tdfsAttempted = await meteorCallAsync('getTdfIDsAndDisplaysAttemptedByUserId', studentID);
   const attemptedTdfIds = new Set(tdfsAttempted.map(t => t.TDFId));
 
-  // Fetch all stats in parallel for performance (don't wait for each one sequentially)
-  const statsPromises = tdfsAttempted.map(async (tdf) => {
-    const stats = await meteorCallAsync('getSimpleTdfStats', studentID, tdf.TDFId);
-    return {TDFId: tdf.TDFId, stats};
+  // PHASE 1.7: Subscribe to user history and WAIT for data to be ready
+  // This eliminates N+1 server queries - data is cached in local Minimongo
+  await new Promise((resolve) => {
+    const handle = Meteor.subscribe('userHistory', {
+      onReady: () => resolve(),
+      onStop: (error) => { if (error) console.error(error); resolve(); }
+    });
   });
-  const statsResults = await Promise.all(statsPromises);
+
+  // Compute stats from local Minimongo cache (no server roundtrips!)
+  const statsResults = tdfsAttempted.map((tdf) => {
+    // Query local Minimongo - instant, no server call needed
+    const history = Histories.find({
+      userId: studentID,
+      TDFId: tdf.TDFId,
+      levelUnitType: 'model'
+    }, {
+      sort: { recordedServerTime: 1 }
+    }).fetch();
+
+    // Compute stats client-side using helper function
+    const stats = computeTdfStats(history);
+    return { TDFId: tdf.TDFId, stats };
+  });
 
   // Build a map of TDFId -> stats for fast lookup
   const statsMap = new Map();

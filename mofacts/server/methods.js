@@ -2198,6 +2198,10 @@ async function getTdfIDsAndDisplaysAttemptedByUserId(userId, onlyWithLearningSes
 }
 
 async function getSimpleTdfStats(userId, tdfId) {
+  // PHASE 1.7 DEPRECATION: This method is deprecated in favor of 'userHistory' publication
+  // Kept for backward compatibility - new code should use Meteor.subscribe('userHistory')
+  // and compute stats client-side using computeTdfStats() helper
+  serverConsole('getSimpleTdfStats [DEPRECATED - use userHistory publication instead]');
 
   // Get all history for this user and TDF (excluding instructions and assessments)
   const history = await Histories.find({

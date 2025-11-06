@@ -26,6 +26,7 @@ export {
   getTestType,
   getCurrentDeliveryParams,
   getCurrentTheme,
+  computeTdfStats,
 };
 
 
@@ -637,4 +638,96 @@ function getCurrentDeliveryParams() {
   }
 
   return deliveryParams;
+}
+
+// ===== PHASE 1.7: Client-Side Stats Computation =====
+// Compute TDF statistics from history records (moved from server)
+// This eliminates server roundtrips for dashboard stats calculations
+function computeTdfStats(history) {
+  if (!history || history.length === 0) {
+    return null;
+  }
+
+  const stats = {
+    totalTrials: history.length,
+    correctTrials: 0,
+    incorrectTrials: 0,
+    totalTime: 0,
+    uniqueItems: new Set(),
+    sessionDates: new Set(),
+    firstAttempt: null,
+    lastAttempt: null
+  };
+
+  // Get last 10 trials for recent accuracy
+  const last10 = history.slice(-10);
+  let last10Correct = 0;
+
+  // Process all history records
+  for (const record of history) {
+    // Count outcomes
+    if (record.outcome === 'correct') {
+      stats.correctTrials++;
+    } else if (record.outcome === 'incorrect') {
+      stats.incorrectTrials++;
+    }
+
+    // Sum time (endLatency + feedbackLatency for total time practiced)
+    const endLatency = record.CFEndLatency || 0;
+    const feedbackLatency = record.CFFeedbackLatency || 0;
+    stats.totalTime += (endLatency + feedbackLatency);
+
+    // Track unique items by itemId, CFStimFileIndex, or problemName
+    const itemIdentifier = record.itemId || record.CFStimFileIndex || record.problemName;
+    if (itemIdentifier !== undefined && itemIdentifier !== null) {
+      stats.uniqueItems.add(itemIdentifier);
+    }
+
+    // Track unique practice dates
+    if (record.recordedServerTime) {
+      const date = new Date(record.recordedServerTime);
+      stats.sessionDates.add(date.toDateString());
+    }
+
+    // Track date range
+    if (record.recordedServerTime) {
+      const recordTime = record.recordedServerTime;
+      if (!stats.firstAttempt || recordTime < stats.firstAttempt) {
+        stats.firstAttempt = recordTime;
+      }
+      if (!stats.lastAttempt || recordTime > stats.lastAttempt) {
+        stats.lastAttempt = recordTime;
+      }
+    }
+  }
+
+  // Calculate last 10 trials accuracy
+  for (const trial of last10) {
+    if (trial.outcome === 'correct') {
+      last10Correct++;
+    }
+  }
+
+  // Calculate final statistics
+  const correctIncorrectTotal = stats.correctTrials + stats.incorrectTrials;
+  const overallAccuracy = correctIncorrectTotal > 0
+    ? (stats.correctTrials / correctIncorrectTotal * 100).toFixed(1)
+    : 0;
+  const last10Accuracy = last10.length > 0
+    ? (last10Correct / last10.length * 100).toFixed(1)
+    : 0;
+  const totalTimeMinutes = (stats.totalTime / 60000).toFixed(1);
+  const lastPracticeDate = stats.lastAttempt
+    ? new Date(stats.lastAttempt).toLocaleDateString()
+    : null;
+
+  return {
+    totalTrials: stats.totalTrials,
+    overallAccuracy: overallAccuracy,
+    last10Accuracy: last10Accuracy,
+    totalTimeMinutes: totalTimeMinutes,
+    itemsPracticed: stats.uniqueItems.size,
+    lastPracticeDate: lastPracticeDate,
+    totalSessions: stats.sessionDates.size
+  };
 }
