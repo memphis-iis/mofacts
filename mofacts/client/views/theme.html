@@ -329,47 +329,18 @@
                     <h5 class="theme-section-header">Branding Assets</h5>
                     <div class="row row-cols-2">
                         <div class="col text-end">
-                            Logo:
+                            Logo & Favicon:
                         </div>
                         <div class="col">
                             <input type="file" class="form-control" id="logoUpload" accept="image/*">
                             <small class="form-text text-muted">
-                                Max file size: 2MB. Recommended: PNG or SVG with transparent background
+                                Max file size: 2MB. Recommended: PNG or SVG with transparent background.<br>
+                                Will also auto-generate 16x16 and 32x32 favicons.
                             </small>
                             {{#if currentTheme.properties.logo_url}}
                             <button type="button" id="clearLogo" class="btn btn-secondary btn-sm" style="margin-top: 0.5rem;">Clear Logo</button>
                             <div style="margin-top: 0.5rem;">
                                 <img src="{{currentTheme.properties.logo_url}}" alt="Logo preview" class="img-thumbnail" style="max-width: 200px;">
-                            </div>
-                            {{/if}}
-                        </div>
-                        <div class="col text-end">
-                            Favicon (16x16):
-                        </div>
-                        <div class="col">
-                            <input type="file" class="form-control" id="favicon16Upload" accept="image/*">
-                            <small class="form-text text-muted">
-                                Max 2MB. Auto-generated from logo if not uploaded. Recommended: 16x16 PNG
-                            </small>
-                            {{#if currentTheme.properties.favicon_16_url}}
-                            <button type="button" id="clearFavicon16" class="btn btn-secondary btn-sm" style="margin-top: 0.5rem;">Clear Favicon 16x16</button>
-                            <div style="margin-top: 0.5rem;">
-                                <img src="{{currentTheme.properties.favicon_16_url}}" alt="16x16 favicon preview" class="img-thumbnail" style="width: 32px; height: 32px; image-rendering: pixelated;">
-                            </div>
-                            {{/if}}
-                        </div>
-                        <div class="col text-end">
-                            Favicon (32x32):
-                        </div>
-                        <div class="col">
-                            <input type="file" class="form-control" id="favicon32Upload" accept="image/*">
-                            <small class="form-text text-muted">
-                                Max 2MB. Auto-generated from logo if not uploaded. Recommended: 32x32 PNG
-                            </small>
-                            {{#if currentTheme.properties.favicon_32_url}}
-                            <button type="button" id="clearFavicon32" class="btn btn-secondary btn-sm" style="margin-top: 0.5rem;">Clear Favicon 32x32</button>
-                            <div style="margin-top: 0.5rem;">
-                                <img src="{{currentTheme.properties.favicon_32_url}}" alt="32x32 favicon preview" class="img-thumbnail" style="width: 64px; height: 64px; image-rendering: pixelated;">
                             </div>
                             {{/if}}
                         </div>

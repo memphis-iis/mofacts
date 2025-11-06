@@ -227,13 +227,45 @@ Template.theme.events({
             const reader = new FileReader();
             reader.onload = async function(e) {
                 const base64Data = e.target.result;
-                try {
-                    await Meteor.callAsync('setCustomThemeProperty', 'logo_url', base64Data);
-                    console.log("Logo uploaded successfully");
-                    getCurrentTheme();
-                } catch (err) {
-                    alert("Error uploading logo: " + err);
-                }
+
+                // Create image to generate favicons
+                const img = new Image();
+                img.onload = async function() {
+                    try {
+                        // Upload the logo
+                        await Meteor.callAsync('setCustomThemeProperty', 'logo_url', base64Data);
+
+                        // Auto-generate 32x32 favicon from logo
+                        const canvas32 = document.createElement('canvas');
+                        canvas32.width = 32;
+                        canvas32.height = 32;
+                        const ctx32 = canvas32.getContext('2d');
+                        ctx32.imageSmoothingEnabled = true;
+                        ctx32.imageSmoothingQuality = 'high';
+                        ctx32.drawImage(img, 0, 0, 32, 32);
+                        const favicon32Data = canvas32.toDataURL('image/png');
+
+                        // Auto-generate 16x16 favicon from logo
+                        const canvas16 = document.createElement('canvas');
+                        canvas16.width = 16;
+                        canvas16.height = 16;
+                        const ctx16 = canvas16.getContext('2d');
+                        ctx16.imageSmoothingEnabled = true;
+                        ctx16.imageSmoothingQuality = 'high';
+                        ctx16.drawImage(img, 0, 0, 16, 16);
+                        const favicon16Data = canvas16.toDataURL('image/png');
+
+                        // Upload both auto-generated favicons
+                        await Meteor.callAsync('setCustomThemeProperty', 'favicon_32_url', favicon32Data);
+                        await Meteor.callAsync('setCustomThemeProperty', 'favicon_16_url', favicon16Data);
+
+                        console.log("Logo uploaded successfully with auto-generated favicons");
+                        getCurrentTheme();
+                    } catch (err) {
+                        alert("Error uploading logo: " + err);
+                    }
+                };
+                img.src = base64Data;
             };
             reader.readAsDataURL(file);
         }
@@ -247,86 +279,6 @@ Template.theme.events({
                 getCurrentTheme();
             } catch (err) {
                 alert("Error clearing logo: " + err);
-            }
-        }
-    },
-    'change #favicon16Upload': function(event) {
-        const file = event.target.files[0];
-        if (file) {
-            // Validate file type
-            if (!file.type.startsWith('image/')) {
-                alert('Please select an image file');
-                return;
-            }
-            // Validate file size (max 2MB)
-            if (file.size > 2 * 1024 * 1024) {
-                alert('File size must be less than 2MB');
-                return;
-            }
-
-            const reader = new FileReader();
-            reader.onload = async function(e) {
-                const base64Data = e.target.result;
-                try {
-                    await Meteor.callAsync('setCustomThemeProperty', 'favicon_16_url', base64Data);
-                    console.log("16x16 favicon uploaded successfully");
-                    getCurrentTheme();
-                } catch (err) {
-                    alert("Error uploading 16x16 favicon: " + err);
-                }
-            };
-            reader.readAsDataURL(file);
-        }
-    },
-    'click #clearFavicon16': async function(event) {
-        if (confirm('Are you sure you want to clear the 16x16 favicon?')) {
-            try {
-                await Meteor.callAsync('setCustomThemeProperty', 'favicon_16_url', '/images/favicon-16x16.png');
-                console.log("16x16 favicon reset to default");
-                $('#favicon16Upload').val('');
-                getCurrentTheme();
-            } catch (err) {
-                alert("Error clearing 16x16 favicon: " + err);
-            }
-        }
-    },
-    'change #favicon32Upload': function(event) {
-        const file = event.target.files[0];
-        if (file) {
-            // Validate file type
-            if (!file.type.startsWith('image/')) {
-                alert('Please select an image file');
-                return;
-            }
-            // Validate file size (max 2MB)
-            if (file.size > 2 * 1024 * 1024) {
-                alert('File size must be less than 2MB');
-                return;
-            }
-
-            const reader = new FileReader();
-            reader.onload = async function(e) {
-                const base64Data = e.target.result;
-                try {
-                    await Meteor.callAsync('setCustomThemeProperty', 'favicon_32_url', base64Data);
-                    console.log("32x32 favicon uploaded successfully");
-                    getCurrentTheme();
-                } catch (err) {
-                    alert("Error uploading 32x32 favicon: " + err);
-                }
-            };
-            reader.readAsDataURL(file);
-        }
-    },
-    'click #clearFavicon32': async function(event) {
-        if (confirm('Are you sure you want to clear the 32x32 favicon?')) {
-            try {
-                await Meteor.callAsync('setCustomThemeProperty', 'favicon_32_url', '/images/favicon-32x32.png');
-                console.log("32x32 favicon reset to default");
-                $('#favicon32Upload').val('');
-                getCurrentTheme();
-            } catch (err) {
-                alert("Error clearing 32x32 favicon: " + err);
             }
         }
     },
