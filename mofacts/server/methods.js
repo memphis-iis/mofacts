@@ -5220,7 +5220,15 @@ Router.route('data-by-teacher', {
       response.end('Unauthorized');
       return;
     }
-    else if (!uid) {
+
+    const authUser = await Meteor.users.findOneAsync({_id: userId});
+    if (!authUser || authUser.secretKey != loginToken){
+      response.writeHead(403);
+      response.end('Unauthorized');
+      return;
+    }
+
+    if (!uid) {
       response.writeHead(404);
       response.end('No user ID specified');
       return;
@@ -5288,18 +5296,18 @@ Router.route('data-by-class', {
       response.end('Unauthorized');
       return;
     }
-    else if (await Meteor.users.findOneAsync({_id: userId}).secretKey != loginToken){
+
+    const user = await Meteor.users.findOneAsync({_id: userId});
+    if (!user || user.secretKey != loginToken){
       response.writeHead(403);
       response.end('Unauthorized');
       return;
     }
-    else if (!classId) {
+
+    if (!classId) {
       response.writeHead(404);
       response.end('No class ID specified');
       return;
-    }
-    else if (!classId) {
-      throw new Meteor.Error('No class ID specified');
     }
 
     const foundClass = await getCourseById(classId);
@@ -5353,12 +5361,16 @@ Router.route('data-by-file', {
       response.writeHead('403');
       response.end();
     }
-    else if (await Meteor.users.findOneAsync({_id: userId}).secretKey != loginToken){
-      response.writeHead(403);
-      response.end('Unauthorized');
-      return;
+    else {
+      const user = await Meteor.users.findOneAsync({_id: userId});
+      if (!user || user.secretKey != loginToken){
+        response.writeHead(403);
+        response.end('Unauthorized');
+        return;
+      }
     }
-    else if (path.includes('..')){ //user is trying to do some naughty stuff
+
+    if (path.includes('..')){ //user is trying to do some naughty stuff
       response.writeHead('404');
       response.end();
       return;
@@ -5405,17 +5417,22 @@ Router.route('clozeEditHistory', {
     if(!userId || !loginToken){
       response.writeHead('403');
       response.end();
+      return;
     }
-    else if (await Meteor.users.findOneAsync({_id: userId}).secretKey != loginToken){
+
+    const user = await Meteor.users.findOneAsync({_id: userId});
+    if (!user || user.secretKey != loginToken){
       response.writeHead(403);
       response.end('Unauthorized');
       return;
     }
-    else if (!uid) {
+
+    if (!uid) {
       response.writeHead(404);
       response.end('No user id specified');
       return;
     }
+
     const filename = uid + '-clozeEditHistory.json';
 
     response.writeHead(200, {
