@@ -55,6 +55,11 @@ html, body {
     max-width: 100%;
 }
 
+/* Always reserve space for scrollbar to prevent layout shift when navigating between pages */
+html {
+    overflow-y: scroll; /* Forces scrollbar gutter to always be present */
+}
+
 /* Prevent Bootstrap from manipulating body and causing content shift */
 body.modal-open,
 body.offcanvas-open {
@@ -722,15 +727,24 @@ tfoot tf, .table tfoot tf, .table tfoot td, .table tfoot th {
 }
 
 /* Navbar alignment options - Override Bootstrap's default space-between */
+/* Hide navbar until alignment class is applied, then fade in (prevents FOUC) */
+.navbar > .container-fluid {
+    opacity: 0;
+    transition: opacity var(--transition-fast) ease-in;
+}
+
 .navbar > .container-fluid.navbar-align-left {
+    opacity: 1;
     justify-content: flex-start;
 }
 
 .navbar > .container-fluid.navbar-align-center {
+    opacity: 1;
     justify-content: center;
 }
 
 .navbar > .container-fluid.navbar-align-right {
+    opacity: 1;
     justify-content: flex-end;
 }
 
