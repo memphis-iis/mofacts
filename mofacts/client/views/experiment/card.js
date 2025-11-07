@@ -1084,13 +1084,11 @@ Template.card.helpers({
   },
 
   'shouldShowSpeechRecognitionUI': function() {
-    // Show SR UI during fade-in and awaiting to prevent layout shift
-    // The container renders BEFORE user sees it (during opacity transition)
+    // Only show SR UI when actually awaiting input (prevents FOUC of red "waiting" state)
+    // Recording starts in PRESENTING_AWAITING state via allowUserInput()
     const state = Session.get('_debugTrialState');
 
-    return state === TRIAL_STATES.PRESENTING_FADING_IN ||
-           state === TRIAL_STATES.PRESENTING_DISPLAYING ||
-           state === TRIAL_STATES.PRESENTING_AWAITING;
+    return state === TRIAL_STATES.PRESENTING_AWAITING;
   },
 
   'isImpersonating': function(){

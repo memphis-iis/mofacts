@@ -43,8 +43,19 @@ function applyThemeCSSProperties(themeData) {
 
   clientConsole(2, 'applyThemeCSSProperties', themeData);
 
-  // Store in session for backward compatibility
-  Session.set('curTheme', themeData);
+  // Only update Session if theme has actually changed (prevents unnecessary re-renders)
+  const currentTheme = Session.get('curTheme');
+  const themeChanged = JSON.stringify(currentTheme) !== JSON.stringify(themeData);
+
+  if (themeChanged) {
+    clientConsole(2, 'Theme changed, updating Session');
+    Session.set('curTheme', themeData);
+  } else {
+    clientConsole(2, 'Theme unchanged, skipping Session update');
+  }
+
+  // Mark theme as ready (enables navbar rendering without layout shift)
+  Session.set('themeReady', true);
 
   // Apply CSS variables
   const themeProps = themeData.properties;
@@ -110,12 +121,19 @@ function getDefaultTheme() {
 function getCurrentTheme() {
   clientConsole(2, 'getCurrentTheme - setting up theme subscription');
 
-  // Subscribe to theme publication
-  Meteor.subscribe('theme');
+  // Subscribe to theme publication and track when ready
+  const themeSubscription = Meteor.subscribe('theme');
 
   // Set up reactive autorun to apply theme whenever it changes
   Tracker.autorun(() => {
     clientConsole(2, 'getCurrentTheme - autorun triggered');
+
+    // Wait for subscription to be ready before applying theme
+    // This prevents flash of default theme before actual theme loads
+    if (!themeSubscription.ready()) {
+      clientConsole(2, 'getCurrentTheme - subscription not ready, waiting...');
+      return;
+    }
 
     const themeSetting = DynamicSettings.findOne({key: 'customTheme'});
     let themeData;

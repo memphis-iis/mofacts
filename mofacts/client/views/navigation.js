@@ -13,50 +13,60 @@ function getDefaultTheme() {
 }
 
 // Handle navbar rendering and logo loading to prevent FOUC
+// Wait for theme data first, then handle logo loading
 Template.nav.onRendered(function() {
-  const container = this.find('.container-fluid.page-loading');
-  if (!container) return;
+  const template = this;
 
-  const logoImg = this.find('img[alt="Logo"]');
+  // Use autorun to wait for theme data to be ready
+  this.autorun(() => {
+    // Don't proceed until theme is loaded
+    if (!Session.get('themeReady')) return;
 
-  if (logoImg && logoImg.src) {
-    // Wait for logo to load before showing navbar
-    if (logoImg.complete) {
-      // Image already loaded (cached)
-      container.classList.remove('page-loading');
-      container.classList.add('page-loaded');
-    } else {
-      // Wait for image to load
-      logoImg.onload = function() {
+    // Use Tracker.afterFlush to ensure DOM is fully rendered after themeReady changes
+    Tracker.afterFlush(() => {
+      const container = template.find('.container-fluid.page-loading');
+      if (!container) {
+        console.log('navbar: container not found');
+        return;
+      }
+
+      const logoImg = template.find('img[alt="Logo"]');
+
+      if (logoImg && logoImg.src) {
+        // Wait for logo to load before showing navbar
+        if (logoImg.complete) {
+          // Image already loaded (cached)
+          container.classList.remove('page-loading');
+          container.classList.add('page-loaded');
+        } else {
+          // Wait for image to load
+          logoImg.onload = function() {
+            container.classList.remove('page-loading');
+            container.classList.add('page-loaded');
+          };
+          // Handle error case - still show navbar even if logo fails
+          logoImg.onerror = function() {
+            container.classList.remove('page-loading');
+            container.classList.add('page-loaded');
+          };
+        }
+      } else {
+        // No logo - show immediately
+        console.log('navbar: no logo found, showing immediately');
         container.classList.remove('page-loading');
         container.classList.add('page-loaded');
-      };
-      // Handle error case - still show navbar even if logo fails
-      logoImg.onerror = function() {
-        container.classList.remove('page-loading');
-        container.classList.add('page-loaded');
-      };
-    }
-  } else {
-    // No logo - show immediately
-    container.classList.remove('page-loading');
-    container.classList.add('page-loaded');
-  }
+      }
+    });
+  });
 });
 
-// Provide reactive access to current theme
-// Queries DynamicSettings directly to avoid race condition with Session
+// Provide reactive access to theme ready state
+// Note: currentTheme helper is provided globally in index.js and uses Session
 Template.nav.helpers({
-  'currentTheme': function() {
-    // Try to get theme from DynamicSettings (reactive)
-    const themeSetting = DynamicSettings.findOne({key: 'customTheme'});
-
-    if (themeSetting && themeSetting.value && themeSetting.value.enabled !== false) {
-      return themeSetting.value;
-    }
-
-    // Fallback to default theme
-    return getDefaultTheme();
+  'themeReady': function() {
+    // Wait for theme subscription to be ready before rendering navbar
+    // This prevents layout shift from default to actual theme values
+    return Session.get('themeReady') === true;
   },
 
   'isExperiment': function() {

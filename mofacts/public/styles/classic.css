@@ -739,6 +739,29 @@ tfoot tf, .table tfoot tf, .table tfoot td, .table tfoot th {
     justify-content: flex-end;
 }
 
+/* Navbar layout stability - prevent layout shifts during theme loading */
+.navbar {
+    contain: layout style; /* CSS containment prevents layout shifts from propagating */
+    min-height: 56px; /* Reserve vertical space to prevent reflow */
+}
+
+/* Navbar placeholder shown while theme data loads */
+.navbar-loading-placeholder {
+    min-height: 56px;
+    opacity: 0.3;
+    justify-content: var(--navbar-alignment, flex-start);
+}
+
+/* Smooth alignment transitions using CSS custom property */
+.navbar > .container-fluid {
+    transition: justify-content 0ms; /* Instant on first render to prevent delay */
+}
+
+/* Once page is loaded, any future alignment changes are smooth */
+.navbar > .container-fluid.page-loaded {
+    transition: justify-content var(--transition-fast, 100ms) ease-out;
+}
+
 /* ===== OFFCANVAS MENU ===== */
 .offcanvas {
     background-color: var(--secondary-color);
