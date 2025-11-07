@@ -25,6 +25,12 @@ Template.nav.helpers({
 
     // Fallback to default theme
     return getDefaultTheme();
+  },
+
+  'isExperiment': function() {
+    // Check if user is in experiment mode (locked-down mode for research studies)
+    // In experiment mode, navbar should not be clickable to prevent navigation
+    return Session.get('loginMode') === 'experiment';
   }
 });
 
