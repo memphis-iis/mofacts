@@ -1,21 +1,12 @@
 <template name="nav">
 <nav class="navbar bg-light">
   <div class="container-fluid navbar-align-{{currentTheme.properties.navbar_alignment}}">
-    {{#unless isInTrial}}
     <a class="navbar-brand home-link" href="#" style="cursor: pointer;">
       {{#if currentTheme.properties.logo_url}}
         <img src="{{currentTheme.properties.logo_url}}" alt="Logo" style="height: 30px; margin-right: 10px; vertical-align: middle;">
       {{/if}}
       {{currentTheme.properties.themeName}}
     </a>
-    {{else}}
-    <span class="navbar-brand">
-      {{#if currentTheme.properties.logo_url}}
-        <img src="{{currentTheme.properties.logo_url}}" alt="Logo" style="height: 30px; margin-right: 10px; vertical-align: middle;">
-      {{/if}}
-      {{currentTheme.properties.themeName}}
-    </span>
-    {{/unless}}
   </div>
 </nav>
 </template>
