@@ -176,8 +176,8 @@
                     {{/if}}
                 {{/if}}
                 {{/if}}
-                {{!-- Text input: always rendered, visibility controlled by CSS based on buttonTrial --}}
-                <div class="input-box col-12 {{#if buttonTrial}}trial-input-hidden{{/if}}">
+                {{!-- Text input: always rendered, visibility controlled by CSS based on buttonTrial and SR mode --}}
+                <div class="input-box col-12 {{#if buttonTrial}}trial-input-hidden{{else}}{{#if audioInputModeEnabled}}trial-input-hidden{{/if}}{{/if}}">
                     {{#if showDialogueHints}}
                         {{#if dialogueCacheHint}}
                             <div class="row hints">
