@@ -42,6 +42,30 @@ if (location.protocol !== 'https:' && forceSSL) {
 // PHASE 1.5: Initialize theme subscription after Meteor is ready
 Meteor.startup(() => {
   getCurrentTheme();
+
+  // MO1: Dynamic viewport height for mobile browsers
+  // iOS Safari and Android Chrome change viewport height when address bar shows/hides
+  // This sets a CSS custom property that updates in real-time
+  setDynamicViewportHeight();
+});
+
+// Dynamic viewport height tracking - prevents scrollbars on mobile
+// iOS Safari address bar and Android Chrome bottom nav cause viewport changes
+// Using CSS custom property allows vh units to adapt to actual viewport
+function setDynamicViewportHeight() {
+  const vh = window.innerHeight * 0.01;
+  document.documentElement.style.setProperty('--vh', `${vh}px`);
+
+  clientConsole(2, `[MO1] Set dynamic viewport height: ${vh}px per 1vh`);
+}
+
+// Update on resize (orientation change, window resize)
+window.addEventListener('resize', setDynamicViewportHeight);
+
+// Update on orientation change (mobile rotation)
+window.addEventListener('orientationchange', () => {
+  // Small delay to let browser finish orientation change
+  setTimeout(setDynamicViewportHeight, 100);
 });
 
 // Register the isInRole helper for templates (Meteor 3.0 compatibility)

@@ -828,7 +828,8 @@ tfoot tf, .table tfoot tf, .table tfoot td, .table tfoot th {
     /*this is a backround image that needs to be top-center and not repeat, and contained within the div*/
     background-position: top center;
     background-repeat: no-repeat;
-    height:50vh;
+    height: 50vh;
+    height: calc(var(--vh, 1vh) * 50); /* MO1: Dynamic vh */
     width: 100%;
     background-size: contain;
 }
@@ -836,6 +837,7 @@ tfoot tf, .table tfoot tf, .table tfoot td, .table tfoot th {
 /*video unit question background */
 .questionContainer{
     height: 65vh;
+    height: calc(var(--vh, 1vh) * 65); /* MO1: Dynamic vh */
     border-radius: var(--border-radius);
     padding: 10px;
     background: var(--background-color);
@@ -843,12 +845,14 @@ tfoot tf, .table tfoot tf, .table tfoot td, .table tfoot th {
     border: 1px solid var(--accent-color);
     box-shadow: 0 0 10px var(--accent-color);
     margin-top: 10vh;
+    margin-top: calc(var(--vh, 1vh) * 10); /* MO1: Dynamic vh */
 }
 
 /* Image containers - smaller but responsive */
 #displaySubContainer .vh-50 {
     height: auto;
     max-height: clamp(250px, 35vh, 400px);  /* 250px-400px range, responsive */
+    max-height: clamp(250px, calc(var(--vh, 1vh) * 35), 400px); /* MO1: Dynamic vh */
 }
 
 #imageDisplay .imgDisplay-container {
@@ -858,6 +862,7 @@ tfoot tf, .table tfoot tf, .table tfoot td, .table tfoot th {
 
 .stimulus-image {
     max-height: clamp(250px, 35vh, 400px);
+    max-height: clamp(250px, calc(var(--vh, 1vh) * 35), 400px); /* MO1: Dynamic vh */
     max-width: 100%;
     object-fit: contain;
     margin-bottom: clamp(0.5rem, 1vh, 0.75rem);  /* Consistent bottom spacing */
@@ -988,48 +993,63 @@ tfoot tf, .table tfoot tf, .table tfoot td, .table tfoot th {
 }
 
 /* utility classes */
+/* MO1: Dynamic viewport height utilities - prevents scrollbars on mobile */
+/* iOS Safari address bar and Android Chrome bottom nav cause viewport changes */
+/* Using --vh custom property set by JavaScript (see client/index.js) */
+
 .vh-100 {
-    height: 100vh;
-}
-
-.vh-50 {
-    height: 50vh;
-}
-
-.vh-25 {
-    height: 25vh;
+    height: 100vh; /* Fallback for browsers without custom properties */
+    height: calc(var(--vh, 1vh) * 100); /* Dynamic - updates with actual viewport */
 }
 
 .vh-75 {
     height: 75vh;
+    height: calc(var(--vh, 1vh) * 75);
 }
 
-.vh-5{
-    height: 5vh;
-}
-
-.vh-10 {
-    height: 10vh;
-}
-
-.vh-15 {
-    height: 15vh;
-}
-
-.vh-20 {
-    height: 20vh;
-}
-
-.vh-30 {
-    height: 30vh;
-}
-
-.vh-35{
-    height: 35vh;
+.vh-50 {
+    height: 50vh;
+    height: calc(var(--vh, 1vh) * 50);
 }
 
 .vh-40{
     height: 40vh;
+    height: calc(var(--vh, 1vh) * 40);
+}
+
+.vh-35{
+    height: 35vh;
+    height: calc(var(--vh, 1vh) * 35);
+}
+
+.vh-30 {
+    height: 30vh;
+    height: calc(var(--vh, 1vh) * 30);
+}
+
+.vh-25 {
+    height: 25vh;
+    height: calc(var(--vh, 1vh) * 25);
+}
+
+.vh-20 {
+    height: 20vh;
+    height: calc(var(--vh, 1vh) * 20);
+}
+
+.vh-15 {
+    height: 15vh;
+    height: calc(var(--vh, 1vh) * 15);
+}
+
+.vh-10 {
+    height: 10vh;
+    height: calc(var(--vh, 1vh) * 10);
+}
+
+.vh-5{
+    height: 5vh;
+    height: calc(var(--vh, 1vh) * 5);
 }
 
 .width-100-percent{
@@ -1124,6 +1144,7 @@ tfoot tf, .table tfoot tf, .table tfoot td, .table tfoot th {
     .fixed-btm{
         position: absolute;
         bottom: 5vh;
+        bottom: calc(var(--vh, 1vh) * 5); /* MO1: Dynamic vh */
         width:75vw;
         max-width: 500px;
     }
@@ -1148,17 +1169,20 @@ tfoot tf, .table tfoot tf, .table tfoot td, .table tfoot th {
     .fixed-btm{
         position: absolute;
         bottom: 5vh;
+        bottom: calc(var(--vh, 1vh) * 5); /* MO1: Dynamic vh */
         width:90vw;
         max-width: 500px;
     }
 
     .modal-expanded{
         height: 80vh !important;
+        height: calc(var(--vh, 1vh) * 80) !important; /* MO1: Dynamic vh */
         top: 20% !important;
     }
 
     .modal-dialog{
         height: 50vh;
+        height: calc(var(--vh, 1vh) * 50); /* MO1: Dynamic vh */
         position: fixed;
         top: 50%;
         width: 90vw;
@@ -1269,6 +1293,7 @@ tfoot tf, .table tfoot tf, .table tfoot td, .table tfoot th {
     /* Smaller images on mobile to fit screen */
     .stimulus-image {
         max-height: clamp(200px, 30vh, 300px); /* Smaller than desktop 35vh */
+        max-height: clamp(200px, calc(var(--vh, 1vh) * 30), 300px); /* MO1: Dynamic vh */
     }
 
     /* Full-width feedback on mobile with minimal margins */
