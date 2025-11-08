@@ -113,13 +113,19 @@
                             {{#if imageCard}}
                             <div class="h2 vh-50" id="imageDisplay">
                                 <div class="w-100 text-center">
-                                    <img src="{{curImgSrc}}" width="{{curImgWidth}}" height="{{curImgHeight}}" class="img-responsive stimulus-image" alt="Image display">
+                                    <img src="{{curImgSrc}}"
+                                         width="{{curImgWidth}}"
+                                         height="{{curImgHeight}}"
+                                         loading="lazy"
+                                         decoding="async"
+                                         class="img-responsive stimulus-image"
+                                         alt="Image display">
                                 </div>
                             </div>
                             {{/if}}
                             {{#if videoCard}}
-                                <video autoplay preload="metadata">
-                                    <source src="{{curVideoSrc}}">
+                                <video autoplay preload="metadata" playsinline>
+                                    <source src="{{curVideoSrc}}" type="video/mp4">
                                     Your browser does not support the video tag.
                                 </video>
                             {{/if}}
