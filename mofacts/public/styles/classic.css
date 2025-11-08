@@ -1307,6 +1307,67 @@ tfoot tf, .table tfoot tf, .table tfoot td, .table tfoot th {
   contain: layout style;
 }
 
+/* Additional CSS containment for card components - prevents overflow and layout shifts */
+#trialContentWrapper {
+  contain: layout;
+}
+
+.input-box {
+  contain: layout style;
+}
+
+#multipleChoiceContainer {
+  contain: layout style;
+}
+
+#displaySubContainer {
+  contain: layout style paint;
+}
+
+#userInteractionContainer {
+  contain: layout style;
+}
+
+#feedbackOverrideContainer {
+  contain: layout style;
+}
+
+#correctAnswerDisplayContainer {
+  contain: layout style;
+}
+
+.scrollHistoryContainer {
+  contain: layout; /* Just layout, allows text overflow */
+}
+
+#userLowerInteractionContainer {
+  contain: layout style;
+}
+
+.video-section-spacing {
+  contain: layout style;
+}
+
+#videoUnitContainer {
+  contain: layout style paint;
+}
+
+.questionContainer {
+  contain: layout style paint;
+}
+
+.removalContainer {
+  contain: layout style;
+}
+
+#postCardContainer {
+  contain: layout;
+}
+
+#continueBar {
+  contain: layout style;
+}
+
 /* Trial content visibility - avoids DOM teardown/rebuild */
 /* JavaScript in card.js reads this CSS variable dynamically to sync timing */
 /* Using smooth transitions (200ms) for FADING_IN/FADING_OUT states */
