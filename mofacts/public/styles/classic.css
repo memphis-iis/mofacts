@@ -95,18 +95,18 @@ body {
 /* General Styles */
 h1{
     font-weight: 800;
-    font-size: 4.6rem;
+    font-size: clamp(2.5rem, 5vw, 4.6rem); /* MO7: Responsive font sizing */
 }
 
 h2{
-    font-size: 2rem;
+    font-size: clamp(1.5rem, 3vw, 2rem); /* MO7: Responsive font sizing */
     font-weight: 700;
     margin-top: clamp(1.5rem, 3vh, 2rem);
     margin-bottom: clamp(1rem, 2vh, 1.5rem);
 }
 
 h3{
-    font-size: 1.5rem;
+    font-size: clamp(1.25rem, 2.5vw, 1.5rem); /* MO7: Responsive font sizing */
     font-weight: 800;
     margin-top: clamp(1.25rem, 2.5vh, 1.75rem);
     margin-bottom: clamp(0.75rem, 1.5vh, 1.25rem);
@@ -438,7 +438,7 @@ input[type="range"]::-moz-range-progress,
     width: 50px;
     height: 50px;
     /* font size should be 50px */
-    font-size: 3.13rem;
+    font-size: clamp(2rem, 4vw, 3.13rem); /* MO7: Responsive font sizing */
     /* circle */
     border-radius: var(--border-radius-circle);
 }
@@ -721,7 +721,7 @@ tfoot tf, .table tfoot tf, .table tfoot td, .table tfoot th {
 .navbar-brand{
     color: var(--navbar-text-color);
     font-weight: 800;
-    font-size: 1.5rem;
+    font-size: clamp(1.25rem, 2.5vw, 1.5rem); /* MO7: Responsive font sizing */
     display: flex;
     align-items: center;
 }
@@ -771,7 +771,7 @@ tfoot tf, .table tfoot tf, .table tfoot td, .table tfoot th {
 }
 
 .offcanvas-title {
-    font-size: 1.5rem;
+    font-size: clamp(1.25rem, 2.5vw, 1.5rem); /* MO7: Responsive font sizing */
     font-weight: 700;
 }
 
@@ -811,7 +811,7 @@ tfoot tf, .table tfoot tf, .table tfoot td, .table tfoot th {
     margin-left: 0.625rem;
     padding: 3vh;
     border-radius: var(--border-radius-none);
-    font-size: 1.75rem;
+    font-size: clamp(1.25rem, 3vw, 1.75rem); /* MO7: Responsive font sizing */
     font-weight: bold;
     text-align: center;
 }
