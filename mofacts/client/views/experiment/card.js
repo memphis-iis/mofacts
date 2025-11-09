@@ -27,25 +27,8 @@ import {Answers} from './answerAssess';
 import {sessionCleanUp} from '../../lib/sessionUtils';
 import {checkUserSession} from '../../index'
 import {instructContinue, unitHasLockout, checkForFileImage} from './instructions';
-import DOMPurify from 'dompurify';
+import {sanitizeHTML, nextChar, levenshteinDistance} from '../../lib/stringUtils';
 import {doubleMetaphone} from 'double-metaphone';
-
-// Security: HTML sanitization for user-generated content
-// Allow safe formatting tags but block scripts, iframes, and event handlers
-function sanitizeHTML(dirty) {
-  if (!dirty) return '';
-
-  return DOMPurify.sanitize(dirty, {
-    ALLOWED_TAGS: ['b', 'i', 'em', 'strong', 'u', 'br', 'p', 'span', 'div',
-                   'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
-                   'table', 'tr', 'td', 'th', 'thead', 'tbody',
-                   'ul', 'ol', 'li', 'center', 'a', 'img', 'audio', 'source'],
-    ALLOWED_ATTR: ['style', 'class', 'id', 'border', 'href', 'src', 'alt', 'width', 'height', 'controls', 'preload', 'data-audio-id'],
-    ALLOWED_URI_REGEXP: /^(?:(?:(?:f|ht)tps?|mailto|tel|callto|sms|cid|xmpp|blob):|[^a-z]|[a-z+.\-]+(?:[^a-z+.\-:]|$))/i,
-    FORBID_TAGS: ['script', 'iframe', 'object', 'embed', 'form', 'input', 'button'],
-    FORBID_ATTR: ['onerror', 'onload', 'onclick', 'onmouseover', 'onfocus', 'onblur']
-  });
-}
 
 // Helper function to check if audio input mode is enabled
 function checkAudioInputMode() {
@@ -390,10 +373,6 @@ if (Meteor.isDevelopment) {
 // technically seconds since unit RESUME began (when we set currentUnitStartTime)
 function elapsedSecs() {
   return (Date.now() - Session.get('currentUnitStartTime')) / 1000.0;
-}
-
-function nextChar(c) {
-  return String.fromCharCode(c.charCodeAt(0) + 1);
 }
 
 // Note that this isn't just a convenience function - it should be called
@@ -4679,35 +4658,6 @@ function tryPhoneticMatch(spokenWord, grammarList, phoneticIndex = null) {
 
   clientConsole(2, `[SR] No phonetic match found`);
   return null;
-}
-
-// Levenshtein distance (edit distance) between two strings
-function levenshteinDistance(str1, str2) {
-  const matrix = [];
-
-  for (let i = 0; i <= str2.length; i++) {
-    matrix[i] = [i];
-  }
-
-  for (let j = 0; j <= str1.length; j++) {
-    matrix[0][j] = j;
-  }
-
-  for (let i = 1; i <= str2.length; i++) {
-    for (let j = 1; j <= str1.length; j++) {
-      if (str2.charAt(i - 1) === str1.charAt(j - 1)) {
-        matrix[i][j] = matrix[i - 1][j - 1];
-      } else {
-        matrix[i][j] = Math.min(
-          matrix[i - 1][j - 1] + 1, // substitution
-          matrix[i][j - 1] + 1,     // insertion
-          matrix[i - 1][j] + 1      // deletion
-        );
-      }
-    }
-  }
-
-  return matrix[str2.length][str1.length];
 }
 
 // Speech recognition function to process audio data, this is called by the web worker
