@@ -394,6 +394,9 @@ Router.route('/contentUpload', {
 
 Router.route('/adminControls', {
   name: 'client.adminControls',
+  waitOn: function() {
+    return Meteor.subscribe('meteor.loginServiceConfiguration');
+  },
   action: function() {
     if(Meteor.user() && (Meteor.user() && Meteor.user().roles && (['admin']).some(role => Meteor.user().roles.includes(role)))){
       this.render('adminControls');
@@ -403,8 +406,25 @@ Router.route('/adminControls', {
   }
 })
 
+Router.route('/admin/tests', {
+  name: 'client.adminTests',
+  waitOn: function() {
+    return Meteor.subscribe('meteor.loginServiceConfiguration');
+  },
+  action: function() {
+    if(Meteor.user() && (Meteor.user() && Meteor.user().roles && (['admin']).some(role => Meteor.user().roles.includes(role)))){
+      this.render('testRunner');
+    } else {
+      this.redirect('/');
+    }
+  }
+})
+
 Router.route('/theme', {
   name: 'client.theme',
+  waitOn: function() {
+    return Meteor.subscribe('meteor.loginServiceConfiguration');
+  },
   action: function() {
     if(Meteor.user() && (Meteor.user() && Meteor.user().roles && (['admin']).some(role => Meteor.user().roles.includes(role)))){
       Session.set('curModule', 'theme');

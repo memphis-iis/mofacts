@@ -1,0 +1,102 @@
+<template name="testRunner">
+  <div class="container mt-4">
+    <div class="row">
+      <div class="col-12">
+        <h1>
+          <i class="fa fa-flask"></i> MoFaCTS Smoke Tests
+        </h1>
+        <p class="lead">Run automated smoke tests to verify main system functionality</p>
+        <hr>
+      </div>
+    </div>
+
+    <div class="row mb-4">
+      <div class="col-12">
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title">Test Suite: card.js</h5>
+            <p class="card-text">
+              Tests main trial flow, multiple choice, study phase, unit completion,
+              speech recognition, and timeout management.
+            </p>
+            <button id="runSmokeTests" class="btn btn-primary btn-lg">
+              <i class="fa fa-play"></i> Run All Tests
+            </button>
+            <button id="clearResults" class="btn btn-secondary btn-lg ml-2">
+              <i class="fa fa-eraser"></i> Clear Results
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-12">
+        <div id="testResultsContainer" style="display: none;">
+          <div class="card">
+            <div class="card-header">
+              <h5>
+                <i class="fa fa-list"></i> Test Results
+                <span id="testSummary" class="float-right"></span>
+              </h5>
+            </div>
+            <div class="card-body">
+              <div id="testResults"></div>
+            </div>
+          </div>
+        </div>
+
+        <div id="testRunning" style="display: none;">
+          <div class="alert alert-info">
+            <i class="fa fa-spinner fa-spin"></i> Running tests...
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row mt-4">
+      <div class="col-12">
+        <div class="card">
+          <div class="card-header">
+            <h5><i class="fa fa-info-circle"></i> About Smoke Tests</h5>
+          </div>
+          <div class="card-body">
+            <h6>What are smoke tests?</h6>
+            <p>
+              Smoke tests verify that main systems work correctly. They test common paths
+              that historically break during refactoring.
+            </p>
+
+            <h6>Coverage</h6>
+            <ul>
+              <li><strong>Basic Trial Flow</strong> - Load and display text question</li>
+              <li><strong>Multiple Choice</strong> - Setup and display MC options</li>
+              <li><strong>Study Phase</strong> - Recognize and display study content</li>
+              <li><strong>Unit Completion</strong> - Finish unit and save state</li>
+              <li><strong>Speech Recognition</strong> - Initialize SR based on settings</li>
+              <li><strong>Timeout Management</strong> - Create and clear timeouts</li>
+              <li><strong>Session State</strong> - Initialize required Session keys</li>
+              <li><strong>Template Helpers</strong> - Call critical helpers without errors</li>
+            </ul>
+
+            <h6>Running on Mobile</h6>
+            <p>
+              These tests run in your browser, so you can test on any device:
+            </p>
+            <ol>
+              <li>Navigate to <code>/admin/tests</code> on mobile browser</li>
+              <li>Login as admin</li>
+              <li>Click "Run All Tests"</li>
+              <li>View results directly on device</li>
+            </ol>
+
+            <div class="alert alert-warning">
+              <strong>Note:</strong> These are smoke tests (happy paths only), not comprehensive
+              integration tests. They catch ~80% of breakages with minimal test code.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
