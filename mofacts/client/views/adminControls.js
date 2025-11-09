@@ -1,6 +1,9 @@
 // PHASE 1.5: Removed unused getCurrentTheme import - now uses reactive subscription
 
 Template.adminControls.onCreated(async function() {
+    // Subscribe to DynamicSettings collection to get client verbosity level
+    this.subscribe('settings');
+
     try {
         const verbosity = await Meteor.callAsync('getVerbosity');
         console.log("Got verbosity: " + verbosity);
@@ -24,23 +27,30 @@ Template.adminControls.onCreated(async function() {
     } catch (err) {
         console.log("Error getting server status:", err);
     }
+
+    // Initialize clientVerbosityLevel if it doesn't exist (server-side)
+    try {
+        await Meteor.callAsync('ensureClientVerbositySetting');
+    } catch (err) {
+        console.log("Error initializing client verbosity setting:", err);
+    }
 });
 
-Template.adminControls.onRendered(async function() {
-        //get client verbosity level
-        clientVerbosityLevel = DynamicSettings.findOne({key: 'clientVerbosityLevel'}).value.toString();
-        //if client verbosity level is not set, set it to 0
-        if (clientVerbosityLevel === undefined) {
-            clientVerbosityLevel = "0"
-            console.log("clientVerbosityLevel not set, setting to 0");
-            DynamicSettings.insert({key: 'clientVerbosityLevel', value: clientVerbosityLevel});
+Template.adminControls.onRendered(function() {
+    // Reactively check the client verbosity radio button when data is ready
+    this.autorun(() => {
+        const settingDoc = DynamicSettings.findOne({key: 'clientVerbosityLevel'});
+        if (settingDoc && settingDoc.value !== undefined) {
+            const clientVerbosityLevel = settingDoc.value.toString();
+            const radioId = `clientVerbosityRadio${clientVerbosityLevel}`;
+            console.log("Setting client verbosity radio:", radioId);
+            const radioElement = document.getElementById(radioId);
+            if (radioElement) {
+                radioElement.checked = true;
+            }
         }
-        //set the name of the radio button to be checked
-        const name = `clientVerbosityRadio${clientVerbosityLevel}`;
-        console.log("clientVerbosityLevel: " + name);
-        //check the radio button
-        document.getElementById(name).checked = true;
     });
+});
 
 Template.adminControls.helpers({
     'serverStatus': function() {
@@ -52,7 +62,8 @@ Template.adminControls.helpers({
         };
     },
     'testLoginsEnabled': function() {
-        return DynamicSettings.findOne({key: 'testLoginsEnabled'}).value;
+        const settingDoc = DynamicSettings.findOne({key: 'testLoginsEnabled'});
+        return settingDoc ? settingDoc.value : false;
     }
 });
 
@@ -65,18 +76,27 @@ Template.adminControls.events({
         Meteor.callAsync('setVerbosity', verbosity);
     },
     'click .clientVerbosityRadio': function(event) {
-        console.log("verbosityRadio clicked");
-        let _id = DynamicSettings.findOne({key: 'clientVerbosityLevel'})._id;
+        console.log("clientVerbosityRadio clicked");
+        const settingDoc = DynamicSettings.findOne({key: 'clientVerbosityLevel'});
+        if (!settingDoc) {
+            console.error("clientVerbosityLevel setting not found in database");
+            return;
+        }
         const name = event.currentTarget.getAttribute('id');
         const start = name.length - 1;
-        const verbosity = _.intval(name.slice(start, name.length))
-        DynamicSettings.update({_id: _id}, {$set: {value: verbosity}});
+        const verbosity = parseInt(name.slice(start, name.length), 10);
+        DynamicSettings.update({_id: settingDoc._id}, {$set: {value: verbosity}});
     },
     'click #testLoginsCheckbox': function(event) {
         console.log("testLoginsCheckbox clicked");
-        let _id = DynamicSettings.findOne({key: 'testLoginsEnabled'})._id;
+        const settingDoc = DynamicSettings.findOne({key: 'testLoginsEnabled'});
         const testLoginsEnabled = $('#testLoginsCheckbox').prop('checked');
-        DynamicSettings.update({_id: _id}, {$set: {value: testLoginsEnabled}});
+        if (settingDoc) {
+            DynamicSettings.update({_id: settingDoc._id}, {$set: {value: testLoginsEnabled}});
+        } else {
+            // If setting doesn't exist, it will be created by a server method if needed
+            console.warn("testLoginsEnabled setting not found in database");
+        }
     },
     'click #updateStimDisplayTypeMap': async function(event) {
         try {

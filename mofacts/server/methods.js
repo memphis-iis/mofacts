@@ -4052,6 +4052,20 @@ export const methods = {
     return await DynamicSettings.findOneAsync({key: 'testLoginsEnabled'}).value;
   },
 
+  ensureClientVerbositySetting: async function() {
+    // Ensure clientVerbosityLevel setting exists in database
+    // This is a global admin-controlled setting, not a per-user preference
+    const existing = await DynamicSettings.findOneAsync({key: 'clientVerbosityLevel'});
+    if (!existing) {
+      await DynamicSettings.insertAsync({
+        key: 'clientVerbosityLevel',
+        value: 0  // Default: no logging (fastest)
+      });
+      serverConsole('Initialized clientVerbosityLevel setting to 0');
+    }
+    return existing ? existing.value : 0;
+  },
+
   getTdfsByOwnerId: async (ownerId) => {
     const tdfs =  await Tdfs.find({'ownerId': ownerId}).fetchAsync();
     return tdfs || [];
