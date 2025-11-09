@@ -4068,7 +4068,7 @@ export const methods = {
 
   setClientVerbosity: async function(level) {
     // Only admins can change client verbosity (global setting)
-    if (!Roles.userIsInRole(this.userId, ['admin'])) {
+    if (!await Roles.userIsInRoleAsync(this.userId, ['admin'])) {
       throw new Meteor.Error('not-authorized', 'Only admins can change client verbosity level');
     }
 
