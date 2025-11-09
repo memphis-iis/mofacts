@@ -28,6 +28,7 @@ import {sessionCleanUp} from '../../lib/sessionUtils';
 import {checkUserSession} from '../../index'
 import {instructContinue, unitHasLockout, checkForFileImage} from './instructions';
 import {sanitizeHTML, nextChar, levenshteinDistance} from '../../lib/stringUtils';
+import {parseSchedItemCondition} from '../../lib/tdfUtils';
 import {doubleMetaphone} from 'double-metaphone';
 
 // Helper function to check if audio input mode is enabled
@@ -3336,26 +3337,6 @@ function gatherAnswerLogRecord(trialEndTimeStamp, trialStartTimeStamp, source, u
     'entryPoint': Meteor.user().loginParams.entryPoint
   };
   return answerLogRecord;
-}
-
-// Helper to parse a schedule condition - see note above about 0 and 1 based
-// indexes for why we do some of our manipulation below
-function parseSchedItemCondition(cond) {
-  if (typeof cond === 'undefined' || !cond) {
-    return 'UNKNOWN';
-  }
-
-  const fields = _.trim('' + cond).split('-');
-  if (fields.length !== 2) {
-    return cond;
-  }
-
-  const num = parseInt(fields[1]);
-  if (isNaN(num)) {
-    return cond;
-  }
-
-  return fields[0] + '_' + (num + 1).toString();
 }
 
 function findQTypeSimpified() {
