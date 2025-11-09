@@ -10,7 +10,9 @@
 
 import { doubleMetaphone } from 'double-metaphone';
 import { levenshteinDistance } from './stringUtils';
-import { clientConsole } from '../index';
+
+// Note: clientConsole is available as a global (window.clientConsole) set by index.js
+// Accessing it directly avoids circular dependency (index.js → card.js → phoneticUtils.js → index.js)
 
 // Module-level cache for phonetic codes to avoid redundant computation
 const phoneticCache = new Map();
