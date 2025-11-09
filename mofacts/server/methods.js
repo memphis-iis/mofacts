@@ -4066,6 +4066,26 @@ export const methods = {
     return existing ? existing.value : 0;
   },
 
+  setClientVerbosity: async function(level) {
+    // Only admins can change client verbosity (global setting)
+    if (!Roles.userIsInRole(this.userId, ['admin'])) {
+      throw new Meteor.Error('not-authorized', 'Only admins can change client verbosity level');
+    }
+
+    level = parseInt(level, 10);
+    if (level < 0 || level > 2) {
+      throw new Meteor.Error('invalid-value', 'Verbosity level must be 0, 1, or 2');
+    }
+
+    await DynamicSettings.updateAsync(
+      {key: 'clientVerbosityLevel'},
+      {$set: {value: level}}
+    );
+
+    serverConsole(`Client verbosity level changed to ${level} by ${this.userId}`);
+    return level;
+  },
+
   getTdfsByOwnerId: async (ownerId) => {
     const tdfs =  await Tdfs.find({'ownerId': ownerId}).fetchAsync();
     return tdfs || [];
@@ -4857,8 +4877,19 @@ Meteor.startup(async function() {
   highestStimuliSetId = await Tdfs.findOneAsync({}, {sort: {stimuliSetId: -1}, limit: 1 });
   nextEventId = await Histories.findOneAsync({}, {limit: 1, sort: {eventId: -1}})?.eventId + 1 || 1;
   nextStimuliSetId = highestStimuliSetId && highestStimuliSetId.stimuliSetId ? parseInt(highestStimuliSetId.stimuliSetId) + 1 : 1;
-  await DynamicSettings.upsertAsync({key: 'clientVerbosityLevel'}, {$set: {value: 1}});
-  await DynamicSettings.upsertAsync({key: 'testLoginsEnabled'}, {$set: {value: false}});
+
+  // Initialize settings only if they don't exist (don't overwrite admin changes on restart!)
+  const existingClientVerbosity = await DynamicSettings.findOneAsync({key: 'clientVerbosityLevel'});
+  if (!existingClientVerbosity) {
+    await DynamicSettings.insertAsync({key: 'clientVerbosityLevel', value: 1});
+    serverConsole('Initialized clientVerbosityLevel to default: 1');
+  }
+
+  const existingTestLogins = await DynamicSettings.findOneAsync({key: 'testLoginsEnabled'});
+  if (!existingTestLogins) {
+    await DynamicSettings.insertAsync({key: 'testLoginsEnabled', value: false});
+    serverConsole('Initialized testLoginsEnabled to default: false');
+  }
 
 
   // Let anyone looking know what config is in effect

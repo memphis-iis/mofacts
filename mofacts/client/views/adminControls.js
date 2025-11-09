@@ -75,17 +75,29 @@ Template.adminControls.events({
         const verbosity = name.slice(start, name.length)
         Meteor.callAsync('setVerbosity', verbosity);
     },
-    'click .clientVerbosityRadio': function(event) {
+    'click .clientVerbosityRadio': async function(event) {
         console.log("clientVerbosityRadio clicked");
-        const settingDoc = DynamicSettings.findOne({key: 'clientVerbosityLevel'});
-        if (!settingDoc) {
-            console.error("clientVerbosityLevel setting not found in database");
-            return;
-        }
         const name = event.currentTarget.getAttribute('id');
         const start = name.length - 1;
-        const verbosity = parseInt(name.slice(start, name.length), 10);
-        DynamicSettings.update({_id: settingDoc._id}, {$set: {value: verbosity}});
+        const verbosity = name.slice(start, name.length);
+
+        try {
+            await Meteor.callAsync('setClientVerbosity', verbosity);
+            console.log(`Client verbosity set to ${verbosity}`);
+        } catch (err) {
+            console.error("Error setting client verbosity:", err);
+            alert(`Error: ${err.message}`);
+            // Revert radio button on error
+            const currentDoc = DynamicSettings.findOne({key: 'clientVerbosityLevel'});
+            if (currentDoc) {
+                const currentValue = currentDoc.value.toString();
+                const radioId = `clientVerbosityRadio${currentValue}`;
+                const radioElement = document.getElementById(radioId);
+                if (radioElement) {
+                    radioElement.checked = true;
+                }
+            }
+        }
     },
     'click #testLoginsCheckbox': function(event) {
         console.log("testLoginsCheckbox clicked");
