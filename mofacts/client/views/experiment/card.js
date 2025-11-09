@@ -5081,6 +5081,12 @@ function speechAPICallback(err, data){
     startRecording();
     // Status messages are shown in SR icon/message display, not in input field
   } else {
+    // FIX: Clear timeout when SR completes successfully with valid transcript
+    // This prevents race condition where timeout fires after SR completes,
+    // reading the SR transcript from textbox and appending " [timeout]" to it
+    // Result without fix: "portugal [timeout]" instead of "portugal"
+    clearCardTimeout();
+
     // Only simulate enter key press if we picked up transcribable/in grammar
     // audio for better UX
     if (getButtonTrial()) {
