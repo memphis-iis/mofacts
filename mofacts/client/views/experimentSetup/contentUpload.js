@@ -301,9 +301,21 @@ Template.contentUpload.events({
   },
   'click .imageLink'(e) {
     const url = $(e.currentTarget).data('link');
-    const img = '<img src="'+url+'">';
+
+    // MO8: Use DOM createElement for security and proper image optimization
+    // SECURITY: Prevents XSS via proper DOM API instead of HTML string concatenation
     const popup = window.open();
-    popup.document.write(img);                        
+
+    // Create proper HTML structure with image attributes
+    const img = popup.document.createElement('img');
+    img.src = url; // Safe - no string concatenation
+    img.alt = 'Uploaded content preview'; // Accessibility
+    img.loading = 'eager'; // Intentional preview, load immediately
+    img.decoding = 'async'; // Non-blocking decode
+    img.style.maxWidth = '100%'; // Ensure image fits in popup
+    img.style.height = 'auto'; // Maintain aspect ratio
+
+    popup.document.body.appendChild(img);
     popup.print();
   },
   'click #add-access-btn': function(event){

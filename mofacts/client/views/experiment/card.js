@@ -2661,10 +2661,37 @@ async function showUserFeedback(isCorrect, feedbackMessage, isTimeout, isSkip) {
   if (!isCorrect && isButtonTrial && getResponseType() == 'image') {
     const buttonImageFeedback = 'Incorrect.  The correct response is displayed below.';
     const correctImageSrc = experimentState.originalAnswer;
-    $('#UserInteraction').html('<p class="text-align alert">' + buttonImageFeedback +
-      '</p><img style="background: url(' + correctImageSrc +
-      '); background-size:100%; background-repeat: no-repeat;" disabled="" \
-      class="btn-alt btn-block btn-image btn-responsive">').removeAttr('hidden');
+
+    // MO8: Use DOM createElement for security and proper image optimization
+    // SECURITY: Prevents XSS via proper DOM API instead of HTML string concatenation
+    // ACCESSIBILITY: Proper <img> element with alt text instead of CSS background
+    const userInteractionEl = document.getElementById('UserInteraction');
+    userInteractionEl.innerHTML = ''; // Clear existing content
+
+    // Create feedback text
+    const feedbackText = document.createElement('p');
+    feedbackText.className = 'text-align alert';
+    feedbackText.textContent = buttonImageFeedback; // textContent prevents XSS
+    userInteractionEl.appendChild(feedbackText);
+
+    // Create image element with proper attributes for mobile excellence
+    const feedbackImage = document.createElement('img');
+    feedbackImage.src = correctImageSrc; // Proper img element, not CSS background
+    feedbackImage.alt = 'Correct answer image'; // Accessibility
+    feedbackImage.className = 'btn-alt btn-block btn-image btn-responsive';
+    feedbackImage.loading = 'eager'; // Appears immediately after answer, should load fast
+    feedbackImage.decoding = 'sync'; // Small feedback image, want immediate display
+    feedbackImage.fetchpriority = 'high'; // User just answered, this is critical feedback
+
+    // Get image dimensions from imagesDict if available (prevents CLS)
+    if (imagesDict && imagesDict[correctImageSrc]) {
+      const imgData = imagesDict[correctImageSrc];
+      if (imgData.naturalWidth) feedbackImage.width = imgData.naturalWidth;
+      if (imgData.naturalHeight) feedbackImage.height = imgData.naturalHeight;
+    }
+
+    userInteractionEl.appendChild(feedbackImage);
+    $(userInteractionEl).removeAttr('hidden');
   } else {
     //check if the feedback has the word "incorrect" or "correct" in it, if so, encase it in a bold tag and a new line before it and after it
       singleLineFeedback = uiSettings.singleLineFeedback;

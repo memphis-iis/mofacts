@@ -340,7 +340,13 @@
                             {{#if currentTheme.properties.logo_url}}
                             <button type="button" id="clearLogo" class="btn btn-secondary btn-sm" style="margin-top: 0.5rem;">Clear Logo</button>
                             <div style="margin-top: 0.5rem;">
-                                <img src="{{currentTheme.properties.logo_url}}" alt="Logo preview" class="img-thumbnail" style="max-width: 200px;">
+                                <img src="{{currentTheme.properties.logo_url}}"
+                                     alt="Logo preview"
+                                     class="img-thumbnail"
+                                     loading="lazy"
+                                     decoding="async"
+                                     fetchpriority="low"
+                                     style="max-width: 200px;">
                             </div>
                             {{/if}}
                         </div>

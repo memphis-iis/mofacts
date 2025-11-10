@@ -5,7 +5,14 @@
             <div class="col-md-5 col-12">
                 <h2 class="mt-0 d-flex align-items-center">
                     {{#if currentTheme.properties.logo_url}}
-                        <img src="{{currentTheme.properties.logo_url}}" alt="Logo" style="height: 40px; margin-right: 10px;">
+                        <img src="{{currentTheme.properties.logo_url}}"
+                             alt="{{currentTheme.properties.themeName}} Logo"
+                             width="40"
+                             height="40"
+                             loading="eager"
+                             decoding="async"
+                             fetchpriority="high"
+                             style="height: 40px; margin-right: 10px;">
                     {{/if}}
                     <span>{{currentTheme.properties.themeName}}</span>
                 </h2>
@@ -41,11 +48,25 @@
                         {{/if}}
                         <button type="button" id="signUpButton" class="btn btn-fixed">Sign Up</button>
                         <button type="button" id="signInButtonOAuth" class="btn btn-fixed">
-                            <img width="20px" class="mb-1 me-1" alt="Google sign-in" src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/1024px-Google_%22G%22_logo.svg.png" />
+                            <img width="20"
+                                 height="20"
+                                 class="mb-1 me-1"
+                                 alt="Google sign-in"
+                                 loading="eager"
+                                 decoding="async"
+                                 fetchpriority="low"
+                                 src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/1024px-Google_%22G%22_logo.svg.png" />
                             Sign in with Google
                         </button>
                         <button type="button" id="signInWithMicrosoftSSO" class="btn btn-fixed">
-                            <img width="20px" class="mb-1 me-1" alt="Microsoft sign-in" src="https://upload.wikimedia.org/wikipedia/commons/4/44/Microsoft_logo.svg" />
+                            <img width="20"
+                                 height="20"
+                                 class="mb-1 me-1"
+                                 alt="Microsoft sign-in"
+                                 loading="eager"
+                                 decoding="async"
+                                 fetchpriority="low"
+                                 src="https://upload.wikimedia.org/wikipedia/commons/4/44/Microsoft_logo.svg" />
                             Sign in with Microsoft
                         </button>
                         <button data-bs-toggle="modal" class="btn btn-fixed btn-secondary" id="classSelectButton" data-bs-target="#classSelectModal">

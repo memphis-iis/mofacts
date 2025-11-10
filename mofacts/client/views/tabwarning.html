@@ -13,7 +13,14 @@
 
                 <h3 style="margin-top: 0; text-align: center;">
                     {{#if currentTheme.properties.logo_url}}
-                        <img src="{{currentTheme.properties.logo_url}}" alt="Logo" style="height: 40px; margin-right: 15px; vertical-align: middle;">
+                        <img src="{{currentTheme.properties.logo_url}}"
+                             alt="{{currentTheme.properties.themeName}} Logo"
+                             width="40"
+                             height="40"
+                             loading="eager"
+                             decoding="async"
+                             fetchpriority="auto"
+                             style="height: 40px; margin-right: 15px; vertical-align: middle;">
                     {{/if}}
                     Multiple Tabs Detected
                 </h3>
