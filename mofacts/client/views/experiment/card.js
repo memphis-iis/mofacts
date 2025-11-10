@@ -239,6 +239,10 @@ turn it on, you need to set <showhistory>true</showhistory> in the
 // Use ReactiveDict for card-specific state instead of global Session
 // This prevents memory leaks and improves performance
 const cardState = new ReactiveDict('cardState');
+// M3: Additional scoped ReactiveDict instances for specialized state management
+const srState = new ReactiveDict('speechRecognition'); // Speech recognition state
+const trialState = new ReactiveDict('trialStateMachine'); // Trial FSM state
+const timeoutState = new ReactiveDict('timeouts'); // Timeout tracking
 
 let engine = null; // The unit engine for display (i.e. model or schedule)
 const hark = require('../../lib/hark');
@@ -251,7 +255,8 @@ cardState.set('wasReportedForRemoval', false);
 Session.set('hiddenItems', []);
 cardState.set('numVisibleCards', 0);
 cardState.set('recordingLocked', false);
-let waitingForTranscription = false; // Track if we're waiting for Google Speech API response
+// M3: Track if we're waiting for Google Speech API response (converted to reactive state)
+srState.set('waitingForTranscription', false);
 let cachedSyllables = null;
 let cachedSuccessColor = null;
 let cachedAlertColor = null;
@@ -271,11 +276,12 @@ let firstKeypressTimestamp = 0;
 let currentSound = null; // See later in this file for sound functions
 let userFeedbackStart = null;
 let player = null;
+// M3: Track timeout state reactively for better coordination
 // We need to track the name/ID for clear and reset. We need the function and
 // delay used for reset
-let timeoutName = null;
-let timeoutFunc = null;
-let timeoutDelay = null;
+timeoutState.set('name', null);
+timeoutState.set('func', null);
+timeoutState.set('delay', null);
 let simTimeoutName = null;
 let countdownInterval = null;
 let userAnswer = null;
@@ -397,13 +403,13 @@ function clearCardTimeout() {
       clientConsole(1, 'Error clearing meteor timeout/interval', e);
     }
   };
-  safeClear(Meteor.clearTimeout, timeoutName);
+  safeClear(Meteor.clearTimeout, timeoutState.get('name'));
   safeClear(Meteor.clearTimeout, simTimeoutName);
   safeClear(Meteor.clearInterval, cardState.get('varLenTimeoutName'));
   safeClear(Meteor.clearInterval, countdownInterval);
-  timeoutName = null;
-  timeoutFunc = null;
-  timeoutDelay = null;
+  timeoutState.set('name', null);
+  timeoutState.set('func', null);
+  timeoutState.set('delay', null);
   simTimeoutName = null;
   countdownInterval = null;
   cardState.set('varLenTimeoutName', null);
@@ -419,11 +425,11 @@ function beginMainCardTimeout(delay, func) {
   const uiSettings = Session.get('curTdfUISettings');
   const displayMode = uiSettings.displayCardTimeoutAsBarOrText;
 
-  timeoutFunc = function() {
+  timeoutState.set('func', function() {
     const numRemainingLocks = cardState.get('pausedLocks');
     if (numRemainingLocks > 0) {
       clientConsole(2, 'timeout reached but there are', numRemainingLocks, 'locks outstanding');
-    } else if (waitingForTranscription) {
+    } else if (srState.get('waitingForTranscription')) {
       clientConsole(2, '[SR] timeout reached but waiting for speech transcription, delaying timeout');
       // Retry timeout after a short delay to give transcription more time
       // This prevents timeout from firing while Google Speech API is processing
@@ -440,12 +446,12 @@ function beginMainCardTimeout(delay, func) {
         clientConsole(1, 'function!!!:', func);
       }
     }
-  };
-  timeoutDelay = delay;
+  });
+  timeoutState.set('delay', delay);
   const mainCardTimeoutStart = new Date();
   cardState.set('mainCardTimeoutStart', mainCardTimeoutStart);
   clientConsole(2, 'mainCardTimeoutStart', mainCardTimeoutStart);
-  timeoutName = Meteor.setTimeout(timeoutFunc, timeoutDelay);
+  timeoutState.set('name', Meteor.setTimeout(timeoutState.get('func'), timeoutState.get('delay')));
   cardStartTime = Date.now();
  if(displayMode == "text" || displayMode == "both"){
   //set the countdown timer text
@@ -454,7 +460,7 @@ function beginMainCardTimeout(delay, func) {
    $('#CountdownTimerText').attr('hidden', '');
  }
   countdownInterval = Meteor.setInterval(function() {
-    const remaining = Math.round((timeoutDelay - (Date.now() - cardStartTime)) / 1000);
+    const remaining = Math.round((timeoutState.get('delay') - (Date.now() - cardStartTime)) / 1000);
     const progressbarElem = document.getElementById("progressbar");
     if (remaining <= 0) {
       Meteor.clearInterval(countdownInterval);
@@ -467,7 +473,7 @@ function beginMainCardTimeout(delay, func) {
       $('#lowerInteraction').html('');
     } else {
       $('#CountdownTimerText').text("Continuing in: " + secsIntervalString(remaining));
-      percent = 100 - (remaining * 1000 / timeoutDelay * 100);
+      percent = 100 - (remaining * 1000 / timeoutState.get('delay') * 100);
       if(displayMode == "bar" || displayMode == "both"){
         //add the progress bar class
         $('#progressbar').addClass('progress-bar');
@@ -490,15 +496,15 @@ function beginMainCardTimeout(delay, func) {
 // Reset the previously set timeout counter
 function resetMainCardTimeout() {
   clientConsole(2, 'RESETTING MAIN CARD TIMEOUT');
-  const savedFunc = timeoutFunc;
-  const savedDelay = timeoutDelay;
+  const savedFunc = timeoutState.get('func');
+  const savedDelay = timeoutState.get('delay');
   clearCardTimeout();
-  timeoutFunc = savedFunc;
-  timeoutDelay = savedDelay;
+  timeoutState.set('func', savedFunc);
+  timeoutState.set('delay', savedDelay);
   const mainCardTimeoutStart = new Date();
   cardState.set('mainCardTimeoutStart', mainCardTimeoutStart);
   clientConsole(2, 'reset, mainCardTimeoutStart:', mainCardTimeoutStart);
-  timeoutName = Meteor.setTimeout(savedFunc, savedDelay);
+  timeoutState.set('name', Meteor.setTimeout(savedFunc, savedDelay));
   cardState.set('varLenTimeoutName', Meteor.setInterval(varLenDisplayTimeout, 400));
 }
 
@@ -515,20 +521,21 @@ function restartMainCardTimeoutIfNecessary() {
   const errorReportStart = Session.get('errorReportStart');
   Session.set('errorReportStart', null);
   const usedDelayTime = errorReportStart - mainCardTimeoutStart;
-  const remainingDelay = timeoutDelay - usedDelayTime;
-  timeoutDelay = remainingDelay;
+  const remainingDelay = timeoutState.get('delay') - usedDelayTime;
+  timeoutState.set('delay', remainingDelay);
   const rightNow = new Date();
   cardState.set('mainCardTimeoutStart', rightNow);
   function wrappedTimeout() {
     const numRemainingLocks = cardState.get('pausedLocks')-1;
     cardState.set('pausedLocks', numRemainingLocks);
     if (numRemainingLocks <= 0) {
-      if (timeoutFunc) timeoutFunc();
+      const func = timeoutState.get('func');
+      if (func) func();
     } else {
       clientConsole(2, 'timeout reached but there are', numRemainingLocks, 'locks outstanding');
     }
   }
-  timeoutName = Meteor.setTimeout(wrappedTimeout, remainingDelay);
+  timeoutState.set('name', Meteor.setTimeout(wrappedTimeout, remainingDelay));
   cardState.set('varLenTimeoutName', Meteor.setInterval(varLenDisplayTimeout, 400));
 }
 
@@ -1661,8 +1668,8 @@ function trialUsesStudyPhase() {
   return testType === 's';
 }
 
-// Track current state
-let currentTrialState = TRIAL_STATES.IDLE;
+// Track current state (M3: Converted to reactive state)
+trialState.set('current', TRIAL_STATES.IDLE);
 
 // Valid state transitions (varies by trial type)
 const VALID_TRANSITIONS = {
@@ -1704,7 +1711,7 @@ const VALID_TRANSITIONS = {
  * @param {string} reason - Human-readable reason for transition
  */
 function transitionTrialState(newState, reason = '') {
-  const previousState = currentTrialState;
+  const previousState = trialState.get('current');
   const trialNum = (Session.get('currentExperimentState')?.numQuestionsAnswered || 0) + 1;
 
   // Validate transition
@@ -1725,7 +1732,7 @@ function transitionTrialState(newState, reason = '') {
     reason ? `(${reason})` : ''
   );
 
-  currentTrialState = newState;
+  trialState.set('current', newState);
 
   // Optional: Store in Session for debugging/visibility
   cardState.set('_debugTrialState', newState);
@@ -1994,7 +2001,7 @@ function getCurrentStimDisplaySources(filterPropertyName='clozeStimulus') {
 }
 
 async function preloadStimuliFiles() {
-  clientConsole(2, '[SM] preloadStimuliFiles called in state:', currentTrialState);
+  clientConsole(2, '[SM] preloadStimuliFiles called in state:', trialState.get('current'));
   // Pre-load sounds to be played into soundsDict to avoid audio lag issues
   if (curStimHasSoundDisplayType()) {
     clientConsole(2, 'Sound type questions detected, pre-loading sounds');
@@ -2252,7 +2259,7 @@ function handleUserForceCorrectInput(e, source) {
         $('#userForceCorrect').val('');
         $('#forceCorrectGuidance').text(oldPrompt + ' (4 character minimum)');
       } else {
-        const savedFunc = timeoutFunc;
+        const savedFunc = timeoutState.get('func');
         clearCardTimeout();
         savedFunc();
       }
@@ -2280,7 +2287,7 @@ function handleUserForceCorrectInput(e, source) {
 }
 
 function handleUserInput(e, source, simAnswerCorrect) {
-  clientConsole(2, '[SM] handleUserInput called in state:', currentTrialState, 'source:', source);
+  clientConsole(2, '[SM] handleUserInput called in state:', trialState.get('current'), 'source:', source);
   let isTimeout = false;
   let isSkip = false;
   let key;
@@ -2320,7 +2327,7 @@ function handleUserInput(e, source, simAnswerCorrect) {
   stopUserInput();
   // We've entered input before the timeout, meaning we need to decrement the pausedLocks before we lose
   // track of the fact that we were counting down to a recalculated delay after being on the error report modal
-  if (timeoutName) {
+  if (timeoutState.get('name')) {
     if (cardState.get('pausedLocks')>0) {
       const numRemainingLocks = cardState.get('pausedLocks')-1;
       cardState.set('pausedLocks', numRemainingLocks);
@@ -2550,7 +2557,7 @@ function determineUserFeedback(userAnswer, isSkip, isCorrect, feedbackForAnswer,
 }
 
 async function showUserFeedback(isCorrect, feedbackMessage, isTimeout, isSkip) {
-  clientConsole(2, '[SM] showUserFeedback called in state:', currentTrialState);
+  clientConsole(2, '[SM] showUserFeedback called in state:', trialState.get('current'));
 
   // NOTE: Do NOT call stopRecording() here - it destroys the audio buffer before
   // the speech recognition API can process it. Recording stops naturally when
@@ -2910,7 +2917,7 @@ async function afterAnswerFeedbackCallback(trialEndTimeStamp, trialStartTimeStam
 
 async function afterFeedbackCallback(trialEndTimeStamp, trialStartTimeStamp, isTimeout, isSkip, isCorrect, testType, deliveryParams, answerLogRecord, callLocation) {
   afterFeedbackCallbackBind = undefined;
-  clientConsole(2, '[SM] afterFeedbackCallback called in state:', currentTrialState);
+  clientConsole(2, '[SM] afterFeedbackCallback called in state:', trialState.get('current'));
   cardState.set('CurTimeoutId', null)
   const userLeavingTrial = callLocation != 'card';
   let reviewEnd = Date.now();
@@ -3054,7 +3061,7 @@ async function afterFeedbackCallback(trialEndTimeStamp, trialStartTimeStamp, isT
 }
 
 async function cardEnd() {
-  clientConsole(2, '[SM] cardEnd called in state:', currentTrialState);
+  clientConsole(2, '[SM] cardEnd called in state:', trialState.get('current'));
   // STATE MACHINE: Begin TRANSITION phase
   transitionTrialState(TRIAL_STATES.TRANSITION_START, 'Trial complete, beginning transition');
 
@@ -3366,7 +3373,7 @@ function findQTypeSimpified() {
 
 
 function hideUserFeedback() {
-  clientConsole(2, '[SM] hideUserFeedback called in state:', currentTrialState);
+  clientConsole(2, '[SM] hideUserFeedback called in state:', trialState.get('current'));
   // Don't use .hide() - let displayReady fade-out handle visibility
   // Using .hide() causes instant flash while content is still visible
   // Clear ALL feedback locations (top, middle, bottom) since we don't know which was used
@@ -3381,7 +3388,7 @@ function hideUserFeedback() {
 // Comprehensive cleanup that mimics what {{#if displayReady}} teardown did automatically
 // IMPORTANT: Only clear input VALUES and non-reactive HTML, NOT Blaze-managed content
 function cleanupTrialContent() {
-  clientConsole(2, '[SM] cleanupTrialContent called in state:', currentTrialState);
+  clientConsole(2, '[SM] cleanupTrialContent called in state:', trialState.get('current'));
 
   // FIX: Stop any orphaned TTS audio from previous trial
   // This is a safety measure to prevent audio bleeding into the next trial
@@ -3714,12 +3721,12 @@ async function prepareCard() {
   clientConsole(2, '[SM]   displayReady before:', cardState.get('displayReady'));
 
   // STATE MACHINE: Handle transition to fade-out based on current state
-  if (currentTrialState === TRIAL_STATES.IDLE) {
+  if (trialState.get('current') === TRIAL_STATES.IDLE) {
     // First trial - no need to fade out, will go straight to LOADING after clearing
     clientConsole(2, '[SM]   First trial (IDLE state), skipping fade-out');
-  } else if (currentTrialState === TRIAL_STATES.TRANSITION_START) {
+  } else if (trialState.get('current') === TRIAL_STATES.TRANSITION_START) {
     transitionTrialState(TRIAL_STATES.TRANSITION_FADING_OUT, 'Fade-out previous trial content');
-  } else if (currentTrialState === TRIAL_STATES.TRANSITION_CLEARING) {
+  } else if (trialState.get('current') === TRIAL_STATES.TRANSITION_CLEARING) {
     // Already in CLEARING (called from processUserTimesLog), skip fade-out
     clientConsole(2, '[SM]   Already in CLEARING state, skipping fade-out');
   } else {
@@ -3746,7 +3753,7 @@ async function prepareCard() {
   cleanupTrialContent();
 
   // STATE MACHINE: Transition to CLEARING
-  if (currentTrialState === TRIAL_STATES.TRANSITION_FADING_OUT) {
+  if (trialState.get('current') === TRIAL_STATES.TRANSITION_FADING_OUT) {
     transitionTrialState(TRIAL_STATES.TRANSITION_CLEARING, 'Clearing previous trial content');
   }
 
@@ -3801,7 +3808,7 @@ async function prepareCard() {
 // TODO: this probably no longer needs to be separate from prepareCard
 async function newQuestionHandler() {
   clientConsole(2, '=== newQuestionHandler START ===');
-  clientConsole(2, '[SM] newQuestionHandler called in state:', currentTrialState);
+  clientConsole(2, '[SM] newQuestionHandler called in state:', trialState.get('current'));
 
   // Cache frequently accessed Session variables
   const experimentState = Session.get('currentExperimentState');
@@ -3927,7 +3934,7 @@ function startQuestionTimeout() {
   }, 1000);
 }
 async function checkAndDisplayPrestimulus(deliveryParams, nextStageCb) {
-  clientConsole(2, '[SM] checkAndDisplayPrestimulus called in state:', currentTrialState);
+  clientConsole(2, '[SM] checkAndDisplayPrestimulus called in state:', trialState.get('current'));
 
   const prestimulusDisplay = Session.get('currentTdfFile').tdfs.tutor.setspec.prestimulusDisplay;
   if (!prestimulusDisplay) {
@@ -3961,7 +3968,7 @@ async function checkAndDisplayPrestimulus(deliveryParams, nextStageCb) {
 }
 
 async function checkAndDisplayTwoPartQuestion(deliveryParams, currentDisplayEngine, closeQuestionParts, nextStageCb) {
-  clientConsole(2, '[SM] checkAndDisplayTwoPartQuestion called in state:', currentTrialState);
+  clientConsole(2, '[SM] checkAndDisplayTwoPartQuestion called in state:', trialState.get('current'));
 
   cardState.set('currentDisplay', currentDisplayEngine);
   const currentExperimentState = Session.get('currentExperimentState');
@@ -4082,7 +4089,7 @@ function beginQuestionAndInitiateUserInput(delayMs, deliveryParams) {
 function allowUserInput() {
   clientConsole(2, '[SR] ========== allowUserInput() CALLED ==========');
   clientConsole(2, 'allow user input');
-  clientConsole(2, '[SM] allowUserInput called in state:', currentTrialState);
+  clientConsole(2, '[SM] allowUserInput called in state:', trialState.get('current'));
 
   // STATE MACHINE: Transition to AWAITING (for drill/test) or STUDY.SHOWING (for study)
   // This is called AFTER fade-in completes (via setTimeout callback chain)
@@ -4147,7 +4154,7 @@ function allowUserInput() {
 let inputDisabled = undefined;
 function stopUserInput() {
   clientConsole(2, 'stop user input');
-  clientConsole(2, '[SM] stopUserInput called in state:', currentTrialState);
+  clientConsole(2, '[SM] stopUserInput called in state:', trialState.get('current'));
   // DO NOT hide #userAnswer - CSS wrapper (#trialContentWrapper) handles visibility via opacity
   // $('#userAnswer').hide(); // REMOVED - breaks input visibility on subsequent trials
   inputDisabled = true;
@@ -4241,10 +4248,10 @@ async function speakMessageIfAudioPromptFeedbackEnabled(msg, audioPromptSource) 
               clientConsole(2, '[SR] 🎤 TTS request complete (audio ended) (ttsRequested=false)');
 
               // FIX: Only restart recording if we're still in a state that accepts input (Layer 2)
-              if (currentTrialState === TRIAL_STATES.PRESENTING_AWAITING) {
+              if (trialState.get('current') === TRIAL_STATES.PRESENTING_AWAITING) {
                 startRecording();
               } else {
-                clientConsole(2, '[SR] TTS ended but state is', currentTrialState, '- not restarting recording');
+                clientConsole(2, '[SR] TTS ended but state is', trialState.get('current'), '- not restarting recording');
               }
             }, {passive: true});
             clientConsole(2, 'inside callback, playing audioObj:');
@@ -4259,10 +4266,10 @@ async function speakMessageIfAudioPromptFeedbackEnabled(msg, audioPromptSource) 
                 cardState.set('recordingLocked', false);
 
                 // FIX: Only restart recording if we're still in a state that accepts input (Layer 2)
-                if (currentTrialState === TRIAL_STATES.PRESENTING_AWAITING) {
+                if (trialState.get('current') === TRIAL_STATES.PRESENTING_AWAITING) {
                   startRecording();
                 } else {
-                  clientConsole(2, '[SR] TTS fallback ended but state is', currentTrialState, '- not restarting recording');
+                  clientConsole(2, '[SR] TTS fallback ended but state is', trialState.get('current'), '- not restarting recording');
                 }
               }, {passive: true});
               utterance.addEventListener('error', (event) => {
@@ -4298,10 +4305,10 @@ async function speakMessageIfAudioPromptFeedbackEnabled(msg, audioPromptSource) 
           clientConsole(2, '[SR] 🎤 TTS request complete (native ended) (ttsRequested=false)');
 
           // FIX: Only restart recording if we're still in a state that accepts input (Layer 2)
-          if (currentTrialState === TRIAL_STATES.PRESENTING_AWAITING) {
+          if (trialState.get('current') === TRIAL_STATES.PRESENTING_AWAITING) {
             startRecording();
           } else {
-            clientConsole(2, '[SR] MDN TTS ended but state is', currentTrialState, '- not restarting recording');
+            clientConsole(2, '[SR] MDN TTS ended but state is', trialState.get('current'), '- not restarting recording');
           }
         }, {passive: true});
         utterance.addEventListener('error', (event) => {
@@ -4312,10 +4319,10 @@ async function speakMessageIfAudioPromptFeedbackEnabled(msg, audioPromptSource) 
           clientConsole(2, '[SR] 🎤 TTS request complete (native error) (ttsRequested=false)');
 
           // FIX: Only restart recording if we're still in a state that accepts input (Layer 2)
-          if (currentTrialState === TRIAL_STATES.PRESENTING_AWAITING) {
+          if (trialState.get('current') === TRIAL_STATES.PRESENTING_AWAITING) {
             startRecording();
           } else {
-            clientConsole(2, '[SR] MDN TTS error but state is', currentTrialState, '- not restarting recording');
+            clientConsole(2, '[SR] MDN TTS error but state is', trialState.get('current'), '- not restarting recording');
           }
         }, {passive: true});
         synthesis.speak(utterance);
@@ -4332,10 +4339,10 @@ async function processLINEAR16(data) {
   clientConsole(2, '[SR] Data parameter:', data ? `${data.length} bytes` : 'UNDEFINED/NULL');
 
   // Set flag to prevent timeout from triggering while waiting for transcription
-  waitingForTranscription = true;
+  srState.set('waitingForTranscription', true);
   clientConsole(2, '[SR] Set waitingForTranscription=true to block timeout');
 
-  if (resetMainCardTimeout && timeoutFunc && !inputDisabled) {
+  if (resetMainCardTimeout && timeoutState.get('func') && !inputDisabled) {
     resetMainCardTimeout(); // Give ourselves a bit more time for the speech api to return results
   } else {
     clientConsole(2, '[SR] not resetting during processLINEAR16');
@@ -4358,7 +4365,7 @@ async function processLINEAR16(data) {
       clientConsole(2, `[SR] ⚠️ Exceeded maxAttempts (${speechTranscriptionTimeoutsSeen} > ${maxAttempts}), skipping API call and forcing incorrect feedback`);
 
       // Clear waiting flag
-      waitingForTranscription = false;
+      srState.set('waitingForTranscription', false);
 
       // Simulate empty/incorrect answer and go to feedback
       // The speechAPICallback logic will be bypassed entirely
@@ -4523,13 +4530,13 @@ async function processLINEAR16(data) {
 
 function speechAPICallback(err, data){
   // Clear the waiting flag now that transcription has returned (success or error)
-  waitingForTranscription = false;
+  srState.set('waitingForTranscription', false);
   clientConsole(2, '[SR] speechAPICallback received, set waitingForTranscription=false');
 
   // FIX: Check if we're still in a valid state for input (Layer 3 of 3-layer defense)
   // This prevents processing late transcriptions that arrive after state has changed
-  if (currentTrialState !== TRIAL_STATES.PRESENTING_AWAITING) {
-    clientConsole(2, '[SR] ⚠️ Transcription arrived too late - trial state is:', currentTrialState);
+  if (trialState.get('current') !== TRIAL_STATES.PRESENTING_AWAITING) {
+    clientConsole(2, '[SR] ⚠️ Transcription arrived too late - trial state is:', trialState.get('current'));
     clientConsole(2, '[SR] Discarding transcription to prevent state machine violation');
 
     // Clear the "waiting for transcription" message if still showing
@@ -4896,7 +4903,7 @@ function startUserMedia(stream) {
       return;
     } else {
       clientConsole(2, '[SR] VOICE START');
-      if (resetMainCardTimeout && timeoutFunc) {
+      if (resetMainCardTimeout && timeoutState.get('func')) {
         if (cardState.get('recording')) {
           clientConsole(2, '[SR] voice_start resetMainCardTimeout');
           resetMainCardTimeout();
