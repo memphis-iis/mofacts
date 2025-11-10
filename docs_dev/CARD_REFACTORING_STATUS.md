@@ -11,13 +11,13 @@
 | Category | Total | Completed | Remaining | % Done |
 |----------|-------|-----------|-----------|--------|
 | **⚡ DO FIRST** | 4 items | 4 | 0 | 100% |
-| **🟢 Quick Wins** | 4 items | 3 | 1 | 75% |
+| **🟢 Quick Wins** | 3 items | 3 | 0 | 100% |
 | **🟡 Medium** | 4 items | 0 | 4 | 0% |
 | **🟠 Complex** | 3 items | 0 | 3 | 0% |
 | **🔴 High Value/High Risk** | 3 items | 1 | 2 | 33% |
 | **⚫ Blaze Limitation** | 1 item | N/A | N/A | N/A |
-| **⚫ Removed/Not Needed** | 1 item | N/A | N/A | N/A |
-| **TOTAL** | **20 items** | **8** | **12** | **40%** |
+| **⚫ Removed/Not Needed** | 3 items | N/A | N/A | N/A |
+| **TOTAL** | **20 items** | **8** | **11** | **42%** |
 
 ---
 
@@ -167,12 +167,27 @@ None currently
 
 ---
 
-## ⚫ Removed/Not Needed (1 item)
+## ⚫ Removed/Not Needed (3 items)
 
 #### REMOVED: C3: Web Vitals Monitoring
 **Status:** ⚫ NOT NEEDED
 **Reason:** Monitoring overhead not justified for current needs
 **Alternative:** Manual testing and user feedback sufficient
+
+#### REMOVED: MO6: Skeleton Loaders
+**Status:** ⚫ NOT NEEDED
+**Reason:** Trial content loads too fast (<100ms) for skeleton loaders to be useful
+**Analysis:**
+- Skeleton loaders designed for 500ms-2s loads
+- At <100ms, they just flash and create distraction
+- Testing context requires minimal visual changes (breaks concentration)
+- Current `displayReady` approach is ideal (show nothing until ready)
+**Alternative:** Keep current behavior (no loading indicators needed)
+
+#### SKIPPED: M6: Null Checks
+**Status:** ⚫ SKIP - ANTI-PATTERN
+**Reason:** Null checks hide logic errors (fail-fast is better)
+**Alternative:** Proper asset validation on TDF upload
 
 ---
 
@@ -184,26 +199,9 @@ None currently
 
 ---
 
-### 🟢 Quick Wins (1 item, 12.5 hours)
+### 🟢 Quick Wins (0 remaining)
 
-#### TODO: MO6: Skeleton Loaders (Score: 5.1)
-**Priority:** 🟢 QUICK WIN
-**Time:** 12.5 hours
-**Safety:** HIGH (8/10)
-**Why:** Prevents layout shift during trial loading (critical for no-scroll)
-**Implementation:**
-```html
-{{#if displayReady}}
-  <!-- Actual trial content -->
-{{else}}
-  <div class="skeleton-loader">
-    <div class="skeleton-question"></div>
-    <div class="skeleton-input"></div>
-    <div class="skeleton-buttons"></div>
-  </div>
-{{/if}}
-```
-**Expected Impact:** Professional loading, prevents overflow
+**All quick wins completed!** ✅
 
 ---
 
@@ -409,15 +407,6 @@ Template.card.helpers({
 **Why:** Blaze doesn't support React-style error boundaries
 **Workaround:** Try-catch in helpers (already done in some places)
 
-#### REMOVED: C3: Web Vitals Monitoring
-**Status:** ⚫ NOT NEEDED
-**Reason:** Monitoring overhead not justified
-**Alternative:** Manual testing and user feedback
-
-#### SKIPPED: M6: Null Checks
-**Status:** ⚫ SKIP - ANTI-PATTERN
-**Reason:** Null checks hide logic errors (fail-fast is better)
-**Alternative:** Proper asset validation on TDF upload
 
 ---
 
@@ -441,13 +430,12 @@ Template.card.helpers({
 
 ---
 
-### NEXT: Phase 2 - Advanced Features (32 hours)
-**Goal:** Professional mobile experience
+### NEXT: Phase 2 - Reactivity Optimization (20 hours)
+**Goal:** Reduce unnecessary re-renders
 
-5. **MO6: Skeleton loaders** (12.5 hrs)
-6. **M3: Tracker.autoruns** (20 hrs)
+1. **M3: Tracker.autoruns** (20 hrs) - Minimize reactive computations
 
-**Expected Impact:** Professional loading, better reactivity
+**Expected Impact:** Better performance, fewer re-renders
 
 ---
 
@@ -474,14 +462,13 @@ Template.card.helpers({
 - ✅ MO1: vh units (DONE)
 - ✅ M4: CSS containment (DONE)
 - ✅ MO3: Tap targets (DONE)
-- **→ MO4: Touch gestures** (1.5 hrs) ⚡
-- **→ MO2: Touch action** (1.5 hrs) ⚡
-- **→ MO7: Complete fonts** (5 hrs) ⚡
+- ✅ MO4: Touch gestures (DONE)
+- ✅ MO2: Touch action (DONE)
+- ✅ MO7: Complete fonts (DONE)
 
 ### High Impact, High Effort (Plan Carefully)
 - ✅ M1: Session → ReactiveDict (DONE)
-- **→ M3: Tracker.autoruns** (20 hrs)
-- **→ MO6: Skeleton loaders** (12.5 hrs)
+- **→ M3: Tracker.autoruns** (20 hrs) - NEXT
 - **→ C1: Split card.js** (125 hrs) - REQUIRES PLANNING
 - **→ M2: Reduce jQuery** (100 hrs) - INCREMENTAL
 
@@ -498,19 +485,15 @@ Template.card.helpers({
 
 ## 🎯 Next Action Items
 
-### Immediate (This Week)
-1. **Audit remaining fixed font sizes** and convert to responsive (MO7)
-2. **Add passive: true to touch events** (MO4)
-3. **Refine touch-action selectors** (MO2)
+### Immediate (Next 2 Weeks)
+1. **Begin M3: Tracker.autorun audit** - identify unnecessary reactive computations
+2. **Start with TTS state** - migrate TTS autoruns to manual dependencies
 
-### Short-term (Next 2 Weeks)
-4. Add skeleton loaders for trial loading
-5. Begin Tracker.autorun migration (start with TTS state)
+### Short-term (Next Month)
 
-### Medium-term (Next Month)
-6. Complete accessibility audit
-7. Remove inline styles → CSS custom properties
-8. Image optimization
+3. Complete accessibility audit (C4)
+4. Remove inline styles → CSS custom properties (C2)
+5. Image optimization (MO9)
 
 ### Long-term (Next Quarter)
 9. Plan C1 (card.js split) architecture
@@ -553,4 +536,4 @@ Template.card.helpers({
 ---
 
 **Last Updated:** 2025-01-10
-**Next Review:** After Phase 2 complete (MO6, M3) or when starting C1 planning
+**Next Review:** After Phase 2 complete (M3) or when starting C1 planning
