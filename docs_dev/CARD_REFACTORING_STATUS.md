@@ -8,16 +8,16 @@
 
 ## 📊 Overall Progress
 
-| Category | Total | Completed | Remaining | % Done |
-|----------|-------|-----------|-----------|--------|
-| **⚡ DO FIRST** | 4 items | 4 | 0 | 100% |
-| **🟢 Quick Wins** | 3 items | 3 | 0 | 100% |
-| **🟡 Medium** | 4 items | 0 | 4 | 0% |
-| **🟠 Complex** | 3 items | 0 | 3 | 0% |
-| **🔴 High Value/High Risk** | 3 items | 1 | 2 | 33% |
-| **⚫ Blaze Limitation** | 1 item | N/A | N/A | N/A |
-| **⚫ Removed/Not Needed** | 3 items | N/A | N/A | N/A |
-| **TOTAL** | **20 items** | **8** | **11** | **42%** |
+| Category | Total | Completed | In Progress | Remaining | % Done |
+|----------|-------|-----------|-------------|-----------|--------|
+| **⚡ DO FIRST** | 4 items | 4 | 0 | 0 | 100% |
+| **🟢 Quick Wins** | 3 items | 3 | 0 | 0 | 100% |
+| **🟡 Medium** | 4 items | 0 | 1 (M3) | 3 | 0% |
+| **🟠 Complex** | 3 items | 0 | 0 | 3 | 0% |
+| **🔴 High Value/High Risk** | 3 items | 1 | 0 | 2 | 33% |
+| **⚫ Blaze Limitation** | 1 item | N/A | N/A | N/A | N/A |
+| **⚫ Removed/Not Needed** | 3 items | N/A | N/A | N/A | N/A |
+| **TOTAL** | **20 items** | **8** | **1 (50% done)** | **10** | **47%** |
 
 ---
 
@@ -161,9 +161,25 @@ btn.addEventListener('click', (e) => {
 
 ---
 
-## 🚧 IN PROGRESS (0 items)
+## 🚧 IN PROGRESS (1 item)
 
-None currently
+### 🟡 Medium Priority
+
+#### M3: Add Tracker.autoruns (Score: 2.1)
+**Status:** ~50% Complete (10/20 hours)
+**Current Phase:** Phase 3A - Autoruns (partial)
+
+**What's Done:**
+- ✅ Phase 1: State machine audit complete
+- ✅ Phase 2A: ReactiveVars converted (with critical bug fix)
+- ✅ Phase 3A: 2 autoruns implemented (TTS Lock Coordination, Input State Guard)
+
+**What's Next:**
+- Test current fixes (red icon, timeout)
+- Complete remaining autoruns (SR Recording Guard, Display Ready, UI Sync)
+- Phase 4: Comprehensive testing
+
+**See full details in TODO section below**
 
 ---
 
@@ -238,42 +254,44 @@ None currently
 
 ---
 
-#### TODO: M3: Add Tracker.autoruns (Score: 2.1)
+#### 🚧 IN PROGRESS: M3: Add Tracker.autoruns (Score: 2.1)
 **Priority:** 🟡 MEDIUM
 **Time:** 20 hours (5 audit + 3 ReactiveVars + 8 autoruns + 4 test)
 **Safety:** MEDIUM (6/10)
-**Why:** Better reactivity for SR/SM state machines
+**Status:** ~50% Complete (Phases 1, 2A, 3A partially done)
 
 **See:** [M3_TRACKER_AUTORUNS_IMPLEMENTATION.md](M3_TRACKER_AUTORUNS_IMPLEMENTATION.md) for complete implementation guide
 
-**Current State:**
-- Only 2 Tracker.autorun instances in 8,700 lines
-- 178+ jQuery DOM manipulations bypass reactivity
-- Mixed reactive/imperative code causes race conditions
-- Should have 15-25 autoruns for proper state synchronization
+**Progress:**
+- ✅ **Phase 1: Audit** (5 hrs) - Completed
+- ✅ **Phase 2A: ReactiveVars** (3 hrs) - Completed with critical bug fix
+  - Created 3 ReactiveDict instances: `srState`, `trialState`, `timeoutState`
+  - Converted `currentTrialState`, `waitingForTranscription`, `recordingLocked`, etc.
+  - **BUG FIXED:** Functions cannot be stored in ReactiveDict - moved `currentTimeoutFunc` and `currentTimeoutDelay` to module variables
+- 🚧 **Phase 3A: Autoruns** (partial, 2/8 hrs) - In progress
+  - ✅ TTS Lock Coordination autorun added (with `!waitingForTranscription` check)
+  - ✅ Input State Guard autorun added
+  - ⏳ Remaining: SR Recording State Guard, Display Ready, UI Sync autoruns
+- ⏳ **Phase 4: Test** (4 hrs) - Not started
 
-**Implementation (4 Phases):**
-1. **Phase 1: Audit** (5 hrs) - Map state transitions → reactive deps → DOM updates
-2. **Phase 2: ReactiveVars** (3 hrs) - Convert module vars to ReactiveDict (`waitingForTranscription`, `recordingLocked`, etc.)
-3. **Phase 3: Autoruns** (8 hrs) - Add 15-25 reactive handlers tied to state machine transitions
-4. **Phase 4: Test** (4 hrs) - Verify no regressions, test bug fixes
+**Recent Fixes (2025-01-10):**
+1. **Critical:** Fixed timeout function storage bug
+   - Issue: `timeoutState.set('func', ...)` corrupted function references
+   - Solution: Moved to module variables `currentTimeoutFunc`/`currentTimeoutDelay`
+   - Result: Fixes `TypeError: n is not a function` on timeout
+2. **SR Icon:** Added `!waitingForTranscription` check to TTS Lock Coordination
+   - Prevents autorun from restarting recording during speech processing
+   - Allows red icon to display while waiting for transcription
 
-**Priority Autoruns:**
-1. SR Recording State Guard (prevent recording in wrong state)
-2. TTS Lock Management (automatic coordination)
-3. Display Ready Transitions
-4. SR UI State Synchronization
-5. Trial Progress Updates
+**Next Steps:**
+1. Test fixes: red icon during processing, timeout firing correctly
+2. Complete remaining Phase 3A autoruns (SR Recording Guard, Display Ready, UI Sync)
+3. Begin Phase 4 testing
 
-**Expected Impact:**
-- Prevents future state synchronization bugs
-- Automatic TTS/recording coordination
-- 20-30% reduction in reactive computations
-- Eliminates race conditions
-- Automatic UI synchronization
-- Better maintainability
-
-**Related:** [SR] and [SM] state machine logs, 3 state machines (Trial FSM, SR, SM)
+**Lessons Learned:**
+- ⚠️ **ReactiveDict is for data, not functions** - Functions lose execution context when stored/retrieved
+- ✅ Only timeout ID (`name`) should be reactive, not the function itself
+- ✅ Autoruns need careful checks to prevent infinite restart loops
 
 ---
 
@@ -492,15 +510,25 @@ Template.card.helpers({
 
 ## 🎯 Next Action Items
 
-### Immediate (Next 2 Weeks)
-1. **Begin M3: Tracker.autorun audit** - identify unnecessary reactive computations
-2. **Start with TTS state** - migrate TTS autoruns to manual dependencies
+### Immediate (This Week)
+1. ✅ ~~M3: Tracker.autorun audit~~ - COMPLETED
+2. ✅ ~~ReactiveVars conversion~~ - COMPLETED (with bug fix)
+3. **🚧 Test M3 Phase 3A fixes:**
+   - Verify red icon shows during speech processing
+   - Verify trial timeout fires correctly
+   - Check for any new issues
+4. **Complete M3 Phase 3A autoruns:**
+   - Add SR Recording State Guard
+   - Add Display Ready transitions
+   - Add UI Sync autoruns
 
-### Short-term (Next Month)
+### Short-term (Next 2 Weeks)
+5. **M3 Phase 4: Comprehensive testing** (4 hrs)
+6. Consider starting accessibility audit (C4)
 
-3. Complete accessibility audit (C4)
-4. Remove inline styles → CSS custom properties (C2)
-5. Image optimization (MO9)
+### Medium-term (Next Month)
+7. Remove inline styles → CSS custom properties (MO5)
+8. Image optimization (MO8)
 
 ### Long-term (Next Quarter)
 9. Plan C1 (card.js split) architecture
@@ -551,4 +579,4 @@ Template.card.helpers({
 ---
 
 **Last Updated:** 2025-01-10
-**Next Review:** After Phase 2 complete (M3) or when starting C1 planning
+**Next Review:** After M3 Phase 3A testing (red icon + timeout fixes validated)

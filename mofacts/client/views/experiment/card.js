@@ -281,8 +281,9 @@ let player = null;
 // We need to track the name/ID for clear and reset. We need the function and
 // delay used for reset
 timeoutState.set('name', null);
-timeoutState.set('func', null);
-timeoutState.set('delay', null);
+// IMPORTANT: Functions cannot be stored in ReactiveDict - use module variables
+let currentTimeoutFunc = null;
+let currentTimeoutDelay = null;
 let simTimeoutName = null;
 let countdownInterval = null;
 let userAnswer = null;
@@ -409,8 +410,8 @@ function clearCardTimeout() {
   safeClear(Meteor.clearInterval, cardState.get('varLenTimeoutName'));
   safeClear(Meteor.clearInterval, countdownInterval);
   timeoutState.set('name', null);
-  timeoutState.set('func', null);
-  timeoutState.set('delay', null);
+  currentTimeoutFunc = null;
+  currentTimeoutDelay = null;
   simTimeoutName = null;
   countdownInterval = null;
   cardState.set('varLenTimeoutName', null);
@@ -426,7 +427,7 @@ function beginMainCardTimeout(delay, func) {
   const uiSettings = Session.get('curTdfUISettings');
   const displayMode = uiSettings.displayCardTimeoutAsBarOrText;
 
-  timeoutState.set('func', function() {
+  currentTimeoutFunc = function() {
     const numRemainingLocks = cardState.get('pausedLocks');
     if (numRemainingLocks > 0) {
       clientConsole(2, 'timeout reached but there are', numRemainingLocks, 'locks outstanding');
@@ -447,12 +448,12 @@ function beginMainCardTimeout(delay, func) {
         clientConsole(1, 'function!!!:', func);
       }
     }
-  });
-  timeoutState.set('delay', delay);
+  };
+  currentTimeoutDelay = delay;
   const mainCardTimeoutStart = new Date();
   cardState.set('mainCardTimeoutStart', mainCardTimeoutStart);
   clientConsole(2, 'mainCardTimeoutStart', mainCardTimeoutStart);
-  timeoutState.set('name', Meteor.setTimeout(timeoutState.get('func'), timeoutState.get('delay')));
+  timeoutState.set('name', Meteor.setTimeout(currentTimeoutFunc, currentTimeoutDelay));
   cardStartTime = Date.now();
  if(displayMode == "text" || displayMode == "both"){
   //set the countdown timer text
@@ -461,7 +462,7 @@ function beginMainCardTimeout(delay, func) {
    $('#CountdownTimerText').attr('hidden', '');
  }
   countdownInterval = Meteor.setInterval(function() {
-    const remaining = Math.round((timeoutState.get('delay') - (Date.now() - cardStartTime)) / 1000);
+    const remaining = Math.round((currentTimeoutDelay - (Date.now() - cardStartTime)) / 1000);
     const progressbarElem = document.getElementById("progressbar");
     if (remaining <= 0) {
       Meteor.clearInterval(countdownInterval);
@@ -474,7 +475,7 @@ function beginMainCardTimeout(delay, func) {
       $('#lowerInteraction').html('');
     } else {
       $('#CountdownTimerText').text("Continuing in: " + secsIntervalString(remaining));
-      percent = 100 - (remaining * 1000 / timeoutState.get('delay') * 100);
+      percent = 100 - (remaining * 1000 / currentTimeoutDelay * 100);
       if(displayMode == "bar" || displayMode == "both"){
         //add the progress bar class
         $('#progressbar').addClass('progress-bar');
@@ -497,11 +498,11 @@ function beginMainCardTimeout(delay, func) {
 // Reset the previously set timeout counter
 function resetMainCardTimeout() {
   clientConsole(2, 'RESETTING MAIN CARD TIMEOUT');
-  const savedFunc = timeoutState.get('func');
-  const savedDelay = timeoutState.get('delay');
+  const savedFunc = currentTimeoutFunc;
+  const savedDelay = currentTimeoutDelay;
   clearCardTimeout();
-  timeoutState.set('func', savedFunc);
-  timeoutState.set('delay', savedDelay);
+  currentTimeoutFunc = savedFunc;
+  currentTimeoutDelay = savedDelay;
   const mainCardTimeoutStart = new Date();
   cardState.set('mainCardTimeoutStart', mainCardTimeoutStart);
   clientConsole(2, 'reset, mainCardTimeoutStart:', mainCardTimeoutStart);
@@ -522,15 +523,15 @@ function restartMainCardTimeoutIfNecessary() {
   const errorReportStart = Session.get('errorReportStart');
   Session.set('errorReportStart', null);
   const usedDelayTime = errorReportStart - mainCardTimeoutStart;
-  const remainingDelay = timeoutState.get('delay') - usedDelayTime;
-  timeoutState.set('delay', remainingDelay);
+  const remainingDelay = currentTimeoutDelay - usedDelayTime;
+  currentTimeoutDelay = remainingDelay;
   const rightNow = new Date();
   cardState.set('mainCardTimeoutStart', rightNow);
   function wrappedTimeout() {
     const numRemainingLocks = cardState.get('pausedLocks')-1;
     cardState.set('pausedLocks', numRemainingLocks);
     if (numRemainingLocks <= 0) {
-      const func = timeoutState.get('func');
+      const func = currentTimeoutFunc;
       if (func) func();
     } else {
       clientConsole(2, 'timeout reached but there are', numRemainingLocks, 'locks outstanding');
@@ -754,6 +755,7 @@ Template.card.onCreated(function() {
     const currentState = trialState.get('current');
     const recording = cardState.get('recording');
     const audioInputEnabled = srState.get('audioInputModeEnabled');
+    const waitingForTranscription = srState.get('waitingForTranscription');
 
     // Auto-restart recording when ALL conditions met:
     // 1. Not locked (TTS finished)
@@ -761,7 +763,8 @@ Template.card.onCreated(function() {
     // 3. In PRESENTING_AWAITING state (accepting input)
     // 4. Not already recording
     // 5. Audio input is enabled
-    if (!locked && !ttsRequested && currentState === TRIAL_STATES.PRESENTING_AWAITING && !recording && audioInputEnabled) {
+    // 6. Not waiting for speech transcription (processing)
+    if (!locked && !ttsRequested && currentState === TRIAL_STATES.PRESENTING_AWAITING && !recording && audioInputEnabled && !waitingForTranscription) {
       clientConsole(2, '[SR] Auto-restarting recording - TTS complete, conditions met');
       Tracker.afterFlush(function() {
         startRecording();
@@ -1127,7 +1130,7 @@ Template.card.helpers({
   },
 
   'microphoneColorClass': function() {
-    // Green when recording, red when not (whether processing or idle)
+    // Green when actively recording, red when not recording (including during processing)
     return cardState.get('recording') ? 'sr-mic-recording' : 'sr-mic-waiting';
   },
 
@@ -2320,7 +2323,7 @@ function handleUserForceCorrectInput(e, source) {
         $('#userForceCorrect').val('');
         $('#forceCorrectGuidance').text(oldPrompt + ' (4 character minimum)');
       } else {
-        const savedFunc = timeoutState.get('func');
+        const savedFunc = currentTimeoutFunc;
         clearCardTimeout();
         savedFunc();
       }
@@ -4403,7 +4406,7 @@ async function processLINEAR16(data) {
   srState.set('waitingForTranscription', true);
   clientConsole(2, '[SR] Set waitingForTranscription=true to block timeout');
 
-  if (resetMainCardTimeout && timeoutState.get('func') && !inputDisabled) {
+  if (resetMainCardTimeout && currentTimeoutFunc && !inputDisabled) {
     resetMainCardTimeout(); // Give ourselves a bit more time for the speech api to return results
   } else {
     clientConsole(2, '[SR] not resetting during processLINEAR16');
@@ -4964,7 +4967,7 @@ function startUserMedia(stream) {
       return;
     } else {
       clientConsole(2, '[SR] VOICE START');
-      if (resetMainCardTimeout && timeoutState.get('func')) {
+      if (resetMainCardTimeout && currentTimeoutFunc) {
         if (cardState.get('recording')) {
           clientConsole(2, '[SR] voice_start resetMainCardTimeout');
           resetMainCardTimeout();
@@ -5005,6 +5008,9 @@ function startUserMedia(stream) {
       clientConsole(2, `[SR] VOICE STOP (after ${timeSinceStart}ms)`);
       recorder.stop();
       cardState.set('recording', false);
+      // CRITICAL: Set flag BEFORE exporting to prevent autorun from restarting recording
+      srState.set('waitingForTranscription', true);
+      clientConsole(2, '[SR] Set waitingForTranscription=true (voice stop, about to process)');
       recorder.exportToProcessCallback();
       recordingStartTime = null;
     }
