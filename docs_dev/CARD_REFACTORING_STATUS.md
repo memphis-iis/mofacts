@@ -240,33 +240,40 @@ None currently
 
 #### TODO: M3: Add Tracker.autoruns (Score: 2.1)
 **Priority:** 🟡 MEDIUM
-**Time:** 20 hours
+**Time:** 20 hours (5 audit + 3 ReactiveVars + 8 autoruns + 4 test)
 **Safety:** MEDIUM (6/10)
 **Why:** Better reactivity for SR/SM state machines
-**Current:** Only 2 Tracker.autorun instances
-**Should Have:** 20-30 for proper reactive state sync
 
-**Targets:**
-```javascript
-// Should have autoruns for:
-Tracker.autorun(() => {
-  const recording = cardState.get('recording');
-  // Update SR UI state reactively
-});
+**See:** [M3_TRACKER_AUTORUNS_IMPLEMENTATION.md](M3_TRACKER_AUTORUNS_IMPLEMENTATION.md) for complete implementation guide
 
-Tracker.autorun(() => {
-  const displayReady = cardState.get('displayReady');
-  // Update visibility reactively
-});
+**Current State:**
+- Only 2 Tracker.autorun instances in 8,700 lines
+- 178+ jQuery DOM manipulations bypass reactivity
+- Mixed reactive/imperative code causes race conditions
+- Should have 15-25 autoruns for proper state synchronization
 
-Tracker.autorun(() => {
-  const trialState = Session.get('currentExperimentState');
-  // Sync trial state machine
-});
-```
-**Expected Impact:** Fewer race conditions, automatic state sync
+**Implementation (4 Phases):**
+1. **Phase 1: Audit** (5 hrs) - Map state transitions → reactive deps → DOM updates
+2. **Phase 2: ReactiveVars** (3 hrs) - Convert module vars to ReactiveDict (`waitingForTranscription`, `recordingLocked`, etc.)
+3. **Phase 3: Autoruns** (8 hrs) - Add 15-25 reactive handlers tied to state machine transitions
+4. **Phase 4: Test** (4 hrs) - Verify no regressions, test bug fixes
 
-**Related:** [SR] and [SM] state machine logs, feedback autorun (already restored)
+**Priority Autoruns:**
+1. SR Recording State Guard (CRITICAL - fixes duplicate feedback bug)
+2. TTS Lock Management (CRITICAL - fixes TTS restart bug)
+3. Display Ready Transitions
+4. SR UI State Synchronization
+5. Trial Progress Updates
+
+**Expected Impact:**
+- ✅ Fixes duplicate feedback bug (SR state guard)
+- ✅ Fixes TTS restart bug (lock management)
+- 20-30% reduction in reactive computations
+- Eliminates race conditions
+- Automatic UI synchronization
+- Better maintainability
+
+**Related:** [SR] and [SM] state machine logs, 3 state machines (Trial FSM, SR, SM)
 
 ---
 
@@ -527,11 +534,19 @@ Template.card.helpers({
 
 ## 📚 Related Documentation
 
+### Planning & Status
 - [CARD_REFACTORING_AUDIT_2025.md](CARD_REFACTORING_AUDIT_2025.md) - Full audit details
 - [CARD_REFACTORING_PRIORITIES_NO_SCROLL.md](CARD_REFACTORING_PRIORITIES_NO_SCROLL.md) - Prioritization analysis
 - [CARD_REFACTORING_QUICKSTART_NO_SCROLL.md](CARD_REFACTORING_QUICKSTART_NO_SCROLL.md) - Quick start guide
+
+### Implementation Guides
+- [M3_TRACKER_AUTORUNS_IMPLEMENTATION.md](M3_TRACKER_AUTORUNS_IMPLEMENTATION.md) - ⭐ M3 (Phase 2) complete plan
 - [scripts/migration_report_FINAL.md](../scripts/migration_report_FINAL.md) - M1 migration details
-- [SPEECH_RECOGNITION_STATE_MACHINE.md](SPEECH_RECOGNITION_STATE_MACHINE.md) - SR/SM state machines (related to M3)
+
+### State Machine Documentation
+- [STATE_MACHINE_IMPLEMENTATION_PLAN.md](STATE_MACHINE_IMPLEMENTATION_PLAN.md) - Trial FSM design
+- [STATE_MACHINE_SAFETY_ASSESSMENT.md](STATE_MACHINE_SAFETY_ASSESSMENT.md) - SR/SM safety analysis
+- [STATE_MACHINE_TRACING_GUIDE.md](STATE_MACHINE_TRACING_GUIDE.md) - Debugging guide
 
 ---
 
