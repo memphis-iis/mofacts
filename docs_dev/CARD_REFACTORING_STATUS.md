@@ -12,12 +12,12 @@
 |----------|-------|-----------|-------------|-----------|--------|
 | **⚡ DO FIRST** | 4 items | 4 | 0 | 0 | 100% |
 | **🟢 Quick Wins** | 3 items | 3 | 0 | 0 | 100% |
-| **🟡 Medium** | 4 items | 0 | 1 (M3) | 3 | 0% |
+| **🟡 Medium** | 4 items | 0 | 1 (M3 @ 80%) | 3 | 0% |
 | **🟠 Complex** | 3 items | 0 | 0 | 3 | 0% |
 | **🔴 High Value/High Risk** | 3 items | 1 | 0 | 2 | 33% |
 | **⚫ Blaze Limitation** | 1 item | N/A | N/A | N/A | N/A |
 | **⚫ Removed/Not Needed** | 3 items | N/A | N/A | N/A | N/A |
-| **TOTAL** | **20 items** | **8** | **1 (50% done)** | **10** | **47%** |
+| **TOTAL** | **20 items** | **8** | **1 (80% done)** | **10** | **53%** |
 
 ---
 
@@ -166,18 +166,21 @@ btn.addEventListener('click', (e) => {
 ### 🟡 Medium Priority
 
 #### M3: Add Tracker.autoruns (Score: 2.1)
-**Status:** ~50% Complete (10/20 hours)
-**Current Phase:** Phase 3A - Autoruns (partial)
+**Status:** ~80% Complete (16/20 hours)
+**Current Phase:** Phase 4 - Testing
 
 **What's Done:**
-- ✅ Phase 1: State machine audit complete
-- ✅ Phase 2A: ReactiveVars converted (with critical bug fix)
-- ✅ Phase 3A: 2 autoruns implemented (TTS Lock Coordination, Input State Guard)
+- ✅ Phase 1: State machine audit complete (5 hrs)
+- ✅ Phase 2A: ReactiveVars converted with critical bug fixes (3 hrs)
+- ✅ Phase 3: 5 autoruns implemented + Blaze helpers (8 hrs)
+  - Audio Input Mode, Feedback Position, SR Guard, TTS Lock, Input Guard
+  - Display Ready & SR UI via Blaze (better than jQuery autoruns)
 
 **What's Next:**
-- Test current fixes (red icon, timeout)
-- Complete remaining autoruns (SR Recording Guard, Display Ready, UI Sync)
-- Phase 4: Comprehensive testing
+- ✅ ~~Test recent fixes~~ - Working perfectly
+- Run comprehensive Phase 4 tests (8 test scenarios)
+- Measure reactive computation reduction
+- Document final results
 
 **See full details in TODO section below**
 
@@ -258,7 +261,7 @@ btn.addEventListener('click', (e) => {
 **Priority:** 🟡 MEDIUM
 **Time:** 20 hours (5 audit + 3 ReactiveVars + 8 autoruns + 4 test)
 **Safety:** MEDIUM (6/10)
-**Status:** ~50% Complete (Phases 1, 2A, 3A partially done)
+**Status:** ~80% Complete (Phases 1-3 done, Phase 4 testing remaining)
 
 **See:** [M3_TRACKER_AUTORUNS_IMPLEMENTATION.md](M3_TRACKER_AUTORUNS_IMPLEMENTATION.md) for complete implementation guide
 
@@ -268,11 +271,14 @@ btn.addEventListener('click', (e) => {
   - Created 3 ReactiveDict instances: `srState`, `trialState`, `timeoutState`
   - Converted `currentTrialState`, `waitingForTranscription`, `recordingLocked`, etc.
   - **BUG FIXED:** Functions cannot be stored in ReactiveDict - moved `currentTimeoutFunc` and `currentTimeoutDelay` to module variables
-- 🚧 **Phase 3A: Autoruns** (partial, 2/8 hrs) - In progress
-  - ✅ TTS Lock Coordination autorun added (with `!waitingForTranscription` check)
-  - ✅ Input State Guard autorun added
-  - ⏳ Remaining: SR Recording State Guard, Display Ready, UI Sync autoruns
-- ⏳ **Phase 4: Test** (4 hrs) - Not started
+- ✅ **Phase 3: Autoruns** (8 hrs) - Completed
+  - ✅ Audio Input Mode Computation (line 697) - Prevents duplicate TDF checks
+  - ✅ Feedback Position Coordination (line 714) - **Critical performance fix**
+  - ✅ SR Recording State Guard (line 737) - Auto-stops recording on state change
+  - ✅ TTS Lock Coordination (line 752) - Auto-restarts recording when TTS completes
+  - ✅ Input State Guard (line 777) - Defensive input disabling
+  - ✅ Display Ready / SR UI - Handled by Blaze helpers (better than jQuery autoruns)
+- ⏳ **Phase 4: Test** (4 hrs) - Next
 
 **Recent Fixes (2025-01-10):**
 1. **Critical:** Fixed timeout function storage bug
@@ -282,16 +288,21 @@ btn.addEventListener('click', (e) => {
 2. **SR Icon:** Added `!waitingForTranscription` check to TTS Lock Coordination
    - Prevents autorun from restarting recording during speech processing
    - Allows red icon to display while waiting for transcription
+3. **SR Timing:** Set `waitingForTranscription` BEFORE `exportToProcessCallback()`
+   - Prevents autorun from clearing audio buffer before processing
+   - Fixes: System not responding to voice answers
 
 **Next Steps:**
-1. Test fixes: red icon during processing, timeout firing correctly
-2. Complete remaining Phase 3A autoruns (SR Recording Guard, Display Ready, UI Sync)
-3. Begin Phase 4 testing
+1. ✅ ~~Test fixes (red icon, timeout)~~ - Working perfectly
+2. **Run comprehensive Phase 4 tests** (8 test scenarios)
+3. **Measure reactive computation reduction**
 
 **Lessons Learned:**
 - ⚠️ **ReactiveDict is for data, not functions** - Functions lose execution context when stored/retrieved
 - ✅ Only timeout ID (`name`) should be reactive, not the function itself
 - ✅ Autoruns need careful checks to prevent infinite restart loops
+- ✅ **Blaze helpers > jQuery autoruns** - More declarative, better performance
+- ✅ Timing matters: Set flags BEFORE async operations to prevent race conditions
 
 ---
 
