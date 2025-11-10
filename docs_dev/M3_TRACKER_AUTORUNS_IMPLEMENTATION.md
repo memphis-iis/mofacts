@@ -79,10 +79,10 @@ Test Flow:   PRESENTING → TRANSITION
 2. **TTS Locking:** `recordingLocked` prevents recording during TTS playback
 3. **State Guards:** SR should only process input during `PRESENTING.AWAITING`
 
-**Known Bugs (to be fixed by M3):**
-- TTS 'ended' listener restarts recording without state check
-- Late transcriptions processed in wrong state (`FEEDBACK.SHOWING`)
-- Causes duplicate feedback bug
+**State Synchronization:**
+- TTS 'ended' listener includes state guard (already implemented)
+- Late transcriptions blocked by clearCardTimeout (already implemented)
+- These patterns serve as examples for M3 autoruns
 
 ### 3. Stimulus Modality (SM) State Machine
 
@@ -298,9 +298,9 @@ srState.set('audioInputModeEnabled', false);
 
 **Priority Order:**
 
-#### 1. SR Recording State Guard (2 hrs) - CRITICAL BUG FIX
+#### 1. SR Recording State Guard (2 hrs) - PREVENT FUTURE BUGS
 
-**Problem:** Late voice input processed during feedback, causes duplicate feedback
+**Goal:** Ensure recording automatically stops when state changes (defensive programming)
 
 **Solution:**
 ```javascript
@@ -319,11 +319,11 @@ template.autorun(() => {
 });
 ```
 
-**Fixes:** Duplicate feedback bug, recording in wrong state
+**Benefits:** Prevents recording in wrong state, automatic cleanup, fail-safe behavior
 
-#### 2. TTS Lock Management (2 hrs) - CRITICAL BUG FIX
+#### 2. TTS Lock Management (2 hrs) - AUTOMATIC COORDINATION
 
-**Problem:** TTS 'ended' listener restarts recording without checking state
+**Goal:** Coordinate TTS and recording reactively (currently manual)
 
 **Solution:**
 ```javascript
@@ -349,7 +349,7 @@ template.autorun(() => {
 });
 ```
 
-**Fixes:** TTS restart bug, prevents recording in wrong state
+**Benefits:** Automatic lock management, centralized logic, prevents manual synchronization errors
 
 #### 3. Display Ready Transitions (1.5 hrs)
 
@@ -461,10 +461,10 @@ template.autorun(() => {
    - PRESENTING.AWAITING → timeout → FEEDBACK.SHOWING
    - Verify: Recording stops at timeout, feedback shown
 
-4. **Drill Trial - Late Voice Input (THE BUG)**
+4. **Drill Trial - Late Voice Input (Edge Case)**
    - PRESENTING.AWAITING → timeout → FEEDBACK.SHOWING → late voice
-   - Expected: Late voice ignored, no duplicate feedback
-   - Verify: Recording stopped, state guard blocks processing
+   - Expected: Late voice ignored, recording already stopped
+   - Verify: Recording stopped, autorun prevents restart
 
 5. **Test Trial**
    - PRESENTING.AWAITING → input → TRANSITION (no feedback)
@@ -482,7 +482,7 @@ template.autorun(() => {
 8. **TTS During Feedback**
    - FEEDBACK.SHOWING → TTS starts → TTS ends
    - Expected: Recording NOT restarted (wrong state)
-   - Verify: State guard prevents restart
+   - Verify: Autorun prevents restart
 
 **Metrics to Track:**
 
@@ -496,7 +496,7 @@ Tracker.autorun(() => {
 **Expected:**
 - Before M3: ~50-100 computations
 - After M3: ~30-50 computations (20-30% reduction)
-- No duplicate feedback bugs
+- Recording stops automatically on state change
 - No recording in wrong state
 - UI always in sync
 
@@ -519,8 +519,8 @@ Tracker.autorun(() => {
 
 ### Reliability Improvements
 
-- ✅ **Fixes duplicate feedback bug** (SR state guard)
-- ✅ **Fixes TTS restart bug** (lock management autorun)
+- ✅ **Prevents future state bugs** (defensive autoruns)
+- ✅ **Automatic state coordination** (TTS + recording)
 - ✅ **Prevents recording in wrong state** (trial state guard)
 - ✅ **UI always in sync** (automatic updates)
 - ✅ **No race conditions** (single source of truth)
@@ -606,9 +606,9 @@ Tracker.autorun(() => {
 
 - [ ] 15-25 new Tracker.autorun instances
 - [ ] 5-10 module variables → ReactiveVars
-- [ ] No duplicate feedback bug
+- [ ] Recording stops automatically on state transitions
 - [ ] No recording in wrong states
-- [ ] TTS doesn't restart in wrong state
+- [ ] TTS coordination automatic (no manual sync)
 - [ ] 20-30% fewer reactive computations
 - [ ] All UI updates automatic (minimize jQuery)
 - [ ] Clean state transition logs

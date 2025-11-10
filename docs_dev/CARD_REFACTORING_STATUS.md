@@ -259,15 +259,15 @@ None currently
 4. **Phase 4: Test** (4 hrs) - Verify no regressions, test bug fixes
 
 **Priority Autoruns:**
-1. SR Recording State Guard (CRITICAL - fixes duplicate feedback bug)
-2. TTS Lock Management (CRITICAL - fixes TTS restart bug)
+1. SR Recording State Guard (prevent recording in wrong state)
+2. TTS Lock Management (automatic coordination)
 3. Display Ready Transitions
 4. SR UI State Synchronization
 5. Trial Progress Updates
 
 **Expected Impact:**
-- ✅ Fixes duplicate feedback bug (SR state guard)
-- ✅ Fixes TTS restart bug (lock management)
+- Prevents future state synchronization bugs
+- Automatic TTS/recording coordination
 - 20-30% reduction in reactive computations
 - Eliminates race conditions
 - Automatic UI synchronization
