@@ -932,7 +932,8 @@ tfoot tf, .table tfoot tf, .table tfoot td, .table tfoot th {
 }
 
 .sr-status-container .fa-microphone {
-    font-size: 30px;
+    /* MO7: Convert to rem for responsive scaling (30px = 1.875rem at 16px base) */
+    font-size: 1.875rem;
 }
 
 .sr-status-container span {
@@ -1257,9 +1258,14 @@ tfoot tf, .table tfoot tf, .table tfoot td, .table tfoot th {
         min-height: 48px;
     }
 
-    /* Prevent double-tap zoom delay */
-    * {
+    /* MO2: Prevent double-tap zoom delay on interactive elements */
+    button, .btn, a, input, select, textarea {
         touch-action: manipulation;
+    }
+
+    /* MO2: Keep pinch-zoom for accessibility on images */
+    img, .stimulus-image {
+        touch-action: pinch-zoom;
     }
 
     /* Larger tap targets for content links */

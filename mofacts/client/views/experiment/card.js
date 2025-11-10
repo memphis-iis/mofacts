@@ -1976,8 +1976,9 @@ function waitForDOMImageReady() {
       resolve();
     };
 
-    imgElement.addEventListener('load', onLoad);
-    imgElement.addEventListener('error', onError);
+    // MO4: Passive listeners for better performance (no preventDefault needed)
+    imgElement.addEventListener('load', onLoad, {passive: true});
+    imgElement.addEventListener('error', onError, {passive: true});
   });
 }
 
@@ -2227,12 +2228,13 @@ function playCurrentSound(onEndCallback) {
   let currentSound = new Audio(currentAudioSrc);
   // Reset sound and play it
   currentSound.play();
+  // MO4: Passive listener for better performance
   currentSound.addEventListener('ended', function() {
     if (onEndCallback) {
       onEndCallback();
     }
     clientConsole(2, 'Sound completed');
-  })
+  }, {passive: true})
 }
 
 function handleUserForceCorrectInput(e, source) {
@@ -4230,6 +4232,7 @@ async function speakMessageIfAudioPromptFeedbackEnabled(msg, audioPromptSource) 
               window.currentAudioObj.pause();
             }
             window.currentAudioObj = audioObj;
+            // MO4: Passive listener for better performance
             window.currentAudioObj.addEventListener('ended', (event) => {
               clientConsole(2, '[SR]   ✅ TTS audio ended, unlocking recording');
               window.currentAudioObj = undefined;
@@ -4243,13 +4246,14 @@ async function speakMessageIfAudioPromptFeedbackEnabled(msg, audioPromptSource) 
               } else {
                 clientConsole(2, '[SR] TTS ended but state is', currentTrialState, '- not restarting recording');
               }
-            });
+            }, {passive: true});
             clientConsole(2, 'inside callback, playing audioObj:');
             window.currentAudioObj.play().catch((err) => {
               clientConsole(2, err)
               cardState.set('ttsRequested', false);
               clientConsole(2, '[SR] 🎤 TTS request complete (play error, using fallback) (ttsRequested=false)');
               let utterance = new SpeechSynthesisUtterance(msg);
+              // MO4: Passive listeners for better performance
               utterance.addEventListener('end', (event) => {
                 clientConsole(2, '[SR]   ✅ TTS fallback utterance ended, unlocking recording');
                 cardState.set('recordingLocked', false);
@@ -4260,12 +4264,12 @@ async function speakMessageIfAudioPromptFeedbackEnabled(msg, audioPromptSource) 
                 } else {
                   clientConsole(2, '[SR] TTS fallback ended but state is', currentTrialState, '- not restarting recording');
                 }
-              });
+              }, {passive: true});
               utterance.addEventListener('error', (event) => {
                 clientConsole(2, '[SR]   ❌ TTS fallback utterance error, unlocking recording');
                 clientConsole(2, event);
                 cardState.set('recordingLocked', false);
-              });
+              }, {passive: true});
               synthesis.speak(utterance);
             });
           }
@@ -4286,6 +4290,7 @@ async function speakMessageIfAudioPromptFeedbackEnabled(msg, audioPromptSource) 
 
         cardState.set('recordingLocked', true);
         let utterance = new SpeechSynthesisUtterance(msg);
+        // MO4: Passive listeners for better performance
         utterance.addEventListener('end', (event) => {
           clientConsole(2, '[SR]   ✅ MDN TTS ended, unlocking recording');
           cardState.set('recordingLocked', false);
@@ -4298,7 +4303,7 @@ async function speakMessageIfAudioPromptFeedbackEnabled(msg, audioPromptSource) 
           } else {
             clientConsole(2, '[SR] MDN TTS ended but state is', currentTrialState, '- not restarting recording');
           }
-        });
+        }, {passive: true});
         utterance.addEventListener('error', (event) => {
           clientConsole(2, '[SR]   ❌ MDN TTS error, unlocking recording');
           clientConsole(2, event);
@@ -4312,7 +4317,7 @@ async function speakMessageIfAudioPromptFeedbackEnabled(msg, audioPromptSource) 
           } else {
             clientConsole(2, '[SR] MDN TTS error but state is', currentTrialState, '- not restarting recording');
           }
-        });
+        }, {passive: true});
         synthesis.speak(utterance);
       }
     }

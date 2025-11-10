@@ -413,11 +413,12 @@ function attachAudioListeners() {
         if (audId) {
             let aud = document.getElementById(audId);
             if (aud) {
+                // Cannot use passive: true because we call preventDefault()
                 btn.addEventListener('click', (e) => {
                     e.preventDefault();
                     aud.currentTime = 0;
                     aud.play().catch(console.error);
-                });
+                }, {passive: false});
                 btn.setAttribute('data-listener-attached', 'true'); // Prevent duplicates
             }
         }

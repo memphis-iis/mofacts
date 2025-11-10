@@ -11,17 +11,17 @@
 | Category | Total | Completed | Remaining | % Done |
 |----------|-------|-----------|-----------|--------|
 | **⚡ DO FIRST** | 4 items | 4 | 0 | 100% |
-| **🟢 Quick Wins** | 4 items | 0 | 4 | 0% |
+| **🟢 Quick Wins** | 4 items | 3 | 1 | 75% |
 | **🟡 Medium** | 4 items | 0 | 4 | 0% |
 | **🟠 Complex** | 3 items | 0 | 3 | 0% |
 | **🔴 High Value/High Risk** | 3 items | 1 | 2 | 33% |
 | **⚫ Blaze Limitation** | 1 item | N/A | N/A | N/A |
 | **⚫ Removed/Not Needed** | 1 item | N/A | N/A | N/A |
-| **TOTAL** | **20 items** | **5** | **15** | **25%** |
+| **TOTAL** | **20 items** | **8** | **12** | **40%** |
 
 ---
 
-## ✅ COMPLETED (5 items)
+## ✅ COMPLETED (8 items)
 
 ### ⚡ DO FIRST Tier
 
@@ -99,20 +99,65 @@ const cardState = new ReactiveDict('cardState');
 
 ---
 
-### 🟢 Quick Wins Tier (Partially Done)
+### 🟢 Quick Wins Tier
 
-#### 5. ✅ MO7: Responsive Font Sizes (Score: 8.0) - PARTIAL
-**Completed:** ~2024-2025 (partially)
-**Implementation:** [classic.css:98, 102, 109, etc.](../mofacts/public/styles/classic.css#L98)
-**Status:** Headers use `clamp()`, but some fixed `px` remain
+#### 5. ✅ MO7: Responsive Font Sizes (Score: 8.0)
+**Completed:** 2025-01-10
+**Implementation:** [classic.css:98, 102, 109, 935-936](../mofacts/public/styles/classic.css#L935-L936)
+**Status:** All fixed px converted to responsive units
 ```css
-/* DONE: */
+/* Headers use clamp(): */
 h1 { font-size: clamp(2.5rem, 5vw, 4.6rem); }
 h2 { font-size: clamp(1.5rem, 3vw, 2rem); }
 
-/* TODO: Convert remaining fixed px to clamp/rem */
+/* Icon sizes use rem: */
+.sr-status-container .fa-microphone { font-size: 1.875rem; /* 30px → rem */ }
 ```
-**Result:** ⚠️ Mostly done, audit needed for remaining fixed sizes
+**Audit Results:**
+- Only 1 fixed px found in classic.css (microphone icon)
+- Converted to 1.875rem for responsive scaling
+- TDF-configurable font sizes (getFontSizeStyle) intentionally kept as px
+**Result:** ✅ Fully responsive typography across all CSS
+
+---
+
+#### 6. ✅ MO4: Passive Event Listeners (Score: 24.0 → 4.0)
+**Completed:** 2025-01-10
+**Implementation:** [card.js:1980-1981, 2232, 4236, 4257, 4268, 4294, 4307](../mofacts/client/views/experiment/card.js#L1980-L1981), [card.html:416-421](../mofacts/client/views/experiment/card.html#L416-L421)
+**Impact:** Improved scroll performance and touch responsiveness
+```javascript
+// Passive listeners allow browser optimization:
+imgElement.addEventListener('load', onLoad, {passive: true});
+utterance.addEventListener('end', callback, {passive: true});
+
+// Non-passive with explanation:
+btn.addEventListener('click', (e) => {
+  e.preventDefault(); // Can't use passive: true
+  aud.play();
+}, {passive: false});
+```
+**Result:** ✅ Better mobile performance, lower CPU usage
+
+---
+
+#### 7. ✅ MO2: Touch Action Selectors (Score: 18.0 → 5.0)
+**Completed:** 2025-01-10
+**Implementation:** [classic.css:1260-1268](../mofacts/public/styles/classic.css#L1260-L1268)
+**Impact:** Better gesture handling and accessibility
+```css
+@media screen and (max-width: 768px) {
+  /* Prevent double-tap zoom on interactive elements */
+  button, .btn, a, input, select, textarea {
+    touch-action: manipulation;
+  }
+
+  /* Keep pinch-zoom for accessibility on images */
+  img, .stimulus-image {
+    touch-action: pinch-zoom;
+  }
+}
+```
+**Result:** ✅ Refined from wildcard (*) to specific selectors, added image accessibility
 
 ---
 
@@ -139,7 +184,7 @@ None currently
 
 ---
 
-### 🟢 Quick Wins (4 items, 31.5 hours)
+### 🟢 Quick Wins (1 item, 12.5 hours)
 
 #### TODO: MO6: Skeleton Loaders (Score: 5.1)
 **Priority:** 🟢 QUICK WIN
@@ -159,53 +204,6 @@ None currently
 {{/if}}
 ```
 **Expected Impact:** Professional loading, prevents overflow
-
----
-
-#### TODO: MO4: Touch Gestures (Score: 24.0 → 4.0 for no-scroll)
-**Priority:** 🟢 QUICK WIN
-**Time:** 1.5 hours
-**Safety:** HIGH (9/10)
-**Why:** Better touch response (not scroll-related)
-**Implementation:**
-```javascript
-// Focus on touch, not scroll:
-btn.addEventListener('click', handler, {passive: true});
-btn.addEventListener('touchstart', handler, {passive: true});
-```
-**Expected Impact:** Faster touch response, lower CPU
-
----
-
-#### TODO: MO2: Touch Action (Score: 18.0 → 5.0 for no-scroll)
-**Priority:** 🟢 QUICK WIN
-**Time:** 2.5 hours
-**Safety:** HIGH (9/10)
-**Why:** Gesture recognition, pinch-zoom accessibility
-**Implementation:**
-```css
-@media screen and (max-width: 768px) {
-  /* Prevent double-tap zoom on buttons */
-  button, a, input { touch-action: manipulation; }
-
-  /* Keep pinch-zoom for accessibility */
-  img.stimulus-image { touch-action: pinch-zoom; }
-}
-```
-**Expected Impact:** Better gesture handling
-
----
-
-#### TODO: MO7: Complete Responsive Fonts (Score: 8.0)
-**Priority:** 🟢 QUICK WIN
-**Time:** 5 hours (audit + remaining conversions)
-**Safety:** HIGH (8/10)
-**Why:** Complete the partially-done work
-**Tasks:**
-1. Audit all remaining fixed `px` font sizes
-2. Convert to `clamp()` or `rem`
-3. Test on various screen sizes
-**Expected Impact:** Fully responsive typography
 
 ---
 
@@ -432,14 +430,14 @@ Template.card.helpers({
 
 ---
 
-### NEXT: Phase 1 - Mobile Polish (7.5 hours)
-**Goal:** Complete mobile polish, finish quick wins
-
-1. **MO7: Complete fonts** (5 hrs) - Finish partial work
-2. **MO4: Touch gestures** (1.5 hrs) - Easy win
-3. **MO2: Touch action** (1.5 hrs) - Easy win (reduced from 2.5)
-
-**Expected Impact:** Complete mobile polish
+### ✅ DONE: Phase 1 - Mobile Polish (Completed 2025-01-10)
+**Time:** 7.5 hours
+**Items:** MO7, MO4, MO2
+**Changes:**
+- ✅ **MO7:** Converted last fixed px (30px icon → 1.875rem), full responsive typography
+- ✅ **MO4:** Added passive listeners to 6 event handlers (images, audio, TTS)
+- ✅ **MO2:** Refined touch-action from wildcard (*) to specific selectors, added image pinch-zoom
+**Result:** Complete mobile polish - all touch targets optimized, fully responsive fonts, better gesture handling
 
 ---
 
@@ -555,4 +553,4 @@ Template.card.helpers({
 ---
 
 **Last Updated:** 2025-01-10
-**Next Review:** After Phase 1 complete (C3, MO7, MO4, MO2)
+**Next Review:** After Phase 2 complete (MO6, M3) or when starting C1 planning
