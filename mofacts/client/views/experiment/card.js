@@ -260,7 +260,8 @@ srState.set('waitingForTranscription', false);
 let cachedSyllables = null;
 let cachedSuccessColor = null;
 let cachedAlertColor = null;
-let audioInputModeEnabled = false;
+// M3: Audio input mode flag (converted to reactive state)
+srState.set('audioInputModeEnabled', false);
 // Cache for speech recognition answer grammar and phonetic index
 // Answer grammar is per-unit (currentStimuliSet), so invalidate when unit changes
 let cachedAnswerGrammar = null;
@@ -700,8 +701,9 @@ Template.card.onCreated(function() {
     // Compute in a non-reactive context to prevent cascade
     Tracker.nonreactive(function() {
       const tdfAudioEnabled = tdfFile?.tdfs?.tutor?.setspec?.audioInputEnabled === 'true';
-      audioInputModeEnabled = (userAudioToggled || false) && tdfAudioEnabled;
-      clientConsole(2, '[Card] Reactive SR icon update - userAudioToggled:', userAudioToggled, 'audioInputModeEnabled:', audioInputModeEnabled);
+      const enabled = (userAudioToggled || false) && tdfAudioEnabled;
+      srState.set('audioInputModeEnabled', enabled);
+      clientConsole(2, '[Card] Reactive SR icon update - userAudioToggled:', userAudioToggled, 'audioInputModeEnabled:', enabled);
     });
   });
 
@@ -724,6 +726,65 @@ Template.card.onCreated(function() {
           $('#userInteractionContainer').attr('hidden', '');
         } else if (feedbackPosition === 'bottom') {
           $('#feedbackOverrideContainer').attr('hidden', '');
+        }
+      });
+    }
+  });
+
+  // M3: SR Recording State Guard - Auto-stop recording when leaving AWAITING state
+  // DEFENSIVE: Prevents recording in wrong state, automatic cleanup, fail-safe behavior
+  template.autorun(function() {
+    const currentState = trialState.get('current');
+    const recording = cardState.get('recording');
+
+    // Auto-stop recording when leaving PRESENTING_AWAITING state
+    if (recording && currentState !== TRIAL_STATES.PRESENTING_AWAITING) {
+      clientConsole(2, '[SR] Auto-stopping recording - state changed to:', currentState);
+      Tracker.afterFlush(function() {
+        stopRecording();
+      });
+    }
+  });
+
+  // M3: TTS Lock Coordination - Automatically coordinate TTS and recording
+  // AUTOMATIC: Centralized logic, prevents manual synchronization errors
+  template.autorun(function() {
+    const locked = cardState.get('recordingLocked');
+    const ttsRequested = cardState.get('ttsRequested');
+    const currentState = trialState.get('current');
+    const recording = cardState.get('recording');
+    const audioInputEnabled = srState.get('audioInputModeEnabled');
+
+    // Auto-restart recording when ALL conditions met:
+    // 1. Not locked (TTS finished)
+    // 2. No TTS requested (not starting new TTS)
+    // 3. In PRESENTING_AWAITING state (accepting input)
+    // 4. Not already recording
+    // 5. Audio input is enabled
+    if (!locked && !ttsRequested && currentState === TRIAL_STATES.PRESENTING_AWAITING && !recording && audioInputEnabled) {
+      clientConsole(2, '[SR] Auto-restarting recording - TTS complete, conditions met');
+      Tracker.afterFlush(function() {
+        startRecording();
+      });
+    }
+  });
+
+  // M3: Input State Guard - Ensure inputs disabled when not accepting input
+  // DEFENSIVE: Prevents input in wrong state, fail-safe behavior
+  template.autorun(function() {
+    const currentState = trialState.get('current');
+
+    // Disable input when not in states that accept input
+    const acceptsInput = currentState === TRIAL_STATES.PRESENTING_AWAITING ||
+                        currentState === TRIAL_STATES.STUDY_SHOWING;
+
+    if (!acceptsInput) {
+      Tracker.afterFlush(function() {
+        // Defensive: Ensure input elements are disabled
+        const userAnswerEl = document.getElementById('userAnswer');
+        if (userAnswerEl && !userAnswerEl.disabled) {
+          clientConsole(2, '[M3] Auto-disabling input - state:', currentState);
+          userAnswerEl.disabled = true;
         }
       });
     }
@@ -1061,8 +1122,8 @@ Template.card.helpers({
   'isNotInDialogueLoopStageIntroOrExit': () => cardState.get('dialogueLoopStage') != 'intro' && cardState.get('dialogueLoopStage') != 'exit',
 
   'audioInputModeEnabled': function() {
-    // Use cached value from reactive autorun (prevents duplicate TDF checks)
-    return audioInputModeEnabled;
+    // Use reactive state value (updated by autorun, prevents duplicate TDF checks)
+    return srState.get('audioInputModeEnabled');
   },
 
   'microphoneColorClass': function() {
@@ -1387,8 +1448,8 @@ Template.card.helpers({
   'userInDiaglogue': () => cardState.get('showDialogueText') && cardState.get('dialogueDisplay'),
 
   'audioEnabled': () => {
-    // Use cached value from reactive autorun (prevents duplicate TDF checks)
-    return audioInputModeEnabled;
+    // Use reactive state value (updated by autorun, prevents duplicate TDF checks)
+    return srState.get('audioInputModeEnabled');
   },
 
   'showDialogueHints': function() {
