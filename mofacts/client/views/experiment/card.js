@@ -66,11 +66,11 @@ async function checkAndWarmupAudioIfNeeded() {
   // Check TTS warmup (Scenario 2: TDF has embedded key)
   if (currentTdfFile.tdfs?.tutor?.setspec?.textToSpeechAPIKey) {
     const audioPromptMode = user.audioSettings?.audioPromptMode;
-    if (audioPromptMode && audioPromptMode !== 'silent' && !Session.get('ttsWarmedUp')) {
+    if (audioPromptMode && audioPromptMode !== 'silent' && !cardState.get('ttsWarmedUp')) {
       clientConsole(2, '[TTS] TDF has embedded key, warming up before first trial (Scenario 2)');
 
       // Set flag immediately to prevent duplicate warmups
-      Session.set('ttsWarmedUp', true);
+      cardState.set('ttsWarmedUp', true);
 
       // Make async warmup call
       const startTime = performance.now();
@@ -93,11 +93,11 @@ async function checkAndWarmupAudioIfNeeded() {
 
   // Check SR warmup (Scenario 2: TDF has embedded key)
   if (currentTdfFile.tdfs?.tutor?.setspec?.speechAPIKey) {
-    if (checkAudioInputMode() && !Session.get('srWarmedUp')) {
+    if (checkAudioInputMode() && !cardState.get('srWarmedUp')) {
       clientConsole(2, '[SR] TDF has embedded key, warming up before first trial (Scenario 2)');
 
       // Set flag immediately to prevent duplicate warmups
-      Session.set('srWarmedUp', true);
+      cardState.set('srWarmedUp', true);
 
       // Make async warmup call
       const startTime2 = performance.now();
@@ -119,18 +119,18 @@ async function checkAndWarmupAudioIfNeeded() {
   // Wait for all warmups to complete
   if (promises.length > 0) {
     console.log(`[Audio] Starting Scenario 2 warmup with ${promises.length} API(s), showing spinner...`);
-    Session.set('audioWarmupInProgress', true);
+    cardState.set('audioWarmupInProgress', true);
     try {
       await Promise.all(promises);
       console.log('[Audio] Scenario 2 warmup complete, hiding spinner');
     } catch (err) {
       console.log('[Audio] Scenario 2 warmup error:', err);
     } finally {
-      Session.set('audioWarmupInProgress', false);
+      cardState.set('audioWarmupInProgress', false);
     }
   } else {
     console.log('[Audio] No warmup needed - promises.length:', promises.length);
-    console.log('[Audio] ttsWarmedUp:', Session.get('ttsWarmedUp'), 'srWarmedUp:', Session.get('srWarmedUp'));
+    console.log('[Audio] ttsWarmedUp:', cardState.get('ttsWarmedUp'), 'srWarmedUp:', cardState.get('srWarmedUp'));
   }
 }
 
@@ -234,17 +234,23 @@ turn it on, you need to set <showhistory>true</showhistory> in the
 // //////////////////////////////////////////////////////////////////////////
 // Global variables and helper functions for them
 
+// ===== PHASE 2: Scoped Reactive State =====
+// CRITICAL: Must be declared BEFORE any usage
+// Use ReactiveDict for card-specific state instead of global Session
+// This prevents memory leaks and improves performance
+const cardState = new ReactiveDict('cardState');
+
 let engine = null; // The unit engine for display (i.e. model or schedule)
 const hark = require('../../lib/hark');
-Session.set('buttonList', []);
+cardState.set('buttonList', []);
 const scrollList = new Mongo.Collection(null); // local-only - no database
-Session.set('scrollListCount', 0);
+cardState.set('scrollListCount', 0);
 Session.set('currentDeliveryParams', {});
 Session.set('inResume', false);
-Session.set('wasReportedForRemoval', false);
+cardState.set('wasReportedForRemoval', false);
 Session.set('hiddenItems', []);
-Session.set('numVisibleCards', 0);
-Session.set('recordingLocked', false);
+cardState.set('numVisibleCards', 0);
+cardState.set('recordingLocked', false);
 let waitingForTranscription = false; // Track if we're waiting for Google Speech API response
 let cachedSyllables = null;
 let cachedSuccessColor = null;
@@ -260,7 +266,7 @@ let timeoutsSeen = 0; // Reset to zero on resume or non-timeout
 let trialStartTimestamp = 0;
 let trialEndTimeStamp = 0;
 let afterFeedbackCallbackBind = null;
-Session.set('trialStartTimestamp', trialStartTimestamp);
+cardState.set('trialStartTimestamp', trialStartTimestamp);
 let firstKeypressTimestamp = 0;
 let currentSound = null; // See later in this file for sound functions
 let userFeedbackStart = null;
@@ -274,11 +280,6 @@ let simTimeoutName = null;
 let countdownInterval = null;
 let userAnswer = null;
 let lastlogicIndex = 0;
-
-// ===== PHASE 2: Scoped Reactive State =====
-// Use ReactiveDict for card-specific state instead of global Session
-// This prevents memory leaks and improves performance
-const cardState = new ReactiveDict('cardState');
 
 // Centralized Timeout Registry - tracks all active timeouts/intervals for debugging
 // Maps timeout name → {id, type, delay, created, description}
@@ -398,14 +399,14 @@ function clearCardTimeout() {
   };
   safeClear(Meteor.clearTimeout, timeoutName);
   safeClear(Meteor.clearTimeout, simTimeoutName);
-  safeClear(Meteor.clearInterval, Session.get('varLenTimeoutName'));
+  safeClear(Meteor.clearInterval, cardState.get('varLenTimeoutName'));
   safeClear(Meteor.clearInterval, countdownInterval);
   timeoutName = null;
   timeoutFunc = null;
   timeoutDelay = null;
   simTimeoutName = null;
   countdownInterval = null;
-  Session.set('varLenTimeoutName', null);
+  cardState.set('varLenTimeoutName', null);
 }
 
 // Start a timeout count
@@ -419,7 +420,7 @@ function beginMainCardTimeout(delay, func) {
   const displayMode = uiSettings.displayCardTimeoutAsBarOrText;
 
   timeoutFunc = function() {
-    const numRemainingLocks = Session.get('pausedLocks');
+    const numRemainingLocks = cardState.get('pausedLocks');
     if (numRemainingLocks > 0) {
       clientConsole(2, 'timeout reached but there are', numRemainingLocks, 'locks outstanding');
     } else if (waitingForTranscription) {
@@ -442,7 +443,7 @@ function beginMainCardTimeout(delay, func) {
   };
   timeoutDelay = delay;
   const mainCardTimeoutStart = new Date();
-  Session.set('mainCardTimeoutStart', mainCardTimeoutStart);
+  cardState.set('mainCardTimeoutStart', mainCardTimeoutStart);
   clientConsole(2, 'mainCardTimeoutStart', mainCardTimeoutStart);
   timeoutName = Meteor.setTimeout(timeoutFunc, timeoutDelay);
   cardStartTime = Date.now();
@@ -483,7 +484,7 @@ function beginMainCardTimeout(delay, func) {
       }
     }
   }, 1000);
-  Session.set('varLenTimeoutName', Meteor.setInterval(varLenDisplayTimeout, 400));
+  cardState.set('varLenTimeoutName', Meteor.setInterval(varLenDisplayTimeout, 400));
 }
 
 // Reset the previously set timeout counter
@@ -495,20 +496,20 @@ function resetMainCardTimeout() {
   timeoutFunc = savedFunc;
   timeoutDelay = savedDelay;
   const mainCardTimeoutStart = new Date();
-  Session.set('mainCardTimeoutStart', mainCardTimeoutStart);
+  cardState.set('mainCardTimeoutStart', mainCardTimeoutStart);
   clientConsole(2, 'reset, mainCardTimeoutStart:', mainCardTimeoutStart);
   timeoutName = Meteor.setTimeout(savedFunc, savedDelay);
-  Session.set('varLenTimeoutName', Meteor.setInterval(varLenDisplayTimeout, 400));
+  cardState.set('varLenTimeoutName', Meteor.setInterval(varLenDisplayTimeout, 400));
 }
 
 // TODO: there is a minor bug here related to not being able to truly pause on
 // re-entering a tdf for the first trial
 function restartMainCardTimeoutIfNecessary() {
   clientConsole(2, 'restartMainCardTimeoutIfNecessary');
-  const mainCardTimeoutStart = Session.get('mainCardTimeoutStart');
+  const mainCardTimeoutStart = cardState.get('mainCardTimeoutStart');
   if (!mainCardTimeoutStart) {
-    const numRemainingLocks = Session.get('pausedLocks')-1;
-    Session.set('pausedLocks', numRemainingLocks);
+    const numRemainingLocks = cardState.get('pausedLocks')-1;
+    cardState.set('pausedLocks', numRemainingLocks);
     return;
   }
   const errorReportStart = Session.get('errorReportStart');
@@ -517,10 +518,10 @@ function restartMainCardTimeoutIfNecessary() {
   const remainingDelay = timeoutDelay - usedDelayTime;
   timeoutDelay = remainingDelay;
   const rightNow = new Date();
-  Session.set('mainCardTimeoutStart', rightNow);
+  cardState.set('mainCardTimeoutStart', rightNow);
   function wrappedTimeout() {
-    const numRemainingLocks = Session.get('pausedLocks')-1;
-    Session.set('pausedLocks', numRemainingLocks);
+    const numRemainingLocks = cardState.get('pausedLocks')-1;
+    cardState.set('pausedLocks', numRemainingLocks);
     if (numRemainingLocks <= 0) {
       if (timeoutFunc) timeoutFunc();
     } else {
@@ -528,7 +529,7 @@ function restartMainCardTimeoutIfNecessary() {
     }
   }
   timeoutName = Meteor.setTimeout(wrappedTimeout, remainingDelay);
-  Session.set('varLenTimeoutName', Meteor.setInterval(varLenDisplayTimeout, 400));
+  cardState.set('varLenTimeoutName', Meteor.setInterval(varLenDisplayTimeout, 400));
 }
 
 // Set a special timeout to handle simulation if necessary
@@ -585,8 +586,8 @@ function varLenDisplayTimeout() {
     // No variable display parameters - we can stop the interval
     $('#continueButton').prop('disabled', false);
     setDispTimeoutText('');
-    Meteor.clearInterval(Session.get('varLenTimeoutName'));
-    Session.set('varLenTimeoutName', null);
+    Meteor.clearInterval(cardState.get('varLenTimeoutName'));
+    cardState.set('varLenTimeoutName', null);
     return;
   }
 
@@ -756,7 +757,7 @@ async function initCard() {
       leavePage('/card');
     }
   };
-  Session.set('scoringEnabled', undefined);
+  cardState.set('scoringEnabled', undefined);
 
   if (!Session.get('stimDisplayTypeMap')) {
     const stimDisplayTypeMap = await meteorCallAsync('getStimDisplayTypeMap');
@@ -824,13 +825,13 @@ async function initCard() {
 
   if (audioInputEnabled) {
     // Check if audio stream was pre-initialized during warmup
-    if (window.preInitializedAudioStream && Session.get('audioRecorderInitialized')) {
+    if (window.preInitializedAudioStream && cardState.get('audioRecorderInitialized')) {
       clientConsole(2, '[Audio] Using pre-initialized audio stream from warmup - skipping getUserMedia');
       // Use the pre-initialized stream directly
       startUserMedia(window.preInitializedAudioStream);
       // Clear the flag so we don't reuse it
       window.preInitializedAudioStream = null;
-      Session.set('audioRecorderInitialized', false);
+      cardState.set('audioRecorderInitialized', false);
     } else {
       await initializeAudio();
     }
@@ -846,8 +847,8 @@ Template.card.events({
 
   'keypress #userAnswer': function(e) {
     const key = e.keyCode || e.which;
-    if (key == ENTER_KEY && !Session.get('submmissionLock')) {
-      Session.set('submmissionLock', true);
+    if (key == ENTER_KEY && !cardState.get('submmissionLock')) {
+      cardState.set('submmissionLock', true);
     }
     handleUserInput(e, 'keypress');
   },
@@ -855,9 +856,9 @@ Template.card.events({
   'click #removeQuestion': async function(e) {
     // check if the question was already reported.
     // This button only needs to fire if the user hasnt answered the question already.
-    if(!Session.get('wasReportedForRemoval')) {
+    if(!cardState.get('wasReportedForRemoval')) {
       await removeCardByUser();
-      Session.set('wasReportedForRemoval', true);
+      cardState.set('wasReportedForRemoval', true);
       await afterAnswerFeedbackCallback(Date.now(), trialStartTimestamp, 'removal', "", false, false, false);
     }
   },
@@ -869,8 +870,8 @@ Template.card.events({
   'keypress #dialogueUserAnswer': function(e) {
     const key = e.keyCode || e.which;
     if (key == ENTER_KEY) {
-      if (!Session.get('enterKeyLock')) {
-        Session.set('enterKeyLock', true);
+      if (!cardState.get('enterKeyLock')) {
+        cardState.set('enterKeyLock', true);
         $('#dialogueUserAnswer').prop('disabled', true);
         const answer = JSON.parse(JSON.stringify(_.trim($('#dialogueUserAnswer').val()).toLowerCase()));
         $('#dialogueUserAnswer').val('');
@@ -900,12 +901,12 @@ Template.card.events({
     }
   },
   'click #confirmFeedbackSelection': function() {
-    Session.set('displayFeedback', false);
+    cardState.set('displayFeedback', false);
     processUserTimesLog();  
   },
   'click #confirmFeedbackSelectionFromIndex': function(){
-    Session.set('displayFeedback', false);
-    Session.set('pausedLocks', Session.get('pausedLocks')-1);
+    cardState.set('displayFeedback', false);
+    cardState.set('pausedLocks', cardState.get('pausedLocks')-1);
     Session.set('resetFeedbackSettingsFromIndex', false);
   },
   'click #overlearningButton': function(event) {
@@ -916,9 +917,9 @@ Template.card.events({
   'click .multipleChoiceButton': function(event) {
     event.preventDefault();
     clientConsole(2, "multipleChoiceButton clicked");
-    if(!Session.get('submmissionLock')){
+    if(!cardState.get('submmissionLock')){
       if(!Session.get('curTdfUISettings').displayConfirmButton){
-        Session.set('submmissionLock', true);
+        cardState.set('submmissionLock', true);
         handleUserInput(event, 'buttonClick');
       } else {
         clientConsole(2, "multipleChoiceButton clicked (waiting for confirm)");
@@ -973,8 +974,8 @@ Template.card.events({
     event.preventDefault();``
     clientConsole(2, "displayConfirmButton clicked");
     $('#confirmButton').addClass('hidden');
-    if(!Session.get('submmissionLock')){
-      if(Session.get('buttonTrial')){
+    if(!cardState.get('submmissionLock')){
+      if(cardState.get('buttonTrial')){
         const selectedButton = $('.btn-secondary, .multipleChoiceButton');
         //change this event to a buttonClick event for that button
         event.currentTarget = selectedButton;
@@ -993,11 +994,11 @@ Template.card.events({
 
   'click #continueStudy': function(event) {
     event.preventDefault();
-    const timeout = Session.get('CurTimeoutId')
-    Session.set('CurTimeoutId', undefined)
+    const timeout = cardState.get('CurTimeoutId')
+    cardState.set('CurTimeoutId', undefined)
     Meteor.clearTimeout(timeout)
     afterFeedbackCallbackBind();
-    engine.updatePracticeTime(Date.now() - Session.get('trialEndTimeStamp'))
+    engine.updatePracticeTime(Date.now() - cardState.get('trialEndTimeStamp'))
   },
 
   'click .instructModalDismiss': function(event) {
@@ -1050,7 +1051,7 @@ Template.card.helpers({
 
   'isNormal': () => Meteor.user().loginParams.loginMode !== 'experiment',
 
-  'isNotInDialogueLoopStageIntroOrExit': () => Session.get('dialogueLoopStage') != 'intro' && Session.get('dialogueLoopStage') != 'exit',
+  'isNotInDialogueLoopStageIntroOrExit': () => cardState.get('dialogueLoopStage') != 'intro' && cardState.get('dialogueLoopStage') != 'exit',
 
   'audioInputModeEnabled': function() {
     // Use cached value from reactive autorun (prevents duplicate TDF checks)
@@ -1059,11 +1060,11 @@ Template.card.helpers({
 
   'microphoneColorClass': function() {
     // Use CSS classes instead of inline styles for better performance
-    return Session.get('recording') ? 'sr-mic-recording' : 'sr-mic-waiting';
+    return cardState.get('recording') ? 'sr-mic-recording' : 'sr-mic-waiting';
   },
 
   'voiceTranscriptionStatusMsg': function() {
-    if(Session.get('recording')){
+    if(cardState.get('recording')){
       return 'Say skip or answer';
     } else {
       return 'Please wait...';
@@ -1073,7 +1074,7 @@ Template.card.helpers({
   'shouldShowSpeechRecognitionUI': function() {
     // Only show SR UI when actually awaiting input (prevents FOUC of red "waiting" state)
     // Recording starts in PRESENTING_AWAITING state via allowUserInput()
-    const state = Session.get('_debugTrialState');
+    const state = cardState.get('_debugTrialState');
 
     return state === TRIAL_STATES.PRESENTING_AWAITING;
   },
@@ -1083,7 +1084,7 @@ Template.card.helpers({
     return user && user.profile ? user.profile.impersonating : false;
   },
 
-  'displayFeedback': () => Session.get('displayFeedback') && Session.get('currentDeliveryParams').allowFeedbackTypeSelect,
+  'displayFeedback': () => cardState.get('displayFeedback') && Session.get('currentDeliveryParams').allowFeedbackTypeSelect,
 
   'resetFeedbackSettingsFromIndex': () => Session.get('resetFeedbackSettingsFromIndex'),
 
@@ -1096,7 +1097,7 @@ Template.card.helpers({
     }
   },
 
-  'ReviewStudyCountdown': () => Session.get('ReviewStudyCountdown'),
+  'ReviewStudyCountdown': () => cardState.get('ReviewStudyCountdown'),
 
   'subWordClozeCurrentQuestionExists': function() {
     const experimentState = Session.get('currentExperimentState');
@@ -1111,7 +1112,7 @@ Template.card.helpers({
   },
 
   'ifClozeDisplayTextExists': function (){
-    const currentDisplay = Session.get('currentDisplay');
+    const currentDisplay = cardState.get('currentDisplay');
     const experimentState = Session.get('currentExperimentState');
     const clozeText = currentDisplay ? currentDisplay.clozeText : undefined;
     const text = currentDisplay ? currentDisplay.text : undefined;
@@ -1124,13 +1125,13 @@ Template.card.helpers({
   },
 
   'clozeText': function() {
-    const currentDisplay = Session.get('currentDisplay');
+    const currentDisplay = cardState.get('currentDisplay');
     // Security: Sanitize HTML to prevent XSS while allowing safe formatting
     return currentDisplay ? sanitizeHTML(currentDisplay.clozeText) : undefined;
   },
 
   'text': function() {
-    const currentDisplay = Session.get('currentDisplay');
+    const currentDisplay = cardState.get('currentDisplay');
     // Security: Sanitize HTML to prevent XSS while allowing safe formatting
     return currentDisplay ? sanitizeHTML(currentDisplay.text) : undefined;
   },
@@ -1142,13 +1143,13 @@ Template.card.helpers({
   },
 
   'dialogueText': function() {
-    const text = Session.get('dialogueDisplay') ? Session.get('dialogueDisplay').text : undefined;
+    const text = cardState.get('dialogueDisplay') ? cardState.get('dialogueDisplay').text : undefined;
     // Security: Sanitize HTML to prevent XSS while allowing safe formatting
     return sanitizeHTML(text);
   },
 
   'curImgSrc': function() {
-    const currentDisplay = Session.get('currentDisplay');
+    const currentDisplay = cardState.get('currentDisplay');
     const curImgSrc = currentDisplay ? currentDisplay.imgSrc : undefined;
     if (curImgSrc && imagesDict[curImgSrc]) {
       return imagesDict[curImgSrc].src;
@@ -1158,7 +1159,7 @@ Template.card.helpers({
   },
 
   'curImgWidth': function() {
-    const currentDisplay = Session.get('currentDisplay');
+    const currentDisplay = cardState.get('currentDisplay');
     const curImgSrc = currentDisplay ? currentDisplay.imgSrc : undefined;
     if (curImgSrc && imagesDict[curImgSrc]) {
       return imagesDict[curImgSrc].naturalWidth || '';
@@ -1167,7 +1168,7 @@ Template.card.helpers({
   },
 
   'curImgHeight': function() {
-    const currentDisplay = Session.get('currentDisplay');
+    const currentDisplay = cardState.get('currentDisplay');
     const curImgSrc = currentDisplay ? currentDisplay.imgSrc : undefined;
     if (curImgSrc && imagesDict[curImgSrc]) {
       return imagesDict[curImgSrc].naturalHeight || '';
@@ -1176,27 +1177,27 @@ Template.card.helpers({
   },
 
   'curVideoSrc': function() {
-    const currentDisplay = Session.get('currentDisplay');
+    const currentDisplay = cardState.get('currentDisplay');
     return currentDisplay ? currentDisplay.videoSrc : undefined;
   },
 
   'displayAnswer': function() {
-    return Answers.getDisplayAnswerText(Session.get('currentAnswer'));
+    return Answers.getDisplayAnswerText(cardState.get('currentAnswer'));
   },
 
-  'rawAnswer': ()=> Session.get('currentAnswer'),
+  'rawAnswer': ()=> cardState.get('currentAnswer'),
 
   'currentProgress': () => Session.get('questionIndex'),
 
   'displayReady': function() {
-    return Session.get('displayReady');
+    return cardState.get('displayReady');
   },
 
   'readyPromptString': () => Session.get('currentDeliveryParams').readyPromptString,
 
   'displayReadyPromptString': function() {
     const deliveryParams = Session.get('currentDeliveryParams');
-    return !Session.get('displayReady') && deliveryParams.readyPromptString
+    return !cardState.get('displayReady') && deliveryParams.readyPromptString
   },
 
   'isDevelopment': () => Meteor.isDevelopment,
@@ -1206,18 +1207,18 @@ Template.card.helpers({
   },
 
   'textCard': function() {
-    const currentDisplay = Session.get('currentDisplay');
+    const currentDisplay = cardState.get('currentDisplay');
     return !!currentDisplay && !!currentDisplay.text;
   },
 
   'audioCard': function() {
-    const currentDisplay = Session.get('currentDisplay');
+    const currentDisplay = cardState.get('currentDisplay');
     return !!currentDisplay && !!currentDisplay.audioSrc;
   },
 
   'speakerCardPosition': function() {
     //centers the speaker icon if there are no displays.
-    const currentDisplay = Session.get('currentDisplay');
+    const currentDisplay = cardState.get('currentDisplay');
     if(currentDisplay &&
         !currentDisplay.imgSrc &&
         !currentDisplay.videoSrc &&
@@ -1228,28 +1229,28 @@ Template.card.helpers({
   },
 
   'imageCard': function() {
-    const currentDisplay = Session.get('currentDisplay');
+    const currentDisplay = cardState.get('currentDisplay');
     return !!currentDisplay && !!currentDisplay.imgSrc;
   },
 
   'videoCard': function() {
-    const currentDisplay = Session.get('currentDisplay');
+    const currentDisplay = cardState.get('currentDisplay');
     return !!currentDisplay && !!currentDisplay.videoSrc;
   },
 
   'clozeCard': function() {
-    const currentDisplay = Session.get('currentDisplay');
+    const currentDisplay = cardState.get('currentDisplay');
     return !!currentDisplay && !!currentDisplay.clozeText;
   },
 
   'textOrClozeCard': function() {
-    const currentDisplay = Session.get('currentDisplay');
+    const currentDisplay = cardState.get('currentDisplay');
     return !!currentDisplay &&
       (!!currentDisplay.text || !!currentDisplay.clozeText);
   },
 
   'anythingButAudioCard': function() {
-    const currentDisplay = Session.get('currentDisplay');
+    const currentDisplay = cardState.get('currentDisplay');
     return !!currentDisplay &&
             (!!currentDisplay.text ||
             !!currentDisplay.clozeText ||
@@ -1265,15 +1266,15 @@ Template.card.helpers({
   'isVideoSession': () => Session.get('isVideoSession'),
 
   'isYoutubeVideo': function() {
-    return (Session.get('isVideoSession') && Session.get('videoSource') && Session.get('videoSource').includes('http'))
+    return (Session.get('isVideoSession') && cardState.get('videoSource') && cardState.get('videoSource').includes('http'))
   },
 
   'videoId': function() {
-    return Session.get('videoSource')
+    return cardState.get('videoSource')
   },
 
   'videoSource': function() {
-    return Session.get('isVideoSession') && Session.get('videoSource') ? Session.get('videoSource') : '';
+    return Session.get('isVideoSession') && cardState.get('videoSource') ? cardState.get('videoSource') : '';
   },
 
   'test': function() {
@@ -1335,18 +1336,18 @@ Template.card.helpers({
     return false;
   },
 
-  'buttonTrial': () => Session.get('buttonTrial'),
+  'buttonTrial': () => cardState.get('buttonTrial'),
 
   'inFeedback': () => cardState.get('inFeedback'),
 
-  'notButtonTrialOrInDialogueLoop': () => !Session.get('buttonTrial') || DialogueUtils.isUserInDialogueLoop(),
+  'notButtonTrialOrInDialogueLoop': () => !cardState.get('buttonTrial') || DialogueUtils.isUserInDialogueLoop(),
 
   'buttonList': function() {
-    return Session.get('buttonList');
+    return cardState.get('buttonList');
   },
 
   'buttonListImageRows': function() {
-    const items = Session.get('buttonList');
+    const items = cardState.get('buttonList');
     const numColumns = Session.get('currentDeliveryParams').numButtonListImageColumns;
     const numRows = Math.ceil(items.length / numColumns);
     const arrayHolder = [];
@@ -1362,21 +1363,21 @@ Template.card.helpers({
   },
 
   'haveScrollList': function() {
-    return _.intval(Session.get('scrollListCount')) > 0;
+    return _.intval(cardState.get('scrollListCount')) > 0;
   },
 
   'scrollList': function() {
     return scrollList.find({'temp': 1, 'justAdded': 0}, {sort: {idx: 1}});
   },
 
-  'currentScore': () => Session.get('currentScore'),
+  'currentScore': () => cardState.get('currentScore'),
 
   'haveDispTimeout': function() {
     const disp = getDisplayTimeouts();
     return (disp.minSecs > 0 || disp.maxSecs > 0);
   },
 
-  'userInDiaglogue': () => Session.get('showDialogueText') && Session.get('dialogueDisplay'),
+  'userInDiaglogue': () => cardState.get('showDialogueText') && cardState.get('dialogueDisplay'),
 
   'audioEnabled': () => {
     // Use cached value from reactive autorun (prevents duplicate TDF checks)
@@ -1387,14 +1388,14 @@ Template.card.helpers({
     if(Meteor.isDevelopment){
       return true;
     }
-    return Session.get('showDialogueHints')
+    return cardState.get('showDialogueHints')
   },
 
-  'dialogueCacheHint': () => Session.get('dialogueCacheHint'),
+  'dialogueCacheHint': () => cardState.get('dialogueCacheHint'),
 
-  'questionIsRemovable': () => Session.get('numVisibleCards') > 3 && Session.get('currentDeliveryParams').allowstimulusdropping,
+  'questionIsRemovable': () => cardState.get('numVisibleCards') > 3 && Session.get('currentDeliveryParams').allowstimulusdropping,
 
-  'debugParms': () => Session.get('debugParms'),
+  'debugParms': () => cardState.get('debugParms'),
 
   'probabilityParameters': function(){
     probParms = [];
@@ -1473,7 +1474,7 @@ Template.card.helpers({
     const trial = type === 'd' || type === 's' || type === 'f' || type === 't' || type === 'm' || type === 'n' || type === 'i';
 
     // Check anythingButAudioCard
-    const currentDisplay = Session.get('currentDisplay');
+    const currentDisplay = cardState.get('currentDisplay');
     const anythingButAudioCard = !!currentDisplay &&
             (!!currentDisplay.text ||
             !!currentDisplay.clozeText ||
@@ -1507,7 +1508,7 @@ Template.card.helpers({
     const trial = type === 'd' || type === 's' || type === 'f' || type === 't' || type === 'm' || type === 'n' || type === 'i';
 
     // Check anythingButAudioCard
-    const currentDisplay = Session.get('currentDisplay');
+    const currentDisplay = cardState.get('currentDisplay');
     const anythingButAudioCard = !!currentDisplay &&
             (!!currentDisplay.text ||
             !!currentDisplay.clozeText ||
@@ -1598,7 +1599,7 @@ function getTransitionDuration() {
 // without changing timing behavior
 
 function shouldSkipFadeIn() {
-  const displayReady = Session.get('displayReady');
+  const displayReady = cardState.get('displayReady');
   const isVideoSession = Session.get('isVideoSession');
   return displayReady || isVideoSession;
 }
@@ -1606,7 +1607,7 @@ function shouldSkipFadeIn() {
 function beginFadeIn(reason) {
   clientConsole(2, '[SM] Starting fade-in:', reason);
   transitionTrialState(TRIAL_STATES.PRESENTING_FADING_IN, reason);
-  Session.set('displayReady', true);
+  cardState.set('displayReady', true);
 }
 
 function completeFadeIn() {
@@ -1727,7 +1728,7 @@ function transitionTrialState(newState, reason = '') {
   currentTrialState = newState;
 
   // Optional: Store in Session for debugging/visibility
-  Session.set('_debugTrialState', newState);
+  cardState.set('_debugTrialState', newState);
 
   // ACCESSIBILITY: Announce important state changes to screen readers
   announceTrialStateToScreenReader(newState, trialNum);
@@ -1803,7 +1804,7 @@ function clearAudioContextAndRelatedVariables() {
 
 function reinitializeMediaDueToDeviceChange() {
   // This will be decremented on startUserMedia and the main card timeout will be reset due to card being reloaded
-  Session.set('pausedLocks', Session.get('pausedLocks')+1);
+  cardState.set('pausedLocks', cardState.get('pausedLocks')+1);
   audioContext.close();
   clearAudioContextAndRelatedVariables();
   const errMsg = 'It appears you may have unplugged your microphone.  \
@@ -1861,9 +1862,9 @@ function preloadVideos() {
   Session.get('currentTdfUnit').videosession &&
   Session.get('currentTdfUnit').videosession.videosource) {
     if(Session.get('currentTdfUnit').videosession.videosource.includes('http')){
-      Session.set('videoSource', Session.get('currentTdfUnit').videosession.videosource);
+      cardState.set('videoSource', Session.get('currentTdfUnit').videosession.videosource);
     } else {
-      Session.set('videoSource', DynamicAssets.findOne({name: Session.get('currentTdfUnit').videosession.videosource}).link());
+      cardState.set('videoSource', DynamicAssets.findOne({name: Session.get('currentTdfUnit').videosession.videosource}).link());
     }
   }
 }
@@ -1927,7 +1928,7 @@ function preloadImages() {
 // This ensures images are displayed when fading in, not after
 function waitForDOMImageReady() {
   return new Promise((resolve) => {
-    const currentDisplay = Session.get('currentDisplay');
+    const currentDisplay = cardState.get('currentDisplay');
 
     // Only wait if this is an image card
     if (!currentDisplay || !currentDisplay.imgSrc) {
@@ -2142,7 +2143,7 @@ function setUpButtonTrial() {
     });
     curChar = nextChar(curChar);
   });
-  Session.set('buttonList', curButtonList);
+  cardState.set('buttonList', curButtonList);
 }
 
 // Return the list of false responses corresponding to the current question/answer
@@ -2211,7 +2212,7 @@ function clearPlayingSound() {
 // Play a sound matching the current question
 function playCurrentSound(onEndCallback) {
   // We currently only play one sound at a time
-  let currentAudioSrc = Session.get('currentDisplay').audioSrc;
+  let currentAudioSrc = cardState.get('currentDisplay').audioSrc;
   clientConsole(2, 'currentAudioSrc:', currentAudioSrc);
   if(!currentAudioSrc.includes('http')){
     try {
@@ -2318,9 +2319,9 @@ function handleUserInput(e, source, simAnswerCorrect) {
   // We've entered input before the timeout, meaning we need to decrement the pausedLocks before we lose
   // track of the fact that we were counting down to a recalculated delay after being on the error report modal
   if (timeoutName) {
-    if (Session.get('pausedLocks')>0) {
-      const numRemainingLocks = Session.get('pausedLocks')-1;
-      Session.set('pausedLocks', numRemainingLocks);
+    if (cardState.get('pausedLocks')>0) {
+      const numRemainingLocks = cardState.get('pausedLocks')-1;
+      cardState.set('pausedLocks', numRemainingLocks);
     }
   }
   clearCardTimeout();
@@ -2352,10 +2353,10 @@ function handleUserInput(e, source, simAnswerCorrect) {
   } 
 
   const trialEndTimeStamp = Date.now();
-  Session.set('trialEndTimeStamp', trialEndTimeStamp);
-  Session.set('trialStartTimestamp', trialStartTimestamp);
+  cardState.set('trialEndTimeStamp', trialEndTimeStamp);
+  cardState.set('trialStartTimestamp', trialStartTimestamp);
   Session.set('source', source);
-  Session.set('userAnswer', userAnswer);
+  cardState.set('userAnswer', userAnswer);
 
   // Show user feedback and find out if they answered correctly
   // Note that userAnswerFeedback will display text and/or media - it is
@@ -2392,10 +2393,10 @@ async function userAnswerFeedback(userAnswer, isSkip, isTimeout, simCorrect) {
 
   // Make sure to record what they just did (and set justAdded)
   await writeCurrentToScrollList(userAnswer, isTimeout, simCorrect, 1);
-  Session.set('isTimeout', isTimeout);
-  Session.set('userAnswer', userAnswer);
-  Session.set('isCorrectAccumulator', isCorrectAccumulator);
-  Session.set('feedbackForAnswer', feedbackForAnswer);
+  cardState.set('isTimeout', isTimeout);
+  cardState.set('userAnswer', userAnswer);
+  cardState.set('isCorrectAccumulator', isCorrectAccumulator);
+  cardState.set('feedbackForAnswer', feedbackForAnswer);
 
   // Answer assessment ->
   let correctAndText = null;
@@ -2464,8 +2465,8 @@ async function writeCurrentToScrollList(userAnswer, isTimeout, simCorrect, justA
       }
     }
 
-    const currCount = _.intval(Session.get('scrollListCount'));
-    const currentQuestion = Session.get('currentDisplay').text || Session.get('currentDisplay').clozeText;
+    const currCount = _.intval(cardState.get('scrollListCount'));
+    const currentQuestion = cardState.get('currentDisplay').text || cardState.get('currentDisplay').clozeText;
 
     scrollList.insert({
       'temp': 1, // Deleted when clearing
@@ -2480,7 +2481,7 @@ async function writeCurrentToScrollList(userAnswer, isTimeout, simCorrect, justA
       if (err) {
         clientConsole(1, 'ERROR inserting scroll list member:', displayify(err));
       }
-      Session.set('scrollListCount', currCount + 1);
+      cardState.set('scrollListCount', currCount + 1);
     });
   };
 
@@ -2495,16 +2496,16 @@ async function writeCurrentToScrollList(userAnswer, isTimeout, simCorrect, justA
 
 function clearScrollList() {
   scrollList.remove({'temp': 1});
-  Session.set('scrollListCount', 0);
+  cardState.set('scrollListCount', 0);
 }
 
 
 function determineUserFeedback(userAnswer, isSkip, isCorrect, feedbackForAnswer, correctAndText) {
-  Session.set('isRefutation', undefined);
+  cardState.set('isRefutation', undefined);
   if (isCorrect == null && correctAndText != null) {
     isCorrect = correctAndText.isCorrect;
     if (userAnswer.includes('[timeout]') != '' && !isCorrect && correctAndText.matchText.split(' ')[0] != 'Incorrect.'){
-      Session.set('isRefutation', true);
+      cardState.set('isRefutation', true);
     }
   }
 
@@ -2519,9 +2520,9 @@ function determineUserFeedback(userAnswer, isSkip, isCorrect, feedbackForAnswer,
     // copy it to the Session object for template updates
     const {correctscore, incorrectscore} = currentDeliveryParams;
 
-    const oldScore = Session.get('currentScore');
+    const oldScore = cardState.get('currentScore');
     const newScore = oldScore + (isCorrect ? correctscore : -incorrectscore);
-    Session.set('currentScore', newScore);
+    cardState.set('currentScore', newScore);
   }
   const testType = getTestType();
   // Drill types all show feedback: 'd' = standard, 'm' = mandatory correction, 'n' = timed prompt
@@ -2538,10 +2539,10 @@ function determineUserFeedback(userAnswer, isSkip, isCorrect, feedbackForAnswer,
     }
   } else {
     userFeedbackStart = null;
-    let trialEndTimeStamp = Session.get('trialEndTimeStamp');
-    let trialStartTimeStamp = Session.get('trialStartTimestamp');
+    let trialEndTimeStamp = cardState.get('trialEndTimeStamp');
+    let trialStartTimeStamp = cardState.get('trialStartTimestamp');
     let source = Session.get('source');
-    let isTimeout = Session.get('isTimeout');
+    let isTimeout = cardState.get('isTimeout');
     afterAnswerFeedbackCallback(trialEndTimeStamp, trialStartTimeStamp, source, userAnswer, isTimeout, isSkip, isCorrect);
   }
 }
@@ -2559,7 +2560,7 @@ async function showUserFeedback(isCorrect, feedbackMessage, isTimeout, isSkip) {
   }
 
   // FIX: Stop recording when entering FEEDBACK phase (Layer 1 of 3-layer defense)
-  if (recorder && Session.get('recording')) {
+  if (recorder && cardState.get('recording')) {
     clientConsole(2, '[SR] Stopping recording - entered FEEDBACK phase');
     stopRecording();
   }
@@ -2571,13 +2572,13 @@ async function showUserFeedback(isCorrect, feedbackMessage, isTimeout, isSkip) {
 
   if (uiSettings.suppressFeedbackDisplay) {
     // Do not display any feedback, but still advance the schedule
-    let trialEndTimeStamp = Session.get('trialEndTimeStamp');
-    let trialStartTimeStamp = Session.get('trialStartTimestamp');
+    let trialEndTimeStamp = cardState.get('trialEndTimeStamp');
+    let trialStartTimeStamp = cardState.get('trialStartTimestamp');
     let source = Session.get('source');
     let isCorrectVal = isCorrect;
     let isSkipVal = isSkip;
     let isTimeoutVal = isTimeout;
-    afterAnswerFeedbackCallback(trialEndTimeStamp, trialStartTimeStamp, source, Session.get('userAnswer'), isTimeoutVal, isSkipVal, isCorrectVal);
+    afterAnswerFeedbackCallback(trialEndTimeStamp, trialStartTimeStamp, source, cardState.get('userAnswer'), isTimeoutVal, isSkipVal, isCorrectVal);
     return;
   }
   userFeedbackStart = Date.now();
@@ -2687,8 +2688,8 @@ async function showUserFeedback(isCorrect, feedbackMessage, isTimeout, isSkip) {
             .removeAttr('hidden')
             var countDownStart = new Date().getTime();
             let dialogueHistory;
-            if (Session.get('dialogueHistory')) {
-              dialogueHistory = JSON.parse(JSON.stringify(Session.get('dialogueHistory')));
+            if (cardState.get('dialogueHistory')) {
+              dialogueHistory = JSON.parse(JSON.stringify(cardState.get('dialogueHistory')));
             }
             countDownStart += getReviewTimeout(getTestType(), deliveryParams, isCorrect, dialogueHistory, isTimeout, isSkip);
             var originalnow = new Date().getTime();
@@ -2740,14 +2741,14 @@ async function showUserFeedback(isCorrect, feedbackMessage, isTimeout, isSkip) {
                 } else {
                   $('#CountdownTimerText').text("Continuing...");
                 }
-                Session.set('CurIntervalId', undefined);
+                cardState.set('CurIntervalId', undefined);
                 // FIX: DO NOT set inFeedback=false here - let afterAnswerFeedbackCallback() handle it
                 // after BOTH countdown AND TTS complete. This prevents UI flash and ensures proper
                 // synchronization between countdown timer and TTS audio completion.
                 // cardState.set('inFeedback', false); // REMOVED - moved to afterAnswerFeedbackCallback
               }
             }, 250); // Reduced from 100ms - 4fps is smooth enough, saves CPU
-            Session.set('CurIntervalId', CountdownTimerInterval);
+            cardState.set('CurIntervalId', CountdownTimerInterval);
           } else {
             //remove progress bar class
             $('#progressbar').removeClass('progress-bar');
@@ -2765,7 +2766,7 @@ async function showUserFeedback(isCorrect, feedbackMessage, isTimeout, isSkip) {
 
   // If incorrect answer for a drill on a sound not after a dialogue loop,
   // we need to replay the sound, after the optional audio feedback delay time
-  if (!!(Session.get('currentDisplay').audioSrc) && !isCorrect) {
+  if (!!(cardState.get('currentDisplay').audioSrc) && !isCorrect) {
     const delay = Session.get('currentDeliveryParams').timeuntilaudiofeedback;
     registerTimeout('audioFeedbackReplay', function() {
       clientConsole(2, 'playing sound after timeuntilaudiofeedback', new Date());
@@ -2789,8 +2790,8 @@ async function showUserFeedback(isCorrect, feedbackMessage, isTimeout, isSkip) {
     const isForceCorrectTrial = getTestType() === 'm' || getTestType() === 'n';
     const doForceCorrect = (!isCorrect && !Session.get('runSimulation') &&
       (Session.get('currentDeliveryParams').forceCorrection || isForceCorrectTrial));
-    const trialEndTimeStamp = Session.get('trialEndTimeStamp');
-    const trialStartTimeStamp = Session.get('trialStartTimestamp');
+    const trialEndTimeStamp = cardState.get('trialEndTimeStamp');
+    const trialStartTimeStamp = cardState.get('trialStartTimestamp');
     const source = Session.get('source');
 
     doClearForceCorrect(doForceCorrect, trialEndTimeStamp, trialStartTimeStamp, source, userAnswer, isTimeout, isCorrect, isSkip);
@@ -2842,13 +2843,13 @@ async function giveWrongAnswer(){
   if(Meteor.isDevelopment){
     curAnswer = Session.get('currentExperimentState').currentAnswer + '123456789321654986321';
     $('#userAnswer').val(curAnswer);
-    Session.set('skipTimeout', true)
+    cardState.set('skipTimeout', true)
     handleUserInput({keyCode: ENTER_KEY}, 'keypress');
   }
 }
 
 async function afterAnswerFeedbackCallback(trialEndTimeStamp, trialStartTimeStamp, source, userAnswer, isTimeout, isSkip, isCorrect) {
-  Session.set('showDialogueText', false);
+  cardState.set('showDialogueText', false);
   //if the user presses the removal button after answering we need to shortcut the timeout
   const wasReportedForRemoval = source == 'removal'
 
@@ -2871,15 +2872,15 @@ async function afterAnswerFeedbackCallback(trialEndTimeStamp, trialStartTimeStam
   Session.set('overallStudyHistory', overallStudyHistory);
   
   let dialogueHistory;
-  if (Session.get('dialogueHistory')) {
-    dialogueHistory = JSON.parse(JSON.stringify(Session.get('dialogueHistory')));
+  if (cardState.get('dialogueHistory')) {
+    dialogueHistory = JSON.parse(JSON.stringify(cardState.get('dialogueHistory')));
   }
   const reviewTimeout = wasReportedForRemoval ? 2000 : getReviewTimeout(testType, deliveryParams, isCorrect, dialogueHistory, isTimeout, isSkip);
 
   // Stop previous timeout, log response data, and clear up any other vars for next question
   clearCardTimeout();
 
-  Session.set('feedbackTimeoutBegins', Date.now())
+  cardState.set('feedbackTimeoutBegins', Date.now())
   const answerLogRecord = gatherAnswerLogRecord(trialEndTimeStamp, trialStartTimeStamp, source, userAnswer, isCorrect,
       testType, deliveryParams, dialogueHistory, wasReportedForRemoval);
   afterFeedbackCallbackBind = afterFeedbackCallback.bind(null, trialEndTimeStamp, trialStartTimeStamp, isTimeout, isSkip, isCorrect, testType, deliveryParams, answerLogRecord, 'card')
@@ -2887,7 +2888,7 @@ async function afterAnswerFeedbackCallback(trialEndTimeStamp, trialStartTimeStam
     await afterFeedbackCallbackBind()
     engine.updatePracticeTime(Date.now() - trialEndTimeStamp)
   }, reviewTimeout)
-  Session.set('CurTimeoutId', timeout)
+  cardState.set('CurTimeoutId', timeout)
   let {responseDuration, startLatency, endLatency, feedbackLatency} = getTrialTime(trialEndTimeStamp, trialStartTimeStamp, trialEndTimeStamp + reviewTimeout, testType)
   let practiceTime = endLatency;
   if (testType === 's') {
@@ -2908,7 +2909,7 @@ async function afterAnswerFeedbackCallback(trialEndTimeStamp, trialStartTimeStam
 async function afterFeedbackCallback(trialEndTimeStamp, trialStartTimeStamp, isTimeout, isSkip, isCorrect, testType, deliveryParams, answerLogRecord, callLocation) {
   afterFeedbackCallbackBind = undefined;
   clientConsole(2, '[SM] afterFeedbackCallback called in state:', currentTrialState);
-  Session.set('CurTimeoutId', null)
+  cardState.set('CurTimeoutId', null)
   const userLeavingTrial = callLocation != 'card';
   let reviewEnd = Date.now();
       
@@ -2923,8 +2924,8 @@ async function afterFeedbackCallback(trialEndTimeStamp, trialStartTimeStamp, isT
     answerLogAction = '[answer]';
   }
   //if dialogueStart is set that means the user went through interactive dialogue
-  Session.set('dialogueTotalTime', undefined);
-  Session.set('dialogueHistory', undefined);
+  cardState.set('dialogueTotalTime', undefined);
+  cardState.set('dialogueHistory', undefined);
   const newExperimentState = {
     lastAction: answerLogAction,
   };
@@ -2974,7 +2975,7 @@ async function afterFeedbackCallback(trialEndTimeStamp, trialStartTimeStamp, isT
 
     // Wait for countdown to finish (if not already finished)
     const waitForCountdown = new Promise(resolve => {
-      const countdownId = Session.get('CurIntervalId');
+      const countdownId = cardState.get('CurIntervalId');
       if (!countdownId) {
         clientConsole(2, '[SM] Countdown already finished');
         resolve(); // Already finished
@@ -2982,7 +2983,7 @@ async function afterFeedbackCallback(trialEndTimeStamp, trialStartTimeStamp, isT
         clientConsole(2, '[SM] Waiting for countdown to finish...');
         const countdownStartTime = Date.now();
         const checkInterval = Meteor.setInterval(() => {
-          if (!Session.get('CurIntervalId')) {
+          if (!cardState.get('CurIntervalId')) {
             const countdownDuration = Date.now() - countdownStartTime;
             clientConsole(2, `[SM] ⏱️ Countdown finished after ${countdownDuration}ms`);
             Meteor.clearInterval(checkInterval);
@@ -2993,17 +2994,17 @@ async function afterFeedbackCallback(trialEndTimeStamp, trialStartTimeStamp, isT
     });
 
     // Wait for TTS to finish (if requested)
-    // FIX: Check Session.get('ttsRequested') to handle async Google TTS API calls
+    // FIX: Check cardState.get('ttsRequested') to handle async Google TTS API calls
     // The issue: when correctprompt=0, countdown finishes before Google TTS API even responds
     // By checking ttsRequested, we wait for the API call to complete, not just audio playback
     const waitForTTS = new Promise(resolve => {
-      if (Session.get('ttsRequested')) {
+      if (cardState.get('ttsRequested')) {
         clientConsole(2, '[SM] 🎤 TTS was requested, waiting for it to complete...');
         const ttsStartTime = Date.now();
 
         // Poll every 50ms until TTS request completes (ttsRequested becomes false)
         const checkTTS = Meteor.setInterval(() => {
-          if (!Session.get('ttsRequested')) {
+          if (!cardState.get('ttsRequested')) {
             Meteor.clearInterval(checkTTS);
             Meteor.clearTimeout(timeoutId); // FIX: Clear timeout when TTS completes normally
             const ttsDuration = Date.now() - ttsStartTime;
@@ -3014,7 +3015,7 @@ async function afterFeedbackCallback(trialEndTimeStamp, trialStartTimeStamp, isT
 
         // Failsafe: timeout after 30 seconds (network issues, API errors)
         const timeoutId = Meteor.setTimeout(() => {
-          if (Session.get('ttsRequested')) {
+          if (cardState.get('ttsRequested')) {
             Meteor.clearInterval(checkTTS);
             clientConsole(1, '[SM] ⚠️ TTS timeout (30s), forcing continue');
 
@@ -3026,8 +3027,8 @@ async function afterFeedbackCallback(trialEndTimeStamp, trialStartTimeStamp, isT
               window.currentAudioObj = undefined;
             }
 
-            Session.set('ttsRequested', false);
-            Session.set('recordingLocked', false); // Unlock recording in case TTS had locked it
+            cardState.set('ttsRequested', false);
+            cardState.set('recordingLocked', false); // Unlock recording in case TTS had locked it
             resolve();
           }
         }, 30000);
@@ -3060,7 +3061,7 @@ async function cardEnd() {
   $('#CountdownTimerText').text("Continuing...");
   // Don't clear #userLowerInteraction - hideUserFeedback() already does it
   $('#userAnswer').val('');
-  Session.set('feedbackTimeoutEnds', Date.now())
+  cardState.set('feedbackTimeoutEnds', Date.now())
 
   // STATE MACHINE: Transition will happen in prepareCard via FADING_OUT and CLEARING
   // prepareCard() handles fade-out and clearing, then moves to next trial's LOADING
@@ -3087,7 +3088,7 @@ function getReviewTimeout(testType, deliveryParams, isCorrect, dialogueHistory, 
       // Fast forward through feedback if we already did a dialogue feedback session
       if (deliveryParams.feedbackType == 'dialogue' && dialogueHistory && dialogueHistory.LastStudentAnswer) {
         reviewTimeout = 0.001;
-      } else if(Session.get('isRefutation') && !isTimeout) {
+      } else if(cardState.get('isRefutation') && !isTimeout) {
         reviewTimeout = _.intval(deliveryParams.refutationstudy) || _.intval(deliveryParams.reviewstudy);
       } else {
         reviewTimeout = _.intval(deliveryParams.reviewstudy);
@@ -3101,9 +3102,9 @@ function getReviewTimeout(testType, deliveryParams, isCorrect, dialogueHistory, 
   if (isSkip) {
     reviewTimeout = 2;
   }
-  if(Meteor.isDevelopment && Session.get('skipTimeout')){
+  if(Meteor.isDevelopment && cardState.get('skipTimeout')){
     reviewTimeout = 0.001;
-    Session.set('skipTimeout', false);
+    cardState.set('skipTimeout', false);
   }
   // We need at least a timeout of 1ms
   if (reviewTimeout < 0.001) throw new Error('No correct timeout specified');
@@ -3113,8 +3114,8 @@ function getReviewTimeout(testType, deliveryParams, isCorrect, dialogueHistory, 
 
 function getTrialTime(trialEndTimeStamp, trialStartTimeStamp, reviewEnd, testType) {
   let feedbackLatency;
-  if(Session.get('dialogueTotalTime')){
-    feedbackLatency = Session.get('dialogueTotalTime');
+  if(cardState.get('dialogueTotalTime')){
+    feedbackLatency = cardState.get('dialogueTotalTime');
   }
   else if(userFeedbackStart){
     feedbackLatency = reviewEnd - userFeedbackStart;
@@ -3171,16 +3172,16 @@ function gatherAnswerLogRecord(trialEndTimeStamp, trialStartTimeStamp, source, u
 
   // Figure out button trial entries
   let buttonEntries = '';
-  const wasButtonTrial = !!Session.get('buttonTrial');
+  const wasButtonTrial = !!cardState.get('buttonTrial');
   if (wasButtonTrial) {
     const wasDrill = (testType === 'd' || testType === 'm' || testType === 'n');
     // If we had a dialogue interaction restore this from the session variable as the screen was wiped
     if (deliveryParams.feedbackType == 'dialogue' && !isCorrect && wasDrill) {
-      buttonEntries = JSON.parse(JSON.stringify(Session.get('buttonEntriesTemp')));
+      buttonEntries = JSON.parse(JSON.stringify(cardState.get('buttonEntriesTemp')));
     } else {
-      buttonEntries = _.map(Session.get('buttonList'), (val) => val.buttonValue).join(',');
+      buttonEntries = _.map(cardState.get('buttonList'), (val) => val.buttonValue).join(',');
     }
-    Session.set('buttonEntriesTemp', undefined);
+    cardState.set('buttonEntriesTemp', undefined);
   }
 
   let currentAnswerSyllables = {
@@ -3237,7 +3238,7 @@ function gatherAnswerLogRecord(trialEndTimeStamp, trialStartTimeStamp, source, u
   const correctAnswer = temp[0];
   const whichHintLevel = parseInt(Session.get('hintLevel')) || 0;
 
-  const currentDisplayRaw = Session.get('currentDisplay');
+  const currentDisplayRaw = cardState.get('currentDisplay');
   if (!currentDisplayRaw) {
     clientConsole(1, 'ERROR: currentDisplay is undefined in gatherAnswerLogRecord');
     return {};
@@ -3278,7 +3279,7 @@ function gatherAnswerLogRecord(trialEndTimeStamp, trialStartTimeStamp, source, u
     'probabilityEstimate': probabilityEstimate,
     'typeOfResponse': responseType,
     'responseValue': _.trim(userAnswer),
-    'displayedStimulus': Session.get('currentDisplay'),
+    'displayedStimulus': cardState.get('currentDisplay'),
     'sectionId': Session.get('curSectionId'),
     'teacherId': Session.get('curTeacher')?._id,
     'anonStudentId': Meteor.user().username,
@@ -3320,7 +3321,7 @@ function gatherAnswerLogRecord(trialEndTimeStamp, trialStartTimeStamp, source, u
     'CFDisplayOrder': Session.get('questionIndex'),
     'CFStimFileIndex': stimFileIndex,
     'CFSetShuffledIndex': shufIndex,
-    'CFAlternateDisplayIndex': Session.get('alternateDisplayIndex') || null,
+    'CFAlternateDisplayIndex': cardState.get('alternateDisplayIndex') || null,
     'CFStimulusVersion': whichStim,
     'CFCorrectAnswer': correctAnswer,
     'CFCorrectAnswerSyllables': currentAnswerSyllables.syllableArray,
@@ -3347,7 +3348,7 @@ function gatherAnswerLogRecord(trialEndTimeStamp, trialStartTimeStamp, source, u
 }
 
 function findQTypeSimpified() {
-  const currentDisplay = Session.get('currentDisplay');
+  const currentDisplay = cardState.get('currentDisplay');
   let QTypes = '';
 
   if (currentDisplay.text) QTypes = QTypes + 'T'; // T for Text
@@ -3459,8 +3460,8 @@ async function revisitUnit(unitNumber) {
   Session.set('resetSchedule', true);
   Session.set('currentDeliveryParams', getCurrentDeliveryParams());
   Session.set('currentUnitStartTime', Date.now());
-  Session.set('feedbackUnset', true);
-  Session.set('feedbackTypeFromHistory', undefined);
+  cardState.set('feedbackUnset', true);
+  cardState.set('feedbackTypeFromHistory', undefined);
   Session.set('curUnitInstructionsSeen', false);
 
   //get the old experiment state
@@ -3564,8 +3565,8 @@ async function unitIsFinished(reason) {
   Session.set('resetSchedule', true);
   Session.set('currentDeliveryParams', getCurrentDeliveryParams());
   Session.set('currentUnitStartTime', Date.now());
-  Session.set('feedbackUnset', true);
-  Session.set('feedbackTypeFromHistory', undefined);
+  cardState.set('feedbackUnset', true);
+  cardState.set('feedbackTypeFromHistory', undefined);
   Session.set('curUnitInstructionsSeen', false);
 
   const resetStudentPerformance = Session.get('currentDeliveryParams').resetStudentPerformance
@@ -3691,8 +3692,8 @@ function cardStart() {
   $('#finalInstructionsDlg').modal('hide');
   // the card loads frequently, but we only want to set this the first time
   if (Session.get('inResume')) {
-    Session.set('buttonTrial', false);
-    Session.set('buttonList', []);
+    cardState.set('buttonTrial', false);
+    cardState.set('buttonList', []);
 
     clientConsole(2, 'cards template rendered => Performing resume');
     let curExperimentState = Session.get('currentExperimentState') || {};
@@ -3708,7 +3709,7 @@ async function prepareCard() {
   const trialNum = (Session.get('currentExperimentState')?.numQuestionsAnswered || 0) + 1;
   clientConsole(2, '[SM] === prepareCard START (Trial #' + trialNum + ') ===');
   // Call stack logging removed (too verbose)
-  clientConsole(2, '[SM]   displayReady before:', Session.get('displayReady'));
+  clientConsole(2, '[SM]   displayReady before:', cardState.get('displayReady'));
 
   // STATE MACHINE: Handle transition to fade-out based on current state
   if (currentTrialState === TRIAL_STATES.IDLE) {
@@ -3725,12 +3726,12 @@ async function prepareCard() {
   }
 
   Meteor.logoutOtherClients();
-  Session.set('wasReportedForRemoval', false);
+  cardState.set('wasReportedForRemoval', false);
 
   // Start fade-out with OLD content still visible (not cleared to empty)
   // DON'T clean up yet - that happens AFTER fade completes
   clientConsole(2, '[SM]   Setting displayReady=false to fade out (old content remains visible during fade)');
-  Session.set('displayReady', false);
+  cardState.set('displayReady', false);
 
   // Wait for fade-out transition to complete
   const fadeDelay = getTransitionDuration();
@@ -3747,16 +3748,16 @@ async function prepareCard() {
     transitionTrialState(TRIAL_STATES.TRANSITION_CLEARING, 'Clearing previous trial content');
   }
 
-  Session.set('submmissionLock', false);
+  cardState.set('submmissionLock', false);
   // CRITICAL: Clear currentDisplay WHILE INVISIBLE (opacity=0) to remove old image
   // This prevents the old image from briefly appearing when new content is set
   // The sequence is: fade out old image → clear while invisible → set new image while invisible → fade in new image
-  Session.set('currentDisplay', {});
+  cardState.set('currentDisplay', {});
 
   // DON'T set buttonTrial to undefined - causes input to flash/paint late
   // It will be updated with correct value in newQuestionHandler()
-  // Session.set('buttonTrial', undefined); // REMOVED - causes Blaze re-render delay
-  Session.set('buttonList', []);
+  // cardState.set('buttonTrial', undefined); // REMOVED - causes Blaze re-render delay
+  cardState.set('buttonList', []);
   $('#helpButton').prop("disabled",false);
   if (await engine.unitFinished()) {
     unitIsFinished('Unit Engine');
@@ -3786,11 +3787,11 @@ async function prepareCard() {
     // Set buttonTrial BEFORE newQuestionHandler so Blaze can render everything atomically
     // when displayReady=true fires. This prevents input field from painting after image.
     const isButtonTrial = getButtonTrial();
-    Session.set('buttonTrial', isButtonTrial);
+    cardState.set('buttonTrial', isButtonTrial);
     clientConsole(2, '[SM] prepareCard: Set buttonTrial =', isButtonTrial, 'before content display');
 
     await newQuestionHandler();
-    Session.set('cardStartTimestamp', Date.now());
+    cardState.set('cardStartTimestamp', Date.now());
     Session.set('engineIndices', undefined);
   }
 }
@@ -3812,13 +3813,13 @@ async function newQuestionHandler() {
       },
   );
 
-  Session.set('buttonList', []);
+  cardState.set('buttonList', []);
   speechTranscriptionTimeoutsSeen = 0;
 
   // buttonTrial is now set BEFORE newQuestionHandler (in prepareCard) to ensure
   // Blaze can render stimulus and input atomically when displayReady=true fires
-  const isButtonTrial = Session.get('buttonTrial');
-  clientConsole(2, 'newQuestionHandler, isButtonTrial', isButtonTrial, 'displayReady', Session.get('displayReady'));
+  const isButtonTrial = cardState.get('buttonTrial');
+  clientConsole(2, 'newQuestionHandler, isButtonTrial', isButtonTrial, 'displayReady', cardState.get('displayReady'));
 
   if (isButtonTrial) {
     setUpButtonTrial();
@@ -3882,7 +3883,7 @@ function startQuestionTimeout() {
     readyPromptTimeout = Session.get('currentDeliveryParams').readyPromptStringDisplayTime
   }
   trialStartTimestamp = Date.now();
-  Session.set('trialStartTimestamp', trialStartTimestamp);
+  cardState.set('trialStartTimestamp', trialStartTimestamp);
   registerTimeout('readyPrompt', () => {
     const beginQuestionAndInitiateUserInputBound = beginQuestionAndInitiateUserInput.bind(null, delayMs, deliveryParams);
     const state = Session.get('currentExperimentState');
@@ -3934,7 +3935,7 @@ async function checkAndDisplayPrestimulus(deliveryParams, nextStageCb) {
   }
 
   clientConsole(2, '[SM] Displaying prestimulus:', prestimulusDisplay);
-  Session.set('currentDisplay', {'text': prestimulusDisplay});
+  cardState.set('currentDisplay', {'text': prestimulusDisplay});
 
   const afterFadeIn = () => {
     const displayTime = deliveryParams.prestimulusdisplaytime;
@@ -3960,7 +3961,7 @@ async function checkAndDisplayPrestimulus(deliveryParams, nextStageCb) {
 async function checkAndDisplayTwoPartQuestion(deliveryParams, currentDisplayEngine, closeQuestionParts, nextStageCb) {
   clientConsole(2, '[SM] checkAndDisplayTwoPartQuestion called in state:', currentTrialState);
 
-  Session.set('currentDisplay', currentDisplayEngine);
+  cardState.set('currentDisplay', currentDisplayEngine);
   const currentExperimentState = Session.get('currentExperimentState');
   if (!currentExperimentState) {
     clientConsole(1, 'ERROR: currentExperimentState not found in session');
@@ -3985,7 +3986,7 @@ async function checkAndDisplayTwoPartQuestion(deliveryParams, currentDisplayEngi
     clientConsole(2, `[SM] Two-part question: waiting ${initialViewDelay}ms before showing part 2`);
     registerTimeout('twoPartQuestionDelay', () => {
       clientConsole(2, '[SM] Displaying question part 2');
-      Session.set('currentDisplay', {'text': questionPart2});
+      cardState.set('currentDisplay', {'text': questionPart2});
       const state = Session.get('currentExperimentState');
       if (state) {
         state.currentQuestionPart2 = undefined;
@@ -4006,7 +4007,7 @@ async function checkAndDisplayTwoPartQuestion(deliveryParams, currentDisplayEngi
     requestAnimationFrame(async () => {
       // FLICKER FIX: Set input disabled state AND focus BEFORE fade-in starts
       // All state changes happen while opacity=0 (invisible), eliminating visible flicker
-      const isButtonTrial = Session.get('buttonTrial');
+      const isButtonTrial = cardState.get('buttonTrial');
       if (!isButtonTrial) {
         // Text input trial: enable input and focus it before fade-in so it's ready when visible
         $('#userAnswer').prop('disabled', false);
@@ -4038,7 +4039,7 @@ async function checkAndDisplayTwoPartQuestion(deliveryParams, currentDisplayEngi
 
 function beginQuestionAndInitiateUserInput(delayMs, deliveryParams) {
   firstKeypressTimestamp = 0;
-  const currentDisplay = Session.get('currentDisplay');
+  const currentDisplay = cardState.get('currentDisplay');
 
   if (!currentDisplay) {
     clientConsole(1, 'ERROR: currentDisplay is undefined in beginQuestionAndInitiateUserInput');
@@ -4119,9 +4120,9 @@ function allowUserInput() {
     $('#confirmButton').removeClass('hidden');
 
     // ACCESSIBILITY: Announce trial state to screen readers
-    const currentDisplay = Session.get('currentDisplay');
+    const currentDisplay = cardState.get('currentDisplay');
     const questionText = currentDisplay?.clozeText || currentDisplay?.text || '';
-    const isButtonTrial = Session.get('buttonTrial');
+    const isButtonTrial = cardState.get('buttonTrial');
     const inputInstruction = isButtonTrial ?
       'Select an answer using arrow keys and space, or click a button' :
       'Type your answer and press enter';
@@ -4203,7 +4204,7 @@ async function speakMessageIfAudioPromptFeedbackEnabled(msg, audioPromptSource) 
         // FIX: Track TTS request state to ensure feedback doesn't advance before TTS completes
         // This is critical when correctprompt=0 - the countdown finishes immediately but TTS
         // API call is still in flight. We must wait for the request to complete.
-        Session.set('ttsRequested', true);
+        cardState.set('ttsRequested', true);
         clientConsole(2, '[SR] 🎤 TTS request started (ttsRequested=true)');
 
         (async () => {
@@ -4212,19 +4213,19 @@ async function speakMessageIfAudioPromptFeedbackEnabled(msg, audioPromptSource) 
 
             if(res == undefined){
               clientConsole(2, '[SR]   ❌ TTS API returned undefined, NOT locking recording');
-              Session.set('ttsRequested', false);
+              cardState.set('ttsRequested', false);
               clientConsole(2, '[SR] 🎤 TTS request complete (undefined) (ttsRequested=false)');
             }
             else{
             // FIX: Check if request is still active (timeout may have fired)
-            if (!Session.get('ttsRequested')) {
+            if (!cardState.get('ttsRequested')) {
               clientConsole(1, '[SR]   ⚠️ TTS audio received but request was already cancelled (timeout), ignoring');
               return;
             }
 
             clientConsole(2, '[SR]   ✅ TTS audio received, LOCKING RECORDING');
             const audioObj = new Audio('data:audio/ogg;base64,' + res)
-            Session.set('recordingLocked', true);
+            cardState.set('recordingLocked', true);
             if (window.currentAudioObj) {
               window.currentAudioObj.pause();
             }
@@ -4232,8 +4233,8 @@ async function speakMessageIfAudioPromptFeedbackEnabled(msg, audioPromptSource) 
             window.currentAudioObj.addEventListener('ended', (event) => {
               clientConsole(2, '[SR]   ✅ TTS audio ended, unlocking recording');
               window.currentAudioObj = undefined;
-              Session.set('recordingLocked', false);
-              Session.set('ttsRequested', false);
+              cardState.set('recordingLocked', false);
+              cardState.set('ttsRequested', false);
               clientConsole(2, '[SR] 🎤 TTS request complete (audio ended) (ttsRequested=false)');
 
               // FIX: Only restart recording if we're still in a state that accepts input (Layer 2)
@@ -4246,12 +4247,12 @@ async function speakMessageIfAudioPromptFeedbackEnabled(msg, audioPromptSource) 
             clientConsole(2, 'inside callback, playing audioObj:');
             window.currentAudioObj.play().catch((err) => {
               clientConsole(2, err)
-              Session.set('ttsRequested', false);
+              cardState.set('ttsRequested', false);
               clientConsole(2, '[SR] 🎤 TTS request complete (play error, using fallback) (ttsRequested=false)');
               let utterance = new SpeechSynthesisUtterance(msg);
               utterance.addEventListener('end', (event) => {
                 clientConsole(2, '[SR]   ✅ TTS fallback utterance ended, unlocking recording');
-                Session.set('recordingLocked', false);
+                cardState.set('recordingLocked', false);
 
                 // FIX: Only restart recording if we're still in a state that accepts input (Layer 2)
                 if (currentTrialState === TRIAL_STATES.PRESENTING_AWAITING) {
@@ -4263,14 +4264,14 @@ async function speakMessageIfAudioPromptFeedbackEnabled(msg, audioPromptSource) 
               utterance.addEventListener('error', (event) => {
                 clientConsole(2, '[SR]   ❌ TTS fallback utterance error, unlocking recording');
                 clientConsole(2, event);
-                Session.set('recordingLocked', false);
+                cardState.set('recordingLocked', false);
               });
               synthesis.speak(utterance);
             });
           }
           } catch (err) {
             clientConsole(2, '[SR]   ❌ TTS API error, NOT locking recording:', err);
-            Session.set('ttsRequested', false);
+            cardState.set('ttsRequested', false);
             clientConsole(2, '[SR] 🎤 TTS request complete (error) (ttsRequested=false)');
           }
         })();
@@ -4280,15 +4281,15 @@ async function speakMessageIfAudioPromptFeedbackEnabled(msg, audioPromptSource) 
         clientConsole(2, '[SR] Using MDN Speech Synthesis, locking recording');
 
         // FIX: Track TTS intent for native speech synthesis too
-        Session.set('ttsRequested', true);
+        cardState.set('ttsRequested', true);
         clientConsole(2, '[SR] 🎤 TTS request started (native) (ttsRequested=true)');
 
-        Session.set('recordingLocked', true);
+        cardState.set('recordingLocked', true);
         let utterance = new SpeechSynthesisUtterance(msg);
         utterance.addEventListener('end', (event) => {
           clientConsole(2, '[SR]   ✅ MDN TTS ended, unlocking recording');
-          Session.set('recordingLocked', false);
-          Session.set('ttsRequested', false);
+          cardState.set('recordingLocked', false);
+          cardState.set('ttsRequested', false);
           clientConsole(2, '[SR] 🎤 TTS request complete (native ended) (ttsRequested=false)');
 
           // FIX: Only restart recording if we're still in a state that accepts input (Layer 2)
@@ -4301,8 +4302,8 @@ async function speakMessageIfAudioPromptFeedbackEnabled(msg, audioPromptSource) 
         utterance.addEventListener('error', (event) => {
           clientConsole(2, '[SR]   ❌ MDN TTS error, unlocking recording');
           clientConsole(2, event);
-          Session.set('recordingLocked', false);
-          Session.set('ttsRequested', false);
+          cardState.set('recordingLocked', false);
+          cardState.set('ttsRequested', false);
           clientConsole(2, '[SR] 🎤 TTS request complete (native error) (ttsRequested=false)');
 
           // FIX: Only restart recording if we're still in a state that accepts input (Layer 2)
@@ -4373,7 +4374,7 @@ async function processLINEAR16(data) {
       return; // Exit early - don't make API call
     }
 
-    const sampleRate = Session.get('sampleRate');
+    const sampleRate = cardState.get('sampleRate');
     const setSpec = Session.get('currentTdfFile').tdfs.tutor.setspec;
     let speechRecognitionLanguage = setSpec.speechRecognitionLanguage;
     if (!speechRecognitionLanguage) {
@@ -4569,7 +4570,7 @@ function speechAPICallback(err, data){
   }
 
   let transcript = '';
-  let ignoreOutOfGrammarResponses = Session.get('ignoreOutOfGrammarResponses');
+  let ignoreOutOfGrammarResponses = cardState.get('ignoreOutOfGrammarResponses');
 
   // Fallback: read from TDF if not in Session (happens on page refresh)
   if (ignoreOutOfGrammarResponses === undefined) {
@@ -4578,7 +4579,7 @@ function speechAPICallback(err, data){
       const setspec = tdfFile.tdfs.tutor.setspec;
       ignoreOutOfGrammarResponses = setspec.speechIgnoreOutOfGrammarResponses ?
         setspec.speechIgnoreOutOfGrammarResponses.toLowerCase() === 'true' : false;
-      Session.set('ignoreOutOfGrammarResponses', ignoreOutOfGrammarResponses); // Cache it
+      cardState.set('ignoreOutOfGrammarResponses', ignoreOutOfGrammarResponses); // Cache it
     } else {
       ignoreOutOfGrammarResponses = false; // Safe default
     }
@@ -4852,7 +4853,7 @@ function startUserMedia(stream) {
   // Firefox hack https://support.mozilla.org/en-US/questions/984179
   window.firefox_audio_hack = input;
   // Capture the sampling rate for later use in google speech api as input
-  Session.set('sampleRate', input.context.sampleRate);
+  cardState.set('sampleRate', input.context.sampleRate);
   const audioRecorderConfig = {errorCallback: function(x) {
     clientConsole(2, 'Error from recorder: ' + x);
   }};
@@ -4885,13 +4886,13 @@ function startUserMedia(stream) {
 
   speechEvents.on('speaking', function() {
     recordingStartTime = Date.now(); // Track when voice starts
-    if (!Session.get('recording')) {
+    if (!cardState.get('recording')) {
       clientConsole(2, '[SR] NOT RECORDING, VOICE START');
       return;
     } else {
       clientConsole(2, '[SR] VOICE START');
       if (resetMainCardTimeout && timeoutFunc) {
-        if (Session.get('recording')) {
+        if (cardState.get('recording')) {
           clientConsole(2, '[SR] voice_start resetMainCardTimeout');
           resetMainCardTimeout();
         } else {
@@ -4904,7 +4905,7 @@ function startUserMedia(stream) {
   });
 
   speechEvents.on('stopped_speaking', function() {
-    if (!Session.get('recording') || Session.get('pausedLocks')>0) {
+    if (!cardState.get('recording') || cardState.get('pausedLocks')>0) {
       if (document.location.pathname != '/card' && document.location.pathname != '/instructions') {
         leavePage(function() {
           clientConsole(2, '[SR] cleaning up page after nav away from card, voice_stop');
@@ -4930,7 +4931,7 @@ function startUserMedia(stream) {
 
       clientConsole(2, `[SR] VOICE STOP (after ${timeSinceStart}ms)`);
       recorder.stop();
-      Session.set('recording', false);
+      cardState.set('recording', false);
       recorder.exportToProcessCallback();
       recordingStartTime = null;
     }
@@ -4941,24 +4942,24 @@ function startUserMedia(stream) {
 }
 
 function startRecording() {
-  if (recorder && !Session.get('recordingLocked') && Meteor.user()?.audioSettings?.audioInputMode) {
-    Session.set('recording', true);
+  if (recorder && !cardState.get('recordingLocked') && Meteor.user()?.audioSettings?.audioInputMode) {
+    cardState.set('recording', true);
     recorder.record();
     clientConsole(2, '[SR] RECORDING START');
   } else {
     clientConsole(2, '[SR] ❌ RECORDING BLOCKED:',
       !recorder ? 'NO RECORDER' : '',
-      Session.get('recordingLocked') ? 'RECORDING LOCKED' : '',
+      cardState.get('recordingLocked') ? 'RECORDING LOCKED' : '',
       !Meteor.user()?.audioInputMode ? 'AUDIO INPUT MODE OFF' : ''
     );
   }
 }
 
 function stopRecording() {
-  clientConsole(2, '[SR] stopRecording', recorder, Session.get('recording'));
-  if (recorder && Session.get('recording')) {
+  clientConsole(2, '[SR] stopRecording', recorder, cardState.get('recording'));
+  if (recorder && cardState.get('recording')) {
     recorder.stop();
-    Session.set('recording', false);
+    cardState.set('recording', false);
 
     recorder.clear();
     clientConsole(2, '[SR] RECORDING END');
@@ -5015,7 +5016,7 @@ async function resumeFromComponentState() {
   timeoutsSeen = 0;
   firstKeypressTimestamp = 0;
   trialStartTimestamp = 0;
-  Session.set('trialStartTimestamp', trialStartTimestamp);
+  cardState.set('trialStartTimestamp', trialStartTimestamp);
   clearScrollList();
   clearCardTimeout();
 
@@ -5237,7 +5238,7 @@ async function resumeFromComponentState() {
   const stimuliSet = curTdf.stimuli
 
   Session.set('currentStimuliSet', stimuliSet);
-  Session.set('feedbackUnset', Session.get('fromInstructions') || Session.get('feedbackUnset'));
+  cardState.set('feedbackUnset', Session.get('fromInstructions') || cardState.get('feedbackUnset'));
   Session.set('fromInstructions', false);
 
   await preloadStimuliFiles();
@@ -5480,15 +5481,15 @@ async function resumeFromComponentState() {
 
   // curTdfUISettings object logging removed (too large)
 
-  if (Session.get('feedbackUnset')){
+  if (cardState.get('feedbackUnset')){
     getFeedbackParameters();
-    Session.set('feedbackUnset', false);
+    cardState.set('feedbackUnset', false);
   }
   
   // Notice that no matter what, we log something about condition data
   // ALSO NOTICE that we'll be calling processUserTimesLog after the server
   // returns and we know we've logged what happened
-  if(!Session.get('displayFeedback')){
+  if(!cardState.get('displayFeedback')){
     processUserTimesLog();
   }
 }
@@ -5496,15 +5497,15 @@ async function resumeFromComponentState() {
 
 async function getFeedbackParameters(){
   if(Session.get('currentDeliveryParams').allowFeedbackTypeSelect){
-    Session.set('displayFeedback',true);
+    cardState.set('displayFeedback',true);
   } 
 }
 
 async function removeCardByUser() {
-  Meteor.clearTimeout(Session.get('CurTimeoutId'));
-  Meteor.clearInterval(Session.get('CurIntervalId'));
-  Session.set('CurTimeoutId', undefined);
-  Session.set('CurIntervalId', undefined);
+  Meteor.clearTimeout(cardState.get('CurTimeoutId'));
+  Meteor.clearInterval(cardState.get('CurIntervalId'));
+  cardState.set('CurTimeoutId', undefined);
+  cardState.set('CurIntervalId', undefined);
   $('#CountdownTimer').text('');
   $('#removalFeedback').removeAttr('hidden');
 
@@ -5517,7 +5518,7 @@ async function removeCardByUser() {
   let hiddenItems = Session.get('hiddenItems');
   hiddenItems.push(stims[whichStim].stimulusKC);
   
-  Session.set('numVisibleCards', Session.get('numVisibleCards') - 1);
+  cardState.set('numVisibleCards', cardState.get('numVisibleCards') - 1);
   Session.set('hiddenItems', hiddenItems);
 }
 
@@ -5540,12 +5541,12 @@ async function processUserTimesLog() {
   } 
   Session.set('clozeQuestionParts', curExperimentState.clozeQuestionParts || undefined);
   Session.set('testType', curExperimentState.testType);
-  Session.set('originalQuestion', curExperimentState.originalQuestion);
-  Session.set('currentAnswer', curExperimentState.currentAnswer);
+  cardState.set('originalQuestion', curExperimentState.originalQuestion);
+  cardState.set('currentAnswer', curExperimentState.currentAnswer);
   Session.set('subTdfIndex', curExperimentState.subTdfIndex);
-  Session.set('alternateDisplayIndex', curExperimentState.alternateDisplayIndex);
+  cardState.set('alternateDisplayIndex', curExperimentState.alternateDisplayIndex);
 
-  Session.set('currentDisplay', undefined);
+  cardState.set('currentDisplay', undefined);
 
   let resumeToQuestion = false;
 
@@ -5627,7 +5628,7 @@ async function processUserTimesLog() {
 
     // Depends on unitType being set in initialized unit engine
     Session.set('currentDeliveryParams', getCurrentDeliveryParams());
-    Session.set('scoringEnabled', Session.get('currentDeliveryParams').scoringEnabled);
+    cardState.set('scoringEnabled', Session.get('currentDeliveryParams').scoringEnabled);
 
     await updateExperimentState(newExperimentState, 'card.processUserTimesLog');
     await engine.loadComponentStates();
