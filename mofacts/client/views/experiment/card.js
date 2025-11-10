@@ -1128,7 +1128,13 @@ Template.card.helpers({
 
   'microphoneColorClass': function() {
     // Use CSS classes instead of inline styles for better performance
-    return cardState.get('recording') ? 'sr-mic-recording' : 'sr-mic-waiting';
+    if (cardState.get('recording')) {
+      return 'sr-mic-recording'; // Green - actively recording
+    } else if (srState.get('waitingForTranscription')) {
+      return 'sr-mic-waiting'; // Red - processing/waiting for API response
+    } else {
+      return 'sr-mic-waiting'; // Red - default waiting state
+    }
   },
 
   'voiceTranscriptionStatusMsg': function() {
