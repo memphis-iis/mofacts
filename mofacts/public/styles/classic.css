@@ -42,6 +42,59 @@
     border-width: 0;
 }
 
+/* Keyboard focus visible styles - WCAG 2.4.7 Level AAA */
+/* Only show focus ring for keyboard navigation, not mouse clicks */
+button:focus-visible,
+.btn:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+.multipleChoiceButton:focus-visible,
+.form-check-input:focus-visible {
+    outline: 3px solid var(--accent-color, #7ed957);
+    outline-offset: 2px;
+    /* Smooth transition for focus appearance */
+    transition: outline-offset var(--transition-fast, 100ms) ease-in-out;
+}
+
+/* Remove default browser focus styles when using focus-visible */
+button:focus:not(:focus-visible),
+.btn:focus:not(:focus-visible),
+a:focus:not(:focus-visible),
+input:focus:not(:focus-visible),
+select:focus:not(:focus-visible),
+textarea:focus:not(:focus-visible) {
+    outline: none;
+}
+
+/* Enhanced focus for multiple choice buttons (radio role) */
+.multipleChoiceButton:focus-visible {
+    outline: 3px solid var(--accent-color, #7ed957);
+    outline-offset: 4px;
+    box-shadow: 0 0 0 4px rgba(126, 217, 87, 0.2);
+}
+
+/* ===== MO5: DYNAMIC STYLES VIA CSS VARIABLES ===== */
+/* TDF-configurable styles set via JavaScript for CSP compliance */
+/* Replaces inline style="{{helper}}" with CSS custom properties */
+
+/* Dynamic font size from TDF settings (replaces style="{{getFontSizeStyle}}") */
+.dynamic-font-size {
+    font-size: var(--card-font-size, inherit);
+}
+
+/* Dynamic stimuli box background color (replaces style="{{stimuliBoxStyle}}") */
+.dynamic-stimuli-box {
+    background-color: var(--stimuli-box-bg-color) !important;
+}
+
+/* Progress bars initial state (replaces inline style="width: 0%") */
+#timerBar,
+#progressbar {
+    width: 0%;
+}
+
 /* ===== BASE ELEMENTS ===== */
 body{
     background-color: var(--background-color);

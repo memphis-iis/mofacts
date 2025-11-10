@@ -26,7 +26,7 @@
                 {{#if allowGoBack}}
                 <div class="col-1 offset-2">
                     <div id="goBackBar" class="video-button-bar">
-                        <button type="button" id="stepBackButton" class="btn text-center">
+                        <button type="button" id="stepBackButton" class="btn text-center" aria-label="Go back to previous question">
                             <!-- back icon -->
                             <i class="fa fa-arrow-left" aria-hidden="true"></i>
                         </button>
@@ -97,9 +97,9 @@
                 {{#if trial}}
                 <div class="{{UIsettings.displayColWidth}} mx-auto" id="displayContainer">
                     {{#if anythingButAudioCard}}
-                        <div class="{{fontSizeClass}} {{studyDisplayClass study UIsettings}} {{stimuliBoxClasses}}" style="{{stimuliBoxStyle}}" id="displaySubContainer">
+                        <div class="{{fontSizeClass}} {{studyDisplayClass study UIsettings}} {{stimuliBoxClasses}} dynamic-stimuli-box" id="displaySubContainer">
                             {{#if textOrClozeCard}}
-                            <p style="{{getFontSizeStyle}}">
+                            <p class="dynamic-font-size">
                             {{#if shouldShowSubWordCloze}}
                                 {{{subWordParts}}}
                             {{else if shouldShowStandardCloze}}
@@ -133,8 +133,9 @@
                         </div>
                     {{/if}}
                     {{#if audioCard}}
-                        <div class="text-center mb-2">
-                            <span class="fa fa-volume-up fa-5x" id="audioIcon"></span>
+                        <div class="text-center mb-2" role="status" aria-label="Audio question playing">
+                            <span class="fa fa-volume-up fa-5x" id="audioIcon" aria-hidden="true"></span>
+                            <span class="sr-only">Audio question is being played</span>
                         </div>
                     {{/if}}
                 </div>
@@ -167,7 +168,7 @@
             {{#if study}}
                 <div class="alert {{UIsettings.displayColWidth}} {{fontSizeClass}} {{UIsettings.textInputDisplay2}} ">
                     {{#if hideResponse}}
-                        <p id="answerLabel" class="answer-display-trial text-center" style="{{getFontSizeStyle}}">{{displayAnswer}}</p>
+                        <p id="answerLabel" class="answer-display-trial text-center dynamic-font-size">{{displayAnswer}}</p>
                     {{/if}}
                 </div>  <!-- close column -->
             {{/if}}
@@ -217,7 +218,7 @@
                                 {{#if audioEnabled}}
                                     <label class="no-bottom-margin mb-2">{{verbalChoice}}.</label>
                                 {{/if}}
-                                    <button style="background-image: url({{buttonValue}});"
+                                    <button data-image-url="{{buttonValue}}"
                                             verbalChoice='{{verbalChoice}}'
                                             type='button'
                                             name='{{buttonName}}'
@@ -252,7 +253,7 @@
 
             {{#if UIsettings.displayConfirmButton}}
             <div class="col-12 text-center mt-3">
-                <button type='button' id='confirmButton' name='confirmButton' class='btn w-100 btn-responsive' disabled>
+                <button type='button' id='confirmButton' name='confirmButton' class='btn w-100 btn-responsive' disabled aria-disabled="true">
                     {{UIsettings.continueButtonText}}
                 </button>
             </div>
@@ -357,7 +358,7 @@
         <span id="displayTimeoutMsg">
             <!-- timer bar -->
             <div class="progress">
-                <div id="timerBar" class="progress-bar progress-bar-success progress-bar-striped active" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="{{displayTimeout}}" style="width: 0%">
+                <div id="timerBar" class="progress-bar progress-bar-success progress-bar-striped active" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="{{displayTimeout}}">
                     <span class="sr-only">0% Complete</span>
                 </div>
             </div>
@@ -370,7 +371,7 @@
             </div>    
             {{#if allowGoBack}}
             <div class="col-1 offset-2">
-                <button type="button" id="stepBackButton" class="btn text-center">
+                <button type="button" id="stepBackButton" class="btn text-center" aria-label="Go back to previous question">
                     <!-- back icon -->
                     <i class="fa fa-arrow-left" aria-hidden="true"></i>
                 </button>
@@ -390,7 +391,7 @@
               <div id="CountdownTimerText" class="smooth-transition">
               </div>
               <div id="progressBarContainer" class="progress">
-                  <div id="progressbar" class="bg-warning progress-bar-striped smooth-transition" role="progressbar" aria-label="Basic example" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100" style="width:0%;"></div>
+                  <div id="progressbar" class="bg-warning progress-bar-striped smooth-transition" role="progressbar" aria-label="Progress indicator" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
               </div>
           </div>
       </div>

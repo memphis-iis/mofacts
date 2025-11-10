@@ -1,7 +1,7 @@
 # Card Refactoring Status Tracker
 
 **Last Updated:** 2025-01-10
-**Purpose:** Track completed and remaining card refactoring work
+**Purpose:** Track remaining card refactoring work
 **Context:** No-scroll cards (must fit viewport perfectly)
 
 ---
@@ -12,359 +12,18 @@
 |----------|-------|-----------|-------------|-----------|--------|
 | **⚡ DO FIRST** | 4 items | 4 | 0 | 0 | 100% |
 | **🟢 Quick Wins** | 3 items | 3 | 0 | 0 | 100% |
-| **🟡 Medium** | 4 items | 1 | 1 (M3 @ 80%) | 2 | 25% |
+| **🟡 Medium** | 4 items | 4 | 0 | 0 | 100% |
 | **🟠 Complex** | 3 items | 0 | 0 | 3 | 0% |
 | **🔴 High Value/High Risk** | 3 items | 1 | 0 | 2 | 33% |
 | **⚫ Blaze Limitation** | 1 item | N/A | N/A | N/A | N/A |
 | **⚫ Removed/Not Needed** | 3 items | N/A | N/A | N/A | N/A |
-| **TOTAL** | **20 items** | **9** | **1 (80% done)** | **9** | **58%** |
+| **TOTAL** | **20 items** | **12** | **0** | **6** | **75%** |
 
 ---
 
-## ✅ COMPLETED (9 items)
+## 📋 TODO: Remaining Work (6 items)
 
-### ⚡ DO FIRST Tier
-
-#### 1. ✅ MO1: Dynamic vh Units (Score: 8.0)
-**Completed:** ~2025-01
-**Implementation:** [index.js:46-69](../mofacts/client/index.js#L46-L69), [classic.css:1000-1053](../mofacts/public/styles/classic.css#L1000-L1053)
-**Impact:** Prevents scrollbars on mobile (iOS Safari/Android Chrome)
-```javascript
-// Dynamic viewport height tracking
-function setDynamicViewportHeight() {
-  const vh = window.innerHeight * 0.01;
-  document.documentElement.style.setProperty('--vh', `${vh}px`);
-}
-// All vh utility classes use calc(var(--vh, 1vh) * N)
-```
-**Result:** ✅ Zero scrollbars on mobile, stable layouts
-
----
-
-#### 2. ✅ M4: CSS Containment (Score: 27.0)
-**Completed:** ~2025-01
-**Implementation:** [classic.css:148, 744, 1368-1499](../mofacts/public/styles/classic.css#L1368-L1499)
-**Impact:** Prevents layout shifts causing overflow
-```css
-#cardContainer { contain: layout style paint; }
-#multipleChoiceContainer { contain: layout style; }
-#displaySubContainer { contain: layout style paint; }
-/* + 12 more containers */
-```
-**Result:** ✅ 40% faster scroll/layout operations
-
----
-
-#### 3. ✅ MO3: Tap Target Sizes (Score: 14.4)
-**Completed:** ~2025-01
-**Implementation:** [classic.css:698, 1247, 1267-1277, 1331-1349](../mofacts/public/styles/classic.css#L1267-L1349)
-**Impact:** WCAG 2.5.5 compliant tap targets
-```css
-@media screen and (max-width: 768px) {
-  #stepBackButton, #removeQuestion, .btn-close {
-    min-width: 44px;
-    min-height: 44px;
-  }
-}
-```
-**Result:** ✅ WCAG compliant, better mobile UX
-
----
-
-### 🔴 High Value/High Risk Tier
-
-#### 4. ✅ M1: Session → ReactiveDict (Score: 0.54)
-**Completed:** 2025-01-10
-**Commit:** [b2cbb051](https://github.com/memphis-iis/mofacts/commit/b2cbb051)
-**Implementation:** [card.js:241](../mofacts/client/views/experiment/card.js#L241)
-**Impact:** 20-30% reduction in reactive computations
-```javascript
-const cardState = new ReactiveDict('cardState');
-// Migrated 258 calls (54 keys) to cardState
-// Kept 342 calls (56 keys) as global Session
-```
-**Result:** ✅ Scoped state, automatic cleanup, better performance
-
-**Migration Stats:**
-- Total: 600 state calls
-- Migrated: 258 (43%) → cardState
-- Global: 342 (57%) → Session (cross-file communication)
-- Keys migrated: 54 card-scoped
-- Keys preserved: 56 global/shared
-
-**Lessons Learned:**
-- Cross-file state (unitEngine.js) must stay global
-- Not all Session keys should be migrated
-- Automated migration saved ~40 hours of manual work
-
----
-
-### 🟢 Quick Wins Tier
-
-#### 5. ✅ MO7: Responsive Font Sizes (Score: 8.0)
-**Completed:** 2025-01-10
-**Implementation:** [classic.css:98, 102, 109, 935-936](../mofacts/public/styles/classic.css#L935-L936)
-**Status:** All fixed px converted to responsive units
-```css
-/* Headers use clamp(): */
-h1 { font-size: clamp(2.5rem, 5vw, 4.6rem); }
-h2 { font-size: clamp(1.5rem, 3vw, 2rem); }
-
-/* Icon sizes use rem: */
-.sr-status-container .fa-microphone { font-size: 1.875rem; /* 30px → rem */ }
-```
-**Audit Results:**
-- Only 1 fixed px found in classic.css (microphone icon)
-- Converted to 1.875rem for responsive scaling
-- TDF-configurable font sizes (getFontSizeStyle) intentionally kept as px
-**Result:** ✅ Fully responsive typography across all CSS
-
----
-
-#### 6. ✅ MO4: Passive Event Listeners (Score: 24.0 → 4.0)
-**Completed:** 2025-01-10
-**Implementation:** [card.js:1980-1981, 2232, 4236, 4257, 4268, 4294, 4307](../mofacts/client/views/experiment/card.js#L1980-L1981), [card.html:416-421](../mofacts/client/views/experiment/card.html#L416-L421)
-**Impact:** Improved scroll performance and touch responsiveness
-```javascript
-// Passive listeners allow browser optimization:
-imgElement.addEventListener('load', onLoad, {passive: true});
-utterance.addEventListener('end', callback, {passive: true});
-
-// Non-passive with explanation:
-btn.addEventListener('click', (e) => {
-  e.preventDefault(); // Can't use passive: true
-  aud.play();
-}, {passive: false});
-```
-**Result:** ✅ Better mobile performance, lower CPU usage
-
----
-
-#### 7. ✅ MO2: Touch Action Selectors (Score: 18.0 → 5.0)
-**Completed:** 2025-01-10
-**Implementation:** [classic.css:1260-1268](../mofacts/public/styles/classic.css#L1260-L1268)
-**Impact:** Better gesture handling and accessibility
-```css
-@media screen and (max-width: 768px) {
-  /* Prevent double-tap zoom on interactive elements */
-  button, .btn, a, input, select, textarea {
-    touch-action: manipulation;
-  }
-
-  /* Keep pinch-zoom for accessibility on images */
-  img, .stimulus-image {
-    touch-action: pinch-zoom;
-  }
-}
-```
-**Result:** ✅ Refined from wildcard (*) to specific selectors, added image accessibility
-
----
-
-### 🟡 Medium Priority
-
-#### 8. ✅ MO8: Image Performance (Score: 3.5)
-**Completed:** 2025-01-10
-**Implementation:** See [MO8_IMAGE_OPTIMIZATION_IMPLEMENTATION.md](MO8_IMAGE_OPTIMIZATION_IMPLEMENTATION.md)
-**Files:** 9 templates + 2 JS files (11 files total)
-**Impact:** Mobile excellence + Security fixes
-
-**What Was Done:**
-1. **SECURITY:** Fixed 2 XSS vulnerabilities (card.js feedback, contentUpload.js preview)
-2. **Optimization:** All 10 images now have:
-   - `loading` attribute (eager/lazy based on position)
-   - `width`/`height` attributes (prevents CLS)
-   - `decoding` attribute (async/sync)
-   - `fetchpriority` attribute (high/auto/low)
-   - Descriptive `alt` text (100% accessibility)
-
-**Key Fixes:**
-```javascript
-// BEFORE (Dangerous XSS):
-$('#UserInteraction').html('<img style="background: url(' + correctImageSrc + ')">');
-
-// AFTER (Secure):
-const img = document.createElement('img');
-img.src = correctImageSrc;
-img.alt = 'Correct answer image';
-img.loading = 'eager';
-img.fetchpriority = 'high';
-```
-
-**Mobile Best Practice:**
-```html
-<!-- width/height = aspect ratio hint, NOT fixed sizing -->
-<img src="logo.png" width="40" height="40" style="max-width: 100%; height: auto;">
-<!-- Result: Scales responsively BUT maintains ratio = zero layout shift! -->
-```
-
-**Expected Impact:**
-- 🔒 Zero XSS vulnerabilities (was 2)
-- ♿ 100% alt text compliance (was 30%)
-- ⚡ Zero layout shift (CLS = 0)
-- 📱 50-70% bandwidth savings on mobile (lazy loading)
-- 🎯 Core Web Vitals: LCP improved, CLS = 0, FCP faster
-
-**Files Modified:**
-- 9 HTML templates (card, navigation, login, instructions, theme, tabwarning, turkWorkflow)
-- 2 JS files (card.js feedback, contentUpload.js preview)
-
-**Documentation:**
-- [MO8_IMAGE_OPTIMIZATION_AUDIT.md](MO8_IMAGE_OPTIMIZATION_AUDIT.md) - Comprehensive audit
-- [MO8_IMAGE_OPTIMIZATION_IMPLEMENTATION.md](MO8_IMAGE_OPTIMIZATION_IMPLEMENTATION.md) - Complete implementation report
-
-**Result:** ✅ Mobile excellence achieved - All images secure, accessible, and optimized
-
----
-
-## 🚧 IN PROGRESS (1 item)
-
-### 🟡 Medium Priority
-
-#### M3: Add Tracker.autoruns (Score: 2.1)
-**Status:** ~80% Complete (16/20 hours)
-**Current Phase:** Phase 4 - Testing
-
-**What's Done:**
-- ✅ Phase 1: State machine audit complete (5 hrs)
-- ✅ Phase 2A: ReactiveVars converted with critical bug fixes (3 hrs)
-- ✅ Phase 3: 5 autoruns implemented + Blaze helpers (8 hrs)
-  - Audio Input Mode, Feedback Position, SR Guard, TTS Lock, Input Guard
-  - Display Ready & SR UI via Blaze (better than jQuery autoruns)
-
-**What's Next:**
-- ✅ ~~Test recent fixes~~ - Working perfectly
-- Run comprehensive Phase 4 tests (8 test scenarios)
-- Measure reactive computation reduction
-- Document final results
-
-**See full details in TODO section below**
-
----
-
-## ⚫ Removed/Not Needed (3 items)
-
-#### REMOVED: C3: Web Vitals Monitoring
-**Status:** ⚫ NOT NEEDED
-**Reason:** Monitoring overhead not justified for current needs
-**Alternative:** Manual testing and user feedback sufficient
-
-#### REMOVED: MO6: Skeleton Loaders
-**Status:** ⚫ NOT NEEDED
-**Reason:** Trial content loads too fast (<100ms) for skeleton loaders to be useful
-**Analysis:**
-- Skeleton loaders designed for 500ms-2s loads
-- At <100ms, they just flash and create distraction
-- Testing context requires minimal visual changes (breaks concentration)
-- Current `displayReady` approach is ideal (show nothing until ready)
-**Alternative:** Keep current behavior (no loading indicators needed)
-
-#### SKIPPED: M6: Null Checks
-**Status:** ⚫ SKIP - ANTI-PATTERN
-**Reason:** Null checks hide logic errors (fail-fast is better)
-**Alternative:** Proper asset validation on TDF upload
-
----
-
-## 📋 TODO: High Priority (10 items)
-
-### ⚡ DO FIRST (0 remaining)
-
-**All critical items completed!** ✅
-
----
-
-### 🟢 Quick Wins (0 remaining)
-
-**All quick wins completed!** ✅
-
----
-
-### 🟡 Medium Priority (4 items, 61 hours)
-
-#### TODO: C4: Accessibility Improvements (Score: 2.4)
-**Priority:** 🟡 MEDIUM
-**Time:** 17.5 hours
-**Safety:** MEDIUM (7/10)
-**Tasks:**
-- Add ARIA labels on missing buttons
-- Focus visible styles for keyboard nav
-- Color contrast validation
-- Screen reader testing
-**Expected Impact:** WCAG AAA compliance
-
----
-
-#### TODO: MO5: Remove Inline Styles (Score: 2.6)
-**Priority:** 🟡 MEDIUM
-**Time:** 14 hours
-**Safety:** MEDIUM (6/10)
-**Why:** CSP compliance, better caching
-**Locations:** [card.html:102, 100, 353](../mofacts/client/views/experiment/card.html)
-```html
-<!-- BEFORE: -->
-<p style="{{getFontSizeStyle}}">
-
-<!-- AFTER: -->
-<p class="dynamic-font-size">
-<!-- Use CSS custom properties set via JS -->
-```
-**Expected Impact:** CSP-compliant, centralized styling
-
----
-
-#### 🚧 IN PROGRESS: M3: Add Tracker.autoruns (Score: 2.1)
-**Priority:** 🟡 MEDIUM
-**Time:** 20 hours (5 audit + 3 ReactiveVars + 8 autoruns + 4 test)
-**Safety:** MEDIUM (6/10)
-**Status:** ~80% Complete (Phases 1-3 done, Phase 4 testing remaining)
-
-**See:** [M3_TRACKER_AUTORUNS_IMPLEMENTATION.md](M3_TRACKER_AUTORUNS_IMPLEMENTATION.md) for complete implementation guide
-
-**Progress:**
-- ✅ **Phase 1: Audit** (5 hrs) - Completed
-- ✅ **Phase 2A: ReactiveVars** (3 hrs) - Completed with critical bug fix
-  - Created 3 ReactiveDict instances: `srState`, `trialState`, `timeoutState`
-  - Converted `currentTrialState`, `waitingForTranscription`, `recordingLocked`, etc.
-  - **BUG FIXED:** Functions cannot be stored in ReactiveDict - moved `currentTimeoutFunc` and `currentTimeoutDelay` to module variables
-- ✅ **Phase 3: Autoruns** (8 hrs) - Completed
-  - ✅ Audio Input Mode Computation (line 697) - Prevents duplicate TDF checks
-  - ✅ Feedback Position Coordination (line 714) - **Critical performance fix**
-  - ✅ SR Recording State Guard (line 737) - Auto-stops recording on state change
-  - ✅ TTS Lock Coordination (line 752) - Auto-restarts recording when TTS completes
-  - ✅ Input State Guard (line 777) - Defensive input disabling
-  - ✅ Display Ready / SR UI - Handled by Blaze helpers (better than jQuery autoruns)
-- ⏳ **Phase 4: Test** (4 hrs) - Next
-
-**Recent Fixes (2025-01-10):**
-1. **Critical:** Fixed timeout function storage bug
-   - Issue: `timeoutState.set('func', ...)` corrupted function references
-   - Solution: Moved to module variables `currentTimeoutFunc`/`currentTimeoutDelay`
-   - Result: Fixes `TypeError: n is not a function` on timeout
-2. **SR Icon:** Added `!waitingForTranscription` check to TTS Lock Coordination
-   - Prevents autorun from restarting recording during speech processing
-   - Allows red icon to display while waiting for transcription
-3. **SR Timing:** Set `waitingForTranscription` BEFORE `exportToProcessCallback()`
-   - Prevents autorun from clearing audio buffer before processing
-   - Fixes: System not responding to voice answers
-
-**Next Steps:**
-1. ✅ ~~Test fixes (red icon, timeout)~~ - Working perfectly
-2. **Run comprehensive Phase 4 tests** (8 test scenarios)
-3. **Measure reactive computation reduction**
-
-**Lessons Learned:**
-- ⚠️ **ReactiveDict is for data, not functions** - Functions lose execution context when stored/retrieved
-- ✅ Only timeout ID (`name`) should be reactive, not the function itself
-- ✅ Autoruns need careful checks to prevent infinite restart loops
-- ✅ **Blaze helpers > jQuery autoruns** - More declarative, better performance
-- ✅ Timing matters: Set flags BEFORE async operations to prevent race conditions
-
----
-
----
-
-## 🟠 Complex Projects (3 items, 100 hours)
+### 🟠 Complex Projects (3 items, 100 hours)
 
 #### TODO: M5: Split Template Helpers (Score: 1.7)
 **Priority:** 🟠 COMPLEX
@@ -406,7 +65,7 @@ img.fetchpriority = 'high';
 
 ---
 
-## 🔴 High Value, High Risk (2 remaining, 225 hours)
+### 🔴 High Value, High Risk (2 items, 225 hours)
 
 #### TODO: C1: Split card.js File (Score: 0.16)
 **Priority:** 🔴 HIGH VALUE, HIGH RISK
@@ -430,11 +89,10 @@ card.js (8700 lines) → Split into:
 ```
 
 **Prerequisites:**
-1. Complete C3 (Web Vitals) for baseline metrics
-2. Complete M3 (Tracker.autoruns) for proper reactivity
-3. Comprehensive testing strategy
-4. Incremental rollout plan
-5. Rollback procedures
+1. Complete M3 (Tracker.autoruns) for proper reactivity
+2. Comprehensive testing strategy
+3. Incremental rollout plan
+4. Rollback procedures
 
 **Expected Impact:** 60% faster load, maintainable codebase
 
@@ -479,136 +137,90 @@ Template.card.helpers({
 
 ---
 
-## ⚫ Limitations & Removed Items (2 items)
+## ⚫ Limitations & Known Items (4 items)
+
+### Blaze Limitation
 
 #### CANNOT DO: C5: Error Boundaries
 **Status:** ⚫ BLAZE LIMITATION
 **Why:** Blaze doesn't support React-style error boundaries
 **Workaround:** Try-catch in helpers (already done in some places)
 
+---
+
+### Removed/Not Needed Items (for reference)
+
+#### REMOVED: C3: Web Vitals Monitoring
+**Status:** ⚫ NOT NEEDED
+**Reason:** Monitoring overhead not justified for current needs
+**Alternative:** Manual testing and user feedback sufficient
+
+#### REMOVED: MO6: Skeleton Loaders
+**Status:** ⚫ NOT NEEDED
+**Reason:** Trial content loads too fast (<100ms) for skeleton loaders to be useful
+**Analysis:**
+- Skeleton loaders designed for 500ms-2s loads
+- At <100ms, they just flash and create distraction
+- Testing context requires minimal visual changes (breaks concentration)
+- Current `displayReady` approach is ideal (show nothing until ready)
+**Alternative:** Keep current behavior (no loading indicators needed)
+
+#### SKIPPED: M6: Null Checks
+**Status:** ⚫ SKIP - ANTI-PATTERN
+**Reason:** Null checks hide logic errors (fail-fast is better)
+**Alternative:** Proper asset validation on TDF upload
 
 ---
 
 ## 📅 Recommended Roadmap
 
-### ✅ DONE: Phase 0 (Completed)
-**Time:** ~20 hours
-**Items:** MO1, M4, MO3, M1 (partial MO7)
-**Result:** 40-50% mobile performance improvement, zero scrollbars, WCAG tap targets
-
----
-
-### ✅ DONE: Phase 1 - Mobile Polish (Completed 2025-01-10)
-**Time:** 7.5 hours
-**Items:** MO7, MO4, MO2
-**Changes:**
-- ✅ **MO7:** Converted last fixed px (30px icon → 1.875rem), full responsive typography
-- ✅ **MO4:** Added passive listeners to 6 event handlers (images, audio, TTS)
-- ✅ **MO2:** Refined touch-action from wildcard (*) to specific selectors, added image pinch-zoom
-**Result:** Complete mobile polish - all touch targets optimized, fully responsive fonts, better gesture handling
-
----
-
-### NEXT: Phase 2 - Reactivity Optimization (20 hours)
-**Goal:** Reduce unnecessary re-renders
-
-1. **M3: Tracker.autoruns** (20 hrs) - Minimize reactive computations
-
-**Expected Impact:** Better performance, fewer re-renders
-
----
-
-### LATER: Phase 3 - Accessibility & Polish (31.5 hours)
-
-7. **C4: Accessibility** (17.5 hrs)
-8. **MO5: Inline styles** (14 hrs)
-
----
-
-### FUTURE: Phase 4 - Architecture (250+ hours)
+### NEXT: Phase 4 - Architecture (250+ hours)
 **Requires:** Phase 1-2 complete, comprehensive planning
 
-10. **C1: Split card.js** (125 hrs)
-11. **M2: Reduce jQuery** (100 hrs, incremental)
-12. **M5: Split helpers** (25 hrs)
+4. **C1: Split card.js** (125 hrs)
+5. **M2: Reduce jQuery** (100 hrs, incremental)
+6. **M5: Split helpers** (25 hrs)
 
 ---
 
 ## 📊 Effort vs Impact Matrix
 
-### High Impact, Low Effort (DO NEXT!)
-- ✅ MO1: vh units (DONE)
-- ✅ M4: CSS containment (DONE)
-- ✅ MO3: Tap targets (DONE)
-- ✅ MO4: Touch gestures (DONE)
-- ✅ MO2: Touch action (DONE)
-- ✅ MO7: Complete fonts (DONE)
-
 ### High Impact, High Effort (Plan Carefully)
-- ✅ M1: Session → ReactiveDict (DONE)
-- **→ M3: Tracker.autoruns** (20 hrs) - NEXT
 - **→ C1: Split card.js** (125 hrs) - REQUIRES PLANNING
 - **→ M2: Reduce jQuery** (100 hrs) - INCREMENTAL
-
-### Low Impact, Low Effort (Nice to Have)
-- ✅ MO8: Image performance (DONE)
 
 ### Low Impact, High Effort (Lower Priority)
 - C2: PWA (50 hrs)
 - MO9: Prefetch (25 hrs)
-- C4: Full accessibility (17.5 hrs)
 
 ---
 
 ## 🎯 Next Action Items
 
-### Immediate (This Week)
-1. ✅ ~~M3: Tracker.autorun audit~~ - COMPLETED
-2. ✅ ~~ReactiveVars conversion~~ - COMPLETED (with bug fix)
-3. **🚧 Test M3 Phase 3A fixes:**
-   - Verify red icon shows during speech processing
-   - Verify trial timeout fires correctly
-   - Check for any new issues
-4. **Complete M3 Phase 3A autoruns:**
-   - Add SR Recording State Guard
-   - Add Display Ready transitions
-   - Add UI Sync autoruns
-
 ### Short-term (Next 2 Weeks)
-5. **M3 Phase 4: Comprehensive testing** (4 hrs)
-6. Consider starting accessibility audit (C4)
+1. Plan architecture for C1 (card.js split)
 
 ### Medium-term (Next Month)
-7. Remove inline styles → CSS custom properties (MO5)
-8. Image optimization (MO8)
+2. Begin incremental jQuery reduction (M2)
 
 ### Long-term (Next Quarter)
-9. Plan C1 (card.js split) architecture
-10. Begin incremental jQuery reduction
-11. Consider PWA features
+3. Consider PWA features (C2)
+4. Consider prefetching optimization (MO9)
 
 ---
 
-## 📝 Notes
+## 📝 Key Principles for Future Work
 
-### Key Insights
-- **No-scroll context** fundamentally changed priorities (MO1 became #1)
-- **Cross-file state** is complex (M1 taught us about unitEngine.js)
-- **Automated migration** saved 40+ hours (M1 script-based approach)
-- **Test immediately** catches bugs fast (found 2 issues in M1 within minutes)
+### Critical Principles
+- **Incremental approach** - Never big-bang migrations
+- **Test coverage first** - Especially for C1/M2
+- **Cross-file analysis** - Check dependencies before changes
+- **Fail-fast design** - No simple null checks that hide errors
 
-### Best Practices Learned
-- ✅ Always analyze dependent files before migration
-- ✅ Preview changes before applying
-- ✅ Incremental approach reduces risk
-- ✅ Automated tooling for repetitive work
-- ✅ Comprehensive documentation for rollback
-
-### Avoid
-- ❌ Simple null checks (hide logic errors)
-- ❌ Big-bang migrations (do incremental)
-- ❌ Starting C1/M2 without test coverage
-- ❌ Migrating global/shared state to local scope
+### Architecture Constraints
+- Avoid migrating global/shared state to local scope
+- Use Blaze helpers over jQuery autoruns when possible
+- DOM-managing code must be bidirectional
 
 ---
 
@@ -620,8 +232,12 @@ Template.card.helpers({
 - [CARD_REFACTORING_QUICKSTART_NO_SCROLL.md](CARD_REFACTORING_QUICKSTART_NO_SCROLL.md) - Quick start guide
 
 ### Implementation Guides
-- [M3_TRACKER_AUTORUNS_IMPLEMENTATION.md](M3_TRACKER_AUTORUNS_IMPLEMENTATION.md) - ⭐ M3 (Phase 2) complete plan
-- [scripts/migration_report_FINAL.md](../scripts/migration_report_FINAL.md) - M1 migration details
+- [M3_TRACKER_AUTORUNS_IMPLEMENTATION.md](M3_TRACKER_AUTORUNS_IMPLEMENTATION.md) - Autorun patterns reference
+- [M3_BEST_PRACTICES_AUDIT.md](M3_BEST_PRACTICES_AUDIT.md) - Best practices reference
+- [scripts/migration_report_FINAL.md](../scripts/migration_report_FINAL.md) - Migration patterns reference
+- [MO8_IMAGE_OPTIMIZATION_IMPLEMENTATION.md](MO8_IMAGE_OPTIMIZATION_IMPLEMENTATION.md) - Image optimization reference
+- [C4_ACCESSIBILITY_AUDIT.md](C4_ACCESSIBILITY_AUDIT.md) - Accessibility patterns reference
+- [C4_MO5_IMPLEMENTATION_SUMMARY.md](C4_MO5_IMPLEMENTATION_SUMMARY.md) - CSS variables pattern reference
 
 ### State Machine Documentation
 - [STATE_MACHINE_IMPLEMENTATION_PLAN.md](STATE_MACHINE_IMPLEMENTATION_PLAN.md) - Trial FSM design
@@ -631,5 +247,5 @@ Template.card.helpers({
 ---
 
 **Last Updated:** 2025-01-10
-**Next Review:** After M3 Phase 4 completion
-**Recent:** MO8 (Image Performance) completed - Mobile excellence achieved!
+**Next Review:** Before starting C1 (card.js split)
+**Status:** 75% complete (6 items remaining - 3 Complex, 2 High Risk, 1 Blaze Limitation)

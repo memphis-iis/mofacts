@@ -711,14 +711,14 @@ Template.card.onCreated(function() {
   // Autorun for feedback container visibility
   // FIX: RESTORED - This was incorrectly removed, causing DOM thrashing and 40-90% performance regression
   // Mixing reactive state changes with manual jQuery DOM updates violates Meteor/Blaze reactivity rules
+  // AUTOMATIC: Shows feedback in correct position, hides when not in feedback
   template.autorun(function() {
     const inFeedback = cardState.get('inFeedback');
     const feedbackPosition = cardState.get('feedbackPosition');
 
-    if (inFeedback && feedbackPosition) {
-      // Centralized DOM update based on reactive state
-      // This runs once per state change instead of scattered throughout code
-      Tracker.afterFlush(function() {
+    Tracker.afterFlush(function() {
+      if (inFeedback && feedbackPosition) {
+        // Show feedback in correct position
         if (feedbackPosition === 'top') {
           $('#userInteractionContainer').removeAttr('hidden');
           $('#feedbackOverrideContainer').attr('hidden', '');
@@ -727,9 +727,14 @@ Template.card.onCreated(function() {
           $('#userInteractionContainer').attr('hidden', '');
         } else if (feedbackPosition === 'bottom') {
           $('#feedbackOverrideContainer').attr('hidden', '');
+          $('#userInteractionContainer').attr('hidden', '');
         }
-      });
-    }
+      } else {
+        // Hide all feedback containers when not in feedback
+        $('#userInteractionContainer').attr('hidden', '');
+        $('#feedbackOverrideContainer').attr('hidden', '');
+      }
+    });
   });
 
   // M3: SR Recording State Guard - Auto-stop recording when leaving AWAITING state
@@ -772,25 +777,75 @@ Template.card.onCreated(function() {
     }
   });
 
-  // M3: Input State Guard - Ensure inputs disabled when not accepting input
-  // DEFENSIVE: Prevents input in wrong state, fail-safe behavior
+  // M3: Input State Guard - Ensure inputs enabled/disabled based on state
+  // AUTOMATIC: Enables input in AWAITING/STUDY states, disables in all others
+  // Also auto-focuses text input when enabled
   template.autorun(function() {
     const currentState = trialState.get('current');
 
-    // Disable input when not in states that accept input
+    // Enable input when in states that accept input
     const acceptsInput = currentState === TRIAL_STATES.PRESENTING_AWAITING ||
                         currentState === TRIAL_STATES.STUDY_SHOWING;
 
-    if (!acceptsInput) {
-      Tracker.afterFlush(function() {
-        // Defensive: Ensure input elements are disabled
-        const userAnswerEl = document.getElementById('userAnswer');
-        if (userAnswerEl && !userAnswerEl.disabled) {
+    Tracker.afterFlush(function() {
+      const userAnswerEl = document.getElementById('userAnswer');
+      if (userAnswerEl) {
+        if (acceptsInput && userAnswerEl.disabled) {
+          clientConsole(2, '[M3] Auto-enabling input - state:', currentState);
+          userAnswerEl.disabled = false;
+          // Auto-focus text input when enabled (not for button trials)
+          const isButtonTrial = cardState.get('buttonTrial');
+          if (!isButtonTrial) {
+            try {
+              userAnswerEl.focus();
+              clientConsole(2, '[M3] Auto-focused input field');
+            } catch (e) {
+              // Ignore - focus may fail if element not in DOM
+            }
+          }
+        } else if (!acceptsInput && !userAnswerEl.disabled) {
           clientConsole(2, '[M3] Auto-disabling input - state:', currentState);
           userAnswerEl.disabled = true;
         }
-      });
+      }
+    });
+  });
+
+  // M3/MO5: Dynamic CSS Custom Properties - Set TDF-configurable styles via CSS variables for CSP compliance
+  // This replaces inline style={{...}} attributes with CSS custom properties
+  template.autorun(function() {
+    // Font size from TDF settings (replaces getFontSizeStyle helper)
+    const deliveryParams = Session.get('currentDeliveryParams');
+    const fontsize = deliveryParams && deliveryParams.fontsizePX;
+    if (fontsize) {
+      document.documentElement.style.setProperty('--card-font-size', fontsize + 'px');
+    } else {
+      document.documentElement.style.removeProperty('--card-font-size');
     }
+
+    // Stimuli box background color from TDF UI settings (replaces stimuliBoxStyle helper)
+    const uiSettings = Session.get('curTdfUISettings');
+    if (uiSettings && uiSettings.showStimuliBox) {
+      const colorValue = uiSettings.stimuliBoxColor || 'alert-bg';
+      if (!colorValue.startsWith('alert-')) {
+        document.documentElement.style.setProperty('--stimuli-box-bg-color', colorValue);
+      } else {
+        document.documentElement.style.removeProperty('--stimuli-box-bg-color');
+      }
+    } else {
+      document.documentElement.style.removeProperty('--stimuli-box-bg-color');
+    }
+
+    // Image button backgrounds - Set from data-image-url attribute (CSP compliance)
+    // Replaces inline style="background-image: url(...)"
+    Tracker.afterFlush(function() {
+      document.querySelectorAll('.btn-image[data-image-url]').forEach(button => {
+        const imageUrl = button.getAttribute('data-image-url');
+        if (imageUrl && !button.style.backgroundImage) {
+          button.style.backgroundImage = `url(${imageUrl})`;
+        }
+      });
+    });
   });
 
   // Initialize card state defaults
@@ -1003,7 +1058,7 @@ Template.card.events({
         $(selectedButton).addClass('btn-secondary')
                          .attr('aria-checked', 'true');
         //enable confirmButton
-        $('#confirmButton').prop('disabled', false);
+        $('#confirmButton').prop('disabled', false).attr('aria-disabled', 'false');
       }
     }
   },
@@ -1037,7 +1092,7 @@ Template.card.events({
                                   .attr('aria-checked', 'false');
         $(allButtons[targetIndex]).addClass('btn-secondary')
                                   .attr('aria-checked', 'true');
-        $('#confirmButton').prop('disabled', false);
+        $('#confirmButton').prop('disabled', false).attr('aria-disabled', 'false');
       }
     }
   },
@@ -2808,7 +2863,9 @@ async function showUserFeedback(isCorrect, feedbackMessage, isTimeout, isSkip) {
               const timerElement = document.getElementById("CountdownTimerText");
               if (!timerElement) {
                 // Element doesn't exist, clear interval and exit
+                // FIX: Must set CurIntervalId to undefined so waiting code doesn't wait forever
                 Meteor.clearInterval(CountdownTimerInterval);
+                cardState.set('CurIntervalId', undefined);
                 return;
               }
               if(displayReviewTimeoutMode == "text" || displayReviewTimeoutMode == "both"){
@@ -2979,6 +3036,12 @@ async function afterAnswerFeedbackCallback(trialEndTimeStamp, trialStartTimeStam
 
   // Stop previous timeout, log response data, and clear up any other vars for next question
   clearCardTimeout();
+
+  // FIX: Clear any stale countdown interval from previous trial
+  // For correct answers, no countdown interval is created, but we need to clear
+  // any leftover CurIntervalId from a previous incorrect trial to prevent
+  // infinite waiting in afterFeedbackCallback
+  cardState.set('CurIntervalId', undefined);
 
   cardState.set('feedbackTimeoutBegins', Date.now())
   const answerLogRecord = gatherAnswerLogRecord(trialEndTimeStamp, trialStartTimeStamp, source, userAnswer, isCorrect,
@@ -3519,7 +3582,7 @@ function cleanupTrialContent() {
   $('#userInteractionContainer').attr('hidden', '');
   $('#feedbackOverrideContainer').attr('hidden', '');
   $('#forceCorrectionEntry').attr('hidden', '');
-  $('#confirmButton').prop('disabled', true);
+  $('#confirmButton').prop('disabled', true).attr('aria-disabled', 'true');
 
   // CRITICAL: Show .input-box that was hidden during feedback
   // showUserFeedback() calls $('.input-box').addClass('hidden') but nothing shows it again
