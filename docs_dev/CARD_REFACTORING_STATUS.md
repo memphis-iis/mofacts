@@ -10,13 +10,14 @@
 
 | Category | Total | Completed | Remaining | % Done |
 |----------|-------|-----------|-----------|--------|
-| **⚡ DO FIRST** | 5 items | 4 | 1 | 80% |
+| **⚡ DO FIRST** | 4 items | 4 | 0 | 100% |
 | **🟢 Quick Wins** | 4 items | 0 | 4 | 0% |
-| **🟡 Medium** | 5 items | 0 | 5 | 0% |
+| **🟡 Medium** | 4 items | 0 | 4 | 0% |
 | **🟠 Complex** | 3 items | 0 | 3 | 0% |
 | **🔴 High Value/High Risk** | 3 items | 1 | 2 | 33% |
 | **⚫ Blaze Limitation** | 1 item | N/A | N/A | N/A |
-| **TOTAL** | **21 items** | **5** | **16** | **24%** |
+| **⚫ Removed/Not Needed** | 1 item | N/A | N/A | N/A |
+| **TOTAL** | **20 items** | **5** | **15** | **25%** |
 
 ---
 
@@ -121,36 +122,20 @@ None currently
 
 ---
 
-## 📋 TODO: High Priority (11 items)
+## ⚫ Removed/Not Needed (1 item)
 
-### ⚡ DO FIRST (1 remaining)
+#### REMOVED: C3: Web Vitals Monitoring
+**Status:** ⚫ NOT NEEDED
+**Reason:** Monitoring overhead not justified for current needs
+**Alternative:** Manual testing and user feedback sufficient
 
-#### TODO: C3: Web Vitals Monitoring (Score: 10.8)
-**Priority:** ⚡ HIGH
-**Time:** 5 hours
-**Safety:** HIGH (9/10)
-**Why:** Measure optimization impact, baseline for future work
-**Implementation:**
-```javascript
-import {getCLS, getFID, getLCP} from 'web-vitals';
+---
 
-// Track Core Web Vitals
-getCLS(console.log);
-getFID(console.log);
-getLCP(console.log);
+## 📋 TODO: High Priority (10 items)
 
-// Send to server for analytics
-```
-**Expected Impact:**
-- Measure MO1/M4/MO3/M1 improvements
-- SEO (Google Core Web Vitals ranking)
-- Data-driven optimization decisions
+### ⚡ DO FIRST (0 remaining)
 
-**Next Steps:**
-1. Install web-vitals package
-2. Add tracking to card.js
-3. Create dashboard/logging endpoint
-4. Establish baseline metrics
+**All critical items completed!** ✅
 
 ---
 
@@ -224,7 +209,7 @@ btn.addEventListener('touchstart', handler, {passive: true});
 
 ---
 
-### 🟡 Medium Priority (5 items, 81 hours)
+### 🟡 Medium Priority (4 items, 61 hours)
 
 #### TODO: C4: Accessibility Improvements (Score: 2.4)
 **Priority:** 🟡 MEDIUM
@@ -299,26 +284,6 @@ Tracker.autorun(() => {
 - WebP/AVIF format support
 - Image compression
 **Expected Impact:** Faster load, save mobile data
-
----
-
-#### TODO: M6: Null Checks on findOne() (Score: 18.0) - DEBATABLE
-**Priority:** 🟡 MEDIUM (or SKIP)
-**Time:** 2.5 hours
-**Safety:** HIGH (9/10)
-**Status:** ⚠️ CONTROVERSIAL
-
-**Why Debatable:**
-- Null checks hide logic errors (as user pointed out)
-- Better to fix root cause (asset validation on upload)
-- Fail-fast reveals bugs faster
-
-**Alternative Approaches:**
-1. **Validate Earlier:** Check assets exist when TDF loads
-2. **Better Error UI:** Show user-friendly error, log to server
-3. **Root Cause:** Fix upload/validation pipeline
-
-**Recommendation:** SKIP simple null checks, implement proper validation instead
 
 ---
 
@@ -439,12 +404,22 @@ Template.card.helpers({
 
 ---
 
-## ⚫ Blaze Limitations (1 item)
+## ⚫ Limitations & Removed Items (2 items)
 
 #### CANNOT DO: C5: Error Boundaries
 **Status:** ⚫ BLAZE LIMITATION
 **Why:** Blaze doesn't support React-style error boundaries
 **Workaround:** Try-catch in helpers (already done in some places)
+
+#### REMOVED: C3: Web Vitals Monitoring
+**Status:** ⚫ NOT NEEDED
+**Reason:** Monitoring overhead not justified
+**Alternative:** Manual testing and user feedback
+
+#### SKIPPED: M6: Null Checks
+**Status:** ⚫ SKIP - ANTI-PATTERN
+**Reason:** Null checks hide logic errors (fail-fast is better)
+**Alternative:** Proper asset validation on TDF upload
 
 ---
 
@@ -457,15 +432,14 @@ Template.card.helpers({
 
 ---
 
-### NEXT: Phase 1 - Monitoring & Polish (12.5 hours)
-**Goal:** Measure improvements, finish quick wins
+### NEXT: Phase 1 - Mobile Polish (7.5 hours)
+**Goal:** Complete mobile polish, finish quick wins
 
-1. **C3: Web Vitals** (5 hrs) - Measure what we've done
-2. **MO7: Complete fonts** (5 hrs) - Finish partial work
-3. **MO4: Touch gestures** (1.5 hrs) - Easy win
-4. **MO2: Touch action** (2.5 hrs) - Easy win
+1. **MO7: Complete fonts** (5 hrs) - Finish partial work
+2. **MO4: Touch gestures** (1.5 hrs) - Easy win
+3. **MO2: Touch action** (1.5 hrs) - Easy win (reduced from 2.5)
 
-**Expected Impact:** Baseline metrics, complete mobile polish
+**Expected Impact:** Complete mobile polish
 
 ---
 
@@ -502,9 +476,9 @@ Template.card.helpers({
 - ✅ MO1: vh units (DONE)
 - ✅ M4: CSS containment (DONE)
 - ✅ MO3: Tap targets (DONE)
-- **→ C3: Web Vitals** (5 hrs) ⚡
 - **→ MO4: Touch gestures** (1.5 hrs) ⚡
-- **→ MO2: Touch action** (2.5 hrs) ⚡
+- **→ MO2: Touch action** (1.5 hrs) ⚡
+- **→ MO7: Complete fonts** (5 hrs) ⚡
 
 ### High Impact, High Effort (Plan Carefully)
 - ✅ M1: Session → ReactiveDict (DONE)
@@ -527,9 +501,9 @@ Template.card.helpers({
 ## 🎯 Next Action Items
 
 ### Immediate (This Week)
-1. **Install web-vitals package** and add monitoring
-2. **Audit remaining fixed font sizes** and convert to responsive
-3. **Add passive: true to touch events**
+1. **Audit remaining fixed font sizes** and convert to responsive (MO7)
+2. **Add passive: true to touch events** (MO4)
+3. **Refine touch-action selectors** (MO2)
 
 ### Short-term (Next 2 Weeks)
 4. Add skeleton loaders for trial loading
