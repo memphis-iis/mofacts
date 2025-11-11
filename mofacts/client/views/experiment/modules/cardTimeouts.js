@@ -74,6 +74,9 @@ export function registerTimeout(name, callback, delay, description = '') {
  * @returns {number} The interval ID
  */
 export function registerInterval(name, callback, delay, description = '') {
+  // Clear any existing interval with this name first to prevent orphaned intervals
+  clearRegisteredTimeout(name);
+
   const id = setInterval(callback, delay);
 
   activeTimeouts.set(name, {

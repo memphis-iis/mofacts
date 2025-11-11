@@ -22,10 +22,6 @@ Template.learningDashboard.helpers({
     return Template.instance().isLoading.get();
   },
 
-  audioWarmupInProgress: () => {
-    return Session.get('audioWarmupInProgress');
-  },
-
   hasTdfs: () => {
     const allTdfs = Template.instance().allTdfsList.get();
     const filtered = Template.instance().filteredTdfsList.get();
@@ -461,7 +457,8 @@ async function checkAndWarmupAudioIfNeeded() {
   // Wait for all warmups to complete (or fail)
   if (promises.length > 0) {
     console.log(`[Audio] Starting Scenario 2 warmup with ${promises.length} API(s), showing spinner...`);
-    Session.set('audioWarmupInProgress', true);
+    Session.set('appLoading', true);
+    Session.set('appLoadingMessage', 'Preparing audio features...');
     try {
       // Use allSettled to wait for ALL promises to complete, even if some fail
       const results = await Promise.allSettled(promises);
@@ -477,11 +474,14 @@ async function checkAndWarmupAudioIfNeeded() {
     } catch (err) {
       // This should never happen with allSettled, but just in case
       console.log('[Audio] Unexpected warmup error:', err);
-    } finally {
-      Session.set('audioWarmupInProgress', false);
     }
+    // NOTE: Don't set appLoading=false here - keep spinner visible during navigation
+    // Card/instructions template will set it to false when ready
   } else {
     console.log('[Audio] No warmup needed');
+    // Still show spinner during navigation even without warmup (for image preloading, etc.)
+    Session.set('appLoading', true);
+    Session.set('appLoadingMessage', 'Loading...');
   }
 }
 

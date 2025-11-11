@@ -461,6 +461,12 @@ Template.instructions.helpers({
 Template.instructions.rendered = function() {
   const instance = this;
 
+  // Hide global loading spinner when instructions page is ready (handles startup units)
+  if (Session.get('appLoading')) {
+    console.log('[UI] Instructions page ready - hiding global spinner');
+    Session.set('appLoading', false);
+  }
+
   // Make sure lockout interval timer is running
   lockoutKick();
 

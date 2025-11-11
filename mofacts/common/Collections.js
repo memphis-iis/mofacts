@@ -35,15 +35,11 @@ DynamicAssets = new FilesCollection({
   allowClientCode: false, // Security: Disallow file operations from client (use server methods)
   onBeforeUpload(file) {
     // Security: Validate file uploads to prevent malicious content
+    // Note: This callback is synchronous - async checks moved to onInitiateUpload
 
-    // 1. Authorization check - only authenticated admin/teacher can upload
+    // 1. Basic authentication check
     if (!this.userId) {
       return 'Must be logged in to upload files';
-    }
-
-    // Note: Using synchronous Roles.userIsInRole() because onBeforeUpload callback cannot be async
-    if (!Roles.userIsInRole(this.userId, ['admin', 'teacher'])) {
-      return 'Only admins and teachers can upload files';
     }
 
     // 2. File size limit (100MB)
@@ -60,6 +56,22 @@ DynamicAssets = new FilesCollection({
     // 4. Extension validation - only zip files
     if (!file.extension || !/^zip$/i.test(file.extension)) {
       return 'Only .zip files are allowed';
+    }
+
+    return true;
+  },
+  async onInitiateUpload(fileData) {
+    // Security: Authorization check using async Roles API (Meteor 3.x compatible)
+    // This callback executes on server right after onBeforeUpload returns true
+
+    if (!this.userId) {
+      throw new Meteor.Error('not-authorized', 'Must be logged in to upload files');
+    }
+
+    // METEOR 3 FIX: Use Roles.userIsInRoleAsync() instead of synchronous version
+    const isAuthorized = await Roles.userIsInRoleAsync(this.userId, ['admin', 'teacher']);
+    if (!isAuthorized) {
+      throw new Meteor.Error('not-authorized', 'Only admins and teachers can upload files');
     }
 
     return true;

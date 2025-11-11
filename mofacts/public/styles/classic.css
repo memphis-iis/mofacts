@@ -27,6 +27,15 @@
     --transition-instant: 10ms;       /* Instant - Accessibility fallback, near-instant transitions */
     --transition-fast: 100ms;         /* Fast - UI feedback, button hovers, quick transitions */
     --transition-smooth: 200ms;       /* Smooth - Trial transitions, main content fades */
+
+    /* Card Spacing System - Container-based spacing with CSS custom properties */
+    /* Desktop spacing (default) - responsive clamp() for fluid scaling */
+    --card-stack-gap: clamp(0.75rem, 2vh, 1.25rem);           /* Vertical spacing between card sections */
+    --card-stack-gap-small: clamp(0.5rem, 1vh, 0.75rem);      /* Tight spacing for related elements */
+    --card-outer-padding: clamp(1rem, 3vh, 2rem);             /* Container outer padding */
+    --card-section-gap: clamp(1.5rem, 3vh, 2rem);             /* Large gap between major sections */
+    --card-feedback-gap: clamp(1rem, 2vh, 1.5rem);            /* Feedback/lower interaction spacing */
+    --card-element-gap: clamp(0.5rem, 1.5vh, 1rem);           /* Small gaps within elements */
 }
 /* ===== ACCESSIBILITY ===== */
 /* Screen reader only content - visually hidden but accessible to assistive technology */
@@ -956,13 +965,40 @@ tfoot tf, .table tfoot tf, .table tfoot td, .table tfoot th {
 }
 
 /* ===== UTILITY CLASSES ===== */
-/* Responsive minimal spacing - scales with viewport but stays compact */
-.stack-gap {
-    height: clamp(0.75rem, 2vh, 1.25rem);  /* 12px to 20px range */
+/* ===== CARD SPACING CONTAINERS ===== */
+/* Container-based spacing system using CSS custom properties */
+/* Centralizes spacing control for trial card layout */
+
+/* Main card stack container - uses flexbox gap for automatic spacing */
+.card-stack {
+    display: flex;
+    flex-direction: column;
+    gap: var(--card-stack-gap);
+    padding: var(--card-outer-padding) 0;
 }
 
-.stack-gap-small {
-    height: clamp(0.5rem, 1vh, 0.75rem);   /* 8px to 12px range */
+.card-stack--flush {
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+.card-stack--compact {
+    gap: var(--card-stack-gap-small);
+}
+
+/* Major section separator (e.g., video section, admin panels) */
+.card-stack-section {
+    margin-top: var(--card-section-gap);
+}
+
+/* Feedback and lower interaction area */
+.card-feedback-area {
+    margin-top: var(--card-feedback-gap);
+}
+
+/* Small gaps for tightly related elements */
+.card-element-spacing {
+    margin-top: var(--card-element-gap);
 }
 
 /* User interaction - minimal but breathing room */
@@ -1019,6 +1055,7 @@ tfoot tf, .table tfoot tf, .table tfoot td, .table tfoot th {
     margin-bottom: 0;
 }
 
+/* DEPRECATED: Use .card-feedback-area instead (container-based spacing) */
 .lower-interaction-spacing {
     margin-bottom: clamp(1.5rem, 3vh, 2rem);
 }
@@ -1038,6 +1075,23 @@ tfoot tf, .table tfoot tf, .table tfoot td, .table tfoot th {
 
 .input-box {
     box-sizing: border-box;
+    transition: opacity var(--transition-smooth) ease-in-out, transform var(--transition-smooth) ease-in-out;
+}
+
+.input-box.input-pending {
+    opacity: 0;
+    transform: translateY(4px);
+    pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .input-box {
+        transition: opacity var(--transition-fast) ease-in-out;
+    }
+
+    .input-box.input-pending {
+        transform: none;
+    }
 }
 
 #postCardContainer {
@@ -1046,17 +1100,6 @@ tfoot tf, .table tfoot tf, .table tfoot td, .table tfoot th {
 
 #progressBarContainer{
     background-color: rgba(0,0,0,0.0);
-}
-
-/* Responsive container spacing classes */
-.outer-container-spacing {
-    margin-top: clamp(1rem, 3vh, 2rem);
-    margin-bottom: clamp(1rem, 3vh, 2rem);
-}
-
-.video-section-spacing {
-    margin-top: clamp(1.5rem, 3vh, 2rem);
-    margin-bottom: clamp(1.5rem, 3vh, 2rem);
 }
 
 /* utility classes */
@@ -1309,6 +1352,16 @@ tfoot tf, .table tfoot tf, .table tfoot td, .table tfoot th {
 
 /* Mobile Optimizations & Touch Targets */
 @media screen and (max-width: 768px) {
+    /* Mobile spacing overrides - tighter spacing to reduce scrolling */
+    :root {
+        --card-stack-gap: clamp(0.5rem, 1.5vh, 0.875rem);      /* 8-14px */
+        --card-stack-gap-small: clamp(0.25rem, 0.75vh, 0.5rem); /* 4-8px */
+        --card-outer-padding: clamp(0.5rem, 2vh, 1rem);         /* 8-16px */
+        --card-section-gap: clamp(0.75rem, 2vh, 1.25rem);      /* 12-20px */
+        --card-feedback-gap: clamp(0.5rem, 1vh, 0.75rem);      /* 8-12px */
+        --card-element-gap: clamp(0.25rem, 1vh, 0.5rem);       /* 4-8px */
+    }
+
     /* Larger touch targets for mobile - iOS recommends 44x44px minimum */
     .btn, button, input[type="text"], input[type="password"] {
         min-height: 44px;
@@ -1353,15 +1406,6 @@ tfoot tf, .table tfoot tf, .table tfoot td, .table tfoot th {
         text-align: center;
     }
 
-    /* Tighter spacing on mobile to reduce scrolling */
-    .stack-gap {
-        height: clamp(0.5rem, 1.5vh, 0.875rem); /* 8-14px instead of 12-20px */
-    }
-
-    .stack-gap-small {
-        height: clamp(0.25rem, 0.75vh, 0.5rem); /* 4-8px instead of 8-12px */
-    }
-
     /* Smaller images on mobile to fit screen */
     .stimulus-image {
         max-height: clamp(200px, 30vh, 300px); /* Fallback */
@@ -1375,21 +1419,8 @@ tfoot tf, .table tfoot tf, .table tfoot td, .table tfoot th {
         padding: clamp(0.75rem, 1.5vh, 1rem);
     }
 
-    /* Reduce outer container spacing on mobile */
-    .outer-container-spacing {
-        margin-top: clamp(0.5rem, 2vh, 1rem);
-        margin-bottom: 0;  /* Remove bottom margin to prevent unnecessary scrollbar */
-    }
-
-    /* Reduce lower interaction spacing to prevent scrollbar */
     .lower-interaction-spacing {
         margin-bottom: 0.5rem;
-    }
-
-    /* Tighter video section spacing */
-    .video-section-spacing {
-        margin-top: clamp(0.75rem, 2vh, 1.25rem);
-        margin-bottom: clamp(0.75rem, 2vh, 1.25rem);
     }
 
     /* ===== MO3: TAP TARGETS - WCAG 2.5.5 Compliance ===== */
@@ -1477,7 +1508,13 @@ tfoot tf, .table tfoot tf, .table tfoot td, .table tfoot th {
   contain: layout style;
 }
 
-.video-section-spacing {
+/* Video sections share containment rules for smoother layout transitions */
+.card-stack-section--video {
+  contain: layout style;
+}
+
+/* Container-based spacing - CSS containment for performance */
+.card-stack-section {
   contain: layout style;
 }
 

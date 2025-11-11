@@ -708,4 +708,12 @@ Template.registerHelper('or',(a,b)=>{
   return a || b;
 });
 
+// Global app loading state for elegant transitions (dashboard → first trial)
+Template.registerHelper('appLoading', function() {
+  return Session.get('appLoading');
+});
+Template.registerHelper('appLoadingMessage', function() {
+  return Session.get('appLoadingMessage') || 'Loading...';
+});
+
 

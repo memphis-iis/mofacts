@@ -581,6 +581,7 @@ Template.card.onCreated(function() {
   cardState.set('inFeedback', false);
   cardState.set('feedbackPosition', null);
   cardState.set('displayReady', false);
+  cardState.set('inputReady', false);
 });
 
 Template.card.rendered = initCard;
@@ -1048,6 +1049,10 @@ Template.card.helpers({
     return cardState.get('displayReady');
   },
 
+  'inputReady': function() {
+    return cardState.get('inputReady');
+  },
+
   'readyPromptString': () => Session.get('currentDeliveryParams').readyPromptString,
 
   'displayReadyPromptString': function() {
@@ -1463,6 +1468,14 @@ function beginFadeIn(reason) {
   clientConsole(2, '[SM] Starting fade-in:', reason);
   transitionTrialState(TRIAL_STATES.PRESENTING_FADING_IN, reason);
   cardState.set('displayReady', true);
+
+  // Hide global loading spinner after first trial is ready (elegant transition from dashboard)
+  const currentState = Session.get('currentExperimentState');
+  const numAnswered = currentState?.numQuestionsAnswered || 0;
+  if (numAnswered === 0 && Session.get('appLoading')) {
+    clientConsole(2, '[UI] First trial ready - hiding global spinner');
+    Session.set('appLoading', false);
+  }
 }
 
 function completeFadeIn() {
@@ -3018,9 +3031,44 @@ function getTrialTime(trialEndTimeStamp, trialStartTimeStamp, reviewEnd, testTyp
   return {responseDuration, startLatency, endLatency, feedbackLatency};
 }
 
+function ensureClusterStateForLogging() {
+  const experimentState = Session.get('currentExperimentState') || {};
+  let clusterMapping = Session.get('clusterMapping');
+  if (!Array.isArray(clusterMapping) || clusterMapping.length === 0) {
+    if (Array.isArray(experimentState.clusterMapping) && experimentState.clusterMapping.length) {
+      clusterMapping = experimentState.clusterMapping;
+      Session.set('clusterMapping', clusterMapping);
+    } else {
+      clientConsole(1, 'Cluster mapping missing when attempting to log answer - aborting log until restored');
+      throw new Error('Cluster mapping not initialized');
+    }
+  }
+
+  let clusterIndex = Session.get('clusterIndex');
+  const expShufIndex = (typeof experimentState.shufIndex === 'number')
+    ? experimentState.shufIndex
+    : experimentState.clusterIndex;
+  if (typeof clusterIndex === 'undefined' && typeof expShufIndex === 'number') {
+    Session.set('clusterIndex', expShufIndex);
+    clusterIndex = expShufIndex;
+  }
+
+  if (typeof clusterIndex !== 'number') {
+    clientConsole(1, 'Cluster index missing when attempting to log answer - aborting log until restored');
+    throw new Error('Cluster index not initialized');
+  }
+
+  if (typeof clusterMapping[clusterIndex] === 'undefined') {
+    clientConsole(1, 'Cluster mapping out of range for current index - aborting log until mapping restored',
+        clusterIndex, clusterMapping);
+    throw new Error('Cluster mapping mismatch');
+  }
+}
+
 // eslint-disable-next-line max-len
 function gatherAnswerLogRecord(trialEndTimeStamp, trialStartTimeStamp, source, userAnswer, isCorrect, 
   testType, deliveryParams, dialogueHistory, wasReportedForRemoval) {
+  ensureClusterStateForLogging();
 
   // Figure out button trial entries
   let buttonEntries = '';
@@ -3068,7 +3116,8 @@ function gatherAnswerLogRecord(trialEndTimeStamp, trialStartTimeStamp, source, u
   // stepName = stepCount + " " + stepName;
   const isStudy = testType === 's';
   let shufIndex = clusterIndex;
-  let stimFileIndex = clusterIndex;
+  const rawClusterIndex = typeof cluster.clusterIndex === 'number' ? cluster.clusterIndex : clusterIndex;
+  let stimFileIndex = rawClusterIndex;
   let schedCondition = 'N/A';
   if (engine.unitType == SCHEDULE_UNIT) {
     const sched = Session.get('schedule');
@@ -3082,6 +3131,7 @@ function gatherAnswerLogRecord(trialEndTimeStamp, trialStartTimeStamp, source, u
     }
   } else {
     shufIndex = cluster.shufIndex;
+    stimFileIndex = rawClusterIndex;
   }
   const originalAnswer = Session.get('currentExperimentState').originalAnswer;
   const currentAnswer = Session.get('currentExperimentState').currentAnswer;
@@ -3277,6 +3327,8 @@ function cleanupTrialContent() {
   // showUserFeedback() calls $('.input-box').addClass('hidden') but nothing shows it again
   $('.input-box').removeClass('hidden');
   $('#multipleChoiceContainer').removeClass('hidden');
+
+  cardState.set('inputReady', false);
 
   // NOTE: Do NOT clear Session variables here - those are cleared in prepareCard/newQuestionHandler
   // NOTE: Do NOT clear HTML that's managed by Blaze templates (buttonList, text, etc.)
@@ -3584,6 +3636,7 @@ async function prepareCard() {
   // DON'T clean up yet - that happens AFTER fade completes
   clientConsole(2, '[SM]   Setting displayReady=false to fade out (old content remains visible during fade)');
   cardState.set('displayReady', false);
+  cardState.set('inputReady', false);
 
   // Wait for fade-out transition to complete
   const fadeDelay = getTransitionDuration();
@@ -3849,6 +3902,7 @@ async function checkAndDisplayTwoPartQuestion(deliveryParams, currentDisplayEngi
 
   if (shouldSkipFadeIn()) {
     clientConsole(2, '[SM] Skipping fade-in (already visible or video session)');
+    cardState.set('inputReady', true);
     handleTwoPartQuestion();
   } else {
     // CRITICAL: Wait one frame for Blaze to finish computing buttonTrial visibility classes
@@ -3878,6 +3932,8 @@ async function checkAndDisplayTwoPartQuestion(deliveryParams, currentDisplayEngi
       // IMAGE UX FIX: Wait for image to be fully loaded and painted before fading in
       // This prevents the image box from fading in empty and then showing the image after
       await waitForDOMImageReady();
+
+      cardState.set('inputReady', true);
 
       beginFadeIn('Question fade-in');
       registerTimeout('questionFadeIn', () => {
