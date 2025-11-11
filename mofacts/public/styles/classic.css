@@ -882,7 +882,7 @@ tfoot tf, .table tfoot tf, .table tfoot td, .table tfoot th {
     background-position: top center;
     background-repeat: no-repeat;
     height: 50vh;
-    height: calc(var(--vh, 1vh) * 50); /* MO1: Dynamic vh */
+    height: 50dvh; /* MO9: Modern viewport units */
     width: 100%;
     background-size: contain;
 }
@@ -890,7 +890,7 @@ tfoot tf, .table tfoot tf, .table tfoot td, .table tfoot th {
 /*video unit question background */
 .questionContainer{
     height: 65vh;
-    height: calc(var(--vh, 1vh) * 65); /* MO1: Dynamic vh */
+    height: 65dvh; /* MO9: Modern viewport units */
     border-radius: var(--border-radius);
     padding: 10px;
     background: var(--background-color);
@@ -898,14 +898,24 @@ tfoot tf, .table tfoot tf, .table tfoot td, .table tfoot th {
     border: 1px solid var(--accent-color);
     box-shadow: 0 0 10px var(--accent-color);
     margin-top: 10vh;
-    margin-top: calc(var(--vh, 1vh) * 10); /* MO1: Dynamic vh */
+    margin-top: 10dvh; /* MO9: Modern viewport units */
 }
 
 /* Image containers - smaller but responsive */
+/* MO9: Modern viewport units prevent mobile URL bar issues */
+.image-display-container {
+    height: auto;
+    /* Fallback for older browsers */
+    max-height: clamp(250px, 35vh, 400px);
+    /* Modern viewport units - small viewport height for consistent safe area */
+    max-height: clamp(250px, 35svh, 400px);
+}
+
+/* Legacy selector for backwards compatibility */
 #displaySubContainer .vh-50 {
     height: auto;
-    max-height: clamp(250px, 35vh, 400px);  /* 250px-400px range, responsive */
-    max-height: clamp(250px, calc(var(--vh, 1vh) * 35), 400px); /* MO1: Dynamic vh */
+    max-height: clamp(250px, 35vh, 400px);
+    max-height: clamp(250px, 35svh, 400px);
 }
 
 #imageDisplay .imgDisplay-container {
@@ -914,11 +924,14 @@ tfoot tf, .table tfoot tf, .table tfoot td, .table tfoot th {
 }
 
 .stimulus-image {
+    /* Fallback for older browsers */
     max-height: clamp(250px, 35vh, 400px);
-    max-height: clamp(250px, calc(var(--vh, 1vh) * 35), 400px); /* MO1: Dynamic vh */
+    /* MO9: Modern viewport units - small viewport height for consistent display */
+    max-height: clamp(250px, 35svh, 400px);
     max-width: 100%;
     object-fit: contain;
-    margin-bottom: clamp(0.5rem, 1vh, 0.75rem);  /* Consistent bottom spacing */
+    /* MO9: Use svh for spacing to maintain consistency */
+    margin-bottom: clamp(0.5rem, 1svh, 0.75rem);
     /* Performance: Only render when visible in viewport */
     content-visibility: auto;
 }
@@ -1047,63 +1060,63 @@ tfoot tf, .table tfoot tf, .table tfoot td, .table tfoot th {
 }
 
 /* utility classes */
-/* MO1: Dynamic viewport height utilities - prevents scrollbars on mobile */
-/* iOS Safari address bar and Android Chrome bottom nav cause viewport changes */
-/* Using --vh custom property set by JavaScript (see client/index.js) */
+/* MO9: Modern viewport height utilities - native mobile URL bar handling */
+/* Using dvh (dynamic viewport height) which automatically adjusts for mobile UI */
+/* Safari 15.4+, Chrome 108+, Firefox 101+ - Fallback to vh for older browsers */
 
 .vh-100 {
-    height: 100vh; /* Fallback for browsers without custom properties */
-    height: calc(var(--vh, 1vh) * 100); /* Dynamic - updates with actual viewport */
+    height: 100vh; /* Fallback for older browsers */
+    height: 100dvh; /* Dynamic viewport - native browser handling */
 }
 
 .vh-75 {
     height: 75vh;
-    height: calc(var(--vh, 1vh) * 75);
+    height: 75dvh;
 }
 
 .vh-50 {
     height: 50vh;
-    height: calc(var(--vh, 1vh) * 50);
+    height: 50dvh;
 }
 
 .vh-40{
     height: 40vh;
-    height: calc(var(--vh, 1vh) * 40);
+    height: 40dvh;
 }
 
 .vh-35{
     height: 35vh;
-    height: calc(var(--vh, 1vh) * 35);
+    height: 35dvh;
 }
 
 .vh-30 {
     height: 30vh;
-    height: calc(var(--vh, 1vh) * 30);
+    height: 30dvh;
 }
 
 .vh-25 {
     height: 25vh;
-    height: calc(var(--vh, 1vh) * 25);
+    height: 25dvh;
 }
 
 .vh-20 {
     height: 20vh;
-    height: calc(var(--vh, 1vh) * 20);
+    height: 20dvh;
 }
 
 .vh-15 {
     height: 15vh;
-    height: calc(var(--vh, 1vh) * 15);
+    height: 15dvh;
 }
 
 .vh-10 {
     height: 10vh;
-    height: calc(var(--vh, 1vh) * 10);
+    height: 10dvh;
 }
 
 .vh-5{
     height: 5vh;
-    height: calc(var(--vh, 1vh) * 5);
+    height: 5dvh;
 }
 
 .width-100-percent{
@@ -1198,7 +1211,7 @@ tfoot tf, .table tfoot tf, .table tfoot td, .table tfoot th {
     .fixed-btm{
         position: absolute;
         bottom: 5vh;
-        bottom: calc(var(--vh, 1vh) * 5); /* MO1: Dynamic vh */
+        bottom: 5dvh; /* MO9: Modern viewport units */
         width:75vw;
         max-width: 500px;
     }
@@ -1223,20 +1236,20 @@ tfoot tf, .table tfoot tf, .table tfoot td, .table tfoot th {
     .fixed-btm{
         position: absolute;
         bottom: 5vh;
-        bottom: calc(var(--vh, 1vh) * 5); /* MO1: Dynamic vh */
+        bottom: 5dvh; /* MO9: Modern viewport units */
         width:90vw;
         max-width: 500px;
     }
 
     .modal-expanded{
         height: 80vh !important;
-        height: calc(var(--vh, 1vh) * 80) !important; /* MO1: Dynamic vh */
+        height: 80dvh !important; /* MO9: Modern viewport units */
         top: 20% !important;
     }
 
     .modal-dialog{
         height: 50vh;
-        height: calc(var(--vh, 1vh) * 50); /* MO1: Dynamic vh */
+        height: 50dvh; /* MO9: Modern viewport units */
         position: fixed;
         top: 50%;
         width: 90vw;
@@ -1351,8 +1364,8 @@ tfoot tf, .table tfoot tf, .table tfoot td, .table tfoot th {
 
     /* Smaller images on mobile to fit screen */
     .stimulus-image {
-        max-height: clamp(200px, 30vh, 300px); /* Smaller than desktop 35vh */
-        max-height: clamp(200px, calc(var(--vh, 1vh) * 30), 300px); /* MO1: Dynamic vh */
+        max-height: clamp(200px, 30vh, 300px); /* Fallback */
+        max-height: clamp(200px, 30svh, 300px); /* MO9: Small viewport for mobile */
     }
 
     /* Full-width feedback on mobile with minimal margins */

@@ -43,20 +43,24 @@ if (location.protocol !== 'https:' && forceSSL) {
 Meteor.startup(() => {
   getCurrentTheme();
 
-  // MO1: Dynamic viewport height for mobile browsers
-  // iOS Safari and Android Chrome change viewport height when address bar shows/hides
-  // This sets a CSS custom property that updates in real-time
+  // MO9: NOTE - This JavaScript viewport tracking is now a LEGACY FALLBACK ONLY
+  // Modern browsers (Safari 15.4+, Chrome 108+, Firefox 101+) use native dvh/svh units
+  // CSS has been updated to use modern viewport units (see classic.css)
+  // This code remains active for backwards compatibility with older browsers
+  // and to maintain the --vh custom property for any legacy custom code
   setDynamicViewportHeight();
 });
 
-// Dynamic viewport height tracking - prevents scrollbars on mobile
-// iOS Safari address bar and Android Chrome bottom nav cause viewport changes
-// Using CSS custom property allows vh units to adapt to actual viewport
+// Dynamic viewport height tracking - LEGACY FALLBACK for older browsers
+// MO9: Modern CSS now uses dvh/svh units which handle this natively
+// This function still runs to support:
+//   1. Older browsers without dvh/svh support (pre-2022)
+//   2. Legacy custom code that might reference --vh custom property
 function setDynamicViewportHeight() {
   const vh = window.innerHeight * 0.01;
   document.documentElement.style.setProperty('--vh', `${vh}px`);
 
-  clientConsole(2, `[MO1] Set dynamic viewport height: ${vh}px per 1vh`);
+  clientConsole(2, `[MO9] Set dynamic viewport height (legacy fallback): ${vh}px per 1vh`);
 }
 
 // Update on resize (orientation change, window resize)
