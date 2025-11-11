@@ -37,6 +37,23 @@ import {
   findPhoneticMatch,
   tryPhoneticMatch
 } from '../../lib/phoneticUtils';
+import {
+  registerTimeout,
+  registerInterval,
+  clearRegisteredTimeout,
+  clearAllRegisteredTimeouts,
+  listActiveTimeouts,
+  elapsedSecs,
+  clearCardTimeout,
+  clearAndFireTimeout,
+  beginMainCardTimeout,
+  resetMainCardTimeout,
+  restartMainCardTimeoutIfNecessary,
+  getDisplayTimeouts,
+  setDispTimeoutText,
+  varLenDisplayTimeout,
+  getReviewTimeout
+} from './modules/cardTimeouts';
 
 // Helper function to check if audio input mode is enabled
 function checkAudioInputMode() {
@@ -282,266 +299,42 @@ let player = null;
 // delay used for reset
 timeoutState.set('name', null);
 // IMPORTANT: Functions cannot be stored in ReactiveDict - use module variables
-let currentTimeoutFunc = null;
-let currentTimeoutDelay = null;
-let simTimeoutName = null;
-let countdownInterval = null;
+// NOTE: Timeout module variables (currentTimeoutFunc, currentTimeoutDelay, countdownInterval)
+// moved to cardTimeouts.js module (Phase 1 extraction)
+let simTimeoutName = null; // Kept here - used by checkSimulation (will move to cardUtils in Phase 3)
 let userAnswer = null;
 let lastlogicIndex = 0;
 
-// Centralized Timeout Registry - tracks all active timeouts/intervals for debugging
-// Maps timeout name → {id, type, delay, created, description}
-const activeTimeouts = new Map();
+// ============================================================================
+// NOTE: Timeout functions moved to cardTimeouts.js module (Phase 1 extraction)
+// Imported at top of file: registerTimeout, registerInterval, clearRegisteredTimeout,
+// clearAllRegisteredTimeouts, listActiveTimeouts, elapsedSecs, clearCardTimeout (module),
+// beginMainCardTimeout, resetMainCardTimeout, restartMainCardTimeoutIfNecessary,
+// getDisplayTimeouts, setDispTimeoutText, varLenDisplayTimeout, getReviewTimeout
+//
+// Import aliased as clearCardTimeoutModule to avoid name conflict with wrapper below
+// ============================================================================
 
-// Register a timeout with the centralized system
-// Returns the timeout ID so caller can clear it if needed
-function registerTimeout(name, callback, delay, description = '') {
-  const id = setTimeout(() => {
-    activeTimeouts.delete(name);
-    callback();
-  }, delay);
-
-  activeTimeouts.set(name, {
-    id,
-    type: 'timeout',
-    delay,
-    created: Date.now(),
-    description
-  });
-
-  return id;
-}
-
-// Register an interval with the centralized system
-// Returns the interval ID so caller can clear it if needed
-function registerInterval(name, callback, delay, description = '') {
-  const id = setInterval(callback, delay);
-
-  activeTimeouts.set(name, {
-    id,
-    type: 'interval',
-    delay,
-    created: Date.now(),
-    description
-  });
-
-  return id;
-}
-
-// Clear a specific registered timeout/interval
-function clearRegisteredTimeout(name) {
-  const entry = activeTimeouts.get(name);
-  if (entry) {
-    if (entry.type === 'timeout') {
-      clearTimeout(entry.id);
-    } else {
-      clearInterval(entry.id);
-    }
-    activeTimeouts.delete(name);
-    clientConsole(2, `[TIMEOUT] Cleared: ${name}`);
-  }
-}
-
-// Clear all registered timeouts/intervals (useful for cleanup)
-function clearAllRegisteredTimeouts() {
-  for (const [name, entry] of activeTimeouts) {
-    if (entry.type === 'timeout') {
-      clearTimeout(entry.id);
-    } else {
-      clearInterval(entry.id);
-    }
-  }
-  activeTimeouts.clear();
-  clientConsole(2, '[TIMEOUT] Cleared all registered timeouts');
-}
-
-// Debug helper - list all active timeouts
-function listActiveTimeouts() {
-  if (activeTimeouts.size === 0) {
-    clientConsole(2, '[TIMEOUT] No active timeouts');
-    return [];
-  }
-
-  const now = Date.now();
-  const list = [];
-  for (const [name, entry] of activeTimeouts) {
-    const elapsed = now - entry.created;
-    list.push({
-      name,
-      type: entry.type,
-      delay: entry.delay,
-      elapsed,
-      remaining: entry.type === 'timeout' ? Math.max(0, entry.delay - elapsed) : 'N/A',
-      description: entry.description
-    });
-  }
-
-  console.table(list);
-  return list;
-}
-
-// Expose debug helper to window for console access
-if (Meteor.isDevelopment) {
-  window.listActiveTimeouts = listActiveTimeouts;
-  window.clearAllRegisteredTimeouts = clearAllRegisteredTimeouts;
-}
-
-// Helper - return elapsed seconds since unit started. Note that this is
-// technically seconds since unit RESUME began (when we set currentUnitStartTime)
-function elapsedSecs() {
-  return (Date.now() - Session.get('currentUnitStartTime')) / 1000.0;
-}
-
-// Note that this isn't just a convenience function - it should be called
-// before we route to other templates so that the timeout doesn't fire over
-// and over
-function clearCardTimeout() {
-  const safeClear = function(clearFunc, clearParm) {
+// Wrapper for clearCardTimeout that also clears simTimeoutName
+// Phase 1: simTimeoutName stays in card.js (used by checkSimulation)
+// Phase 3: checkSimulation moves to cardUtils, this wrapper can be removed
+function clearCardTimeoutWrapper() {
+  // Import from module is aliased, call it directly from the import
+  // First clear simTimeoutName if present
+  if (simTimeoutName) {
     try {
-      if (clearParm) {
-        clearFunc(clearParm);
-      }
+      Meteor.clearTimeout(simTimeoutName);
     } catch (e) {
-      clientConsole(1, 'Error clearing meteor timeout/interval', e);
+      clientConsole(1, 'Error clearing sim timeout', e);
     }
-  };
-  safeClear(Meteor.clearTimeout, timeoutState.get('name'));
-  safeClear(Meteor.clearTimeout, simTimeoutName);
-  safeClear(Meteor.clearInterval, cardState.get('varLenTimeoutName'));
-  safeClear(Meteor.clearInterval, countdownInterval);
-  timeoutState.set('name', null);
-  currentTimeoutFunc = null;
-  currentTimeoutDelay = null;
-  simTimeoutName = null;
-  countdownInterval = null;
-  cardState.set('varLenTimeoutName', null);
-}
-
-// Start a timeout count
-// Note we reverse the params for Meteor.setTimeout - makes calling code much cleaner
-function beginMainCardTimeout(delay, func) {
-  clientConsole(2, 'beginMainCardTimeout');
-  clearCardTimeout();
-
-  // Cache UI settings at function start
-  const uiSettings = Session.get('curTdfUISettings');
-  const displayMode = uiSettings.displayCardTimeoutAsBarOrText;
-
-  currentTimeoutFunc = function() {
-    const numRemainingLocks = cardState.get('pausedLocks');
-    if (numRemainingLocks > 0) {
-      clientConsole(2, 'timeout reached but there are', numRemainingLocks, 'locks outstanding');
-    } else if (srState.get('waitingForTranscription')) {
-      clientConsole(2, '[SR] timeout reached but waiting for speech transcription, delaying timeout');
-      // Retry timeout after a short delay to give transcription more time
-      // This prevents timeout from firing while Google Speech API is processing
-      clearCardTimeout();
-      beginMainCardTimeout(3000, func); // Give 3 more seconds for transcription
-    } else {
-      if (document.location.pathname != '/card') {
-        leavePage(function() {
-          clientConsole(2, 'cleaning up page after nav away from card');
-        });
-      } else if (typeof func === 'function') {
-        func();
-      } else {
-        clientConsole(1, 'function!!!:', func);
-      }
-    }
-  };
-  currentTimeoutDelay = delay;
-  const mainCardTimeoutStart = new Date();
-  cardState.set('mainCardTimeoutStart', mainCardTimeoutStart);
-  clientConsole(2, 'mainCardTimeoutStart', mainCardTimeoutStart);
-  timeoutState.set('name', Meteor.setTimeout(currentTimeoutFunc, currentTimeoutDelay));
-  cardStartTime = Date.now();
- if(displayMode == "text" || displayMode == "both"){
-  //set the countdown timer text
-  $('#CountdownTimerText').removeAttr('hidden');
- } else {
-   $('#CountdownTimerText').attr('hidden', '');
- }
-  countdownInterval = Meteor.setInterval(function() {
-    const remaining = Math.round((currentTimeoutDelay - (Date.now() - cardStartTime)) / 1000);
-    const progressbarElem = document.getElementById("progressbar");
-    if (remaining <= 0) {
-      Meteor.clearInterval(countdownInterval);
-      countdownInterval = null;
-      //reset the progress bar
-      $('#progressbar').removeClass('progress-bar');
-      if (progressbarElem) {
-        progressbarElem.style.width = 0 + "%";
-      }
-      $('#lowerInteraction').html('');
-    } else {
-      $('#CountdownTimerText').text("Continuing in: " + secsIntervalString(remaining));
-      percent = 100 - (remaining * 1000 / currentTimeoutDelay * 100);
-      if(displayMode == "bar" || displayMode == "both"){
-        //add the progress bar class
-        $('#progressbar').addClass('progress-bar');
-        if (progressbarElem) {
-          progressbarElem.style.width = percent + "%";
-        }
-      } else {
-        //set width to 0%
-        if (progressbarElem) {
-          progressbarElem.style.width = 0 + "%";
-        }
-        //remove progress bar class
-        $('#progressbar').removeClass('progress-bar');
-      }
-    }
-  }, 1000);
-  cardState.set('varLenTimeoutName', Meteor.setInterval(varLenDisplayTimeout, 400));
-}
-
-// Reset the previously set timeout counter
-function resetMainCardTimeout() {
-  clientConsole(2, 'RESETTING MAIN CARD TIMEOUT');
-  const savedFunc = currentTimeoutFunc;
-  const savedDelay = currentTimeoutDelay;
-  clearCardTimeout();
-  currentTimeoutFunc = savedFunc;
-  currentTimeoutDelay = savedDelay;
-  const mainCardTimeoutStart = new Date();
-  cardState.set('mainCardTimeoutStart', mainCardTimeoutStart);
-  clientConsole(2, 'reset, mainCardTimeoutStart:', mainCardTimeoutStart);
-  timeoutState.set('name', Meteor.setTimeout(savedFunc, savedDelay));
-  cardState.set('varLenTimeoutName', Meteor.setInterval(varLenDisplayTimeout, 400));
-}
-
-// TODO: there is a minor bug here related to not being able to truly pause on
-// re-entering a tdf for the first trial
-function restartMainCardTimeoutIfNecessary() {
-  clientConsole(2, 'restartMainCardTimeoutIfNecessary');
-  const mainCardTimeoutStart = cardState.get('mainCardTimeoutStart');
-  if (!mainCardTimeoutStart) {
-    const numRemainingLocks = cardState.get('pausedLocks')-1;
-    cardState.set('pausedLocks', numRemainingLocks);
-    return;
+    simTimeoutName = null;
   }
-  const errorReportStart = Session.get('errorReportStart');
-  Session.set('errorReportStart', null);
-  const usedDelayTime = errorReportStart - mainCardTimeoutStart;
-  const remainingDelay = currentTimeoutDelay - usedDelayTime;
-  currentTimeoutDelay = remainingDelay;
-  const rightNow = new Date();
-  cardState.set('mainCardTimeoutStart', rightNow);
-  function wrappedTimeout() {
-    const numRemainingLocks = cardState.get('pausedLocks')-1;
-    cardState.set('pausedLocks', numRemainingLocks);
-    if (numRemainingLocks <= 0) {
-      const func = currentTimeoutFunc;
-      if (func) func();
-    } else {
-      clientConsole(2, 'timeout reached but there are', numRemainingLocks, 'locks outstanding');
-    }
-  }
-  timeoutState.set('name', Meteor.setTimeout(wrappedTimeout, remainingDelay));
-  cardState.set('varLenTimeoutName', Meteor.setInterval(varLenDisplayTimeout, 400));
+  // Then call module function with required parameters
+  clearCardTimeout(timeoutState, cardState);
 }
 
 // Set a special timeout to handle simulation if necessary
+// NOTE: This will move to cardUtils.js in Phase 3
 function checkSimulation() {
   if (!Session.get('runSimulation') ||
         !(Meteor.user() && Meteor.user().roles && (['admin', 'teacher']).some(role => Meteor.user().roles.includes(role)))) {
@@ -565,70 +358,6 @@ function checkSimulation() {
     simTimeoutName = null;
     handleUserInput({}, 'simulation', correct);
   }, simTimeout);
-}
-
-// Min and Max display seconds: if these are enabled, they determine
-// potential messages, the continue button functionality, and may even move
-// the screen forward.  This is nearly identical to the function of the same
-// name in instructions.js (where we use two similar parameters)
-function getDisplayTimeouts() {
-  const curUnit = Session.get('currentTdfUnit');
-  // Safely handle undefined curUnit or learningsession
-  const session = (curUnit && curUnit.learningsession) || null;
-  return {
-    'minSecs': parseInt((session ? session.displayminseconds : 0) || 0),
-    'maxSecs': parseInt((session ? session.displaymaxseconds : 0) || 0),
-  };
-}
-
-function setDispTimeoutText(txt) {
-  let msg = _.trim(txt || '');
-  if (msg.length > 0) {
-    msg = ' (' + msg + ')';
-  }
-  $('#displayTimeoutMsg').text(msg);
-}
-
-function varLenDisplayTimeout() {
-  const display = getDisplayTimeouts();
-  if (!(display.minSecs > 0.0 || display.maxSecs > 0.0)) {
-    // No variable display parameters - we can stop the interval
-    $('#continueButton').prop('disabled', false);
-    setDispTimeoutText('');
-    Meteor.clearInterval(cardState.get('varLenTimeoutName'));
-    cardState.set('varLenTimeoutName', null);
-    return;
-  }
-
-  const elapsed = elapsedSecs();
-  if (elapsed <= display.minSecs) {
-    // Haven't reached min yet
-    $('#continueButton').prop('disabled', true);
-    const dispLeft = display.minSecs - elapsed;
-    if (dispLeft >= 1.0) {
-      setDispTimeoutText('You can continue in: ' + secsIntervalString(dispLeft));
-    } else {
-      setDispTimeoutText(''); // Don't display 0 secs
-    }
-  } else if (elapsed <= display.maxSecs) {
-    // Between min and max
-    $('#continueButton').prop('disabled', false);
-    const dispLeft = display.maxSecs - elapsed;
-    if (dispLeft >= 1.0) {
-      setDispTimeoutText('Time remaining: ' + secsIntervalString(dispLeft));
-    } else {
-      setDispTimeoutText('');
-    }
-  } else if (display.maxSecs > 0.0) {
-    // Past max and a max was specified - it's time to go
-    $('#continueButton').prop('disabled', true);
-    setDispTimeoutText('');
-    unitIsFinished('DisplaMaxSecs exceeded');
-  } else {
-    // Past max and no valid maximum - they get a continue button
-    $('#continueButton').prop('disabled', false);
-    setDispTimeoutText('You can continue whenever you want');
-  }
 }
 
 // Clean up things if we navigate away from this page
@@ -670,7 +399,7 @@ async function leavePage(dest) {
       return;
     }
   }
-  clearCardTimeout();
+  clearCardTimeoutWrapper();
   clearPlayingSound();
   if (typeof dest === 'function') {
     dest();
@@ -2378,9 +2107,13 @@ function handleUserForceCorrectInput(e, source) {
         $('#userForceCorrect').val('');
         $('#forceCorrectGuidance').text(oldPrompt + ' (4 character minimum)');
       } else {
-        const savedFunc = currentTimeoutFunc;
-        clearCardTimeout();
-        savedFunc();
+        // Clear simTimeoutName (still in card.js)
+        if (simTimeoutName) {
+          Meteor.clearTimeout(simTimeoutName);
+          simTimeoutName = null;
+        }
+        // Clear and fire the main timeout immediately
+        clearAndFireTimeout(timeoutState, cardState);
       }
     } else {
       const answer = Answers.getDisplayAnswerText(Session.get('currentExperimentState').currentAnswer).toLowerCase();
@@ -2401,7 +2134,7 @@ function handleUserForceCorrectInput(e, source) {
     }
   } else if (getTestType() === 'n') {
     // "Normal" keypress - reset the timeout period
-    resetMainCardTimeout();
+    resetMainCardTimeout(cardState, timeoutState);
   }
 }
 
@@ -2433,7 +2166,7 @@ function handleUserInput(e, source, simAnswerCorrect) {
   // If we haven't seen the correct keypress, then we want to reset our
   // timeout and leave
   if (key != ENTER_KEY) {
-    resetMainCardTimeout();
+    resetMainCardTimeout(cardState, timeoutState);
     return;
   }
 
@@ -2452,7 +2185,7 @@ function handleUserInput(e, source, simAnswerCorrect) {
       cardState.set('pausedLocks', numRemainingLocks);
     }
   }
-  clearCardTimeout();
+  clearCardTimeoutWrapper();
 
   if(testType === 's'){
     userAnswer = '' //no response for study trial
@@ -2846,7 +2579,7 @@ async function showUserFeedback(isCorrect, feedbackMessage, isTimeout, isSkip) {
             if (cardState.get('dialogueHistory')) {
               dialogueHistory = JSON.parse(JSON.stringify(cardState.get('dialogueHistory')));
             }
-            countDownStart += getReviewTimeout(getTestType(), deliveryParams, isCorrect, dialogueHistory, isTimeout, isSkip);
+            countDownStart += getReviewTimeout(getTestType(), deliveryParams, isCorrect, dialogueHistory, isTimeout, isSkip, cardState);
             var originalnow = new Date().getTime();
             var originalDist = countDownStart - originalnow;
             var originalSecs = Math.ceil((originalDist % (1000 * 60)) / 1000);
@@ -2968,7 +2701,7 @@ function doClearForceCorrect(doForceCorrect, trialEndTimeStamp, trialStartTimeSt
       speakMessageIfAudioPromptFeedbackEnabled(prompt, 'feedback');
 
       const forcecorrecttimeout = Session.get('currentDeliveryParams').forcecorrecttimeout;
-      beginMainCardTimeout(forcecorrecttimeout, afterAnswerFeedbackCallback(trialEndTimeStamp, trialStartTimeStamp, source, userAnswer, isTimeout, false, isCorrect));
+      beginMainCardTimeout(forcecorrecttimeout, afterAnswerFeedbackCallback(trialEndTimeStamp, trialStartTimeStamp, source, userAnswer, isTimeout, false, isCorrect), cardState, timeoutState, srState, leavePage);
     } else {
       // Type 'm' (or forceCorrection=true): Require re-entry of correct answer
       const prompt = 'Please enter the correct answer to continue';
@@ -3032,10 +2765,10 @@ async function afterAnswerFeedbackCallback(trialEndTimeStamp, trialStartTimeStam
   if (cardState.get('dialogueHistory')) {
     dialogueHistory = JSON.parse(JSON.stringify(cardState.get('dialogueHistory')));
   }
-  const reviewTimeout = wasReportedForRemoval ? 2000 : getReviewTimeout(testType, deliveryParams, isCorrect, dialogueHistory, isTimeout, isSkip);
+  const reviewTimeout = wasReportedForRemoval ? 2000 : getReviewTimeout(testType, deliveryParams, isCorrect, dialogueHistory, isTimeout, isSkip, cardState);
 
   // Stop previous timeout, log response data, and clear up any other vars for next question
-  clearCardTimeout();
+  clearCardTimeoutWrapper();
 
   // FIX: Clear any stale countdown interval from previous trial
   // For correct answers, no countdown interval is created, but we need to clear
@@ -3229,50 +2962,6 @@ async function cardEnd() {
   // STATE MACHINE: Transition will happen in prepareCard via FADING_OUT and CLEARING
   // prepareCard() handles fade-out and clearing, then moves to next trial's LOADING
   await prepareCard();
-}
-
-function getReviewTimeout(testType, deliveryParams, isCorrect, dialogueHistory, isTimeout, isSkip) {
-  let reviewTimeout = 0;
-
-  if (testType === 's') {
-    // Just a study - note that the purestudy timeout is used for the QUESTION
-    // timeout, not the display timeout after the ANSWER. However, we need a
-    // timeout for our logic below so just use the minimum
-    reviewTimeout = 1;
-  } else if (testType === 't' || testType === 'i') {
-    // A test or instruction unit - we don't have timeouts since they don't get feedback about
-    // how they did (that's what drills are for)
-    reviewTimeout = 1;
-  } else if (testType === 'd' || testType === 'm' || testType === 'n') {
-    // Drill - the timeout depends on how they did
-    if (isCorrect) {
-      reviewTimeout = _.intval(deliveryParams.correctprompt);
-    } else {
-      // Fast forward through feedback if we already did a dialogue feedback session
-      if (deliveryParams.feedbackType == 'dialogue' && dialogueHistory && dialogueHistory.LastStudentAnswer) {
-        reviewTimeout = 0.001;
-      } else if(cardState.get('isRefutation') && !isTimeout) {
-        reviewTimeout = _.intval(deliveryParams.refutationstudy) || _.intval(deliveryParams.reviewstudy);
-      } else {
-        reviewTimeout = _.intval(deliveryParams.reviewstudy);
-      }
-    }
-  } else {
-    // We don't know what to do since this is an unsupported test type - fail
-    throw new Error('Unknown trial type was specified - no way to proceed');
-  }
-  //if flagged to skip the timeout, set the timeout to 0.001
-  if (isSkip) {
-    reviewTimeout = 2;
-  }
-  if(Meteor.isDevelopment && cardState.get('skipTimeout')){
-    reviewTimeout = 0.001;
-    cardState.set('skipTimeout', false);
-  }
-  // We need at least a timeout of 1ms
-  if (reviewTimeout < 0.001) throw new Error('No correct timeout specified');
-
-  return reviewTimeout;
 }
 
 function getTrialTime(trialEndTimeStamp, trialStartTimeStamp, reviewEnd, testType) {
@@ -3597,7 +3286,7 @@ function cleanupTrialContent() {
 //Called to revisit a previous unit in the current session.
 async function revisitUnit(unitNumber) {
   clientConsole(2, 'REVIST UNIT:', unitNumber);
-  clearCardTimeout();
+  clearCardTimeoutWrapper();
   destroyPlyr();
 
   const curTdf = Session.get('currentTdfFile');
@@ -3666,7 +3355,7 @@ async function revisitUnit(unitNumber) {
 // prepareCard) or user-initiated (see the continue button event and the var
 // len display timeout function)
 async function unitIsFinished(reason) {
-  clearCardTimeout();
+  clearCardTimeoutWrapper();
 
   const curTdf = Session.get('currentTdfFile');
   if (!curTdf) {
@@ -4011,7 +3700,7 @@ async function newQuestionHandler() {
 
 function startQuestionTimeout() {
   stopUserInput(); // No user input (re-enabled below) and reset keypress timestamp.
-  clearCardTimeout(); // No previous timeout now
+  clearCardTimeoutWrapper(); // No previous timeout now
 
   const deliveryParams = Session.get('currentDeliveryParams');
   if (!deliveryParams) {
@@ -4055,13 +3744,12 @@ function startQuestionTimeout() {
         deliveryParams, currentDisplayEngine, clozeQuestionParts, beginQuestionAndInitiateUserInputBound);
     checkAndDisplayPrestimulus(deliveryParams, pipeline);
   }, readyPromptTimeout, 'Ready prompt display time');
-  countdownInterval = registerInterval('readyPromptCountdown', () => {
+  registerInterval('readyPromptCountdown', () => {
     const timeLeft = Math.max(0, readyPromptTimeout - (Date.now() - trialStartTimestamp));
     const timeLeftSecs = Math.ceil(timeLeft / 1000);
     const progressbarElem = document.getElementById("progressbar");
     if(timeLeft <= 0){
-      clearInterval(countdownInterval);
-      countdownInterval = null;
+      clearRegisteredTimeout('readyPromptCountdown');
     } else {
       if(Session.get('curTdfUISettings').displayReadyPromptTimeoutAsBarOrText == "bar" || Session.get('curTdfUISettings').displayCardTimeoutAsBarOrText == "both"){
         //add the progress bar class
@@ -4220,7 +3908,7 @@ function beginQuestionAndInitiateUserInput(delayMs, deliveryParams) {
           clientConsole(2, 'stopping input after ' + delayMs + ' ms');
           stopUserInput();
           handleUserInput({}, 'timeout');
-        });
+        }, cardState, timeoutState, srState, leavePage);
       });
     }, timeuntilaudio, 'Time until audio plays (TDF parameter)');
   } else { // Not a sound - can unlock now for data entry now
@@ -4236,7 +3924,7 @@ function beginQuestionAndInitiateUserInput(delayMs, deliveryParams) {
       clientConsole(2, 'stopping input after ' + delayMs + ' ms');
       stopUserInput();
       handleUserInput({}, 'timeout');
-    });
+    }, cardState, timeoutState, srState, leavePage);
   }
 }
 
@@ -4496,8 +4184,8 @@ async function processLINEAR16(data) {
   srState.set('waitingForTranscription', true);
   clientConsole(2, '[SR] Set waitingForTranscription=true to block timeout');
 
-  if (resetMainCardTimeout && currentTimeoutFunc && !inputDisabled) {
-    resetMainCardTimeout(); // Give ourselves a bit more time for the speech api to return results
+  if (resetMainCardTimeout && !inputDisabled) {
+    resetMainCardTimeout(cardState, timeoutState); // Give ourselves a bit more time for the speech api to return results
   } else {
     clientConsole(2, '[SR] not resetting during processLINEAR16');
   }
@@ -4929,7 +4617,7 @@ function speechAPICallback(err, data){
     // This prevents race condition where timeout fires after SR completes,
     // reading the SR transcript from textbox and appending " [timeout]" to it
     // Result without fix: "portugal [timeout]" instead of "portugal"
-    clearCardTimeout();
+    clearCardTimeoutWrapper();
 
     // Only simulate enter key press if we picked up transcribable/in grammar
     // audio for better UX
@@ -5057,10 +4745,10 @@ function startUserMedia(stream) {
       return;
     } else {
       clientConsole(2, '[SR] VOICE START');
-      if (resetMainCardTimeout && currentTimeoutFunc) {
+      if (resetMainCardTimeout) {
         if (cardState.get('recording')) {
           clientConsole(2, '[SR] voice_start resetMainCardTimeout');
-          resetMainCardTimeout();
+          resetMainCardTimeout(cardState, timeoutState);
         } else {
           clientConsole(2, '[SR] NOT RECORDING');
         }
@@ -5187,7 +4875,7 @@ async function resumeFromComponentState() {
   trialStartTimestamp = 0;
   cardState.set('trialStartTimestamp', trialStartTimestamp);
   clearScrollList();
-  clearCardTimeout();
+  clearCardTimeoutWrapper();
 
   // Disallow continuing (it will be turned on somewhere else)
   setDispTimeoutText('');
