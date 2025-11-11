@@ -9,8 +9,13 @@
                 <label for="dialogueUserAnswer" class="sr-only">
                     Enter your answer to the dialogue question
                 </label>
-                <input id="dialogueUserAnswer"
+                <input type="text"
+                       id="dialogueUserAnswer"
                        style="display:table-cell;width:100%;"
+                       autocomplete="off"
+                       autocorrect="off"
+                       autocapitalize="off"
+                       spellcheck="false"
                        placeholder="{{UISettings.inputPlaceholder}}"
                        aria-required="true">
             </div>
@@ -24,6 +29,9 @@
                    id="userAnswer"
                    style="display:table-cell;width:100%;"
                    autocomplete="off"
+                   autocorrect="off"
+                   autocapitalize="off"
+                   spellcheck="false"
                    placeholder="{{UISettings.inputPlaceholder}}"
                    aria-required="true">
         </div>
@@ -37,9 +45,14 @@
         <label for="userForceCorrect" class="sr-only">
             Enter the correct answer
         </label>
-        <input id="userForceCorrect"
+        <input type="text"
+               id="userForceCorrect"
                class="alert alert-warning"
                style="display:table-cell;width:100%;"
+               autocomplete="off"
+               autocorrect="off"
+               autocapitalize="off"
+               spellcheck="false"
                aria-required="true"
                aria-describedby="forceCorrectGuidance">
     </div>

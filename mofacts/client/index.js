@@ -648,7 +648,11 @@ Template.registerHelper('showPerformanceDetails', function() {
   if(Session.get('isVideoSession')) return false;
   if(type == "t" && uiSettings.displayPerformanceDuringTrial) return true;
   if(type == "t" && !uiSettings.displayPerformanceDuringTrial) return false;
-  return (Session.get('scoringEnabled') && Session.get('unitType') != 'schedule');
+  // FIX: Read scoringEnabled from currentDeliveryParams instead of Session
+  // (scoringEnabled was migrated from Session to cardState which is not accessible here)
+  const deliveryParams = Session.get('currentDeliveryParams');
+  const scoringEnabled = deliveryParams && deliveryParams.scoringEnabled;
+  return (scoringEnabled && Session.get('unitType') != 'schedule');
 });
 Template.registerHelper('showPageNumbers', function() {
   return Session.get('showPageNumbers');
