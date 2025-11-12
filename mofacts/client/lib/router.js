@@ -711,9 +711,11 @@ Router.route('/card', {
           setspec,
           false,
           true);
+        return;
       } else {
         // No TDF found, redirect to home
         this.redirect('/');
+        return;
       }
     } else {
       this.subscribe('files.assets.all').wait();
@@ -726,7 +728,11 @@ Router.route('/card', {
           this.render('card');
         } else {
           this.redirect('/');
+          return;
         }
+      } else {
+        this.render('customLoading');
+        return;
       }
     }
   },
