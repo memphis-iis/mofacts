@@ -260,6 +260,11 @@ function checkSimulation() {
 
 // Clean up on navigation away from page
 async function leavePage(dest) {
+  if (isNavigatingAway) {
+    clientConsole(2, 'leavePage already in progress, ignoring duplicate request for dest:', typeof dest === 'function' ? 'function' : dest);
+    return;
+  }
+  isNavigatingAway = true;
   clientConsole(2, 'leaving page for dest:', dest);
   if (dest != '/card' && dest != '/instructions' && document.location.pathname != '/instructions') {
     Session.set('currentExperimentState', undefined);
@@ -467,6 +472,7 @@ Template.card.onCreated(function() {
 Template.card.rendered = initCard;
 
 async function initCard() {
+  isNavigatingAway = false;
   const tdfResponse = Session.get('currentTdfFile');
   const curTdfTips = tdfResponse.tdfs.tutor.setspec.tips || [];
   const formattedTips = []
@@ -557,7 +563,7 @@ async function initCard() {
     if (window.preInitializedAudioStream && cardState.get('audioRecorderInitialized')) {
       clientConsole(2, '[Audio] Using pre-initialized audio stream from warmup - skipping getUserMedia');
       // Use the pre-initialized stream directly
-      startUserMedia(window.preInitializedAudioStream);
+      await startUserMedia(window.preInitializedAudioStream);
       // Clear the flag so we don't reuse it
       window.preInitializedAudioStream = null;
       cardState.set('audioRecorderInitialized', false);
@@ -1493,6 +1499,7 @@ function announceTrialStateToScreenReader(state, trialNum) {
 
 let soundsDict = {};
 let imagesDict = {};
+let isNavigatingAway = false;
 const onEndCallbackDict = {};
 let pollMediaDevicesInterval = null;
 function pollMediaDevices() {
@@ -1530,10 +1537,12 @@ function reinitializeMediaDueToDeviceChange() {
   const errMsg = 'It appears you may have unplugged your microphone.  \
     Please plug it back then click ok to reinitialize audio input.';
   alert(errMsg);
-  initializeAudio();
+  initializeAudio().catch(function(err) {
+    clientConsole(1, 'Error reinitializing audio after device change', err);
+  });
 }
 
-function initializeAudio() {
+async function initializeAudio() {
   try {
     // Older browsers might not implement mediaDevices at all, so we set an empty object first
     if (navigator.mediaDevices === undefined) {
@@ -1560,17 +1569,14 @@ function initializeAudio() {
       };
     }
 
-    navigator.mediaDevices.getUserMedia({audio: true, video: false})
-        .then(startUserMedia)
-        .catch(function(err) {
-          console.error('[SR] Error getting user media:', err.name, err.message);
-          console.warn('[SR] Speech recognition disabled - continuing without audio input');
-          console.warn('[SR] Note: getUserMedia requires HTTPS for remote connections');
-          // Continue card initialization even if audio fails
-          cardStart();
-        });
-  } catch (e) {
-    clientConsole(1, 'Error initializing Web Audio browser', e);
+    const stream = await navigator.mediaDevices.getUserMedia({audio: true, video: false});
+    await startUserMedia(stream);
+  } catch (err) {
+    console.error('[SR] Error getting user media:', err.name, err.message);
+    console.warn('[SR] Speech recognition disabled - continuing without audio input');
+    console.warn('[SR] Note: getUserMedia requires HTTPS for remote connections');
+    // Continue card initialization even if audio fails
+    cardStart();
   }
 }
 
@@ -4488,7 +4494,7 @@ let streamSource = null;
 let speechEvents = null;
 
 // The callback used in initializeAudio when an audio data stream becomes available
-function startUserMedia(stream) {
+async function startUserMedia(stream) {
   userMediaStream = stream;
   const tracks = stream.getTracks();
   selectedInputDevice = tracks[0].getSettings().deviceId;
@@ -4506,6 +4512,15 @@ function startUserMedia(stream) {
   }};
   // eslint-disable-next-line no-undef
   recorder = new Recorder(input, audioRecorderConfig);
+
+  try {
+    await recorder.ready;
+  } catch (err) {
+    clientConsole(1, '[SR] Recorder initialization failed', err);
+    alert('Speech recognition could not start because the microphone setup failed. The lesson will continue without voice input.');
+    cardStart();
+    return;
+  }
 
   // Set process callback for when speech end detected (will process audio data)
   recorder.setProcessCallback(processLINEAR16);
