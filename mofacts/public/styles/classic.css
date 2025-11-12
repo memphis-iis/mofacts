@@ -1001,81 +1001,62 @@ tfoot tf, .table tfoot tf, .table tfoot td, .table tfoot th {
     margin-top: var(--card-element-gap);
 }
 
-.card-stats-container {
-    width: 100%;
-    max-width: 720px;
-    margin: clamp(0.5rem, 2vh, 1rem) auto;
-    background-color: var(--neutral-color, #ffffff);
-    border-radius: var(--border-radius, 8px);
-    border: 1px solid rgba(15, 23, 42, 0.08);
-    box-shadow: 0 8px 16px rgba(15, 23, 42, 0.08);
-    padding: clamp(0.9rem, 2vh, 1.4rem) clamp(1rem, 4vw, 2.75rem);
-}
-
-.card-stats {
-    display: flex;
-    justify-content: space-between;
-    align-items: stretch;
-    gap: var(--card-stack-gap-small);
-    padding-top: clamp(1.5rem, 3vh, 2rem);
-}
-
-.card-stat {
-    flex: 1 1 200px;
-    text-align: center;
-}
-
-.card-stat-label {
-    font-size: 0.82rem;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: var(--secondary-text-color);
-    margin: 0;
-}
-
-.card-stat-value {
-    margin: 0.25rem 0 0;
+.card-stats-bar {
     display: inline-flex;
-    align-items: baseline;
-    justify-content: center;
-    gap: 0.25rem;
-    font-size: clamp(1.35rem, 3vw, 1.75rem);
+    align-items: center;
+    gap: clamp(0.5rem, 1vw, 0.75rem);
+    padding: 0 clamp(0.5rem, 2vw, 0.75rem);
+    height: 24px;
+    line-height: 1;
+    border-radius: var(--border-radius-pill, 999px);
+    border: 1px solid rgba(15, 23, 42, 0.12);
+    background-color: var(--neutral-color, #ffffff);
+    font-size: 0.8rem;
     font-weight: 600;
     color: var(--text-color);
+    margin: 0 auto clamp(0.5rem, 2vh, 1rem);
+    width: fit-content;
+    min-width: 220px;
 }
 
-.card-stat-number {
+.card-stats-bar__item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
     font-variant-numeric: tabular-nums;
+    white-space: nowrap;
 }
 
-.card-stat-unit {
-    font-size: clamp(0.85rem, 2vw, 1rem);
-    color: var(--secondary-text-color);
-}
-
-.card-stats-container[aria-label] {
-    position: relative;
-}
-
-.card-stats-container[aria-label]::before {
-    content: attr(aria-label);
-    position: absolute;
-    top: 0.75rem;
-    left: clamp(1rem, 4vw, 2.75rem);
-    font-size: 0.75rem;
-    font-weight: 600;
-    text-transform: uppercase;
+.card-stats-bar__label {
+    font-size: 0.7rem;
     letter-spacing: 0.08em;
+    text-transform: uppercase;
     color: var(--secondary-text-color);
-    opacity: 0.65;
 }
 
-@media screen and (max-width: 640px) {
-    .card-stats {
-        flex-direction: column;
-        align-items: stretch;
-        padding-top: clamp(0.5rem, 2vh, 0.75rem);
-    }
+.card-stats-bar__value {
+    font-size: 0.82rem;
+    font-weight: 700;
+}
+
+.card-stats-bar__unit {
+    font-weight: 500;
+    font-size: 0.7rem;
+    color: var(--secondary-text-color);
+}
+
+.card-stats-bar__divider {
+    display: inline-block;
+    width: 1px;
+    height: 16px;
+    background: rgba(15, 23, 42, 0.15);
+}
+
+.card-stats-bar-wrapper {
+    display: flex;
+    justify-content: center;
+    margin-top: clamp(0.25rem, 1vh, 0.5rem);
+    margin-bottom: clamp(0.5rem, 1.5vh, 0.75rem);
 }
 
 /* User interaction - minimal but breathing room */

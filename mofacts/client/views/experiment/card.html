@@ -94,6 +94,11 @@
                 {{/each}}
                 {{/if}}
             </div>
+            {{#if showPerformanceDetails}}
+            <div class="card-element-spacing card-stats-bar-wrapper">
+                {{> curStudentPerformance}}
+            </div>
+            {{/if}}
             <div class="row{{UIsettings.reverseStimuliAndInputColumns}} mx-auto w-100 top-0 {{videoSessionClasses isVideoSession}}">
                 {{#if trial}}
                 <div class="{{UIsettings.displayColWidth}} mx-auto" id="displayContainer">
