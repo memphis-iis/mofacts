@@ -3242,10 +3242,10 @@ export const methods = {
     }
   },
 
-  updatePerformanceData: function(codeLocation) {
+  updatePerformanceData: function(codeLocation, uid = null) {
     const timestamp = new Date();
     const user = Meteor.user();
-    const userId = user._id;
+    const userId = uid ? uid : user._id;
     user.lastActionTimestamp = timestamp;
     user.timestampLocation = codeLocation;
     Meteor.users.update({_id: userId}, user);
