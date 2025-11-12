@@ -5356,7 +5356,7 @@ Router.route('data-by-teacher', {
     // eslint-disable-next-line no-useless-escape
     userName = userName.replace('/[/\\?%*:|"<>\s]/g', '_');
 
-    const fileName = 'mofacts_' + userName + '_all_tdf_data.txt';
+    const fileName = 'mofacts_' + userName + '_all_tdf_data.tsv';
 
     response.writeHead(200, {
       'Content-Type': 'text/tab-separated-values',
@@ -5422,7 +5422,7 @@ Router.route('data-by-class', {
 
     // eslint-disable-next-line no-useless-escape
     const className = foundClass.coursename.replace('/[/\\?%*:|"<>\s]/g', '_');
-    const fileName = 'mofacts_' + className + '_all_class_data.txt';
+    const fileName = 'mofacts_' + className + '_all_class_data.tsv';
 
     response.writeHead(200, {
       'Content-Type': 'text/tab-separated-values',
@@ -5475,7 +5475,7 @@ Router.route('data-by-file', {
       return;
     }
 
-    const fileName = exp.split('.json')[0] + '-data.txt';
+    const fileName = exp.split('.json')[0] + '-data.tsv';
 
     response.writeHead(200, {
       'Content-Type': 'text/tab-separated-values',
