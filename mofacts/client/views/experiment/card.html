@@ -1,10 +1,7 @@
 <template name="card">
     <div class="container-fluid position-relative card-stack">
 
-        <!-- ============================================================
-             VIDEO SESSION MODE - Instructional video player interface
-             Only displays when user is watching educational videos
-             ============================================================ -->
+        <!-- VIDEO SESSION MODE - Instructional video player interface -->
         {{#if isVideoSession}}
         <div class="card-stack-section card-stack card-stack--flush card-stack--compact card-stack-section--video">
             <div class="row">
@@ -39,9 +36,7 @@
         </div>
         {{/if}}
 
-        <!-- ============================================================
-             ADMIN/DEBUG WARNINGS
-             ============================================================ -->
+        <!-- ADMIN/DEBUG WARNINGS -->
         {{#if isImpersonating}}
         <div class='text-center alert alert-warning card-stack-section card-stack-section--warning'>
                 Impersonation Mode. Nothing will be logged. Log out to reset.
@@ -60,18 +55,12 @@
         </div>
         {{/if}}
 
-        <!-- ============================================================
-             ACCESSIBILITY: ARIA Live Region for Screen Readers
-             Announces trial state changes to assistive technology users
-             ============================================================ -->
+        <!-- ACCESSIBILITY: ARIA Live Region for screen reader announcements -->
         <div id="trialStateAnnouncer" role="status" aria-live="polite" aria-atomic="true" class="sr-only">
             <!-- Updated by JavaScript with trial state messages -->
         </div>
 
-        <!-- ============================================================
-             PRACTICE CARD - Main learning interface
-             Includes stimulus display, input methods, and feedback
-             ============================================================ -->
+        <!-- PRACTICE CARD - Main learning interface -->
         <div id="trialContentWrapper" class="card-stack-section card-stack card-stack--flush {{#unless displayReady}}trial-hidden{{/unless}}">
             <div id="userInteractionContainer" class="smooth-transition" hidden>
                 <div class="text-center {{fontSizeClass}} smooth-transition" id="UserInteraction" hidden></div>
@@ -190,7 +179,7 @@
                     {{/if}}
                 {{/if}}
                 {{/if}}
-                {{!-- Text input: always rendered, visibility controlled by CSS based on buttonTrial and SR mode --}}
+                <!-- Text input: visibility controlled by CSS based on buttonTrial and SR mode -->
                 <div class="input-box col-12 {{#if buttonTrial}}trial-input-hidden{{else}}{{#if audioInputModeEnabled}}trial-input-hidden{{/if}}{{/if}}{{#unless inputReady}} input-pending{{/unless}}">
                     {{#if showDialogueHints}}
                         {{#if dialogueCacheHint}}
@@ -204,7 +193,7 @@
                     {{> inputF}}
                 </div>
 
-                {{!-- Button/Multiple choice: always rendered, visibility controlled by CSS --}}
+                <!-- Button/Multiple choice: visibility controlled by CSS -->
                 {{#unless inFeedback}}
                 {{#if audioEnabled}}
                     <p class="marginLeftAndRight text-center {{#unless buttonTrial}}trial-input-hidden{{/unless}}">Please speak the letter next to the correct option for audio input</p>
@@ -215,7 +204,7 @@
                      role="radiogroup"
                      aria-labelledby="displaySubContainer"
                      aria-required="true">
-                    <!-- will contain multiple choice buttons which are dynamically added. -->
+                    <!-- Multiple choice buttons dynamically added -->
                     <div id="multipleChoiceTable" class="row gy-3 choice text-center row-cols-{{UIsettings.choiceButtonCols}} align-items-start">
                         {{#if imageResponse}}
                             {{#each buttonListImageRows}}
@@ -277,10 +266,7 @@
             {{/if}}
             </div>
 
-        <!-- ============================================================
-             DEBUG PANELS - Teacher/Admin only displays
-             Shows answers, progress, and probability parameters
-             ============================================================ -->
+        <!-- DEBUG PANELS - Teacher/Admin only displays -->
             {{#if isInRole 'teacher'}}
             <div class="row card-stack-section card-stack-section--debug">
                 <div class="col-lg-12 visible-text text-center">
@@ -313,12 +299,7 @@
                 </div>
             </div>
         </div><!-- Close trialContentWrapper -->
-    {{!-- Removed readyPromptString display to prevent "Loading..." flash between screens --}}
-    {{!-- {{#if displayReadyPromptString}}
-        <div class="marginLeftAndRight alert alert-info {{fontSizeClass}} text-center" id="textQuestion">
-            {{readyPromptString}}
-        </div>
-    {{/if}} --}}
+    <!-- Removed readyPromptString display to prevent 'Loading...' flash -->
 
         <!-- Modal -->
         <div class="modal fade" id="finalInstructionsDlg" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-backdrop="static">
@@ -358,7 +339,7 @@
     <div id="postCardContainer"></div>
 
 
-    <!-- Use a fixed footer if we have something to show -->
+    <!-- Fixed footer for timeout display -->
     {{#if haveDispTimeout}}
     <div id="continueBar" >
         <span id="displayTimeoutMsg">
@@ -386,7 +367,7 @@
         </div>
     </div> 
     {{/if}}
-    <!-- card lower feedback-->
+    <!-- card lower feedback -->
   {{#if isInTrial}}
   {{#unless isInInstructions}}
   <div id="userLowerInteractionContainer" class="card-feedback-area">
@@ -406,8 +387,7 @@
   {{/if}}
 
 <script>
-// Use event delegation to handle all .play-btn clicks efficiently
-// This works for both static and dynamically added buttons without needing a MutationObserver
+// Event delegation for .play-btn clicks (handles static and dynamic buttons efficiently without MutationObserver)
 (function() {
     let delegatedListenerAttached = false;
 

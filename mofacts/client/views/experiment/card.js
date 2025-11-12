@@ -167,94 +167,11 @@ export {
   checkAudioInputMode,
 };
 
-/*
-* card.js - the implementation behind card.html (and thus
-the main GUI implementation for MoFaCTS).
+// Main GUI logic for MoFaCTS with TDF/Stim abstraction via currentTestingHelpers.js. Trial timeouts: purestudy (study display), drill (answer time), reviewstudy (incorrect feedback), correctprompt (correct feedback). Admin/teacher simulation via simTimeout/simCorrectProb TDF params. Scrollable history enabled via <showhistory>true</deliveryparams>.
 
-There is quite a bit of logic in this file, but most of it is commented locally.
-One note to keep in mind that much of the direct access to the TDF and Stim
-files has been abstracted out to places like currentTestingHelpers.js
-
-This is important because that abstraction is used to do things like support
-multiple deliveryParam (the x-condition logic) and centralize some of the
-checks that we do to make sure everything is functioning correctly.
-
-
-Timeout logic overview
-------------------------
-
-Currently we use the appropriate deliveryparams section. For scheduled trials
-we use the deliveryparams of the current unit. Note that "x-conditions" can be
-used to select from multiple deliveryparams in any unit.
-
-All timeouts are specified in milliseconds and should be at least one (1).
-
-There are two settings that correspond to what most people think of as the
-"trial timeout". That is the amount of time that may elapse from the beginning
-of a trial before the user runs out of time to answer (see the function
-startQuestionTimeout):
-
-purestudy - The amount of time a "study" trial is displayed
-
-drill     - The amount of time a user has to answer a drill or test trial
-
-There are two "timeouts" that are used after the user has answered (see
-the function handleUserInput):
-
-reviewstudy   - If a user answers a drill trial incorrectly, the correct
-                answer is displayed for this long
-
-correctprompt - If a user gets a drill trial correct, the amount of time
-                the feedback message is shown
-
-Note that if the trial is "test", feedback is show for neither correct nor
-incorrect responses.
-
-Some TDF's contain legacy timeouts. For instance,
-timebeforefeedback is not currently implemented.
-
-
-Simulation Overview
-----------------------
-
-If the current user is an admin or teacher, they may check the "Simulate if
-TDF param present?" checkbox on the profile screen (located above the buttons
-for the various user-visible TDF's). Doing so sets the runSimulation session
-variable.
-
-For each question displayed here, if the runSimulation session variable is
-true, if the user is an admin or teacher, and if the TDF has the appropriate
-parameters set then a simulation timeout will be set. When that timeout fires,
-the system will simulate an answer. This behavior is controlled by the two TDF
-parameters (which should be in the top-level setspec):
-
-    * simTimeout - (integer) the number of milliseconds to wait before the
-      answer is given.
-    * simCorrectProb - (float) probability (0.0 < p <= 1.0) that the correct
-      answer is given.
-
-Then no simulation will take place if either parameter is:
-
-    * Missing
-    * Invalid (not interpretable as a number)
-    * Less than or equal to zero
-
-
-History Scrolling Overview
-----------------------------
-
-We provide scrollable history for units (it is turned off by default). To
-turn it on, you need to set <showhistory>true</showhistory> in the
-<deliveryparams> section of the unit where you want it on.
-*/
-
-// //////////////////////////////////////////////////////////////////////////
 // Global variables and helper functions for them
 
-// ===== PHASE 2: Scoped Reactive State =====
-// CRITICAL: Must be declared BEFORE any usage
-// Use ReactiveDict for card-specific state instead of global Session
-// This prevents memory leaks and improves performance
+// PHASE 2: Scoped Reactive State - Use ReactiveDict for card-specific state to prevent memory leaks and improve performance
 const cardState = new ReactiveDict('cardState');
 // M3: Additional scoped ReactiveDict instances for specialized state management
 const srState = new ReactiveDict('speechRecognition'); // Speech recognition state
@@ -272,15 +189,14 @@ cardState.set('wasReportedForRemoval', false);
 Session.set('hiddenItems', []);
 cardState.set('numVisibleCards', 0);
 cardState.set('recordingLocked', false);
-// M3: Track if we're waiting for Google Speech API response (converted to reactive state)
+// M3: Track if waiting for Google Speech API response (converted to reactive state)
 srState.set('waitingForTranscription', false);
 let cachedSyllables = null;
 let cachedSuccessColor = null;
 let cachedAlertColor = null;
 // M3: Audio input mode flag (converted to reactive state)
 srState.set('audioInputModeEnabled', false);
-// Cache for speech recognition answer grammar and phonetic index
-// Answer grammar is per-unit (currentStimuliSet), so invalidate when unit changes
+// Cache speech recognition answer grammar and phonetic index per unit (invalidate when currentStimuliSet changes)
 let cachedAnswerGrammar = null;
 let cachedPhoneticIndex = null;
 let lastCachedUnitNumber = null;
@@ -294,33 +210,16 @@ let firstKeypressTimestamp = 0;
 let currentSound = null; // See later in this file for sound functions
 let userFeedbackStart = null;
 let player = null;
-// M3: Track timeout state reactively for better coordination
-// We need to track the name/ID for clear and reset. We need the function and
-// delay used for reset
-timeoutState.set('name', null);
-// IMPORTANT: Functions cannot be stored in ReactiveDict - use module variables
-// NOTE: Timeout module variables (currentTimeoutFunc, currentTimeoutDelay, countdownInterval)
-// moved to cardTimeouts.js module (Phase 1 extraction)
+// M3: Track timeout state reactively (name/ID for clear/reset, function/delay for reset); Functions cannot be stored in ReactiveDict - timeout vars moved to cardTimeouts.js module (Phase 1)
 let simTimeoutName = null; // Kept here - used by checkSimulation (will move to cardUtils in Phase 3)
 let userAnswer = null;
 let lastlogicIndex = 0;
 
-// ============================================================================
-// NOTE: Timeout functions moved to cardTimeouts.js module (Phase 1 extraction)
-// Imported at top of file: registerTimeout, registerInterval, clearRegisteredTimeout,
-// clearAllRegisteredTimeouts, listActiveTimeouts, elapsedSecs, clearCardTimeout (module),
-// beginMainCardTimeout, resetMainCardTimeout, restartMainCardTimeoutIfNecessary,
-// getDisplayTimeouts, setDispTimeoutText, varLenDisplayTimeout, getReviewTimeout
-//
-// Import aliased as clearCardTimeoutModule to avoid name conflict with wrapper below
-// ============================================================================
+// Timeout functions extracted to cardTimeouts.js module (Phase 1): register/clear/reset timeouts, intervals, display helpers; clearCardTimeout aliased to avoid wrapper conflict
 
-// Wrapper for clearCardTimeout that also clears simTimeoutName
-// Phase 1: simTimeoutName stays in card.js (used by checkSimulation)
-// Phase 3: checkSimulation moves to cardUtils, this wrapper can be removed
+// Wrapper adds simTimeoutName clearing to module clearCardTimeout; temporary until checkSimulation migrates to cardUtils (Phase 3)
 function clearCardTimeoutWrapper() {
-  // Import from module is aliased, call it directly from the import
-  // First clear simTimeoutName if present
+  // Import from module is aliased; first clear simTimeoutName if present
   if (simTimeoutName) {
     try {
       Meteor.clearTimeout(simTimeoutName);
@@ -333,8 +232,7 @@ function clearCardTimeoutWrapper() {
   clearCardTimeout(timeoutState, cardState);
 }
 
-// Set a special timeout to handle simulation if necessary
-// NOTE: This will move to cardUtils.js in Phase 3
+// Simulation timeout handler (migrates to cardUtils.js in Phase 3)
 function checkSimulation() {
   if (!Session.get('runSimulation') ||
         !(Meteor.user() && Meteor.user().roles && (['admin', 'teacher']).some(role => Meteor.user().roles.includes(role)))) {
@@ -350,7 +248,7 @@ function checkSimulation() {
     return;
   }
 
-  // If we we are here, then we should set a timeout to sim a correct answer
+  // If we are here, set timeout to simulate a correct answer
   const correct = Math.random() <= simCorrectProb;
   clientConsole(2, 'SIM: will simulate response with correct=', correct, 'in', simTimeout);
   simTimeoutName = Meteor.setTimeout(function() {
@@ -360,7 +258,7 @@ function checkSimulation() {
   }, simTimeout);
 }
 
-// Clean up things if we navigate away from this page
+// Clean up on navigation away from page
 async function leavePage(dest) {
   clientConsole(2, 'leaving page for dest:', dest);
   if (dest != '/card' && dest != '/instructions' && document.location.pathname != '/instructions') {
@@ -408,27 +306,24 @@ async function leavePage(dest) {
   }
 }
 
-// ===== PHASE 2: Centralized DOM Updates =====
-// Use Tracker.autorun to batch DOM updates reactively
-// This prevents multiple unnecessary re-renders
+// PHASE 2: Batch DOM updates via Tracker.autorun to prevent unnecessary re-renders
 Template.card.onCreated(function() {
   const template = this;
 
-  // Cache CSS color variables for SR status icon (prevents repeated getComputedStyle calls)
+  // Cache SR icon colors from CSS to avoid repeated getComputedStyle calls
   Tracker.afterFlush(function() {
     const root = document.documentElement;
     cachedSuccessColor = getComputedStyle(root).getPropertyValue('--success-color').trim() || '#00cc00';
     cachedAlertColor = getComputedStyle(root).getPropertyValue('--alert-color').trim() || '#ff0000';
   });
 
-  // Reactive computation for audio input mode (prevents duplicate TDF checks in multiple helpers)
-  // FIX: Use Tracker.nonreactive to prevent cascade invalidation on unrelated state changes
+  // Compute audio input mode reactively once per change; Tracker.nonreactive prevents cascade invalidation
   template.autorun(function() {
     // Explicitly track only the dependencies we care about
     const userAudioToggled = Meteor.user()?.audioSettings?.audioInputMode;
     const tdfFile = Session.get('currentTdfFile');
 
-    // Compute in a non-reactive context to prevent cascade
+    // Compute in non-reactive context to prevent cascade
     Tracker.nonreactive(function() {
       const tdfAudioEnabled = tdfFile?.tdfs?.tutor?.setspec?.audioInputEnabled === 'true';
       const enabled = (userAudioToggled || false) && tdfAudioEnabled;
@@ -437,10 +332,7 @@ Template.card.onCreated(function() {
     });
   });
 
-  // Autorun for feedback container visibility
-  // FIX: RESTORED - This was incorrectly removed, causing DOM thrashing and 40-90% performance regression
-  // Mixing reactive state changes with manual jQuery DOM updates violates Meteor/Blaze reactivity rules
-  // AUTOMATIC: Shows feedback in correct position, hides when not in feedback
+  // Autorun manages feedback visibility (RESTORED after 40-90% perf regression from manual jQuery DOM updates violating Blaze reactivity)
   template.autorun(function() {
     const inFeedback = cardState.get('inFeedback');
     const feedbackPosition = cardState.get('feedbackPosition');
@@ -466,8 +358,7 @@ Template.card.onCreated(function() {
     });
   });
 
-  // M3: SR Recording State Guard - Auto-stop recording when leaving AWAITING state
-  // DEFENSIVE: Prevents recording in wrong state, automatic cleanup, fail-safe behavior
+  // M3: Auto-stop recording when leaving PRESENTING_AWAITING state (fail-safe against wrong-state recording)
   template.autorun(function() {
     const currentState = trialState.get('current');
     const recording = cardState.get('recording');
@@ -481,8 +372,7 @@ Template.card.onCreated(function() {
     }
   });
 
-  // M3: TTS Lock Coordination - Automatically coordinate TTS and recording
-  // AUTOMATIC: Centralized logic, prevents manual synchronization errors
+  // M3: Auto-restart recording after TTS completes when in PRESENTING_AWAITING state (centralized coordination prevents manual sync errors)
   template.autorun(function() {
     const locked = cardState.get('recordingLocked');
     const ttsRequested = cardState.get('ttsRequested');
@@ -491,13 +381,7 @@ Template.card.onCreated(function() {
     const audioInputEnabled = srState.get('audioInputModeEnabled');
     const waitingForTranscription = srState.get('waitingForTranscription');
 
-    // Auto-restart recording when ALL conditions met:
-    // 1. Not locked (TTS finished)
-    // 2. No TTS requested (not starting new TTS)
-    // 3. In PRESENTING_AWAITING state (accepting input)
-    // 4. Not already recording
-    // 5. Audio input is enabled
-    // 6. Not waiting for speech transcription (processing)
+    // Auto-restart recording when: not locked (TTS finished), no TTS requested, in PRESENTING_AWAITING, not already recording, audio enabled, not processing speech
     if (!locked && !ttsRequested && currentState === TRIAL_STATES.PRESENTING_AWAITING && !recording && audioInputEnabled && !waitingForTranscription) {
       clientConsole(2, '[SR] Auto-restarting recording - TTS complete, conditions met');
       Tracker.afterFlush(function() {
@@ -506,9 +390,7 @@ Template.card.onCreated(function() {
     }
   });
 
-  // M3: Input State Guard - Ensure inputs enabled/disabled based on state
-  // AUTOMATIC: Enables input in AWAITING/STUDY states, disables in all others
-  // Also auto-focuses text input when enabled
+  // M3: Auto-enable inputs in AWAITING/STUDY states, disable elsewhere; auto-focus text input when enabled
   template.autorun(function() {
     const currentState = trialState.get('current');
 
@@ -540,8 +422,7 @@ Template.card.onCreated(function() {
     });
   });
 
-  // M3/MO5: Dynamic CSS Custom Properties - Set TDF-configurable styles via CSS variables for CSP compliance
-  // This replaces inline style={{...}} attributes with CSS custom properties
+  // M3/MO5: Apply TDF-configurable styles via CSS custom properties (CSP-compliant alternative to inline styles)
   template.autorun(function() {
     // Font size from TDF settings (replaces getFontSizeStyle helper)
     const deliveryParams = Session.get('currentDeliveryParams');
@@ -565,8 +446,7 @@ Template.card.onCreated(function() {
       document.documentElement.style.removeProperty('--stimuli-box-bg-color');
     }
 
-    // Image button backgrounds - Set from data-image-url attribute (CSP compliance)
-    // Replaces inline style="background-image: url(...)"
+    // Image button backgrounds from data-image-url attribute (CSP compliance, replaces inline style)
     Tracker.afterFlush(function() {
       document.querySelectorAll('.btn-image[data-image-url]').forEach(button => {
         const imageUrl = button.getAttribute('data-image-url');
@@ -598,8 +478,7 @@ async function initCard() {
   Session.set('curTdfTips', formattedTips)
   await checkUserSession();
 
-  // Set up periodic multi-tab detection check during practice (every 1 second as backup)
-  // Note: BroadcastChannel provides instant detection, this is just a fallback
+  // Backup 1-second multi-tab detection (primary: BroadcastChannel)
   if (!Session.get('sessionCheckInterval')) {
     const sessionCheckInterval = Meteor.setInterval(async function() {
       await checkUserSession();
@@ -607,7 +486,7 @@ async function initCard() {
     Session.set('sessionCheckInterval', sessionCheckInterval);
   }
 
-  // Catch page navigation events (like pressing back button) so we can call our cleanup method
+  // Intercept navigation (back button) for cleanup via onpopstate
   window.onpopstate = function() {
     if (document.location.pathname == '/card') {
       leavePage('/card');
@@ -620,10 +499,7 @@ async function initCard() {
     Session.set('stimDisplayTypeMap', stimDisplayTypeMap);
   }
 
-  // Check if audio input should be enabled:
-  // 1. User must have toggled SR icon on (audioInputMode)
-  // 2. TDF must have audioInputEnabled='true'
-  // 3. Must have API key (either user key or TDF key)
+  // Enable audio input if: user toggled SR on, TDF audioInputEnabled='true', and API key exists (user or TDF)
   const userAudioToggled = Meteor.user()?.audioSettings?.audioInputMode || false;
   const tdfAudioEnabled = Session.get('currentTdfFile').tdfs.tutor.setspec.audioInputEnabled === 'true';
   let audioInputEnabled = userAudioToggled && tdfAudioEnabled;
@@ -639,7 +515,7 @@ async function initCard() {
       // Don't initialize audio without API key
       audioInputEnabled = false;
     } else if (!Session.get('audioInputSensitivity')) {
-      // Default to 60 (very sensitive) in case tdf doesn't specify and we're in an experiment
+      // Default to 60 (very sensitive) if TDF doesn't specify audioInputSensitivity
       const audioInputSensitivity = parseInt(Session.get('currentTdfFile').tdfs.tutor.setspec.audioInputSensitivity) || 60;
       Session.set('audioInputSensitivity', audioInputSensitivity);
     }
@@ -648,34 +524,31 @@ async function initCard() {
   const audioOutputEnabled = Session.get('enableAudioPromptAndFeedback');
   if (audioOutputEnabled) {
     if (!Session.get('audioPromptSpeakingRate')) {
-      // Default to 1 in case tdf doesn't specify and we're in an experiment
+      // Default to 1 if TDF doesn't specify audioInputSilenceDelay
       const audioPromptSpeakingRate = parseFloat(Session.get('currentTdfFile').tdfs.tutor.setspec.audioPromptSpeakingRate) || 1;
       Session.set('audioPromptSpeakingRate', audioPromptSpeakingRate);
     }
   }
-  //Gets the list of hidden items from the db on load of card. 
+  // Get hidden items list from DB on card load
   const hiddenItems = ComponentStates.find({componentType: 'stimulus', showItem: false}).fetch();
   Session.set('hiddenItems', hiddenItems);
 
   window.AudioContext = window.webkitAudioContext || window.AudioContext;
   window.URL = window.URL || window.webkitURL;
 
-  // Check if audio recorder was pre-initialized during warmup
+  // Check if audio recorder pre-initialized during warmup
   if (window.audioRecorderContext) {
     clientConsole(2, '[Audio] Using pre-initialized audio context from warmup');
     audioContext = window.audioRecorderContext;
   } else {
     const audioContextConfig = {
-      // FIX: Lower sample rate from 48kHz to 16kHz (Google recommended for Speech API)
-      // This reduces audio payload size and improves latency on EVERY trial
+      // FIX: Lower sample rate to 16kHz (Google Speech API recommendation) to reduce payload and improve latency
       sampleRate: 16000,
     }
     audioContext = new AudioContext(audioContextConfig);
   }
 
-  // If user has enabled audio input initialize web audio (this takes a bit)
-  // (this will eventually call cardStart after we redirect through the voice
-  // interstitial and get back here again)
+  // Initialize web audio if user enabled audio input (redirects through voice interstitial)
 
   $('#userLowerInteraction').html('');
 
@@ -710,8 +583,7 @@ Template.card.events({
   },
 
   'click #removeQuestion': async function(e) {
-    // check if the question was already reported.
-    // This button only needs to fire if the user hasnt answered the question already.
+    // Check if question was already reported before firing button
     if(!cardState.get('wasReportedForRemoval')) {
       await removeCardByUser();
       cardState.set('wasReportedForRemoval', true);
@@ -928,8 +800,7 @@ Template.card.helpers({
   },
 
   'shouldShowSpeechRecognitionUI': function() {
-    // Only show SR UI when actually awaiting input (prevents FOUC of red "waiting" state)
-    // Recording starts in PRESENTING_AWAITING state via allowUserInput()
+    // Only show SR UI when awaiting input to prevent FOUC of red 'waiting' state
     const state = cardState.get('_debugTrialState');
 
     return state === TRIAL_STATES.PRESENTING_AWAITING;
@@ -1318,11 +1189,7 @@ Template.card.helpers({
     }
   },
 
-  // ============================================================
-  // TEMPLATE OPTIMIZATION HELPERS
-  // These helpers flatten deeply nested conditionals and replace
-  // inline class logic to improve template readability
-  // ============================================================
+  // TEMPLATE OPTIMIZATION HELPERS - Flatten nested conditionals and replace inline class logic
 
   /**
    * Checks if sub-word cloze should be displayed
@@ -1434,9 +1301,7 @@ function getResponseType() {
   return ('' + type).toLowerCase();
 }
 
-// TRANSITION TIMING CONFIGURATION
-// Reads the actual CSS variable value set by admin in theme panel
-// This ensures JavaScript timing stays in sync with CSS transitions
+// Read CSS --transition-smooth variable to sync JavaScript timing with CSS transitions
 function getTransitionDuration() {
   // Read --transition-smooth CSS variable from root element for FADING_IN/FADING_OUT transitions
   const rootStyles = getComputedStyle(document.documentElement);
@@ -1454,9 +1319,7 @@ function getTransitionDuration() {
   return 200;
 }
 
-// FADE-IN STATE MACHINE HELPERS
-// These functions encapsulate the PRESENTING.FADING_IN → PRESENTING.DISPLAYING transition
-// without changing timing behavior
+// STATE MACHINE: FADE-IN helpers encapsulate PRESENTING.FADING_IN → DISPLAYING transition
 
 function shouldSkipFadeIn() {
   const displayReady = cardState.get('displayReady');
@@ -1482,32 +1345,22 @@ function completeFadeIn() {
   transitionTrialState(TRIAL_STATES.PRESENTING_DISPLAYING, 'Fade-in complete, content visible');
 }
 
-// TRIAL STATE MACHINE CONSTANTS (Hierarchical Model)
-// Three distinct trial flows (based on trial type):
-//   Study:  PRESENTING.LOADING → PRESENTING.FADING_IN → PRESENTING.DISPLAYING → STUDY.SHOWING → TRANSITION
-//   Drill:  PRESENTING.LOADING → PRESENTING.FADING_IN → PRESENTING.DISPLAYING → PRESENTING.AWAITING → FEEDBACK.SHOWING → TRANSITION
-//   Test:   PRESENTING.LOADING → PRESENTING.FADING_IN → PRESENTING.DISPLAYING → PRESENTING.AWAITING → TRANSITION
-// All trials share the first 3 PRESENTING substates (LOADING, FADING_IN, DISPLAYING)
-// Study skips AWAITING and uses STUDY phase; Drill adds FEEDBACK; Test skips both STUDY and FEEDBACK
+// STATE MACHINE: Trial flows - Study: PRESENTING→STUDY→TRANSITION, Drill: PRESENTING→AWAITING→FEEDBACK→TRANSITION, Test: PRESENTING→AWAITING→TRANSITION
 
 const TRIAL_STATES = {
-  // PRESENTING PHASE - User sees question/content (drill/test share this)
-  // Duration: 15-30s for drill/test (waiting for input)
+  // PRESENTING PHASE - User sees question (drill/test share this, 15-30s for input)
   PRESENTING_LOADING: 'PRESENTING.LOADING',          // Selecting card, loading assets (50-500ms)
   PRESENTING_FADING_IN: 'PRESENTING.FADING_IN',      // New content appearing (uses --transition-smooth)
   PRESENTING_DISPLAYING: 'PRESENTING.DISPLAYING',    // Visible, input disabled (brief ~10ms)
   PRESENTING_AWAITING: 'PRESENTING.AWAITING',        // Input enabled, waiting (drill/test only)
 
-  // STUDY PHASE - Study trials only (completely separate from presenting/feedback)
-  // Duration: purestudy timeout (e.g., 3 seconds)
+  // STUDY PHASE - Study trials only (separate from presenting/feedback, purestudy timeout)
   STUDY_SHOWING: 'STUDY.SHOWING',                    // Display stimulus+answer (study only)
 
-  // FEEDBACK PHASE - Drill trials only (shows correctness after input)
-  // Duration: 2-5s for drill
+  // FEEDBACK PHASE - Drill trials only (shows correctness, 2-5s duration)
   FEEDBACK_SHOWING: 'FEEDBACK.SHOWING',              // Display correct/incorrect (drill only)
 
-  // TRANSITION PHASE - Between trials (all trial types use this)
-  // Duration: ~(2 * transition-smooth) + ~40ms cleanup (default: ~440ms total)
+  // TRANSITION PHASE - Between trials (all types, ~440ms total with default settings)
   TRANSITION_START: 'TRANSITION.START',              // Brief cleanup (10ms)
   TRANSITION_FADING_OUT: 'TRANSITION.FADING_OUT',    // Old content disappearing (uses --transition-smooth)
   TRANSITION_CLEARING: 'TRANSITION.CLEARING',        // Clearing DOM while invisible (40ms)
@@ -1583,8 +1436,7 @@ function transitionTrialState(newState, reason = '') {
       `\n   Valid transitions from ${previousState}: ${validNextStates.join(', ')}`,
       reason ? `\n   Reason: ${reason}` : ''
     );
-    // Don't throw - just log. In production we might want to transition to ERROR state
-    // For now, allow the transition but flag it
+    // STATE MACHINE: Don't throw on invalid transition - log only, allow transition for now
   }
 
   // Log transition
@@ -1689,17 +1541,14 @@ function initializeAudio() {
       navigator.mediaDevices = {};
     }
 
-    // Some browsers partially implement mediaDevices. We can't just assign an object
-    // with getUserMedia as it would overwrite existing properties.
-    // Here, we will just add the getUserMedia property if it's missing.
+    // Browser compat: Some browsers partially implement mediaDevices, can't overwrite with assignment
     if (navigator.mediaDevices.getUserMedia === undefined) {
       navigator.mediaDevices.getUserMedia = function(constraints) {
         // First get ahold of the legacy getUserMedia, if present
         const getUserMedia = navigator.webkitGetUserMedia || navigator.mozGetUserMedia ||
           navigator.msGetUserMedia || navigator.getUserMedia;
 
-        // Some browsers just don't implement it - return a rejected promise with an error
-        // to keep a consistent interface
+        // Browser compat: Return rejected promise for consistent interface if getUserMedia not implemented
         if (!getUserMedia) {
           return Promise.reject(new Error('getUserMedia is not implemented in this browser'));
         }
@@ -1753,8 +1602,7 @@ function preloadImages() {
         }
         link = asset.link();
 
-        // Convert ALL absolute URLs to relative paths for remote/LAN access
-        // This ensures images work whether accessed via localhost, LAN IP, or domain
+        // Convert absolute URLs to relative paths for remote/LAN access compatibility
         const pathMatch = link.match(/^https?:\/\/[^/]+(\/.+)$/);
         if (pathMatch) {
           link = pathMatch[1]; // Use relative path
@@ -1792,8 +1640,7 @@ function preloadImages() {
   return Promise.all(imageLoadPromises);
 }
 
-// Wait for the DOM image element to be fully loaded and ready to paint
-// This ensures images are displayed when fading in, not after
+// Wait for DOM image to be fully loaded and painted before fading in
 function waitForDOMImageReady() {
   return new Promise((resolve) => {
     const currentDisplay = cardState.get('currentDisplay');
@@ -1877,9 +1724,7 @@ async function preloadStimuliFiles() {
     clientConsole(2, 'Non image type detected');
   }
 
-  // TTS warm-up is now done in audioSettings.js when user enables audio prompts
-  // This gives better UX because the delay happens when accessing audio settings,
-  // not during unit initialization where it would block trial 1 from appearing
+  // TTS warmup now in audioSettings.js for better UX (delay when accessing settings, not trial 1)
 }
 
 function checkUserAudioConfigCompatability(){
@@ -1924,15 +1769,7 @@ function curStimHasImageDisplayType() {
 
 
 
-// Buttons are determined by 3 options: buttonorder, buttonOptions, wrongButtonLimit:
-//
-// 1. buttonorder - can be "fixed" or "random" with a default of fixed.
-//
-// 2. buttonOptions - the list of button labels to use. If empty the
-//    button labels will be taken from the current stim cluster.
-//
-// 3. wrongButtonLimit - The number of WRONG buttons to display (so final
-//    button is wrongButtonLimit + 1 for the correct answer).
+// Button config: buttonorder (fixed/random), buttonOptions (labels), wrongButtonLimit (count of wrong buttons)
 function setUpButtonTrial() {
   const currUnit = Session.get('currentTdfUnit');
   const deliveryParams = Session.get('currentDeliveryParams');
@@ -2176,8 +2013,7 @@ function handleUserInput(e, source, simAnswerCorrect) {
     clientConsole(2, 'skipped study');
   }
 
-  // If we haven't seen the correct keypress, then we want to reset our
-  // timeout and leave
+  // If no correct keypress seen yet, reset timeout and leave
   if (key != ENTER_KEY) {
     resetMainCardTimeout(cardState, timeoutState);
     return;
@@ -2190,8 +2026,7 @@ function handleUserInput(e, source, simAnswerCorrect) {
   
   // Stop current timeout and stop user input
   stopUserInput();
-  // We've entered input before the timeout, meaning we need to decrement the pausedLocks before we lose
-  // track of the fact that we were counting down to a recalculated delay after being on the error report modal
+  // Entered input before timeout - decrement pausedLocks to track error report modal state
   if (timeoutState.get('name')) {
     if (cardState.get('pausedLocks')>0) {
       const numRemainingLocks = cardState.get('pausedLocks')-1;
@@ -2232,14 +2067,11 @@ function handleUserInput(e, source, simAnswerCorrect) {
   Session.set('source', source);
   cardState.set('userAnswer', userAnswer);
 
-  // Show user feedback and find out if they answered correctly
-  // Note that userAnswerFeedback will display text and/or media - it is
-  // our responsbility to decide when to hide it and move on
+  // Show user feedback and determine correctness (userAnswerFeedback displays text/media)
   userAnswerFeedback(userAnswer, isSkip , isTimeout, simAnswerCorrect);
 }
 
-// Take care of user feedback - simCorrect will usually be undefined/null BUT if
-// it is true or false we know this is part of a simulation call
+// Handle user feedback - simCorrect indicates simulation (true/false) vs real answer (undefined/null)
 async function userAnswerFeedback(userAnswer, isSkip, isTimeout, simCorrect) {
   const isButtonTrial = getButtonTrial();
   const setspec = !isButtonTrial ? Session.get('currentTdfFile').tdfs.tutor.setspec : undefined;
@@ -2252,9 +2084,7 @@ async function userAnswerFeedback(userAnswer, isSkip, isTimeout, simCorrect) {
     isTimeout = false;
     feedbackForAnswer = 'Please study the answer';
   } else if (isTimeout) {
-    // How was their answer? (And note we only need to update historyUserAnswer
-    // if it's not a "standard" )
-    // Timeout - doesn't matter what the answer says!
+    // Evaluate answer correctness (only update historyUserAnswer if not 'standard')
     isCorrectAccumulator = false;
     userAnswerWithTimeout = '';
   } else if (typeof simCorrect === 'boolean') {
@@ -2390,8 +2220,7 @@ function determineUserFeedback(userAnswer, isSkip, isCorrect, feedbackForAnswer,
 
   const currentDeliveryParams = Session.get('currentDeliveryParams')
   if (currentDeliveryParams.scoringEnabled) {
-    // Note that we track the score in the user progress object, but we
-    // copy it to the Session object for template updates
+    // Track score in user progress object, copy to Session for template updates
     const {correctscore, incorrectscore} = currentDeliveryParams;
 
     const oldScore = cardState.get('currentScore');
@@ -2424,9 +2253,7 @@ function determineUserFeedback(userAnswer, isSkip, isCorrect, feedbackForAnswer,
 async function showUserFeedback(isCorrect, feedbackMessage, isTimeout, isSkip) {
   clientConsole(2, '[SM] showUserFeedback called in state:', trialState.get('current'));
 
-  // NOTE: Do NOT call stopRecording() here - it destroys the audio buffer before
-  // the speech recognition API can process it. Recording stops naturally when
-  // user stops speaking (hark.js voice detection) and exports buffer to API.
+  // NOTE: Don't call stopRecording() here - destroys audio buffer before SR API processes it
 
   // STATE MACHINE: Transition to FEEDBACK.SHOWING (drill only, test skips feedback)
   if (trialShowsFeedback()) {
@@ -2463,9 +2290,7 @@ async function showUserFeedback(isCorrect, feedbackMessage, isTimeout, isSkip) {
     const buttonImageFeedback = 'Incorrect.  The correct response is displayed below.';
     const correctImageSrc = experimentState.originalAnswer;
 
-    // MO8: Use DOM createElement for security and proper image optimization
-    // SECURITY: Prevents XSS via proper DOM API instead of HTML string concatenation
-    // ACCESSIBILITY: Proper <img> element with alt text instead of CSS background
+    // MO8: SECURITY - Use DOM createElement instead of HTML strings to prevent XSS, proper img with alt
     const userInteractionEl = document.getElementById('UserInteraction');
     userInteractionEl.innerHTML = ''; // Clear existing content
 
@@ -2532,8 +2357,7 @@ async function showUserFeedback(isCorrect, feedbackMessage, isTimeout, isSkip) {
     if(!singleLineFeedback){
       feedbackMessage = "<br>" + feedbackMessage;
     }
-    //we have several options for displaying the feedback, we can display it in the top (#userInteraction), bottom (#userLowerInteraction). We write a case for this
-    // PHASE 2: Set reactive state, let Tracker.autorun handle DOM updates
+    // Feedback display options: top (#userInteraction), bottom (#userLowerInteraction) - set reactive state
     cardState.set('feedbackPosition', feedbackDisplayPosition);
     cardState.set('inFeedback', true);
 
@@ -2548,8 +2372,7 @@ async function showUserFeedback(isCorrect, feedbackMessage, isTimeout, isSkip) {
         break;
       case "bottom":
         target = "#userLowerInteraction";
-        // DOM updates handled by autorun in Template.card.onCreated()
-        //add the fontSize class to the target
+        // DOM updates handled by autorun, add fontSize class to target
         const hSizeBottom = deliveryParams ? deliveryParams.fontsize.toString() : 2;
         $(target).addClass('h' + hSizeBottom);
         break;
@@ -2580,8 +2403,7 @@ async function showUserFeedback(isCorrect, feedbackMessage, isTimeout, isSkip) {
           }
           if(!isSkip){
             if(!isCorrect){
-              // inFeedback already set via cardState above
-              // Batch DOM update: get existing content, append, then single write
+              // inFeedback already set via cardState, batch DOM update with single write
               const existingContent = $(target).html() || '';
               const newContent = existingContent + feedbackMessage;
               $(target)
@@ -2608,8 +2430,7 @@ async function showUserFeedback(isCorrect, feedbackMessage, isTimeout, isSkip) {
               var percent = 100 - ((seconds / originalSecs) * 100);
               const timerElement = document.getElementById("CountdownTimerText");
               if (!timerElement) {
-                // Element doesn't exist, clear interval and exit
-                // FIX: Must set CurIntervalId to undefined so waiting code doesn't wait forever
+                // FIX: Element doesn't exist - clear interval and set CurIntervalId to undefined (prevents infinite wait)
                 Meteor.clearInterval(CountdownTimerInterval);
                 cardState.set('CurIntervalId', undefined);
                 return;
@@ -2645,10 +2466,7 @@ async function showUserFeedback(isCorrect, feedbackMessage, isTimeout, isSkip) {
                   $('#CountdownTimerText').text("Continuing...");
                 }
                 cardState.set('CurIntervalId', undefined);
-                // FIX: DO NOT set inFeedback=false here - let afterAnswerFeedbackCallback() handle it
-                // after BOTH countdown AND TTS complete. This prevents UI flash and ensures proper
-                // synchronization between countdown timer and TTS audio completion.
-                // cardState.set('inFeedback', false); // REMOVED - moved to afterAnswerFeedbackCallback
+                // FIX: Don't set inFeedback=false here - let afterAnswerFeedbackCallback() handle after both countdown AND TTS
               }
             }, 250); // Reduced from 100ms - 4fps is smooth enough, saves CPU
             cardState.set('CurIntervalId', CountdownTimerInterval);
@@ -2667,8 +2485,7 @@ async function showUserFeedback(isCorrect, feedbackMessage, isTimeout, isSkip) {
 
   speakMessageIfAudioPromptFeedbackEnabled(feedbackMessage, 'feedback');
 
-  // If incorrect answer for a drill on a sound not after a dialogue loop,
-  // we need to replay the sound, after the optional audio feedback delay time
+  // Replay sound after optional audio feedback delay if incorrect drill answer (not after dialogue loop)
   if (!!(cardState.get('currentDisplay').audioSrc) && !isCorrect) {
     const delay = Session.get('currentDeliveryParams').timeuntilaudiofeedback;
     registerTimeout('audioFeedbackReplay', function() {
@@ -2677,19 +2494,11 @@ async function showUserFeedback(isCorrect, feedbackMessage, isTimeout, isSkip) {
     }, delay, 'Replay audio after incorrect answer');
   }
 
-  // forceCorrection is now part of user interaction - we always clear the
-  // textbox, but only show it if:
-  // * They got the answer wrong somehow
-  // * forceCorrection is true in the current delivery params
-  // * the trial params are specified to enable forceCorrection
-  // * we are NOT in a sim
+  // forceCorrection: clear textbox always, show only if wrong answer + forceCorrection enabled + not sim
 
-  // Call doClearForceCorrect non-reactively to prevent infinite loop
-  // Previously used Tracker.afterFlush which caused the callback to fire after EVERY flush,
-  // creating a loop when Session variables were updated in afterAnswerFeedbackCallback
+  // Call doClearForceCorrect non-reactively to prevent infinite loop (was Tracker.afterFlush causing loop)
   Tracker.nonreactive(() => {
-    // 'm' = mandatory correction (must re-type), 'n' = timed prompt/hint (auto-continues)
-    // Both use force correction UI but with different behavior
+    // Trial type 'm' = mandatory correction (must re-type), 'n' = timed prompt/hint (auto-continues)
     const isForceCorrectTrial = getTestType() === 'm' || getTestType() === 'n';
     const doForceCorrect = (!isCorrect && !Session.get('runSimulation') &&
       (Session.get('currentDeliveryParams').forceCorrection || isForceCorrectTrial));
@@ -2783,10 +2592,7 @@ async function afterAnswerFeedbackCallback(trialEndTimeStamp, trialStartTimeStam
   // Stop previous timeout, log response data, and clear up any other vars for next question
   clearCardTimeoutWrapper();
 
-  // FIX: Clear any stale countdown interval from previous trial
-  // For correct answers, no countdown interval is created, but we need to clear
-  // any leftover CurIntervalId from a previous incorrect trial to prevent
-  // infinite waiting in afterFeedbackCallback
+  // FIX: Clear stale countdown interval from previous trial (correct answers don't create one, prevents infinite wait)
   cardState.set('CurIntervalId', undefined);
 
   cardState.set('feedbackTimeoutBegins', Date.now())
@@ -2858,17 +2664,13 @@ async function afterFeedbackCallback(trialEndTimeStamp, trialStartTimeStamp, isT
   }
 
   if(!userLeavingTrial){
-    // Special: count the number of timeouts in a row. If autostopTimeoutThreshold
-    // is specified and we have seen that many (or more) timeouts in a row, then
-    // we leave the page. Note that autostopTimeoutThreshold defaults to 0 so that
-    // this feature MUST be turned on in the TDF.
+    // Auto-stop: Count consecutive timeouts, leave page if autostopTimeoutThreshold reached
     if (!isTimeout) {
       timeoutsSeen = 0; // Reset count
     } else {
       timeoutsSeen++;
 
-      // Figure out threshold (with default of 0)
-      // Also note: threshold < 1 means no autostop at all
+      // autostopTimeoutThreshold defaults to 0, must be >= 1 to enable feature
       const threshold = deliveryParams.autostopTimeoutThreshold;
 
       if (threshold > 0 && timeoutsSeen >= threshold) {
@@ -2878,8 +2680,7 @@ async function afterFeedbackCallback(trialEndTimeStamp, trialStartTimeStamp, isT
       }
     }
 
-    // FIX: Wait for BOTH countdown timer AND TTS to complete before transitioning to next trial
-    // This prevents TTS from the current trial bleeding into the next trial
+    // FIX: Wait for BOTH countdown AND TTS to complete before transitioning (prevents TTS bleeding into next trial)
     clientConsole(2, '[SM] afterAnswerFeedbackCallback: Waiting for countdown and TTS to complete');
 
     // Wait for countdown to finish (if not already finished)
@@ -2902,10 +2703,7 @@ async function afterFeedbackCallback(trialEndTimeStamp, trialStartTimeStamp, isT
       }
     });
 
-    // Wait for TTS to finish (if requested)
-    // FIX: Check cardState.get('ttsRequested') to handle async Google TTS API calls
-    // The issue: when correctprompt=0, countdown finishes before Google TTS API even responds
-    // By checking ttsRequested, we wait for the API call to complete, not just audio playback
+    // FIX: Wait for TTS request completion via cardState.get('ttsRequested') for async Google TTS API
     const waitForTTS = new Promise(resolve => {
       if (cardState.get('ttsRequested')) {
         clientConsole(2, '[SM] 🎤 TTS was requested, waiting for it to complete...');
@@ -2947,8 +2745,7 @@ async function afterFeedbackCallback(trialEndTimeStamp, trialStartTimeStamp, isT
       }
     });
 
-    // Wait for BOTH to complete (whichever happens LAST)
-    // This ensures reviewstudy timeout is extended if TTS hasn't returned yet
+    // Wait for whichever completes LAST (countdown or TTS) to extend reviewstudy timeout if needed
     const startWait = Date.now();
     await Promise.all([waitForCountdown, waitForTTS]);
     const waitDuration = Date.now() - startWait;
@@ -2972,8 +2769,7 @@ async function cardEnd() {
   $('#userAnswer').val('');
   cardState.set('feedbackTimeoutEnds', Date.now())
 
-  // STATE MACHINE: Transition will happen in prepareCard via FADING_OUT and CLEARING
-  // prepareCard() handles fade-out and clearing, then moves to next trial's LOADING
+  // STATE MACHINE: Transition happens in prepareCard via FADING_OUT → CLEARING → LOADING
   await prepareCard();
 }
 
@@ -3103,17 +2899,14 @@ function gatherAnswerLogRecord(trialEndTimeStamp, trialStartTimeStamp, source, u
   const cluster = getStimCluster(clusterIndex);
   const {_id, clusterKC, stimulusKC} = cluster.stims[whichStim];
   const responseType = ('' + cluster.stims[0].itemResponseType || 'text').toLowerCase()
-  // let curKCBase = getStimKCBaseForCurrentStimuliSet();
-  // let stimulusKC = whichStim + curKCBase;
+  // Commented out: let curKCBase = getStimKCBaseForCurrentStimuliSet(); let stimulusKC = whichStim + curKCBase;
 
   const curTdf = Session.get('currentTdfFile');
   const unitName = _.trim(curTdf.tdfs.tutor.unit[Session.get('currentUnitNumber')].unitname);
 
   const problemName = Session.get('currentExperimentState').originalDisplay;
   const stepName = problemName;
-  // let stepCount = (state.stepNameSeen[stepName] || 0) + 1;
-  // state.stepNameSeen[stepName] = stepCount;
-  // stepName = stepCount + " " + stepName;
+  // Commented out: let stepCount = (state.stepNameSeen[stepName] || 0) + 1; state.stepNameSeen[stepName] = stepCount; stepName = stepCount + ' ' + stepName;
   const isStudy = testType === 's';
   let shufIndex = clusterIndex;
   const rawClusterIndex = typeof cluster.clusterIndex === 'number' ? cluster.clusterIndex : clusterIndex;
@@ -3181,7 +2974,7 @@ function gatherAnswerLogRecord(trialEndTimeStamp, trialStartTimeStamp, source, u
     'probabilityEstimate': probabilityEstimate,
     'typeOfResponse': responseType,
     'responseValue': _.trim(userAnswer),
-    'displayedStimulus': cardState.get('currentDisplay'),
+    'displayedStimulus': filledInDisplay,
     'sectionId': Session.get('curSectionId'),
     'teacherId': Session.get('curTeacher')?._id,
     'anonStudentId': Meteor.user().username,
@@ -3267,25 +3060,19 @@ function findQTypeSimpified() {
 
 function hideUserFeedback() {
   clientConsole(2, '[SM] hideUserFeedback called in state:', trialState.get('current'));
-  // Don't use .hide() - let displayReady fade-out handle visibility
-  // Using .hide() causes instant flash while content is still visible
-  // Clear ALL feedback locations (top, middle, bottom) since we don't know which was used
+  // Don't use .hide() - let displayReady fade-out handle visibility (prevents instant flash)
   $('#UserInteraction').removeClass('text-align alert').html('');
   $('#feedbackOverride').html('');
   $('#userLowerInteraction').html('');
   $('#userForceCorrect').val(''); // text box - see inputF.html
-  // Don't hide forceCorrectionEntry - let fade-out handle it
-  // Don't hide removeQuestion - let fade-out handle it
+  // Don't hide forceCorrectionEntry or removeQuestion - let fade-out handle them
 }
 
-// Comprehensive cleanup that mimics what {{#if displayReady}} teardown did automatically
-// IMPORTANT: Only clear input VALUES and non-reactive HTML, NOT Blaze-managed content
+// Comprehensive cleanup mimicking {{#if displayReady}} teardown - only clear VALUES/non-reactive HTML, not Blaze-managed content
 function cleanupTrialContent() {
   clientConsole(2, '[SM] cleanupTrialContent called in state:', trialState.get('current'));
 
-  // FIX: Stop any orphaned TTS audio from previous trial
-  // This is a safety measure to prevent audio bleeding into the next trial
-  // Normally Promise.all waits for audio to finish, but this catches edge cases
+  // FIX: Stop orphaned TTS audio as safety measure (normally Promise.all waits, this catches edge cases)
   if (window.currentAudioObj) {
     clientConsole(2, '[SM]   Stopping orphaned TTS audio during cleanup');
     window.currentAudioObj.pause();
@@ -3294,19 +3081,16 @@ function cleanupTrialContent() {
     window.currentAudioObj = undefined;
   }
 
-  // Clear input VALUES (not HTML - let Blaze handle that)
-  // Note: #userAnswer already cleared in cardEnd(), but safe to repeat
+  // Clear input VALUES only (not HTML, Blaze handles that) - #userAnswer already cleared in cardEnd()
   $('#userAnswer').val('');
   $('#userForceCorrect').val('');
 
-  // Reset input styling that may persist from previous trial
-  // This prevents border color flash (black→red) during fade-in
+  // Reset input styling to prevent border color flash (black→red) during fade-in
   $('#userAnswer').removeClass('is-invalid is-valid'); // Bootstrap validation classes
   $('#userAnswer').css('border-color', ''); // Reset any inline border styles
   $('#userAnswer').css('border', ''); // Reset full border property
 
-  // Clear non-reactive HTML (NOT feedback - hideUserFeedback() already did that)
-  // Only clear elements that weren't handled by hideUserFeedback
+  // Clear non-reactive HTML only (feedback already handled by hideUserFeedback)
   $('#correctAnswerDisplayContainer').html('');
   $('#CountdownTimerText').text('');
 
@@ -3323,15 +3107,13 @@ function cleanupTrialContent() {
   $('#forceCorrectionEntry').attr('hidden', '');
   $('#confirmButton').prop('disabled', true).attr('aria-disabled', 'true');
 
-  // CRITICAL: Show .input-box that was hidden during feedback
-  // showUserFeedback() calls $('.input-box').addClass('hidden') but nothing shows it again
+  // CRITICAL: Re-show .input-box (was hidden during feedback, nothing shows it again otherwise)
   $('.input-box').removeClass('hidden');
   $('#multipleChoiceContainer').removeClass('hidden');
 
   cardState.set('inputReady', false);
 
-  // NOTE: Do NOT clear Session variables here - those are cleared in prepareCard/newQuestionHandler
-  // NOTE: Do NOT clear HTML that's managed by Blaze templates (buttonList, text, etc.)
+  // NOTE: Don't clear Session vars here (done in prepareCard/newQuestionHandler), don't clear Blaze-managed HTML
 }
 
 
@@ -3391,8 +3173,7 @@ async function revisitUnit(unitNumber) {
 
   let leaveTarget;
   if (newUnitNum < curTdf.tdfs.tutor.unit.length || curTdf.tdfs.tutor.unit[newUnitNum] > 0) {
-    // Revisiting a Unit, we need to restart with instructions
-    // Check if the unit has a learning session, assess
+    // Revisiting unit requires restart with instructions - check for learning session assessment
     clientConsole(2, 'REVISIT UNIT: show instructions for unit', newUnitNum);
       const rootTDFBoxed = Tdfs.findOne({_id: Session.get('currentRootTdfId')});
       const rootTDF = rootTDFBoxed.content;
@@ -3403,9 +3184,7 @@ async function revisitUnit(unitNumber) {
 
 }
 
-// Called when the current unit is done. This should be either unit-defined (see
-// prepareCard) or user-initiated (see the continue button event and the var
-// len display timeout function)
+// Called when current unit is done (either unit-defined via prepareCard or user-initiated via continue button)
 async function unitIsFinished(reason) {
   clearCardTimeoutWrapper();
 
@@ -3592,8 +3371,7 @@ function cardStart() {
   });
   $('#userLowerInteraction').html('');
 
-  // Hide global loading spinner when card starts (handles video sessions and other edge cases)
-  // Video sessions skip beginFadeIn() so we need this fallback
+  // Hide global loading spinner when card starts (fallback for video sessions which skip beginFadeIn)
   if (Session.get('appLoading')) {
     clientConsole(2, '[UI] Card start - hiding global spinner');
     Session.set('appLoading', false);
@@ -3616,9 +3394,9 @@ function cardStart() {
   }
 }
 
-async function prepareCard() {
+async function prepareCard(isResume = false) {
   const trialNum = (Session.get('currentExperimentState')?.numQuestionsAnswered || 0) + 1;
-  clientConsole(2, '[SM] === prepareCard START (Trial #' + trialNum + ') ===');
+  clientConsole(2, '[SM] === prepareCard START (Trial #' + trialNum + ', isResume=' + isResume + ') ===');
   // Call stack logging removed (too verbose)
   clientConsole(2, '[SM]   displayReady before:', cardState.get('displayReady'));
 
@@ -3639,8 +3417,7 @@ async function prepareCard() {
   Meteor.logoutOtherClients();
   cardState.set('wasReportedForRemoval', false);
 
-  // Start fade-out with OLD content still visible (not cleared to empty)
-  // DON'T clean up yet - that happens AFTER fade completes
+  // Start fade-out with OLD content still visible - cleanup happens AFTER fade completes
   clientConsole(2, '[SM]   Setting displayReady=false to fade out (old content remains visible during fade)');
   cardState.set('displayReady', false);
   cardState.set('inputReady', false);
@@ -3651,8 +3428,7 @@ async function prepareCard() {
   await new Promise(resolve => registerTimeout('fadeOutTransition', resolve, fadeDelay, 'Wait for CSS fade-out transition'));
   clientConsole(2, '[SM]   Fade-out complete, now cleaning up WHILE INVISIBLE');
 
-  // Clean up feedback/input styling AFTER fade-out (while opacity=0)
-  // This prevents flashing during the visible transition
+  // Clean up feedback/input styling AFTER fade-out while opacity=0 to prevent visible flashing
   cleanupTrialContent();
 
   // STATE MACHINE: Transition to CLEARING
@@ -3661,14 +3437,10 @@ async function prepareCard() {
   }
 
   cardState.set('submmissionLock', false);
-  // CRITICAL: Clear currentDisplay WHILE INVISIBLE (opacity=0) to remove old image
-  // This prevents the old image from briefly appearing when new content is set
-  // The sequence is: fade out old image → clear while invisible → set new image while invisible → fade in new image
+  // CRITICAL: Clear currentDisplay while invisible (opacity=0) to prevent old image briefly appearing during new content fade-in
   cardState.set('currentDisplay', {});
 
-  // DON'T set buttonTrial to undefined - causes input to flash/paint late
-  // It will be updated with correct value in newQuestionHandler()
-  // cardState.set('buttonTrial', undefined); // REMOVED - causes Blaze re-render delay
+  // Don't set buttonTrial to undefined - causes input flash/paint delay (updated in newQuestionHandler instead)
   cardState.set('buttonList', []);
   $('#helpButton').prop("disabled",false);
   if (await engine.unitFinished()) {
@@ -3692,12 +3464,16 @@ async function prepareCard() {
     }
   } else {
     // STATE MACHINE: Transition to PRESENTING.LOADING
-    transitionTrialState(TRIAL_STATES.PRESENTING_LOADING, 'Starting card selection');
+    transitionTrialState(TRIAL_STATES.PRESENTING_LOADING, isResume ? 'Resuming existing card' : 'Starting card selection');
 
-    await engine.selectNextCard(Session.get('engineIndices'), Session.get('currentExperimentState'));
+    // Resume path: card selected, skip selectNextCard() - Normal path: select from engine
+    if (!isResume) {
+      await engine.selectNextCard(Session.get('engineIndices'), Session.get('currentExperimentState'));
+    } else {
+      clientConsole(2, '[SM] prepareCard: Skipping selectNextCard (resume path, card already selected)');
+    }
 
-    // Set buttonTrial BEFORE newQuestionHandler so Blaze can render everything atomically
-    // when displayReady=true fires. This prevents input field from painting after image.
+    // Set buttonTrial BEFORE newQuestionHandler so Blaze renders atomically when displayReady=true (prevents input field painting after image)
     const isButtonTrial = getButtonTrial();
     cardState.set('buttonTrial', isButtonTrial);
     clientConsole(2, '[SM] prepareCard: Set buttonTrial =', isButtonTrial, 'before content display');
@@ -3728,8 +3504,7 @@ async function newQuestionHandler() {
   cardState.set('buttonList', []);
   speechTranscriptionTimeoutsSeen = 0;
 
-  // buttonTrial is now set BEFORE newQuestionHandler (in prepareCard) to ensure
-  // Blaze can render stimulus and input atomically when displayReady=true fires
+  // buttonTrial now set BEFORE newQuestionHandler (in prepareCard) for atomic Blaze render
   const isButtonTrial = cardState.get('buttonTrial');
   clientConsole(2, 'newQuestionHandler, isButtonTrial', isButtonTrial, 'displayReady', cardState.get('displayReady'));
 
@@ -3737,10 +3512,7 @@ async function newQuestionHandler() {
     setUpButtonTrial();
   }
 
-  // If this is a study-trial and we are displaying a cloze, then we should
-  // construct the question to display the actual information. Note that we
-  // use a regex so that we can do a global(all matches) replace on 3 or
-  // more underscores
+  // For study-trial cloze, construct question to display actual info using regex for global replace of 3+ underscores
   if ((getTestType() === 's' || getTestType() === 'f') && !!(experimentState.currentDisplayEngine.clozeText)) {
     const currentDisplay = experimentState.currentDisplayEngine;
     const clozeQuestionFilledIn = Answers.clozeStudy(currentDisplay.clozeText, experimentState.currentAnswer);
@@ -3787,8 +3559,7 @@ function startQuestionTimeout() {
   }
   const currentDisplayEngine = currentExperimentState.currentDisplayEngine;
 
-  // displayReady is toggled false→true for each trial to control CSS opacity transitions
-  // With CSS wrapper approach, DOM stays in place - only visibility changes via .trial-hidden class
+  // displayReady toggled false→true per trial to control CSS opacity transitions (DOM stays in place, only visibility changes)
 
   let readyPromptTimeout = 0;
   if(Session.get('currentDeliveryParams').readyPromptStringDisplayTime && Session.get('currentDeliveryParams').readyPromptStringDisplayTime > 0){
@@ -3912,13 +3683,9 @@ async function checkAndDisplayTwoPartQuestion(deliveryParams, currentDisplayEngi
     cardState.set('inputReady', true);
     handleTwoPartQuestion();
   } else {
-    // CRITICAL: Wait one frame for Blaze to finish computing buttonTrial visibility classes
-    // Before this fix: displayReady=true triggered CSS fade-in while Blaze was still updating
-    // .trial-input-hidden class, causing input field to flash/repaint mid-transition
-    // After: Blaze completes DOM updates → THEN fade-in starts with final layout already set
+    // CRITICAL: Wait one frame for Blaze to finish computing buttonTrial visibility classes before fade-in (prevents input flash/repaint mid-transition)
     requestAnimationFrame(async () => {
-      // FLICKER FIX: Set input disabled state AND focus BEFORE fade-in starts
-      // All state changes happen while opacity=0 (invisible), eliminating visible flicker
+      // FLICKER FIX: Set input disabled state AND focus BEFORE fade-in while opacity=0 (eliminates visible flicker)
       const isButtonTrial = cardState.get('buttonTrial');
       if (!isButtonTrial) {
         // Text input trial: enable input and focus it before fade-in so it's ready when visible
@@ -3936,8 +3703,7 @@ async function checkAndDisplayTwoPartQuestion(deliveryParams, currentDisplayEngi
         inputDisabled = false;
       }
 
-      // IMAGE UX FIX: Wait for image to be fully loaded and painted before fading in
-      // This prevents the image box from fading in empty and then showing the image after
+      // IMAGE UX FIX: Wait for image fully loaded and painted before fading in (prevents empty box then late image)
       await waitForDOMImageReady();
 
       cardState.set('inputReady', true);
@@ -3976,8 +3742,7 @@ function beginQuestionAndInitiateUserInput(delayMs, deliveryParams) {
     }, timeuntilaudio, 'Time until audio plays (TDF parameter)');
   } else { // Not a sound - can unlock now for data entry now
     const questionToSpeak = currentDisplay.clozeText || currentDisplay.text;
-    // Only speak the prompt if the question type makes sense
-    // For button trials: speak question but NOT button labels (A, B, C, D)
+    // Speak prompt only for appropriate question types (button trials: speak question but not A/B/C/D labels)
     if (questionToSpeak) {
       clientConsole(2, 'text to speak playing prompt: ', new Date());
       speakMessageIfAudioPromptFeedbackEnabled(questionToSpeak, 'question');
@@ -3996,8 +3761,7 @@ function allowUserInput() {
   clientConsole(2, 'allow user input');
   clientConsole(2, '[SM] allowUserInput called in state:', trialState.get('current'));
 
-  // STATE MACHINE: Transition to AWAITING (for drill/test) or STUDY.SHOWING (for study)
-  // This is called AFTER fade-in completes (via setTimeout callback chain)
+  // STATE MACHINE: Transition to AWAITING (drill/test) or STUDY.SHOWING (study) after fade-in completes
   if (trialUsesStudyPhase()) {
     // Study trials: transition to STUDY.SHOWING phase
     transitionTrialState(TRIAL_STATES.STUDY_SHOWING, 'Study trial showing stimulus+answer');
@@ -4006,9 +3770,7 @@ function allowUserInput() {
     transitionTrialState(TRIAL_STATES.PRESENTING_AWAITING, 'Ready for user input');
   }
 
-  // DO NOT need to show #userAnswer - CSS wrapper (#trialContentWrapper) handles visibility via opacity
-  // Visibility is controlled by displayReady, not jQuery show/hide
-  // $('#userAnswer').show(); // REMOVED - not needed with CSS wrapper approach
+  // Don't need show() - CSS wrapper (#trialContentWrapper) handles visibility via displayReady and opacity
 
   // SR should not activate for button trials (multiple choice) - only for text input
   if (!getButtonTrial()) {
@@ -4020,15 +3782,12 @@ function allowUserInput() {
   }
   clientConsole(2, '[SR] ==========================================');
 
-  // FLICKER FIX: Input disabled state already set in prepareCard() to prevent flicker
-  // We only need to update the flag here for safety in case stopUserInput() is in progress
-  // The actual prop('disabled', false) happens in prepareCard() while opacity=0
+  // FLICKER FIX: Input disabled state already set in prepareCard() - only update flag here for safety
   if (inputDisabled !== false) {
     inputDisabled = false;
   }
 
-  // REPAINT FIX: Batch remaining DOM updates in single requestAnimationFrame
-  // Note: Focus already happened in checkAndDisplayTwoPartQuestion before fade-in
+  // REPAINT FIX: Batch remaining DOM updates in single requestAnimationFrame (focus already happened before fade-in)
   requestAnimationFrame(() => {
     // Show confirm button
     $('#confirmButton').removeClass('hidden');
@@ -4052,23 +3811,16 @@ function allowUserInput() {
 }
 
 
-// This records the synchronous state of whether input should be enabled or disabled
-// without this we get into the situation where either stopUserInput fails because
-// the DOM hasn't fully updated yet or worse allowUserInput fails because the DOM
-// loads before it and stopUserInput is erroneously executed afterwards due to timing issues
+// inputDisabled flag records synchronous enable/disable state to prevent race conditions between stopUserInput and allowUserInput
 let inputDisabled = undefined;
 function stopUserInput() {
   clientConsole(2, 'stop user input');
   clientConsole(2, '[SM] stopUserInput called in state:', trialState.get('current'));
-  // DO NOT hide #userAnswer - CSS wrapper (#trialContentWrapper) handles visibility via opacity
-  // $('#userAnswer').hide(); // REMOVED - breaks input visibility on subsequent trials
+  // Don't hide #userAnswer - CSS wrapper handles visibility via opacity (would break input on subsequent trials)
   inputDisabled = true;
   // stopRecording(); // COMMENTED OUT - destroys audio buffer before API can process it
 
-  // Delay disabling inputs to sync with CSS fade transition
-  // This prevents visible button state changes during fade-out, improving perceived smoothness
-  // The inputDisabled flag guards against race conditions if allowUserInput() is called during this delay
-  // NOTE: We only DISABLE here, not enable - enabling happens in prepareCard() before fade-in to prevent flicker
+  // Delay disabling inputs to sync with CSS fade transition (prevents visible button state changes, inputDisabled guards race conditions)
   registerTimeout('stopUserInputDelay', function() {
     clientConsole(2, 'after delay, stopping user input');
     // Only disable if inputDisabled is still true (allowUserInput may have set it to false)
@@ -4085,10 +3837,7 @@ async function speakMessageIfAudioPromptFeedbackEnabled(msg, audioPromptSource) 
   const userAudioPromptMode = Meteor.user()?.audioSettings?.audioPromptMode;
   const tdfAudioPromptMode = Session.get('currentTdfFile')?.tdfs?.tutor?.setspec?.audioPromptMode;
 
-  // TTS should only activate if:
-  // 1. TDF has audioPromptMode set to something other than 'silent' (or unset, which defaults to 'silent')
-  // 2. User has their preference set to something other than 'silent'
-  // The icon toggle only controls user preference - if TDF doesn't support it, don't activate
+  // TTS activates only if: (1) TDF audioPromptMode != 'silent' AND (2) User preference != 'silent'
   const tdfSupportsAudioPrompts = tdfAudioPromptMode && tdfAudioPromptMode !== 'silent';
   const userWantsAudioPrompts = userAudioPromptMode && userAudioPromptMode !== 'silent';
   const enableAudioPromptAndFeedback = tdfSupportsAudioPrompts && userWantsAudioPrompts;
@@ -4099,9 +3848,7 @@ async function speakMessageIfAudioPromptFeedbackEnabled(msg, audioPromptSource) 
 
   if (enableAudioPromptAndFeedback) {
     if (audioPromptSource === audioPromptMode || audioPromptMode === 'all') {
-      // Note: Recording lock moved INSIDE TTS success callback to avoid permanent lock on errors
-      // Replace underscores with blank so that we don't get awkward UNDERSCORE UNDERSCORE
-      // UNDERSCORE...speech from literal reading of text
+      // Recording lock moved inside TTS success callback (avoids permanent lock on errors), replace underscores in speech text
       msg = msg.replace(/(&nbsp;)+/g, 'blank');
       // Remove all HTML
       msg = msg.replace( /(<([^>]+)>)/ig, '');
@@ -4115,9 +3862,7 @@ async function speakMessageIfAudioPromptFeedbackEnabled(msg, audioPromptSource) 
           audioPromptVoice = Session.get('audioPromptVoice')
         }
 
-        // FIX: Track TTS request state to ensure feedback doesn't advance before TTS completes
-        // This is critical when correctprompt=0 - the countdown finishes immediately but TTS
-        // API call is still in flight. We must wait for the request to complete.
+        // FIX: Track ttsRequested state to prevent feedback advancing before TTS completes (critical when correctprompt=0)
         cardState.set('ttsRequested', true);
         clientConsole(2, '[SR] 🎤 TTS request started (ttsRequested=true)');
 
@@ -4236,8 +3981,7 @@ async function speakMessageIfAudioPromptFeedbackEnabled(msg, audioPromptSource) 
   }
 }
 
-// Speech recognition function to process audio data, this is called by the web worker
-// started with the recorder object when enough data is received to fill up the buffer
+// Speech recognition: process audio data when web worker buffer fills
 async function processLINEAR16(data) {
   clientConsole(2, '[SR] ========== processLINEAR16 CALLED ==========');
   clientConsole(2, '[SR] Audio data received, processing...');
@@ -4264,16 +4008,14 @@ async function processLINEAR16(data) {
     const maxAttempts = Session.get('currentDeliveryParams').autostopTranscriptionAttemptLimit;
     clientConsole(2, `[SR] Attempt ${speechTranscriptionTimeoutsSeen} of ${maxAttempts}`);
 
-    // Check if we've ALREADY exceeded maxAttempts (attempt 4 when limit is 3)
-    // If so, skip API call and force incorrect answer immediately
+    // Check if already exceeded maxAttempts before API call - if so, skip API and force incorrect
     if (speechTranscriptionTimeoutsSeen > maxAttempts) {
       clientConsole(2, `[SR] ⚠️ Exceeded maxAttempts (${speechTranscriptionTimeoutsSeen} > ${maxAttempts}), skipping API call and forcing incorrect feedback`);
 
       // Clear waiting flag
       srState.set('waitingForTranscription', false);
 
-      // Simulate empty/incorrect answer and go to feedback
-      // The speechAPICallback logic will be bypassed entirely
+      // Simulate empty/incorrect answer and go to feedback (bypassing speechAPICallback logic)
       if (getButtonTrial()) {
         handleUserInput({answer: {'answer': {'name': 'a'}}}, 'voice');
       } else if (DialogueUtils.isUserInDialogueLoop()) {
@@ -4313,9 +4055,7 @@ async function processLINEAR16(data) {
       }
       answerGrammar = phraseHints;
     } else if (!DialogueUtils.isUserInDialogueLoop()) {
-      // PERFORMANCE OPTIMIZATION: Cache answer grammar per UNIT
-      // Answer grammar is ALL possible answers for current unit (currentStimuliSet)
-      // It only changes when unit changes. Recomputing every trial wastes 100+ ms!
+      // PERF: Cache answer grammar per UNIT (all possible answers for currentStimuliSet, only changes on unit change, saves 100+ms)
       const {curClusterIndex, curStimIndex} = getCurrentClusterAndStimIndices();
       const currentUnitNumber = Session.get('currentTdfUnit')?.unitnumber;
 
@@ -4334,8 +4074,7 @@ async function processLINEAR16(data) {
         clientConsole(2, `[SR] 📦 Cached answer grammar for unit ${currentUnitNumber} (${answerGrammar.length} items)`);
       }
 
-      // Get the correct answer for THIS trial to filter out phonetic conflicts
-      // Use Session's currentExperimentState which is always set for SR trials
+      // Get correct answer for THIS trial to filter phonetic conflicts (from Session.currentExperimentState)
       const experimentState = Session.get('currentExperimentState');
       const correctAnswer = experimentState?.currentAnswer;
 
@@ -4357,8 +4096,7 @@ async function processLINEAR16(data) {
           }
         }
 
-        // Find phonetically conflicting words with the correct answer
-        // Example: if correct answer is "anguilla", remove "angola" from grammar
+        // Find phonetically conflicting words with correct answer (e.g., 'anguilla' conflicts with 'angola')
         const [correctPrimary, correctSecondary] = getPhoneticCodes(correctAnswer);
         clientConsole(2, `[SR] 🔍 Correct answer "${correctAnswer}" phonetic codes: primary="${correctPrimary}", secondary="${correctSecondary || 'none'}"`);
 
@@ -4368,15 +4106,12 @@ async function processLINEAR16(data) {
           phoneticIndexForConflicts
         );
 
-        // Remove phonetic conflicts from answer grammar for validation
-        // This forces clearer pronunciation since conflicting words won't match
+        // Remove phonetic conflicts from answer grammar to force clearer pronunciation (conflicting words won't match)
         if (phoneticConflicts.length > 0) {
           answerGrammar = answerGrammar.filter(word => phoneticConflicts.indexOf(word) === -1);
           clientConsole(2, `[SR] 🚫 Removed ${phoneticConflicts.length} phonetic conflict(s) from answer grammar: [${phoneticConflicts.join(', ')}]`);
 
-          // CRITICAL: Rebuild phonetic index with FILTERED grammar
-          // The cached index includes removed conflicts, causing false matches in callback
-          // Example: "guinea" test removes "ghana", but old index still has it → "guini" matches "ghana"
+          // CRITICAL: Rebuild phonetic index with FILTERED grammar (cached index has removed conflicts, causes false matches like 'guinea'→'ghana')
           cachedPhoneticIndex = buildPhoneticIndex(answerGrammar);
           clientConsole(2, `[SR] 🔄 Rebuilt phonetic index with filtered grammar (${answerGrammar.length} items)`);
         } else {
@@ -4419,8 +4154,7 @@ async function processLINEAR16(data) {
         clientConsole(2, '[SR] Using TDF-embedded API key');
         res = await Meteor.callAsync('makeGoogleSpeechAPICall', Session.get('currentTdfId'), "", request, answerGrammar);
       } else {
-        // If we don't have a tdf provided speech api key load up the user key
-        // NOTE: we shouldn't be able to get here if there is no user key
+        // Load user API key if TDF doesn't provide one (shouldn't reach here without key)
         clientConsole(2, '[SR] Using user-provided API key');
         res = await Meteor.callAsync('makeGoogleSpeechAPICall', Session.get('currentTdfId'), Session.get('speechAPIKey'), request, answerGrammar);
       }
@@ -4438,8 +4172,7 @@ function speechAPICallback(err, data){
   srState.set('waitingForTranscription', false);
   clientConsole(2, '[SR] speechAPICallback received, set waitingForTranscription=false');
 
-  // FIX: Check if we're still in a valid state for input (Layer 3 of 3-layer defense)
-  // This prevents processing late transcriptions that arrive after state has changed
+  // FIX: Check still in valid input state (Layer 3 of 3-layer defense against late transcriptions)
   if (trialState.get('current') !== TRIAL_STATES.PRESENTING_AWAITING) {
     clientConsole(2, '[SR] ⚠️ Transcription arrived too late - trial state is:', trialState.get('current'));
     clientConsole(2, '[SR] Discarding transcription to prevent state machine violation');
@@ -4467,9 +4200,7 @@ function speechAPICallback(err, data){
     [answerGrammar, response] = data;
   }
 
-  // PERFORMANCE OPTIMIZATION: Cache phonetic index per UNIT
-  // Building phonetic index is expensive (100+ ms for large grammars)
-  // Since answer grammar doesn't change within a unit, cache the index too
+  // PERF: Cache phonetic index per UNIT (building is expensive 100+ms, doesn't change within unit)
   let phoneticIndex = null;
   if (answerGrammar && answerGrammar.length > 10) {
     const currentUnitNumber = Session.get('currentTdfUnit')?.unitnumber;
@@ -4525,8 +4256,7 @@ function speechAPICallback(err, data){
     }
     ignoredOrSilent = true;
   } else if (response && response['results'] && response['results'].length > 0) {
-    // Successfully got response - collect ALL alternatives from ALL results
-    // Google sometimes returns multiple results with alternatives spread across them
+    // Successfully got response - collect ALL alternatives from ALL results (Google spreads them across multiple)
     let alternatives = [];
     for (let resultIdx = 0; resultIdx < response['results'].length; resultIdx++) {
       const result = response['results'][resultIdx];
@@ -4565,8 +4295,7 @@ function speechAPICallback(err, data){
         clientConsole(2, `[SR] ✅ FOUND EXACT GRAMMAR MATCH: "${transcript}"`);
       }
 
-      // Second pass: Phonetic matching for homophones (Mali/Molly, Palau/pull out)
-      // Only try phonetic matching for words with 3+ characters to avoid false positives
+      // Second pass: Phonetic matching for homophones (Mali/Molly, Palau/pull out) - only for 3+ char words to avoid false positives
       if (!foundGrammarMatch && alternatives.length > 0 && alternatives[0]['transcript']) {
         const bestAlternative = alternatives[0]['transcript'].toLowerCase();
 
@@ -4651,8 +4380,7 @@ function speechAPICallback(err, data){
     }
   }
 
-  // Check if we've reached maxAttempts AFTER this attempt finished
-  // If so, force feedback instead of retrying
+  // Check if reached maxAttempts AFTER this attempt - if so, force feedback instead of retrying
   const maxAttempts = Session.get('currentDeliveryParams').autostopTranscriptionAttemptLimit;
   if (speechTranscriptionTimeoutsSeen >= maxAttempts && ignoredOrSilent) {
     clientConsole(2, `[SR] ⚠️ Reached maxAttempts (${speechTranscriptionTimeoutsSeen} >= ${maxAttempts}) in callback, forcing incorrect feedback instead of retry`);
@@ -4676,14 +4404,10 @@ function speechAPICallback(err, data){
     startRecording();
     // Status messages are shown in SR icon/message display, not in input field
   } else {
-    // FIX: Clear timeout when SR completes successfully with valid transcript
-    // This prevents race condition where timeout fires after SR completes,
-    // reading the SR transcript from textbox and appending " [timeout]" to it
-    // Result without fix: "portugal [timeout]" instead of "portugal"
+    // FIX: Clear timeout when SR completes successfully (prevents race: timeout fires after SR, appends ' [timeout]' to transcript)
     clearCardTimeoutWrapper();
 
-    // Only simulate enter key press if we picked up transcribable/in grammar
-    // audio for better UX
+    // Only simulate enter key press if picked up transcribable/in-grammar audio (better UX)
     if (getButtonTrial()) {
       handleUserInput({answer: userAnswer}, 'voice');
     } else if (DialogueUtils.isUserInDialogueLoop()) {
@@ -4777,13 +4501,10 @@ function startUserMedia(stream) {
   // eslint-disable-next-line no-undef
   recorder = new Recorder(input, audioRecorderConfig);
 
-  // Set up the process callback so that when we detect speech end we have the
-  // function to process the audio data
+  // Set process callback for when speech end detected (will process audio data)
   recorder.setProcessCallback(processLINEAR16);
 
-  // Set up options for voice activity detection code (hark.js)
-  // audioInputSensitivity: threshold for voice detection (higher number = more sensitive)
-  // Default 60 (converts to -60 dB threshold), range 0-100 (maps to 0 to -100 dB)
+  // Voice activity detection config: audioInputSensitivity (0-100, default 60 = -60 dB threshold)
   const sensitivity = Session.get('audioInputSensitivity') || 60;
   const harkOptions = {
     threshold: -1 * sensitivity,  // Convert to negative dB value (e.g., -20 dB)
@@ -4796,10 +4517,7 @@ function startUserMedia(stream) {
 
   let recordingStartTime = null;
 
-  // Volume monitoring removed - floods console
-  // speechEvents.on('volume_change', function(volume, threshold) {
-  //   clientConsole(2, '[SR] Volume:', volume.toFixed(2), 'dB | Threshold:', threshold, 'dB');
-  // });
+  // Volume monitoring removed - floods console with volume_change events
 
   speechEvents.on('speaking', function() {
     recordingStartTime = Date.now(); // Track when voice starts
@@ -4916,13 +4634,7 @@ async function updateExperimentState(newState, codeCallLocation, unitEngineOverr
   return curExperimentState.currentTdfId;
 }
 
-// Re-initialize our User Progress and Card Probabilities internal storage
-// from the user times log. Note that most of the logic will be in
-// processUserTimesLog This function just does some initial set up, insures
-// that experimental conditions are correct, and uses processUserTimesLog as
-// a callback. This callback pattern is important because it allows us to be
-// sure our server-side call regarding experimental conditions has completed
-// before continuing to resume the session
+// Re-initialize User Progress and Card Probabilities from user times log (processUserTimesLog callback ensures server-side experimental conditions complete)
 async function resumeFromComponentState() {
   if (Session.get('inResume')) {
     clientConsole(2, 'RESUME DENIED - already running in resume');
@@ -4944,11 +4656,7 @@ async function resumeFromComponentState() {
   setDispTimeoutText('');
   $('#continueButton').prop('disabled', true);
 
-  // So here's the place where we'll use the ROOT tdf instead of just the
-  // current TDF. It's how we'll find out if we need to perform experimental
-  // condition selection. It will be our responsibility to update
-  // currentTdfId and currentStimuliSetId based on experimental conditions
-  // (if necessary)
+  // Use ROOT tdf to find if experimental condition selection needed (will update currentTdfId and currentStimuliSetId)
   let rootTDFBoxed = Tdfs.findOne({_id: Session.get('currentRootTdfId')});
   if (!rootTDFBoxed) {
     clientConsole(1, 'Root TDF not found in client collection, fetching from server:', Session.get('currentRootTdfId'));
@@ -5123,8 +4831,7 @@ async function resumeFromComponentState() {
     Session.set('currentTdfFile', curTdf.content);
     Session.set('currentTdfName', curTdf.content.fileName);
 
-    // Also need to read new stimulus file (and note that we allow an exception
-    // to kill us if the current tdf is broken and has no stimulus file)
+    // Read new stimulus file (exception allowed to kill if current tdf broken with no stimulus file)
     Session.set('currentStimuliSetId', curTdf.stimuliSetId);
     clientConsole(2, 'condition stimuliSetId', curTdf);
   } else {
@@ -5148,8 +4855,7 @@ async function resumeFromComponentState() {
       Session.set('currentTdfFile', curTdf.content);
       Session.set('currentTdfName', curTdf.content.fileName);
 
-      // Also need to read new stimulus file (and note that we allow an exception
-      // to kill us if the current tdf is broken and has no stimulus file)
+      // Read new stimulus file (exception allowed to kill if current tdf broken with no stimulus file)
       Session.set('currentStimuliSetId', curTdf.stimuliSetId);
       clientConsole(2, 'condition stimuliSetId', curTdf);
     }
@@ -5164,9 +4870,7 @@ async function resumeFromComponentState() {
   await preloadStimuliFiles();
   checkUserAudioConfigCompatability();
 
-  // In addition to experimental condition, we allow a root TDF to specify
-  // that the xcond parameter used for selecting from multiple deliveryParms's
-  // is to be system assigned (as opposed to URL-specified)
+  // Root TDF can specify xcond parameter for deliveryParms is system-assigned (vs URL-specified)
   if (setspec.randomizedDelivery && setspec.randomizedDelivery.length) {
     clientConsole(2, 'xcond for delivery params is sys assigned: searching');
     const prevExperimentXCond = curExperimentState.experimentXCond;
@@ -5189,19 +4893,14 @@ async function resumeFromComponentState() {
     Session.set('experimentXCond', experimentXCond);
   }
 
-  // Find previous cluster mapping (or create if it's missing)
-  // Note that we need to wait until the exp condition is selected above so
-  // that we go to the correct TDF
+  // Find or create cluster mapping (must wait until exp condition selected for correct TDF)
   const stimCount = getStimCount();
   let clusterMapping = curExperimentState.clusterMapping;
   if (!clusterMapping) {
-    // No cluster mapping! Need to create it and store for resume
-    // We process each pair of shuffle/swap together and keep processing
-    // until we have nothing left
+    // No cluster mapping - create it by processing shuffle/swap pairs and store for resume
     const setSpec = Session.get('currentTdfFile').tdfs.tutor.setspec;
 
-    // Note our default of a single no-op to insure we at least build a
-    // default cluster mapping
+    // Default single no-op to ensure at least build default cluster mapping
     const shuffles = setSpec.shuffleclusters ? setSpec.shuffleclusters.trim().split(" ") : [''];
     const swaps = setSpec.swapclusters ? setSpec.swapclusters.trim().split(" ") : [''];
     clusterMapping = [];
@@ -5255,9 +4954,7 @@ async function resumeFromComponentState() {
 
   await updateExperimentState(newExperimentState, 'card.resumeFromComponentState');
 
-  //custom settings for user interface
-  //we get the current settings from the tdf file's setspec
-  //but the unit and individual question can override these settings
+  // Custom UI settings from TDF setspec (unit and individual question can override)
   const curTdfUISettings = rootTDF.tdfs.tutor.setspec.uiSettings ? rootTDF.tdfs.tutor.setspec.uiSettings : false;
   const curUnitUISettions = curTdfUnit.uiSettings ? curTdfUnit.uiSettings : false;
   
@@ -5300,14 +4997,10 @@ async function resumeFromComponentState() {
       'stimuliBoxColor': 'alert-bg', // Can be Bootstrap class (alert-primary) or color (#ff0000, red, etc.)
     },
   }
-  //here we interprit the stimulus and input position settings to set the colum widths. There are 4 possible combinations.
-  // 1. stimuliPosition = top, userInputPosition = bottom. We set both to col-12
-  // 2. stimuliPosition = left, userInputPosition = right. We set stimuli to col-6 and input to col-6
+  // Interpret stimulus and input position settings to set column widths (4 combinations: top/bottom, left/right)
   
 
-  //if curTdfUISettings is set, then we need to check if it is a string or an object.
-  //if it is a string, then we need to check if it is a preset. Otherwise, we set it to default
-  //and modify the keys that are set in the object.
+  // If curTdfUISettings is string, check if preset - otherwise treat as object and fill missing keys with defaults
   if(UIsettings){
     if(typeof UIsettings === 'string'){
       if(displayPresets[UIsettings]){
@@ -5406,9 +5099,7 @@ async function resumeFromComponentState() {
     cardState.set('feedbackUnset', false);
   }
   
-  // Notice that no matter what, we log something about condition data
-  // ALSO NOTICE that we'll be calling processUserTimesLog after the server
-  // returns and we know we've logged what happened
+  // Always log condition data, then call processUserTimesLog after server returns
   if(!cardState.get('displayFeedback')){
     processUserTimesLog();
   }
@@ -5470,12 +5161,10 @@ async function processUserTimesLog() {
 
   let resumeToQuestion = false;
 
-  // prepareCard will handle whether or not new units see instructions, but
-  // it will miss instructions for the very first unit.
+  // prepareCard handles new unit instructions but misses first unit instructions
   let needFirstUnitInstructions = !Session.get('curUnitInstructionsSeen'); 
 
-  // It's possible that they clicked Continue on a final unit, so we need to
-  // know to act as if we're done
+  // Possible clicked Continue on final unit - need to act as if done
   let moduleCompleted = false;
 
   // Reset current engine
@@ -5509,8 +5198,7 @@ async function processUserTimesLog() {
       needFirstUnitInstructions = false;
       break;
     case 'unit-end':
-      // Logged completion of unit - if this is the final unit we also
-      // know that the TDF is completed
+      // Logged unit completion - if final unit, also know TDF completed
       if ((!!newUnitNum && !!checkUnit) && checkUnit === newUnitNum) {
         if (lastUnitCompleted >= tdfFile.tdfs.tutor.unit.length) {
           moduleCompleted = true; // TODO: what do we do for multiTdfs? Depends on structure of template parentTdf
@@ -5519,15 +5207,13 @@ async function processUserTimesLog() {
         needFirstUnitInstructions = tdfFile.tdfs.tutor.unit && tdfFile.tdfs.tutor.unit.unitinstructions;
       }
       break;
-      // case "schedule":
-      //    break;
+      // Commented out: case 'schedule': break;
     case 'question':
       resumeToQuestion = true;
       break;
     case 'answer':
     case '[timeout]':
-      // resumeToQuestion = true;//TODO: may want true here
-      // writeCurrentToScrollList(entry.answer, action === "[timeout]", simCorrect, 0);//TODO restore all scroll list state
+      // TODO: resumeToQuestion = true; writeCurrentToScrollList(entry.answer, action === '[timeout]', simCorrect, 0); - restore scroll list state
       break;
   }
 
@@ -5553,8 +5239,7 @@ async function processUserTimesLog() {
     await updateExperimentState(newExperimentState, 'card.processUserTimesLog');
     await engine.loadComponentStates();
 
-    // If we make it here, then we know we won't need a resume until something
-    // else happens
+    // If reached here, no resume needed until something else happens
 
     Session.set('inResume', false);
 
@@ -5581,17 +5266,15 @@ async function processUserTimesLog() {
         await initializePlyr();
       }
     } else if (resumeToQuestion) {
-      // Question outstanding: force question display and let them give an answer
-      clientConsole(2, 'RESUME FINISHED: displaying current question');
-      await newQuestionHandler();
+      // FIX: Question outstanding - go through proper cleanup/transitions before display (was calling newQuestionHandler directly, bypassing state machine)
+      clientConsole(2, 'RESUME FINISHED: preparing and displaying current question');
+      await prepareCard(true); // isResume=true skips selectNextCard, but still does cleanup
     } else if (needFirstUnitInstructions && typeof curTdfUnit.unitinstructions !== 'undefined') {
       // They haven't seen our first instruction yet
       clientConsole(2, 'RESUME FINISHED: displaying initial instructions');
       leavePage('/instructions');
     } else {
-      // If we get this far and the unit engine thinks the unit is finished,
-      // we might need to stick with the instructions *IF AND ONLY IF* the
-      // lockout period hasn't finished (which prepareCard won't handle)
+      // If unit engine thinks finished, might need instructions IF lockout period hasn't finished (prepareCard won't handle)
       if (await engine.unitFinished()) {
         let lockoutMins = Session.get('currentDeliveryParams').lockoutminutes;
         user = Meteor.user();
