@@ -1,0 +1,597 @@
+[
+  {
+    "startLine": 669,
+    "endLine": 670,
+    "compressed": "// FIX: Lower sample rate to 16kHz (Google Speech API recommendation) to reduce payload and improve latency"
+  },
+  {
+    "startLine": 676,
+    "endLine": 678,
+    "compressed": "// Initialize web audio if user enabled audio input (redirects through voice interstitial)"
+  },
+  {
+    "startLine": 713,
+    "endLine": 714,
+    "compressed": "// Check if question was already reported before firing button"
+  },
+  {
+    "startLine": 931,
+    "endLine": 932,
+    "compressed": "// Only show SR UI when awaiting input to prevent FOUC of red 'waiting' state"
+  },
+  {
+    "startLine": 1321,
+    "endLine": 1325,
+    "compressed": "// TEMPLATE OPTIMIZATION HELPERS - Flatten nested conditionals and replace inline class logic"
+  },
+  {
+    "startLine": 1437,
+    "endLine": 1439,
+    "compressed": "// Read CSS --transition-smooth variable to sync JavaScript timing with CSS transitions"
+  },
+  {
+    "startLine": 1457,
+    "endLine": 1459,
+    "compressed": "// STATE MACHINE: FADE-IN helpers encapsulate PRESENTING.FADING_IN → DISPLAYING transition"
+  },
+  {
+    "startLine": 1485,
+    "endLine": 1491,
+    "compressed": "// STATE MACHINE: Trial flows - Study: PRESENTING→STUDY→TRANSITION, Drill: PRESENTING→AWAITING→FEEDBACK→TRANSITION, Test: PRESENTING→AWAITING→TRANSITION"
+  },
+  {
+    "startLine": 1494,
+    "endLine": 1495,
+    "compressed": "// PRESENTING PHASE - User sees question (drill/test share this, 15-30s for input)"
+  },
+  {
+    "startLine": 1501,
+    "endLine": 1502,
+    "compressed": "// STUDY PHASE - Study trials only (separate from presenting/feedback, purestudy timeout)"
+  },
+  {
+    "startLine": 1505,
+    "endLine": 1506,
+    "compressed": "// FEEDBACK PHASE - Drill trials only (shows correctness, 2-5s duration)"
+  },
+  {
+    "startLine": 1509,
+    "endLine": 1510,
+    "compressed": "// TRANSITION PHASE - Between trials (all types, ~440ms total with default settings)"
+  },
+  {
+    "startLine": 1586,
+    "endLine": 1587,
+    "compressed": "// STATE MACHINE: Don't throw on invalid transition - log only, allow transition for now"
+  },
+  {
+    "startLine": 1692,
+    "endLine": 1694,
+    "compressed": "// Browser compat: Some browsers partially implement mediaDevices, can't overwrite with assignment"
+  },
+  {
+    "startLine": 1701,
+    "endLine": 1702,
+    "compressed": "// Browser compat: Return rejected promise for consistent interface if getUserMedia not implemented"
+  },
+  {
+    "startLine": 1756,
+    "endLine": 1757,
+    "compressed": "// Convert absolute URLs to relative paths for remote/LAN access compatibility"
+  },
+  {
+    "startLine": 1795,
+    "endLine": 1796,
+    "compressed": "// Wait for DOM image to be fully loaded and painted before fading in"
+  },
+  {
+    "startLine": 1880,
+    "endLine": 1882,
+    "compressed": "// TTS warmup now in audioSettings.js for better UX (delay when accessing settings, not trial 1)"
+  },
+  {
+    "startLine": 1927,
+    "endLine": 1935,
+    "compressed": "// Button config: buttonorder (fixed/random), buttonOptions (labels), wrongButtonLimit (count of wrong buttons)"
+  },
+  {
+    "startLine": 2179,
+    "endLine": 2180,
+    "compressed": "// If no correct keypress seen yet, reset timeout and leave"
+  },
+  {
+    "startLine": 2193,
+    "endLine": 2194,
+    "compressed": "// Entered input before timeout - decrement pausedLocks to track error report modal state"
+  },
+  {
+    "startLine": 2235,
+    "endLine": 2237,
+    "compressed": "// Show user feedback and determine correctness (userAnswerFeedback displays text/media)"
+  },
+  {
+    "startLine": 2241,
+    "endLine": 2242,
+    "compressed": "// Handle user feedback - simCorrect indicates simulation (true/false) vs real answer (undefined/null)"
+  },
+  {
+    "startLine": 2255,
+    "endLine": 2257,
+    "compressed": "// Evaluate answer correctness (only update historyUserAnswer if not 'standard')"
+  },
+  {
+    "startLine": 2393,
+    "endLine": 2394,
+    "compressed": "// Track score in user progress object, copy to Session for template updates"
+  },
+  {
+    "startLine": 2427,
+    "endLine": 2429,
+    "compressed": "// NOTE: Don't call stopRecording() here - destroys audio buffer before SR API processes it"
+  },
+  {
+    "startLine": 2466,
+    "endLine": 2468,
+    "compressed": "// MO8: SECURITY - Use DOM createElement instead of HTML strings to prevent XSS, proper img with alt"
+  },
+  {
+    "startLine": 2535,
+    "endLine": 2536,
+    "compressed": "// Feedback display options: top (#userInteraction), bottom (#userLowerInteraction) - set reactive state"
+  },
+  {
+    "startLine": 2551,
+    "endLine": 2552,
+    "compressed": "// DOM updates handled by autorun, add fontSize class to target"
+  },
+  {
+    "startLine": 2583,
+    "endLine": 2584,
+    "compressed": "// inFeedback already set via cardState, batch DOM update with single write"
+  },
+  {
+    "startLine": 2611,
+    "endLine": 2612,
+    "compressed": "// FIX: Element doesn't exist - clear interval and set CurIntervalId to undefined (prevents infinite wait)"
+  },
+  {
+    "startLine": 2648,
+    "endLine": 2651,
+    "compressed": "// FIX: Don't set inFeedback=false here - let afterAnswerFeedbackCallback() handle after both countdown AND TTS"
+  },
+  {
+    "startLine": 2670,
+    "endLine": 2671,
+    "compressed": "// Replay sound after optional audio feedback delay if incorrect drill answer (not after dialogue loop)"
+  },
+  {
+    "startLine": 2680,
+    "endLine": 2685,
+    "compressed": "// forceCorrection: clear textbox always, show only if wrong answer + forceCorrection enabled + not sim"
+  },
+  {
+    "startLine": 2687,
+    "endLine": 2689,
+    "compressed": "// Call doClearForceCorrect non-reactively to prevent infinite loop (was Tracker.afterFlush causing loop)"
+  },
+  {
+    "startLine": 2691,
+    "endLine": 2692,
+    "compressed": "// Trial type 'm' = mandatory correction (must re-type), 'n' = timed prompt/hint (auto-continues)"
+  },
+  {
+    "startLine": 2786,
+    "endLine": 2789,
+    "compressed": "// FIX: Clear stale countdown interval from previous trial (correct answers don't create one, prevents infinite wait)"
+  },
+  {
+    "startLine": 2861,
+    "endLine": 2864,
+    "compressed": "// Auto-stop: Count consecutive timeouts, leave page if autostopTimeoutThreshold reached"
+  },
+  {
+    "startLine": 2870,
+    "endLine": 2871,
+    "compressed": "// autostopTimeoutThreshold defaults to 0, must be >= 1 to enable feature"
+  },
+  {
+    "startLine": 2881,
+    "endLine": 2882,
+    "compressed": "// FIX: Wait for BOTH countdown AND TTS to complete before transitioning (prevents TTS bleeding into next trial)"
+  },
+  {
+    "startLine": 2905,
+    "endLine": 2908,
+    "compressed": "// FIX: Wait for TTS request completion via cardState.get('ttsRequested') for async Google TTS API"
+  },
+  {
+    "startLine": 2950,
+    "endLine": 2951,
+    "compressed": "// Wait for whichever completes LAST (countdown or TTS) to extend reviewstudy timeout if needed"
+  },
+  {
+    "startLine": 2975,
+    "endLine": 2976,
+    "compressed": "// STATE MACHINE: Transition happens in prepareCard via FADING_OUT → CLEARING → LOADING"
+  },
+  {
+    "startLine": 3106,
+    "endLine": 3107,
+    "compressed": "// Commented out: let curKCBase = getStimKCBaseForCurrentStimuliSet(); let stimulusKC = whichStim + curKCBase;"
+  },
+  {
+    "startLine": 3114,
+    "endLine": 3116,
+    "compressed": "// Commented out: let stepCount = (state.stepNameSeen[stepName] || 0) + 1; state.stepNameSeen[stepName] = stepCount; stepName = stepCount + ' ' + stepName;"
+  },
+  {
+    "startLine": 3270,
+    "endLine": 3272,
+    "compressed": "// Don't use .hide() - let displayReady fade-out handle visibility (prevents instant flash)"
+  },
+  {
+    "startLine": 3277,
+    "endLine": 3278,
+    "compressed": "// Don't hide forceCorrectionEntry or removeQuestion - let fade-out handle them"
+  },
+  {
+    "startLine": 3281,
+    "endLine": 3282,
+    "compressed": "// Comprehensive cleanup mimicking {{#if displayReady}} teardown - only clear VALUES/non-reactive HTML, not Blaze-managed content"
+  },
+  {
+    "startLine": 3286,
+    "endLine": 3288,
+    "compressed": "// FIX: Stop orphaned TTS audio as safety measure (normally Promise.all waits, this catches edge cases)"
+  },
+  {
+    "startLine": 3297,
+    "endLine": 3298,
+    "compressed": "// Clear input VALUES only (not HTML, Blaze handles that) - #userAnswer already cleared in cardEnd()"
+  },
+  {
+    "startLine": 3302,
+    "endLine": 3303,
+    "compressed": "// Reset input styling to prevent border color flash (black→red) during fade-in"
+  },
+  {
+    "startLine": 3308,
+    "endLine": 3309,
+    "compressed": "// Clear non-reactive HTML only (feedback already handled by hideUserFeedback)"
+  },
+  {
+    "startLine": 3326,
+    "endLine": 3327,
+    "compressed": "// CRITICAL: Re-show .input-box (was hidden during feedback, nothing shows it again otherwise)"
+  },
+  {
+    "startLine": 3333,
+    "endLine": 3334,
+    "compressed": "// NOTE: Don't clear Session vars here (done in prepareCard/newQuestionHandler), don't clear Blaze-managed HTML"
+  },
+  {
+    "startLine": 3394,
+    "endLine": 3395,
+    "compressed": "// Revisiting unit requires restart with instructions - check for learning session assessment"
+  },
+  {
+    "startLine": 3406,
+    "endLine": 3408,
+    "compressed": "// Called when current unit is done (either unit-defined via prepareCard or user-initiated via continue button)"
+  },
+  {
+    "startLine": 3595,
+    "endLine": 3596,
+    "compressed": "// Hide global loading spinner when card starts (fallback for video sessions which skip beginFadeIn)"
+  },
+  {
+    "startLine": 3642,
+    "endLine": 3643,
+    "compressed": "// Start fade-out with OLD content still visible - cleanup happens AFTER fade completes"
+  },
+  {
+    "startLine": 3654,
+    "endLine": 3655,
+    "compressed": "// Clean up feedback/input styling AFTER fade-out while opacity=0 to prevent visible flashing"
+  },
+  {
+    "startLine": 3664,
+    "endLine": 3666,
+    "compressed": "// CRITICAL: Clear currentDisplay while invisible (opacity=0) to prevent old image briefly appearing during new content fade-in"
+  },
+  {
+    "startLine": 3669,
+    "endLine": 3671,
+    "compressed": "// Don't set buttonTrial to undefined - causes input flash/paint delay (updated in newQuestionHandler instead)"
+  },
+  {
+    "startLine": 3697,
+    "endLine": 3698,
+    "compressed": "// Resume path: card selected, skip selectNextCard() - Normal path: select from engine"
+  },
+  {
+    "startLine": 3705,
+    "endLine": 3706,
+    "compressed": "// Set buttonTrial BEFORE newQuestionHandler so Blaze renders atomically when displayReady=true (prevents input field painting after image)"
+  },
+  {
+    "startLine": 3737,
+    "endLine": 3738,
+    "compressed": "// buttonTrial now set BEFORE newQuestionHandler (in prepareCard) for atomic Blaze render"
+  },
+  {
+    "startLine": 3746,
+    "endLine": 3749,
+    "compressed": "// For study-trial cloze, construct question to display actual info using regex for global replace of 3+ underscores"
+  },
+  {
+    "startLine": 3796,
+    "endLine": 3797,
+    "compressed": "// displayReady toggled false→true per trial to control CSS opacity transitions (DOM stays in place, only visibility changes)"
+  },
+  {
+    "startLine": 3921,
+    "endLine": 3924,
+    "compressed": "// CRITICAL: Wait one frame for Blaze to finish computing buttonTrial visibility classes before fade-in (prevents input flash/repaint mid-transition)"
+  },
+  {
+    "startLine": 3926,
+    "endLine": 3927,
+    "compressed": "// FLICKER FIX: Set input disabled state AND focus BEFORE fade-in while opacity=0 (eliminates visible flicker)"
+  },
+  {
+    "startLine": 3945,
+    "endLine": 3946,
+    "compressed": "// IMAGE UX FIX: Wait for image fully loaded and painted before fading in (prevents empty box then late image)"
+  },
+  {
+    "startLine": 3985,
+    "endLine": 3986,
+    "compressed": "// Speak prompt only for appropriate question types (button trials: speak question but not A/B/C/D labels)"
+  },
+  {
+    "startLine": 4005,
+    "endLine": 4006,
+    "compressed": "// STATE MACHINE: Transition to AWAITING (drill/test) or STUDY.SHOWING (study) after fade-in completes"
+  },
+  {
+    "startLine": 4015,
+    "endLine": 4017,
+    "compressed": "// Don't need show() - CSS wrapper (#trialContentWrapper) handles visibility via displayReady and opacity"
+  },
+  {
+    "startLine": 4029,
+    "endLine": 4031,
+    "compressed": "// FLICKER FIX: Input disabled state already set in prepareCard() - only update flag here for safety"
+  },
+  {
+    "startLine": 4036,
+    "endLine": 4037,
+    "compressed": "// REPAINT FIX: Batch remaining DOM updates in single requestAnimationFrame (focus already happened before fade-in)"
+  },
+  {
+    "startLine": 4061,
+    "endLine": 4064,
+    "compressed": "// inputDisabled flag records synchronous enable/disable state to prevent race conditions between stopUserInput and allowUserInput"
+  },
+  {
+    "startLine": 4069,
+    "endLine": 4070,
+    "compressed": "// Don't hide #userAnswer - CSS wrapper handles visibility via opacity (would break input on subsequent trials)"
+  },
+  {
+    "startLine": 4074,
+    "endLine": 4077,
+    "compressed": "// Delay disabling inputs to sync with CSS fade transition (prevents visible button state changes, inputDisabled guards race conditions)"
+  },
+  {
+    "startLine": 4094,
+    "endLine": 4097,
+    "compressed": "// TTS activates only if: (1) TDF audioPromptMode != 'silent' AND (2) User preference != 'silent'"
+  },
+  {
+    "startLine": 4108,
+    "endLine": 4110,
+    "compressed": "// Recording lock moved inside TTS success callback (avoids permanent lock on errors), replace underscores in speech text"
+  },
+  {
+    "startLine": 4124,
+    "endLine": 4126,
+    "compressed": "// FIX: Track ttsRequested state to prevent feedback advancing before TTS completes (critical when correctprompt=0)"
+  },
+  {
+    "startLine": 4245,
+    "endLine": 4246,
+    "compressed": "// Speech recognition: process audio data when web worker buffer fills"
+  },
+  {
+    "startLine": 4273,
+    "endLine": 4274,
+    "compressed": "// Check if already exceeded maxAttempts before API call - if so, skip API and force incorrect"
+  },
+  {
+    "startLine": 4281,
+    "endLine": 4282,
+    "compressed": "// Simulate empty/incorrect answer and go to feedback (bypassing speechAPICallback logic)"
+  },
+  {
+    "startLine": 4322,
+    "endLine": 4324,
+    "compressed": "// PERF: Cache answer grammar per UNIT (all possible answers for currentStimuliSet, only changes on unit change, saves 100+ms)"
+  },
+  {
+    "startLine": 4343,
+    "endLine": 4344,
+    "compressed": "// Get correct answer for THIS trial to filter phonetic conflicts (from Session.currentExperimentState)"
+  },
+  {
+    "startLine": 4366,
+    "endLine": 4367,
+    "compressed": "// Find phonetically conflicting words with correct answer (e.g., 'anguilla' conflicts with 'angola')"
+  },
+  {
+    "startLine": 4377,
+    "endLine": 4378,
+    "compressed": "// Remove phonetic conflicts from answer grammar to force clearer pronunciation (conflicting words won't match)"
+  },
+  {
+    "startLine": 4383,
+    "endLine": 4385,
+    "compressed": "// CRITICAL: Rebuild phonetic index with FILTERED grammar (cached index has removed conflicts, causes false matches like 'guinea'→'ghana')"
+  },
+  {
+    "startLine": 4428,
+    "endLine": 4429,
+    "compressed": "// Load user API key if TDF doesn't provide one (shouldn't reach here without key)"
+  },
+  {
+    "startLine": 4447,
+    "endLine": 4448,
+    "compressed": "// FIX: Check still in valid input state (Layer 3 of 3-layer defense against late transcriptions)"
+  },
+  {
+    "startLine": 4476,
+    "endLine": 4478,
+    "compressed": "// PERF: Cache phonetic index per UNIT (building is expensive 100+ms, doesn't change within unit)"
+  },
+  {
+    "startLine": 4534,
+    "endLine": 4535,
+    "compressed": "// Successfully got response - collect ALL alternatives from ALL results (Google spreads them across multiple)"
+  },
+  {
+    "startLine": 4574,
+    "endLine": 4575,
+    "compressed": "// Second pass: Phonetic matching for homophones (Mali/Molly, Palau/pull out) - only for 3+ char words to avoid false positives"
+  },
+  {
+    "startLine": 4660,
+    "endLine": 4661,
+    "compressed": "// Check if reached maxAttempts AFTER this attempt - if so, force feedback instead of retrying"
+  },
+  {
+    "startLine": 4685,
+    "endLine": 4688,
+    "compressed": "// FIX: Clear timeout when SR completes successfully (prevents race: timeout fires after SR, appends ' [timeout]' to transcript)"
+  },
+  {
+    "startLine": 4691,
+    "endLine": 4692,
+    "compressed": "// Only simulate enter key press if picked up transcribable/in-grammar audio (better UX)"
+  },
+  {
+    "startLine": 4786,
+    "endLine": 4787,
+    "compressed": "// Set process callback for when speech end detected (will process audio data)"
+  },
+  {
+    "startLine": 4790,
+    "endLine": 4792,
+    "compressed": "// Voice activity detection config: audioInputSensitivity (0-100, default 60 = -60 dB threshold)"
+  },
+  {
+    "startLine": 4805,
+    "endLine": 4808,
+    "compressed": "// Volume monitoring removed - floods console with volume_change events"
+  },
+  {
+    "startLine": 4925,
+    "endLine": 4931,
+    "compressed": "// Re-initialize User Progress and Card Probabilities from user times log (processUserTimesLog callback ensures server-side experimental conditions complete)"
+  },
+  {
+    "startLine": 4953,
+    "endLine": 4957,
+    "compressed": "// Use ROOT tdf to find if experimental condition selection needed (will update currentTdfId and currentStimuliSetId)"
+  },
+  {
+    "startLine": 5132,
+    "endLine": 5133,
+    "compressed": "// Read new stimulus file (exception allowed to kill if current tdf broken with no stimulus file)"
+  },
+  {
+    "startLine": 5157,
+    "endLine": 5158,
+    "compressed": "// Read new stimulus file (exception allowed to kill if current tdf broken with no stimulus file)"
+  },
+  {
+    "startLine": 5173,
+    "endLine": 5175,
+    "compressed": "// Root TDF can specify xcond parameter for deliveryParms is system-assigned (vs URL-specified)"
+  },
+  {
+    "startLine": 5198,
+    "endLine": 5200,
+    "compressed": "// Find or create cluster mapping (must wait until exp condition selected for correct TDF)"
+  },
+  {
+    "startLine": 5204,
+    "endLine": 5206,
+    "compressed": "// No cluster mapping - create it by processing shuffle/swap pairs and store for resume"
+  },
+  {
+    "startLine": 5209,
+    "endLine": 5210,
+    "compressed": "// Default single no-op to ensure at least build default cluster mapping"
+  },
+  {
+    "startLine": 5264,
+    "endLine": 5266,
+    "compressed": "// Custom UI settings from TDF setspec (unit and individual question can override)"
+  },
+  {
+    "startLine": 5309,
+    "endLine": 5311,
+    "compressed": "// Interpret stimulus and input position settings to set column widths (4 combinations: top/bottom, left/right)"
+  },
+  {
+    "startLine": 5314,
+    "endLine": 5316,
+    "compressed": "// If curTdfUISettings is string, check if preset - otherwise treat as object and fill missing keys with defaults"
+  },
+  {
+    "startLine": 5415,
+    "endLine": 5417,
+    "compressed": "// Always log condition data, then call processUserTimesLog after server returns"
+  },
+  {
+    "startLine": 5479,
+    "endLine": 5480,
+    "compressed": "// prepareCard handles new unit instructions but misses first unit instructions"
+  },
+  {
+    "startLine": 5483,
+    "endLine": 5484,
+    "compressed": "// Possible clicked Continue on final unit - need to act as if done"
+  },
+  {
+    "startLine": 5518,
+    "endLine": 5519,
+    "compressed": "// Logged unit completion - if final unit, also know TDF completed"
+  },
+  {
+    "startLine": 5528,
+    "endLine": 5529,
+    "compressed": "// Commented out: case 'schedule': break;"
+  },
+  {
+    "startLine": 5535,
+    "endLine": 5536,
+    "compressed": "// TODO: resumeToQuestion = true; writeCurrentToScrollList(entry.answer, action === '[timeout]', simCorrect, 0); - restore scroll list state"
+  },
+  {
+    "startLine": 5562,
+    "endLine": 5563,
+    "compressed": "// If reached here, no resume needed until something else happens"
+  },
+  {
+    "startLine": 5590,
+    "endLine": 5592,
+    "compressed": "// FIX: Question outstanding - go through proper cleanup/transitions before display (was calling newQuestionHandler directly, bypassing state machine)"
+  },
+  {
+    "startLine": 5600,
+    "endLine": 5602,
+    "compressed": "// If unit engine thinks finished, might need instructions IF lockout period hasn't finished (prepareCard won't handle)"
+  }
+]

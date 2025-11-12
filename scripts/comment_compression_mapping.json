@@ -1,0 +1,1114 @@
+[
+  {
+    "blockNum": 1,
+    "startLine": 251,
+    "endLine": 252,
+    "lineCount": 2,
+    "preview": "////////////////////////////////////////////////////////////////////////// Global variables and help...",
+    "compressed": "// //////////////////////////////////////////////////////////////////////////"
+  },
+  {
+    "blockNum": 2,
+    "startLine": 254,
+    "endLine": 257,
+    "lineCount": 4,
+    "preview": "===== PHASE 2: Scoped Reactive State ===== CRITICAL: Must be declared BEFORE any usage",
+    "compressed": "// PHASE 2: Scoped Reactive State"
+  },
+  {
+    "blockNum": 3,
+    "startLine": 282,
+    "endLine": 283,
+    "lineCount": 2,
+    "preview": "Cache for speech recognition answer grammar and phonetic index Answer grammar is per-unit (currentSt...",
+    "compressed": "// Logic: Cache for speech recognition answer grammar and phonetic index Answer grammar is per-unit (currentSt"
+  },
+  {
+    "blockNum": 4,
+    "startLine": 297,
+    "endLine": 299,
+    "lineCount": 3,
+    "preview": "M3: Track timeout state reactively for better coordination We need to track the name/ID for clear an...",
+    "compressed": "// M3: Track timeout state reactively for better coordination We need to track the name/ID for clear and reset. We need the"
+  },
+  {
+    "blockNum": 5,
+    "startLine": 301,
+    "endLine": 303,
+    "lineCount": 3,
+    "preview": "IMPORTANT: Functions cannot be stored in ReactiveDict - use module variables NOTE: Timeout module va...",
+    "compressed": "// IMPORTANT: Functions cannot be stored in ReactiveDict - use module variables NOTE: Timeout module variables (currentTime"
+  },
+  {
+    "blockNum": 6,
+    "startLine": 308,
+    "endLine": 316,
+    "lineCount": 9,
+    "preview": "============================================================================ NOTE: Timeout functions...",
+    "compressed": "// Phase 1 extraction) Imported at top of file: registerTimeout, registerInterval, clearRegisteredTimeout, clearAllRegisteredTimeouts, listActiveTimeouts, elapsedSecs, clearCardTimeout (module), beginMainCardTimeout, resetMainCardTimeout, restartMainCardTimeoutIfNecessary, getDisplayTimeouts, setDispTimeoutText, varLenDisplayTimeout, getReviewTimeout  Import aliased as clearCardTimeoutModule to avoid name conflict with wrapper below"
+  },
+  {
+    "blockNum": 7,
+    "startLine": 318,
+    "endLine": 320,
+    "lineCount": 3,
+    "preview": "Wrapper for clearCardTimeout that also clears simTimeoutName Phase 1: simTimeoutName stays in card.j...",
+    "compressed": "// Wrapper for clearCardTimeout that also clears simTimeoutName Phase 1: simTimeoutName stays in card.js (used by checkSimu"
+  },
+  {
+    "blockNum": 8,
+    "startLine": 322,
+    "endLine": 323,
+    "lineCount": 2,
+    "preview": "Import from module is aliased, call it directly from the import First clear simTimeoutName if presen...",
+    "compressed": "// Logic: Import from module is aliased, call it directly from the import First clear simTimeoutName if presen"
+  },
+  {
+    "blockNum": 9,
+    "startLine": 336,
+    "endLine": 337,
+    "lineCount": 2,
+    "preview": "Set a special timeout to handle simulation if necessary NOTE: This will move to cardUtils.js in Phas...",
+    "compressed": "// Set a special timeout to handle simulation if necessary NOTE: This will move to cardUtils.js in Phas"
+  },
+  {
+    "blockNum": 10,
+    "startLine": 411,
+    "endLine": 413,
+    "lineCount": 3,
+    "preview": "===== PHASE 2: Centralized DOM Updates ===== Use Tracker.autorun to batch DOM updates reactively",
+    "compressed": "// PHASE 2: Centralized DOM Updates"
+  },
+  {
+    "blockNum": 11,
+    "startLine": 424,
+    "endLine": 425,
+    "lineCount": 2,
+    "preview": "Reactive computation for audio input mode (prevents duplicate TDF checks in multiple helpers) FIX: U...",
+    "compressed": "// FIX: Reactive computation for audio input mode (prevents duplicate TDF checks in multiple helpers)  U"
+  },
+  {
+    "blockNum": 12,
+    "startLine": 440,
+    "endLine": 443,
+    "lineCount": 4,
+    "preview": "Autorun for feedback container visibility FIX: RESTORED - This was incorrectly removed, causing DOM ...",
+    "compressed": "// FIX: Autorun for feedback container visibility  RESTORED - This was incorrectly removed, causing DOM"
+  },
+  {
+    "blockNum": 13,
+    "startLine": 469,
+    "endLine": 470,
+    "lineCount": 2,
+    "preview": "M3: SR Recording State Guard - Auto-stop recording when leaving AWAITING state DEFENSIVE: Prevents r...",
+    "compressed": "// M3: SR Recording State Guard - Auto-stop recording when leaving AWAITING state DEFENSIVE: Prevents recording in wrong st"
+  },
+  {
+    "blockNum": 14,
+    "startLine": 484,
+    "endLine": 485,
+    "lineCount": 2,
+    "preview": "M3: TTS Lock Coordination - Automatically coordinate TTS and recording AUTOMATIC: Centralized logic,...",
+    "compressed": "// M3: TTS Lock Coordination - Automatically coordinate TTS and recording AUTOMATIC: Centralized logic, prevents manual syn"
+  },
+  {
+    "blockNum": 15,
+    "startLine": 494,
+    "endLine": 500,
+    "lineCount": 7,
+    "preview": "Auto-restart recording when ALL conditions met: 1. Not locked (TTS finished)",
+    "compressed": "// Logic: Auto-restart recording when ALL conditions met: 1. Not locked (TTS finished) 2. No TTS requested (no"
+  },
+  {
+    "blockNum": 16,
+    "startLine": 509,
+    "endLine": 511,
+    "lineCount": 3,
+    "preview": "M3: Input State Guard - Ensure inputs enabled/disabled based on state AUTOMATIC: Enables input in AW...",
+    "compressed": "// M3: Input State Guard - Ensure inputs enabled/disabled based on state AUTOMATIC: Enables input in AWAITING/STUDY states,"
+  },
+  {
+    "blockNum": 17,
+    "startLine": 543,
+    "endLine": 544,
+    "lineCount": 2,
+    "preview": "M3/MO5: Dynamic CSS Custom Properties - Set TDF-configurable styles via CSS variables for CSP compli...",
+    "compressed": "// M3/MO5: Dynamic CSS Custom Properties - Set TDF-configurable styles via CSS variables for CSP compliance This replaces i"
+  },
+  {
+    "blockNum": 18,
+    "startLine": 568,
+    "endLine": 569,
+    "lineCount": 2,
+    "preview": "Image button backgrounds - Set from data-image-url attribute (CSP compliance) Replaces inline style=...",
+    "compressed": "// Image button backgrounds - Set from data-image-url attribute (CSP compliance)"
+  },
+  {
+    "blockNum": 19,
+    "startLine": 601,
+    "endLine": 602,
+    "lineCount": 2,
+    "preview": "Set up periodic multi-tab detection check during practice (every 1 second as backup) Note: Broadcast...",
+    "compressed": "// Set up periodic multi-tab detection check during practice (every 1 second as backup) Note: Broadcast"
+  },
+  {
+    "blockNum": 20,
+    "startLine": 623,
+    "endLine": 626,
+    "lineCount": 4,
+    "preview": "Check if audio input should be enabled: 1. User must have toggled SR icon on (audioInputMode)",
+    "compressed": "// Logic: Check if audio input should be enabled: 1. User must have toggled SR icon on (audioInputMode) 2. TDF"
+  },
+  {
+    "blockNum": 21,
+    "startLine": 669,
+    "endLine": 670,
+    "lineCount": 2,
+    "preview": "FIX: Lower sample rate from 48kHz to 16kHz (Google recommended for Speech API) This reduces audio pa...",
+    "compressed": "// FIX: Lower sample rate from 48kHz to 16kHz (Google recommended for Speech API) This reduces audio pa"
+  },
+  {
+    "blockNum": 22,
+    "startLine": 676,
+    "endLine": 678,
+    "lineCount": 3,
+    "preview": "If user has enabled audio input initialize web audio (this takes a bit) (this will eventually call c...",
+    "compressed": "// If user has enabled audio input initialize web audio (this takes a bit) (this will eventually call cardStart after we re"
+  },
+  {
+    "blockNum": 23,
+    "startLine": 713,
+    "endLine": 714,
+    "lineCount": 2,
+    "preview": "check if the question was already reported. This button only needs to fire if the user hasnt answere...",
+    "compressed": "// check if the question was already reported"
+  },
+  {
+    "blockNum": 24,
+    "startLine": 931,
+    "endLine": 932,
+    "lineCount": 2,
+    "preview": "Only show SR UI when actually awaiting input (prevents FOUC of red \"waiting\" state) Recording starts...",
+    "compressed": "// Logic: Only show SR UI when actually awaiting input (prevents FOUC of red \"waiting\" state) Recording starts"
+  },
+  {
+    "blockNum": 25,
+    "startLine": 1321,
+    "endLine": 1325,
+    "lineCount": 5,
+    "preview": "============================================================ TEMPLATE OPTIMIZATION HELPERS",
+    "compressed": "// ============================================================"
+  },
+  {
+    "blockNum": 26,
+    "startLine": 1437,
+    "endLine": 1439,
+    "lineCount": 3,
+    "preview": "TRANSITION TIMING CONFIGURATION Reads the actual CSS variable value set by admin in theme panel",
+    "compressed": "// State transition: TRANSITION TIMING CONFIGURATION Reads the actual CSS variable value set by admin"
+  },
+  {
+    "blockNum": 27,
+    "startLine": 1457,
+    "endLine": 1459,
+    "lineCount": 3,
+    "preview": "FADE-IN STATE MACHINE HELPERS These functions encapsulate the PRESENTING.FADING_IN → PRESENTING.DISP...",
+    "compressed": "// STATE MACHINE: These functions encapsulate the PRESENTING.FADING_IN → PRESENTING.DISPLAYING transition"
+  },
+  {
+    "blockNum": 28,
+    "startLine": 1485,
+    "endLine": 1491,
+    "lineCount": 7,
+    "preview": "TRIAL STATE MACHINE CONSTANTS (Hierarchical Model) Three distinct trial flows (based on trial type):",
+    "compressed": "// STATE MACHINE: Three distinct trial flows (based on trial type):"
+  },
+  {
+    "blockNum": 29,
+    "startLine": 1494,
+    "endLine": 1495,
+    "lineCount": 2,
+    "preview": "PRESENTING PHASE - User sees question/content (drill/test share this) Duration: 15-30s for drill/tes...",
+    "compressed": "// PRESENTING PHASE - User sees question/content (drill/test share this)"
+  },
+  {
+    "blockNum": 30,
+    "startLine": 1501,
+    "endLine": 1502,
+    "lineCount": 2,
+    "preview": "STUDY PHASE - Study trials only (completely separate from presenting/feedback) Duration: purestudy t...",
+    "compressed": "// STUDY PHASE - Study trials only (completely separate from presenting/feedback)"
+  },
+  {
+    "blockNum": 31,
+    "startLine": 1505,
+    "endLine": 1506,
+    "lineCount": 2,
+    "preview": "FEEDBACK PHASE - Drill trials only (shows correctness after input) Duration: 2-5s for drill",
+    "compressed": "// FEEDBACK PHASE - Drill trials only (shows correctness after input)"
+  },
+  {
+    "blockNum": 32,
+    "startLine": 1509,
+    "endLine": 1510,
+    "lineCount": 2,
+    "preview": "TRANSITION PHASE - Between trials (all trial types use this) Duration: ~(2 * transition-smooth) + ~4...",
+    "compressed": "// State transition: TRANSITION PHASE - Between trials (all trial types use this) Duration: ~(2 * tra"
+  },
+  {
+    "blockNum": 33,
+    "startLine": 1586,
+    "endLine": 1587,
+    "lineCount": 2,
+    "preview": "Don't throw - just log. In production we might want to transition to ERROR state For now, allow the ...",
+    "compressed": "// State transition: Don't throw - just log. In production we might want to transition to ERROR state"
+  },
+  {
+    "blockNum": 34,
+    "startLine": 1692,
+    "endLine": 1694,
+    "lineCount": 3,
+    "preview": "Some browsers partially implement mediaDevices. We can't just assign an object with getUserMedia as ...",
+    "compressed": "// Some browsers partially implement mediaDevices"
+  },
+  {
+    "blockNum": 35,
+    "startLine": 1701,
+    "endLine": 1702,
+    "lineCount": 2,
+    "preview": "Some browsers just don't implement it - return a rejected promise with an error to keep a consistent...",
+    "compressed": "// Some browsers just don't implement it - return a rejected promise with an error"
+  },
+  {
+    "blockNum": 36,
+    "startLine": 1756,
+    "endLine": 1757,
+    "lineCount": 2,
+    "preview": "Convert ALL absolute URLs to relative paths for remote/LAN access This ensures images work whether a...",
+    "compressed": "// Convert ALL absolute URLs to relative paths for remote/LAN access This ensures images work whether accessed via localhos"
+  },
+  {
+    "blockNum": 37,
+    "startLine": 1795,
+    "endLine": 1796,
+    "lineCount": 2,
+    "preview": "Wait for the DOM image element to be fully loaded and ready to paint This ensures images are display...",
+    "compressed": "// Wait for the DOM image element to be fully loaded and ready to paint This ensures images are displayed when fading in, n"
+  },
+  {
+    "blockNum": 38,
+    "startLine": 1880,
+    "endLine": 1882,
+    "lineCount": 3,
+    "preview": "TTS warm-up is now done in audioSettings.js when user enables audio prompts This gives better UX bec...",
+    "compressed": "// TTS warm-up is now done in audioSettings.js when user enables audio prompts This gives better UX because the delay happe"
+  },
+  {
+    "blockNum": 39,
+    "startLine": 1927,
+    "endLine": 1935,
+    "lineCount": 9,
+    "preview": "Buttons are determined by 3 options: buttonorder, buttonOptions, wrongButtonLimit: ",
+    "compressed": "// Config: Buttons are determined by 3 options: buttonorder, buttonOptions, wrongButtonLimit:  1. buttonorder -"
+  },
+  {
+    "blockNum": 40,
+    "startLine": 2179,
+    "endLine": 2180,
+    "lineCount": 2,
+    "preview": "If we haven't seen the correct keypress, then we want to reset our timeout and leave",
+    "compressed": "// If we haven't seen the correct keypress, then we want to reset our timeout and leave"
+  },
+  {
+    "blockNum": 41,
+    "startLine": 2193,
+    "endLine": 2194,
+    "lineCount": 2,
+    "preview": "We've entered input before the timeout, meaning we need to decrement the pausedLocks before we lose ...",
+    "compressed": "// We've entered input before the timeout, meaning we need to decrement the pausedLocks before we lose track of the fact th"
+  },
+  {
+    "blockNum": 42,
+    "startLine": 2235,
+    "endLine": 2237,
+    "lineCount": 3,
+    "preview": "Show user feedback and find out if they answered correctly Note that userAnswerFeedback will display...",
+    "compressed": "// Show user feedback and find out if they answered correctly Note that userAnswerFeedback will display text and/or media -"
+  },
+  {
+    "blockNum": 43,
+    "startLine": 2241,
+    "endLine": 2242,
+    "lineCount": 2,
+    "preview": "Take care of user feedback - simCorrect will usually be undefined/null BUT if it is true or false we...",
+    "compressed": "// Take care of user feedback - simCorrect will usually be undefined/null BUT if it is true or false we know this is part o"
+  },
+  {
+    "blockNum": 44,
+    "startLine": 2255,
+    "endLine": 2257,
+    "lineCount": 3,
+    "preview": "How was their answer? (And note we only need to update historyUserAnswer if it's not a \"standard\" )",
+    "compressed": "// How was their answer"
+  },
+  {
+    "blockNum": 45,
+    "startLine": 2393,
+    "endLine": 2394,
+    "lineCount": 2,
+    "preview": "Note that we track the score in the user progress object, but we copy it to the Session object for t...",
+    "compressed": "// Note that we track the score in the user progress object, but we copy it to the Session object for template updates"
+  },
+  {
+    "blockNum": 46,
+    "startLine": 2427,
+    "endLine": 2429,
+    "lineCount": 3,
+    "preview": "NOTE: Do NOT call stopRecording() here - it destroys the audio buffer before the speech recognition ...",
+    "compressed": "// NOTE: Do NOT call stopRecording() here - it destroys the audio buffer before the speech recognition "
+  },
+  {
+    "blockNum": 47,
+    "startLine": 2466,
+    "endLine": 2468,
+    "lineCount": 3,
+    "preview": "MO8: Use DOM createElement for security and proper image optimization SECURITY: Prevents XSS via pro...",
+    "compressed": "// PERF: MO8: Use DOM createElement for security and proper image optimization SECURITY: Prevents XSS via pro"
+  },
+  {
+    "blockNum": 48,
+    "startLine": 2535,
+    "endLine": 2536,
+    "lineCount": 2,
+    "preview": "we have several options for displaying the feedback, we can display it in the top (#userInteraction)...",
+    "compressed": "// we have several options for displaying the feedback, we can display it in the top (#userInteraction), bottom (#userLower"
+  },
+  {
+    "blockNum": 49,
+    "startLine": 2551,
+    "endLine": 2552,
+    "lineCount": 2,
+    "preview": "DOM updates handled by autorun in Template.card.onCreated() add the fontSize class to the target",
+    "compressed": "// Logic: DOM updates handled by autorun in Template.card.onCreated() add the fontSize class to the target"
+  },
+  {
+    "blockNum": 50,
+    "startLine": 2583,
+    "endLine": 2584,
+    "lineCount": 2,
+    "preview": "inFeedback already set via cardState above Batch DOM update: get existing content, append, then sing...",
+    "compressed": "// inFeedback already set via cardState above"
+  },
+  {
+    "blockNum": 51,
+    "startLine": 2611,
+    "endLine": 2612,
+    "lineCount": 2,
+    "preview": "Element doesn't exist, clear interval and exit FIX: Must set CurIntervalId to undefined so waiting c...",
+    "compressed": "// FIX: Element doesn't exist, clear interval and exit  Must set CurIntervalId to undefined so waiting c"
+  },
+  {
+    "blockNum": 52,
+    "startLine": 2648,
+    "endLine": 2651,
+    "lineCount": 4,
+    "preview": "FIX: DO NOT set inFeedback=false here - let afterAnswerFeedbackCallback() handle it after BOTH count...",
+    "compressed": "// FIX: DO NOT set inFeedback=false here - let afterAnswerFeedbackCallback() handle it after BOTH count"
+  },
+  {
+    "blockNum": 53,
+    "startLine": 2670,
+    "endLine": 2671,
+    "lineCount": 2,
+    "preview": "If incorrect answer for a drill on a sound not after a dialogue loop, we need to replay the sound, a...",
+    "compressed": "// If incorrect answer for a drill on a sound not after a dialogue loop, we need to replay the sound, after the optional au"
+  },
+  {
+    "blockNum": 54,
+    "startLine": 2680,
+    "endLine": 2685,
+    "lineCount": 6,
+    "preview": "forceCorrection is now part of user interaction - we always clear the textbox, but only show it if:",
+    "compressed": "// forceCorrection is now part of user interaction - we always clear the textbox, but only show it if: * They got the answe"
+  },
+  {
+    "blockNum": 55,
+    "startLine": 2687,
+    "endLine": 2689,
+    "lineCount": 3,
+    "preview": "Call doClearForceCorrect non-reactively to prevent infinite loop Previously used Tracker.afterFlush ...",
+    "compressed": "// Logic: Call doClearForceCorrect non-reactively to prevent infinite loop Previously used Tracker.afterFlush "
+  },
+  {
+    "blockNum": 56,
+    "startLine": 2691,
+    "endLine": 2692,
+    "lineCount": 2,
+    "preview": "'m' = mandatory correction (must re-type), 'n' = timed prompt/hint (auto-continues) Both use force c...",
+    "compressed": "// 'm' = mandatory correction (must re-type), 'n' = timed prompt/hint (auto-continues)"
+  },
+  {
+    "blockNum": 57,
+    "startLine": 2786,
+    "endLine": 2789,
+    "lineCount": 4,
+    "preview": "FIX: Clear any stale countdown interval from previous trial For correct answers, no countdown interv...",
+    "compressed": "// FIX: Clear any stale countdown interval from previous trial For correct answers, no countdown interv"
+  },
+  {
+    "blockNum": 58,
+    "startLine": 2861,
+    "endLine": 2864,
+    "lineCount": 4,
+    "preview": "Special: count the number of timeouts in a row. If autostopTimeoutThreshold is specified and we have...",
+    "compressed": "// Special: count the number of timeouts in a row"
+  },
+  {
+    "blockNum": 59,
+    "startLine": 2870,
+    "endLine": 2871,
+    "lineCount": 2,
+    "preview": "Figure out threshold (with default of 0) Also note: threshold < 1 means no autostop at all",
+    "compressed": "// Figure out threshold (with default of 0) Also note: threshold < 1 means no autostop at all"
+  },
+  {
+    "blockNum": 60,
+    "startLine": 2881,
+    "endLine": 2882,
+    "lineCount": 2,
+    "preview": "FIX: Wait for BOTH countdown timer AND TTS to complete before transitioning to next trial This preve...",
+    "compressed": "// State transition: FIX: Wait for BOTH countdown timer AND TTS to complete before transitioning to n"
+  },
+  {
+    "blockNum": 61,
+    "startLine": 2905,
+    "endLine": 2908,
+    "lineCount": 4,
+    "preview": "Wait for TTS to finish (if requested) FIX: Check cardState.get('ttsRequested') to handle async Googl...",
+    "compressed": "// FIX: Wait for TTS to finish (if requested)  Check cardState.get('ttsRequested') to handle async Googl"
+  },
+  {
+    "blockNum": 62,
+    "startLine": 2950,
+    "endLine": 2951,
+    "lineCount": 2,
+    "preview": "Wait for BOTH to complete (whichever happens LAST) This ensures reviewstudy timeout is extended if T...",
+    "compressed": "// Wait for BOTH to complete (whichever happens LAST) This ensures reviewstudy timeout is extended if TTS hasn't returned y"
+  },
+  {
+    "blockNum": 63,
+    "startLine": 2975,
+    "endLine": 2976,
+    "lineCount": 2,
+    "preview": "STATE MACHINE: Transition will happen in prepareCard via FADING_OUT and CLEARING prepareCard() handl...",
+    "compressed": "// STATE MACHINE: prepareCard() handles fade-out and clearing, then moves to next trial's LOADING"
+  },
+  {
+    "blockNum": 64,
+    "startLine": 3106,
+    "endLine": 3107,
+    "lineCount": 2,
+    "preview": "let curKCBase = getStimKCBaseForCurrentStimuliSet(); let stimulusKC = whichStim + curKCBase;",
+    "compressed": "// let curKCBase = getStimKCBaseForCurrentStimuliSet();"
+  },
+  {
+    "blockNum": 65,
+    "startLine": 3114,
+    "endLine": 3116,
+    "lineCount": 3,
+    "preview": "let stepCount = (state.stepNameSeen[stepName] || 0) + 1; state.stepNameSeen[stepName] = stepCount;",
+    "compressed": "// let stepCount = (state.stepNameSeen[stepName] || 0) + 1;"
+  },
+  {
+    "blockNum": 66,
+    "startLine": 3270,
+    "endLine": 3272,
+    "lineCount": 3,
+    "preview": "Don't use .hide() - let displayReady fade-out handle visibility Using .hide() causes instant flash w...",
+    "compressed": "// Don't use .hide() - let displayReady fade-out handle visibility Using .hide() causes instant flash while content is stil"
+  },
+  {
+    "blockNum": 67,
+    "startLine": 3277,
+    "endLine": 3278,
+    "lineCount": 2,
+    "preview": "Don't hide forceCorrectionEntry - let fade-out handle it Don't hide removeQuestion - let fade-out ha...",
+    "compressed": "// Logic: Don't hide forceCorrectionEntry - let fade-out handle it Don't hide removeQuestion - let fade-out ha"
+  },
+  {
+    "blockNum": 68,
+    "startLine": 3281,
+    "endLine": 3282,
+    "lineCount": 2,
+    "preview": "Comprehensive cleanup that mimics what {{#if displayReady}} teardown did automatically IMPORTANT: On...",
+    "compressed": "// Comprehensive cleanup that mimics what {{#if displayReady}} teardown did automatically IMPORTANT: Only clear input VALUE"
+  },
+  {
+    "blockNum": 69,
+    "startLine": 3286,
+    "endLine": 3288,
+    "lineCount": 3,
+    "preview": "FIX: Stop any orphaned TTS audio from previous trial This is a safety measure to prevent audio bleed...",
+    "compressed": "// FIX: Stop any orphaned TTS audio from previous trial This is a safety measure to prevent audio bleed"
+  },
+  {
+    "blockNum": 70,
+    "startLine": 3297,
+    "endLine": 3298,
+    "lineCount": 2,
+    "preview": "Clear input VALUES (not HTML - let Blaze handle that) Note: #userAnswer already cleared in cardEnd()...",
+    "compressed": "// Clear input VALUES (not HTML - let Blaze handle that) Note: #userAnswer already cleared in cardEnd()"
+  },
+  {
+    "blockNum": 71,
+    "startLine": 3302,
+    "endLine": 3303,
+    "lineCount": 2,
+    "preview": "Reset input styling that may persist from previous trial This prevents border color flash (black→red...",
+    "compressed": "// Reset input styling that may persist from previous trial This prevents border color flash (black→red) during fade-in"
+  },
+  {
+    "blockNum": 72,
+    "startLine": 3308,
+    "endLine": 3309,
+    "lineCount": 2,
+    "preview": "Clear non-reactive HTML (NOT feedback - hideUserFeedback() already did that) Only clear elements tha...",
+    "compressed": "// Logic: Clear non-reactive HTML (NOT feedback - hideUserFeedback() already did that) Only clear elements tha"
+  },
+  {
+    "blockNum": 73,
+    "startLine": 3326,
+    "endLine": 3327,
+    "lineCount": 2,
+    "preview": "CRITICAL: Show .input-box that was hidden during feedback showUserFeedback() calls $('.input-box').a...",
+    "compressed": "// CRITICAL: Show .input-box that was hidden during feedback showUserFeedback() calls $('.input-box').addClass('hidden') bu"
+  },
+  {
+    "blockNum": 74,
+    "startLine": 3333,
+    "endLine": 3334,
+    "lineCount": 2,
+    "preview": "NOTE: Do NOT clear Session variables here - those are cleared in prepareCard/newQuestionHandler NOTE...",
+    "compressed": "// NOTE: Do NOT clear Session variables here - those are cleared in prepareCard/newQuestionHandler NOTE"
+  },
+  {
+    "blockNum": 75,
+    "startLine": 3394,
+    "endLine": 3395,
+    "lineCount": 2,
+    "preview": "Revisiting a Unit, we need to restart with instructions Check if the unit has a learning session, as...",
+    "compressed": "// Revisiting a Unit, we need to restart with instructions Check if the unit has a learning session, assess"
+  },
+  {
+    "blockNum": 76,
+    "startLine": 3406,
+    "endLine": 3408,
+    "lineCount": 3,
+    "preview": "Called when the current unit is done. This should be either unit-defined (see prepareCard) or user-i...",
+    "compressed": "// Called when the current unit is done"
+  },
+  {
+    "blockNum": 77,
+    "startLine": 3595,
+    "endLine": 3596,
+    "lineCount": 2,
+    "preview": "Hide global loading spinner when card starts (handles video sessions and other edge cases) Video ses...",
+    "compressed": "// Hide global loading spinner when card starts (handles video sessions and other edge cases) Video sessions skip beginFade"
+  },
+  {
+    "blockNum": 78,
+    "startLine": 3642,
+    "endLine": 3643,
+    "lineCount": 2,
+    "preview": "Start fade-out with OLD content still visible (not cleared to empty) DON'T clean up yet - that happe...",
+    "compressed": "// Start fade-out with OLD content still visible (not cleared to empty)"
+  },
+  {
+    "blockNum": 79,
+    "startLine": 3654,
+    "endLine": 3655,
+    "lineCount": 2,
+    "preview": "Clean up feedback/input styling AFTER fade-out (while opacity=0) This prevents flashing during the v...",
+    "compressed": "// State transition: Clean up feedback/input styling AFTER fade-out (while opacity=0) This prevents f"
+  },
+  {
+    "blockNum": 80,
+    "startLine": 3664,
+    "endLine": 3666,
+    "lineCount": 3,
+    "preview": "CRITICAL: Clear currentDisplay WHILE INVISIBLE (opacity=0) to remove old image This prevents the old...",
+    "compressed": "// CRITICAL: Clear currentDisplay WHILE INVISIBLE (opacity=0) to remove old image This prevents the old image from briefly "
+  },
+  {
+    "blockNum": 81,
+    "startLine": 3669,
+    "endLine": 3671,
+    "lineCount": 3,
+    "preview": "DON'T set buttonTrial to undefined - causes input to flash/paint late It will be updated with correc...",
+    "compressed": "// Logic: DON'T set buttonTrial to undefined - causes input to flash/paint late It will be updated with correc"
+  },
+  {
+    "blockNum": 82,
+    "startLine": 3697,
+    "endLine": 3698,
+    "lineCount": 2,
+    "preview": "Resume path: card already selected, skip selectNextCard() Normal path: select next card from engine",
+    "compressed": "// Resume path: card already selected, skip selectNextCard()"
+  },
+  {
+    "blockNum": 83,
+    "startLine": 3705,
+    "endLine": 3706,
+    "lineCount": 2,
+    "preview": "Set buttonTrial BEFORE newQuestionHandler so Blaze can render everything atomically when displayRead...",
+    "compressed": "// Set buttonTrial BEFORE newQuestionHandler so Blaze can render everything atomically when displayReady=true fires"
+  },
+  {
+    "blockNum": 84,
+    "startLine": 3737,
+    "endLine": 3738,
+    "lineCount": 2,
+    "preview": "buttonTrial is now set BEFORE newQuestionHandler (in prepareCard) to ensure Blaze can render stimulu...",
+    "compressed": "// Logic: buttonTrial is now set BEFORE newQuestionHandler (in prepareCard) to ensure Blaze can render stimulu"
+  },
+  {
+    "blockNum": 85,
+    "startLine": 3746,
+    "endLine": 3749,
+    "lineCount": 4,
+    "preview": "If this is a study-trial and we are displaying a cloze, then we should construct the question to dis...",
+    "compressed": "// If this is a study-trial and we are displaying a cloze, then we should construct the question to display the actual info"
+  },
+  {
+    "blockNum": 86,
+    "startLine": 3796,
+    "endLine": 3797,
+    "lineCount": 2,
+    "preview": "displayReady is toggled false→true for each trial to control CSS opacity transitions With CSS wrappe...",
+    "compressed": "// State transition: displayReady is toggled false→true for each trial to control CSS opacity transit"
+  },
+  {
+    "blockNum": 87,
+    "startLine": 3921,
+    "endLine": 3924,
+    "lineCount": 4,
+    "preview": "CRITICAL: Wait one frame for Blaze to finish computing buttonTrial visibility classes Before this fi...",
+    "compressed": "// State transition: CRITICAL: Wait one frame for Blaze to finish computing buttonTrial visibility cl"
+  },
+  {
+    "blockNum": 88,
+    "startLine": 3926,
+    "endLine": 3927,
+    "lineCount": 2,
+    "preview": "FLICKER FIX: Set input disabled state AND focus BEFORE fade-in starts All state changes happen while...",
+    "compressed": "// FIX: FLICKER  Set input disabled state AND focus BEFORE fade-in starts All state changes happen while"
+  },
+  {
+    "blockNum": 89,
+    "startLine": 3945,
+    "endLine": 3946,
+    "lineCount": 2,
+    "preview": "IMAGE UX FIX: Wait for image to be fully loaded and painted before fading in This prevents the image...",
+    "compressed": "// FIX: IMAGE UX  Wait for image to be fully loaded and painted before fading in This prevents the image"
+  },
+  {
+    "blockNum": 90,
+    "startLine": 3985,
+    "endLine": 3986,
+    "lineCount": 2,
+    "preview": "Only speak the prompt if the question type makes sense For button trials: speak question but NOT but...",
+    "compressed": "// Logic: Only speak the prompt if the question type makes sense For button trials: speak question but NOT but"
+  },
+  {
+    "blockNum": 91,
+    "startLine": 4005,
+    "endLine": 4006,
+    "lineCount": 2,
+    "preview": "STATE MACHINE: Transition to AWAITING (for drill/test) or STUDY.SHOWING (for study) This is called A...",
+    "compressed": "// STATE MACHINE: This is called AFTER fade-in completes (via setTimeout callback chain)"
+  },
+  {
+    "blockNum": 92,
+    "startLine": 4015,
+    "endLine": 4017,
+    "lineCount": 3,
+    "preview": "DO NOT need to show #userAnswer - CSS wrapper (#trialContentWrapper) handles visibility via opacity ...",
+    "compressed": "// Logic: DO NOT need to show #userAnswer - CSS wrapper (#trialContentWrapper) handles visibility via opacity "
+  },
+  {
+    "blockNum": 93,
+    "startLine": 4029,
+    "endLine": 4031,
+    "lineCount": 3,
+    "preview": "FLICKER FIX: Input disabled state already set in prepareCard() to prevent flicker We only need to up...",
+    "compressed": "// FIX: FLICKER  Input disabled state already set in prepareCard() to prevent flicker We only need to up"
+  },
+  {
+    "blockNum": 94,
+    "startLine": 4036,
+    "endLine": 4037,
+    "lineCount": 2,
+    "preview": "REPAINT FIX: Batch remaining DOM updates in single requestAnimationFrame Note: Focus already happene...",
+    "compressed": "// FIX: REPAINT  Batch remaining DOM updates in single requestAnimationFrame Note: Focus already happene"
+  },
+  {
+    "blockNum": 95,
+    "startLine": 4061,
+    "endLine": 4064,
+    "lineCount": 4,
+    "preview": "This records the synchronous state of whether input should be enabled or disabled without this we ge...",
+    "compressed": "// This records the synchronous state of whether input should be enabled or disabled without this we get into the situation"
+  },
+  {
+    "blockNum": 96,
+    "startLine": 4069,
+    "endLine": 4070,
+    "lineCount": 2,
+    "preview": "DO NOT hide #userAnswer - CSS wrapper (#trialContentWrapper) handles visibility via opacity $('#user...",
+    "compressed": "// Logic: DO NOT hide #userAnswer - CSS wrapper (#trialContentWrapper) handles visibility via opacity $('#user"
+  },
+  {
+    "blockNum": 97,
+    "startLine": 4074,
+    "endLine": 4077,
+    "lineCount": 4,
+    "preview": "Delay disabling inputs to sync with CSS fade transition This prevents visible button state changes d...",
+    "compressed": "// State transition: Delay disabling inputs to sync with CSS fade transition This prevents visible bu"
+  },
+  {
+    "blockNum": 98,
+    "startLine": 4094,
+    "endLine": 4097,
+    "lineCount": 4,
+    "preview": "TTS should only activate if: 1. TDF has audioPromptMode set to something other than 'silent' (or uns...",
+    "compressed": "// Logic: TTS should only activate if: 1. TDF has audioPromptMode set to something other than 'silent' (or uns"
+  },
+  {
+    "blockNum": 99,
+    "startLine": 4108,
+    "endLine": 4110,
+    "lineCount": 3,
+    "preview": "Note: Recording lock moved INSIDE TTS success callback to avoid permanent lock on errors Replace und...",
+    "compressed": "// Note: Recording lock moved INSIDE TTS success callback to avoid permanent lock on errors Replace und"
+  },
+  {
+    "blockNum": 100,
+    "startLine": 4124,
+    "endLine": 4126,
+    "lineCount": 3,
+    "preview": "FIX: Track TTS request state to ensure feedback doesn't advance before TTS completes This is critica...",
+    "compressed": "// FIX: Track TTS request state to ensure feedback doesn't advance before TTS completes This is critica"
+  },
+  {
+    "blockNum": 101,
+    "startLine": 4245,
+    "endLine": 4246,
+    "lineCount": 2,
+    "preview": "Speech recognition function to process audio data, this is called by the web worker started with the...",
+    "compressed": "// Speech recognition function to process audio data, this is called by the web worker started with the recorder object whe"
+  },
+  {
+    "blockNum": 102,
+    "startLine": 4273,
+    "endLine": 4274,
+    "lineCount": 2,
+    "preview": "Check if we've ALREADY exceeded maxAttempts (attempt 4 when limit is 3) If so, skip API call and for...",
+    "compressed": "// Logic: Check if we've ALREADY exceeded maxAttempts (attempt 4 when limit is 3) If so, skip API call and for"
+  },
+  {
+    "blockNum": 103,
+    "startLine": 4281,
+    "endLine": 4282,
+    "lineCount": 2,
+    "preview": "Simulate empty/incorrect answer and go to feedback The speechAPICallback logic will be bypassed enti...",
+    "compressed": "// Simulate empty/incorrect answer and go to feedback"
+  },
+  {
+    "blockNum": 104,
+    "startLine": 4322,
+    "endLine": 4324,
+    "lineCount": 3,
+    "preview": "PERFORMANCE OPTIMIZATION: Cache answer grammar per UNIT Answer grammar is ALL possible answers for c...",
+    "compressed": "// PERF: PERFORMANCE OPTIMIZATION: Cache answer grammar per UNIT Answer grammar is ALL possible answers for c"
+  },
+  {
+    "blockNum": 105,
+    "startLine": 4343,
+    "endLine": 4344,
+    "lineCount": 2,
+    "preview": "Get the correct answer for THIS trial to filter out phonetic conflicts Use Session's currentExperime...",
+    "compressed": "// Get the correct answer for THIS trial to filter out phonetic conflicts Use Session's currentExperimentState which is alw"
+  },
+  {
+    "blockNum": 106,
+    "startLine": 4366,
+    "endLine": 4367,
+    "lineCount": 2,
+    "preview": "Find phonetically conflicting words with the correct answer Example: if correct answer is \"anguilla\"...",
+    "compressed": "// Logic: Find phonetically conflicting words with the correct answer Example: if correct answer is \"anguilla\""
+  },
+  {
+    "blockNum": 107,
+    "startLine": 4377,
+    "endLine": 4378,
+    "lineCount": 2,
+    "preview": "Remove phonetic conflicts from answer grammar for validation This forces clearer pronunciation since...",
+    "compressed": "// Remove phonetic conflicts from answer grammar for validation This forces clearer pronunciation since conflicting words w"
+  },
+  {
+    "blockNum": 108,
+    "startLine": 4383,
+    "endLine": 4385,
+    "lineCount": 3,
+    "preview": "CRITICAL: Rebuild phonetic index with FILTERED grammar The cached index includes removed conflicts, ...",
+    "compressed": "// CRITICAL: Rebuild phonetic index with FILTERED grammar The cached index includes removed conflicts, causing false matche"
+  },
+  {
+    "blockNum": 109,
+    "startLine": 4428,
+    "endLine": 4429,
+    "lineCount": 2,
+    "preview": "If we don't have a tdf provided speech api key load up the user key NOTE: we shouldn't be able to ge...",
+    "compressed": "// If we don't have a tdf provided speech api key load up the user key NOTE: we shouldn't be able to ge"
+  },
+  {
+    "blockNum": 110,
+    "startLine": 4447,
+    "endLine": 4448,
+    "lineCount": 2,
+    "preview": "FIX: Check if we're still in a valid state for input (Layer 3 of 3-layer defense) This prevents proc...",
+    "compressed": "// FIX: Check if we're still in a valid state for input (Layer 3 of 3-layer defense) This prevents proc"
+  },
+  {
+    "blockNum": 111,
+    "startLine": 4476,
+    "endLine": 4478,
+    "lineCount": 3,
+    "preview": "PERFORMANCE OPTIMIZATION: Cache phonetic index per UNIT Building phonetic index is expensive (100+ m...",
+    "compressed": "// PERF: PERFORMANCE OPTIMIZATION: Cache phonetic index per UNIT Building phonetic index is expensive (100+ m"
+  },
+  {
+    "blockNum": 112,
+    "startLine": 4534,
+    "endLine": 4535,
+    "lineCount": 2,
+    "preview": "Successfully got response - collect ALL alternatives from ALL results Google sometimes returns multi...",
+    "compressed": "// Successfully got response - collect ALL alternatives from ALL results"
+  },
+  {
+    "blockNum": 113,
+    "startLine": 4574,
+    "endLine": 4575,
+    "lineCount": 2,
+    "preview": "Second pass: Phonetic matching for homophones (Mali/Molly, Palau/pull out) Only try phonetic matchin...",
+    "compressed": "// Second pass: Phonetic matching for homophones (Mali/Molly, Palau/pull out)"
+  },
+  {
+    "blockNum": 114,
+    "startLine": 4660,
+    "endLine": 4661,
+    "lineCount": 2,
+    "preview": "Check if we've reached maxAttempts AFTER this attempt finished If so, force feedback instead of retr...",
+    "compressed": "// Check if we've reached maxAttempts AFTER this attempt finished If so, force feedback instead of retrying"
+  },
+  {
+    "blockNum": 115,
+    "startLine": 4685,
+    "endLine": 4688,
+    "lineCount": 4,
+    "preview": "FIX: Clear timeout when SR completes successfully with valid transcript This prevents race condition...",
+    "compressed": "// FIX: Clear timeout when SR completes successfully with valid transcript This prevents race condition"
+  },
+  {
+    "blockNum": 116,
+    "startLine": 4691,
+    "endLine": 4692,
+    "lineCount": 2,
+    "preview": "Only simulate enter key press if we picked up transcribable/in grammar audio for better UX",
+    "compressed": "// Only simulate enter key press if we picked up transcribable/in grammar audio for better UX"
+  },
+  {
+    "blockNum": 117,
+    "startLine": 4786,
+    "endLine": 4787,
+    "lineCount": 2,
+    "preview": "Set up the process callback so that when we detect speech end we have the function to process the au...",
+    "compressed": "// Set up the process callback so that when we detect speech end we have the function to process the audio data"
+  },
+  {
+    "blockNum": 118,
+    "startLine": 4790,
+    "endLine": 4792,
+    "lineCount": 3,
+    "preview": "Set up options for voice activity detection code (hark.js) audioInputSensitivity: threshold for voic...",
+    "compressed": "// Config: Set up options for voice activity detection code (hark.js) audioInputSensitivity: threshold for voic"
+  },
+  {
+    "blockNum": 119,
+    "startLine": 4805,
+    "endLine": 4808,
+    "lineCount": 4,
+    "preview": "Volume monitoring removed - floods console speechEvents.on('volume_change', function(volume, thresho...",
+    "compressed": "// Volume monitoring removed - floods console speechEvents.on('volume_change', function(volume, threshold) { clientConsole("
+  },
+  {
+    "blockNum": 120,
+    "startLine": 4925,
+    "endLine": 4931,
+    "lineCount": 7,
+    "preview": "Re-initialize our User Progress and Card Probabilities internal storage from the user times log. Not...",
+    "compressed": "// Re-initialize our User Progress and Card Probabilities internal storage from the user times log"
+  },
+  {
+    "blockNum": 121,
+    "startLine": 4953,
+    "endLine": 4957,
+    "lineCount": 5,
+    "preview": "So here's the place where we'll use the ROOT tdf instead of just the current TDF. It's how we'll fin...",
+    "compressed": "// So here's the place where we'll use the ROOT tdf instead of just the current TDF"
+  },
+  {
+    "blockNum": 122,
+    "startLine": 5132,
+    "endLine": 5133,
+    "lineCount": 2,
+    "preview": "Also need to read new stimulus file (and note that we allow an exception to kill us if the current t...",
+    "compressed": "// Also need to read new stimulus file (and note that we allow an exception to kill us if the current tdf is broken and has"
+  },
+  {
+    "blockNum": 123,
+    "startLine": 5157,
+    "endLine": 5158,
+    "lineCount": 2,
+    "preview": "Also need to read new stimulus file (and note that we allow an exception to kill us if the current t...",
+    "compressed": "// Also need to read new stimulus file (and note that we allow an exception to kill us if the current tdf is broken and has"
+  },
+  {
+    "blockNum": 124,
+    "startLine": 5173,
+    "endLine": 5175,
+    "lineCount": 3,
+    "preview": "In addition to experimental condition, we allow a root TDF to specify that the xcond parameter used ...",
+    "compressed": "// In addition to experimental condition, we allow a root TDF to specify that the xcond parameter used for selecting from m"
+  },
+  {
+    "blockNum": 125,
+    "startLine": 5198,
+    "endLine": 5200,
+    "lineCount": 3,
+    "preview": "Find previous cluster mapping (or create if it's missing) Note that we need to wait until the exp co...",
+    "compressed": "// Find previous cluster mapping (or create if it's missing) Note that we need to wait until the exp condition is selected "
+  },
+  {
+    "blockNum": 126,
+    "startLine": 5204,
+    "endLine": 5206,
+    "lineCount": 3,
+    "preview": "No cluster mapping! Need to create it and store for resume We process each pair of shuffle/swap toge...",
+    "compressed": "// No cluster mapping"
+  },
+  {
+    "blockNum": 127,
+    "startLine": 5209,
+    "endLine": 5210,
+    "lineCount": 2,
+    "preview": "Note our default of a single no-op to insure we at least build a default cluster mapping",
+    "compressed": "// Note our default of a single no-op to insure we at least build a default cluster mapping"
+  },
+  {
+    "blockNum": 128,
+    "startLine": 5264,
+    "endLine": 5266,
+    "lineCount": 3,
+    "preview": "custom settings for user interface we get the current settings from the tdf file's setspec",
+    "compressed": "// custom settings for user interface we get the current settings from the tdf file's setspec but the unit and individual q"
+  },
+  {
+    "blockNum": 129,
+    "startLine": 5309,
+    "endLine": 5311,
+    "lineCount": 3,
+    "preview": "here we interprit the stimulus and input position settings to set the colum widths. There are 4 poss...",
+    "compressed": "// here we interprit the stimulus and input position settings to set the colum widths"
+  },
+  {
+    "blockNum": 130,
+    "startLine": 5314,
+    "endLine": 5316,
+    "lineCount": 3,
+    "preview": "if curTdfUISettings is set, then we need to check if it is a string or an object. if it is a string,...",
+    "compressed": "// if curTdfUISettings is set, then we need to check if it is a string or an object"
+  },
+  {
+    "blockNum": 131,
+    "startLine": 5415,
+    "endLine": 5417,
+    "lineCount": 3,
+    "preview": "Notice that no matter what, we log something about condition data ALSO NOTICE that we'll be calling ...",
+    "compressed": "// Notice that no matter what, we log something about condition data ALSO NOTICE that we'll be calling processUserTimesLog "
+  },
+  {
+    "blockNum": 132,
+    "startLine": 5479,
+    "endLine": 5480,
+    "lineCount": 2,
+    "preview": "prepareCard will handle whether or not new units see instructions, but it will miss instructions for...",
+    "compressed": "// Logic: prepareCard will handle whether or not new units see instructions, but it will miss instructions for"
+  },
+  {
+    "blockNum": 133,
+    "startLine": 5483,
+    "endLine": 5484,
+    "lineCount": 2,
+    "preview": "It's possible that they clicked Continue on a final unit, so we need to know to act as if we're done",
+    "compressed": "// It's possible that they clicked Continue on a final unit, so we need to know to act as if we're done"
+  },
+  {
+    "blockNum": 134,
+    "startLine": 5518,
+    "endLine": 5519,
+    "lineCount": 2,
+    "preview": "Logged completion of unit - if this is the final unit we also know that the TDF is completed",
+    "compressed": "// Logged completion of unit - if this is the final unit we also know that the TDF is completed"
+  },
+  {
+    "blockNum": 135,
+    "startLine": 5528,
+    "endLine": 5529,
+    "lineCount": 2,
+    "preview": "case \"schedule\": break;",
+    "compressed": "// case \"schedule\":"
+  },
+  {
+    "blockNum": 136,
+    "startLine": 5535,
+    "endLine": 5536,
+    "lineCount": 2,
+    "preview": "resumeToQuestion = true;//TODO: may want true here writeCurrentToScrollList(entry.answer, action ===...",
+    "compressed": "// resumeToQuestion = true;//TODO: may want true here"
+  },
+  {
+    "blockNum": 137,
+    "startLine": 5562,
+    "endLine": 5563,
+    "lineCount": 2,
+    "preview": "If we make it here, then we know we won't need a resume until something else happens",
+    "compressed": "// If we make it here, then we know we won't need a resume until something else happens"
+  },
+  {
+    "blockNum": 138,
+    "startLine": 5590,
+    "endLine": 5592,
+    "lineCount": 3,
+    "preview": "Question outstanding: go through proper cleanup/transitions then display FIX: Previously called newQ...",
+    "compressed": "// STATE MACHINE: FIX: Previously called newQuestionHandler() directly, bypassing state machine"
+  },
+  {
+    "blockNum": 139,
+    "startLine": 5600,
+    "endLine": 5602,
+    "lineCount": 3,
+    "preview": "If we get this far and the unit engine thinks the unit is finished, we might need to stick with the ...",
+    "compressed": "// If we get this far and the unit engine thinks the unit is finished, we might need to stick with the instructions *IF AND"
+  }
+]
