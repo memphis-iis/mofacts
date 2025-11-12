@@ -1,20 +1,20 @@
 <template name="curStudentPerformance">
-    <br>
-    <div class="row text-center">
-        <div class="col-sm-12 col-12 col-md-6 col-lg-6 mx-auto card-header ">
-            <div class="row ">
-                <div class="d-md-block col-lg-8  d-sm-block"></div>
-                <div class="text-right col-md-12 col-lg-4 col-sm-12 col-12  displaystats">
-                    <div class="row row-cols-2 row-cols-md-2 row-cols-sm-1 row-cols-1">
-                        <div class="col">
-                            {{curStudentPerformance.totalTimeDisplay}} min
-                        </div>
-                        <div class="col">
-                            {{curStudentPerformance.percentCorrect}} correct
-                        </div>
-                    </div>
-                </div>
+    <section class="card-stats-container" aria-label="Current session performance">
+        <div class="card-stats" role="group" aria-roledescription="Study stats">
+            <div class="card-stat">
+                <p class="card-stat-label" id="card-stat-time-label">Study time</p>
+                <p class="card-stat-value" aria-labelledby="card-stat-time-label">
+                    <span class="card-stat-number">{{curStudentPerformance.totalTimeDisplay}}</span>
+                    <span class="card-stat-unit">min</span>
+                </p>
+            </div>
+            <div class="card-stat">
+                <p class="card-stat-label" id="card-stat-accuracy-label">Accuracy</p>
+                <p class="card-stat-value" aria-labelledby="card-stat-accuracy-label">
+                    <span class="card-stat-number">{{curStudentPerformance.percentCorrect}}</span>
+                    <span class="card-stat-unit">correct</span>
+                </p>
             </div>
         </div>
-    </div>
+    </section>
 </template>

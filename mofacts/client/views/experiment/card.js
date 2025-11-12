@@ -3592,6 +3592,13 @@ function cardStart() {
   });
   $('#userLowerInteraction').html('');
 
+  // Hide global loading spinner when card starts (handles video sessions and other edge cases)
+  // Video sessions skip beginFadeIn() so we need this fallback
+  if (Session.get('appLoading')) {
+    clientConsole(2, '[UI] Card start - hiding global spinner');
+    Session.set('appLoading', false);
+  }
+
   // Always hide the final instructions box
   $('#finalInstructionsDlg').modal('hide');
   // the card loads frequently, but we only want to set this the first time

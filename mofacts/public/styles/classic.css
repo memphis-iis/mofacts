@@ -1001,6 +1001,83 @@ tfoot tf, .table tfoot tf, .table tfoot td, .table tfoot th {
     margin-top: var(--card-element-gap);
 }
 
+.card-stats-container {
+    width: 100%;
+    max-width: 720px;
+    margin: clamp(0.5rem, 2vh, 1rem) auto;
+    background-color: var(--neutral-color, #ffffff);
+    border-radius: var(--border-radius, 8px);
+    border: 1px solid rgba(15, 23, 42, 0.08);
+    box-shadow: 0 8px 16px rgba(15, 23, 42, 0.08);
+    padding: clamp(0.9rem, 2vh, 1.4rem) clamp(1rem, 4vw, 2.75rem);
+}
+
+.card-stats {
+    display: flex;
+    justify-content: space-between;
+    align-items: stretch;
+    gap: var(--card-stack-gap-small);
+    padding-top: clamp(1.5rem, 3vh, 2rem);
+}
+
+.card-stat {
+    flex: 1 1 200px;
+    text-align: center;
+}
+
+.card-stat-label {
+    font-size: 0.82rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--secondary-text-color);
+    margin: 0;
+}
+
+.card-stat-value {
+    margin: 0.25rem 0 0;
+    display: inline-flex;
+    align-items: baseline;
+    justify-content: center;
+    gap: 0.25rem;
+    font-size: clamp(1.35rem, 3vw, 1.75rem);
+    font-weight: 600;
+    color: var(--text-color);
+}
+
+.card-stat-number {
+    font-variant-numeric: tabular-nums;
+}
+
+.card-stat-unit {
+    font-size: clamp(0.85rem, 2vw, 1rem);
+    color: var(--secondary-text-color);
+}
+
+.card-stats-container[aria-label] {
+    position: relative;
+}
+
+.card-stats-container[aria-label]::before {
+    content: attr(aria-label);
+    position: absolute;
+    top: 0.75rem;
+    left: clamp(1rem, 4vw, 2.75rem);
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--secondary-text-color);
+    opacity: 0.65;
+}
+
+@media screen and (max-width: 640px) {
+    .card-stats {
+        flex-direction: column;
+        align-items: stretch;
+        padding-top: clamp(0.5rem, 2vh, 0.75rem);
+    }
+}
+
 /* User interaction - minimal but breathing room */
 #userInteractionContainer {
     padding: clamp(4px, 1vh, 8px) 0;

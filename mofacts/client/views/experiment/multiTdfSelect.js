@@ -22,6 +22,12 @@ Template.multiTdfSelect.rendered = function() {
   // this is called whenever the template is rendered.
   const subTdfs = Session.get('currentTdfFile').subTdfs;
 
+  // Hide global loading spinner when multiTdfSelect page is ready
+  if (Session.get('appLoading')) {
+    console.log('[UI] MultiTdfSelect page ready - hiding global spinner');
+    Session.set('appLoading', false);
+  }
+
   $('#expDataDownloadContainer').html('');
 
   // Check all the valid TDF's
