@@ -3409,6 +3409,12 @@ async function prepareCard(isResume = false) {
   } else if (trialState.get('current') === TRIAL_STATES.TRANSITION_CLEARING) {
     // Already in CLEARING (called from processUserTimesLog), skip fade-out
     clientConsole(2, '[SM]   Already in CLEARING state, skipping fade-out');
+  } else if (trialState.get('current') === TRIAL_STATES.PRESENTING_AWAITING ||
+             trialState.get('current') === TRIAL_STATES.STUDY_SHOWING) {
+    // FIX: Unit transition (e.g., instruction-only → first real trial) - properly exit current state
+    clientConsole(2, '[SM]   Transitioning from', trialState.get('current'), 'to TRANSITION.START before prepareCard');
+    transitionTrialState(TRIAL_STATES.TRANSITION_START, 'Unit transition - exiting current trial state');
+    transitionTrialState(TRIAL_STATES.TRANSITION_FADING_OUT, 'Fade-out previous unit content');
   } else {
     // Called from somewhere unexpected - transition to fade-out anyway
     transitionTrialState(TRIAL_STATES.TRANSITION_FADING_OUT, 'prepareCard() starting fade-out from unexpected state');
