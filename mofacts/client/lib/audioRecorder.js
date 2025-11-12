@@ -15,16 +15,15 @@ DEALINGS IN THE SOFTWARE.
 
 (function(window){
   var WORKER_PATH = 'lib/audioRecorderWorker.js';
+  var WORKLET_PATH = 'lib/recorderWorkletProcessor.js';
+  var WORKLET_NAME = 'recorder-worklet-processor';
+  var workletModulePromises = typeof WeakMap !== 'undefined' ? new WeakMap() : null;
 
   var Recorder = function(source, cfg){
     var config = cfg || {};
     var bufferLen = config.bufferLen || 4096;
     this.context = source.context;
-    if(!this.context.createScriptProcessor){
-       this.node = this.context.createJavaScriptNode(bufferLen, 1, 1);
-    } else {
-       this.node = this.context.createScriptProcessor(bufferLen, 1, 1);
-    }
+    this.node = null;
 
     var worker = new Worker(config.workerPath || WORKER_PATH);
     worker.postMessage({
@@ -34,25 +33,91 @@ DEALINGS IN THE SOFTWARE.
       }
     });
 
-    var recording = false,
-    currCallback;
-    processCallback = null;
-    var wasSilent = true;
+    var recording = false;
+    var currCallback = null;
+    var processCallback = null;
+    var self = this;
 
-    this.node.onaudioprocess = function(e){
-      if (!recording){
-        //console.log("audio recorder, not recording");
+    function postBufferToWorker(channelData){
+      if (!recording) {
         return;
       }
-      //console.log("audio recorder, posting data to worker");
+
       worker.postMessage({
         command: 'record',
         buffer: [
-          e.inputBuffer.getChannelData(0)//,
-          //e.inputBuffer.getChannelData(1)
+          channelData
         ]
       });
     }
+
+    function setupScriptNode(){
+      if(!self.context.createScriptProcessor){
+        self.node = self.context.createJavaScriptNode(bufferLen, 1, 1);
+      } else {
+        self.node = self.context.createScriptProcessor(bufferLen, 1, 1);
+      }
+
+      self.node.onaudioprocess = function(e){
+        postBufferToWorker(e.inputBuffer.getChannelData(0));
+      };
+
+      source.connect(self.node);
+      self.node.connect(self.context.destination);
+    }
+
+    async function setupWorkletNode(){
+      if (!self.context.audioWorklet || typeof window.AudioWorkletNode === 'undefined') {
+        throw new Error('AudioWorkletNode is not supported in this browser');
+      }
+
+      var modulePromise;
+      if (workletModulePromises) {
+        modulePromise = workletModulePromises.get(self.context);
+        if (!modulePromise) {
+          modulePromise = self.context.audioWorklet.addModule(config.workletPath || WORKLET_PATH);
+          workletModulePromises.set(self.context, modulePromise);
+        }
+      } else {
+        modulePromise = self.context.audioWorklet.addModule(config.workletPath || WORKLET_PATH);
+      }
+
+      await modulePromise;
+
+      self.node = new AudioWorkletNode(self.context, WORKLET_NAME, {
+        numberOfInputs: 1,
+        numberOfOutputs: 1,
+        outputChannelCount: [1]
+      });
+      self.node.port.onmessage = function(event) {
+        postBufferToWorker(event.data);
+      };
+
+      source.connect(self.node);
+      self.node.connect(self.context.destination);
+    }
+
+    async function initNode(){
+      if (config.forceScriptProcessor) {
+        setupScriptNode();
+        return 'script';
+      }
+
+      try {
+        if (self.context.audioWorklet && typeof window.AudioWorkletNode !== 'undefined') {
+          await setupWorkletNode();
+          return 'worklet';
+        }
+      } catch (err) {
+        console.warn('[Recorder] AudioWorklet init failed, falling back to ScriptProcessor:', err);
+      }
+
+      setupScriptNode();
+      return 'script';
+    }
+
+    // Expose a readiness promise so callers can await the node being connected before starting SR.
+    this.ready = initNode();
 
     this.configure = function(cfg){
       for (var prop in cfg){
@@ -63,6 +128,10 @@ DEALINGS IN THE SOFTWARE.
     }
 
     this.record = function(){
+      if (!this.node) {
+        console.warn('[Recorder] record() called before node initialized');
+        return;
+      }
       recording = true;
     }
 
@@ -123,8 +192,10 @@ DEALINGS IN THE SOFTWARE.
       currCallback(blob);
     }
 
-    source.connect(this.node);
-    this.node.connect(this.context.destination);   // if the script node is not connected to an output the "onaudioprocess" event is not triggered in chrome.
+    // Backwards compatibility: ensure ready promise always exists even if initNode threw synchronously
+    if (!this.ready) {
+      this.ready = Promise.resolve();
+    }
   };
 
   Recorder.setupDownload = function(blob, filename){
