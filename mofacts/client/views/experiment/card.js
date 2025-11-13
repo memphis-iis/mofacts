@@ -302,6 +302,34 @@ async function leavePage(dest) {
       return;
     }
   }
+
+  // Clean up all audio sources to prevent audio bleeding into other pages
+  clientConsole(2, '[Audio] Cleaning up all audio sources');
+
+  // Stop Google TTS audio (if playing)
+  if (window.currentAudioObj) {
+    clientConsole(2, '[Audio]   Stopping Google TTS audio');
+    window.currentAudioObj.pause();
+    window.currentAudioObj.onended = null;
+    window.currentAudioObj = undefined;
+  }
+
+  // Cancel browser TTS (if active)
+  if (window.speechSynthesis && window.speechSynthesis.speaking) {
+    clientConsole(2, '[Audio]   Cancelling browser TTS');
+    window.speechSynthesis.cancel();
+  }
+
+  // Destroy Plyr video player (if active)
+  if (playerController && playerController.player) {
+    clientConsole(2, '[Audio]   Destroying Plyr player');
+    try {
+      destroyPlyr();
+    } catch (e) {
+      clientConsole(1, '[Audio]   Error destroying Plyr:', e);
+    }
+  }
+
   clearCardTimeoutWrapper();
   clearPlayingSound();
   if (typeof dest === 'function') {
@@ -468,6 +496,48 @@ Template.card.onCreated(function() {
   cardState.set('displayReady', false);
   cardState.set('inputReady', false);
 });
+
+Template.card.onDestroyed(function() {
+  clientConsole(2, '[Lifecycle] card template destroyed, running cleanup');
+  if (!isNavigatingAway) {
+    // leavePage() hasn't been called yet - need to clean up ALL audio resources
+    clientConsole(2, '[Lifecycle] Direct navigation detected, cleaning up all audio');
+
+    // Stop Google TTS audio (if playing)
+    if (window.currentAudioObj) {
+      clientConsole(2, '[Lifecycle]   Stopping Google TTS audio');
+      window.currentAudioObj.pause();
+      window.currentAudioObj.onended = null;
+      window.currentAudioObj = undefined;
+    }
+
+    // Cancel browser TTS (if active)
+    if (window.speechSynthesis && window.speechSynthesis.speaking) {
+      clientConsole(2, '[Lifecycle]   Cancelling browser TTS');
+      window.speechSynthesis.cancel();
+    }
+
+    // Destroy Plyr video player (if active)
+    if (playerController && playerController.player) {
+      clientConsole(2, '[Lifecycle]   Destroying Plyr player');
+      try {
+        destroyPlyr();
+      } catch (e) {
+        clientConsole(1, '[Lifecycle]   Error destroying Plyr:', e);
+      }
+    }
+
+    // Clean up speech recognition audio context
+    if (window.AudioContext) {
+      stopRecording();
+      clearAudioContextAndRelatedVariables();
+    }
+
+    // Clean up sound effects
+    clearPlayingSound();
+  }
+});
+
 
 Template.card.rendered = initCard;
 
@@ -793,8 +863,18 @@ Template.card.helpers({
   },
 
   'microphoneColorClass': function() {
-    // Green when actively recording, red when not recording (including during processing)
-    return cardState.get('recording') ? 'sr-mic-recording' : 'sr-mic-waiting';
+    // Check if API key is configured in TDF (green) or if user needs to provide it (dark gray)
+    const tdfFile = Session.get('currentTdfFile');
+    const tdfHasKey = !!(tdfFile?.tdfs?.tutor?.setspec?.speechAPIKey);
+    const tdfAudioEnabled = tdfFile?.tdfs?.tutor?.setspec?.audioInputEnabled === 'true';
+
+    // Only apply color classes if audio input is enabled in TDF
+    if (!tdfAudioEnabled) {
+      return ''; // No special color if feature not enabled
+    }
+
+    // Green if TDF has API key, dark gray if user needs to provide key
+    return tdfHasKey ? 'icon-configured' : 'icon-needs-config';
   },
 
   'voiceTranscriptionStatusMsg': function() {
@@ -951,6 +1031,22 @@ Template.card.helpers({
   'audioCard': function() {
     const currentDisplay = cardState.get('currentDisplay');
     return !!currentDisplay && !!currentDisplay.audioSrc;
+  },
+
+  'audioIconColorClass': function() {
+    // Check if audio output is configured (audio files) or if user needs to provide it (TTS only)
+    const tdfFile = Session.get('currentTdfFile');
+    const tdfAudioPromptMode = tdfFile?.tdfs?.tutor?.setspec?.audioPromptMode;
+    const audioOutputEnabled = tdfAudioPromptMode && tdfAudioPromptMode !== 'silent';
+
+    // Only apply color classes if audio output is enabled in TDF
+    if (!audioOutputEnabled) {
+      return ''; // No special color if feature not enabled
+    }
+
+    // Green if TDF has audioPromptMode configured (TDF provides the setting)
+    // This means the TDF is set up to use audio output
+    return 'icon-configured';
   },
 
   'speakerCardPosition': function() {
@@ -2460,17 +2556,11 @@ async function showUserFeedback(isCorrect, feedbackMessage, isTimeout, isSkip) {
               
 
 
-              // If the count down is finished, end interval and clear CountdownTimer
+              // If the count down is finished, end interval - DON'T clear visible elements (let fade-out handle)
               if (distance < 0) {
-                $('#userLowerInteraction').html('');
+                // FIX: Don't clear feedback elements here - they should remain visible during fade-out transition
+                // All cleanup now happens in cleanupTrialContent() AFTER fade-out completes
                 Meteor.clearInterval(CountdownTimerInterval);
-                //reset the progress bar
-                document.getElementById("progressbar").style.width = 0 + "%";
-                if(window.currentAudioObj) {
-                  $('#CountdownTimerText').text('Continuing after feedback...');
-                } else {
-                  $('#CountdownTimerText').text("Continuing...");
-                }
                 cardState.set('CurIntervalId', undefined);
                 // FIX: Don't set inFeedback=false here - let afterAnswerFeedbackCallback() handle after both countdown AND TTS
               }
@@ -2768,10 +2858,10 @@ async function cardEnd() {
   // STATE MACHINE: Begin TRANSITION phase
   transitionTrialState(TRIAL_STATES.TRANSITION_START, 'Trial complete, beginning transition');
 
-  hideUserFeedback(); // Clears all feedback locations
+  // FIX: Don't clear feedback elements before fade-out - they should remain visible during transition
+  // hideUserFeedback() now called in cleanupTrialContent() AFTER fade-out completes
   cardState.set('inFeedback', false);
-  $('#CountdownTimerText').text("Continuing...");
-  // Don't clear #userLowerInteraction - hideUserFeedback() already does it
+  // Don't update #CountdownTimerText or clear feedback - let them fade out with current content
   $('#userAnswer').val('');
   cardState.set('feedbackTimeoutEnds', Date.now())
 
@@ -3078,6 +3168,9 @@ function hideUserFeedback() {
 function cleanupTrialContent() {
   clientConsole(2, '[SM] cleanupTrialContent called in state:', trialState.get('current'));
 
+  // FIX: Clear all feedback elements AFTER fade-out (moved from cardEnd for synchronized cleanup)
+  hideUserFeedback();
+
   // FIX: Stop orphaned TTS audio as safety measure (normally Promise.all waits, this catches edge cases)
   if (window.currentAudioObj) {
     clientConsole(2, '[SM]   Stopping orphaned TTS audio during cleanup');
@@ -3096,16 +3189,17 @@ function cleanupTrialContent() {
   $('#userAnswer').css('border-color', ''); // Reset any inline border styles
   $('#userAnswer').css('border', ''); // Reset full border property
 
-  // Clear non-reactive HTML only (feedback already handled by hideUserFeedback)
+  // Clear non-reactive HTML (countdown timer, progress bar, correct answer display)
   $('#correctAnswerDisplayContainer').html('');
   $('#CountdownTimerText').text('');
+  $('#userLowerInteraction').html(''); // Clear bottom feedback area
 
   // Reset CSS classes (NOT feedback classes - already done)
   $('#displayContainer').removeClass('mx-auto');
   $('#correctAnswerDisplayContainer').addClass('d-none');
 
-  // Reset inline styles
-  $('#progressbar').css('width', '0%');
+  // Reset inline styles and classes for progress bar
+  $('#progressbar').css('width', '0%').removeClass('progress-bar');
 
   // Hide elements that need to be hidden (using attr not .hide() to work with Blaze)
   $('#userInteractionContainer').attr('hidden', '');
