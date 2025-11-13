@@ -1,27 +1,81 @@
 import { getCurrentTheme } from '../lib/currentTestingHelpers'
 
-Template.theme.onCreated(async function() {
-    // Load custom help page status
+const DEFAULT_THEME_ID = 'mofacts-default';
+
+function getThemeLibrary() {
+    const library = DynamicSettings.findOne({key: 'themeLibrary'});
+    return library?.value || [];
+}
+
+function getActiveThemeId() {
+    const theme = Session.get('curTheme');
+    return theme?.activeThemeId;
+}
+
+function isThemeActive(themeId) {
+    const activeId = getActiveThemeId();
+    return Boolean(activeId && themeId === activeId);
+}
+
+async function downloadThemeJson(themeId, filenameFallback = 'theme.json') {
     try {
-        const status = await Meteor.callAsync('getCustomHelpPageStatus');
-        if (status) {
-            Session.set('customHelpPageEnabled', status.enabled);
-            Session.set('customHelpPageUploadedAt', status.uploadedAt);
-        }
+        const json = await Meteor.callAsync('exportThemeFile', themeId);
+        const blob = new Blob([json], {type: 'application/json'});
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = filenameFallback;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
     } catch (err) {
-        console.log("Error getting custom help page status:", err);
+        alert('Error exporting theme: ' + (err?.message || err));
     }
+}
+
+Template.theme.onCreated(async function() {
+    this.subscribe('themeLibrary');
 });
 
 Template.theme.helpers({
     'currentTheme': function() {
         return Session.get('curTheme');
     },
+    'availableThemes': function() {
+        return getThemeLibrary();
+    },
+    'hasThemeLibrary': function() {
+        return getThemeLibrary().length > 0;
+    },
+    'isThemeActive': function(themeId) {
+        return isThemeActive(themeId);
+    },
+    'themePillModifier': function(themeId) {
+        return isThemeActive(themeId) ? 'border-primary bg-light shadow-sm' : 'border-light';
+    },
+    'themeOrigin': function(origin) {
+        return origin === 'system' ? 'System default' : 'Custom';
+    },
+    'isSystemTheme': function(origin) {
+        return origin === 'system';
+    },
+    'themeActivationAttrs': function(themeId) {
+        return isThemeActive(themeId)
+            ? { disabled: true, 'aria-disabled': true }
+            : {};
+    },
     'customHelpPageEnabled': function() {
-        return Session.get('customHelpPageEnabled') || false;
+        const theme = Session.get('curTheme');
+        const help = theme?.help;
+        if (!help || help.enabled === false) {
+            return false;
+        }
+        return Boolean(help.markdown?.length || help.url?.length);
     },
     'customHelpPageUploadedAt': function() {
-        return Session.get('customHelpPageUploadedAt');
+        const theme = Session.get('curTheme');
+        return theme?.help?.uploadedAt || null;
     },
     'formatDate': function(date) {
         if (!date) return '';
@@ -102,6 +156,111 @@ function calculateContrastRatio(fgHex, bgHex) {
 }
 
 Template.theme.events({
+    'click .set-active-theme': async function(event) {
+        event.preventDefault();
+        const themeId = event.currentTarget.getAttribute('data-id');
+        if (!themeId) {
+            return;
+        }
+        try {
+            await Meteor.callAsync('setActiveTheme', themeId);
+        } catch (err) {
+            alert('Error activating theme: ' + (err?.message || err));
+        }
+    },
+    'click .duplicate-theme': async function(event) {
+        event.preventDefault();
+        const themeId = event.currentTarget.getAttribute('data-id');
+        const themeName = event.currentTarget.getAttribute('data-name') || 'New Theme';
+        const proposedName = `${themeName} Copy`;
+        const newName = prompt('Name for duplicated theme', proposedName);
+        if (!newName) {
+            return;
+        }
+        try {
+            await Meteor.callAsync('duplicateTheme', {
+                sourceThemeId: themeId,
+                name: newName
+            });
+        } catch (err) {
+            alert('Error duplicating theme: ' + (err?.message || err));
+        }
+    },
+    'click .rename-theme': async function(event) {
+        event.preventDefault();
+        const themeId = event.currentTarget.getAttribute('data-id');
+        const currentName = event.currentTarget.getAttribute('data-name') || 'this theme';
+        if (!themeId) {
+            return;
+        }
+        const newName = prompt('Enter new theme name', currentName);
+        if (!newName || newName === currentName) {
+            return;
+        }
+        try {
+            await Meteor.callAsync('renameTheme', {
+                themeId: themeId,
+                newName: newName
+            });
+        } catch (err) {
+            alert('Error renaming theme: ' + (err?.message || err));
+        }
+    },
+    'click .delete-theme': async function(event) {
+        event.preventDefault();
+        const themeId = event.currentTarget.getAttribute('data-id');
+        const themeName = event.currentTarget.getAttribute('data-name') || 'this theme';
+        if (!themeId) {
+            return;
+        }
+        if (!confirm(`Delete ${themeName}? This cannot be undone.`)) {
+            return;
+        }
+        try {
+            await Meteor.callAsync('deleteTheme', themeId);
+        } catch (err) {
+            alert('Error deleting theme: ' + (err?.message || err));
+        }
+    },
+    'click .export-theme': async function(event) {
+        event.preventDefault();
+        const themeId = event.currentTarget.getAttribute('data-id');
+        const filename = event.currentTarget.getAttribute('data-filename') || `${themeId}.json`;
+        if (!themeId) {
+            return;
+        }
+        await downloadThemeJson(themeId, filename);
+    },
+    'click #exportActiveTheme': async function() {
+        const activeId = getActiveThemeId();
+        if (!activeId) {
+            alert('No active theme selected.');
+            return;
+        }
+        const theme = Session.get('curTheme');
+        const filename = (theme?.properties?.themeName || activeId) + '.json';
+        await downloadThemeJson(activeId, filename);
+    },
+    'click #themeImportButton': async function(event, template) {
+        event.preventDefault();
+        const fileInput = template.find('#themeImportInput');
+        const file = fileInput?.files?.[0];
+        if (!file) {
+            alert('Select a theme JSON file to import.');
+            return;
+        }
+        if (file.size > 1024 * 1024) {
+            alert('Theme files must be smaller than 1MB.');
+            return;
+        }
+        try {
+            const text = await file.text();
+            await Meteor.callAsync('importThemeFile', text, true);
+            fileInput.value = '';
+        } catch (err) {
+            alert('Error importing theme: ' + (err?.message || err));
+        }
+    },
     'click #themeResetButton': async function(event) {
         try {
             await Meteor.callAsync('initializeCustomTheme', 'MoFaCTS');
@@ -318,26 +477,15 @@ Template.theme.events({
         reader.onload = async function(e) {
             const markdownContent = e.target.result;
 
-            try {
-                await Meteor.callAsync('setCustomHelpPage', markdownContent);
-                statusSpan.textContent = 'Custom help page uploaded successfully!';
-                statusSpan.className = 'text-success';
-                fileInput.value = '';
-
-                // Update session to show status
                 try {
-                    const status = await Meteor.callAsync('getCustomHelpPageStatus');
-                    if (status) {
-                        Session.set('customHelpPageEnabled', status.enabled);
-                        Session.set('customHelpPageUploadedAt', status.uploadedAt);
-                    }
+                    await Meteor.callAsync('setCustomHelpPage', markdownContent);
+                    statusSpan.textContent = 'Custom help page uploaded successfully!';
+                    statusSpan.className = 'text-success';
+                    fileInput.value = '';
                 } catch (err) {
-                    console.log("Error getting help page status:", err);
+                    statusSpan.textContent = 'Error: ' + err.message;
+                    statusSpan.className = 'text-danger';
                 }
-            } catch (err) {
-                statusSpan.textContent = 'Error: ' + err.message;
-                statusSpan.className = 'text-danger';
-            }
         };
 
         reader.onerror = function() {
@@ -358,10 +506,6 @@ Template.theme.events({
                 await Meteor.callAsync('removeCustomHelpPage');
                 statusSpan.textContent = 'Custom help page removed. Now using wiki.';
                 statusSpan.className = 'text-success';
-
-                // Update session
-                Session.set('customHelpPageEnabled', false);
-                Session.set('customHelpPageUploadedAt', null);
             } catch (err) {
                 statusSpan.textContent = 'Error: ' + err.message;
                 statusSpan.className = 'text-danger';

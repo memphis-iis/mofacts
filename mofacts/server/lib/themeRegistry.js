@@ -22,6 +22,8 @@ const FALLBACK_THEME = {
     button_color: '#7ed957',
     primary_button_text_color: '#000000',
     accent_color: '#7ed957',
+    accent_border_color: '#7ed957',
+    accent_background_color: '#7ed957',
     secondary_color: '#d9d9d9',
     secondary_text_color: '#000000',
     audio_alert_color: '#06723e',
@@ -465,8 +467,43 @@ class ThemeRegistry {
 
     const active = await DynamicSettings.findOneAsync({ key: ACTIVE_THEME_KEY });
     if (active?.value?.activeThemeId === themeId) {
+      await DynamicSettings.upsertAsync(
+        { key: ACTIVE_THEME_KEY },
+        { $set: { value: null } }
+      );
       await this.ensureActiveTheme();
     }
+  }
+
+  async renameTheme(themeId, newName) {
+    const entry = this.getThemeEntry(themeId);
+    if (!entry) {
+      throw new Meteor.Error('theme-not-found', 'Theme not found');
+    }
+    if (entry.readOnly) {
+      throw new Meteor.Error('read-only-theme', 'System themes cannot be renamed');
+    }
+
+    // Update the theme name in memory
+    entry.data.metadata.name = newName;
+    entry.data.metadata.updatedAt = nowIso();
+
+    // Write the updated theme to file
+    await fsp.writeFile(entry.filePath, JSON.stringify(entry.data, null, 2), 'utf8');
+
+    // Update the library setting
+    await this.persistLibrarySetting();
+
+    // Update active theme if this is the active theme
+    const active = await DynamicSettings.findOneAsync({ key: ACTIVE_THEME_KEY });
+    if (active?.value?.activeThemeId === themeId) {
+      await DynamicSettings.upsertAsync(
+        { key: ACTIVE_THEME_KEY },
+        { $set: { 'value.theme': entry.data } }
+      );
+    }
+
+    return entry.data;
   }
 
   async ensureEditableTheme(themeId, userName = 'admin') {

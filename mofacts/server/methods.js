@@ -19,6 +19,7 @@ import { _ } from 'core-js';
 import { all } from 'bluebird';
 import { check, Match } from 'meteor/check'; // Security: Input validation
 import { WebApp } from 'meteor/webapp'; // Security: For adding HTTP headers
+import { themeRegistry } from './lib/themeRegistry';
 
 
 export {
@@ -142,6 +143,77 @@ async function getUserIdforUsername(username) {
     usernameToUserIds[username] = userId;
   }
   return userId;
+}
+
+async function updateActiveThemeDocument(userId, mutator) {
+  let activeSetting = await DynamicSettings.findOneAsync({key: 'customTheme'});
+  if (!activeSetting || !activeSetting.value) {
+    await themeRegistry.ensureActiveTheme();
+    activeSetting = await DynamicSettings.findOneAsync({key: 'customTheme'});
+  }
+
+  const activeThemeId = activeSetting?.value?.activeThemeId;
+  if (!activeThemeId) {
+    throw new Meteor.Error('theme-not-found', 'Active theme is not set');
+  }
+
+  let entry = themeRegistry.getThemeEntry(activeThemeId);
+  if (!entry) {
+    await themeRegistry.refreshFromDisk();
+    entry = themeRegistry.getThemeEntry(activeThemeId);
+  }
+
+  if (!entry) {
+    entry = await themeRegistry.ensureStoredThemeRegistered(activeSetting?.value);
+  }
+
+  if (!entry) {
+    throw new Meteor.Error('theme-not-found', 'Unable to locate active theme');
+  }
+
+  if (entry.readOnly) {
+    const userRecord = userId ? await Meteor.users.findOneAsync({_id: userId}, {fields: {username: 1}}) : null;
+    entry = await themeRegistry.ensureEditableTheme(entry.id, userRecord?.username || userId || 'admin');
+  }
+
+  const updatedEntry = await themeRegistry.updateTheme(entry.id, (theme) => {
+    const result = mutator(theme);
+    return result || theme;
+  });
+  const serialized = themeRegistry.serializeActiveTheme(updatedEntry);
+  await DynamicSettings.upsertAsync({key: 'customTheme'}, {$set: {value: serialized}});
+  return {entry: updatedEntry, serialized};
+}
+
+async function migrateLegacyHelpPage() {
+  const legacyHelp = await DynamicSettings.findOneAsync({key: 'customHelpPage'});
+  const legacyValue = legacyHelp?.value;
+  if (!legacyValue || !legacyValue.markdownContent) {
+    if (legacyHelp) {
+      await DynamicSettings.removeAsync({key: 'customHelpPage'});
+    }
+    return;
+  }
+
+  try {
+    await updateActiveThemeDocument(legacyValue.uploadedBy || null, (theme) => {
+      theme.help = {
+        enabled: legacyValue.enabled !== false,
+        format: 'markdown',
+        markdown: legacyValue.markdownContent,
+        url: '',
+        uploadedAt: legacyValue.uploadedAt || new Date().toISOString(),
+        uploadedBy: legacyValue.uploadedBy || null,
+        fileName: legacyValue.fileName || null,
+        source: 'legacy'
+      };
+      return theme;
+    });
+    await DynamicSettings.removeAsync({key: 'customHelpPage'});
+    serverConsole('Migrated legacy custom help page into active theme');
+  } catch (err) {
+    serverConsole('Warning: Failed to migrate legacy help page:', err.message);
+  }
 }
 
 // For Southwest SSO with ADFS/SAML 2.0
@@ -4104,135 +4176,90 @@ export const methods = {
 
   initializeCustomTheme: async function(themeName) {
     serverConsole('initializeCustomTheme');
-    //This creates a theme key that contains an object with the theme name
-    //and an empty object for the theme's properties
-    let theme = {};
-    theme.themeName = themeName;
-    theme.enabled = true;
-    theme.properties = {
-      themeName: themeName,
-      background_color: '#F2F2F2',
-      text_color: '#000000',
-      button_color: '#7ed957',
-      primary_button_text_color: '#000000',
-      accent_color: '#7ed957',
-      secondary_color: '#d9d9d9',
-      secondary_text_color: '#000000',
-      audio_alert_color: '#06723e',
-      success_color: '#00cc00',
-      navbar_text_color: '#000000',
-      navbar_alignment: 'left',
-      neutral_color: '#ffffff',
-      alert_color: '#ff0000',
-      main_button_color: '#7FC89E',
-      main_button_text_color: '#000000',
-      main_button_hover_color: '#6BB089',
-      teacher_button_color: '#7CB8F5',
-      teacher_button_text_color: '#000000',
-      teacher_button_hover_color: '#6AA5E0',
-      shared_button_color: '#7BC5D3',
-      shared_button_text_color: '#000000',
-      shared_button_hover_color: '#68B0BD',
-      admin_button_color: '#F5B57C',
-      admin_button_text_color: '#000000',
-      admin_button_hover_color: '#E0A366',
-      logo_url: '/images/brain-logo.png',
-      favicon_16_url: '/images/favicon-16x16.png',
-      favicon_32_url: '/images/favicon-32x32.png',
-      signInDescription: 'A web-based adaptive learning system that uses spaced practice and retrieval to help you learn and retain information more effectively. Sign in to access your personalized learning experience.'
-    };
-    //This inserts the theme into the database, or updates it if it already exists
-    await DynamicSettings.upsertAsync({key: 'customTheme'}, {$set: {value: theme}});
-    return theme;
+
+    // Only admins may reset the theme
+    if (!await Roles.userIsInRoleAsync(this.userId, ['admin'])) {
+      throw new Meteor.Error('unauthorized', 'Only admins can initialize themes');
+    }
+
+    const requestedName = typeof themeName === 'string' && themeName.trim() ? themeName.trim() : 'MoFaCTS';
+
+    // Resetting to the stock theme just activates the bundled default
+    if (requestedName === 'MoFaCTS') {
+      return await themeRegistry.setActiveTheme('mofacts-default');
+    }
+
+    // Otherwise spin up a brand-new editable theme cloned from the default palette
+    const createdTheme = await themeRegistry.createTheme({
+      name: requestedName,
+      description: `Custom theme "${requestedName}" initialized from default`,
+      baseThemeId: 'mofacts-default',
+      author: this.userId
+    });
+
+    return await themeRegistry.setActiveTheme(createdTheme.id);
   },
 
   // PHASE 1.5 DEPRECATION: This method is deprecated in favor of 'theme' publication
   // Kept for backward compatibility - new code should use Meteor.subscribe('theme')
   getTheme: async function() {
     serverConsole('getTheme [DEPRECATED - use theme publication instead]');
-    const ret = await DynamicSettings.findOneAsync({key: 'customTheme'}) 
-    if(!ret || ret.value.enabled == false) {
-      return {
-        themeName: 'MoFaCTS',
-        properties: {
-          themeName: 'MoFaCTS',
-          background_color: '#F2F2F2',
-          text_color: '#000000',
-          button_color: '#7ed957',
-          primary_button_text_color: '#000000',
-          accent_color: '#7ed957',
-          secondary_color: '#d9d9d9',
-          secondary_text_color: '#000000',
-          audio_alert_color: '#06723e',
-          success_color: '#00cc00',
-          navbar_text_color: '#000000',
-          navbar_alignment: 'left',
-          neutral_color: '#ffffff',
-          alert_color: '#ff0000',
-          main_button_color: '#7FC89E',
-          main_button_text_color: '#000000',
-          main_button_hover_color: '#6BB089',
-          teacher_button_color: '#7CB8F5',
-          teacher_button_text_color: '#000000',
-          teacher_button_hover_color: '#6AA5E0',
-          shared_button_color: '#7BC5D3',
-          shared_button_text_color: '#000000',
-          shared_button_hover_color: '#68B0BD',
-          admin_button_color: '#F5B57C',
-          admin_button_text_color: '#000000',
-          admin_button_hover_color: '#E0A366',
-          logo_url: '/images/brain-logo.png',
-          favicon_16_url: '/images/favicon-16x16.png',
-          favicon_32_url: '/images/favicon-32x32.png',
-          signInDescription: 'A web-based adaptive learning system that uses spaced practice and retrieval to help you learn and retain information more effectively. Sign in to access your personalized learning experience.',
-          transition_instant: '10ms',
-          transition_fast: '100ms',
-          transition_smooth: '200ms'
-        }
-      }
-     }
-    return ret.value;
+    return await themeRegistry.ensureActiveTheme();
   },
 
   setCustomThemeProperty: async function(property, value) {
-    //This sets the value of a property in the custom theme
+    serverConsole('setCustomThemeProperty', property);
 
-    // Note: Authorization handled by UI - only admins can access admin controls
-    // Additional server-side check for safety
     if (!this.userId) {
       throw new Meteor.Error('not-logged-in', 'Must be logged in to modify theme');
     }
-
-    const path = 'value.properties.' + property;
-    serverConsole('setCustomThemeProperty', path, value);
+    if (!await Roles.userIsInRoleAsync(this.userId, ['admin'])) {
+      throw new Meteor.Error('unauthorized', 'Only admins can modify theme settings');
+    }
+    if (typeof property !== 'string' || !property.trim()) {
+      throw new Meteor.Error('invalid-property', 'Theme property name is required');
+    }
 
     try {
-      // Update the property
-      await DynamicSettings.updateAsync({key: 'customTheme'}, {$set: {[path]: value}});
+      let updateResult = await updateActiveThemeDocument(this.userId, (theme) => {
+        theme.properties = theme.properties || {};
+        theme.properties[property] = value;
+        if (property === 'themeName') {
+          theme.themeName = value;
+          theme.metadata = theme.metadata || {};
+          theme.metadata.name = value;
+          theme.properties.themeName = value;
+        }
+        return theme;
+      });
 
-      // If updating themeName, also update the top-level themeName for consistency
-      if (property === 'themeName') {
-        await DynamicSettings.updateAsync({key: 'customTheme'}, {$set: {'value.themeName': value}});
-      }
+      let serializedTheme = updateResult.serialized;
 
-      // If updating logo_url, auto-generate favicons
-      if (property === 'logo_url' && value && value.startsWith('data:image')) {
+      if (property === 'logo_url' && value && typeof value === 'string' && value.startsWith('data:image')) {
         try {
           const favicons = await Meteor.callAsync('generateFaviconsFromLogo', value);
+          const faviconUpdates = {};
           if (favicons.favicon_16) {
-            await DynamicSettings.updateAsync({key: 'customTheme'}, {$set: {'value.properties.favicon_16_url': favicons.favicon_16}});
+            faviconUpdates.favicon_16_url = favicons.favicon_16;
           }
           if (favicons.favicon_32) {
-            await DynamicSettings.updateAsync({key: 'customTheme'}, {$set: {'value.properties.favicon_32_url': favicons.favicon_32}});
+            faviconUpdates.favicon_32_url = favicons.favicon_32;
+          }
+          if (Object.keys(faviconUpdates).length) {
+            const faviconResult = await updateActiveThemeDocument(this.userId, (theme) => {
+              theme.properties = theme.properties || {};
+              Object.assign(theme.properties, faviconUpdates);
+              return theme;
+            });
+            serializedTheme = faviconResult.serialized;
           }
           serverConsole('Auto-generated favicons from logo');
         } catch (error) {
           serverConsole('Warning: Failed to auto-generate favicons:', error.message);
-          // Don't throw - logo upload should still succeed even if favicon generation fails
         }
       }
 
-      return {success: true, property, value};
+      return {success: true, property, value, theme: serializedTheme};
     } catch (error) {
       serverConsole('Error setting theme property:', error);
       throw new Meteor.Error('update-failed', 'Failed to update theme property: ' + error.message);
@@ -4307,43 +4334,194 @@ export const methods = {
 
   toggleCustomTheme: async function() {
     serverConsole('toggleCustomTheme');
-    //This toggles the custom theme on or off
-    let theme = await DynamicSettings.findOneAsync({key: 'customTheme'});
-    if(!theme) {
-      Meteor.call('initializeCustomTheme', 'Custom Theme');
-    } else {
-      theme = theme.value;
-      theme.enabled = !theme.enabled;
-      serverConsole('custom theme enabled:', theme.enabled);
-      await DynamicSettings.updateAsync({key: 'customTheme'}, {$set: {'value.enabled': theme.enabled}});
+    if (!await Roles.userIsInRoleAsync(this.userId, ['admin'])) {
+      throw new Meteor.Error('unauthorized', 'Only admins can toggle themes');
     }
+
+    const current = await themeRegistry.ensureActiveTheme();
+    const wasEnabled = current?.enabled !== false;
+    const nextState = {
+      ...current,
+      enabled: !wasEnabled
+    };
+
+    await DynamicSettings.upsertAsync({key: 'customTheme'}, {$set: {value: nextState}});
+
+    const entry = nextState?.activeThemeId ? themeRegistry.getThemeEntry(nextState.activeThemeId) : null;
+    if (entry && !entry.readOnly) {
+      await themeRegistry.updateTheme(entry.id, (theme) => {
+        theme.enabled = nextState.enabled;
+        return theme;
+      });
+    }
+
+    serverConsole('custom theme enabled:', nextState.enabled);
+    return nextState;
+  },
+
+  createThemeFromBase: async function(options) {
+    serverConsole('createThemeFromBase', options?.name);
+    check(options, {
+      name: String,
+      description: Match.Optional(String),
+      baseThemeId: Match.Optional(String),
+      properties: Match.Optional(Object),
+      activate: Match.Optional(Boolean)
+    });
+
+    if (!await Roles.userIsInRoleAsync(this.userId, ['admin'])) {
+      throw new Meteor.Error('unauthorized', 'Only admins can create themes');
+    }
+
+    const theme = await themeRegistry.createTheme({
+      name: options.name,
+      description: options.description,
+      baseThemeId: options.baseThemeId || 'mofacts-default',
+      properties: options.properties,
+      author: this.userId
+    });
+
+    if (options.activate === false) {
+      return theme;
+    }
+    return await themeRegistry.setActiveTheme(theme.id);
+  },
+
+  duplicateTheme: async function(options) {
+    serverConsole('duplicateTheme', options?.sourceThemeId, options?.name);
+    check(options, {
+      sourceThemeId: String,
+      name: String,
+      activate: Match.Optional(Boolean)
+    });
+
+    if (!await Roles.userIsInRoleAsync(this.userId, ['admin'])) {
+      throw new Meteor.Error('unauthorized', 'Only admins can duplicate themes');
+    }
+
+    const sourceEntry = themeRegistry.getThemeEntry(options.sourceThemeId);
+    if (!sourceEntry) {
+      throw new Meteor.Error('theme-not-found', 'Source theme not found');
+    }
+
+    const theme = await themeRegistry.createTheme({
+      name: options.name,
+      description: sourceEntry.data.metadata?.description,
+      baseThemeId: sourceEntry.id,
+      properties: sourceEntry.data.properties,
+      author: this.userId
+    });
+
+    if (options.activate === false) {
+      return theme;
+    }
+    return await themeRegistry.setActiveTheme(theme.id);
+  },
+
+  importThemeFile: async function(payload, activate = true) {
+    serverConsole('importThemeFile');
+    if (!await Roles.userIsInRoleAsync(this.userId, ['admin'])) {
+      throw new Meteor.Error('unauthorized', 'Only admins can import themes');
+    }
+
+    let parsedPayload = payload;
+    if (typeof payload === 'string') {
+      try {
+        parsedPayload = JSON.parse(payload);
+      } catch (err) {
+        throw new Meteor.Error('invalid-json', 'Uploaded theme is not valid JSON');
+      }
+    }
+
+    if (!parsedPayload || typeof parsedPayload !== 'object') {
+      throw new Meteor.Error('invalid-theme', 'Theme payload must be an object');
+    }
+
+    const theme = await themeRegistry.importTheme(parsedPayload);
+    if (!activate) {
+      return theme;
+    }
+    return await themeRegistry.setActiveTheme(theme.id);
+  },
+
+  exportThemeFile: async function(themeId) {
+    serverConsole('exportThemeFile', themeId);
+    check(themeId, String);
+
+    if (!await Roles.userIsInRoleAsync(this.userId, ['admin'])) {
+      throw new Meteor.Error('unauthorized', 'Only admins can export themes');
+    }
+
+    return await themeRegistry.exportTheme(themeId);
+  },
+
+  deleteTheme: async function(themeId) {
+    serverConsole('deleteTheme', themeId);
+    check(themeId, String);
+
+    if (!await Roles.userIsInRoleAsync(this.userId, ['admin'])) {
+      throw new Meteor.Error('unauthorized', 'Only admins can delete themes');
+    }
+
+    await themeRegistry.deleteTheme(themeId);
+    return await themeRegistry.ensureActiveTheme();
+  },
+
+  renameTheme: async function(options) {
+    serverConsole('renameTheme', options?.themeId, options?.newName);
+    check(options, {
+      themeId: String,
+      newName: String
+    });
+
+    if (!await Roles.userIsInRoleAsync(this.userId, ['admin'])) {
+      throw new Meteor.Error('unauthorized', 'Only admins can rename themes');
+    }
+
+    return await themeRegistry.renameTheme(options.themeId, options.newName);
+  },
+
+  setActiveTheme: async function(themeId) {
+    serverConsole('setActiveTheme', themeId);
+    check(themeId, String);
+
+    if (!await Roles.userIsInRoleAsync(this.userId, ['admin'])) {
+      throw new Meteor.Error('unauthorized', 'Only admins can change the active theme');
+    }
+
+    return await themeRegistry.setActiveTheme(themeId);
   },
 
   // Custom Help Page Methods
   setCustomHelpPage: async function(markdownContent) {
     serverConsole('setCustomHelpPage');
 
-    // Verify user is admin
     if (!await Roles.userIsInRoleAsync(this.userId, ['admin'])) {
       throw new Meteor.Error('unauthorized', 'Only admins can set custom help page');
     }
 
-    // Validate content size (max 1MB)
+    if (typeof markdownContent !== 'string') {
+      throw new Meteor.Error('invalid-help', 'Help content must be text');
+    }
+
     if (markdownContent.length > 1048576) {
       throw new Meteor.Error('file-too-large', 'Help file must be less than 1MB');
     }
 
-    const helpPageData = {
-      enabled: true,
-      markdownContent: markdownContent,
-      uploadedAt: new Date(),
-      uploadedBy: this.userId
-    };
+    const timestamp = new Date().toISOString();
 
-    await DynamicSettings.upsertAsync(
-      {key: 'customHelpPage'},
-      {$set: {value: helpPageData}}
-    );
+    await updateActiveThemeDocument(this.userId, (theme) => {
+      theme.help = {
+        enabled: true,
+        format: 'markdown',
+        markdown: markdownContent,
+        url: '',
+        uploadedAt: timestamp,
+        uploadedBy: this.userId,
+        source: 'admin'
+      };
+      return theme;
+    });
 
     return {success: true};
   },
@@ -4351,24 +4529,42 @@ export const methods = {
   getCustomHelpPage: async function() {
     serverConsole('getCustomHelpPage');
 
-    const customHelp = await DynamicSettings.findOneAsync({key: 'customHelpPage'});
+    const activeTheme = await themeRegistry.ensureActiveTheme();
+    const help = activeTheme?.help;
 
-    if (!customHelp || !customHelp.value || !customHelp.value.enabled) {
+    if (!help || help.enabled === false) {
       return null;
     }
 
-    return customHelp.value.markdownContent;
+    if (help.markdown && help.markdown.length) {
+      return help.markdown;
+    }
+
+    return null;
   },
 
   removeCustomHelpPage: async function() {
     serverConsole('removeCustomHelpPage');
 
-    // Verify user is admin
     if (!await Roles.userIsInRoleAsync(this.userId, ['admin'])) {
       throw new Meteor.Error('unauthorized', 'Only admins can remove custom help page');
     }
 
-    await DynamicSettings.removeAsync({key: 'customHelpPage'});
+    const timestamp = new Date().toISOString();
+
+    await updateActiveThemeDocument(this.userId, (theme) => {
+      const existingHelp = theme.help || {};
+      theme.help = {
+        enabled: false,
+        format: existingHelp.format || 'markdown',
+        markdown: '',
+        url: '',
+        uploadedAt: timestamp,
+        uploadedBy: this.userId,
+        source: 'admin'
+      };
+      return theme;
+    });
 
     return {success: true};
   },
@@ -4376,9 +4572,10 @@ export const methods = {
   getCustomHelpPageStatus: async function() {
     serverConsole('getCustomHelpPageStatus');
 
-    const customHelp = await DynamicSettings.findOneAsync({key: 'customHelpPage'});
+    const activeTheme = await themeRegistry.ensureActiveTheme();
+    const help = activeTheme?.help;
 
-    if (!customHelp || !customHelp.value || !customHelp.value.enabled) {
+    if (!help || help.enabled === false || (!help.markdown && !help.url)) {
       return {
         enabled: false,
         uploadedAt: null,
@@ -4388,8 +4585,8 @@ export const methods = {
 
     return {
       enabled: true,
-      uploadedAt: customHelp.value.uploadedAt,
-      uploadedBy: customHelp.value.uploadedBy
+      uploadedAt: help.uploadedAt || null,
+      uploadedBy: help.uploadedBy || null
     };
   }
 }
@@ -4864,6 +5061,9 @@ Meteor.startup(async function() {
     // DO NOT set Cross-Origin-Opener-Policy - it breaks OAuth popup communication
     next();
   });
+
+  await themeRegistry.initialize();
+  await migrateLegacyHelpPage();
 
   // Initialize username cache (Meteor 3.0 async pattern)
   serverConsole('Initializing username cache...');

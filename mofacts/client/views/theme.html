@@ -34,6 +34,7 @@
                                             <button type="button" class="btn btn-primary set-active-theme" data-id="{{id}}" {{themeActivationAttrs id}}>Activate</button>
                                             <button type="button" class="btn btn-outline-secondary duplicate-theme" data-id="{{id}}" data-name="{{metadata.name}}">Duplicate</button>
                                             {{#unless (isSystemTheme metadata.origin)}}
+                                                <button type="button" class="btn btn-outline-info rename-theme" data-id="{{id}}" data-name="{{metadata.name}}">Rename</button>
                                                 <button type="button" class="btn btn-outline-danger delete-theme" data-id="{{id}}" data-name="{{metadata.name}}">Delete</button>
                                             {{/unless}}
                                             <button type="button" class="btn btn-outline-success export-theme" data-id="{{id}}" data-filename="{{metadata.filename}}">Export</button>
@@ -42,20 +43,10 @@
                                 {{/each}}
                             {{else}}
                                 <div class="alert alert-info mb-0">
-                                    No themes have been registered yet. Use the form below to create or import one.
+                                    No themes have been registered yet. Import a theme below or duplicate an existing one.
                                 </div>
                             {{/if}}
                         </div>
-
-                        <form id="createThemeForm" class="row g-2 align-items-end">
-                            <div class="col-md-6">
-                                <label for="newThemeName" class="form-label">Theme name</label>
-                                <input type="text" id="newThemeName" class="form-control" placeholder="e.g., High Contrast" required>
-                            </div>
-                            <div class="col-md-6">
-                                <button type="submit" class="btn btn-primary w-100">Create Theme From Default</button>
-                            </div>
-                        </form>
 
                         <div class="row g-2 align-items-center mt-3">
                             <div class="col-md-6">
@@ -180,6 +171,26 @@
                             <input type="color" class="currentThemePropColor" value="{{currentTheme.properties.accent_color}}" data-id="accent_color">
                             <small class="form-text text-muted">
                                 Used for highlights, active states, and emphasis
+                            </small>
+                        </div>
+                        <div class="col text-end">
+                            Accent Border Color (inputs, outlines):
+                        </div>
+                        <div class="col">
+                            <input type="text" class="currentThemeProp form-control" value="{{currentTheme.properties.accent_border_color}}" data-id="accent_border_color">
+                            <input type="color" class="currentThemePropColor" value="{{currentTheme.properties.accent_border_color}}" data-id="accent_border_color">
+                            <small class="form-text text-muted">
+                                Controls outlines for buttons, tables, and inputs
+                            </small>
+                        </div>
+                        <div class="col text-end">
+                            Accent Background Color (dropdowns, alerts):
+                        </div>
+                        <div class="col">
+                            <input type="text" class="currentThemeProp form-control" value="{{currentTheme.properties.accent_background_color}}" data-id="accent_background_color">
+                            <input type="color" class="currentThemePropColor" value="{{currentTheme.properties.accent_background_color}}" data-id="accent_background_color">
+                            <small class="form-text text-muted">
+                                Used for accent fills like dropdown hovers and alert panels
                             </small>
                         </div>
                     </div>
