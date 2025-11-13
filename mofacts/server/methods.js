@@ -135,6 +135,9 @@ const userIdToUsernames = {};
 const usernameToUserIds = {};
 // Username cache will be populated in Meteor.startup (async in Meteor 3.0)
 
+// Lock to prevent race condition when creating editable theme copies
+const themeConversionLocks = new Map();
+
 async function getUserIdforUsername(username) {
   let userId = usernameToUserIds[username];
   if (!userId) {
@@ -171,9 +174,42 @@ async function updateActiveThemeDocument(userId, mutator) {
     throw new Meteor.Error('theme-not-found', 'Unable to locate active theme');
   }
 
+  // RACE CONDITION FIX: If theme is read-only, we need to convert it to editable
+  // But multiple concurrent calls might try to do this simultaneously, creating duplicates
   if (entry.readOnly) {
-    const userRecord = userId ? await Meteor.users.findOneAsync({_id: userId}, {fields: {username: 1}}) : null;
-    entry = await themeRegistry.ensureEditableTheme(entry.id, userRecord?.username || userId || 'admin');
+    const lockKey = `theme-conversion-${entry.id}`;
+
+    // Check if another call is already converting this theme
+    if (themeConversionLocks.has(lockKey)) {
+      // Wait for the ongoing conversion to complete
+      await themeConversionLocks.get(lockKey);
+
+      // After waiting, refetch the active theme (should now be the new editable copy)
+      activeSetting = await DynamicSettings.findOneAsync({key: 'customTheme'});
+      const newActiveId = activeSetting?.value?.activeThemeId;
+      entry = themeRegistry.getThemeEntry(newActiveId);
+
+      if (!entry || entry.readOnly) {
+        throw new Meteor.Error('theme-conversion-failed', 'Failed to convert theme to editable');
+      }
+    } else {
+      // We're the first call - create the lock and do the conversion
+      let resolveConversion;
+      const conversionPromise = new Promise(resolve => {
+        resolveConversion = resolve;
+      });
+      themeConversionLocks.set(lockKey, conversionPromise);
+
+      try {
+        const userRecord = userId ? await Meteor.users.findOneAsync({_id: userId}, {fields: {username: 1}}) : null;
+        entry = await themeRegistry.ensureEditableTheme(entry.id, userRecord?.username || userId || 'admin');
+        serverConsole(`Converted read-only theme ${lockKey} to editable: ${entry.id}`);
+      } finally {
+        // Release the lock
+        resolveConversion();
+        themeConversionLocks.delete(lockKey);
+      }
+    }
   }
 
   const updatedEntry = await themeRegistry.updateTheme(entry.id, (theme) => {
@@ -4192,7 +4228,6 @@ export const methods = {
     // Otherwise spin up a brand-new editable theme cloned from the default palette
     const createdTheme = await themeRegistry.createTheme({
       name: requestedName,
-      description: `Custom theme "${requestedName}" initialized from default`,
       baseThemeId: 'mofacts-default',
       author: this.userId
     });
@@ -4363,7 +4398,6 @@ export const methods = {
     serverConsole('createThemeFromBase', options?.name);
     check(options, {
       name: String,
-      description: Match.Optional(String),
       baseThemeId: Match.Optional(String),
       properties: Match.Optional(Object),
       activate: Match.Optional(Boolean)
@@ -4375,7 +4409,6 @@ export const methods = {
 
     const theme = await themeRegistry.createTheme({
       name: options.name,
-      description: options.description,
       baseThemeId: options.baseThemeId || 'mofacts-default',
       properties: options.properties,
       author: this.userId
@@ -4406,7 +4439,6 @@ export const methods = {
 
     const theme = await themeRegistry.createTheme({
       name: options.name,
-      description: sourceEntry.data.metadata?.description,
       baseThemeId: sourceEntry.id,
       properties: sourceEntry.data.properties,
       author: this.userId

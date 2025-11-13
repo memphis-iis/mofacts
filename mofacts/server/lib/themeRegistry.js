@@ -54,11 +54,11 @@ const FALLBACK_THEME = {
     border_radius_lg: '12px',
     transition_instant: '10ms',
     transition_fast: '100ms',
-    transition_smooth: '200ms'
+    transition_smooth: '200ms',
+    button_border_darkness: 20
   },
   metadata: {
     name: 'MoFaCTS Default',
-    description: 'Baseline MoFaCTS look and feel.',
     version: 1,
     author: 'MoFaCTS',
     origin: 'system',
@@ -170,7 +170,6 @@ function sanitizeTheme(rawTheme, origin, fileName) {
       ...metadata,
       id: base.id || metadata.id || slugify(derivedName),
       name: metadata.name || derivedName,
-      description: metadata.description || '',
       version: metadata.version || 1,
       author: metadata.author || (origin === 'system' ? 'system' : 'unknown'),
       origin,
@@ -367,8 +366,7 @@ class ThemeRegistry {
             storedValue.metadata?.name ||
             storedValue.properties?.themeName ||
             storedValue.themeName ||
-            'Theme',
-          description: storedValue.metadata?.description || ''
+            'Theme'
         },
         properties: storedValue.properties || {},
         help: storedValue.help || null
@@ -409,7 +407,7 @@ class ThemeRegistry {
     return stored;
   }
 
-  async createTheme({ name, description, baseThemeId, properties, author }) {
+  async createTheme({ name, baseThemeId, properties, author }) {
     if (!name || !name.trim()) {
       throw new Meteor.Error('invalid-name', 'Theme name is required');
     }
@@ -421,8 +419,7 @@ class ThemeRegistry {
         ...baseData,
         metadata: {
           ...baseData.metadata,
-          name,
-          description: description || baseData.metadata?.description || ''
+          name
         },
         properties: {
           ...baseData.properties,
@@ -517,7 +514,6 @@ class ThemeRegistry {
     const cloneName = `${entry.data.metadata.name || entry.data.themeName} Copy`;
     const clone = await this.createTheme({
       name: cloneName,
-      description: entry.data.metadata.description,
       baseThemeId: entry.id,
       properties: entry.data.properties,
       author: userName
