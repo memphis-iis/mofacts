@@ -4,6 +4,11 @@
     --background-color: #F2F2F2;
     --text-color: #000000;
     --accent-color: #7ed957;
+    --accent-border-color: var(--accent-color);
+    --accent-background-color: var(--accent-color);
+    --focus-ring-color: var(--accent-color);
+    --surface-emphasis-color: var(--accent-color);
+    --brand-primary-color: var(--accent-color);
     --button-color: #7ed957;
     --primary-button-text-color: #000000;
     --secondary-color: #d9d9d9;
@@ -64,7 +69,7 @@ select:focus-visible,
 textarea:focus-visible,
 .multipleChoiceButton:focus-visible,
 .form-check-input:focus-visible {
-    outline: 3px solid var(--accent-color, #7ed957);
+    outline: 3px solid var(--focus-ring-color, var(--accent-color, #7ed957));
     outline-offset: 2px;
     /* Smooth transition for focus appearance */
     transition: outline-offset var(--transition-fast, 100ms) ease-in-out;
@@ -82,7 +87,7 @@ textarea:focus:not(:focus-visible) {
 
 /* Enhanced focus for multiple choice buttons (radio role) */
 .multipleChoiceButton:focus-visible {
-    outline: 3px solid var(--accent-color, #7ed957);
+    outline: 3px solid var(--focus-ring-color, var(--accent-color, #7ed957));
     outline-offset: 4px;
     box-shadow: 0 0 0 4px rgba(126, 217, 87, 0.2);
 }
@@ -243,7 +248,7 @@ input[type=file]{
     border-width: 1px;
     border-radius: var(--border-radius-sm);
     padding: clamp(4px, 1vh, 8px);
-    border-color: var(--accent-color);
+    border-color: var(--accent-border-color, var(--accent-color));
     margin-left: clamp(8px, 2vw, 12px);
 }
 
@@ -252,7 +257,7 @@ select{
     border-width: 1px;
     border-radius: var(--border-radius-sm);
     padding: clamp(4px, 1vh, 8px);
-    border-color: var(--accent-color);
+    border-color: var(--accent-border-color, var(--accent-color));
     margin-left: clamp(8px, 2vw, 12px);
 }
 
@@ -264,7 +269,7 @@ select{
 .form-switch .form-check-input:checked {
     background-position: right center;
     background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='%23fff'/%3e%3c/svg%3e");
-    background-color: var(--accent-color);
+    background-color: var(--accent-background-color, var(--accent-color));
 }
 
 .form-switch .form-check-input {
@@ -310,7 +315,7 @@ input[type="range"]::-webkit-slider-thumb,
     width: 1.25rem;
     height: 1.25rem;
     border-radius: var(--border-radius-circle);
-    background: var(--accent-color);
+    background: var(--accent-background-color, var(--accent-color));
     cursor: pointer;
     margin-top: -0.375rem; /* (thumb height - track height) / 2 = (1.25 - 0.5) / 2 */
     border: 2px solid white;
@@ -332,7 +337,7 @@ input[type="range"]::-moz-range-thumb,
     width: 1.25rem;
     height: 1.25rem;
     border-radius: var(--border-radius-circle);
-    background: var(--accent-color);
+    background: var(--accent-background-color, var(--accent-color));
     cursor: pointer;
     box-shadow: 0 1px 3px rgba(0,0,0,0.3);
 }
@@ -353,7 +358,7 @@ input[type="range"]::-moz-range-progress,
 
 .btn, .btn-icon{
     background-color: var(--button-color) !important;
-    border-color: var(--accent-color) !important;
+    border-color: var(--accent-border-color, var(--accent-color)) !important;
     color: var(--primary-button-text-color);
     margin-left: auto;
     margin-right: auto;
@@ -361,8 +366,8 @@ input[type="range"]::-moz-range-progress,
 
 /*primary button selected*/
 .btn-selected{
-    background-color: var(--accent-color) !important;
-    border-color: var(--accent-color) !important;
+    background-color: var(--accent-background-color, var(--accent-color)) !important;
+    border-color: var(--accent-border-color, var(--accent-color)) !important;
     color: var(--primary-button-text-color);
     margin-left: auto;
     margin-right: auto;
@@ -377,7 +382,7 @@ input[type="range"]::-moz-range-progress,
 
 .btn:hover, .btn-icon:hover{
     background-color: var(--success-color);
-    border-color: var(--accent-color);
+    border-color: var(--accent-border-color, var(--accent-color));
     color: var(--text-color);
 }
 
@@ -417,14 +422,14 @@ input[type="range"]::-moz-range-progress,
 /* Special button styles */
 #signInButtonOAuth {
     /* Use accent color for brand consistency */
-    border: 1px solid var(--accent-color);
+    border: 1px solid var(--accent-border-color, var(--accent-color));
     background-color: var(--background-color) !important;
     color: var(--text-color);
 }
 
 #backkTosignInButton{
     /* use google's blue for outline with white background */
-    border: 1px solid var(--accent-color);
+    border: 1px solid var(--accent-border-color, var(--accent-color));
     background-color: var(--background-color) !important;
 }
 
@@ -561,7 +566,7 @@ input[type="range"]::-moz-range-progress,
     font-size: clamp(1rem, 2.5vw, 1.1rem);
     font-weight: 600;
     color: var(--text-color);
-    border-bottom: 2px solid var(--accent-color);
+    border-bottom: 2px solid var(--accent-border-color, var(--accent-color));
     padding-bottom: 0.5rem;
 }
 
@@ -604,16 +609,16 @@ input[type="range"]::-moz-range-progress,
 
 /* Table header styling */
 thead {
-    background-color: var(--accent-color);
+    background-color: var(--accent-background-color, var(--accent-color));
     font-weight: 800;
-    border: 1px solid var(--accent-color);
+    border: 1px solid var(--accent-border-color, var(--accent-color));
     color: var(--primary-button-text-color);
 }
 
 thead th {
     padding: clamp(10px, 2vh, 14px) clamp(12px, 2vw, 16px);
     text-align: left;
-    border-bottom: 2px solid var(--accent-color);
+    border-bottom: 2px solid var(--accent-border-color, var(--accent-color));
     font-size: 1rem;
     font-weight: 700;
     vertical-align: middle;
@@ -668,7 +673,7 @@ tbody th {
 tfoot, .table tfoot {
     background-color: rgba(0, 0, 0, 0.05);
     font-weight: 600;
-    border-top: 2px solid var(--accent-color);
+    border-top: 2px solid var(--accent-border-color, var(--accent-color));
 }
 
 tfoot tf, .table tfoot tf, .table tfoot td, .table tfoot th {
@@ -860,7 +865,7 @@ tfoot tf, .table tfoot tf, .table tfoot td, .table tfoot th {
 }
 
 .offcanvas-body .dropdown-item:hover {
-    background-color: var(--accent-color);
+    background-color: var(--accent-background-color, var(--accent-color));
     cursor: pointer;
 }
 
@@ -872,7 +877,7 @@ tfoot tf, .table tfoot tf, .table tfoot td, .table tfoot th {
 }
 
 .dropdown-item:hover {
-    background-color: var(--accent-color);
+    background-color: var(--accent-background-color, var(--accent-color));
 }
 
 /* ===== HEADER BOX ===== */
@@ -914,8 +919,8 @@ tfoot tf, .table tfoot tf, .table tfoot td, .table tfoot th {
     padding: 10px;
     background: var(--background-color);
     /*blurred border*/
-    border: 1px solid var(--accent-color);
-    box-shadow: 0 0 10px var(--accent-color);
+    border: 1px solid var(--surface-emphasis-color, var(--accent-color));
+    box-shadow: 0 0 10px var(--surface-emphasis-color, var(--accent-color));
     margin-top: 10vh;
     margin-top: 10dvh; /* MO9: Modern viewport units */
 }
@@ -1345,7 +1350,7 @@ tfoot tf, .table tfoot tf, .table tfoot td, .table tfoot th {
     }
     .alert-audio-100{
         color: var(--audio-alert-color);
-        background-color: var(--accent-color);
+        background-color: var(--accent-background-color, var(--accent-color));
         padding: 20px;
         margin-top: 20px;
     }
@@ -1407,7 +1412,7 @@ tfoot tf, .table tfoot tf, .table tfoot td, .table tfoot th {
 
     .alert-audio-100{
         color: var(--audio-alert-color);
-        background-color: var(--accent-color);
+        background-color: var(--accent-background-color, var(--accent-color));
         padding: 20px;
         margin-top: 20px;
         margin-right: -8vw;
@@ -1419,7 +1424,7 @@ tfoot tf, .table tfoot tf, .table tfoot td, .table tfoot th {
 @media screen and (min-width: 768px) and (max-width: 1024px) {
     .alert-audio-100{
         color: var(--audio-alert-color);
-        background-color: var(--accent-color);
+        background-color: var(--accent-background-color, var(--accent-color));
         padding: 20px;
         margin-top: 20px;
         margin-right: -6vw;
@@ -1726,6 +1731,12 @@ tfoot tf, .table tfoot tf, .table tfoot td, .table tfoot th {
 
 .learning-dashboard-table {
   display: table;
+  border-radius: var(--border-radius-sm);
+  overflow: hidden;
+}
+
+.learning-dashboard-cards .rounded {
+  border-radius: var(--border-radius-sm) !important;
 }
 
 /* Mobile + Tablet: Card layout (mobile-first approach) */

@@ -85,6 +85,8 @@ function getDefaultTheme() {
       button_color: '#7ed957',
       primary_button_text_color: '#000000',
       accent_color: '#7ed957',
+      accent_border_color: '#7ed957',
+      accent_background_color: '#7ed957',
       secondary_color: '#d9d9d9',
       secondary_text_color: '#000000',
       audio_alert_color: '#06723e',
