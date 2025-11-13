@@ -36,6 +36,16 @@ Template.learningDashboard.helpers({
     }
     return Template.instance().allTdfsList.get();
   },
+
+  // Return CSS class for TTS (headphones) icon based on whether TDF has API key
+  ttsIconClass() {
+    return this.hasTTSAPIKey ? 'icon-configured' : 'icon-needs-config';
+  },
+
+  // Return CSS class for SR (microphone) icon based on whether TDF has API key
+  srIconClass() {
+    return this.hasSpeechAPIKey ? 'icon-configured' : 'icon-needs-config';
+  },
 });
 
 Template.learningDashboard.events({
@@ -158,8 +168,26 @@ Template.learningDashboard.rendered = async function() {
 
   // Process all TDFs to build used/unused lists
   const isAdmin = (Meteor.user() && Meteor.user().roles && (['admin']).some(role => Meteor.user().roles.includes(role)));
+  const isTeacher = (Meteor.user() && Meteor.user().roles && (['teacher']).some(role => Meteor.user().roles.includes(role)));
   const courseId = Meteor.user().loginParams.curClass ? Meteor.user().loginParams.curClass.courseId : null;
   const courseTdfs = Assignments.find({courseId: courseId}).fetch();
+
+  // Check if user has personal API keys configured
+  const user = Meteor.user();
+  const userHasSpeechAPIKey = !!(user?.speechAPIKey && user.speechAPIKey.trim());
+  const userHasTTSAPIKey = !!(user?.textToSpeechAPIKey && user.textToSpeechAPIKey.trim());
+
+  // Build a set of all child TDF filenames (referenced by parent TDFs' condition arrays)
+  // These should be hidden from the learning dashboard - only root TDFs should be shown
+  const childTdfFilenames = new Set();
+  for (const tdf of allTdfs) {
+    const setspec = tdf.content?.tdfs?.tutor?.setspec;
+    if (setspec && setspec.condition && Array.isArray(setspec.condition)) {
+      for (const conditionFileName of setspec.condition) {
+        childTdfFilenames.add(conditionFileName);
+      }
+    }
+  }
 
   // Filter by section if curClass is set
   if (Session.get('curClass') && Session.get('curClass').sectionId) {
@@ -197,6 +225,13 @@ Template.learningDashboard.rendered = async function() {
     const enableAudioPromptAndFeedback = setspec.enableAudioPromptAndFeedback ?
       setspec.enableAudioPromptAndFeedback == 'true' : false;
 
+    // Check if TDF has embedded API keys OR if user has personal API keys
+    // Icon should be green if EITHER source has a key (TDF or user personal key)
+    const tdfHasSpeechAPIKey = !!(setspec.speechAPIKey && setspec.speechAPIKey.trim());
+    const tdfHasTTSAPIKey = !!(setspec.textToSpeechAPIKey && setspec.textToSpeechAPIKey.trim());
+    const hasSpeechAPIKey = tdfHasSpeechAPIKey || userHasSpeechAPIKey;
+    const hasTTSAPIKey = tdfHasTTSAPIKey || userHasTTSAPIKey;
+
     // Debug: Log what we're extracting
     if (audioInputEnabled || enableAudioPromptAndFeedback) {
       console.log(`[Dashboard] TDF: ${name}`);
@@ -211,8 +246,13 @@ Template.learningDashboard.rendered = async function() {
     const tdfIsAssigned = courseTdfs.filter(e => e.TDFId === TDFId);
     const isAssigned = courseTdfs.length > 0 ? tdfIsAssigned.length > 0 : true;
 
-    // Show TDF ONLY if userselect is explicitly 'true'
-    const shouldShow = (setspec.userselect === 'true');
+    // Show TDF if:
+    // 1. userselect is explicitly 'true' (for all users)
+    // 2. Has experimentTarget AND user is teacher or admin (for experiment access)
+    //    BUT NOT if it's a child TDF referenced by another TDF's condition array
+    const hasExperimentTarget = setspec.experimentTarget && setspec.experimentTarget !== '';
+    const isChildTdf = childTdfFilenames.has(tdfObject.fileName);
+    const shouldShow = (setspec.userselect === 'true') || (hasExperimentTarget && (isTeacher || isAdmin) && !isChildTdf);
 
     // Check if this TDF has been attempted
     const hasBeenAttempted = attemptedTdfIds.has(TDFId);
@@ -227,6 +267,8 @@ Template.learningDashboard.rendered = async function() {
         speechOutOfGrammarFeedback: speechOutOfGrammarFeedback,
         audioInputEnabled: audioInputEnabled,
         enableAudioPromptAndFeedback: enableAudioPromptAndFeedback,
+        hasSpeechAPIKey: hasSpeechAPIKey,
+        hasTTSAPIKey: hasTTSAPIKey,
         isMultiTdf: isMultiTdf,
         tags: setspec.tags || [],
         isUsed: false,  // Default to false, will update in second pass if practiced

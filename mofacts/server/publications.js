@@ -9,6 +9,10 @@ Meteor.publish('theme', function() {
     return DynamicSettings.find({key: 'customTheme'});
 });
 
+Meteor.publish('themeLibrary', function() {
+    return DynamicSettings.find({key: 'themeLibrary'});
+});
+
 // ===== PHASE 1.7: User History Publication =====
 // Publish user's practice history for dashboard statistics
 // Security: Only publishes user's own history with sparse fields
@@ -118,13 +122,14 @@ Meteor.publish('allTdfs', async function() {
         return Tdfs.find();
     }
 
-    // Teachers can see their own TDFs, TDFs they have access to, and public TDFs
+    // Teachers can see their own TDFs, TDFs they have access to, public TDFs, and all TDFs with experimentTarget
     if (await Roles.userIsInRoleAsync(this.userId, ['teacher'])) {
         return Tdfs.find({
             $or: [
                 { ownerId: this.userId },
                 { 'accessors.userId': this.userId },
-                { visibility: 'public' }
+                { visibility: 'public' },
+                { 'content.tdfs.tutor.setspec.experimentTarget': { $exists: true, $ne: null } }
             ]
         });
     }
