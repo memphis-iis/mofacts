@@ -6,9 +6,66 @@
             <h3 style="margin-top: 0; text-align: center;">Theme Settings</h3>
 
             <div class="admin-section">
-                <div class="row mb-3">
-                    <div class="col-12">
-                        <button type="button" id="themeResetButton" class="btn btn-secondary">Reset to Default Theme</button>
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-3">
+                            <div>
+                                <h5 class="mb-1">Theme Library</h5>
+                                <div class="text-muted small">
+                                    Active theme: {{currentTheme.properties.themeName}} {{#if currentTheme.metadata.name}}<span class="text-muted">({{currentTheme.metadata.name}})</span>{{/if}}
+                                </div>
+                            </div>
+                            <div class="d-flex flex-wrap gap-2">
+                                <button type="button" id="exportActiveTheme" class="btn btn-outline-success">Export Active Theme</button>
+                                <button type="button" id="themeResetButton" class="btn btn-secondary">Reset to Default Theme</button>
+                            </div>
+                        </div>
+
+                        <div class="theme-library-list mb-3">
+                            {{#if hasThemeLibrary}}
+                                {{#each availableThemes}}
+                                    <div class="theme-pill border rounded p-3 mb-2 d-flex flex-column flex-md-row justify-content-between gap-3 {{themePillModifier id}}">
+                                        <div>
+                                            <div class="fw-semibold">{{metadata.name}}</div>
+                                            <div class="small text-muted">{{metadata.description}}</div>
+                                            <span class="badge bg-light text-dark mt-1">{{themeOrigin metadata.origin}}</span>
+                                        </div>
+                                        <div class="btn-group btn-group-sm flex-wrap">
+                                            <button type="button" class="btn btn-primary set-active-theme" data-id="{{id}}" {{themeActivationAttrs id}}>Activate</button>
+                                            <button type="button" class="btn btn-outline-secondary duplicate-theme" data-id="{{id}}" data-name="{{metadata.name}}">Duplicate</button>
+                                            {{#unless (isSystemTheme metadata.origin)}}
+                                                <button type="button" class="btn btn-outline-danger delete-theme" data-id="{{id}}" data-name="{{metadata.name}}">Delete</button>
+                                            {{/unless}}
+                                            <button type="button" class="btn btn-outline-success export-theme" data-id="{{id}}" data-filename="{{metadata.filename}}">Export</button>
+                                        </div>
+                                    </div>
+                                {{/each}}
+                            {{else}}
+                                <div class="alert alert-info mb-0">
+                                    No themes have been registered yet. Use the form below to create or import one.
+                                </div>
+                            {{/if}}
+                        </div>
+
+                        <form id="createThemeForm" class="row g-2 align-items-end">
+                            <div class="col-md-6">
+                                <label for="newThemeName" class="form-label">Theme name</label>
+                                <input type="text" id="newThemeName" class="form-control" placeholder="e.g., High Contrast" required>
+                            </div>
+                            <div class="col-md-6">
+                                <button type="submit" class="btn btn-primary w-100">Create Theme From Default</button>
+                            </div>
+                        </form>
+
+                        <div class="row g-2 align-items-center mt-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Import theme (JSON)</label>
+                                <div class="input-group">
+                                    <input type="file" class="form-control" id="themeImportInput" accept=".json,application/json">
+                                    <button type="button" class="btn btn-outline-secondary" id="themeImportButton">Import</button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -29,14 +86,14 @@
                             Page Background Color:
                         </div>
                         <div class="col">
-                            <input type="text" class="currentThemeProp" value="{{currentTheme.properties.background_color}}" data-id="background_color">
+                            <input type="text" class="currentThemeProp form-control" value="{{currentTheme.properties.background_color}}" data-id="background_color">
                             <input type="color" class="currentThemePropColor" value="{{currentTheme.properties.background_color}}" data-id="background_color">
                         </div>
                         <div class="col text-end">
                             Body Text Color:
                         </div>
                         <div class="col">
-                            <input type="text" class="currentThemeProp" value="{{currentTheme.properties.text_color}}" data-id="text_color">
+                            <input type="text" class="currentThemeProp form-control" value="{{currentTheme.properties.text_color}}" data-id="text_color">
                             <input type="color" class="currentThemePropColor" value="{{currentTheme.properties.text_color}}" data-id="text_color">
                             {{#with (getContrastInfo "text_color" "background_color")}}
                                 <small class="form-text {{#unless passes}}text-warning{{/unless}}">
@@ -49,14 +106,14 @@
                             Top Navigation Bar Background:
                         </div>
                         <div class="col">
-                            <input type="text" class="currentThemeProp" value="{{currentTheme.properties.neutral_color}}" data-id="neutral_color">
+                            <input type="text" class="currentThemeProp form-control" value="{{currentTheme.properties.neutral_color}}" data-id="neutral_color">
                             <input type="color" class="currentThemePropColor" value="{{currentTheme.properties.neutral_color}}" data-id="neutral_color">
                         </div>
                         <div class="col text-end">
                             Navigation Bar Text Color:
                         </div>
                         <div class="col">
-                            <input type="text" class="currentThemeProp" value="{{currentTheme.properties.navbar_text_color}}" data-id="navbar_text_color">
+                            <input type="text" class="currentThemeProp form-control" value="{{currentTheme.properties.navbar_text_color}}" data-id="navbar_text_color">
                             <input type="color" class="currentThemePropColor" value="{{currentTheme.properties.navbar_text_color}}" data-id="navbar_text_color">
                             {{#with (getContrastInfo "navbar_text_color" "neutral_color")}}
                                 <small class="form-text {{#unless passes}}text-warning{{/unless}}">
@@ -86,7 +143,7 @@
                             Default Button Background:
                         </div>
                         <div class="col">
-                            <input type="text" class="currentThemeProp" value="{{currentTheme.properties.button_color}}" data-id="button_color">
+                            <input type="text" class="currentThemeProp form-control" value="{{currentTheme.properties.button_color}}" data-id="button_color">
                             <input type="color" class="currentThemePropColor" value="{{currentTheme.properties.button_color}}" data-id="button_color">
                             <small class="form-text text-muted">
                                 Used for standard buttons including Main Menu and Learning Dashboard
@@ -96,7 +153,7 @@
                             Default Button Text Color:
                         </div>
                         <div class="col">
-                            <input type="text" class="currentThemeProp" value="{{currentTheme.properties.primary_button_text_color}}" data-id="primary_button_text_color">
+                            <input type="text" class="currentThemeProp form-control" value="{{currentTheme.properties.primary_button_text_color}}" data-id="primary_button_text_color">
                             <input type="color" class="currentThemePropColor" value="{{currentTheme.properties.primary_button_text_color}}" data-id="primary_button_text_color">
                             {{#with (getContrastInfo "primary_button_text_color" "button_color")}}
                                 <small class="form-text {{#unless passes}}text-warning{{/unless}}">
@@ -109,7 +166,7 @@
                             Default Button Hover Color:
                         </div>
                         <div class="col">
-                            <input type="text" class="currentThemeProp" value="{{currentTheme.properties.success_color}}" data-id="success_color">
+                            <input type="text" class="currentThemeProp form-control" value="{{currentTheme.properties.success_color}}" data-id="success_color">
                             <input type="color" class="currentThemePropColor" value="{{currentTheme.properties.success_color}}" data-id="success_color">
                             <small class="form-text text-muted">
                                 Used when hovering over default buttons and for success messages
@@ -119,7 +176,7 @@
                             Accent Color (highlights, links):
                         </div>
                         <div class="col">
-                            <input type="text" class="currentThemeProp" value="{{currentTheme.properties.accent_color}}" data-id="accent_color">
+                            <input type="text" class="currentThemeProp form-control" value="{{currentTheme.properties.accent_color}}" data-id="accent_color">
                             <input type="color" class="currentThemePropColor" value="{{currentTheme.properties.accent_color}}" data-id="accent_color">
                             <small class="form-text text-muted">
                                 Used for highlights, active states, and emphasis
@@ -136,7 +193,7 @@
                             Teacher Functions Button Background:
                         </div>
                         <div class="col">
-                            <input type="text" class="currentThemeProp" value="{{currentTheme.properties.teacher_button_color}}" data-id="teacher_button_color">
+                            <input type="text" class="currentThemeProp form-control" value="{{currentTheme.properties.teacher_button_color}}" data-id="teacher_button_color">
                             <input type="color" class="currentThemePropColor" value="{{currentTheme.properties.teacher_button_color}}" data-id="teacher_button_color">
                             <small class="form-text text-muted">
                                 Teacher Functions buttons
@@ -146,7 +203,7 @@
                             Teacher Functions Button Text:
                         </div>
                         <div class="col">
-                            <input type="text" class="currentThemeProp" value="{{currentTheme.properties.teacher_button_text_color}}" data-id="teacher_button_text_color">
+                            <input type="text" class="currentThemeProp form-control" value="{{currentTheme.properties.teacher_button_text_color}}" data-id="teacher_button_text_color">
                             <input type="color" class="currentThemePropColor" value="{{currentTheme.properties.teacher_button_text_color}}" data-id="teacher_button_text_color">
                             {{#with (getContrastInfo "teacher_button_text_color" "teacher_button_color")}}
                                 <small class="form-text {{#unless passes}}text-warning{{/unless}}">
@@ -159,7 +216,7 @@
                             Teacher Functions Button Hover:
                         </div>
                         <div class="col">
-                            <input type="text" class="currentThemeProp" value="{{currentTheme.properties.teacher_button_hover_color}}" data-id="teacher_button_hover_color">
+                            <input type="text" class="currentThemeProp form-control" value="{{currentTheme.properties.teacher_button_hover_color}}" data-id="teacher_button_hover_color">
                             <input type="color" class="currentThemePropColor" value="{{currentTheme.properties.teacher_button_hover_color}}" data-id="teacher_button_hover_color">
                             <small class="form-text text-muted">
                                 Darker shade for hover effect
@@ -169,7 +226,7 @@
                             Shared Functions Button Background:
                         </div>
                         <div class="col">
-                            <input type="text" class="currentThemeProp" value="{{currentTheme.properties.shared_button_color}}" data-id="shared_button_color">
+                            <input type="text" class="currentThemeProp form-control" value="{{currentTheme.properties.shared_button_color}}" data-id="shared_button_color">
                             <input type="color" class="currentThemePropColor" value="{{currentTheme.properties.shared_button_color}}" data-id="shared_button_color">
                             <small class="form-text text-muted">
                                 Shared Functions buttons (teachers & admins)
@@ -179,7 +236,7 @@
                             Shared Functions Button Text:
                         </div>
                         <div class="col">
-                            <input type="text" class="currentThemeProp" value="{{currentTheme.properties.shared_button_text_color}}" data-id="shared_button_text_color">
+                            <input type="text" class="currentThemeProp form-control" value="{{currentTheme.properties.shared_button_text_color}}" data-id="shared_button_text_color">
                             <input type="color" class="currentThemePropColor" value="{{currentTheme.properties.shared_button_text_color}}" data-id="shared_button_text_color">
                             {{#with (getContrastInfo "shared_button_text_color" "shared_button_color")}}
                                 <small class="form-text {{#unless passes}}text-warning{{/unless}}">
@@ -192,7 +249,7 @@
                             Shared Functions Button Hover:
                         </div>
                         <div class="col">
-                            <input type="text" class="currentThemeProp" value="{{currentTheme.properties.shared_button_hover_color}}" data-id="shared_button_hover_color">
+                            <input type="text" class="currentThemeProp form-control" value="{{currentTheme.properties.shared_button_hover_color}}" data-id="shared_button_hover_color">
                             <input type="color" class="currentThemePropColor" value="{{currentTheme.properties.shared_button_hover_color}}" data-id="shared_button_hover_color">
                             <small class="form-text text-muted">
                                 Darker shade for hover effect
@@ -202,7 +259,7 @@
                             Admin Functions Button Background:
                         </div>
                         <div class="col">
-                            <input type="text" class="currentThemeProp" value="{{currentTheme.properties.admin_button_color}}" data-id="admin_button_color">
+                            <input type="text" class="currentThemeProp form-control" value="{{currentTheme.properties.admin_button_color}}" data-id="admin_button_color">
                             <input type="color" class="currentThemePropColor" value="{{currentTheme.properties.admin_button_color}}" data-id="admin_button_color">
                             <small class="form-text text-muted">
                                 Admin Functions buttons
@@ -212,7 +269,7 @@
                             Admin Functions Button Text:
                         </div>
                         <div class="col">
-                            <input type="text" class="currentThemeProp" value="{{currentTheme.properties.admin_button_text_color}}" data-id="admin_button_text_color">
+                            <input type="text" class="currentThemeProp form-control" value="{{currentTheme.properties.admin_button_text_color}}" data-id="admin_button_text_color">
                             <input type="color" class="currentThemePropColor" value="{{currentTheme.properties.admin_button_text_color}}" data-id="admin_button_text_color">
                             {{#with (getContrastInfo "admin_button_text_color" "admin_button_color")}}
                                 <small class="form-text {{#unless passes}}text-warning{{/unless}}">
@@ -225,7 +282,7 @@
                             Admin Functions Button Hover:
                         </div>
                         <div class="col">
-                            <input type="text" class="currentThemeProp" value="{{currentTheme.properties.admin_button_hover_color}}" data-id="admin_button_hover_color">
+                            <input type="text" class="currentThemeProp form-control" value="{{currentTheme.properties.admin_button_hover_color}}" data-id="admin_button_hover_color">
                             <input type="color" class="currentThemePropColor" value="{{currentTheme.properties.admin_button_hover_color}}" data-id="admin_button_hover_color">
                             <small class="form-text text-muted">
                                 Darker shade for hover effect
@@ -242,14 +299,14 @@
                             Secondary Button/Menu Background:
                         </div>
                         <div class="col">
-                            <input type="text" class="currentThemeProp" value="{{currentTheme.properties.secondary_color}}" data-id="secondary_color">
+                            <input type="text" class="currentThemeProp form-control" value="{{currentTheme.properties.secondary_color}}" data-id="secondary_color">
                             <input type="color" class="currentThemePropColor" value="{{currentTheme.properties.secondary_color}}" data-id="secondary_color">
                         </div>
                         <div class="col text-end">
                             Secondary Button/Menu Text:
                         </div>
                         <div class="col">
-                            <input type="text" class="currentThemeProp" value="{{currentTheme.properties.secondary_text_color}}" data-id="secondary_text_color">
+                            <input type="text" class="currentThemeProp form-control" value="{{currentTheme.properties.secondary_text_color}}" data-id="secondary_text_color">
                             <input type="color" class="currentThemePropColor" value="{{currentTheme.properties.secondary_text_color}}" data-id="secondary_text_color">
                             {{#with (getContrastInfo "secondary_text_color" "secondary_color")}}
                                 <small class="form-text {{#unless passes}}text-warning{{/unless}}">
@@ -269,7 +326,7 @@
                             Alert/Error Color:
                         </div>
                         <div class="col">
-                            <input type="text" class="currentThemeProp" value="{{currentTheme.properties.alert_color}}" data-id="alert_color">
+                            <input type="text" class="currentThemeProp form-control" value="{{currentTheme.properties.alert_color}}" data-id="alert_color">
                             <input type="color" class="currentThemePropColor" value="{{currentTheme.properties.alert_color}}" data-id="alert_color">
                             <small class="form-text text-muted">
                                 Used for error messages and warnings
@@ -279,10 +336,57 @@
                             Audio Alert Color:
                         </div>
                         <div class="col">
-                            <input type="text" class="currentThemeProp" value="{{currentTheme.properties.audio_alert_color}}" data-id="audio_alert_color">
+                            <input type="text" class="currentThemeProp form-control" value="{{currentTheme.properties.audio_alert_color}}" data-id="audio_alert_color">
                             <input type="color" class="currentThemePropColor" value="{{currentTheme.properties.audio_alert_color}}" data-id="audio_alert_color">
                             <small class="form-text text-muted">
                                 Indicator shown on audio playback button
+                            </small>
+                        </div>
+                        <div class="col text-end">
+                            Audio Icon Color (Active):
+                        </div>
+                        <div class="col">
+                            <input type="text" class="currentThemeProp form-control" value="{{currentTheme.properties.audio_icon_color}}" data-id="audio_icon_color">
+                            <input type="color" class="currentThemePropColor" value="{{currentTheme.properties.audio_icon_color}}" data-id="audio_icon_color">
+                            <small class="form-text text-muted">
+                                Color for audio/volume icons when active or configured
+                            </small>
+                        </div>
+                        <div class="col text-end">
+                            Audio Icon Color (Disabled):
+                        </div>
+                        <div class="col">
+                            <input type="text" class="currentThemeProp form-control" value="{{currentTheme.properties.audio_icon_disabled_color}}" data-id="audio_icon_disabled_color">
+                            <input type="color" class="currentThemePropColor" value="{{currentTheme.properties.audio_icon_disabled_color}}" data-id="audio_icon_disabled_color">
+                            <small class="form-text text-muted">
+                                Color for audio/volume icons when disabled or needs configuration
+                            </small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Border Radius & Layout -->
+                <div class="theme-section">
+                    <h5 class="theme-section-header">Border Radius & Corners</h5>
+                    <div class="row row-cols-2">
+                        <div class="col text-end">
+                            Small Border Radius:
+                        </div>
+                        <div class="col">
+                            <input type="text" class="currentThemeProp form-control" value="{{currentTheme.properties.border_radius_sm}}" data-id="border_radius_sm" placeholder="8px">
+                            <small class="form-text text-muted">
+                                <strong>Default: 8px</strong> - Small UI elements<br>
+                                <em>Used for:</em> Buttons, inputs, dropdowns, small cards
+                            </small>
+                        </div>
+                        <div class="col text-end">
+                            Large Border Radius:
+                        </div>
+                        <div class="col">
+                            <input type="text" class="currentThemeProp form-control" value="{{currentTheme.properties.border_radius_lg}}" data-id="border_radius_lg" placeholder="12px">
+                            <small class="form-text text-muted">
+                                <strong>Default: 12px</strong> - Large containers<br>
+                                <em>Used for:</em> Modals, large cards, prominent UI sections
                             </small>
                         </div>
                     </div>
@@ -370,6 +474,7 @@
                             <p class="text-muted mb-3">
                                 Upload a custom markdown (.md) file to replace the default wiki help page.
                                 Students will see your custom content instead of the GitHub wiki.
+                                Help uploads are saved with the currently active theme, so switching themes also switches help content.
                             </p>
                         </div>
                     </div>

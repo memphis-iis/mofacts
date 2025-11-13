@@ -88,6 +88,8 @@ function getDefaultTheme() {
       secondary_color: '#d9d9d9',
       secondary_text_color: '#000000',
       audio_alert_color: '#06723e',
+      audio_icon_color: '#00cc00',
+      audio_icon_disabled_color: '#6c757d',
       success_color: '#00cc00',
       navbar_text_color: '#000000',
       navbar_alignment: 'left',
@@ -109,6 +111,8 @@ function getDefaultTheme() {
       favicon_16_url: '/images/favicon-16x16.png',
       favicon_32_url: '/images/favicon-32x32.png',
       signInDescription: 'A web-based adaptive learning system that uses spaced practice and retrieval to help you learn and retain information more effectively. Sign in to access your personalized learning experience.',
+      border_radius_sm: '8px',
+      border_radius_lg: '12px',
       transition_instant: '10ms',
       transition_fast: '100ms',
       transition_smooth: '200ms'

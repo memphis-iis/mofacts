@@ -34,10 +34,10 @@
               <td><strong>{{this.displayName}}</strong></td>
               <td class="text-center">
                 {{#if this.enableAudioPromptAndFeedback}}
-                  <span class="fa fa-headphones" title="Text-to-Speech enabled"></span>
+                  <span class="fa fa-headphones {{ttsIconClass}}" title="Text-to-Speech {{#if this.hasTTSAPIKey}}(API key available){{else}}(needs API key in Audio Settings){{/if}}"></span>
                 {{/if}}
                 {{#if this.audioInputEnabled}}
-                  <span class="fa fa-microphone" title="Speech Recognition enabled"></span>
+                  <span class="fa fa-microphone {{srIconClass}}" title="Speech Recognition {{#if this.hasSpeechAPIKey}}(API key available){{else}}(needs API key in Audio Settings){{/if}}"></span>
                 {{/if}}
               </td>
               {{#if this.isUsed}}
@@ -92,10 +92,10 @@
             <div class="d-flex justify-content-between align-items-center py-1" style="height: 2rem;">
               <div class="d-flex gap-1 align-items-center">
                 {{#if this.enableAudioPromptAndFeedback}}
-                  <span class="fa fa-headphones" title="Text-to-Speech enabled"></span>
+                  <span class="fa fa-headphones {{ttsIconClass}}" title="Text-to-Speech {{#if this.hasTTSAPIKey}}(API key available){{else}}(needs API key in Audio Settings){{/if}}"></span>
                 {{/if}}
                 {{#if this.audioInputEnabled}}
-                  <span class="fa fa-microphone" title="Speech Recognition enabled"></span>
+                  <span class="fa fa-microphone {{srIconClass}}" title="Speech Recognition {{#if this.hasSpeechAPIKey}}(API key available){{else}}(needs API key in Audio Settings){{/if}}"></span>
                 {{/if}}
               </div>
 
