@@ -85,8 +85,6 @@ function getDefaultTheme() {
       button_color: '#7ed957',
       primary_button_text_color: '#000000',
       accent_color: '#7ed957',
-      accent_border_color: '#7ed957',
-      accent_background_color: '#7ed957',
       secondary_color: '#d9d9d9',
       secondary_text_color: '#000000',
       audio_alert_color: '#06723e',
@@ -99,16 +97,12 @@ function getDefaultTheme() {
       alert_color: '#ff0000',
       main_button_color: '#7FC89E',
       main_button_text_color: '#000000',
-      main_button_hover_color: '#6BB089',
       teacher_button_color: '#7CB8F5',
       teacher_button_text_color: '#000000',
-      teacher_button_hover_color: '#6AA5E0',
       shared_button_color: '#7BC5D3',
       shared_button_text_color: '#000000',
-      shared_button_hover_color: '#68B0BD',
       admin_button_color: '#F5B57C',
       admin_button_text_color: '#000000',
-      admin_button_hover_color: '#E0A366',
       logo_url: '/images/brain-logo.png',
       favicon_16_url: '/images/favicon-16x16.png',
       favicon_32_url: '/images/favicon-32x32.png',
@@ -117,7 +111,9 @@ function getDefaultTheme() {
       border_radius_lg: '12px',
       transition_instant: '10ms',
       transition_fast: '100ms',
-      transition_smooth: '200ms'
+      transition_smooth: '200ms',
+      button_border_darkness: 20,
+      button_hover_darkness: 15
     }
   };
 }

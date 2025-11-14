@@ -153,43 +153,35 @@
                             {{/with}}
                         </div>
                         <div class="col text-end">
-                            Default Button Hover Color:
-                        </div>
-                        <div class="col">
-                            <input type="text" class="currentThemeProp form-control" value="{{currentTheme.properties.success_color}}" data-id="success_color">
-                            <input type="color" class="currentThemePropColor" value="{{currentTheme.properties.success_color}}" data-id="success_color">
-                            <small class="form-text text-muted">
-                                Used when hovering over default buttons and for success messages
-                            </small>
-                        </div>
-                        <div class="col text-end">
-                            Accent Color (highlights, links):
+                            Accent Color:
                         </div>
                         <div class="col">
                             <input type="text" class="currentThemeProp form-control" value="{{currentTheme.properties.accent_color}}" data-id="accent_color">
                             <input type="color" class="currentThemePropColor" value="{{currentTheme.properties.accent_color}}" data-id="accent_color">
                             <small class="form-text text-muted">
-                                Used for highlights, active states, and emphasis
+                                Used for highlights, links, active states, emphasis, borders, table headers, toggles, and selected buttons
                             </small>
                         </div>
                         <div class="col text-end">
-                            Accent Border Color (inputs, outlines):
+                            Button Border Darkness (%):
                         </div>
                         <div class="col">
-                            <input type="text" class="currentThemeProp form-control" value="{{currentTheme.properties.accent_border_color}}" data-id="accent_border_color">
-                            <input type="color" class="currentThemePropColor" value="{{currentTheme.properties.accent_border_color}}" data-id="accent_border_color">
+                            <input type="number" class="currentThemeProp form-control" value="{{currentTheme.properties.button_border_darkness}}" data-id="button_border_darkness" min="0" max="50" step="5" placeholder="20">
                             <small class="form-text text-muted">
-                                Controls outlines for buttons, tables, and inputs
+                                <strong>Default: 20%</strong> - Darkens button borders relative to button color<br>
+                                <em>Range:</em> 0% (same as button) to 50% (very dark)<br>
+                                <em>Applies to:</em> All standard buttons, role-based buttons, and interactive elements
                             </small>
                         </div>
                         <div class="col text-end">
-                            Accent Background Color (dropdowns, alerts):
+                            Button Hover Darkness (%):
                         </div>
                         <div class="col">
-                            <input type="text" class="currentThemeProp form-control" value="{{currentTheme.properties.accent_background_color}}" data-id="accent_background_color">
-                            <input type="color" class="currentThemePropColor" value="{{currentTheme.properties.accent_background_color}}" data-id="accent_background_color">
+                            <input type="number" class="currentThemeProp form-control" value="{{currentTheme.properties.button_hover_darkness}}" data-id="button_hover_darkness" min="0" max="50" step="5" placeholder="15">
                             <small class="form-text text-muted">
-                                Used for accent fills like dropdown hovers and alert panels
+                                <strong>Default: 15%</strong> - Darkens button backgrounds on hover<br>
+                                <em>Range:</em> 0% (no hover effect) to 50% (very dark hover)<br>
+                                <em>Applies to:</em> All button types automatically match their base color hue
                             </small>
                         </div>
                     </div>
@@ -223,16 +215,6 @@
                             {{/with}}
                         </div>
                         <div class="col text-end">
-                            Teacher Functions Button Hover:
-                        </div>
-                        <div class="col">
-                            <input type="text" class="currentThemeProp form-control" value="{{currentTheme.properties.teacher_button_hover_color}}" data-id="teacher_button_hover_color">
-                            <input type="color" class="currentThemePropColor" value="{{currentTheme.properties.teacher_button_hover_color}}" data-id="teacher_button_hover_color">
-                            <small class="form-text text-muted">
-                                Darker shade for hover effect
-                            </small>
-                        </div>
-                        <div class="col text-end">
                             Shared Functions Button Background:
                         </div>
                         <div class="col">
@@ -256,16 +238,6 @@
                             {{/with}}
                         </div>
                         <div class="col text-end">
-                            Shared Functions Button Hover:
-                        </div>
-                        <div class="col">
-                            <input type="text" class="currentThemeProp form-control" value="{{currentTheme.properties.shared_button_hover_color}}" data-id="shared_button_hover_color">
-                            <input type="color" class="currentThemePropColor" value="{{currentTheme.properties.shared_button_hover_color}}" data-id="shared_button_hover_color">
-                            <small class="form-text text-muted">
-                                Darker shade for hover effect
-                            </small>
-                        </div>
-                        <div class="col text-end">
                             Admin Functions Button Background:
                         </div>
                         <div class="col">
@@ -287,16 +259,6 @@
                                     <span class="badge bg-{{badgeClass}}">{{#if passes}}✓{{else}}⚠{{/if}} WCAG {{level}}</span>
                                 </small>
                             {{/with}}
-                        </div>
-                        <div class="col text-end">
-                            Admin Functions Button Hover:
-                        </div>
-                        <div class="col">
-                            <input type="text" class="currentThemeProp form-control" value="{{currentTheme.properties.admin_button_hover_color}}" data-id="admin_button_hover_color">
-                            <input type="color" class="currentThemePropColor" value="{{currentTheme.properties.admin_button_hover_color}}" data-id="admin_button_hover_color">
-                            <small class="form-text text-muted">
-                                Darker shade for hover effect
-                            </small>
                         </div>
                     </div>
                 </div>

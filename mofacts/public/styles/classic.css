@@ -4,8 +4,6 @@
     --background-color: #F2F2F2;
     --text-color: #000000;
     --accent-color: #7ed957;
-    --accent-border-color: var(--accent-color);
-    --accent-background-color: var(--accent-color);
     --focus-ring-color: var(--accent-color);
     --surface-emphasis-color: var(--accent-color);
     --brand-primary-color: var(--accent-color);
@@ -248,7 +246,7 @@ input[type=file]{
     border-width: 1px;
     border-radius: var(--border-radius-sm);
     padding: clamp(4px, 1vh, 8px);
-    border-color: var(--accent-border-color, var(--accent-color));
+    border-color: var(--accent-color);
     margin-left: clamp(8px, 2vw, 12px);
 }
 
@@ -257,7 +255,7 @@ select{
     border-width: 1px;
     border-radius: var(--border-radius-sm);
     padding: clamp(4px, 1vh, 8px);
-    border-color: var(--accent-border-color, var(--accent-color));
+    border-color: var(--accent-color);
     margin-left: clamp(8px, 2vw, 12px);
 }
 
@@ -269,7 +267,7 @@ select{
 .form-switch .form-check-input:checked {
     background-position: right center;
     background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='%23fff'/%3e%3c/svg%3e");
-    background-color: var(--accent-background-color, var(--accent-color));
+    background-color: var(--accent-color);
 }
 
 .form-switch .form-check-input {
@@ -315,7 +313,7 @@ input[type="range"]::-webkit-slider-thumb,
     width: 1.25rem;
     height: 1.25rem;
     border-radius: var(--border-radius-circle);
-    background: var(--accent-background-color, var(--accent-color));
+    background: var(--accent-color);
     cursor: pointer;
     margin-top: -0.375rem; /* (thumb height - track height) / 2 = (1.25 - 0.5) / 2 */
     border: 2px solid white;
@@ -337,7 +335,7 @@ input[type="range"]::-moz-range-thumb,
     width: 1.25rem;
     height: 1.25rem;
     border-radius: var(--border-radius-circle);
-    background: var(--accent-background-color, var(--accent-color));
+    background: var(--accent-color);
     cursor: pointer;
     box-shadow: 0 1px 3px rgba(0,0,0,0.3);
 }
@@ -358,7 +356,7 @@ input[type="range"]::-moz-range-progress,
 
 .btn, .btn-icon{
     background-color: var(--button-color) !important;
-    border-color: var(--accent-border-color, var(--accent-color)) !important;
+    border-color: color-mix(in srgb, var(--button-color) calc((100 - var(--button-border-darkness, 20)) * 1%), black calc(var(--button-border-darkness, 20) * 1%)) !important;
     color: var(--primary-button-text-color);
     margin-left: auto;
     margin-right: auto;
@@ -366,8 +364,8 @@ input[type="range"]::-moz-range-progress,
 
 /*primary button selected*/
 .btn-selected{
-    background-color: var(--accent-background-color, var(--accent-color)) !important;
-    border-color: var(--accent-border-color, var(--accent-color)) !important;
+    background-color: var(--accent-color) !important;
+    border-color: color-mix(in srgb, var(--accent-color) calc((100 - var(--button-border-darkness, 20)) * 1%), black calc(var(--button-border-darkness, 20) * 1%)) !important;
     color: var(--primary-button-text-color);
     margin-left: auto;
     margin-right: auto;
@@ -375,14 +373,15 @@ input[type="range"]::-moz-range-progress,
 
 .btn-secondary{
     background-color: var(--secondary-color) !important;
+    border-color: color-mix(in srgb, var(--secondary-color) calc((100 - var(--button-border-darkness, 20)) * 1%), black calc(var(--button-border-darkness, 20) * 1%)) !important;
     color: var(--secondary-text-color);
     margin-left: auto;
     margin-right: auto;
 }
 
 .btn:hover, .btn-icon:hover{
-    background-color: var(--success-color);
-    border-color: var(--accent-border-color, var(--accent-color));
+    background-color: color-mix(in srgb, var(--button-color) calc((100 - var(--button-hover-darkness, 15)) * 1%), black calc(var(--button-hover-darkness, 15) * 1%)) !important;
+    border-color: color-mix(in srgb, var(--button-color) calc((100 - var(--button-border-darkness, 20) - var(--button-hover-darkness, 15)) * 1%), black calc((var(--button-border-darkness, 20) + var(--button-hover-darkness, 15)) * 1%)) !important;
     color: var(--text-color);
 }
 
@@ -422,14 +421,14 @@ input[type="range"]::-moz-range-progress,
 /* Special button styles */
 #signInButtonOAuth {
     /* Use accent color for brand consistency */
-    border: 1px solid var(--accent-border-color, var(--accent-color));
+    border-color: color-mix(in srgb, var(--accent-color) calc((100 - var(--button-border-darkness, 20)) * 1%), black calc(var(--button-border-darkness, 20) * 1%));
     background-color: var(--background-color) !important;
     color: var(--text-color);
 }
 
 #backkTosignInButton{
-    /* use google's blue for outline with white background */
-    border: 1px solid var(--accent-border-color, var(--accent-color));
+    /* use accent color for outline with white background */
+    border-color: color-mix(in srgb, var(--accent-color) calc((100 - var(--button-border-darkness, 20)) * 1%), black calc(var(--button-border-darkness, 20) * 1%));
     background-color: var(--background-color) !important;
 }
 
@@ -566,7 +565,7 @@ input[type="range"]::-moz-range-progress,
     font-size: clamp(1rem, 2.5vw, 1.1rem);
     font-weight: 600;
     color: var(--text-color);
-    border-bottom: 2px solid var(--accent-border-color, var(--accent-color));
+    border-bottom: 2px solid var(--accent-color);
     padding-bottom: 0.5rem;
 }
 
@@ -609,16 +608,16 @@ input[type="range"]::-moz-range-progress,
 
 /* Table header styling */
 thead {
-    background-color: var(--accent-background-color, var(--accent-color));
+    background-color: var(--accent-color);
     font-weight: 800;
-    border: 1px solid var(--accent-border-color, var(--accent-color));
+    border: 1px solid var(--accent-color);
     color: var(--primary-button-text-color);
 }
 
 thead th {
     padding: clamp(10px, 2vh, 14px) clamp(12px, 2vw, 16px);
     text-align: left;
-    border-bottom: 2px solid var(--accent-border-color, var(--accent-color));
+    border-bottom: 2px solid var(--accent-color);
     font-size: 1rem;
     font-weight: 700;
     vertical-align: middle;
@@ -1479,13 +1478,23 @@ tfoot tf, .table tfoot tf, .table tfoot td, .table tfoot th {
     }
 
     /* Font Awesome icons - preserve inline-block for proper rendering */
-    .fa {
+    /* Touch targets for interactive icons (buttons, links) */
+    button .fa,
+    a .fa,
+    .btn .fa {
         min-width: 44px;
         min-height: 44px;
         /* Keep display: inline-block for FA pseudo-element rendering */
         display: inline-block !important;
         line-height: 44px;
         text-align: center;
+    }
+
+    /* Informational icons (non-interactive) don't need large touch targets */
+    .learning-dashboard-cards .fa {
+        min-width: auto;
+        min-height: auto;
+        line-height: normal;
     }
 
     /* Smaller images on mobile to fit screen */
@@ -1785,48 +1794,52 @@ tfoot tf, .table tfoot tf, .table tfoot td, .table tfoot th {
 .btn-role-main {
     background-color: var(--main-button-color) !important;
     border-color: var(--main-button-color) !important;
+    border-color: color-mix(in srgb, var(--main-button-color) calc((100 - var(--button-border-darkness, 20)) * 1%), black calc(var(--button-border-darkness, 20) * 1%)) !important;
     color: var(--main-button-text-color) !important;
 }
 
 .btn-role-main:hover {
-    background-color: var(--main-button-hover-color) !important;
-    border-color: var(--main-button-hover-color) !important;
+    background-color: color-mix(in srgb, var(--main-button-color) calc((100 - var(--button-hover-darkness, 15)) * 1%), black calc(var(--button-hover-darkness, 15) * 1%)) !important;
+    border-color: color-mix(in srgb, var(--main-button-color) calc((100 - var(--button-border-darkness, 20) - var(--button-hover-darkness, 15)) * 1%), black calc((var(--button-border-darkness, 20) + var(--button-hover-darkness, 15)) * 1%)) !important;
 }
 
 /* Teacher Functions buttons - Theme-configurable */
 .btn-role-teacher {
     background-color: var(--teacher-button-color) !important;
     border-color: var(--teacher-button-color) !important;
+    border-color: color-mix(in srgb, var(--teacher-button-color) calc((100 - var(--button-border-darkness, 20)) * 1%), black calc(var(--button-border-darkness, 20) * 1%)) !important;
     color: var(--teacher-button-text-color) !important;
 }
 
 .btn-role-teacher:hover {
-    background-color: var(--teacher-button-hover-color) !important;
-    border-color: var(--teacher-button-hover-color) !important;
+    background-color: color-mix(in srgb, var(--teacher-button-color) calc((100 - var(--button-hover-darkness, 15)) * 1%), black calc(var(--button-hover-darkness, 15) * 1%)) !important;
+    border-color: color-mix(in srgb, var(--teacher-button-color) calc((100 - var(--button-border-darkness, 20) - var(--button-hover-darkness, 15)) * 1%), black calc((var(--button-border-darkness, 20) + var(--button-hover-darkness, 15)) * 1%)) !important;
 }
 
 /* Shared Functions buttons - Theme-configurable (teachers & admins) */
 .btn-role-shared {
     background-color: var(--shared-button-color) !important;
     border-color: var(--shared-button-color) !important;
+    border-color: color-mix(in srgb, var(--shared-button-color) calc((100 - var(--button-border-darkness, 20)) * 1%), black calc(var(--button-border-darkness, 20) * 1%)) !important;
     color: var(--shared-button-text-color) !important;
 }
 
 .btn-role-shared:hover {
-    background-color: var(--shared-button-hover-color) !important;
-    border-color: var(--shared-button-hover-color) !important;
+    background-color: color-mix(in srgb, var(--shared-button-color) calc((100 - var(--button-hover-darkness, 15)) * 1%), black calc(var(--button-hover-darkness, 15) * 1%)) !important;
+    border-color: color-mix(in srgb, var(--shared-button-color) calc((100 - var(--button-border-darkness, 20) - var(--button-hover-darkness, 15)) * 1%), black calc((var(--button-border-darkness, 20) + var(--button-hover-darkness, 15)) * 1%)) !important;
 }
 
 /* Admin Functions buttons - Theme-configurable */
 .btn-role-admin {
     background-color: var(--admin-button-color) !important;
     border-color: var(--admin-button-color) !important;
+    border-color: color-mix(in srgb, var(--admin-button-color) calc((100 - var(--button-border-darkness, 20)) * 1%), black calc(var(--button-border-darkness, 20) * 1%)) !important;
     color: var(--admin-button-text-color) !important;
 }
 
 .btn-role-admin:hover {
-    background-color: var(--admin-button-hover-color) !important;
-    border-color: var(--admin-button-hover-color) !important;
+    background-color: color-mix(in srgb, var(--admin-button-color) calc((100 - var(--button-hover-darkness, 15)) * 1%), black calc(var(--button-hover-darkness, 15) * 1%)) !important;
+    border-color: color-mix(in srgb, var(--admin-button-color) calc((100 - var(--button-border-darkness, 20) - var(--button-hover-darkness, 15)) * 1%), black calc((var(--button-border-darkness, 20) + var(--button-hover-darkness, 15)) * 1%)) !important;
 }
 
 /* Profile page role separators - labeled horizontal dividers */
