@@ -63,6 +63,7 @@ const FALLBACK_THEME = {
   },
   help: null
 };
+const FALLBACK_PROPERTIES = FALLBACK_THEME.properties || {};
 
 const log = (...args) => console.log('[ThemeRegistry]', ...args);
 
@@ -89,7 +90,9 @@ function slugify(value) {
 }
 
 function sanitizeFilename(name) {
-  const base = slugify(name || 'theme');
+  // Strip .json extension if present before slugifying to prevent "json-json-json..." bug
+  const nameWithoutExt = (name || 'theme').replace(/\.json$/i, '');
+  const base = slugify(nameWithoutExt);
   return `${base}.json`;
 }
 
@@ -141,6 +144,15 @@ function findDefaultThemeDirs() {
   return [...new Set(dirs.filter((dir) => dir && fs.existsSync(dir)))];
 }
 
+function mergeWithFallbackProps(properties, derivedName) {
+  const normalized = properties && typeof properties === 'object' ? properties : {};
+  return {
+    ...FALLBACK_PROPERTIES,
+    ...normalized,
+    themeName: normalized.themeName || derivedName
+  };
+}
+
 function sanitizeTheme(rawTheme, origin, fileName) {
   const base = rawTheme && typeof rawTheme === 'object' ? clone(rawTheme) : {};
   const properties = base.properties && typeof base.properties === 'object' ? base.properties : {};
@@ -152,14 +164,12 @@ function sanitizeTheme(rawTheme, origin, fileName) {
 
   const metadata = base.metadata && typeof base.metadata === 'object' ? clone(base.metadata) : {};
   const timestamp = nowIso();
+  const mergedProperties = mergeWithFallbackProps(properties, derivedName);
   const sanitized = {
     id: base.id || metadata.id || slugify(derivedName),
     themeName: derivedName,
     enabled: base.enabled !== false,
-    properties: {
-      ...properties,
-      themeName: properties.themeName || derivedName
-    },
+    properties: mergedProperties,
     metadata: {
       ...metadata,
       id: base.id || metadata.id || slugify(derivedName),
@@ -265,6 +275,10 @@ class ThemeRegistry {
       return null;
     }
     const active = clone(entry.data);
+    active.properties = mergeWithFallbackProps(
+      active.properties,
+      active.themeName || active.properties?.themeName || active.metadata?.name || 'MoFaCTS'
+    );
     active.activeThemeId = entry.id;
     return active;
   }
@@ -299,8 +313,18 @@ class ThemeRegistry {
             return stored;
           }
         }
+        if (entry) {
+          const stored = this.serializeActiveTheme(entry);
+          await DynamicSettings.upsertAsync({ key: ACTIVE_THEME_KEY }, { $set: { value: stored } });
+          return stored;
+        }
       }
-      return existing.value;
+      const safeExisting = clone(existing.value);
+      safeExisting.properties = mergeWithFallbackProps(
+        safeExisting.properties,
+        safeExisting.themeName || safeExisting.properties?.themeName || safeExisting.metadata?.name || 'MoFaCTS'
+      );
+      return safeExisting;
     }
 
     const fallbackEntry =

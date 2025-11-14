@@ -683,9 +683,14 @@ async function processAllTdfs(templateInstance, allTdfs) {
       enabledTdfs.sort((a, b) => a.name.localeCompare(b.name, 'en', {numeric: true, sensitivity: 'base'}));
     }
 
-    templateInstance.disabledTdfs.set(disabledTdfs);
-    templateInstance.enabledTdfs.set(enabledTdfs);
+    // MOVED OUTSIDE LOOP - these reactive updates were causing infinite re-runs
+    // templateInstance.disabledTdfs.set(disabledTdfs);
+    // templateInstance.enabledTdfs.set(enabledTdfs);
   }
+
+  // Update reactive vars ONCE after processing all TDFs (not on every iteration)
+  templateInstance.disabledTdfs.set(disabledTdfs);
+  templateInstance.enabledTdfs.set(enabledTdfs);
 
   if (isAdmin) {
     (async () => {
