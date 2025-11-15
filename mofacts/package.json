@@ -23,6 +23,7 @@
     "hyphenation.en-us": "^0.2.1",
     "hypher": "^0.2.5",
     "isomorphic-fetch": "^3.0.0",
+    "jszip": "^3.10.1",
     "marked": "^16.4.1",
     "meteor-node-stubs": "^1.2.24",
     "mochawesome": "^7.1.3",
@@ -31,6 +32,7 @@
     "pretty-format": "^29.7.0",
     "punycode": "^2.3.0",
     "sinon": "^18.0.0",
+    "sql.js": "^1.13.0",
     "transliteration": "^2.1.7",
     "unzipper": "^0.12.3",
     "util": "^0.12.5"

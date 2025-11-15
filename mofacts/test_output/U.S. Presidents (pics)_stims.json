@@ -1,0 +1,578 @@
+{
+  "setspec": {
+    "clusters": [
+      {
+        "stims": [
+          {
+            "response": {
+              "correctResponse": "George Washington"
+            },
+            "display": {
+              "imgSrc": "01.jpg",
+              "text": "1"
+            }
+          }
+        ]
+      },
+      {
+        "stims": [
+          {
+            "response": {
+              "correctResponse": "John Adams"
+            },
+            "display": {
+              "imgSrc": "02.jpg",
+              "text": "2"
+            }
+          }
+        ]
+      },
+      {
+        "stims": [
+          {
+            "response": {
+              "correctResponse": "Thomas Jefferson"
+            },
+            "display": {
+              "imgSrc": "03.jpg",
+              "text": "3"
+            }
+          }
+        ]
+      },
+      {
+        "stims": [
+          {
+            "response": {
+              "correctResponse": "James Madison"
+            },
+            "display": {
+              "imgSrc": "04.jpg",
+              "text": "4"
+            }
+          }
+        ]
+      },
+      {
+        "stims": [
+          {
+            "response": {
+              "correctResponse": "James Monroe"
+            },
+            "display": {
+              "imgSrc": "05.gif",
+              "text": "5"
+            }
+          }
+        ]
+      },
+      {
+        "stims": [
+          {
+            "response": {
+              "correctResponse": "John Quincy Adams"
+            },
+            "display": {
+              "imgSrc": "06.jpg",
+              "text": "6"
+            }
+          }
+        ]
+      },
+      {
+        "stims": [
+          {
+            "response": {
+              "correctResponse": "Andrew Jackson"
+            },
+            "display": {
+              "imgSrc": "07.jpg",
+              "text": "7"
+            }
+          }
+        ]
+      },
+      {
+        "stims": [
+          {
+            "response": {
+              "correctResponse": "Martin Van Buren"
+            },
+            "display": {
+              "imgSrc": "08.jpg",
+              "text": "8"
+            }
+          }
+        ]
+      },
+      {
+        "stims": [
+          {
+            "response": {
+              "correctResponse": "William Henry Harrison"
+            },
+            "display": {
+              "imgSrc": "09.jpg",
+              "text": "9"
+            }
+          }
+        ]
+      },
+      {
+        "stims": [
+          {
+            "response": {
+              "correctResponse": "John Tyler"
+            },
+            "display": {
+              "imgSrc": "10.jpg",
+              "text": "10"
+            }
+          }
+        ]
+      },
+      {
+        "stims": [
+          {
+            "response": {
+              "correctResponse": "James K. Polk"
+            },
+            "display": {
+              "imgSrc": "11.jpg",
+              "text": "11"
+            }
+          }
+        ]
+      },
+      {
+        "stims": [
+          {
+            "response": {
+              "correctResponse": "Zachary Taylor"
+            },
+            "display": {
+              "imgSrc": "12.png",
+              "text": "12"
+            }
+          }
+        ]
+      },
+      {
+        "stims": [
+          {
+            "response": {
+              "correctResponse": "Millard Fillmore"
+            },
+            "display": {
+              "imgSrc": "13.jpg",
+              "text": "13"
+            }
+          }
+        ]
+      },
+      {
+        "stims": [
+          {
+            "response": {
+              "correctResponse": "Franklin Pierce"
+            },
+            "display": {
+              "imgSrc": "14.jpg",
+              "text": "14"
+            }
+          }
+        ]
+      },
+      {
+        "stims": [
+          {
+            "response": {
+              "correctResponse": "James Buchanan"
+            },
+            "display": {
+              "imgSrc": "15.jpg",
+              "text": "15"
+            }
+          }
+        ]
+      },
+      {
+        "stims": [
+          {
+            "response": {
+              "correctResponse": "Abraham Lincoln"
+            },
+            "display": {
+              "imgSrc": "16.jpg",
+              "text": "16"
+            }
+          }
+        ]
+      },
+      {
+        "stims": [
+          {
+            "response": {
+              "correctResponse": "Andrew Johnson"
+            },
+            "display": {
+              "imgSrc": "17.jpg",
+              "text": "17"
+            }
+          }
+        ]
+      },
+      {
+        "stims": [
+          {
+            "response": {
+              "correctResponse": "Ulysses S. Grant"
+            },
+            "display": {
+              "imgSrc": "18.jpg",
+              "text": "18"
+            }
+          }
+        ]
+      },
+      {
+        "stims": [
+          {
+            "response": {
+              "correctResponse": "Rutherford B. Hayes"
+            },
+            "display": {
+              "imgSrc": "19.jpg",
+              "text": "19"
+            }
+          }
+        ]
+      },
+      {
+        "stims": [
+          {
+            "response": {
+              "correctResponse": "James Garfield"
+            },
+            "display": {
+              "imgSrc": "20.jpg",
+              "text": "20"
+            }
+          }
+        ]
+      },
+      {
+        "stims": [
+          {
+            "response": {
+              "correctResponse": "Chester A. Arthur"
+            },
+            "display": {
+              "imgSrc": "21.jpg",
+              "text": "21"
+            }
+          }
+        ]
+      },
+      {
+        "stims": [
+          {
+            "response": {
+              "correctResponse": "Grover Cleveland"
+            },
+            "display": {
+              "imgSrc": "22.png",
+              "text": "22"
+            }
+          }
+        ]
+      },
+      {
+        "stims": [
+          {
+            "response": {
+              "correctResponse": "Benjamin Harrison"
+            },
+            "display": {
+              "imgSrc": "23.jpg",
+              "text": "23"
+            }
+          }
+        ]
+      },
+      {
+        "stims": [
+          {
+            "response": {
+              "correctResponse": "Grover Cleveland"
+            },
+            "display": {
+              "imgSrc": "24.jpg",
+              "text": "24"
+            }
+          }
+        ]
+      },
+      {
+        "stims": [
+          {
+            "response": {
+              "correctResponse": "William McKinley"
+            },
+            "display": {
+              "imgSrc": "25.jpg",
+              "text": "25"
+            }
+          }
+        ]
+      },
+      {
+        "stims": [
+          {
+            "response": {
+              "correctResponse": "Theodore Roosevelt"
+            },
+            "display": {
+              "imgSrc": "26.jpg",
+              "text": "26"
+            }
+          }
+        ]
+      },
+      {
+        "stims": [
+          {
+            "response": {
+              "correctResponse": "William Howard Taft"
+            },
+            "display": {
+              "imgSrc": "27.jpg",
+              "text": "27"
+            }
+          }
+        ]
+      },
+      {
+        "stims": [
+          {
+            "response": {
+              "correctResponse": "Woodrow Wilson"
+            },
+            "display": {
+              "imgSrc": "28.jpg",
+              "text": "28"
+            }
+          }
+        ]
+      },
+      {
+        "stims": [
+          {
+            "response": {
+              "correctResponse": "Warren G. Harding"
+            },
+            "display": {
+              "imgSrc": "29.jpg",
+              "text": "29"
+            }
+          }
+        ]
+      },
+      {
+        "stims": [
+          {
+            "response": {
+              "correctResponse": "Calvin Coolidge"
+            },
+            "display": {
+              "imgSrc": "30.jpg",
+              "text": "30"
+            }
+          }
+        ]
+      },
+      {
+        "stims": [
+          {
+            "response": {
+              "correctResponse": "Herbert Hoover"
+            },
+            "display": {
+              "imgSrc": "31.jpg",
+              "text": "31"
+            }
+          }
+        ]
+      },
+      {
+        "stims": [
+          {
+            "response": {
+              "correctResponse": "Franklin D. Roosevelt"
+            },
+            "display": {
+              "imgSrc": "32.jpg",
+              "text": "32"
+            }
+          }
+        ]
+      },
+      {
+        "stims": [
+          {
+            "response": {
+              "correctResponse": "Harry S. Truman"
+            },
+            "display": {
+              "imgSrc": "33.jpg",
+              "text": "33"
+            }
+          }
+        ]
+      },
+      {
+        "stims": [
+          {
+            "response": {
+              "correctResponse": "Dwight D. Eisenhower"
+            },
+            "display": {
+              "imgSrc": "34.jpg",
+              "text": "34"
+            }
+          }
+        ]
+      },
+      {
+        "stims": [
+          {
+            "response": {
+              "correctResponse": "John F. Kennedy"
+            },
+            "display": {
+              "imgSrc": "35.jpg",
+              "text": "35"
+            }
+          }
+        ]
+      },
+      {
+        "stims": [
+          {
+            "response": {
+              "correctResponse": "Lyndon B. Johnson"
+            },
+            "display": {
+              "imgSrc": "36.jpg",
+              "text": "36"
+            }
+          }
+        ]
+      },
+      {
+        "stims": [
+          {
+            "response": {
+              "correctResponse": "Richard M. Nixon"
+            },
+            "display": {
+              "imgSrc": "37.jpg",
+              "text": "37"
+            }
+          }
+        ]
+      },
+      {
+        "stims": [
+          {
+            "response": {
+              "correctResponse": "Gerald R. Ford"
+            },
+            "display": {
+              "imgSrc": "38.jpg",
+              "text": "38"
+            }
+          }
+        ]
+      },
+      {
+        "stims": [
+          {
+            "response": {
+              "correctResponse": "James Carter"
+            },
+            "display": {
+              "imgSrc": "39.jpg",
+              "text": "39"
+            }
+          }
+        ]
+      },
+      {
+        "stims": [
+          {
+            "response": {
+              "correctResponse": "Ronald Reagan"
+            },
+            "display": {
+              "imgSrc": "40.jpg",
+              "text": "40"
+            }
+          }
+        ]
+      },
+      {
+        "stims": [
+          {
+            "response": {
+              "correctResponse": "George H.W. Bush"
+            },
+            "display": {
+              "imgSrc": "41.jpg",
+              "text": "41"
+            }
+          }
+        ]
+      },
+      {
+        "stims": [
+          {
+            "response": {
+              "correctResponse": "William J. Clinton"
+            },
+            "display": {
+              "imgSrc": "42.jpg",
+              "text": "42"
+            }
+          }
+        ]
+      },
+      {
+        "stims": [
+          {
+            "response": {
+              "correctResponse": "George W. Bush"
+            },
+            "display": {
+              "imgSrc": "43.jpeg",
+              "text": "43"
+            }
+          }
+        ]
+      },
+      {
+        "stims": [
+          {
+            "response": {
+              "correctResponse": "Barack Obama"
+            },
+            "display": {
+              "imgSrc": "44.jpg",
+              "text": "44"
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

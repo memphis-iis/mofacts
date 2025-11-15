@@ -1,0 +1,35 @@
+{
+  "tutor": {
+    "setspec": {
+      "lessonname": "U.S. Presidents (pics) (imported from Anki)",
+      "stimulusfile": "U.S. Presidents (pics)_stims.json",
+      "shuffleclusters": "0-43",
+      "userselect": "true",
+      "lfparameter": "0.85"
+    },
+    "unit": [
+      {
+        "unitname": "Instructions",
+        "unitinstructions": "<p>This lesson was imported from an Anki deck.</p><p>Study each card and type your answer when prompted.</p>"
+      },
+      {
+        "unitname": "Practice",
+        "learningsession": {
+          "clusterlist": "0-43",
+          "unitMode": "distance"
+        },
+        "deliveryparams": {
+          "purestudy": "10000",
+          "drill": "10000",
+          "skipstudy": "false",
+          "reviewstudy": "5000",
+          "correctprompt": "500",
+          "fontsize": "3",
+          "correctscore": "1",
+          "incorrectscore": "0",
+          "practiceseconds": "1000000"
+        }
+      }
+    ]
+  }
+}
