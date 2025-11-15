@@ -204,6 +204,9 @@ Template.contentUpload.events({
     const file = event.target.files[0];
     if (!file) return;
 
+    // Capture template instance before async operations
+    const template = Template.instance();
+
     console.log('[APKG] Starting conversion:', file.name);
     $('#apkg-status').show();
 
@@ -346,7 +349,7 @@ Template.contentUpload.events({
 
       // Upload through normal ZIP process
       $('#apkg-status').hide();
-      await doPackageUpload(zipFile, Template.instance());
+      await doPackageUpload(zipFile, template);
 
     } catch (error) {
       console.error('[APKG] Conversion error:', error);
