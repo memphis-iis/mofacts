@@ -208,9 +208,22 @@ Template.contentUpload.events({
     $('#apkg-status').show();
 
     try {
-      // Import JSZip and sql.js dynamically
+      // Import JSZip dynamically
       const JSZip = (await import('jszip')).default;
-      const initSqlJs = (await import('sql.js')).default;
+
+      // Load sql.js from CDN (includes WASM properly configured)
+      const initSqlJs = window.initSqlJs || await new Promise((resolve, reject) => {
+        // Check if already loading
+        if (window.initSqlJs) {
+          resolve(window.initSqlJs);
+          return;
+        }
+        const script = document.createElement('script');
+        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/sql-wasm.js';
+        script.onload = () => resolve(window.initSqlJs);
+        script.onerror = () => reject(new Error('Failed to load sql.js from CDN'));
+        document.head.appendChild(script);
+      });
 
       // Read .apkg file
       const arrayBuffer = await file.arrayBuffer();
@@ -241,8 +254,10 @@ Template.contentUpload.events({
 
       console.log('[APKG] Found', Object.keys(mediaIndex).length, 'media files');
 
-      // Open SQLite database
-      const SQL = await initSqlJs();
+      // Open SQLite database with CDN-loaded sql.js (WASM properly configured)
+      const SQL = await initSqlJs({
+        locateFile: file => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/${file}`
+      });
       const db = new SQL.Database(new Uint8Array(sqliteBytes));
 
       // Extract data (using simplified version of our converter)
