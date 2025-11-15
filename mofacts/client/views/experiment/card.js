@@ -3684,31 +3684,17 @@ function startQuestionTimeout() {
   registerInterval('readyPromptCountdown', () => {
     const timeLeft = Math.max(0, readyPromptTimeout - (Date.now() - trialStartTimestamp));
     const timeLeftSecs = Math.ceil(timeLeft / 1000);
-    const progressbarElem = document.getElementById("progressbar");
-    if(timeLeft <= 0){
+    if (timeLeft <= 0) {
       clearRegisteredTimeout('readyPromptCountdown');
-    } else {
-      if(Session.get('curTdfUISettings').displayReadyPromptTimeoutAsBarOrText == "bar" || Session.get('curTdfUISettings').displayCardTimeoutAsBarOrText == "both"){
-        //add the progress bar class
-        $('#progressbar').addClass('progress-bar');
-        if (progressbarElem) {
-          progressbarElem.style.width = percent + "%";
-        }
-      } else {
-        //set width to 0%
-        if (progressbarElem) {
-          progressbarElem.style.width = 0 + "%";
-        }
-        //remove progress bar class
-        $('#progressbar').removeClass('progress-bar');
-      }
-     if(Session.get('curTdfUISettings').displayReadyPromptTimeoutAsBarOrText == "text" || Session.get('curTdfUISettings').displayReadyPromptTimeoutAsBarOrText == "both"){
-      $('#CountdownTimerText').text("Continuing in: " + timeLeftSecs + "s.");
-     } else {
-      $('#CountdownTimerText').text("");
-     }
-      
+      $('#CountdownTimerText').text('');
+      return;
+    }
 
+    if (Session.get('curTdfUISettings').displayReadyPromptTimeoutAsBarOrText === 'text' ||
+        Session.get('curTdfUISettings').displayReadyPromptTimeoutAsBarOrText === 'both') {
+      $('#CountdownTimerText').text("Continuing in: " + timeLeftSecs + "s.");
+    } else {
+      $('#CountdownTimerText').text('');
     }
   }, 1000);
 }

@@ -317,13 +317,22 @@ User speaks at 11s (AFTER timeout):
 
 **Broken synchronization!** SR processes late input from wrong state.
 
-### The Fix: Respect State Machine in SR
-
-1. **Stop recording** when entering FEEDBACK (Layer 1)
-2. **Don't restart** recording from TTS if not in AWAITING (Layer 2)
-3. **Discard transcriptions** that arrive in wrong state (Layer 3)
-
----
+ ### The Fix: Respect State Machine in SR
+ 
+ 1. **Stop recording** when entering FEEDBACK (Layer 1)
+ 2. **Don't restart** recording from TTS if not in AWAITING (Layer 2)
+ 3. **Discard transcriptions** that arrive in wrong state (Layer 3)
+  
+  ### Fade Transition Impact
+  
+  Keeping SR aligned with the UI transitions also means honoring the fade pipeline established in `card.js`:
+  - `cardEnd()` → `prepareCard()` (`mofacts/client/views/experiment/card.js:2856-3520`) sets `displayReady=false` and waits for the CSS fade-out before clearing DOM. SR must already be idle here so no new transcriptions can arrive while the card is invisible.
+  - `checkAndDisplayTwoPartQuestion()` + `beginQuestionAndInitiateUserInput()` (`card.js:3749-3864`) only call `allowUserInput()` after `completeFadeIn()` fires. This is the single point where SR should re-enter `PRESENTING.AWAITING`.
+  - Any TTS that runs during feedback or before input toggles `cardState.ttsRequested`; `afterFeedbackCallback()` waits for it before `cardEnd()` triggers the next fade. If that flag ever stays true, the UI appears “stuck” because the next card cannot start fading in.
+  
+  Treat these transition hooks as state-machine boundaries: SR should never restart before `allowUserInput()` fires, and it should always be stopped before `prepareCard()` drops opacity to zero. Otherwise the fade-out/fade-in cycle and the SR callbacks will drift apart again.
+  
+  ---
 
 ## Implementation Priority
 

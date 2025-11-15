@@ -114,6 +114,31 @@ The logging enables:
 [SM] prepareCard called in TRANSITION.START
 ```
 
+## Transition Phase: Fade-out → Fade-in Timeline
+
+This captures every subsystem involved after one card finishes feedback and before the following card finishes its fade-in. Cross-reference the noted functions when debugging perceived slowness between cards.
+
+1. **Feedback / Study completion** – `afterFeedbackCallback()` (`mofacts/client/views/experiment/card.js:2720`) blocks until both the review countdown and any requested TTS (`cardState.ttsRequested`) finish. Only then does it clear timers, write history, and invoke `cardEnd()`.
+2. **Transition start** – `cardEnd()` (`card.js:2856`) forces `TRIAL_STATES.TRANSITION_START`, clears feedback flags, and immediately awaits `prepareCard()`. Content remains visible during this step.
+3. **Fade-out and cleanup** – `prepareCard()` (`card.js:3497`) asserts a valid entry state, toggles `displayReady=false` / `inputReady=false`, and waits one CSS transition (`getTransitionDuration()`, default ≈220 ms). While opacity=0 it runs `cleanupTrialContent()`, transitions to `TRANSITION.CLEARING`, and wipes `currentDisplay`, button metadata, etc.
+   - **Branches**: `engine.unitFinished()` routes to `unitIsFinished()` (navigates to instructions/home). Video sessions skip the normal loading path and hand off to `playerController`. Unexpected states are logged but still forced into `TRANSITION_FADING_OUT`.
+   - Otherwise the flow jumps to `PRESENTING.LOADING`, optionally awaits `engine.selectNextCard()`, sets `cardState.buttonTrial`, runs `newQuestionHandler()`, and stores the `cardStartTimestamp`.
+4. **New question prep** – `newQuestionHandler()` (≈`card.js:3605`) resets scroll history flags, handles study-specific cloze fills, and calls `startQuestionTimeout()`.
+5. **Ready prompt / prestimulus** – `startQuestionTimeout()` (`card.js:3639`) calculates the drill/study timeout, registers any ready-prompt delay, and chains `checkAndDisplayPrestimulus()` → `checkAndDisplayTwoPartQuestion()` → `beginQuestionAndInitiateUserInput()`.
+   - **Prestimulus branch** (`card.js:3715`): if setspec defines `prestimulusDisplay`, the pipeline performs a dedicated fade-in for that text, waits `prestimulusdisplaytime`, then proceeds.
+6. **Question fade-in** – `checkAndDisplayTwoPartQuestion()` (`card.js:3749`) injects the main payload.
+   - When `shouldSkipFadeIn()` (video or prestimulus already visible) it simply marks `inputReady=true`.
+   - Otherwise it waits one RAF so Blaze finishes CSS class updates, pre-enables the proper input control, waits for `waitForDOMImageReady()`, sets `inputReady=true`, calls `beginFadeIn('Question fade-in')`, and schedules `completeFadeIn()` after another CSS transition to enter `PRESENTING.DISPLAYING`.
+   - Two-part questions may still delay part 2 via `deliveryParams.initialview` while staying in `PRESENTING.DISPLAYING`.
+7. **Audio prompt / SR gating** – `beginQuestionAndInitiateUserInput()` (`card.js:3826`) either delays on `currentDisplay.audioSrc` (input locked until playback finishes) or immediately fires optional question TTS. Once the prompt finishes it calls `allowUserInput()`.
+8. **Final fade-in complete → Awaiting** – `allowUserInput()` (`card.js:3865`) moves to `PRESENTING.AWAITING` (drill/test) or `STUDY.SHOWING`, starts SR for text trials, announces readiness for accessibility, and leaves the UI visible until the next `cardEnd()`.
+
+### Branch signals to watch
+
+- **TTS / SR** – `cardState.ttsRequested` remains true until question or feedback TTS ends; transitions wait for it so audio never overlaps the next fade. SR only restarts inside `allowUserInput()`, keeping late speech from leaking into feedback (see `docs_dev/SR_SM_SYNCHRONIZATION_DESIGN.md`).
+- **Unit changes** – During instruction/unit jumps, `prepareCard()` first forces `TRANSITION.START` so the fade-out path runs even if we were still in `PRESENTING.AWAITING` or `STUDY.SHOWING`.
+- **Video sessions** – `shouldSkipFadeIn()` bypasses both prestimulus and question fades, so `displayReady` remains true and CSS transitions are skipped entirely.
+
 ## Anomaly Detection
 
 ### Invalid State Transitions

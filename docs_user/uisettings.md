@@ -26,7 +26,7 @@ The following settings can be defined in `setspec.uiSettings` for a lesson-wide 
 ### Pre-Trial & Navigation Controls (before advancing)
 | uiSetting Name | Options | Default | Description |
 |----------------|---------|---------|-------------|
-| `displayReadyPromptTimeoutAsBarOrText` | "both" \| "bar" \| "text" \| "false" | "both" | Chooses how the pre-question ready countdown is displayed. |
+| `displayReadyPromptTimeoutAsBarOrText` | "text" \| "false" | "false" | Shows or hides the ready-prompt countdown text. (Progress bar support removed.) |
 | `displayConfirmButton` | true \| false | false | Adds a confirm button that must be enabled before moving past the current prompt. |
 | `continueButtonText` | string | "Continue" | Provides the label used on Continue/Confirm buttons. |
 | `skipStudyButtonText` | string | "Skip" | Labels the optional Skip Study button when present. |
