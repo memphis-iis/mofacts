@@ -1,3 +1,5 @@
+import type { DueDateException } from '../../common/courseAssignments.contracts';
+
 type ClassPerformanceEntry = {
   userId: string;
   count: number;
@@ -10,14 +12,6 @@ type ClassPerformanceEntry = {
   exception?: string | false;
 };
 
-type DueDateException = {
-  assignmentId?: string;
-  courseId?: string;
-  TDFId?: string;
-  tdfId?: string;
-  classId?: string;
-  date: string | number | Date;
-};
 
 type UserDoc = {
   _id?: unknown;
@@ -65,7 +59,6 @@ function subtractGroupedStats(allStats: Partial<ClassPerformanceEntry>, metStats
 
 function buildUserPerformanceMetaById(
   users: UserDoc[],
-  tdfId: string,
   classId: string,
   assignmentId?: string | null
 ) {
@@ -80,13 +73,9 @@ function buildUserPerformanceMetaById(
     let exception: string | false = false;
     let exceptionRawDate: number | false = false;
     const exceptions = Array.isArray(user.dueDateExceptions) ? user.dueDateExceptions : [];
-    const assignmentExceptionEntry = assignmentId
-      ? exceptions.find((item) => item.assignmentId === assignmentId)
+    const exceptionEntry = assignmentId
+      ? exceptions.find((item) => item.assignmentId === assignmentId && item.courseId === classId)
       : null;
-    const exceptionEntry = assignmentExceptionEntry || exceptions.find((item) => (
-      (item.tdfId === tdfId && item.classId === classId) ||
-      (item.TDFId === tdfId && item.courseId === classId)
-    ));
     if (exceptionEntry) {
       const rawDate = new Date(exceptionEntry.date).getTime();
       exceptionRawDate = rawDate;
@@ -200,7 +189,7 @@ export async function getClassPerformanceByTdfWorkflow(
     levelUnitType: { $ne: 'Instruction' }
   };
   const users = await deps.findUsersByIds(enrolledUserIds);
-  const userMetaById = buildUserPerformanceMetaById(users, tdfId, classId, assignmentContext?.assignmentId || null);
+  const userMetaById = buildUserPerformanceMetaById(users, classId, assignmentContext?.assignmentId || null);
   const allStatsByUserId = await aggregateHistoryStatsByUser(baseMatch, deps);
   const baseMetStatsByUserId = await aggregateHistoryStatsByUser(baseMatch, deps, {
     $expr: {

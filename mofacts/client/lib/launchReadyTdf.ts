@@ -105,6 +105,9 @@ export async function loadLaunchReadyTdf(
   }
 
   if (courseAssignment?.launchMode === 'progressive') {
+    if (!courseAssignment.progressiveRevisionId) {
+      throw new Error(`[${source}] Progressive revision is missing; launch again from Courses`);
+    }
     if (courseAssignment.progressiveEndpointTdfId !== currentTdfId) {
       throw new Error(`[${source}] Progressive endpoint must match the route TDF`);
     }
@@ -112,6 +115,7 @@ export async function loadLaunchReadyTdf(
       'getProgressiveAssignmentLaunch',
       courseAssignment.assignmentId,
       currentTdfId,
+      courseAssignment.progressiveRevisionId,
     );
     const tdfDoc = composeProgressiveLesson(payload);
     const content = tdfDoc.content;

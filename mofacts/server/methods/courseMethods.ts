@@ -1,4 +1,7 @@
 import { Meteor } from 'meteor/meteor';
+import { progressiveRevisionId, progressiveRevisionPrefix } from '../lib/progressiveAssignmentRevision';
+import type { DueDateException } from '../../common/courseAssignments.contracts';
+import { ensurePublishedDeploymentBrandProfile } from '../lib/deploymentBrandProfileRegistry';
 import { curSemester } from '../../common/Definitions';
 import type {
   CourseAssignmentEditorSnapshot,
@@ -33,14 +36,6 @@ type MethodContext = {
   userId?: string | null;
   unblock?: () => void;
   connection?: { id?: string; clientAddress?: string | null } | null;
-};
-type DueDateException = {
-  assignmentId?: string;
-  courseId?: string;
-  TDFId?: string;
-  tdfId?: string;
-  classId?: string;
-  date: string | number | Date;
 };
 const MAX_ASSIGNMENTS_PER_COURSE = 250;
 const DEFAULT_COURSE_TIMEZONE = 'America/Chicago';
@@ -636,14 +631,15 @@ export function createCourseMethods(deps: CourseMethodsDeps) {
     const coursesUrl = `${normalizedBaseUrl}/courses`;
     const courseName = String(course?.courseName || 'your course');
     const sectionName = String(section?.sectionName || 'your section');
-    const subject = `MoFaCTS course assignment: ${courseName}`;
+    const brandName = (await ensurePublishedDeploymentBrandProfile()).identity.name;
+    const subject = `${brandName} course assignment: ${courseName}`;
     const displayName = deps.getUserDisplayIdentifier(student) || 'learner';
     const text = [
       `Hello ${displayName},`,
       '',
-      `You have been assigned to ${courseName} (${sectionName}) in MoFaCTS.`,
+      `You have been assigned to ${courseName} (${sectionName}) in ${brandName}.`,
       '',
-      `Open MoFaCTS: ${normalizedBaseUrl}`,
+      `Open ${brandName}: ${normalizedBaseUrl}`,
       `Go directly to Courses: ${coursesUrl}`,
       '',
       'After signing in, choose Courses from the Learn menu. Your assigned course will appear at the top of the Courses page. Select Start or Continue on an assignment to begin practicing.',
@@ -1042,6 +1038,7 @@ export function createCourseMethods(deps: CourseMethodsDeps) {
     this: MethodContext,
     assignmentId: string,
     endpointTdfId: string,
+    revisionId?: string,
   ): Promise<ProgressiveAssignmentLaunchPayload> {
     const userId = requireAuthenticatedUser(this.userId, 'Must be logged in', 401);
     const normalizedAssignmentId = deps.normalizeCanonicalId(assignmentId);
@@ -1061,7 +1058,7 @@ export function createCourseMethods(deps: CourseMethodsDeps) {
     }
     const assignment = await deps.Assignments.findOneAsync(
       { _id: normalizedAssignmentId, courseId: visibleAssignment.courseId, assignmentType: 'progressive' },
-      { fields: { _id: 1, courseId: 1, assignmentType: 1, title: 1, memberTdfIds: 1, releaseAt: 1 } },
+      { fields: { _id: 1, courseId: 1, assignmentType: 1, title: 1, memberTdfIds: 1, releaseAt: 1, progressiveRevisions: 1 } },
     );
     if (!assignment) throw new Meteor.Error(404, 'Progressive assignment no longer exists');
     const releaseAt = parseNullablePersistedDate(assignment.releaseAt);
@@ -1070,10 +1067,16 @@ export function createCourseMethods(deps: CourseMethodsDeps) {
     }
     const memberTdfIds = assignmentMemberTdfIds(assignment);
     const endpointIndex = memberTdfIds.indexOf(normalizedEndpointId);
-    if (endpointIndex < 1) {
+    if (revisionId === undefined && endpointIndex < 1) {
       throw new Meteor.Error(400, 'Progressive practice requires the second or a later member lesson');
     }
-    const prefixTdfIds = memberTdfIds.slice(0, endpointIndex + 1);
+    const orderingRevisionId = revisionId === undefined ? progressiveRevisionId(memberTdfIds) : revisionId;
+    const prefixTdfIds = revisionId === undefined
+      ? memberTdfIds.slice(0, endpointIndex + 1)
+      : progressiveRevisionPrefix(assignment, revisionId, normalizedEndpointId);
+    if (!prefixTdfIds.every((id) => memberTdfIds.includes(id))) {
+      throw new Meteor.Error(403, 'A lesson in this progressive session has been removed; launch again from Courses');
+    }
     const tdfs = await deps.Tdfs.find({ _id: { $in: prefixTdfIds } }).fetchAsync();
     const tdfById = new Map(tdfs.map((tdf: any) => [String(tdf?._id || ''), tdf]));
     const orderedTdfs = prefixTdfIds.map((tdfId) => tdfById.get(tdfId));
@@ -1103,7 +1106,17 @@ export function createCourseMethods(deps: CourseMethodsDeps) {
         stimuli,
       });
     });
+    if (revisionId === undefined) {
+      // Match the order we read so an edit during launch cannot authorize a
+      // different ordering. Identical orders share the same immutable snapshot.
+      const updated = await deps.Assignments.updateAsync(
+        { _id: normalizedAssignmentId, assignmentType: 'progressive', memberTdfIds, releaseAt: assignment.releaseAt ?? null },
+        { $set: { [`progressiveRevisions.${orderingRevisionId}`]: memberTdfIds } },
+      );
+      if (!updated) throw new Meteor.Error(409, 'Assignment changed during launch; launch again from Courses');
+    }
     return {
+      progressiveRevisionId: orderingRevisionId,
       assignmentId: normalizedAssignmentId,
       courseId: visibleAssignment.courseId,
       title: String(assignment.title),
@@ -1441,19 +1454,11 @@ export function createCourseMethods(deps: CourseMethodsDeps) {
     return true;
   }
 
-  async function resolveAssignmentForDueDateException(this: MethodContext, classId: string, tdfId: string, assignmentId?: string | null) {
+  async function resolveAssignmentForDueDateException(this: MethodContext, classId: string, tdfId: string, assignmentId: string) {
     await assertCanManageCourse(this, classId);
-    const selector = assignmentId
-      ? { _id: assignmentId, courseId: classId }
-      : {
-        courseId: classId,
-        $or: [
-          { TDFId: tdfId },
-          { assignmentType: 'progressive', memberTdfIds: tdfId },
-        ],
-      };
+    if (!deps.normalizeCanonicalId(assignmentId)) throw new Meteor.Error(400, 'Assignment id is required');
     const assignment = await deps.Assignments.findOneAsync(
-      selector,
+      { _id: assignmentId, courseId: classId },
       { fields: { _id: 1, courseId: 1, assignmentType: 1, TDFId: 1, memberTdfIds: 1 } },
     );
     if (!assignment || !assignmentMemberTdfIds(assignment).includes(tdfId)) {
@@ -1462,8 +1467,8 @@ export function createCourseMethods(deps: CourseMethodsDeps) {
     return assignment;
   }
 
-  async function addUserDueDateException(this: MethodContext, userId: string, tdfId: string, classId: string, date: string | number | Date, assignmentId?: string) {
-    const assignment = await resolveAssignmentForDueDateException.call(this, classId, tdfId, assignmentId || null);
+  async function addUserDueDateException(this: MethodContext, userId: string, tdfId: string, classId: string, date: string | number | Date, assignmentId: string) {
+    const assignment = await resolveAssignmentForDueDateException.call(this, classId, tdfId, assignmentId);
     deps.serverConsole('addUserDueDateException', userId, tdfId, date, assignment._id);
     const now = new Date();
     const exception = {
@@ -1505,7 +1510,7 @@ export function createCourseMethods(deps: CourseMethodsDeps) {
     return !!tdf;
   }
 
-  async function checkForUserException(this: MethodContext, userId: string, tdfId: string) {
+  async function checkForUserException(this: MethodContext, userId: string, assignmentId: string) {
     await requireUserMatchesOrHasRole(deps.getMethodAuthorizationDeps(), {
       actingUserId: this.userId,
       subjectUserId: userId,
@@ -1515,19 +1520,11 @@ export function createCourseMethods(deps: CourseMethodsDeps) {
       forbiddenMessage: 'Can only read your own due date exceptions',
       forbiddenCode: 403,
     });
-    deps.serverConsole('checkForUserException', userId, tdfId);
+    if (!deps.normalizeCanonicalId(assignmentId)) throw new Meteor.Error(400, 'Assignment id is required');
     const user = await deps.usersCollection.findOneAsync({ _id: userId });
     if (user.dueDateExceptions) {
       const exceptions = user.dueDateExceptions as DueDateException[];
-      const assignment = await deps.Assignments.findOneAsync(
-        { $or: [{ TDFId: tdfId }, { assignmentType: 'progressive', memberTdfIds: tdfId }] },
-        { fields: { _id: 1 } },
-      );
-      const exception = exceptions.find((item: DueDateException) => (
-        (assignment && item.assignmentId === String(assignment._id)) ||
-        item.tdfId == tdfId ||
-        item.TDFId == tdfId
-      ));
+      const exception = exceptions.find((item) => item.assignmentId === assignmentId);
       if (exception) {
         const exceptionDate = new Date(exception.date);
         return exceptionDate.toLocaleDateString();
@@ -1536,29 +1533,14 @@ export function createCourseMethods(deps: CourseMethodsDeps) {
     return false;
   }
 
-  async function removeUserDueDateException(this: MethodContext, userId: string, tdfId: string, classId?: string, assignmentId?: string) {
-    if (classId) {
-      await assertCanManageCourse(this, classId);
-    } else {
-      await requireTeacherOrAdmin(this);
-    }
+  async function removeUserDueDateException(this: MethodContext, userId: string, tdfId: string, classId: string, assignmentId: string) {
+    if (!classId || !assignmentId) throw new Meteor.Error(400, 'Course and assignment ids are required');
+    const assignment = await resolveAssignmentForDueDateException.call(this, classId, tdfId, assignmentId);
     deps.serverConsole('removeUserDueDateException', userId, tdfId);
     const user = await deps.usersCollection.findOneAsync({ _id: userId });
     if (user.dueDateExceptions) {
-      const assignment = classId
-        ? await deps.Assignments.findOneAsync(
-          {
-            courseId: classId,
-            $or: [{ TDFId: tdfId }, { assignmentType: 'progressive', memberTdfIds: tdfId }],
-          },
-          { fields: { _id: 1 } },
-        )
-        : null;
-      const resolvedAssignmentId = assignmentId || (assignment ? String(assignment._id) : null);
       const exceptionIndex = (user.dueDateExceptions as DueDateException[]).findIndex((item: DueDateException) => (
-        (resolvedAssignmentId && item.assignmentId === resolvedAssignmentId) ||
-        item.tdfId == tdfId ||
-        item.TDFId == tdfId
+        item.assignmentId === String(assignment._id) && item.courseId === classId
       ));
       if (exceptionIndex > -1) {
         user.dueDateExceptions.splice(exceptionIndex, 1);

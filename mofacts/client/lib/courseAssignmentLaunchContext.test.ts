@@ -10,6 +10,15 @@ import {
 } from './courseAssignmentLaunchContext';
 
 describe('courseAssignmentLaunchContext', function() {
+  it('persists the launch revision while stamping each trial with its source lesson', function() {
+    const context = { assignmentId: 'p', courseId: 'c', TDFId: 'b', launchSource: 'courses' as const,
+      launchMode: 'progressive' as const, progressiveEndpointTdfId: 'b', progressiveRevisionId: 'revision-1' };
+    setCourseAssignmentLaunchContext(context);
+    const row = applyCourseAssignmentLaunchContext({ TDFId: 'a', levelUnit: 1, levelUnitName: 'A practice' });
+    expect(row).to.deep.include({ TDFId: 'a', levelUnit: 1, levelUnitName: 'A practice' });
+    expect((row as any).courseAssignment).to.deep.equal({ ...context, TDFId: 'a' });
+    expect(restoreCourseAssignmentLaunchContextFromState({ courseAssignmentLaunchContext: context })).to.deep.equal(context);
+  });
   beforeEach(function() {
     clearCourseAssignmentLaunchContext();
     Session.set('currentRootTdfId', undefined);

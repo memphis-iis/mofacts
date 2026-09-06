@@ -15,11 +15,13 @@ function cursor(rows: any[] = []) {
 
 function matchesSelector(row: any, selector: Record<string, any> = {}): boolean {
   if (Array.isArray(selector.$or)) {
-    return selector.$or.some((branch: Record<string, any>) => matchesSelector(row, branch));
+    if (!selector.$or.some((branch: Record<string, any>) => matchesSelector(row, branch))) return false;
   }
   return Object.entries(selector).every(([key, expected]) => {
     if (key === '$or') return true;
     const actual = row[key];
+    if (Array.isArray(expected)) return JSON.stringify(actual) === JSON.stringify(expected);
+    if (expected === null) return actual === null || actual === undefined;
     if (expected && typeof expected === 'object' && !Array.isArray(expected)) {
       if ('$in' in expected) {
         return expected.$in.includes(actual);
@@ -51,7 +53,14 @@ function createMemoryCollection(initialRows: any[] = []) {
       let count = 0;
       for (const row of rows) {
         if (!matchesSelector(row, selector)) continue;
-        if (modifier?.$set) Object.assign(row, modifier.$set);
+        if (modifier?.$set) {
+          for (const [path, value] of Object.entries(modifier.$set)) {
+            const parts = path.split('.');
+            let target = row;
+            for (const part of parts.slice(0, -1)) target = target[part] ||= {};
+            target[parts[parts.length - 1]!] = value;
+          }
+        }
         if (!modifier?.$set) Object.assign(row, modifier);
         count += 1;
       }
@@ -146,6 +155,26 @@ function createDeps(overrides: Record<string, any> = {}) {
 }
 
 describe('course method operational errors', function() {
+  it('reads and removes exceptions by assignment without matching another course or old formats', async function() {
+    const date = new Date('2026-09-10T12:00:00Z');
+    const users = createMemoryCollection([{ _id: 'student', dueDateExceptions: [
+      { assignmentId: 'other', courseId: 'other-course', TDFId: 'lesson', date },
+      { tdfId: 'lesson', classId: 'course', date },
+      { TDFId: 'lesson', courseId: 'course', date },
+      { assignmentId: 'target', courseId: 'course', TDFId: 'lesson', date },
+    ] }]);
+    const methods = createCourseMethods(createDeps({
+      usersCollection: users,
+      Courses: createMemoryCollection([{ _id: 'course', teacherUserId: 'teacher' }]),
+      Assignments: createMemoryCollection([{ _id: 'target', courseId: 'course', assignmentType: 'lesson', TDFId: 'lesson' }]),
+    }));
+    expect(await methods.checkForUserException.call({ userId: 'student' }, 'student', 'target')).to.equal(date.toLocaleDateString());
+    expect(await methods.checkForUserException.call({ userId: 'student' }, 'student', 'lesson')).to.equal(false);
+    await methods.removeUserDueDateException.call({ userId: 'teacher' }, 'student', 'lesson', 'course', 'target');
+    expect(users.rows[0].dueDateExceptions).to.have.length(3);
+    expect(users.rows[0].dueDateExceptions[0].assignmentId).to.equal('other');
+    expect(await methods.checkForUserException.call({ userId: 'student' }, 'student', 'target')).to.equal(false);
+  });
   it('returns an empty array for a valid empty broad course listing', async function() {
     const methods = createCourseMethods(createDeps());
 
@@ -510,5 +539,20 @@ describe('course assignment metadata methods', function() {
     expect(launch.memberTdfIds).to.deep.equal(['lesson-1', 'lesson-2']);
     expect(launch.tdfs.map((tdf: any) => tdf._id)).to.deep.equal(['lesson-1', 'lesson-2']);
     expect(launch.tdfs.map((tdf: any) => tdf.stimuli[0].stimuliSetId)).to.deep.equal(['set-1', 'set-2']);
+    // An insertion before the endpoint affects new launches only.
+    await methods.saveCourseAssignments.call({ userId: 'teacher-user' }, {
+      courseId: 'course-progressive',
+      assignments: [{ assignmentId: progressive!.assignmentId, assignmentType: 'progressive',
+        title: 'Cumulative sequence', memberTdfIds: ['lesson-1', 'lesson-3', 'lesson-2'], order: 0, required: true }],
+    });
+    const resumed = await methods.getProgressiveAssignmentLaunch.call(
+      { userId: 'teacher-user' }, progressive!.assignmentId, 'lesson-2', launch.progressiveRevisionId,
+    );
+    expect(resumed.tdfs.map((tdf: any) => tdf._id)).to.deep.equal(['lesson-1', 'lesson-2']);
+    const fresh = await methods.getProgressiveAssignmentLaunch.call(
+      { userId: 'teacher-user' }, progressive!.assignmentId, 'lesson-2',
+    );
+    expect(fresh.memberTdfIds).to.deep.equal(['lesson-1', 'lesson-3', 'lesson-2']);
+    expect(fresh.progressiveRevisionId).not.to.equal(launch.progressiveRevisionId);
   });
 });

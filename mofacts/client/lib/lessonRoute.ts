@@ -71,6 +71,7 @@ export function buildLessonRouteLocation(
         throw new Error('[Lesson Route] Progressive endpoint does not match the route root TDF');
       }
       queryParams.progressive = '1';
+      queryParams.progressiveRevisionId = requireNonEmptyRouteValue(descriptor.courseAssignment.progressiveRevisionId, 'progressive revision');
     }
   }
 
@@ -86,6 +87,7 @@ export function resolveLessonRouteRequest(input: {
   routeCourseId: unknown;
   routeAssignmentId: unknown;
   routeProgressive?: unknown;
+  routeProgressiveRevisionId?: unknown;
   activeRootTdfId: unknown;
   activeCurrentTdfId: unknown;
   activePracticeLaunchMode: PracticeLaunchMode;
@@ -111,7 +113,10 @@ export function resolveLessonRouteRequest(input: {
         TDFId: rootTdfId,
         launchSource: 'courses',
         launchMode: progressiveValue === '1' ? 'progressive' : 'individual',
-        ...(progressiveValue === '1' ? { progressiveEndpointTdfId: rootTdfId } : {}),
+        ...(progressiveValue === '1' ? {
+          progressiveEndpointTdfId: rootTdfId,
+          progressiveRevisionId: requireNonEmptyRouteValue(input.routeProgressiveRevisionId, 'progressive revision'),
+        } : {}),
       }
     : null;
   const activeRootTdfId = typeof input.activeRootTdfId === 'string'
@@ -129,7 +134,8 @@ export function resolveLessonRouteRequest(input: {
       && activeCourseAssignment.TDFId === courseAssignment.TDFId;
     if (courseAssignmentMatches) {
       courseAssignmentMatches = activeCourseAssignment!.launchMode === courseAssignment.launchMode
-        && activeCourseAssignment!.progressiveEndpointTdfId === courseAssignment.progressiveEndpointTdfId;
+        && activeCourseAssignment!.progressiveEndpointTdfId === courseAssignment.progressiveEndpointTdfId
+        && activeCourseAssignment!.progressiveRevisionId === courseAssignment.progressiveRevisionId;
     }
   }
 

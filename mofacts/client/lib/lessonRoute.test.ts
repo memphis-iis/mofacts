@@ -6,6 +6,25 @@ import {
 } from './lessonRoute';
 
 describe('lesson route', function() {
+  it('round-trips the authorized progressive revision through a page reload', function() {
+    const context = { assignmentId: 'p', courseId: 'c', TDFId: 'b', launchSource: 'courses' as const,
+      launchMode: 'progressive' as const, progressiveEndpointTdfId: 'b', progressiveRevisionId: 'old-order' };
+    const location = buildLessonRouteLocation('/content', {
+      rootTdfId: 'b', practiceLaunchMode: 'normal', courseAssignment: context,
+    });
+    const request = resolveLessonRouteRequest({
+      routeTdfId: 'b', routeMode: undefined, routeCourseId: location.queryParams.courseId,
+      routeAssignmentId: location.queryParams.assignmentId, routeProgressive: location.queryParams.progressive,
+      routeProgressiveRevisionId: location.queryParams.progressiveRevisionId,
+      activeRootTdfId: '', activeCurrentTdfId: '', activePracticeLaunchMode: 'normal',
+    });
+    expect(request.courseAssignment).to.deep.equal(context);
+    expect(request.requiresBootstrap).to.equal(true);
+    expect(() => resolveLessonRouteRequest({
+      routeTdfId: 'b', routeMode: undefined, routeCourseId: 'c', routeAssignmentId: 'p', routeProgressive: '1',
+      activeRootTdfId: '', activeCurrentTdfId: '', activePracticeLaunchMode: 'normal',
+    })).to.throw('revision');
+  });
   it('puts the exact TDF and Blocks mode in the content route', function() {
     expect(buildLessonRouteLocation('/content', {
       rootTdfId: 'times tables',

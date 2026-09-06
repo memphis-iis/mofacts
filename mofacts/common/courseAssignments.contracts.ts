@@ -4,6 +4,15 @@ export type CourseVisibility = 'private' | 'public';
 export type CourseAssignmentAvailability = 'available' | 'scheduled' | 'unavailable';
 export type CourseAssignmentType = 'lesson' | 'progressive';
 
+export interface DueDateException {
+  assignmentId: string;
+  courseId: string;
+  TDFId: string;
+  date: string | number | Date;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 interface CourseAssignmentInputBase {
   assignmentId?: string;
   order: number;
@@ -145,9 +154,11 @@ export interface CourseAssignmentHistoryContext {
   launchSource: 'courses';
   launchMode: 'individual' | 'progressive';
   progressiveEndpointTdfId?: string;
+  progressiveRevisionId?: string;
 }
 
 export interface ProgressiveAssignmentLaunchPayload {
+  progressiveRevisionId: string;
   assignmentId: string;
   courseId: string;
   title: string;

@@ -473,6 +473,7 @@ Template.courses.events({
       return;
     }
     await instance.commandRegistry.run(scope, async () => {
+      const launch: any = await meteorCallAsync('getProgressiveAssignmentLaunch', assignment.assignmentId, assignment.TDFId);
       const launchContext = {
         assignmentId: assignment.assignmentId,
         courseId: assignment.courseId,
@@ -480,8 +481,9 @@ Template.courses.events({
         launchSource: 'courses' as const,
         launchMode: 'progressive' as const,
         progressiveEndpointTdfId: assignment.TDFId,
+        progressiveRevisionId: launch.progressiveRevisionId,
       };
-      const tdf: any = await meteorCallAsync('getTdfById', assignment.TDFId, { courseAssignment: launchContext });
+      const tdf = launch.tdfs[launch.tdfs.length - 1];
       const setspec = tdf?.content?.tdfs?.tutor?.setspec || {};
       await selectTdf(
         assignment.TDFId,

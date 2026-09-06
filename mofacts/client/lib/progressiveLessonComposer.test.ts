@@ -37,6 +37,7 @@ function member(id: string, setId: string, clusterKC: string, stimulusKC: string
 describe('progressive lesson composition', function() {
   it('merges shared clusters while retaining distinct source-scoped stimuli and endpoint settings', function() {
     const result = composeProgressiveLesson({
+      progressiveRevisionId: 'revision-1',
       assignmentId: 'progression-1',
       courseId: 'course-1',
       title: 'Progression',

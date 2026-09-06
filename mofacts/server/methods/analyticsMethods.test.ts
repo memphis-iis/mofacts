@@ -1,4 +1,5 @@
 import { expect } from 'chai';
+import { progressiveRevisionId } from '../lib/progressiveAssignmentRevision';
 import { createAnalyticsMethods } from './analyticsMethods';
 
 function createMeteorErrorClass() {
@@ -518,7 +519,7 @@ describe('analyticsMethods', function() {
 
   it('scopes progressive history to exact prefix TDFs and excludes future same-cluster lessons', async function() {
     let capturedSelector: Record<string, unknown> | null = null;
-    const { deps } = createAnalyticsDeps({
+    const { deps, insertedHistory } = createAnalyticsDeps({
       Histories: {
         find: (selector: Record<string, unknown>) => {
           capturedSelector = selector;
@@ -534,7 +535,10 @@ describe('analyticsMethods', function() {
           _id: 'progressive-1',
           courseId: 'course-1',
           assignmentType: 'progressive',
-          memberTdfIds: ['lesson-1', 'lesson-2', 'lesson-3'],
+          memberTdfIds: ['lesson-1', 'lesson-3', 'lesson-2'],
+          progressiveRevisions: {
+            [progressiveRevisionId(['lesson-1', 'lesson-2', 'lesson-3'])]: ['lesson-1', 'lesson-2', 'lesson-3'],
+          },
           releaseAt: null,
         }),
       },
@@ -576,6 +580,7 @@ describe('analyticsMethods', function() {
           launchSource: 'courses',
           launchMode: 'progressive',
           progressiveEndpointTdfId: 'lesson-2',
+          progressiveRevisionId: progressiveRevisionId(['lesson-1', 'lesson-2', 'lesson-3']),
         },
       },
     );
@@ -587,6 +592,32 @@ describe('analyticsMethods', function() {
         { TDFId: { $in: ['lesson-1', 'lesson-2'] } },
       ],
     });
+    const context = { assignmentId: 'progressive-1', courseId: 'course-1', TDFId: 'lesson-1',
+      launchSource: 'courses', launchMode: 'progressive', progressiveEndpointTdfId: 'lesson-2',
+      progressiveRevisionId: progressiveRevisionId(['lesson-1', 'lesson-2', 'lesson-3']) };
+    await methods.insertHistory.call({ userId: 'learner-1' }, createHistoryRecord({
+      TDFId: 'lesson-1', levelUnit: 1, courseAssignment: context,
+    }));
+    expect(insertedHistory).to.have.length(1);
+    expect(insertedHistory[0]).to.include({ TDFId: 'lesson-1', levelUnit: 1 });
+    expect(insertedHistory[0]!.courseAssignment).to.deep.equal(context);
+    for (const invalidContext of [
+      { ...context, TDFId: 'lesson-3' },
+      { ...context, progressiveRevisionId: '0'.repeat(64) },
+      { ...context, progressiveRevisionId: undefined },
+    ]) {
+      let rejected = false;
+      try {
+        await methods.insertHistory.call({ userId: 'learner-1' }, createHistoryRecord({
+          TDFId: invalidContext.TDFId, levelUnit: 1, courseAssignment: invalidContext,
+        }));
+      } catch (error: any) {
+        expect(error.error).to.equal(400);
+        rejected = true;
+      }
+      expect(rejected).to.equal(true);
+    }
+    expect(insertedHistory).to.have.length(1);
   });
 
   it('insertHistory accepts course history for a resolved child of the assigned root TDF', async function() {

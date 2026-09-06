@@ -1,4 +1,5 @@
 import { Meteor } from 'meteor/meteor';
+import { progressiveRevisionPrefix } from '../lib/progressiveAssignmentRevision';
 import {
   requireAuthenticatedUser,
   requireUserMatchesOrHasRole,
@@ -215,12 +216,12 @@ export function createAnalyticsMethods(deps: AnalyticsMethodsDeps) {
     }
     const assignment = await deps.Assignments.findOneAsync(
       { _id: assignmentId, courseId },
-      { fields: { _id: 1, assignmentType: 1, TDFId: 1, memberTdfIds: 1, releaseAt: 1 } }
+      { fields: { _id: 1, assignmentType: 1, TDFId: 1, memberTdfIds: 1, releaseAt: 1, progressiveRevisions: 1 } }
     );
     if (!assignment) {
       throw new Meteor.Error(400, 'Course assignment history context does not match an assignment');
     }
-    const memberTdfIds = assignment.assignmentType === 'progressive' && Array.isArray(assignment.memberTdfIds)
+    let memberTdfIds: string[] = assignment.assignmentType === 'progressive' && Array.isArray(assignment.memberTdfIds)
       ? assignment.memberTdfIds.map((id: unknown) => String(id || '').trim()).filter(Boolean)
       : [];
     if (launchMode === 'individual' && endpointTdfId) {
@@ -233,8 +234,16 @@ export function createAnalyticsMethods(deps: AnalyticsMethodsDeps) {
       }
       if (launchMode !== 'individual') throw new Meteor.Error(400, 'Lesson assignments do not support progressive launch mode');
     } else if (assignment.assignmentType === 'progressive') {
+      if (!memberTdfIds.includes(contextTdfId) || !memberTdfIds.includes(tdfId)
+        || (launchMode === 'progressive' && !memberTdfIds.includes(endpointTdfId || ''))) {
+        throw new Meteor.Error(403, 'Progressive source or endpoint is no longer assigned');
+      }
+      if (launchMode === 'progressive') {
+        memberTdfIds = progressiveRevisionPrefix(assignment, record.progressiveRevisionId, endpointTdfId || '');
+        memberTdfIds = memberTdfIds.filter((id) => assignment.memberTdfIds.includes(id));
+      }
       if (!memberTdfIds.includes(contextTdfId) || !memberTdfIds.includes(tdfId)) {
-        throw new Meteor.Error(400, 'Progressive assignment no longer contains the source TDF');
+        throw new Meteor.Error(400, 'Source TDF is outside the authorized progressive lessons');
       }
       if (launchMode === 'progressive' && (!endpointTdfId || !memberTdfIds.includes(endpointTdfId))) {
         throw new Meteor.Error(400, 'Progressive assignment endpoint is no longer a member');
@@ -1005,7 +1014,7 @@ export function createAnalyticsMethods(deps: AnalyticsMethodsDeps) {
       forbiddenCode: 403,
     });
     const assignment = await deps.Assignments.findOneAsync(
-      { courseId: classId, TDFId: tdfId },
+      { courseId: classId, $or: [{ TDFId: tdfId }, { assignmentType: 'progressive', memberTdfIds: tdfId }] },
       { fields: { _id: 1, dueAt: 1 } }
     );
     return deps.getClassPerformanceByTdfWorkflow(classId, tdfId, date, {

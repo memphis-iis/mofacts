@@ -261,7 +261,8 @@ Course-assigned model-practice history writes must include course context, prefe
   courseId,
   TDFId,
   launchMode: "individual" | "progressive",
-  progressiveEndpointTdfId?
+  progressiveEndpointTdfId?,
+  progressiveRevisionId?
 }
 ```
 
@@ -269,7 +270,7 @@ Course-scoped history reads should query stamped course context rather than infe
 
 The implementation should keep the existing learning-session reconstruction pipeline and extend its history read contract with resolved model context. Course context changes which rows are available to reconstruction; it does not introduce a second hydration pipeline.
 
-For an individual course launch, the server returns model rows carrying the launched source `TDFId` in any context plus rows in the same course whose normalized `clusterKC` matches the launched lesson. For a progressive launch, the server returns rows carrying a source `TDFId` in the current ordered prefix through the selected endpoint. Rows from other TDFs outside that prefix are excluded even when their cluster names match.
+For an individual course launch, the server returns model rows carrying the launched source `TDFId` in any context plus rows in the same course whose normalized `clusterKC` matches the launched lesson. For a progressive launch, the server returns rows carrying a source `TDFId` in the server-recorded ordering revision's prefix through the selected endpoint. The revision is retained across insertion, reordering, and page reloads. Rows from other TDFs outside that prefix are excluded even when their cluster names match. See `docs/course-assignments.md` for revision ownership and revocation rules.
 
 For a TDF-local context, the cumulative model-history read remains source-`TDFId` scoped. Progressive trials preserve their original member `TDFId`, `stimuliSetId`, `stimulusKC`, `clusterKC`, and Unit 2 name, so later direct or individual launches can reconstruct the correct member model and item history.
 

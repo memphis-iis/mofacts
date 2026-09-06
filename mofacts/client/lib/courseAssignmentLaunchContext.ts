@@ -36,7 +36,10 @@ export function readCourseAssignmentLaunchContext(value: unknown): CourseAssignm
     TDFId: requireNonEmptyString(record.TDFId, 'TDFId'),
     launchSource: 'courses',
     launchMode: record.launchMode,
-    ...(progressiveEndpointTdfId ? { progressiveEndpointTdfId } : {}),
+    ...(progressiveEndpointTdfId ? {
+      progressiveEndpointTdfId,
+      progressiveRevisionId: requireNonEmptyString(record.progressiveRevisionId, 'progressiveRevisionId'),
+    } : {}),
   };
 }
 

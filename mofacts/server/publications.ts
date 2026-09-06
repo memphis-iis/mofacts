@@ -775,7 +775,10 @@ Meteor.publish('Assignments', async function(courseId: any) {
         return this.ready();
     }
 
-    return Assignments.find({courseId: courseId});
+    return Assignments.find({courseId: courseId}, { fields: {
+        courseId: 1, assignmentType: 1, TDFId: 1, title: 1, memberTdfIds: 1,
+        order: 1, releaseAt: 1, dueAt: 1, required: 1, createdAt: 1, updatedAt: 1,
+    } });
 });
 
 Meteor.publish('settings', async function() {

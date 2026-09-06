@@ -211,6 +211,7 @@ interface CourseAssignmentHistoryContext {
   launchSource: 'courses';
   launchMode: 'individual' | 'progressive';
   progressiveEndpointTdfId?: string;
+  progressiveRevisionId?: string;
 }
 ```
 
@@ -222,7 +223,7 @@ Rules:
 - Public course launch context must be recorded even when the learner is not enrolled.
 - Existing non-course Practice launches continue without assignment context.
 - Progressive trial rows use the original member `TDFId`, original `stimuliSetId`, original item and cluster identities, and the original Unit 2 name. This lets an individual member launch replay trials previously completed in the progressive runtime.
-- An individual course launch reads all history for its TDF plus same-course rows from other TDFs with matching `clusterKC`. A progressive launch reads all history whose source `TDFId` is in the current ordered prefix. Identical cluster names outside that prefix are excluded, while exact source-TDF history remains reusable across contexts.
+- An individual course launch reads all history for its TDF plus same-course rows from other TDFs with matching `clusterKC`. A progressive launch reads all history whose source `TDFId` is in its authorized ordering revision's prefix. Identical cluster names outside that prefix are excluded, while exact source-TDF history remains reusable across contexts.
 - Reporting should prefer `assignmentId` for assignment-specific reporting and may use `courseId`/`TDFId` for legacy compatibility.
 
 ## Indexes
@@ -910,4 +911,6 @@ UI verification:
 - Public courses are discoverable by signed-in learners, teachers, and admins; learners join a section before launching course assignments.
 - Ordinary assignment title overrides remain deferred; progressive groups have their own label.
 - Progressive practice has no aggregate completion state. Per-member history and metrics remain authoritative even when teachers later insert, remove, or reorder members.
-- A new progressive launch uses the current saved order, while an already-open composed session keeps the content with which it started. Removing a member revokes subsequent course-context history writes for that removed member without deleting existing history.
+- A new progressive launch uses the current saved order. The server records the ordering in `Assignments.progressiveRevisions`, keyed by its SHA-256 digest, when first launched. Identical orderings reuse the same entry; assignment edits preserve existing entries. The required `progressiveRevisionId` travels through the lesson URL, runtime context, and trial context. Reads, writes, crowd statistics, and reloads resolve the original prefix from that server-owned revision. Inserting or reordering lessons affects subsequent launches only. Removing a member revokes writes for that source and excludes it from subsequent course-context reads; removing the endpoint revokes the session. Reloading a session whose prefix includes a removed member requires a new launch. Existing history is retained. Deleting the assignment deletes its revisions and revokes its launches.
+- Existing trial records do not require migration: their original lesson and unit identities remain unchanged. An open progressive URL/context without a revision must be relaunched from Courses after this update; the server never infers an old ordering from the current assignment.
+- Due-date exceptions use only `assignmentId`, `courseId`, `TDFId`, `date`, `createdAt`, and `updatedAt`. Reads and removals match assignment identity; `checkForUserException(userId, assignmentId)` accepts an assignment ID. Older assignment-less and lowercase identity formats are unsupported. No exception migration is required for the production database checked on September 4, 2026 (zero exception records).
