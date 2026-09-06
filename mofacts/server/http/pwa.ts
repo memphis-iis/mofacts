@@ -1,10 +1,12 @@
-import { Meteor } from 'meteor/meteor';
 import { WebApp } from 'meteor/webapp';
 import type { IncomingMessage, ServerResponse } from 'http';
 import fs from 'fs/promises';
 import path from 'path';
-import { createHash } from 'crypto';
-import { resolveThemeBrandLabel } from '../../common/themeBranding';
+import {
+  DEPLOYMENT_BRAND_SOCIAL_IMAGE_ROUTE,
+  type DeploymentBrandProfile,
+} from '../../common/deploymentBrandProfile';
+import { ensurePublishedDeploymentBrandProfile } from '../lib/deploymentBrandProfileRegistry';
 import { themeRegistry } from '../lib/themeRegistry';
 
 type ThemeLike = {
@@ -48,38 +50,11 @@ function getThemeColors(theme: ThemeLike) {
   return { backgroundColor, themeColor };
 }
 
-function buildThemeVersion(theme: ThemeLike) {
-  const properties = theme.properties || {};
-  return createHash('sha1')
-    .update(JSON.stringify({
-      activeThemeId: theme.activeThemeId || null,
-      themeName: theme.themeName || null,
-      updatedAt: theme.metadata?.updatedAt || null,
-      brandLabel: properties.brand_display_label || null,
-      logoUrl: properties.brand_logo_url || null,
-      favicon16Url: properties.brand_favicon_16_url || null,
-      favicon32Url: properties.brand_favicon_32_url || null,
-      appleTouchIconUrl: properties.brand_apple_touch_icon_url || null,
-      androidIcon192Url: properties.brand_android_icon_192_url || null,
-      androidIcon512Url: properties.brand_android_icon_512_url || null,
-      androidMaskableIcon192Url: properties.brand_android_maskable_icon_192_url || null,
-      androidMaskableIcon512Url: properties.brand_android_maskable_icon_512_url || null,
-      backgroundColor: properties.app_background_color || null,
-      accentColor: properties.app_accent_color || null
-    }))
-    .digest('hex')
-    .slice(0, 12);
-}
-
-function buildManifestPayload(theme: ThemeLike) {
-  const properties = theme.properties || {};
-  const appName = resolveThemeBrandLabel(theme, Meteor.settings.public?.systemName);
-  const shortName = appName.length > 24 ? appName.slice(0, 24) : appName;
-  const description =
-    asNonEmptyString(properties.auth_sign_in_description) ||
-    'A web-based adaptive learning system that supports adaptive practice and learning.';
+function buildManifestPayload(theme: ThemeLike, brandProfile: DeploymentBrandProfile) {
+  const appName = brandProfile.identity.name;
+  const shortName = brandProfile.identity.shortName;
+  const description = brandProfile.locales[brandProfile.defaultLocale].socialDescription;
   const { backgroundColor, themeColor } = getThemeColors(theme);
-  const version = buildThemeVersion(theme);
 
   return {
     id: '/',
@@ -93,25 +68,25 @@ function buildManifestPayload(theme: ThemeLike) {
     theme_color: themeColor,
     icons: [
       {
-        src: `${PWA_ICON_ROUTE_PREFIX}192.png?v=${version}`,
+        src: brandProfile.identity.androidIcon192Url,
         sizes: '192x192',
         type: 'image/png',
         purpose: 'any'
       },
       {
-        src: `${PWA_ICON_ROUTE_PREFIX}512.png?v=${version}`,
+        src: brandProfile.identity.androidIcon512Url,
         sizes: '512x512',
         type: 'image/png',
         purpose: 'any'
       },
       {
-        src: `${PWA_ICON_ROUTE_PREFIX}maskable-192.png?v=${version}`,
+        src: brandProfile.identity.androidMaskableIcon192Url,
         sizes: '192x192',
         type: 'image/png',
         purpose: 'maskable'
       },
       {
-        src: `${PWA_ICON_ROUTE_PREFIX}maskable-512.png?v=${version}`,
+        src: brandProfile.identity.androidMaskableIcon512Url,
         sizes: '512x512',
         type: 'image/png',
         purpose: 'maskable'
@@ -251,7 +226,8 @@ WebAppAny.handlers.use(async function(req: IncomingMessage, res: ServerResponse,
     pathname !== '/manifest.json' &&
     pathname !== APPLE_TOUCH_ICON_ROUTE &&
     pathname !== APPLE_TOUCH_ICON_PRECOMPOSED_ROUTE &&
-    !pathname.startsWith(PWA_ICON_ROUTE_PREFIX)
+    !pathname.startsWith(PWA_ICON_ROUTE_PREFIX) &&
+    pathname !== DEPLOYMENT_BRAND_SOCIAL_IMAGE_ROUTE
   ) {
     next();
     return;
@@ -259,9 +235,22 @@ WebAppAny.handlers.use(async function(req: IncomingMessage, res: ServerResponse,
 
   try {
     const theme = (await themeRegistry.ensureActiveTheme()) as ThemeLike;
+    const brandProfile = await ensurePublishedDeploymentBrandProfile();
+    const identity = brandProfile.identity;
+    const brandAssetTheme: ThemeLike = { properties: {
+      brand_logo_url: identity.logoUrl,
+      brand_favicon_16_url: identity.favicon16Url,
+      brand_favicon_32_url: identity.favicon32Url,
+      brand_apple_touch_icon_url: identity.appleTouchIconUrl,
+      brand_android_icon_192_url: identity.androidIcon192Url,
+      brand_android_icon_512_url: identity.androidIcon512Url,
+      brand_android_maskable_icon_192_url: identity.androidMaskableIcon192Url,
+      brand_android_maskable_icon_512_url: identity.androidMaskableIcon512Url,
+      brand_social_image_url: identity.socialImageUrl,
+    } };
 
     if (pathname === '/site.webmanifest' || pathname === '/manifest.json') {
-      const payload = buildManifestPayload(theme);
+      const payload = buildManifestPayload(theme, brandProfile);
       const body = JSON.stringify(payload);
       res.writeHead(200, {
         'Content-Type': 'application/manifest+json; charset=utf-8',
@@ -275,14 +264,16 @@ WebAppAny.handlers.use(async function(req: IncomingMessage, res: ServerResponse,
       return;
     }
 
-    const propertyName = resolveIconPropertyName(pathname);
+    const propertyName = pathname === DEPLOYMENT_BRAND_SOCIAL_IMAGE_ROUTE
+      ? 'brand_social_image_url'
+      : resolveIconPropertyName(pathname);
     if (!propertyName) {
       res.writeHead(404, { 'Cache-Control': 'no-store' });
       res.end();
       return;
     }
 
-    const resolvedIcon = await resolveThemeIconContent(theme, propertyName);
+    const resolvedIcon = await resolveThemeIconContent(brandAssetTheme, propertyName);
     if (!resolvedIcon) {
       res.writeHead(404, { 'Cache-Control': 'no-store' });
       res.end();

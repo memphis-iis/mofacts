@@ -3,7 +3,6 @@ import { Tracker } from 'meteor/tracker';
 import { Session } from 'meteor/session';
 import { clientConsole } from './userSessionHelpers';
 import { normalizeThemePropertyValue } from '../../common/themePropertyNormalization';
-import { resolveThemeBrandLabel } from '../../common/themeBranding';
 import defaultTheme from '../../public/themes/mofacts-default.json';
 import {
   clearSavedUserThemeSelection,
@@ -34,51 +33,6 @@ function asNonEmptyString(value: unknown): string | null {
   }
   const trimmed = value.trim();
   return trimmed.length > 0 ? trimmed : null;
-}
-
-function updateFaviconLink(rel: string, sizes: string | null, href: string) {
-  let selector = `link[rel="${rel}"][type="image/png"]`;
-  if (sizes) {
-    selector = `link[rel="${rel}"][sizes="${sizes}"]`;
-  } else {
-    selector = `link[rel="${rel}"][type="image/png"]:not([sizes])`;
-  }
-
-  let link = document.querySelector(selector) as HTMLLinkElement | null;
-  if (!link) {
-    link = document.createElement('link');
-    link.rel = rel;
-    if (sizes) {
-      link.sizes = sizes;
-    }
-    link.type = 'image/png';
-    document.head.appendChild(link);
-  }
-  link.href = href;
-}
-
-function updateManifestLink(href: string) {
-  let link = document.querySelector('link[rel="manifest"]') as HTMLLinkElement | null;
-  if (!link) {
-    link = document.createElement('link');
-    link.rel = 'manifest';
-    document.head.appendChild(link);
-  }
-  link.href = href;
-}
-
-function updateAppleTouchIconLink(href: string) {
-  let link = document.querySelector('link[rel="apple-touch-icon"]') as HTMLLinkElement | null;
-  if (!link) {
-    link = document.createElement('link');
-    link.rel = 'apple-touch-icon';
-    link.sizes = '180x180';
-    document.head.appendChild(link);
-  }
-  if (!link.sizes.contains('180x180')) {
-    link.setAttribute('sizes', '180x180');
-  }
-  link.href = href;
 }
 
 function updateThemeColorMeta(content: string) {
@@ -161,39 +115,8 @@ export function applyThemeCSSProperties(themeData: ThemeData | null | undefined)
       applyThemeFontStylesheet(themeProps.app_font_stylesheet_url);
     }
 
-    // Set document title
-    const titleValue = resolveThemeBrandLabel(themeData, Meteor.settings.public?.systemName);
-    clientConsole(2, 'Setting document.title to:', titleValue);
-    document.title = titleValue;
-
-    const themePropsForIcons = themeData.properties || {};
-    const favicon32 = asNonEmptyString(themePropsForIcons.brand_favicon_32_url);
-    const favicon16 = asNonEmptyString(themePropsForIcons.brand_favicon_16_url);
-    const logoUrl = asNonEmptyString(themePropsForIcons.brand_logo_url);
-    const defaultFavicon = favicon32 || favicon16 || logoUrl;
-
-    if (favicon32) {
-      updateFaviconLink('icon', '32x32', favicon32);
-    }
-    if (favicon16) {
-      updateFaviconLink('icon', '16x16', favicon16);
-    }
-    if (defaultFavicon) {
-      updateFaviconLink('icon', null, defaultFavicon);
-    }
-
-    const manifestVersionParts = [
-      asNonEmptyString(themeData.activeThemeId),
-      asNonEmptyString((themeData as { metadata?: { updatedAt?: string } }).metadata?.updatedAt),
-      asNonEmptyString(themeData.themeName),
-    ].filter(Boolean);
-    const manifestVersion = manifestVersionParts.length > 0
-      ? encodeURIComponent(manifestVersionParts.join(':'))
-      : 'default';
-    updateManifestLink(`/site.webmanifest?v=${manifestVersion}`);
-    updateAppleTouchIconLink(`/apple-touch-icon.png?v=${manifestVersion}`);
-
-    const themeColor = asNonEmptyString(themePropsForIcons.app_background_color) || '#F2F2F2';
+    const themePropsForColors = themeData.properties || {};
+    const themeColor = asNonEmptyString(themePropsForColors.app_background_color) || '#F2F2F2';
     updateThemeColorMeta(themeColor);
 
     themeCssAppliedThisSession = true;
@@ -259,11 +182,11 @@ export function getCurrentTheme() {
       themeData = themeSetting.value as ThemeData;
       clientConsole(2, 'getCurrentTheme - using custom server theme');
     } else {
-      clientConsole(2, 'getCurrentTheme - no custom server theme found, using MoFaCTS default');
+      clientConsole(2, 'getCurrentTheme - no custom server theme found, using the bundled default');
       themeData = {
         ...(defaultTheme as ThemeData),
         activeThemeId: 'mofacts-default',
-        themeName: 'MoFaCTS',
+        themeName: 'Default',
       };
     }
 

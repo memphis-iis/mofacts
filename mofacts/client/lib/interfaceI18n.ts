@@ -13,6 +13,12 @@ import {
 
 export type TranslationValues = Record<string, string | number | boolean>;
 
+let platformBrandNameResolver: (() => string) | null = null;
+
+export function setPlatformBrandNameResolver(resolver: () => string): void {
+  platformBrandNameResolver = resolver;
+}
+
 export function assertCompletePlatformLocaleResources(
   resources: Record<TargetUiLocale, LocaleResource> = PLATFORM_LOCALE_RESOURCES
 ): void {
@@ -54,7 +60,9 @@ export function translatePlatformString(
     throw new Error(`Missing platform translation "${key}" for locale "${locale}"`);
   }
 
-  return interpolateTemplate(template, values);
+  const interpolated = interpolateTemplate(template, values);
+  const brandName = platformBrandNameResolver?.().trim();
+  return brandName ? interpolated.replace(/mofacts/gi, () => brandName) : interpolated;
 }
 
 export function getPlatformTextDirection(localeInput: string): 'ltr' | 'rtl' {

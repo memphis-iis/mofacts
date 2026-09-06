@@ -4,6 +4,7 @@ import {Meteor} from 'meteor/meteor';
 import { clientConsole } from '../lib/clientLogger';
 import { getActiveUiLocale } from '../lib/interfaceLocaleState';
 import { translatePlatformString } from '../lib/interfaceI18n';
+import { getLocalizedBrandContent, readPublishedDeploymentBrandProfile } from '../lib/deploymentBrandProfileRuntime';
 import './help.html';
 import './help.css';
 
@@ -17,10 +18,6 @@ declare const Template: {
 type MeteorWithCallAsync = typeof Meteor & {
   callAsync<T = unknown>(name: string, ...args: unknown[]): Promise<T>;
 };
-
-const DEFAULT_ONLINE_HELP_URL = 'https://github.com/memphis-iis/mofacts/wiki/Student-Overview';
-const DEFAULT_ONLINE_HELP_MARKDOWN_URL = 'https://raw.githubusercontent.com/wiki/memphis-iis/mofacts/Student-Overview.md';
-const DEFAULT_ONLINE_HELP_WIKI_BASE_URL = 'https://github.com/memphis-iis/MoFaCTS/wiki';
 
 function helpText(key: Parameters<typeof translatePlatformString>[1], values?: Parameters<typeof translatePlatformString>[2]) {
   return translatePlatformString(getActiveUiLocale(), key, values);
@@ -51,7 +48,7 @@ function convertMarkdownToHTML(markdown: string): string {
   });
 }
 
-function normalizeWikiLink(href: string): string {
+function normalizeHelpLink(href: string): string {
   if (!href || href.startsWith('#')) {
     return href;
   }
@@ -60,11 +57,10 @@ function normalizeWikiLink(href: string): string {
     return href;
   }
 
-  const normalizedHref = href.replace(/^\.\//, '');
-  return `${DEFAULT_ONLINE_HELP_WIKI_BASE_URL}/${normalizedHref}`;
+  return href.startsWith('/') ? href : `/${href.replace(/^\.\//, '')}`;
 }
 
-function normalizeWikiImage(src: string): string {
+function normalizeHelpImage(src: string): string {
   if (!src) {
     return src;
   }
@@ -73,8 +69,7 @@ function normalizeWikiImage(src: string): string {
     return src;
   }
 
-  const normalizedSrc = src.replace(/^\.\//, '');
-  return `${DEFAULT_ONLINE_HELP_WIKI_BASE_URL}/${normalizedSrc}`;
+  return src.startsWith('/') ? src : `/${src.replace(/^\.\//, '')}`;
 }
 
 function normalizeRenderedHelpContent(helpContent: HTMLElement) {
@@ -84,7 +79,7 @@ function normalizeRenderedHelpContent(helpContent: HTMLElement) {
       return;
     }
 
-    const normalizedHref = normalizeWikiLink(href);
+    const normalizedHref = normalizeHelpLink(href);
     anchor.setAttribute('href', normalizedHref);
 
     if (!normalizedHref.startsWith('#')) {
@@ -99,7 +94,7 @@ function normalizeRenderedHelpContent(helpContent: HTMLElement) {
       return;
     }
 
-    image.setAttribute('src', normalizeWikiImage(src));
+    image.setAttribute('src', normalizeHelpImage(src));
   });
 }
 
@@ -112,31 +107,27 @@ Template.help.helpers({
 Template.help.rendered = async function() {
   // Fetch and render the help content
   try {
-    let markdown: string;
-
-    // First, check for custom help page
     const customHelp = await (Meteor as MeteorWithCallAsync).callAsync<string | null>('getCustomHelpPage');
-
     if (customHelp) {
-      // Use custom help markdown
-      markdown = customHelp;
-    } else {
-      // Fall back to the live GitHub wiki markdown and render it in-app.
-      const response = await fetch(DEFAULT_ONLINE_HELP_MARKDOWN_URL);
-      if (!response.ok) {
-        throw new Error('Failed to load help content');
+      const html = convertMarkdownToHTML(customHelp);
+      const helpContent = document.getElementById('helpContent');
+      if (helpContent) {
+        helpContent.innerHTML = html;
+        normalizeRenderedHelpContent(helpContent);
       }
-      markdown = await response.text();
-    }
-
-    // Convert markdown to HTML
-    const html = convertMarkdownToHTML(markdown);
-
-    // Update page content
-    const helpContent = document.getElementById('helpContent');
-    if (helpContent) {
-      helpContent.innerHTML = html;
-      normalizeRenderedHelpContent(helpContent);
+    } else {
+      const profile = readPublishedDeploymentBrandProfile();
+      const localized = getLocalizedBrandContent(getActiveUiLocale());
+      if (!profile || !localized) throw new Error('Brand Profile is not ready');
+      const helpContent = document.getElementById('helpContent');
+      if (helpContent) {
+        helpContent.textContent = '';
+        const link = document.createElement('a');
+        link.href = profile.legal.supportUrl;
+        link.textContent = localized.supportLinkLabel;
+        link.rel = 'noopener noreferrer';
+        helpContent.appendChild(link);
+      }
     }
 
     // Ensure body styles from offcanvas are cleared before fade-in
@@ -152,12 +143,7 @@ Template.help.rendered = async function() {
   } catch (error: unknown) {
     const helpContent = document.getElementById('helpContent');
     if (helpContent) {
-      helpContent.innerHTML = `
-      <div class="alert alert-warning">
-        <p>${helpText('help.loadFailedPrefix')}
-        <a href="${DEFAULT_ONLINE_HELP_URL}" target="_blank" class="content-link">${helpText('help.onlineHelpGuide')}</a>.</p>
-      </div>
-    `;
+      helpContent.textContent = helpText('help.loadFailedPrefix');
     }
     // Ensure body styles from offcanvas are cleared before fade-in
     document.body.style.overflow = '';

@@ -14,10 +14,10 @@ const PUBLIC_THEME_ENV = process.env.MOFACTS_DEFAULT_THEME_DIR;
 
 const FALLBACK_THEME = {
   id: DEFAULT_THEME_ID,
-  themeName: 'MoFaCTS',
+  themeName: 'Default',
   enabled: true,
   properties: {
-    themeName: 'MoFaCTS',
+    themeName: 'Default',
     app_background_color: '#F2F2F2',
     app_text_color: '#000000',
     app_page_header_text_color: '#000000',
@@ -45,7 +45,7 @@ const FALLBACK_THEME = {
     practice_menu_accuracy_bar_track_color: 'color-mix(in srgb, var(--app-text-color) 12%, transparent)',
     practice_menu_underlay_image_url: '',
     practice_menu_welcome_html: '<h1>Welcome back!</h1><p>Access your teaching tools, resources, and system functions.</p>',
-    practice_menu_first_practice_welcome_html: '<h1>Welcome to MoFaCTS!</h1><p>Choose a lesson below to begin your first practice session.</p>',
+    practice_menu_first_practice_welcome_html: '<h1>Welcome!</h1><p>Choose a lesson below to begin your first practice session.</p>',
     brand_display_label: '',
     brand_logo_url: '/images/themes/brain-logo.png',
     brand_favicon_16_url: '/images/themes/brain-16.png',
@@ -72,9 +72,9 @@ const FALLBACK_THEME = {
     app_button_hover_darkness: 15
   },
   metadata: {
-    name: 'MoFaCTS Default',
+    name: 'Default',
     version: 1,
-    author: 'MoFaCTS',
+    author: 'system',
     origin: 'system',
     tags: ['default', 'baseline'],
     filename: 'mofacts-default.json',
@@ -537,7 +537,7 @@ class ThemeRegistry {
     const active = clone(entry.data);
     active.properties = mergeWithFallbackProps(
       active.properties,
-      active.themeName || active.properties?.themeName || active.metadata?.name || 'MoFaCTS'
+      active.themeName || active.properties?.themeName || active.metadata?.name || 'Default'
     );
     active.activeThemeId = entry.id;
     return active;
@@ -582,7 +582,7 @@ class ThemeRegistry {
       const safeExisting = clone(existing.value);
       safeExisting.properties = mergeWithFallbackProps(
         safeExisting.properties,
-        safeExisting.themeName || safeExisting.properties?.themeName || safeExisting.metadata?.name || 'MoFaCTS'
+        safeExisting.themeName || safeExisting.properties?.themeName || safeExisting.metadata?.name || 'Default'
       );
       return safeExisting;
     }

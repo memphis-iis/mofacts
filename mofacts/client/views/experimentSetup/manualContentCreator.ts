@@ -917,7 +917,7 @@ Template.manualContentCreator.events({
     const firstManifest = Array.isArray(result.manifest) && result.manifest.length > 0
       ? result.manifest[0]
       : null;
-    const fileName = firstManifest ? `${firstManifest.tdfName}.zip` : 'MoFaCTS_Manual_Content.zip';
+    const fileName = firstManifest ? `${firstManifest.tdfName}.zip` : 'manual-learning-content.zip';
 
     const url = URL.createObjectURL(result.zipBlob);
     const anchor = document.createElement('a');
@@ -942,7 +942,7 @@ Template.manualContentCreator.events({
     const firstManifest = Array.isArray(result.manifest) && result.manifest.length > 0
       ? result.manifest[0]
       : null;
-    const fileName = firstManifest ? `${firstManifest.tdfName}.zip` : 'MoFaCTS_Manual_Content.zip';
+    const fileName = firstManifest ? `${firstManifest.tdfName}.zip` : 'manual-learning-content.zip';
 
     const startUpload = async () => {
       try {

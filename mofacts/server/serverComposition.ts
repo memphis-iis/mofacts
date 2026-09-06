@@ -70,6 +70,7 @@ import {
   createThemeMethods,
   createUpdateActiveThemeDocument,
 } from './methods/themeMethods';
+import { createDeploymentBrandProfileMethods } from './methods/deploymentBrandProfileMethods';
 import { getOrBuildCurrentPackageAsset } from './lib/packageExport';
 import { getClassPerformanceByTdfWorkflow } from './lib/classPerformance';
 import { createAuthSupport } from './lib/authSupport';
@@ -775,6 +776,10 @@ export const methods: any = {
     requireAdminUser,
     getMethodAuthorizationDeps,
     updateActiveThemeDocument,
+  }),
+
+  ...createDeploymentBrandProfileMethods({
+    requireAdminUser,
   }),
 
   ...createProfileMethods({

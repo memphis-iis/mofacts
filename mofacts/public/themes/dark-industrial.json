@@ -31,7 +31,7 @@
     "practice_menu_accuracy_bar_track_color": "color-mix(in srgb, var(--app-text-color) 18%, transparent)",
     "practice_menu_underlay_image_url": "",
     "practice_menu_welcome_html": "<h1>Welcome back!</h1><p>Access your teaching tools, resources, and system functions.</p>",
-    "practice_menu_first_practice_welcome_html": "<h1>Welcome to MoFaCTS!</h1><p>Choose a lesson below to begin your first practice session.</p>",
+    "practice_menu_first_practice_welcome_html": "<h1>Welcome!</h1><p>Choose a lesson below to begin your first practice session.</p>",
     "brand_display_label": "",
     "brand_logo_url": "/images/themes/gearhead-logo.png",
     "brand_favicon_16_url": "/images/themes/gearhead-16.png",
@@ -59,7 +59,7 @@
   "metadata": {
     "name": "Dark Industrial",
     "version": 1,
-    "author": "MoFaCTS",
+    "author": "system",
     "origin": "system",
     "tags": [
       "built-in",

@@ -1,9 +1,8 @@
 <template name="footer">
     <div class='footer app-footer text-center'>
         <span>
-            {{t 'footer.copyright'}}
-            <a href="/terms-of-service">{{t 'footer.termsOfService'}}</a>
-            <a href="{{licenseSourceUrl}}" target="_blank" rel="noopener noreferrer">{{t 'footer.licenseSource'}}</a>
+            {{brandText 'footerCopyright'}}
+            <a href="/legal">{{brandText 'legalLinkLabel'}}</a>
         </span>
     </div>
 </template>

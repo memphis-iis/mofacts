@@ -7,6 +7,12 @@ import { getActiveUiLocale } from '../lib/interfaceLocaleState';
 import { translatePlatformString } from '../lib/interfaceI18n';
 import { formatActiveInterfaceDateTime } from '../lib/interfaceFormatting';
 import {
+    PUBLIC_EXPERIENCE_KEYS,
+    type DeploymentBrandProfile,
+    type PublicDemoAudience,
+} from '../../common/deploymentBrandProfile';
+import { TARGET_LOCALE_DEFINITIONS, TARGET_UI_LOCALES, type TargetUiLocale } from '../../common/lib/interfaceLocales';
+import {
     isThemeLengthProperty,
     isThemeDensityScaleProperty,
     isValidThemeDensityScale,
@@ -31,6 +37,37 @@ const THEME_FONT_STYLESHEET_LINK_ID = 'mofacts-theme-font-stylesheet';
 const THEME_IMPORT_MAX_FILE_BYTES = 10 * 1024 * 1024;
 const HOME_UNDERLAY_MAX_FILE_BYTES = 5 * 1024 * 1024;
 const MIN_ICON_CONTRAST_RATIO = 3;
+const BRAND_PROFILE_SUPPLEMENTAL_LOCALE_KEYS = [
+    'footerCopyright', 'legalLinkLabel', 'legalPageTitle', 'termsLinkLabel', 'privacyLinkLabel',
+    'supportLinkLabel', 'licenseSourceLinkLabel', 'socialTitle', 'socialDescription', 'socialImageAlt',
+    'signInDescription',
+] as const;
+
+function humanizeBrandField(key: string) {
+    return key.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/^./, (value) => value.toUpperCase());
+}
+
+function cloneJson<T>(value: T): T {
+    return JSON.parse(JSON.stringify(value)) as T;
+}
+
+async function loadBrandProfileDraft(template: any) {
+    try {
+        const draft = await (Meteor as any).callAsync('getDeploymentBrandProfileDraft');
+        template.brandProfileDraft.set(draft);
+        template.brandProfileMessage.set(null);
+    } catch (error: any) {
+        template.brandProfileMessage.set({ level: 'error', text: error?.reason || error?.message || String(error) });
+    }
+}
+
+function updateBrandProfileDraft(template: any, mutator: (draft: DeploymentBrandProfile) => void) {
+    const current = template.brandProfileDraft.get() as DeploymentBrandProfile | null;
+    if (!current) return;
+    const next = cloneJson(current);
+    mutator(next);
+    template.brandProfileDraft.set(next);
+}
 
 function themeText(key: Parameters<typeof translatePlatformString>[1], values?: Parameters<typeof translatePlatformString>[2]) {
     return translatePlatformString(getActiveUiLocale(), key, values);
@@ -337,6 +374,19 @@ async function downloadThemeJson(themeId: any, filenameFallback = 'theme.json') 
     URL.revokeObjectURL(url);
 }
 
+async function downloadBrandProfileJson() {
+    const json = await (Meteor as any).callAsync('exportDeploymentBrandProfile');
+    const blob = new Blob([json], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'deployment-brand-profile.json';
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+}
+
 Template.theme.onCreated(function(this: any) {
     this.autoruns = [];
 
@@ -360,7 +410,11 @@ Template.theme.onCreated(function(this: any) {
     this.themeEditorDraftProperties = new ReactiveVar({});
     this.themePropertyRevisions = new Map();
     this.themeColorSaveTimeout = null;
+    this.brandProfileDraft = new ReactiveVar<DeploymentBrandProfile | null>(null);
+    this.brandProfileLocale = new ReactiveVar<TargetUiLocale>('en');
+    this.brandProfileMessage = new ReactiveVar<{ level: string; text: string } | null>(null);
     loadThemePublications(this);
+    void loadBrandProfileDraft(this);
 });
 
 Template.theme.onRendered(function(this: any) {
@@ -396,6 +450,98 @@ Template.theme.onDestroyed(function(this: any) {
 Template.theme.helpers({
     'currentTheme': function() {
         return getThemeEditorTheme(Template.instance());
+    },
+    brandProfileDraft() {
+        return (Template.instance() as any).brandProfileDraft.get();
+    },
+    brandProfileMessage() {
+        return (Template.instance() as any).brandProfileMessage.get();
+    },
+    brandProfileLocaleOptions() {
+        const instance = Template.instance() as any;
+        const selected = instance.brandProfileLocale.get() as TargetUiLocale;
+        return TARGET_UI_LOCALES.map((locale) => ({
+            locale,
+            label: `${TARGET_LOCALE_DEFINITIONS[locale].nativeName} (${TARGET_LOCALE_DEFINITIONS[locale].englishName})`,
+            selected: locale === selected,
+        }));
+    },
+    brandProfileDefaultLocaleOptions() {
+        const draft = (Template.instance() as any).brandProfileDraft.get() as DeploymentBrandProfile | null;
+        return TARGET_UI_LOCALES.map((locale) => ({
+            locale,
+            label: `${TARGET_LOCALE_DEFINITIONS[locale].nativeName} (${TARGET_LOCALE_DEFINITIONS[locale].englishName})`,
+            selected: draft?.defaultLocale === locale,
+        }));
+    },
+    brandProfileCompleteness() {
+        const instance = Template.instance() as any;
+        const draft = instance.brandProfileDraft.get() as DeploymentBrandProfile | null;
+        if (!draft) return '';
+        const incomplete = TARGET_UI_LOCALES.filter((locale) => {
+            const content = draft.locales?.[locale] as unknown as Record<string, string> | undefined;
+            return [...PUBLIC_EXPERIENCE_KEYS, ...BRAND_PROFILE_SUPPLEMENTAL_LOCALE_KEYS]
+                .some((key) => !String(content?.[key] || '').trim())
+                || (Boolean(draft.landing.heroImageUrl) && !String(draft.landing.heroImageAltByLocale?.[locale] || '').trim());
+        });
+        return incomplete.length === 0
+            ? 'All supported languages are complete.'
+            : `Incomplete languages: ${incomplete.map((locale) => TARGET_LOCALE_DEFINITIONS[locale].nativeName).join(', ')}`;
+    },
+    brandLocaleFields() {
+        const instance = Template.instance() as any;
+        const draft = instance.brandProfileDraft.get() as DeploymentBrandProfile | null;
+        const locale = instance.brandProfileLocale.get() as TargetUiLocale;
+        if (!draft) return [];
+        return [...PUBLIC_EXPERIENCE_KEYS, ...BRAND_PROFILE_SUPPLEMENTAL_LOCALE_KEYS].map((key) => ({
+            key,
+            label: humanizeBrandField(key),
+            value: draft.locales?.[locale]?.[key] || '',
+            multiline: /copy|description|privacy|design|liveAi|copyright/i.test(key),
+        }));
+    },
+    brandHeroAlt() {
+        const instance = Template.instance() as any;
+        const draft = instance.brandProfileDraft.get() as DeploymentBrandProfile | null;
+        const locale = instance.brandProfileLocale.get() as TargetUiLocale;
+        return draft?.landing.heroImageAltByLocale?.[locale] || '';
+    },
+    brandShowCreateAccount() {
+        return (Template.instance() as any).brandProfileDraft.get()?.landing.showCreateAccount ? 'checked' : null;
+    },
+    brandHeroEnabled() {
+        return (Template.instance() as any).brandProfileDraft.get()?.landing.heroEnabled ? 'checked' : null;
+    },
+    brandAudiencesEnabled() {
+        return (Template.instance() as any).brandProfileDraft.get()?.landing.audiencesEnabled ? 'checked' : null;
+    },
+    brandPreview() {
+        const instance = Template.instance() as any;
+        const draft = instance.brandProfileDraft.get() as DeploymentBrandProfile | null;
+        const locale = instance.brandProfileLocale.get() as TargetUiLocale;
+        if (!draft) return null;
+        return {
+            name: draft.identity.name,
+            logoUrl: draft.identity.logoUrl,
+            eyebrow: draft.locales[locale].eyebrow,
+            title: draft.locales[locale].heroTitle,
+            copy: draft.locales[locale].heroCopy,
+            heroImageUrl: draft.landing.heroImageUrl,
+            heroImageAlt: draft.landing.heroImageAltByLocale[locale],
+        };
+    },
+    brandHeroFirst() {
+        return (Template.instance() as any).brandProfileDraft.get()?.landing.sectionOrder?.[0] === 'hero' ? 'checked' : null;
+    },
+    brandAudienceRows() {
+        const draft = (Template.instance() as any).brandProfileDraft.get() as DeploymentBrandProfile | null;
+        if (!draft) return [];
+        return (['student', 'teacher', 'researcher'] as const).map((id) => ({
+            id,
+            label: humanizeBrandField(id),
+            enabled: draft.landing.audiences[id].enabled ? 'checked' : null,
+            order: draft.landing.audiences[id].order,
+        }));
     },
     'themeEditorValue': function(propId: any) {
         const theme = getThemeEditorTheme(Template.instance());
@@ -704,7 +850,6 @@ function applyThemeState(themeData: any, template?: any) {
         Object.entries(themeData.properties).forEach(([property, value]) => {
             applyThemePropertyPreview(property, value, template);
         });
-        document.title = themeData.properties.themeName || 'MoFaCTS';
     }
     syncThemeColorPickers(document, themeData.properties);
 }
@@ -870,6 +1015,182 @@ function createPngDataUrlFromImage(
 }
 
 Template.theme.events({
+    'change [data-brand-image-upload]': function(event: any, template: any) {
+        const target = event.currentTarget.getAttribute('data-brand-image-upload');
+        const file = event.currentTarget.files?.[0] as File | undefined;
+        if (!target || !file) return;
+        const maximumBytes = target === 'logo' ? 2 * 1024 * 1024 : 5 * 1024 * 1024;
+        if (file.size > maximumBytes) {
+            template.brandProfileMessage.set({
+                level: 'error',
+                text: target === 'logo' ? 'Logo images must be smaller than 2 MB.' : 'Brand images must be smaller than 5 MB.',
+            });
+            return;
+        }
+        if (target !== 'hero' && file.type !== 'image/png') {
+            template.brandProfileMessage.set({ level: 'error', text: 'Logo and social preview uploads must be PNG files.' });
+            return;
+        }
+        if (target === 'hero' && !['image/png', 'image/jpeg', 'image/webp', 'image/gif'].includes(file.type)) {
+            template.brandProfileMessage.set({ level: 'error', text: 'Hero images must be PNG, JPEG, WebP, or GIF files.' });
+            return;
+        }
+        const reader = new FileReader();
+        reader.onload = () => {
+            const dataUrl = String(reader.result || '');
+            if (target === 'logo') {
+                const image = new Image();
+                image.onload = () => {
+                    const backgroundColor = getContrastingIconBackgroundColor(image, getThemeIconBackgroundColor());
+                    updateBrandProfileDraft(template, (draft) => {
+                        draft.identity.logoUrl = dataUrl;
+                        draft.identity.favicon16Url = createPngDataUrlFromImage(image, 16);
+                        draft.identity.favicon32Url = createPngDataUrlFromImage(image, 32);
+                        draft.identity.appleTouchIconUrl = createPngDataUrlFromImage(image, 180, { backgroundColor, paddingRatio: 0.10 });
+                        draft.identity.androidIcon192Url = createPngDataUrlFromImage(image, 192, { backgroundColor, paddingRatio: 0.10 });
+                        draft.identity.androidIcon512Url = createPngDataUrlFromImage(image, 512, { backgroundColor, paddingRatio: 0.10 });
+                        draft.identity.androidMaskableIcon192Url = createPngDataUrlFromImage(image, 192, { backgroundColor, paddingRatio: 0.18 });
+                        draft.identity.androidMaskableIcon512Url = createPngDataUrlFromImage(image, 512, { backgroundColor, paddingRatio: 0.18 });
+                    });
+                };
+                image.onerror = () => template.brandProfileMessage.set({ level: 'error', text: 'The logo image could not be read.' });
+                image.src = dataUrl;
+                return;
+            }
+            updateBrandProfileDraft(template, (draft) => {
+                if (target === 'hero') {
+                    draft.landing.heroImageUrl = dataUrl;
+                } else {
+                    draft.identity.socialImageUrl = dataUrl;
+                }
+            });
+        };
+        reader.onerror = () => template.brandProfileMessage.set({ level: 'error', text: 'The selected image could not be read.' });
+        reader.readAsDataURL(file);
+    },
+    'change [data-brand-locale]': function(event: any, template: any) {
+        template.brandProfileLocale.set(event.currentTarget.value as TargetUiLocale);
+    },
+    'change [data-brand-default-locale]': function(event: any, template: any) {
+        updateBrandProfileDraft(template, (draft) => {
+            draft.defaultLocale = event.currentTarget.value as TargetUiLocale;
+        });
+    },
+    'input [data-brand-identity]': function(event: any, template: any) {
+        const key = event.currentTarget.getAttribute('data-brand-identity');
+        if (!key) return;
+        updateBrandProfileDraft(template, (draft) => {
+            (draft.identity as unknown as Record<string, string>)[key] = event.currentTarget.value;
+        });
+    },
+    'input [data-brand-legal]': function(event: any, template: any) {
+        const key = event.currentTarget.getAttribute('data-brand-legal');
+        if (!key) return;
+        updateBrandProfileDraft(template, (draft) => {
+            (draft.legal as unknown as Record<string, string>)[key] = event.currentTarget.value;
+        });
+    },
+    'input [data-brand-locale-field]': function(event: any, template: any) {
+        const key = event.currentTarget.getAttribute('data-brand-locale-field');
+        const locale = template.brandProfileLocale.get() as TargetUiLocale;
+        if (!key) return;
+        updateBrandProfileDraft(template, (draft) => {
+            (draft.locales[locale] as unknown as Record<string, string>)[key] = event.currentTarget.value;
+        });
+    },
+    'input [data-brand-hero-alt]': function(event: any, template: any) {
+        const locale = template.brandProfileLocale.get() as TargetUiLocale;
+        updateBrandProfileDraft(template, (draft) => {
+            draft.landing.heroImageAltByLocale[locale] = event.currentTarget.value;
+        });
+    },
+    'input [data-brand-landing-text]': function(event: any, template: any) {
+        const key = event.currentTarget.getAttribute('data-brand-landing-text');
+        if (!key) return;
+        updateBrandProfileDraft(template, (draft) => {
+            (draft.landing as unknown as Record<string, unknown>)[key] = event.currentTarget.value;
+        });
+    },
+    'change [data-brand-landing-boolean]': function(event: any, template: any) {
+        const key = event.currentTarget.getAttribute('data-brand-landing-boolean');
+        if (!key) return;
+        updateBrandProfileDraft(template, (draft) => {
+            (draft.landing as unknown as Record<string, unknown>)[key] = event.currentTarget.checked;
+        });
+    },
+    'change [data-brand-hero-first]': function(event: any, template: any) {
+        updateBrandProfileDraft(template, (draft) => {
+            draft.landing.sectionOrder = event.currentTarget.checked
+                ? ['hero', 'audiences']
+                : ['audiences', 'hero'];
+        });
+    },
+    'change [data-brand-audience-enabled]': function(event: any, template: any) {
+        const audience = event.currentTarget.getAttribute('data-brand-audience-enabled') as PublicDemoAudience;
+        updateBrandProfileDraft(template, (draft) => {
+            draft.landing.audiences[audience].enabled = event.currentTarget.checked;
+        });
+    },
+    'change [data-brand-audience-order]': function(event: any, template: any) {
+        const audience = event.currentTarget.getAttribute('data-brand-audience-order') as PublicDemoAudience;
+        updateBrandProfileDraft(template, (draft) => {
+            draft.landing.audiences[audience].order = Number(event.currentTarget.value);
+        });
+    },
+    'click [data-brand-save]': async function(_event: any, template: any) {
+        const draft = template.brandProfileDraft.get();
+        if (!draft) return;
+        try {
+            const saved = await (Meteor as any).callAsync('saveDeploymentBrandProfileDraft', draft);
+            template.brandProfileDraft.set(saved);
+            template.brandProfileMessage.set({ level: 'success', text: 'Brand Profile draft saved.' });
+        } catch (error: any) {
+            template.brandProfileMessage.set({ level: 'error', text: error?.reason || error?.message || String(error) });
+        }
+    },
+    'click [data-brand-publish]': async function(_event: any, template: any) {
+        const draft = template.brandProfileDraft.get();
+        if (!draft) return;
+        try {
+            await (Meteor as any).callAsync('saveDeploymentBrandProfileDraft', draft);
+            const published = await (Meteor as any).callAsync('publishDeploymentBrandProfile');
+            template.brandProfileDraft.set(cloneJson(published));
+            template.brandProfileMessage.set({ level: 'success', text: 'Brand Profile published.' });
+        } catch (error: any) {
+            template.brandProfileMessage.set({ level: 'error', text: error?.reason || error?.message || String(error) });
+        }
+    },
+    'click [data-brand-export]': async function(_event: any, template: any) {
+        try {
+            await downloadBrandProfileJson();
+        } catch (error: any) {
+            template.brandProfileMessage.set({ level: 'error', text: error?.reason || error?.message || String(error) });
+        }
+    },
+    'change [data-brand-import]': function(event: any, template: any) {
+        const input = event.currentTarget as HTMLInputElement;
+        const file = input.files?.[0];
+        if (!file) return;
+        if (file.size > 10 * 1024 * 1024) {
+            template.brandProfileMessage.set({ level: 'error', text: 'Brand Profile files must be smaller than 10 MB.' });
+            input.value = '';
+            return;
+        }
+        const reader = new FileReader();
+        reader.onload = async () => {
+            try {
+                const imported = await (Meteor as any).callAsync('importDeploymentBrandProfileDraft', String(reader.result || ''));
+                template.brandProfileDraft.set(imported);
+                template.brandProfileMessage.set({ level: 'success', text: 'Brand Profile imported as a draft.' });
+            } catch (error: any) {
+                template.brandProfileMessage.set({ level: 'error', text: error?.reason || error?.message || String(error) });
+            } finally {
+                input.value = '';
+            }
+        };
+        reader.onerror = () => template.brandProfileMessage.set({ level: 'error', text: 'The Brand Profile file could not be read.' });
+        reader.readAsText(file);
+    },
     'click [data-theme-retry]': function(_event: any, template: any) {
         loadThemePublications(template);
     },
@@ -1005,7 +1326,7 @@ Template.theme.events({
     },
     'click #themeResetButton': async function(event: any, template: any) {
         try {
-            const activeTheme = await (Meteor as any).callAsync('initializeCustomTheme', 'MoFaCTS');
+            const activeTheme = await (Meteor as any).callAsync('initializeCustomTheme', 'Default');
             clearThemeEditorDraft(template);
             applyThemeState(activeTheme, template);
             setThemeMessage(template, 'success', themeText('theme.resetToDefault'));
@@ -1118,101 +1439,6 @@ Template.theme.events({
             setThemeMessage(template, 'success', themeText('theme.homeUnderlayCleared'), 'underlay');
         }
     },
-    'change #logoUpload': function(event: any, template: any) {
-        const file = event.target.files[0];
-        if (file) {
-            // Validate file type
-            if (!file.type.startsWith('image/')) {
-                setThemeMessage(template, 'warning', themeText('theme.selectImageFile'), 'logo');
-                return;
-            }
-            // Validate file size (max 2MB)
-            if (file.size > 2 * 1024 * 1024) {
-                setThemeMessage(template, 'warning', themeText('theme.fileSizeLessThanTwoMb'), 'logo');
-                return;
-            }
-
-            const reader = new FileReader();
-            reader.onload = async function(e: any) {
-                const base64Data = e.target.result;
-
-                // Create image to generate favicons
-                const img = new Image();
-                img.onload = async function() {
-                    try {
-                        const backgroundColor = getContrastingIconBackgroundColor(
-                            img,
-                            getThemeIconBackgroundColor()
-                        );
-
-                        const logoRevision = stageThemePropertyDraft(template, 'brand_logo_url', base64Data);
-                        const logoSaved = await persistThemePropertyDraft(template, 'brand_logo_url', base64Data, logoRevision, 'logo');
-                        if (!logoSaved) {
-                            return;
-                        }
-
-                        const generatedIcons: Record<string, string> = {
-                            brand_favicon_32_url: createPngDataUrlFromImage(img, 32),
-                            brand_favicon_16_url: createPngDataUrlFromImage(img, 16),
-                            brand_apple_touch_icon_url: createPngDataUrlFromImage(img, 180, {
-                                backgroundColor: backgroundColor,
-                                paddingRatio: 0.10
-                            }),
-                            brand_android_icon_192_url: createPngDataUrlFromImage(img, 192, {
-                                backgroundColor: backgroundColor,
-                                paddingRatio: 0.10
-                            }),
-                            brand_android_icon_512_url: createPngDataUrlFromImage(img, 512, {
-                                backgroundColor: backgroundColor,
-                                paddingRatio: 0.10
-                            }),
-                            brand_android_maskable_icon_192_url: createPngDataUrlFromImage(img, 192, {
-                                backgroundColor: backgroundColor,
-                                paddingRatio: 0.18
-                            }),
-                            brand_android_maskable_icon_512_url: createPngDataUrlFromImage(img, 512, {
-                                backgroundColor: backgroundColor,
-                                paddingRatio: 0.18
-                            })
-                        };
-
-                        for (const [property, generatedData] of Object.entries(generatedIcons)) {
-                            const response = await saveThemeProperty(property, generatedData);
-                            if (response?.theme?.properties) {
-                                applyThemeState(response.theme, template);
-                            }
-                        }
-
-                        
-                        // PHASE 1.5: No need to call getCurrentTheme() - reactive subscription handles it
-                        setThemeMessage(template, 'success', themeText('theme.logoUploaded'), 'logo');
-                    } catch (err: any) {
-                        setThemeMessage(template, 'error', themeText('theme.logoUploadError', { error: err }), 'logo');
-                    }
-                };
-                img.src = base64Data;
-            };
-            reader.readAsDataURL(file);
-        }
-    },
-    'click #clearLogo': async function(event: any, template: any) {
-        const confirmed = await requestThemeConfirmation(template, event.currentTarget as HTMLElement, {
-            title: themeText('theme.clearLogoTitle'),
-            message: themeText('theme.clearLogoMessage'),
-            confirmLabel: themeText('theme.clearLogo'),
-            scope: 'logo',
-        });
-        if (confirmed) {
-            const revision = stageThemePropertyDraft(template, 'brand_logo_url', '');
-            const saved = await persistThemePropertyDraft(template, 'brand_logo_url', '', revision, 'logo');
-            if (saved) {
-                const fileInput = template.find('#logoUpload') as HTMLInputElement | null;
-                if (fileInput) fileInput.value = '';
-                setThemeMessage(template, 'success', themeText('theme.logoCleared'), 'logo');
-            }
-        }
-    },
-
     // Custom Help Page Upload
     'click #uploadHelpFileButton': function(_event: any, template: any) {
         const fileInput = template.find('#helpFileUpload') as HTMLInputElement | null;

@@ -986,6 +986,14 @@ FlowRouter.route('/terms-of-service', {
   }
 })
 
+FlowRouter.route('/legal', {
+  name: 'client.legal',
+  action: function() {
+    Session.set('curModule', 'legalHub');
+    renderLayout(this, 'legalHub');
+  }
+})
+
 FlowRouter.route('/audioSettings', {
   name: 'client.audioSettings',
   action: async function() {

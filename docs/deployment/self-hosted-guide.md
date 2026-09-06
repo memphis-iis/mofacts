@@ -39,7 +39,7 @@ The SPARC OpenRouter sticky-session optimization is disabled by default. An admi
 
 The admin backup control plane writes local archives to `/backups` inside the app container. Compose mounts `MOFACTS_BACKUP_HOST_PATH` there, defaulting to `/backups/mofacts` on the host. Create and protect that host directory before production use, then copy completed archives off-server. A backup stored only on the same server does not protect against server loss, disk loss, hosting-account loss, or accidental deletion of the backup directory.
 
-For email verification deliverability, set `emailFrom` to an address on a domain authenticated with your SMTP provider, for example `MoFaCTS <no-reply@your-domain.example>`, and use `emailReplyTo` for the admin contact address. Do not send production verification mail from a personal Gmail address through a separate SMTP provider.
+For email verification deliverability, set `emailFrom` to an address on a domain authenticated with your SMTP provider, for example `Learning Lab <no-reply@your-domain.example>`, and use `emailReplyTo` for the admin contact address. Do not send production verification mail from a personal Gmail address through a separate SMTP provider.
 
 `storage.backend` defaults to `local`. To use S3-compatible object storage, set `storage.backend` to `s3` and configure `storage.s3.endpoint`, `bucket`, `region`, `accessKeyId`, and `secretAccessKey`. Optional `storage.s3.prefix` scopes object keys for one MoFaCTS instance, and `storage.s3.forcePathStyle` defaults to `true` for MinIO-style endpoints. Readiness writes and deletes a temporary object, so the configured credentials need object write, read, head, list-prefix, and delete permissions.
 
@@ -52,6 +52,8 @@ docker compose --env-file .env.self-hosted -f docker-compose.yml up -d
 ```
 
 After startup, sign up with the email configured as `owner` and included in `initRoles.admins`. The existing login/startup role-assignment flow grants that account the admin role. Then open `/admin/tests` and run Deployment Readiness.
+
+Before inviting users or publicizing the URL, open **Theme → Branding and Landing Page** as that administrator. Complete every supported language, identity/icon asset, landing-page option, and legal destination, then publish the Brand Profile. Use its preview and public `/legal` page to confirm that the deployment identity and software license/source access are correct. Brand Profile publication is deployment-wide and independent of users' visual-theme choices.
 
 ## State
 

@@ -517,19 +517,96 @@
                     </div>
                 </div>
 
-                <!-- Branding -->
+                <!-- Deployment branding and public landing page -->
                 <div class="theme-section">
-                    <h5 class="theme-section-header">{{themeText 'theme.branding'}}</h5>
+                    <h5 class="theme-section-header">Branding and Landing Page</h5>
+                    <p class="text-muted">This deployment-wide identity is independent of visual themes. Changes remain private until the complete Brand Profile is published.</p>
+                    {{#with brandProfileDraft}}
+                    <h6>Identity</h6>
                     <div class="row row-cols-2">
-                        <div class="col text-end">
-                            {{themeText 'theme.brandLabel'}}
+                        <div class="col text-end">Product name</div><div class="col"><input class="form-control" data-brand-identity="name" value="{{identity.name}}"></div>
+                        <div class="col text-end">Short name</div><div class="col"><input class="form-control" data-brand-identity="shortName" value="{{identity.shortName}}" maxlength="24"></div>
+                        <div class="col text-end">Organization</div><div class="col"><input class="form-control" data-brand-identity="organizationName" value="{{identity.organizationName}}"></div>
+                        <div class="col text-end">Logo</div><div class="col"><input class="form-control" type="file" accept="image/png" data-brand-image-upload="logo"><input class="form-control admin-form-row-top" data-brand-identity="logoUrl" value="{{identity.logoUrl}}"></div>
+                        <div class="col text-end">16px favicon URL</div><div class="col"><input class="form-control" data-brand-identity="favicon16Url" value="{{identity.favicon16Url}}"></div>
+                        <div class="col text-end">32px favicon URL</div><div class="col"><input class="form-control" data-brand-identity="favicon32Url" value="{{identity.favicon32Url}}"></div>
+                        <div class="col text-end">Apple touch icon URL</div><div class="col"><input class="form-control" data-brand-identity="appleTouchIconUrl" value="{{identity.appleTouchIconUrl}}"></div>
+                        <div class="col text-end">Android 192px icon URL</div><div class="col"><input class="form-control" data-brand-identity="androidIcon192Url" value="{{identity.androidIcon192Url}}"></div>
+                        <div class="col text-end">Android 512px icon URL</div><div class="col"><input class="form-control" data-brand-identity="androidIcon512Url" value="{{identity.androidIcon512Url}}"></div>
+                        <div class="col text-end">Maskable 192px icon URL</div><div class="col"><input class="form-control" data-brand-identity="androidMaskableIcon192Url" value="{{identity.androidMaskableIcon192Url}}"></div>
+                        <div class="col text-end">Maskable 512px icon URL</div><div class="col"><input class="form-control" data-brand-identity="androidMaskableIcon512Url" value="{{identity.androidMaskableIcon512Url}}"></div>
+                        <div class="col text-end">Social preview image</div><div class="col"><input class="form-control" type="file" accept="image/png" data-brand-image-upload="social"><input class="form-control admin-form-row-top" data-brand-identity="socialImageUrl" value="{{identity.socialImageUrl}}"></div>
+                    </div>
+
+                    <h6 class="admin-form-row-top">Landing layout</h6>
+                    <div class="form-check"><input class="form-check-input" type="checkbox" data-brand-landing-boolean="heroEnabled" {{brandHeroEnabled}}><label class="form-check-label">Show hero section</label></div>
+                    <div class="form-check"><input class="form-check-input" type="checkbox" data-brand-landing-boolean="audiencesEnabled" {{brandAudiencesEnabled}}><label class="form-check-label">Show audience demos section</label></div>
+                    <div class="form-check"><input class="form-check-input" type="checkbox" data-brand-landing-boolean="showCreateAccount" {{brandShowCreateAccount}}><label class="form-check-label">Show Create account action</label></div>
+                    <div class="form-check"><input class="form-check-input" type="checkbox" data-brand-hero-first {{brandHeroFirst}}><label class="form-check-label">Show hero before audience demos</label></div>
+                    <label class="form-label admin-form-row-top">Hero image</label><input class="form-control" type="file" accept="image/png,image/jpeg,image/webp,image/gif" data-brand-image-upload="hero"><input class="form-control admin-form-row-top" data-brand-landing-text="heroImageUrl" value="{{landing.heroImageUrl}}">
+                    <label class="form-label admin-form-row-top">Hero image alternative text for selected language</label><input class="form-control" data-brand-hero-alt value="{{brandHeroAlt}}">
+                    <div class="row admin-form-row-top">
+                        {{#each brandAudienceRows}}
+                        <div class="col-md-4">
+                            <div class="form-check"><input class="form-check-input" type="checkbox" data-brand-audience-enabled="{{id}}" {{enabled}}><label class="form-check-label">Show {{label}} demo</label></div>
+                            <label class="form-label">Order (0–2)</label><input class="form-control" type="number" min="0" max="2" data-brand-audience-order="{{id}}" value="{{order}}">
                         </div>
+                        {{/each}}
+                    </div>
+
+                    <h6 class="admin-form-row-top">Legal destinations</h6>
+                    <div class="row row-cols-2">
+                        <div class="col text-end">Terms URL</div><div class="col"><input class="form-control" data-brand-legal="termsUrl" value="{{legal.termsUrl}}"></div>
+                        <div class="col text-end">Privacy URL</div><div class="col"><input class="form-control" data-brand-legal="privacyUrl" value="{{legal.privacyUrl}}"></div>
+                        <div class="col text-end">Support URL</div><div class="col"><input class="form-control" data-brand-legal="supportUrl" value="{{legal.supportUrl}}"></div>
+                        <div class="col text-end">Software license and source URL</div><div class="col"><input class="form-control" data-brand-legal="licenseSourceUrl" value="{{legal.licenseSourceUrl}}"></div>
+                    </div>
+
+                    <h6 class="admin-form-row-top">Localized landing and identity text</h6>
+                    <label class="form-label" for="brandProfileDefaultLocale">Default language for crawlers and signed-out visitors</label>
+                    <select id="brandProfileDefaultLocale" class="form-select" data-brand-default-locale>
+                        {{#each brandProfileDefaultLocaleOptions}}<option value="{{locale}}" selected={{selected}}>{{label}}</option>{{/each}}
+                    </select>
+                    <label class="form-label" for="brandProfileLocale">Language</label>
+                    <select id="brandProfileLocale" class="form-select" data-brand-locale>
+                        {{#each brandProfileLocaleOptions}}<option value="{{locale}}" selected={{selected}}>{{label}}</option>{{/each}}
+                    </select>
+                    <p class="text-muted admin-form-row-top">{{brandProfileCompleteness}}</p>
+                    <div class="row row-cols-2 admin-form-row-top">
+                        {{#each brandLocaleFields}}
+                        <div class="col text-end"><label>{{label}}</label></div>
                         <div class="col">
-                            <input type="text" class="form-control currentThemeProp" value="{{currentTheme.properties.brand_display_label}}" data-id="brand_display_label" aria-label="{{themeText 'theme.brandLabel'}}">
-                            <small class="form-text text-muted">
-                                {{themeText 'theme.brandLabelHelp'}}
-                            </small>
+                            {{#if multiline}}<textarea class="form-control" rows="3" data-brand-locale-field="{{key}}">{{value}}</textarea>{{else}}<input class="form-control" data-brand-locale-field="{{key}}" value="{{value}}">{{/if}}
                         </div>
+                        {{/each}}
+                    </div>
+
+                    {{#with brandPreview}}
+                    <div class="card admin-form-row-top" aria-label="Brand Profile landing preview">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center gap-2">{{#if logoUrl}}<img src="{{logoUrl}}" alt="" style="max-height:48px;max-width:160px">{{/if}}<strong>{{name}}</strong></div>
+                            {{#if heroImageUrl}}<img class="img-fluid admin-form-row-top" src="{{heroImageUrl}}" alt="{{heroImageAlt}}" style="max-height:220px">{{/if}}
+                            <p class="text-muted admin-form-row-top">{{eyebrow}}</p><h3>{{title}}</h3><p>{{copy}}</p>
+                        </div>
+                    </div>
+                    {{/with}}
+
+                    <div class="theme-action-row admin-form-row-top">
+                        <button type="button" class="btn btn-secondary" data-brand-save>Save draft</button>
+                        <button type="button" class="btn btn-primary" data-brand-publish>Publish Brand Profile</button>
+                        <button type="button" class="btn btn-secondary" data-brand-export>Export</button>
+                        <label class="btn btn-secondary">Import draft<input type="file" accept="application/json,.json" data-brand-import hidden></label>
+                    </div>
+                    {{#with brandProfileMessage}}{{> adminStatus variant=level text=text}}{{/with}}
+                    {{else}}
+                    <p>Loading Brand Profile…</p>
+                    {{/with}}
+                </div>
+
+                <!-- Theme-specific home appearance -->
+                <div class="theme-section">
+                    <h5 class="theme-section-header">Home appearance</h5>
+                    <div class="row row-cols-2">
                         <div class="col text-end">
                             {{themeText 'theme.homePageUnderlayImage'}}
                         </div>
@@ -568,38 +645,6 @@
                             <textarea class="form-control currentThemeProp" rows="5" data-id="practice_menu_first_practice_welcome_html" aria-label="{{themeText 'theme.homeFirstPracticeHtml'}}">{{currentTheme.properties.practice_menu_first_practice_welcome_html}}</textarea>
                             <small class="form-text text-muted">
                                 {{themeText 'theme.homeFirstPracticeHtmlHelp'}}
-                            </small>
-                        </div>
-                        <div class="col text-end">
-                            {{themeText 'theme.logoAndFavicon'}}
-                        </div>
-                        <div class="col">
-                            <input type="file" class="form-control" id="logoUpload" accept="image/*" aria-label="{{themeText 'theme.logoAndFavicon'}}">
-                            <input type="text" class="form-control currentThemeProp admin-form-row-top" value="{{currentTheme.properties.brand_logo_url}}" data-id="brand_logo_url" placeholder="/images/themes/brain-logo.png" aria-label="{{themeText 'theme.logoAndFavicon'}}">
-                            <small class="form-text text-muted">
-                                {{themeText 'theme.logoHelp'}}
-                            </small>
-                            {{#with (themeMessage 'logo')}}{{> adminStatus variant=level text=text}}{{/with}}
-                            {{> adminInlineConfirmation confirmation=(themeConfirmationFor 'logo')}}
-                            {{#if currentTheme.properties.brand_logo_url}}
-                            <button type="button" id="clearLogo" class="btn btn-secondary btn-sm admin-form-row-top">{{themeText 'theme.clearLogo'}}</button>
-                            <div class="admin-form-row-top">
-                                <img src="{{currentTheme.properties.brand_logo_url}}"
-                                     alt="{{themeText 'theme.logoPreviewAlt'}}"
-                                     class="img-thumbnail theme-logo-preview"
-                                     loading="lazy"
-                                     decoding="async"
-                                     fetchpriority="low">
-                            </div>
-                            {{/if}}
-                        </div>
-                        <div class="col text-end">
-                            {{themeText 'theme.signInDescription'}}
-                        </div>
-                        <div class="col">
-                            <textarea class="form-control currentThemeProp" rows="3" data-id="auth_sign_in_description" aria-label="{{themeText 'theme.signInDescription'}}">{{currentTheme.properties.auth_sign_in_description}}</textarea>
-                            <small class="form-text text-muted">
-                                {{themeText 'theme.signInDescriptionHelp'}}
                             </small>
                         </div>
                     </div>

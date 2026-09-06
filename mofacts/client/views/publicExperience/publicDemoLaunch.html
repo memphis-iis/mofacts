@@ -2,7 +2,7 @@
   <div class="public-theme-context public-experience-page public-demo-launch-page">
     <header class="public-site-header">
       <a class="public-brand" href="/" aria-label="{{systemName}}">
-        {{#if currentTheme.properties.brand_logo_url}}<span class="public-brand-logo" aria-hidden="true" style="--public-brand-logo-image: url('{{currentTheme.properties.brand_logo_url}}');"></span>{{/if}}
+        {{#if deploymentBrandProfile.identity.logoUrl}}<span class="public-brand-logo" aria-hidden="true" style="--public-brand-logo-image: url('{{deploymentBrandProfile.identity.logoUrl}}');"></span>{{/if}}
         <span><strong>{{systemName}}</strong><small>{{pt 'brandTagline'}}</small></span>
       </a>
       <a class="public-back-link" href="/"><span class="public-back-arrow" aria-hidden="true">←</span> {{pt 'demoExit'}}</a>

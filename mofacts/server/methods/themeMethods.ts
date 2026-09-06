@@ -182,9 +182,9 @@ export function createThemeMethods(deps: ThemeMethodDeps) {
 
       await deps.requireAdminUser(this.userId, 'Only admins can initialize themes', 'unauthorized');
 
-      const requestedName = typeof themeName === 'string' && themeName.trim() ? themeName.trim() : 'MoFaCTS';
+      const requestedName = typeof themeName === 'string' && themeName.trim() ? themeName.trim() : 'Default';
 
-      if (requestedName === 'MoFaCTS') {
+      if (requestedName === 'Default') {
         return await themeRegistry.setActiveTheme('mofacts-default');
       }
 

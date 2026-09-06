@@ -1,15 +1,15 @@
 <template name="termsOfService">
-  <div class="public-document-page">
+  <div class="public-document-page public-theme-context">
     <main class="public-document-shell">
-      <h1>Terms of Service</h1>
+      <h1>{{brandText 'termsLinkLabel'}}</h1>
       <p class="public-document-updated">Last updated June 6, 2026</p>
 
       <section>
-        <h2>Using MoFaCTS</h2>
+        <h2>Using {{systemName}}</h2>
         <p>
-          MoFaCTS is provided for learning, teaching, research, and related administrative work. By using the service,
-          you agree to use it lawfully, respect other people and their data, and follow any course, study, institution,
-          or deployment-specific rules that apply to your account.
+          This service is provided for learning, teaching, research, and related administrative work. By using it, you
+          agree to use it lawfully, respect other people and their data, and follow any course, study, institution, or
+          deployment-specific rules that apply to your account.
         </p>
       </section>
 
@@ -17,9 +17,9 @@
         <h2>User Content</h2>
         <p>
           If you upload, create, edit, share, or link to lessons, prompts, media, files, comments, or other materials,
-          you are responsible for that content and for having the rights needed to use it in MoFaCTS. Content should be
-          educational or study related and must not violate privacy, intellectual property, security, or other legal
-          rights.
+          you are responsible for that content and for having the rights needed to use it in this service. Content
+          should be educational or study related and must not violate privacy, intellectual property, security, or
+          other legal rights.
         </p>
         <p>
           Do not submit content that is harassing, hateful, exploitative, sexually explicit, defamatory, intentionally
@@ -31,9 +31,9 @@
       <section>
         <h2>Service Content And Links</h2>
         <p>
-          MoFaCTS may contain materials provided by users, instructors, researchers, administrators, or linked third
-          parties. The University of Memphis does not review every item before it appears and does not endorse every
-          lesson, link, file, or statement made available through the service.
+          This service may contain materials provided by users, instructors, researchers, administrators, or linked
+          third parties. The deployment operator does not review every item before it appears and does not endorse
+          every lesson, link, file, or statement made available through the service.
         </p>
         <p>
           Use appropriate care when opening files or following links. Third-party sites and resources are controlled by
@@ -44,48 +44,64 @@
       <section>
         <h2>Copyright And Intellectual Property</h2>
         <p>
-          Respect copyright, licenses, trademarks, privacy rights, and other intellectual property rights. If you believe
-          material in MoFaCTS infringes your rights, contact the administrator for the MoFaCTS deployment where the
-          material appears and include enough detail to identify the material and your claim.
+          Respect copyright, licenses, trademarks, privacy rights, and other intellectual property rights. If you
+          believe material in this service infringes your rights, contact the deployment operator and include enough
+          detail to identify the material and your claim.
         </p>
         <p>
-          MoFaCTS may remove content, disable access, or suspend accounts when content appears to violate these terms,
-          applicable law, or the rights of others.
+          The deployment operator may remove content, disable access, or suspend accounts when content appears to
+          violate these terms, applicable law, or the rights of others.
         </p>
       </section>
 
       <section>
         <h2>Availability, Changes, And Risk</h2>
         <p>
-          The service, its features, and these terms may change over time. MoFaCTS is provided as available and without
-          promises that it will be uninterrupted, error free, or suitable for every purpose.
+          The service, its features, and these terms may change over time. The service is provided as available and
+          without promises that it will be uninterrupted, error free, or suitable for every purpose.
         </p>
         <p>
-          To the extent allowed by law, the University of Memphis is not responsible for indirect, incidental,
-          consequential, special, exemplary, or similar damages arising from use of the service, user content, downloads,
-          or linked resources.
+          To the extent allowed by law, the deployment operator is not responsible for indirect, incidental,
+          consequential, special, exemplary, or similar damages arising from use of the service, user content,
+          downloads, or linked resources.
         </p>
       </section>
 
       <section>
         <h2>Your Responsibilities</h2>
         <p>
-          You are responsible for your account activity, protecting your credentials, complying with applicable laws and
-          institutional policies, and avoiding activity that interferes with the service or attempts to bypass security
-          controls.
+          You are responsible for your account activity, protecting your credentials, complying with applicable laws
+          and institutional policies, and avoiding activity that interferes with the service or attempts to bypass
+          security controls.
         </p>
         <p>
-          You agree to hold harmless the University of Memphis and its personnel from claims and expenses arising from
-          your misuse of MoFaCTS, your content, or your violation of these terms.
+          You agree to hold harmless the deployment operator and its personnel from claims and expenses arising from
+          your misuse of the service, your content, or your violation of these terms.
         </p>
       </section>
 
       <section>
         <h2>Severability</h2>
-        <p>
-          If any part of these terms is found invalid or unenforceable, the remaining terms will continue to apply.
-        </p>
+        <p>If any part of these terms is found invalid or unenforceable, the remaining terms will continue to apply.</p>
       </section>
+
+      <p>{{deploymentBrandProfile.identity.organizationName}}</p>
+    </main>
+    {{> footer}}
+  </div>
+</template>
+
+<template name="legalHub">
+  <div class="public-document-page public-theme-context">
+    <main class="public-document-shell">
+      <h1>{{brandText 'legalPageTitle'}}</h1>
+      <p>{{deploymentBrandProfile.identity.organizationName}}</p>
+      <nav class="public-legal-links" aria-label="{{brandText 'legalPageTitle'}}">
+        <a href="{{brandLegalUrl 'termsUrl'}}" rel="noopener">{{brandText 'termsLinkLabel'}}</a>
+        <a href="{{brandLegalUrl 'privacyUrl'}}" rel="noopener">{{brandText 'privacyLinkLabel'}}</a>
+        <a href="{{brandLegalUrl 'supportUrl'}}" rel="noopener">{{brandText 'supportLinkLabel'}}</a>
+        <a href="{{brandLegalUrl 'licenseSourceUrl'}}" rel="noopener">{{brandText 'licenseSourceLinkLabel'}}</a>
+      </nav>
     </main>
     {{> footer}}
   </div>

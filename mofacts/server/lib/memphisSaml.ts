@@ -15,7 +15,7 @@ const MEMPHIS_SAML_ACS_PATH = '/auth/saml/memphis/acs';
 const MEMPHIS_SAML_METADATA_PATH = '/auth/saml/memphis/metadata';
 const SAML_REDIRECT_BINDING = 'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect';
 const SAML_POST_BINDING = 'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST';
-const DEFAULT_MEMPHIS_DISPLAY_NAME = 'University of Memphis';
+const DEFAULT_MEMPHIS_DISPLAY_NAME = 'Institutional SSO';
 const MAX_FORM_BODY_BYTES = 1024 * 1024;
 const SAML_HASH_ALGORITHMS = ['sha1', 'sha256', 'sha512'] as const;
 

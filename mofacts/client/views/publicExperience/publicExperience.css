@@ -388,6 +388,20 @@
   min-height: calc(420px * var(--app-density-scale));
 }
 
+.public-hero-visual > img {
+  width: 100%;
+  height: 100%;
+  max-height: calc(520px * var(--app-density-scale));
+  object-fit: contain;
+  border-radius: var(--app-border-radius-lg);
+}
+
+.public-legal-links {
+  display: grid;
+  gap: calc(0.9rem * var(--app-density-scale));
+  margin-top: calc(1.5rem * var(--app-density-scale));
+}
+
 .public-visual-orbit {
   position: absolute;
   border: var(--app-border-width) solid var(--public-decoration);

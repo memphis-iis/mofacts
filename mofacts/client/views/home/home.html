@@ -14,11 +14,11 @@
   <aside class="sidebar" id="sidebar" aria-label="{{t 'home.practiceMenu'}}">
       <div class="sidebar-header">
         <div class="logo">
-          {{#if currentTheme.properties.brand_logo_url}}
+          {{#if deploymentBrandProfile.identity.logoUrl}}
             <span
               class="navbar-brand-icon"
               aria-hidden="true"
-              style="--navbar-brand-icon-image: url('{{currentTheme.properties.brand_logo_url}}');"></span>
+              style="--navbar-brand-icon-image: url('{{deploymentBrandProfile.identity.logoUrl}}');"></span>
           {{else}}
             <span class="fa fa-graduation-cap" aria-hidden="true"></span>
           {{/if}}
@@ -108,10 +108,10 @@
       </nav>
 
       <div class="sidebar-collapsed-brand" aria-hidden="true">
-        {{#if currentTheme.properties.brand_logo_url}}
+        {{#if deploymentBrandProfile.identity.logoUrl}}
           <span
             class="navbar-brand-icon"
-            style="--navbar-brand-icon-image: url('{{currentTheme.properties.brand_logo_url}}');"></span>
+            style="--navbar-brand-icon-image: url('{{deploymentBrandProfile.identity.logoUrl}}');"></span>
         {{else}}
           <span class="fa fa-graduation-cap"></span>
         {{/if}}

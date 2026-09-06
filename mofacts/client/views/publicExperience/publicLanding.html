@@ -2,46 +2,50 @@
   <div class="public-theme-context public-experience-page">
     <header class="public-site-header">
       <a class="public-brand" href="/" aria-label="{{systemName}}">
-        {{#if currentTheme.properties.brand_logo_url}}
-          <span class="public-brand-logo" aria-hidden="true" style="--public-brand-logo-image: url('{{currentTheme.properties.brand_logo_url}}');"></span>
+        {{#if deploymentBrandProfile.identity.logoUrl}}
+          <span class="public-brand-logo" aria-hidden="true" style="--public-brand-logo-image: url('{{deploymentBrandProfile.identity.logoUrl}}');"></span>
         {{/if}}
         <span><strong>{{systemName}}</strong><small>{{pt 'brandTagline'}}</small></span>
       </a>
       <nav class="public-site-nav" aria-label="{{pt 'demosTitle'}}">
-        <a href="#students" data-public-audience="student" aria-current="{{audienceCurrent 'student'}}">{{pt 'navStudents'}}</a>
-        <a href="#teachers" data-public-audience="teacher" aria-current="{{audienceCurrent 'teacher'}}">{{pt 'navTeachers'}}</a>
-        <a href="#researchers" data-public-audience="researcher" aria-current="{{audienceCurrent 'researcher'}}">{{pt 'navResearchers'}}</a>
+        {{#each enabledAudiences}}<a href="{{hash}}" data-public-audience="{{id}}" aria-current="{{current}}">{{label}}</a>{{/each}}
       </nav>
       <div class="public-site-actions">
-        <a class="btn btn-outline-secondary" href="/auth/signup">{{pt 'createAccount'}}</a>
+        {{#if showCreateAccount}}<a class="btn btn-outline-secondary" href="/auth/signup">{{pt 'createAccount'}}</a>{{/if}}
         <a class="btn btn-primary" href="/auth/login">{{pt 'signIn'}}</a>
       </div>
     </header>
 
     <main>
+      {{#each landingSections}}
+      {{#if isHeroSection id}}
       <section class="public-hero" aria-labelledby="publicHeroTitle">
         <div class="public-hero-copy">
           <p class="public-eyebrow">{{pt 'eyebrow'}}</p>
           <h1 id="publicHeroTitle">{{pt 'heroTitle'}}</h1>
           <p>{{pt 'heroCopy'}}</p>
           <div class="public-hero-actions">
-            <a class="btn btn-primary btn-lg" href="#students" data-public-audience="student">{{pt 'tryMofacts'}}</a>
+            {{#if heroAudienceId}}<a class="btn btn-primary btn-lg" href="{{heroAudienceHash}}" data-public-audience="{{heroAudienceId}}">{{pt 'tryMofacts'}}</a>{{/if}}
             <a class="btn btn-outline-secondary btn-lg" href="/auth/login">{{pt 'signIn'}}</a>
           </div>
         </div>
+        {{#if heroImageUrl}}
+        <div class="public-hero-visual"><img src="{{heroImageUrl}}" alt="{{heroImageAlt}}"></div>
+        {{else}}
         <div class="public-hero-visual" aria-hidden="true">
           <div class="public-visual-orbit public-visual-orbit-one"></div>
           <div class="public-visual-orbit public-visual-orbit-two"></div>
           <div class="public-visual-card public-visual-card-primary"><span class="fa fa-refresh"></span></div>
           <div class="public-visual-card public-visual-card-secondary"><span class="fa fa-bar-chart"></span></div>
         </div>
+        {{/if}}
       </section>
-
+      {{else}}
       <section class="public-audience-explorer" id="publicAudiences" aria-labelledby="publicAudienceTitle">
         <div class="public-audience-tabs" role="tablist" aria-label="{{pt 'demosTitle'}}">
-          <button type="button" role="tab" id="publicAudienceStudent" aria-controls="publicAudiencePanel" aria-selected="{{audienceSelected 'student'}}" tabindex="{{audienceTabIndex 'student'}}" data-public-audience="student"><span class="fa fa-graduation-cap" aria-hidden="true"></span>{{pt 'navStudents'}}</button>
-          <button type="button" role="tab" id="publicAudienceTeacher" aria-controls="publicAudiencePanel" aria-selected="{{audienceSelected 'teacher'}}" tabindex="{{audienceTabIndex 'teacher'}}" data-public-audience="teacher"><span class="fa fa-comments" aria-hidden="true"></span>{{pt 'navTeachers'}}</button>
-          <button type="button" role="tab" id="publicAudienceResearcher" aria-controls="publicAudiencePanel" aria-selected="{{audienceSelected 'researcher'}}" tabindex="{{audienceTabIndex 'researcher'}}" data-public-audience="researcher"><span class="fa fa-flask" aria-hidden="true"></span>{{pt 'navResearchers'}}</button>
+          {{#each enabledAudiences}}
+          <button type="button" role="tab" id="{{tabId}}" aria-controls="publicAudiencePanel" aria-selected="{{selected}}" tabindex="{{tabIndex}}" data-public-audience="{{id}}"><span class="fa {{icon}}" aria-hidden="true"></span>{{label}}</button>
+          {{/each}}
         </div>
 
         <div class="public-audience-panel" id="publicAudiencePanel" role="tabpanel" aria-labelledby="{{activeAudienceTabId}}">
@@ -75,11 +79,13 @@
           </div>
         </div>
       </section>
+      {{/if}}
+      {{/each}}
     </main>
 
     <footer class="public-site-footer">
-      <span>© {{currentYear}} University of Memphis · {{systemName}}</span>
-      <nav aria-label="Footer"><a href="https://optimallearning.org/mofacts" rel="noopener">{{pt 'project'}}</a><a href="https://github.com/memphis-iis/mofacts" rel="noopener">{{pt 'source'}}</a><a href="/terms-of-service">{{pt 'terms'}}</a></nav>
+      <span>{{footerCopyright}}</span>
+      <nav aria-label="Footer"><a href="/legal">{{legalLinkLabel}}</a></nav>
     </footer>
   </div>
 </template>

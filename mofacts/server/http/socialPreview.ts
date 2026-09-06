@@ -5,8 +5,9 @@ import fs from 'fs';
 import os from 'os';
 import path from 'path';
 import { promisify } from 'util';
-import { resolveThemeBrandLabel } from '../../common/themeBranding';
 import { themeRegistry } from '../lib/themeRegistry';
+import { ensurePublishedDeploymentBrandProfile } from '../lib/deploymentBrandProfileRegistry';
+import { deploymentBrandSocialImageUrl } from '../../common/deploymentBrandProfile';
 import type { NextFunction } from 'connect';
 import type { IncomingMessage, ServerResponse } from 'http';
 
@@ -144,19 +145,19 @@ function imageHrefForSvg(imageUrl: string | null, rootUrl: string) {
 
 function resolveThemeLogoPath(imageUrl: string | null) {
   if (!imageUrl) {
-    throw new Error('Social preview requires active theme properties.brand_logo_url.');
+    throw new Error('Social preview requires Brand Profile identity.logoUrl.');
   }
   if (imageUrl.startsWith('/')) {
     const localPath = findPublicAsset(imageUrl);
     if (!localPath) {
-      throw new Error(`Social preview theme logo was not found in bundled public assets: ${imageUrl}`);
+      throw new Error(`Social preview Brand Profile logo was not found in bundled public assets: ${imageUrl}`);
     }
     return localPath;
   }
   if (imageUrl.startsWith('data:image/')) {
     return imageUrl;
   }
-  throw new Error(`Social preview theme logo must be a local public asset or data image, got: ${imageUrl}`);
+  throw new Error(`Social preview Brand Profile logo must be a local public asset or data image, got: ${imageUrl}`);
 }
 
 async function getSocialPreviewSettings() {
@@ -165,15 +166,14 @@ async function getSocialPreviewSettings() {
   const configured = ((Meteor.settings.public || {}) as { socialPreview?: SocialPreviewSettings }).socialPreview || {};
   const theme = await getActiveTheme();
   const themeProperties = theme?.properties || {};
-  const systemName = resolveThemeBrandLabel(theme, Meteor.settings.public?.systemName);
-  const themeLogoUrl = firstNonEmptyString(themeProperties.brand_logo_url);
+  const brandProfile = await ensurePublishedDeploymentBrandProfile();
+  const localized = brandProfile.locales[brandProfile.defaultLocale];
+  const systemName = brandProfile.identity.name;
+  const themeLogoUrl = firstNonEmptyString(brandProfile.identity.logoUrl);
 
-  const title = firstNonEmptyString(configured.title) || `${systemName} | Mobile Fact and Concept Training System`;
-  const description = firstNonEmptyString(configured.description) ||
-    'MoFaCTS is an open-source learning system for practice, assessment, instruction, and research, with tools for adaptive delivery and learner-data analysis.';
-  const configuredImage = firstNonEmptyString(configured.image);
-  const image = configuredImage === 'theme' ? '/social-preview.png' : configuredImage;
-  const imageUrl = image ? absoluteUrl(image, root) : absoluteUrl('/social-preview.png', root);
+  const title = localized.socialTitle;
+  const description = localized.socialDescription;
+  const imageUrl = absoluteUrl(deploymentBrandSocialImageUrl(brandProfile), root);
   const versionedImageUrl = imageUrl.includes('/social-preview')
     ? withQueryParam(imageUrl, 'v', SOCIAL_PREVIEW_IMAGE_VERSION)
     : imageUrl;
@@ -181,14 +181,14 @@ async function getSocialPreviewSettings() {
   return {
     title,
     description,
-    twitterDescription: firstNonEmptyString(configured.twitterDescription, configured.description) || description,
+    twitterDescription: description,
     type: firstNonEmptyString(configured.type) || 'website',
     url: absoluteUrl(firstNonEmptyString(configured.url) || '/', root),
     image: versionedImageUrl,
     imageType: firstNonEmptyString(configured.imageType) || 'image/png',
     imageWidth: firstNonEmptyString(configured.imageWidth) || '1200',
     imageHeight: firstNonEmptyString(configured.imageHeight) || '630',
-    imageAlt: firstNonEmptyString(configured.imageAlt) || null,
+    imageAlt: localized.socialImageAlt,
     noindex: configured.noindex === true,
     rootUrl: root,
     theme: {
@@ -278,7 +278,7 @@ function wrapText(value: string, maxCharsPerLine: number, maxLines: number) {
 }
 
 function previewImageTitle(preview: Awaited<ReturnType<typeof getSocialPreviewSettings>>) {
-  return firstNonEmptyString(preview.theme.brandLabel, preview.title.split('|')[0]) || 'MoFaCTS';
+  return firstNonEmptyString(preview.theme.brandLabel, preview.title.split('|')[0]) || '';
 }
 
 function imageMagickCommand() {
@@ -369,7 +369,7 @@ async function renderSocialPreviewPng() {
   const basePath = path.join(tempDir, 'base.png');
   const logoResizedPath = path.join(tempDir, 'logo.png');
   const pngPath = path.join(tempDir, 'preview.png');
-  const rawLogoSource = firstNonEmptyString((await getActiveTheme())?.properties?.brand_logo_url);
+  const rawLogoSource = firstNonEmptyString((await ensurePublishedDeploymentBrandProfile()).identity.logoUrl);
   const logoSource = resolveThemeLogoPath(rawLogoSource);
   const logoPath = logoSource.startsWith('data:image/')
     ? writeDataImage(logoSource, path.join(tempDir, 'logo-source'))

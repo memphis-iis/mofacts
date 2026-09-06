@@ -2,6 +2,7 @@ import { Meteor } from 'meteor/meteor';
 import { Email } from 'meteor/email';
 import { check } from 'meteor/check';
 import { sendErrorReportSummariesWorkflow } from './errorReportSummary';
+import { ensurePublishedDeploymentBrandProfile } from './deploymentBrandProfileRegistry';
 
 type ServerUtilityDeps = {
   ErrorReports: any;
@@ -90,12 +91,14 @@ export function createServerUtilityHelpers(deps: ServerUtilityDeps) {
   }
 
   async function sendErrorReportSummaries() {
+    const brandProfile = await ensurePublishedDeploymentBrandProfile();
     return sendErrorReportSummariesWorkflow({
       ErrorReports: deps.ErrorReports,
       findUsersByIds: deps.findUsersByIds,
       adminUsers: deps.adminUsers,
       ownerEmail: deps.ownerEmail,
       thisServerUrl: deps.thisServerUrl,
+      brandName: brandProfile.identity.name,
       sendEmail,
       serverConsole: deps.serverConsole
     });

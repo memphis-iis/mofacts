@@ -25,8 +25,13 @@ import { Tracker } from 'meteor/tracker';
 import {
   getCurrentTheme
 } from './lib/themeRuntime';
-import { resolveThemeBrandLabel } from '../common/themeBranding';
-import { translatePlatformString, getPlatformTextDirection } from './lib/interfaceI18n';
+import { translatePlatformString, getPlatformTextDirection, setPlatformBrandNameResolver } from './lib/interfaceI18n';
+import {
+  getCurrentDeploymentBrandProfile,
+  getDeploymentBrandName,
+  getLocalizedBrandContent,
+  readPublishedDeploymentBrandProfile,
+} from './lib/deploymentBrandProfileRuntime';
 import { applyActiveUiLocaleToDocument, getActiveUiLocale } from './lib/interfaceLocaleState';
 import {
   formatActiveInterfaceDateTime,
@@ -53,7 +58,6 @@ import './index.html';
 import { getPracticeLaunchMode } from './lib/practiceLaunchMode';
 import { isLessonRoutePath } from './lib/lessonRoute';
 import { clearStoredPublicDemoSession, readStoredPublicDemoSession } from './lib/publicDemoSession';
-import { publicExperienceText } from './views/publicExperience/publicExperienceI18n';
 
 // =============================================================================
 // Blaze Template Registration
@@ -166,7 +170,7 @@ function getAuthenticatedChromeMode(): AuthenticatedChromeMode {
 }
 
 function getSystemName() {
-  return resolveThemeBrandLabel(Session.get('curTheme'), Meteor.settings.public?.systemName);
+  return getDeploymentBrandName();
 }
 
 // This redirects to the SSL version of the page if we're not on it
@@ -178,6 +182,8 @@ if (location.protocol !== 'https:' && forceSSL) {
 
 // PHASE 1.5: Initialize theme subscription after Meteor is ready
 Meteor.startup(() => {
+  setPlatformBrandNameResolver(getDeploymentBrandName);
+  getCurrentDeploymentBrandProfile(getActiveUiLocale);
   getCurrentTheme();
   Tracker.autorun(() => {
     applyActiveUiLocaleToDocument();
@@ -518,7 +524,7 @@ function handleUnexpectedLogout(currentPath: string) {
     sessionCleanUp();
     Session.set('uiMessage', {
       variant: 'warning',
-      text: publicExperienceText(getActiveUiLocale(), 'demoExpired'),
+      text: getLocalizedBrandContent(getActiveUiLocale())?.demoExpired || '',
     });
     FlowRouter.go('/');
     return;
@@ -825,7 +831,18 @@ Template.registerHelper('systemName', function() {
   return getSystemName();
 });
 Template.registerHelper('licenseSourceUrl', function() {
-  return Meteor.settings.public?.sourceUrl || 'https://github.com/memphis-iis/MoFaCTS/tree/v0.1.0-alpha.1';
+  return readPublishedDeploymentBrandProfile()?.legal.licenseSourceUrl || '';
+});
+Template.registerHelper('deploymentBrandProfile', function() {
+  return readPublishedDeploymentBrandProfile();
+});
+Template.registerHelper('brandText', function(key: string) {
+  const localized = getLocalizedBrandContent(getActiveUiLocale()) as unknown as Record<string, string> | null;
+  return localized?.[key] || '';
+});
+Template.registerHelper('brandLegalUrl', function(key: string) {
+  const legal = readPublishedDeploymentBrandProfile()?.legal as unknown as Record<string, string> | undefined;
+  return legal?.[key] || '';
 });
 Template.registerHelper('uiLocale', function() {
   return getActiveUiLocale();

@@ -726,7 +726,7 @@ Template.apkgWizard.events({
       const firstManifest = Array.isArray(result.manifest) && result.manifest.length > 0 ? result.manifest[0] : null;
       a.download = result.mode === 'single' && firstManifest
         ? `${firstManifest.tdfName}.zip`
-        : 'MoFaCTS_Package.zip';
+        : 'learning-package.zip';
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -749,7 +749,7 @@ Template.apkgWizard.events({
       const firstManifest = Array.isArray(result.manifest) && result.manifest.length > 0 ? result.manifest[0] : null;
       const filename = result.mode === 'single' && firstManifest
         ? `${firstManifest.tdfName}.zip`
-        : 'MoFaCTS_Package.zip';
+        : 'learning-package.zip';
 
       // Create File object from blob
       const file = new File([result.zipBlob], filename, { type: 'application/zip' });

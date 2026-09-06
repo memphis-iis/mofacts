@@ -16,6 +16,7 @@ import { resolveSpeechIgnoreOutOfGrammarResponses } from '../../lib/speechRecogn
 import '../../lib/memphisSaml';
 import { translatePlatformString, type TranslationValues } from '../../lib/interfaceI18n';
 import { getActiveUiLocale } from '../../lib/interfaceLocaleState';
+import { getLocalizedBrandContent } from '../../lib/deploymentBrandProfileRuntime';
 import { resolveProlificExperimentEntry } from '../../lib/prolificExperimentEntry';
 import {
   DEFAULT_NORMAL_LOGIN_DESTINATION,
@@ -219,7 +220,7 @@ Session.setDefault('allowPublicSignup', false);
 Session.setDefault('requireEmailVerification', false);
 Session.setDefault('minPasswordLength', 8);
 Session.setDefault('memphisSamlEnabled', false);
-Session.setDefault('memphisSamlDisplayName', 'University of Memphis');
+Session.setDefault('memphisSamlDisplayName', 'Institutional SSO');
 
 Template.signIn.onCreated(function(this: any) {
   this.normalLoginDestination = resolveNormalLoginDestination(
@@ -302,7 +303,7 @@ Template.signIn.onRendered(async function(this: any) {
       Session.set('requireEmailVerification', !!authClientConfig?.requireEmailVerification);
       Session.set('minPasswordLength', Number(authClientConfig?.minPasswordLength) || 8);
       Session.set('memphisSamlEnabled', !!authClientConfig?.memphisSamlEnabled);
-      Session.set('memphisSamlDisplayName', authClientConfig?.memphisSamlDisplayName || 'University of Memphis');
+      Session.set('memphisSamlDisplayName', authClientConfig?.memphisSamlDisplayName || 'Institutional SSO');
     }
   } catch (err) {
     clientConsole(1, '[SIGNIN] Async init failed:', err);
@@ -572,7 +573,7 @@ Template.signIn.events({
       clientConsole(1, '[MEMPHIS-SAML] Error details:', JSON.stringify(error, null, 2));
       restoreVisibleSignInScreen(template);
       Session.set('loginMode', 'password');
-      showInlineSignInError(getOAuthDuplicateAccountMessage(error, 'University of Memphis'), { serverErrorScope: 'provider' }, template);
+      showInlineSignInError(getOAuthDuplicateAccountMessage(error, String(Session.get('memphisSamlDisplayName') || 'Institutional SSO')), { serverErrorScope: 'provider' }, template);
       $('#signInButton').prop('disabled', false);
       focusFirstSignInError(template);
     }
@@ -731,16 +732,7 @@ Template.signIn.helpers({
     if (Session.get('loginMode') === 'experiment') {
       return authText('auth.experimentPortalDescription');
     }
-    const activeLocale = getActiveUiLocale();
-    const theme = Session.get('curTheme') as any;
-    const localizedThemeDescription = theme?.properties?.auth_sign_in_description_i18n?.[activeLocale];
-    if (typeof localizedThemeDescription === 'string' && localizedThemeDescription.trim()) {
-      return localizedThemeDescription;
-    }
-    if (activeLocale === 'en' && typeof theme?.properties?.auth_sign_in_description === 'string' && theme.properties.auth_sign_in_description.trim()) {
-      return theme.properties.auth_sign_in_description;
-    }
-    return translatePlatformString(activeLocale, 'auth.defaultSignInDescription');
+    return getLocalizedBrandContent(getActiveUiLocale())?.signInDescription || '';
   },
 
   canShowSignUp: function() {
@@ -753,7 +745,7 @@ Template.signIn.helpers({
 
   memphisSamlButtonLabel: function() {
     return authText('auth.signInWithProvider', {
-      provider: String(Session.get('memphisSamlDisplayName') || 'University of Memphis'),
+      provider: String(Session.get('memphisSamlDisplayName') || 'Institutional SSO'),
     });
   },
 

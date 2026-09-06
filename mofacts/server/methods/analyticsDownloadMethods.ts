@@ -71,7 +71,7 @@ export function createAnalyticsDownloadMethods(deps: AnalyticsDownloadDeps) {
         throw new Meteor.Error(404, 'User not found');
       }
       const userName = sanitizeFileNameSegment(user.username || user.emails?.[0]?.address || targetUserId, targetUserId);
-      const fileName = `mofacts_${userName}_all_tdf_data.tsv`;
+      const fileName = `learning-data_${userName}_all-lessons.tsv`;
 
       const tsvContent = await deps.createExperimentExport(uniqueTdfs, targetUserId);
       return { fileName, contentType: 'text/tab-separated-values', content: tsvContent };
@@ -91,7 +91,7 @@ export function createAnalyticsDownloadMethods(deps: AnalyticsDownloadDeps) {
       }
 
       const userName = sanitizeFileNameSegment(user.username || user.emails?.[0]?.address || actingUserId, actingUserId);
-      const fileName = `mofacts_${userName}_own_history_all_tdfs.tsv`;
+      const fileName = `learning-data_${userName}_own-history_all-lessons.tsv`;
       return {
         fileName,
         contentType: 'text/tab-separated-values',

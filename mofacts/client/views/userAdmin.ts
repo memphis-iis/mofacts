@@ -12,6 +12,7 @@ import { getErrorMessage } from '../lib/errorUtils';
 import { getActiveUiLocale } from '../lib/interfaceLocaleState';
 import { translatePlatformString } from '../lib/interfaceI18n';
 import { formatActiveInterfaceDateTime, formatActiveInterfaceNumber } from '../lib/interfaceFormatting';
+import { getDeploymentBrandName } from '../lib/deploymentBrandProfileRuntime';
 import { loadOpenRouterModelCatalog } from '../lib/openRouterModelCatalogClient';
 import {
   createScopedAsyncCommandRegistry,
@@ -37,17 +38,14 @@ const MeteorCompat = Meteor as typeof Meteor & { callAsync: (name: string, ...ar
 declare const UserDashboardCache: Mongo.Collection<any>;
 
 const USERS_PER_PAGE = 50;
-const NEWS_EMAIL_SUBJECT = 'MoFaCTS News';
-const NEWS_EMAIL_BODY = [
-  'Hello,',
-  '',
-  'Here is the latest MoFaCTS news:',
-  '',
-  '- ',
-  '',
-  'Best,',
-  'The MoFaCTS Team',
-].join('\n');
+function newsEmailSubject() {
+  return `${getDeploymentBrandName()} News`;
+}
+
+function newsEmailBody() {
+  const brandName = getDeploymentBrandName();
+  return ['Hello,', '', `Here is the latest ${brandName} news:`, '', '- ', '', 'Best,', `The ${brandName} Team`].join('\n');
+}
 
 type SortDirection = 'asc' | 'desc';
 type RoleName = 'admin' | 'teacher';
@@ -132,8 +130,8 @@ function getPagedUserIds(): string[] {
 function buildNewsEmailMailto(emails: string[]): string {
   const params = [
     `bcc=${encodeURIComponent(emails.join(','))}`,
-    `subject=${encodeURIComponent(NEWS_EMAIL_SUBJECT)}`,
-    `body=${encodeURIComponent(NEWS_EMAIL_BODY)}`,
+    `subject=${encodeURIComponent(newsEmailSubject())}`,
+    `body=${encodeURIComponent(newsEmailBody())}`,
   ].join('&');
   return `mailto:?${params}`;
 }

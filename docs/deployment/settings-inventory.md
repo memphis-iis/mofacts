@@ -29,11 +29,11 @@ This inventory classifies the self-hosted configuration surface used by applicat
 | `storage.backend` | optional, private-server | defaults to `local`; `s3` enables object storage | storage boundary, readiness, package and media paths |
 | `storage.local.dynamicAssetsPath` | required for deployed local storage, private-server | local uploaded-asset storage | FilesCollection, dynamic asset route, storage boundary, readiness, backup and restore |
 | `storage.s3.*` | optional integration, private-server, secret-capable | S3-compatible storage backend | storage boundary and readiness |
-| `public.systemName` | public-client | optional branding | client title/branding |
+| `public.systemName` | public-client | required initial identity | one-time Brand Profile initialization; published Brand Profile owns runtime identity afterward |
 | `public.forceSSL` | public-client | public HTTPS deployments | client SSL redirect behavior |
 | `public.packages.accounts.clientStorage` | required, public-client auth behavior | all supported runtimes | Meteor Accounts credential persistence; must be `session` for per-tab authentication |
-| `public.sourceUrl` | public-client | public source traceability | footer License / Source link |
-| `public.socialPreview.*` | public-client | optional preview metadata | social preview/http metadata |
+| `public.sourceUrl` | public-client | initial source traceability | one-time Brand Profile initialization; published legal destination owns runtime source access afterward |
+| `public.socialPreview.*` | public-client | optional preview layout | social-preview type, URL, dimensions, and crawler behavior; published Brand Profile owns title, description, image, and image alt text |
 | `debug` | development-only/private-server | local debugging | settings template only |
 
 ## Environment Variables

@@ -26,6 +26,7 @@ type SendErrorReportSummariesDeps = {
   adminUsers: string[];
   ownerEmail: string;
   thisServerUrl: string;
+  brandName: string;
   sendEmail: (to: string, from: string, subject: string, text: string) => void;
   serverConsole: (...args: unknown[]) => void;
 };
@@ -38,7 +39,8 @@ function stringifyReportField(value: unknown, fallback = 'UNKNOWN') {
 function buildIndividualAckText(
   username: string,
   report: ErrorReportDoc,
-  thisServerUrl: string
+  thisServerUrl: string,
+  brandName: string,
 ) {
   return 'Hi ' + username + ', \n\n' +
     'Thank you for reporting an error on ' + thisServerUrl + '. ' +
@@ -51,7 +53,7 @@ function buildIndividualAckText(
     'Description: ' + stringifyReportField(report.description) + '\n' +
     'User Agent: ' + stringifyReportField(report.userAgent) + '\n\n' +
     'Thanks again for your help! \n\n' +
-    'The Mofacts Team';
+    `The ${brandName} Team`;
 }
 
 function buildSummaryLine(username: string, report: ErrorReportDoc) {
@@ -97,8 +99,8 @@ export async function sendErrorReportSummariesWorkflow(deps: SendErrorReportSumm
         deps.sendEmail(
           userEmail,
           deps.ownerEmail,
-          'Mofacts Error Report - ' + deps.thisServerUrl,
-          buildIndividualAckText(username, report, deps.thisServerUrl)
+          `${deps.brandName} Error Report - ${deps.thisServerUrl}`,
+          buildIndividualAckText(username, report, deps.thisServerUrl, deps.brandName)
         );
       }
     } catch (error: unknown) {

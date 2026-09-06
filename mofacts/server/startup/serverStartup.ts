@@ -9,6 +9,7 @@ import type { NextFunction } from 'connect';
 import type { IncomingMessage, ServerResponse } from 'http';
 import _ from 'underscore';
 import { themeRegistry } from '../lib/themeRegistry';
+import { ensurePublishedDeploymentBrandProfile } from '../lib/deploymentBrandProfileRegistry';
 import {
   extractMemphisSamlEmail,
   isMemphisSamlAccountUser,
@@ -170,7 +171,7 @@ function registerSecurityHeaders() {
   });
 }
 
-function checkDriveSpace(deps: RunServerStartupDeps) {
+async function checkDriveSpace(deps: RunServerStartupDeps) {
   deps.serverConsole('checkDriveSpace');
   try {
     const info = deps.getDiskUsageInfo('/');
@@ -182,7 +183,8 @@ function checkDriveSpace(deps: RunServerStartupDeps) {
     deps.serverConsole('freeSpace: ' + info.free + ', totalSpace: ' + info.total + ', percentFree: ' + percentFree);
     if (percentFree < 10) {
       deps.serverConsole('Low disk space: ' + percentFree + '%');
-      const subject = 'MoFaCTs Low Disk Space - ' + deps.thisServerUrl;
+      const brandName = (await ensurePublishedDeploymentBrandProfile()).identity.name;
+      const subject = `${brandName} Low Disk Space - ${deps.thisServerUrl}`;
       const text = 'Low disk space: ' + percentFree + '%';
       deps.sendEmail(deps.ownerEmail, deps.emailFrom, subject, text);
     }
@@ -304,7 +306,7 @@ function throwOAuthExistingAccountError(existingUser: any, attemptedProvider: st
     throw new Meteor.Error('oauth-account-exists-microsoft', 'This email is already registered with Microsoft sign-in.');
   }
   if (existingMethod === 'memphisSaml') {
-    throw new Meteor.Error('oauth-account-exists-memphis-saml', 'This email is already registered with University of Memphis sign-in.');
+    throw new Meteor.Error('oauth-account-exists-memphis-saml', 'This email is already registered with institutional sign-in.');
   }
   throw new Meteor.Error('oauth-account-exists-different-method', 'This email is already registered with a different sign-in method.');
 }
@@ -379,6 +381,7 @@ export async function runServerStartup(deps: RunServerStartupDeps) {
   }
   registerSecurityHeaders();
   await themeRegistry.initialize();
+  await ensurePublishedDeploymentBrandProfile();
   await runStartupCleanupMigrations({
     DynamicSettings: deps.DynamicSettings,
     Courses: deps.Courses,
@@ -556,7 +559,7 @@ export async function runServerStartup(deps: RunServerStartupDeps) {
     const baseUrl = (Meteor.settings.ROOT_URL || Meteor.absoluteUrl()).replace(/\/$/, '');
     return `${baseUrl}/auth/verify-email?token=${encodeURIComponent(token)}`;
   };
-  Accounts.emailTemplates.siteName = Meteor.settings.public?.systemName || 'MoFaCTS';
+  Accounts.emailTemplates.siteName = (await ensurePublishedDeploymentBrandProfile()).identity.name;
   Accounts.emailTemplates.from = deps.emailFrom;
   if (deps.emailReplyTo) {
     (Accounts.emailTemplates as unknown as { headers?: Record<string, string> }).headers = {
@@ -848,6 +851,7 @@ export async function runServerStartup(deps: RunServerStartupDeps) {
   for (const emailaddr of allEmails) {
     let server = Meteor.absoluteUrl().split('//')[1] || Meteor.absoluteUrl();
     server = server.substring(0, server.length - 1);
-    deps.sendEmail(emailaddr, deps.emailFrom, `MoFaCTs Deployed on ${server}`, `The server has restarted.\nServer: ${server}`);
+    const brandName = (await ensurePublishedDeploymentBrandProfile()).identity.name;
+    deps.sendEmail(emailaddr, deps.emailFrom, `${brandName} Deployed on ${server}`, `The server has restarted.\nServer: ${server}`);
   }
 }

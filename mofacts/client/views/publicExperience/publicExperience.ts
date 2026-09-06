@@ -3,7 +3,6 @@ import { ReactiveVar } from 'meteor/reactive-var';
 import { Meteor } from 'meteor/meteor';
 import { Session } from 'meteor/session';
 import { FlowRouter } from 'meteor/ostrio:flow-router-extra';
-import { resolveThemeBrandLabel } from '../../../common/themeBranding';
 import { PUBLIC_DEMO_DEFINITIONS, type PublicDemoKind } from '../../../common/publicDemoContract';
 import { getActiveUiLocale } from '../../lib/interfaceLocaleState';
 import { meteorCallAsync } from '../../lib/meteorAsync';
@@ -18,7 +17,12 @@ import {
   readStoredPublicDemoSession,
   writeStoredPublicDemoSession,
 } from '../../lib/publicDemoSession';
-import { publicExperienceText, type PublicExperienceKey } from './publicExperienceI18n';
+import type { PublicExperienceKey } from './publicExperienceI18n';
+import {
+  getDeploymentBrandName,
+  getLocalizedBrandContent,
+  readPublishedDeploymentBrandProfile,
+} from '../../lib/deploymentBrandProfileRuntime';
 import './publicLanding.html';
 import './publicExperience.css';
 
@@ -65,11 +69,30 @@ function audienceHash(audience: PublicAudience): string {
 }
 
 function currentPublicText(key: PublicExperienceKey): string {
-  return publicExperienceText(getActiveUiLocale(), key);
+  return getLocalizedBrandContent(getActiveUiLocale())?.[key] || '';
 }
 
 function systemName(): string {
-  return resolveThemeBrandLabel(Session.get('curTheme'), Meteor.settings.public?.systemName);
+  return getDeploymentBrandName();
+}
+
+function enabledAudiences(instance: any) {
+  const profile = readPublishedDeploymentBrandProfile();
+  if (!profile) return [];
+  const selected = instance.selectedAudience.get() as PublicAudience;
+  return PUBLIC_AUDIENCES
+    .filter((audience) => profile.landing.audiences[audience].enabled)
+    .sort((a, b) => profile.landing.audiences[a].order - profile.landing.audiences[b].order)
+    .map((audience) => ({
+      id: audience,
+      hash: audienceHash(audience),
+      current: selected === audience ? 'page' : false,
+      selected: selected === audience ? 'true' : 'false',
+      tabIndex: selected === audience ? '0' : '-1',
+      tabId: PUBLIC_AUDIENCE_PRESENTATIONS[audience].tabId,
+      icon: PUBLIC_AUDIENCE_PRESENTATIONS[audience].icon,
+      label: currentPublicText(PUBLIC_AUDIENCE_PRESENTATIONS[audience].labelKey),
+    }));
 }
 
 Template.publicLanding.onCreated(function(this: any) {
@@ -79,12 +102,37 @@ Template.publicLanding.onCreated(function(this: any) {
   const stored = readStoredPublicDemoSession();
   this.expired = new ReactiveVar(Boolean(stored && new Date(stored.expiresAt).getTime() <= Date.now()));
   if (this.expired.get()) clearStoredPublicDemoSession();
+  this.autorun(() => {
+    const profile = readPublishedDeploymentBrandProfile();
+    if (!profile) return;
+    const available = PUBLIC_AUDIENCES
+      .filter((audience) => profile.landing.audiences[audience].enabled)
+      .sort((a, b) => profile.landing.audiences[a].order - profile.landing.audiences[b].order);
+    if (available.length > 0 && !available.includes(this.selectedAudience.get())) {
+      this.selectedAudience.set(available[0]!);
+    }
+  });
 });
 
 Template.publicLanding.helpers({
   systemName,
-  currentYear() { return new Date().getFullYear(); },
   pt(key: PublicExperienceKey) { return currentPublicText(key); },
+  landingSections() {
+    const landing = readPublishedDeploymentBrandProfile()?.landing;
+    if (!landing) return [];
+    return landing.sectionOrder
+      .filter((id) => id === 'hero' ? landing.heroEnabled : landing.audiencesEnabled)
+      .map((id) => ({ id }));
+  },
+  isHeroSection(id: string) { return id === 'hero'; },
+  showCreateAccount() { return readPublishedDeploymentBrandProfile()?.landing.showCreateAccount === true; },
+  heroImageUrl() { return readPublishedDeploymentBrandProfile()?.landing.heroImageUrl || ''; },
+  heroImageAlt() { return readPublishedDeploymentBrandProfile()?.landing.heroImageAltByLocale[getActiveUiLocale()] || ''; },
+  heroAudienceHash() { return enabledAudiences(Template.instance() as any)[0]?.hash || ''; },
+  heroAudienceId() { return enabledAudiences(Template.instance() as any)[0]?.id || ''; },
+  enabledAudiences() { return enabledAudiences(Template.instance() as any); },
+  footerCopyright() { return getLocalizedBrandContent(getActiveUiLocale())?.footerCopyright || ''; },
+  legalLinkLabel() { return getLocalizedBrandContent(getActiveUiLocale())?.legalLinkLabel || ''; },
   audienceCurrent(audience: PublicAudience) { return (Template.instance() as any).selectedAudience.get() === audience ? 'page' : false; },
   audienceSelected(audience: PublicAudience) { return (Template.instance() as any).selectedAudience.get() === audience ? 'true' : 'false'; },
   audienceTabIndex(audience: PublicAudience) { return (Template.instance() as any).selectedAudience.get() === audience ? '0' : '-1'; },
@@ -138,16 +186,18 @@ Template.publicLanding.events({
   'keydown [role="tab"]'(event: KeyboardEvent, template: any) {
     if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return;
     event.preventDefault();
+    const available = enabledAudiences(template).map(({ id }) => id as PublicAudience);
+    if (available.length === 0) return;
     const selected = template.selectedAudience.get() as PublicAudience;
-    const currentIndex = PUBLIC_AUDIENCES.indexOf(selected);
+    const currentIndex = Math.max(0, available.indexOf(selected));
     const inlineDirection = document.documentElement.dir === 'rtl' ? -1 : 1;
     const arrowOffset = event.key === 'ArrowRight' ? inlineDirection : -inlineDirection;
     const nextIndex = event.key === 'Home'
       ? 0
       : event.key === 'End'
-        ? PUBLIC_AUDIENCES.length - 1
-        : (currentIndex + arrowOffset + PUBLIC_AUDIENCES.length) % PUBLIC_AUDIENCES.length;
-    const nextAudience = PUBLIC_AUDIENCES[nextIndex]!;
+        ? available.length - 1
+        : (currentIndex + arrowOffset + available.length) % available.length;
+    const nextAudience = available[nextIndex]!;
     selectPublicAudience(template, nextAudience, false);
     requestAnimationFrame(() => {
       document.getElementById(PUBLIC_AUDIENCE_PRESENTATIONS[nextAudience].tabId)?.focus();

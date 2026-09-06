@@ -18,6 +18,8 @@ import {
 import { DynamicSettings } from '../common/Collections';
 import { CLIENT_VERBOSITY_SETTING } from '../common/loggingSettings';
 import { themeRegistry } from './lib/themeRegistry';
+import { ensurePublishedDeploymentBrandProfile } from './lib/deploymentBrandProfileRegistry';
+import { DEPLOYMENT_BRAND_PROFILE_KEY } from '../common/deploymentBrandProfile';
 import { assignmentMemberTdfIds } from '../common/progressiveAssignments';
 
 // Use Meteor.roleAssignment — set unconditionally by alanning:roles v4 at
@@ -196,6 +198,11 @@ Meteor.publish('theme', async function() {
 
 Meteor.publish('themeLibrary', function() {
     return DynamicSettings.find({key: 'themeLibrary'});
+});
+
+Meteor.publish('deploymentBrandProfile', async function() {
+    await ensurePublishedDeploymentBrandProfile();
+    return DynamicSettings.find({ key: DEPLOYMENT_BRAND_PROFILE_KEY });
 });
 
 // ===== PHASE 1.7: User History Publication =====

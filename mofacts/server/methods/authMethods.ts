@@ -1,4 +1,5 @@
 import { Meteor } from 'meteor/meteor';
+import { ensurePublishedDeploymentBrandProfile } from '../lib/deploymentBrandProfileRegistry';
 import { Accounts } from 'meteor/accounts-base';
 import { check, Match } from 'meteor/check';
 import { createHash, randomBytes } from 'crypto';
@@ -242,10 +243,11 @@ export function createAuthMethods(deps: AuthMethodsDeps) {
           '/auth/reset-password?email=' + encodeURIComponent(normalizedEmail) +
           '&token=' + encodeURIComponent(token);
         try {
+          const brandName = (await ensurePublishedDeploymentBrandProfile()).identity.name;
           deps.sendEmail(
             normalizedEmail,
             deps.emailFrom,
-            'MoFaCTS Password Reset',
+            `${brandName} Password Reset`,
             'You requested a password reset.\n\n' +
               'Open this link to set a new password:\n' + resetUrl + '\n\n' +
               'This link expires in 1 hour.\n\n' +

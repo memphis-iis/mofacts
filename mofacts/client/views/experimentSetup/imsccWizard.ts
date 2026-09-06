@@ -682,7 +682,7 @@ Template.imsccWizard.events({
       : null;
     const filename = result.mode === 'single' && firstManifest
       ? `${firstManifest.tdfName}.zip`
-      : 'MoFaCTS_IMSCC_Package.zip';
+      : 'canvas-learning-package.zip';
 
     const url = URL.createObjectURL(result.zipBlob);
     const anchor = document.createElement('a');
@@ -719,7 +719,7 @@ Template.imsccWizard.events({
         : null;
       const baseName = result.mode === 'single' && firstManifest
         ? `${firstManifest.tdfName}.zip`
-        : 'MoFaCTS_IMSCC_Package.zip';
+        : 'canvas-learning-package.zip';
       let uploadName = baseName;
 
       const existing = await (Meteor as any).callAsync('getUserAssetByName', uploadName);
