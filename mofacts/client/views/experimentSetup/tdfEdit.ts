@@ -14,6 +14,7 @@ import { ValidatorEngine, ValidationContext } from '../../lib/validatorCore';
 import { createValidationSummary, applyFieldErrors, initValidationUI } from '../../lib/validatorUI';
 import { installSchemaApplicabilityControls, sortPropertiesModal } from '../../lib/schemaApplicabilityEditor';
 import { ensureJsonEditor } from '../../lib/jsonEditorLoader';
+import { prepareTutorSchemaForJsonEditor } from './tdfDraftSchema';
 import { translatePlatformString } from '../../lib/interfaceI18n';
 import { getActiveUiLocale } from '../../lib/interfaceLocaleState';
 import { getErrorMessage } from '../../lib/errorUtils';
@@ -977,7 +978,7 @@ async function initEditor(instance: any, tdf: any) {
     tutorData = removeEmptyProperties(tutorData);
 
     // Extract the tutor schema (the main part we want to edit)
-    const tutorSchema = cachedSchema.properties?.tutor || cachedSchema;
+    const tutorSchema = prepareTutorSchemaForJsonEditor(cachedSchema.properties?.tutor || cachedSchema);
 
     // Inject tooltip descriptions based on current mode (brief or verbose)
     const schemaWithDescriptions = injectDescriptions(tutorSchema, TDF_TOOLTIPS, tooltipMode);

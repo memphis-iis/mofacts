@@ -5,6 +5,7 @@ describe('prepareTutorSchemaForJsonEditor', function() {
   it('declares canonical tutor properties in conditional branches without weakening branch rules', function() {
     const schema = {
       type: 'object',
+      required: ['setspec'],
       properties: {
         setspec: { type: 'object' },
         unit: { type: 'array', items: { type: 'object' } },
@@ -36,6 +37,7 @@ describe('prepareTutorSchemaForJsonEditor', function() {
       items: { type: 'object' },
       minItems: 1
     });
+    expect(prepared.required).to.deep.equal(['setspec']);
     expect(schema.allOf[0]?.then).not.to.have.property('properties');
   });
 });
