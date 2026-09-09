@@ -10,6 +10,7 @@ import { resolveSpeechIgnoreOutOfGrammarResponses } from './speechRecognitionCon
 import { translatePlatformString } from './interfaceI18n';
 import { getActiveUiLocale } from './interfaceLocaleState';
 import type { CourseAssignmentHistoryContext } from '../../common/courseAssignments.contracts';
+import { initializeLessonLaunchEntry, type LessonLaunchEntryRoute } from './lessonLaunchEntryRoute';
 
 type LessonLaunchTimingLogger = (eventName: string, payload?: Record<string, unknown>) => void;
 type LessonLaunchMessageSetter = (message: string) => void;
@@ -31,6 +32,7 @@ type PreparedLessonLaunch = {
   content: any;
   unitCount: number;
   launchProgress: CardLaunchProgress;
+  entryRoute: LessonLaunchEntryRoute | null;
 };
 
 export async function prepareLessonLaunchContext(params: PrepareLessonLaunchParams): Promise<PreparedLessonLaunch> {
@@ -97,11 +99,18 @@ export async function prepareLessonLaunchContext(params: PrepareLessonLaunchPara
   const persistedExperimentState = await getExperimentState();
   markLaunchLoadingTiming?.('getExperimentState:complete', { source });
   const launchProgress = resolveCardLaunchProgress(persistedExperimentState, unitCount);
+  // Initialization belongs to preparation, not navigation: cold routes need the
+  // same instruction identity as dashboard entry even when navigation is deferred.
+  const entryRoute = launchProgress.moduleCompleted ? null : initializeLessonLaunchEntry({
+    content,
+    intent: launchProgress.intent,
+  }, (key, value) => Session.set(key, value));
 
   return {
     tdfDoc,
     content,
     unitCount,
     launchProgress,
+    entryRoute,
   };
 }

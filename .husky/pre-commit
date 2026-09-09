@@ -3,5 +3,6 @@ set -e
 
 # Run from the app package directory so npm finds the correct package.json.
 cd "$(dirname "$0")/../mofacts"
+npm run check:meteor-test-artifacts
 npm run precommit:lint-staged
 npm run secret:scan:staged

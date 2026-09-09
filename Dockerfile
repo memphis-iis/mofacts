@@ -1,21 +1,38 @@
+# One owner for context inputs. No tools, tests or qualification checks run here.
+FROM scratch AS source_inputs
+COPY ./deploy/docker/ /deploy/docker/
+COPY ./mofacts/ /mofacts/
+COPY ./learning-components/ /learning-components/
+COPY ./packages/ /packages/
+
+# Explicitly selected acquisition target; not an ordinary-build dependency.
+FROM source_inputs AS source_capture
+COPY ./Dockerfile ./.dockerignore /
+
 # The tag here should match the Meteor version of your app, per .meteor/release
 FROM geoffreybooth/meteor-base:3.5@sha256:58b203caa2c3dc963774117cbf45534d4533ddd77b220e075107da3f3600a083 AS meteor_builder
 ENV METEOR_ALLOW_SUPERUSER=1
 ENV APP_SOURCE_FOLDER=/opt/mofacts
 
+# Meteor's public uWebSockets.js dependency must use HTTPS even when npm emits
+# an SSH-form URL. Keep the same repository/ref; no SSH client or credentials.
+# This config belongs only to meteor_builder and is not copied into runtime.
+RUN git config --global --add url.https://github.com/unetworking/uWebSockets.js.insteadOf ssh://git@github.com/unetworking/uWebSockets.js && \
+    git config --global --add url.https://github.com/unetworking/uWebSockets.js.insteadOf git@github.com:unetworking/uWebSockets.js
+
 # Use the repo-owned deploy scripts so deploy/ is the only source of truth.
-COPY ./deploy/docker/ $SCRIPTS_FOLDER/
+COPY --from=source_inputs /deploy/docker/ $SCRIPTS_FOLDER/
 RUN sed -i 's/\r$//' $SCRIPTS_FOLDER/*.sh && \
     chmod +x $SCRIPTS_FOLDER/*.sh
 
 # Function: copy application source into container build context.
-COPY ./mofacts/ $APP_SOURCE_FOLDER/
+COPY --from=source_inputs /mofacts/ $APP_SOURCE_FOLDER/
 
 # Function: copy root-level source roots used by the application.
 # Relative imports from /opt/learning-components/... resolve the app as
 # /opt/mofacts, matching the repository layout during local development.
-COPY ./learning-components/ /opt/learning-components/
-COPY ./packages/ /opt/packages/
+COPY --from=source_inputs /learning-components/ /opt/learning-components/
+COPY --from=source_inputs /packages/ /opt/packages/
 
 # Function: clear Meteor cache so the image build compiles from a clean state.
 RUN echo "[Function] Clean Meteor local cache" && \

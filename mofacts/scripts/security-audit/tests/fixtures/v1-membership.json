@@ -1,0 +1,62 @@
+{
+  "external": [
+    "external.dns-addresses",
+    "external.public-tcp-ports",
+    "external.public-udp-ports",
+    "external.http-redirect",
+    "external.tls-protocols",
+    "external.certificate",
+    "external.tls-ciphers",
+    "external.websocket-tls",
+    "external.hsts",
+    "external.csp",
+    "external.security-headers"
+  ],
+  "authentication": [
+    "authentication.enumeration",
+    "authentication.timing",
+    "authentication.reset-token.expired-rejected",
+    "authentication.reset-token.current-single-use",
+    "authentication.reset-token.replay-rejected",
+    "authentication.session-revocation",
+    "authentication.session-lifetime",
+    "authentication.material-leakage",
+    "authentication.authorization",
+    "authentication.passwordless.resume-token-issued",
+    "authentication.passwordless.token-login",
+    "authentication.passwordless.participant-identity",
+    "authentication.passwordless.experiment-flag",
+    "authentication.passwordless.sealed-target-binding",
+    "authentication.passwordless.modified-target-rejected",
+    "authentication.passwordless.admin-denied",
+    "authentication.passwordless.ordinary-account-denied",
+    "authentication.passwordless.assigned-experiment-allowed",
+    "authentication.passwordless.cross-user-method-denied",
+    "authentication.passwordless.cross-user-publication-contained",
+    "authentication.passwordless.token-not-leaked",
+    "authentication.throttling"
+  ],
+  "internal": [
+    "internal.audit-config",
+    "internal.listening-sockets",
+    "internal.app-loopback",
+    "internal.sidecar-loopback",
+    "internal.docker-ports",
+    "internal.firewall",
+    "internal.reverse-proxy-routes",
+    "internal.mongodb-auth",
+    "internal.redis-auth"
+  ],
+  "repository": [
+    "repository.git-history-secrets",
+    "repository.dependencies-application-runtime",
+    "repository.dependencies-application-development",
+    "repository.dependencies-sidecar-mongo-runtime",
+    "repository.dependencies-sidecar-mongo-development",
+    "repository.security-surface-contract",
+    "repository.sensitive-logging",
+    "repository.source-security-tests",
+    "repository.runtime-image-vulnerabilities",
+    "repository.client-bundle-canaries"
+  ]
+}

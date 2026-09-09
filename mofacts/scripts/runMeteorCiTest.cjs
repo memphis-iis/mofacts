@@ -1,13 +1,18 @@
 const { spawn } = require('node:child_process');
-const { existsSync } = require('node:fs');
+const { existsSync, readFileSync, writeFileSync } = require('node:fs');
 const path = require('node:path');
 const {
   clientPassingCount,
   validateMeteorTestModules,
 } = require('./meteorCiHarness.cjs');
+const {
+  findMeteorTestVersionArtifacts,
+  removeMeteorTestVersionArtifacts,
+} = require('./meteorTestVersionArtifacts.cjs');
 
 const appRoot = path.resolve(__dirname, '..');
 const packageJson = require(path.join(appRoot, 'package.json'));
+const meteorVersionsPath = path.join(appRoot, '.meteor/versions');
 
 try {
   validateMeteorTestModules(packageJson, appRoot);
@@ -34,6 +39,16 @@ if (!testSettingsFile) {
 }
 if (!existsSync(testSettingsFile)) {
   console.error('TEST_SETTINGS_FILE does not identify an existing file.');
+  process.exit(1);
+}
+
+const initialMeteorVersionArtifacts = findMeteorTestVersionArtifacts(
+  readFileSync(meteorVersionsPath, 'utf8'),
+);
+if (initialMeteorVersionArtifacts.length > 0) {
+  console.error(
+    '.meteor/versions already contains Meteor test-driver resolutions. Remove them before starting CI.',
+  );
   process.exit(1);
 }
 
@@ -102,6 +117,29 @@ let timedOut = false;
 let timeoutHandle;
 let forceKillHandle;
 let hardExitHandle;
+let meteorVersionsCleaned = false;
+
+function cleanMeteorTestVersionArtifacts() {
+  if (meteorVersionsCleaned) return true;
+  try {
+    const currentVersions = readFileSync(meteorVersionsPath, 'utf8');
+    const cleanedVersions = removeMeteorTestVersionArtifacts(currentVersions);
+    if (cleanedVersions !== currentVersions) {
+      writeFileSync(meteorVersionsPath, cleanedVersions, 'utf8');
+      console.log('Removed Meteor test-driver resolutions from .meteor/versions.');
+    }
+    meteorVersionsCleaned = true;
+    return true;
+  } catch (error) {
+    console.error(`Unable to clean Meteor test-driver resolutions: ${error.message}`);
+    return false;
+  }
+}
+
+// Normal completion calls this through finish(). The exit hook also covers an
+// interrupted wrapper; the pre-commit invariant remains the final protection
+// if the entire process tree is forcibly terminated before cleanup can run.
+process.once('exit', cleanMeteorTestVersionArtifacts);
 
 function finish(exitStatus) {
   if (finished) return;
@@ -109,7 +147,7 @@ function finish(exitStatus) {
   clearTimeout(timeoutHandle);
   clearTimeout(forceKillHandle);
   clearTimeout(hardExitHandle);
-  process.exit(exitStatus);
+  process.exit(cleanMeteorTestVersionArtifacts() ? exitStatus : 1);
 }
 
 function terminateTestTree() {
@@ -157,7 +195,7 @@ timeoutHandle = setTimeout(() => {
   terminateTestTree();
   hardExitHandle = setTimeout(() => {
     console.error('Meteor test process tree did not report exit after termination; forcing wrapper exit.');
-    process.exit(1);
+    finish(1);
   }, 15000);
 }, testRunTimeoutMs);
 

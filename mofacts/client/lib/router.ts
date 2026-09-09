@@ -4,6 +4,7 @@ import {instructContinue, unitHasLockout} from '../views/experiment/instructions
 import {Cookie} from './cookies';
 import {displayify} from '../../common/globalHelpers';
 import {selectTdf} from './lessonLaunchRunner';
+import { buildActiveLessonRouteLocation } from './activeLessonRoute';
 import {clientConsole} from '../index';
 import { setIgnoreOutOfGrammarResponses } from '../views/experiment/svelte/services/audioRuntimeState';
 import { Tracker } from 'meteor/tracker';
@@ -1227,6 +1228,7 @@ async function bootstrapLessonRoute(
   controller: any,
   routeRequest: LessonRouteRequest,
   preserveColdContentBootstrap: boolean,
+  requestedSurface: '/content' | '/instructions',
 ): Promise<boolean> {
   const tdfId = routeRequest.rootTdfId;
   let tdf: any = null;
@@ -1258,7 +1260,7 @@ async function bootstrapLessonRoute(
   renderLayout(controller, 'customLoading');
   Session.set('contentBootstrapInProgress', preserveColdContentBootstrap);
   try {
-    await selectTdf(
+    const entryRoute = await selectTdf(
       tdfId,
       setspec.lessonname,
       tdf.stimuliSetId,
@@ -1274,12 +1276,23 @@ async function bootstrapLessonRoute(
         practiceLaunchMode: routeRequest.practiceLaunchMode,
       },
     );
+    if (!entryRoute) {
+      FlowRouter.go('/home');
+      return false;
+    }
+    setCardEntryIntent(CARD_ENTRY_INTENT.CARD_REFRESH_REBUILD, {
+      source: 'router.lessonRoute.bootstrap',
+    });
+    // A saved lesson resumes through the content lifecycle, which restores its
+    // persisted unit. Never render a cold instruction screen with partial state.
+    if (requestedSurface === '/instructions' && entryRoute.route === '/content') {
+      const location = buildActiveLessonRouteLocation('/content');
+      FlowRouter.go(location.path, {}, location.queryParams);
+      return false;
+    }
   } finally {
     Session.set('contentBootstrapInProgress', false);
   }
-  setCardEntryIntent(CARD_ENTRY_INTENT.CARD_REFRESH_REBUILD, {
-    source: 'router.lessonRoute.bootstrap',
-  });
   return true;
 }
 
@@ -1322,7 +1335,7 @@ FlowRouter.route('/content/:tdfId?', {
     const refreshContentRequested = Boolean(FlowRouter.current()?.queryParams?.refreshContent);
     if (routeRequest.requiresBootstrap) {
       const preserveColdContentBootstrap = !Session.get('currentTdfId');
-      if (!await bootstrapLessonRoute(this, routeRequest, preserveColdContentBootstrap)) {
+      if (!await bootstrapLessonRoute(this, routeRequest, preserveColdContentBootstrap, '/content')) {
         return;
       }
       // Re-enter the authenticated content action so the canonical content and
@@ -1433,7 +1446,7 @@ FlowRouter.route('/instructions/:tdfId?', {
     }
 
     if (routeRequest.requiresBootstrap) {
-      if (!await bootstrapLessonRoute(this, routeRequest, false)) {
+      if (!await bootstrapLessonRoute(this, routeRequest, false, '/instructions')) {
         return;
       }
       await instructionsRouteAction.call(this, params);

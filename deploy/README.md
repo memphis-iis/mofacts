@@ -35,6 +35,8 @@ Run Docker Compose from this folder.
 
 Private settings files under `deploy/` are ignored by Docker build context. Production and self-hosted settings must be copied to the server separately and mounted into the app container at `/run/mofacts/settings.json`.
 
+The Meteor build stage configures Git to fetch the existing public `unetworking/uWebSockets.js` repository through HTTPS, including when npm supplies its SSH-form URL. The repository and dependency ref are unchanged. This build-stage-only setting is not copied into the runtime image and does not alter workstation Git configuration. No SSH package, key, alternate repository or additional retry loop is required; HTTPS failures still fail the build. The transport regression is covered by `npm run security:test:source`.
+
 ## Self-Hosted Operator Path
 
 Start with the docs, then use these tracked examples:

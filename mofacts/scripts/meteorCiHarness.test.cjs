@@ -10,6 +10,10 @@ const {
   CLIENT_LIBRARY_NAME,
   rspackClientOutputContract,
 } = require('./rspackClientOutputContract.cjs');
+const {
+  findMeteorTestVersionArtifacts,
+  removeMeteorTestVersionArtifacts,
+} = require('./meteorTestVersionArtifacts.cjs');
 
 const completePackage = {
   meteor: {
@@ -43,6 +47,40 @@ test('recognizes an ANSI-formatted zero-test client result', () => {
 test('returns a nonzero client passing count', () => {
   const output = '----- RUNNING CLIENT TESTS -----\n127 passing\nAll tests finished!';
   assert.equal(clientPassingCount(output), 127);
+});
+
+test('removes only Meteor test-driver resolutions from the application version manifest', () => {
+  const versions = [
+    'meteor@2.3.1',
+    'meteortesting:browser-tests@1.8.0_1',
+    'meteortesting:mocha@3.4.0',
+    'meteortesting:mocha-core@8.2.0',
+    'minimongo@2.2.0',
+    '',
+  ].join('\n');
+
+  assert.deepEqual(findMeteorTestVersionArtifacts(versions), [
+    'meteortesting:browser-tests@1.8.0_1',
+    'meteortesting:mocha@3.4.0',
+    'meteortesting:mocha-core@8.2.0',
+  ]);
+  assert.equal(
+    removeMeteorTestVersionArtifacts(versions),
+    ['meteor@2.3.1', 'minimongo@2.2.0', ''].join('\n'),
+  );
+});
+
+test('preserves unrelated Meteor version changes while cleaning test artifacts', () => {
+  const versions = [
+    'custom:test-support@1.0.0\r\n',
+    'meteortesting:mocha@3.4.0\r\n',
+    'new-runtime-package@2.0.0\r\n',
+  ].join('');
+
+  assert.equal(
+    removeMeteorTestVersionArtifacts(versions),
+    'custom:test-support@1.0.0\r\nnew-runtime-package@2.0.0\r\n',
+  );
 });
 
 test('pins the source-owned Rspack client-test bridge correction', () => {

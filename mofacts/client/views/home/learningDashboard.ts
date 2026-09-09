@@ -21,7 +21,7 @@ import {
 import { getAudioLaunchPreparationPlan, prepareAudioForLaunchIfNeeded } from '../../lib/audioStartup';
 import { unlockAppleMobileAudioForUserGesture } from '../../lib/audioUnlock';
 import { shouldLockMultiTdfLaunchToCurrentUnit } from '../../lib/lessonLaunchLockPolicy';
-import { resolveLessonLaunchEntryRoute } from '../../lib/lessonLaunchEntryRoute';
+import { formatItemsPracticed } from './practiceMetrics';
 import { CARD_ENTRY_INTENT, setCardEntryIntent, type CardEntryIntent } from '../../lib/cardEntryIntent';
 import { prepareLessonLaunchContext } from '../../lib/lessonLaunchInitializer';
 import {
@@ -958,15 +958,7 @@ const lessonRowHelpers = {
   },
 
   itemsPracticedDisplay(this: any): string {
-    if (this.itemsPracticedApplies === false) {
-      return '-';
-    }
-    const practiced = this.isUsed ? Number(this.itemsPracticed || 0) : 0;
-    const total = Number(this.totalPracticeItems);
-    if (!Number.isFinite(total)) {
-      return Number.isFinite(practiced) ? String(practiced) : '-';
-    }
-    return `${Number.isFinite(practiced) ? practiced : 0} / ${total}`;
+    return formatItemsPracticed(this);
   },
 
   accuracyBadgeLabel(this: any): string {
@@ -1866,16 +1858,7 @@ async function selectTdf(currentTdfId: any, lessonName: any, currentStimuliSetId
       setCardEntryIntent(launchProgress.intent, {
         source: 'practiceMenu.selectTdf',
       });
-      const entryRoute = resolveLessonLaunchEntryRoute({
-        content: curTdfContent,
-        intent: launchProgress.intent,
-      });
-      if (entryRoute.route === '/instructions') {
-        Session.set('currentUnitNumber', entryRoute.currentUnitNumber);
-        Session.set('currentTdfUnit', entryRoute.currentTdfUnit);
-        Session.set('curUnitInstructionsSeen', entryRoute.curUnitInstructionsSeen);
-      }
-      goToActiveLessonSurface(entryRoute.route);
+      goToActiveLessonSurface(preparedLaunch.entryRoute!.route);
     }
   }
 }

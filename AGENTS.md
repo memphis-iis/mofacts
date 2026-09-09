@@ -115,6 +115,8 @@ Use the verification path that matches the change. Say clearly when a check coul
 
 Every invocation of `npm run test:ci` requires fresh, explicit user authorization. Authorization is single-use and does not carry forward to a later invocation, even within the same conversation or task.
 
+The CI runner owns cleanup of test-generated `meteortesting:*` resolutions in `.meteor/versions`. Treat those entries as transient test artifacts; lint and pre-commit verification must reject their persistence in the application dependency manifest.
+
 For TypeScript-bearing app changes, the full app check is:
 
 ```bash

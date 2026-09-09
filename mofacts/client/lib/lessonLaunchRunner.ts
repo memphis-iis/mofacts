@@ -8,7 +8,6 @@ import {
 } from './cardEntryIntent';
 import { clientConsole } from './clientLogger';
 import { prepareLessonLaunchContext } from './lessonLaunchInitializer';
-import { resolveLessonLaunchEntryRoute } from './lessonLaunchEntryRoute';
 import { shouldLockMultiTdfLaunchToCurrentUnit } from './lessonLaunchLockPolicy';
 import { sessionCleanUp } from './sessionUtils';
 import { setCourseAssignmentLaunchContext } from './courseAssignmentLaunchContext';
@@ -203,16 +202,8 @@ export async function selectTdf(
       setCardEntryIntent(launchProgress.intent, {
         source: 'lessonLaunch.selectTdf',
       });
-      const entryRoute = resolveLessonLaunchEntryRoute({
-        content: curTdfContent,
-        intent: launchProgress.intent,
-      });
-      if (entryRoute.route === '/instructions') {
-        Session.set('currentUnitNumber', entryRoute.currentUnitNumber);
-        Session.set('currentTdfUnit', entryRoute.currentTdfUnit);
-        Session.set('curUnitInstructionsSeen', entryRoute.curUnitInstructionsSeen);
-      }
-      goToActiveLessonSurface(entryRoute.route);
+      goToActiveLessonSurface(preparedLaunch.entryRoute!.route);
     }
   }
+  return preparedLaunch.entryRoute;
 }

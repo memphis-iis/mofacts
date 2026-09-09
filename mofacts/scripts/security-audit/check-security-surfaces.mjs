@@ -127,7 +127,7 @@ if (process.argv.includes('--discover')) {
   const invalidPolicies = Object.entries(manifest)
     .filter(([, entries]) => Array.isArray(entries))
     .flatMap(([kind, entries]) => entries.filter((entry) =>
-      !['public-rate-limited', 'authenticated-self', 'role-checked', 'admin-only', 'signed-ingestion', 'single-use-download'].includes(entry.access))
+      !['public', 'public-rate-limited', 'authenticated-self', 'role-checked', 'admin-only', 'signed-ingestion', 'single-use-download'].includes(entry.access))
       .map((entry) => `${kind}:${entry.name}`));
   const failures = comparisons.filter((comparison) => comparison.missing.length || comparison.removed.length);
   if (failures.length || invalidPolicies.length) {

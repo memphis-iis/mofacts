@@ -65,6 +65,26 @@ import {
 
 const repositoryRoot = fileURLToPath(new URL('../../../', import.meta.url));
 
+test('Meteor builder resolves the public uWebSockets repository over HTTPS without changing its ref', () => {
+  const recipe = fs.readFileSync(path.join(repositoryRoot, 'Dockerfile'), 'utf8');
+  const stage = recipe.split(' AS meteor_builder')[1].split('\nFROM ')[0];
+  const settings = [...stage.matchAll(/git config --global --add (url\.\S+\.insteadOf) (\S+)/g)];
+  assert.equal(settings.length, 2);
+  assert.ok(stage.indexOf('git config --global') < stage.indexOf('meteor update --npm'));
+  const args = settings.flatMap((match) => ['-c', `${match[1]}=${match[2]}`]);
+  const url = 'https://github.com/unetworking/uWebSockets.js.git';
+  for (const source of [url, 'ssh://git@github.com/unetworking/uWebSockets.js.git', 'git@github.com:unetworking/uWebSockets.js.git']) {
+    assert.equal(execFileSync('git', [...args, 'ls-remote', '--get-url', source], { encoding: 'utf8' }).trim(), url);
+    assert.equal(execFileSync('git', [...args, 'ls-remote', '--get-url', `${source}#v20.66.0`], { encoding: 'utf8' }).trim(), `${url}#v20.66.0`);
+  }
+  const unrelated = 'ssh://git@github.com/another/repository.git';
+  assert.equal(execFileSync('git', [...args, 'ls-remote', '--get-url', unrelated], { encoding: 'utf8' }).trim(), unrelated);
+  // Deny HTTPS before network access: failure must remain failure, not use SSH.
+  assert.throws(() => execFileSync('git', [...args, '-c', 'protocol.https.allow=never', 'ls-remote',
+    'ssh://git@github.com/unetworking/uWebSockets.js.git'], { stdio: 'pipe' }),
+  (error) => error.status !== 0 && error.stderr.toString().includes("transport 'https' not allowed"));
+});
+
 function runtimeSourceFiles(directory) {
   return fs.readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
     const absolutePath = path.join(directory, entry.name);

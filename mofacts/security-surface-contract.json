@@ -206,6 +206,10 @@
       "access": "role-checked"
     },
     {
+      "name": "exportDeploymentBrandProfile",
+      "access": "admin-only"
+    },
+    {
       "name": "exportThemeFile",
       "access": "role-checked"
     },
@@ -314,6 +318,10 @@
       "access": "public-rate-limited"
     },
     {
+      "name": "getDeploymentBrandProfileDraft",
+      "access": "admin-only"
+    },
+    {
       "name": "getExperimentState",
       "access": "authenticated-self"
     },
@@ -384,6 +392,10 @@
     {
       "name": "getPracticeDashboardSnapshot",
       "access": "role-checked"
+    },
+    {
+      "name": "getProgressiveAssignmentLaunch",
+      "access": "authenticated-self"
     },
     {
       "name": "getResponseKCMapForTdf",
@@ -518,6 +530,10 @@
       "access": "role-checked"
     },
     {
+      "name": "importDeploymentBrandProfileDraft",
+      "access": "admin-only"
+    },
+    {
       "name": "importPrivateRepoTdfBatch",
       "access": "role-checked"
     },
@@ -600,6 +616,10 @@
     {
       "name": "provisionExperimentUser",
       "access": "public-rate-limited"
+    },
+    {
+      "name": "publishDeploymentBrandProfile",
+      "access": "admin-only"
     },
     {
       "name": "recordSessionRevocation",
@@ -704,6 +724,10 @@
     {
       "name": "saveCourseAssignments",
       "access": "role-checked"
+    },
+    {
+      "name": "saveDeploymentBrandProfileDraft",
+      "access": "admin-only"
     },
     {
       "name": "saveLearnerTdfConfig",
@@ -916,6 +940,10 @@
       "access": "role-checked"
     },
     {
+      "name": "deploymentBrandProfile",
+      "access": "public"
+    },
+    {
       "name": "files.assets.all",
       "access": "role-checked"
     },
@@ -1058,6 +1086,10 @@
     {
       "name": "method:downloadOwnHistoryAcrossTdfs",
       "access": "authenticated-self"
+    },
+    {
+      "name": "method:exportDeploymentBrandProfile",
+      "access": "admin-only"
     },
     {
       "name": "method:exportThemeFile",

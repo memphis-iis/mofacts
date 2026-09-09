@@ -1,0 +1,44 @@
+{
+  "deployedAtUtc": "2026-01-01T00:00:00.1234567Z",
+  "baseCommit": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "includedUncommittedLocalChanges": false,
+  "image": "registry.example.test/mofacts:prod-synthetic",
+  "tag": "prod-synthetic",
+  "digest": "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+  "qualification": {
+    "schema": "ReleaseQualificationV1",
+    "buildIdentity": {
+      "schema": "BuildIdentityV1",
+      "baseCommit": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "includedUncommittedLocalChanges": false,
+      "sourceSnapshotDigestSha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+    },
+    "sourceVerification": {
+      "state": "observed",
+      "sourceSnapshotDigestSha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "result": "PASS"
+    },
+    "builtImage": {
+      "configDigest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+      "platform": "linux/amd64"
+    },
+    "publishedImage": {
+      "kind": "manifest",
+      "digest": "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+      "configDigest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+      "platform": "linux/amd64"
+    },
+    "runningImage": {
+      "configDigest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+      "platform": "linux/amd64",
+      "baseCommit": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    "commands": {
+      "build": { "state": "completed", "exitCode": 0 },
+      "smoke": { "state": "completed", "exitCode": 0 },
+      "push": { "state": "completed", "exitCode": 0 },
+      "deploy": { "state": "completed", "exitCode": 0 },
+      "verify": { "state": "completed", "exitCode": 0 }
+    }
+  }
+}

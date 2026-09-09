@@ -137,6 +137,11 @@ owned by Meteor's local test database or CI's replica-set container. A local
 invocation requires fresh maintainer authorization.
 The source-owned browser-test package makes that Playwright contract portable
 across the supported Linux CI job and an explicitly authorized Windows run.
+Meteor resolves the dynamically selected test driver into `.meteor/versions`
+during a test run. The repository runner removes only those test-driver entries
+when it exits, while lint and the pre-commit hook reject any such entries left
+in the application dependency manifest. Do not commit these `meteortesting:*`
+resolutions as application dependencies.
 Never overwrite a private `settings.json` or describe a narrower local check as
 equivalent coverage.
 
