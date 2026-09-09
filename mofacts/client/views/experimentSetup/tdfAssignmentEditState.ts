@@ -81,3 +81,32 @@ export function filterAssignableTdfs(
       return !normalizedQuery || haystack.includes(normalizedQuery);
     });
 }
+
+export function appendProgressivePackage(
+  row: AssignmentEditorRow,
+  rows: AssignmentEditorRow[],
+  selectedPackage: CourseAssignmentEditorSnapshot['packages'][number],
+  tdfs: AssignableTdf[],
+): AssignmentEditorRow {
+  if (row.assignmentType !== 'progressive') throw new Error('Choose a progressive assignment.');
+  if (selectedPackage.blockedReason) throw new Error(selectedPackage.blockedReason);
+  const ids = selectedPackage.memberTdfIds;
+  if (!ids.length || ids.length !== selectedPackage.lessonCount || new Set(ids).size !== ids.length) {
+    throw new Error('The complete package membership is unavailable. Reload assignments and try again.');
+  }
+  const selected = new Set(rows.flatMap((item) => item.assignmentType === 'lesson' ? [item.TDFId] : item.memberTdfIds));
+  const byId = new Map(tdfs.map((tdf) => [tdf.TDFId, tdf]));
+  for (const id of ids) {
+    const tdf = byId.get(id);
+    if (!tdf || !tdf.progressiveEligible) throw new Error('This package contains inaccessible or ineligible lessons.');
+    if (selected.has(id)) throw new Error('A lesson from this package is already assigned in this course. Nothing was added.');
+  }
+  const collator = new Intl.Collator('en', { numeric: true, sensitivity: 'base' });
+  const sorted = [...ids].sort((a, b) => {
+    const left = byId.get(a)!;
+    const right = byId.get(b)!;
+    return collator.compare(left.displayName, right.displayName)
+      || collator.compare(left.fileName, right.fileName) || a.localeCompare(b);
+  });
+  return { ...row, memberTdfIds: [...row.memberTdfIds, ...sorted] };
+}

@@ -130,7 +130,16 @@ export interface LearnerCoursesSnapshot {
   source: 'cache' | 'rebuilt';
 }
 
+export interface CourseAssignmentPackage {
+  packageAssetId: string;
+  fileName: string;
+  lessonCount: number;
+  memberTdfIds: string[];
+  blockedReason: string | null;
+}
+
 export interface CourseAssignmentEditorSnapshot {
+  packages: CourseAssignmentPackage[];
   course: {
     courseId: string;
     courseName: string;

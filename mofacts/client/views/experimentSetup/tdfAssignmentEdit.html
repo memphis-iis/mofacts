@@ -74,20 +74,20 @@
                                 <div class="progressive-member-row">
                                   <span class="progressive-member-position">{{memberPosition}}</span>
                                   <span><b>{{displayName}}</b><br><span class="assignment-row-meta">{{fileName}}</span></span>
-                                  <button type="button" class="btn btn-sm btn-outline-secondary move-progressive-member-up" data-member-index="{{memberIndex}}" aria-label="Move member up" disabled="{{editorBusy}}"><span class="fa fa-arrow-up" aria-hidden="true"></span></button>
-                                  <button type="button" class="btn btn-sm btn-outline-secondary move-progressive-member-down" data-member-index="{{memberIndex}}" aria-label="Move member down" disabled="{{editorBusy}}"><span class="fa fa-arrow-down" aria-hidden="true"></span></button>
+                                  <button type="button" class="btn btn-sm btn-outline-secondary move-progressive-member-up" data-member-index="{{memberIndex}}" aria-label="Move member up" disabled="{{progressiveMemberUpDisabled}}"><span class="fa fa-arrow-up" aria-hidden="true"></span></button>
+                                  <button type="button" class="btn btn-sm btn-outline-secondary move-progressive-member-down" data-member-index="{{memberIndex}}" aria-label="Move member down" disabled="{{progressiveMemberDownDisabled}}"><span class="fa fa-arrow-down" aria-hidden="true"></span></button>
                                   <button type="button" class="btn btn-sm btn-outline-danger remove-progressive-member" data-member-index="{{memberIndex}}" aria-label="Remove member" disabled="{{editorBusy}}"><span class="fa fa-times" aria-hidden="true"></span></button>
                                 </div>
                               {{/each}}
                             </div>
                             <div class="input-group input-group-sm mt-2">
-                              <select class="form-select progressive-member-select" aria-label="Lesson to add" disabled="{{editorBusy}}">
-                                <option value="">Select eligible lesson</option>
-                                {{#each progressiveEligibleTdfs}}
-                                  <option value="{{TDFId}}">{{displayName}}</option>
+                              <select class="form-select progressive-package-select" aria-label="Uploaded package to add" disabled="{{editorBusy}}">
+                                <option value="">Select uploaded package</option>
+                                {{#each progressivePackages}}
+                                  <option value="{{packageAssetId}}">{{fileName}} ({{lessonCount}} lessons)</option>
                                 {{/each}}
                               </select>
-                              <button type="button" class="btn btn-outline-primary add-progressive-member" disabled="{{editorBusy}}">Add to progression</button>
+                              <button type="button" class="btn btn-outline-primary add-progressive-package" disabled="{{editorBusy}}">Add package to progression</button>
                             </div>
                           {{else}}
                             <div class="assignment-row-title">{{this.title}}</div>

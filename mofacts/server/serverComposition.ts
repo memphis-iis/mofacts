@@ -318,6 +318,7 @@ const updateActiveThemeDocument = createUpdateActiveThemeDocument({
 });
 
 const courseMethods = createCourseMethods({
+  DynamicAssets,
   serverConsole,
   Courses,
   Sections,

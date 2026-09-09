@@ -62,6 +62,7 @@ type CourseMethodsDeps = {
   SectionUserMap: CollectionLike;
   Assignments: CollectionLike;
   Tdfs: CollectionLike;
+  DynamicAssets: Pick<CollectionLike, 'findOneAsync'>;
   UserDashboardCache?: CollectionLike;
   CourseLearnerSnapshotCache?: CollectionLike;
   Histories: {
@@ -664,6 +665,7 @@ export function createCourseMethods(deps: CourseMethodsDeps) {
           ownerId: 1,
           accessors: 1,
           stimuliSetId: 1,
+          packageAssetId: 1,
           tdfAvailability: 1,
           'content.fileName': 1,
           'content.isMultiTdf': 1,
@@ -680,6 +682,31 @@ export function createCourseMethods(deps: CourseMethodsDeps) {
         },
       }
     ).fetchAsync();
+    const packageIds = [...new Set<string>(assignableTdfs
+      .map((tdf: any) => deps.normalizeCanonicalId(tdf.packageAssetId))
+      .filter((id: string | null): id is string => id !== null))];
+    const accessibleIds = new Set(assignableTdfs.map((tdf: any) => String(tdf._id)));
+    const packages = await Promise.all(packageIds.map(async (packageAssetId) => {
+      const [asset, members] = await Promise.all([
+        deps.DynamicAssets.findOneAsync({ _id: packageAssetId }, { fields: { name: 1 } }),
+        deps.Tdfs.find({ packageAssetId }, { fields: { _id: 1 } }).fetchAsync(),
+      ]);
+      const fileName = typeof asset?.name === 'string' ? asset.name.trim() : '';
+      const memberTdfIds = members.map((member: any) => String(member._id));
+      const inaccessible = memberTdfIds.some((id: string) => !accessibleIds.has(id));
+      const ineligible = assignableTdfs.some((tdf: any) => tdf.packageAssetId === packageAssetId
+        && progressiveTdfIneligibilityReasons(tdf).length > 0);
+      return {
+        packageAssetId,
+        fileName,
+        lessonCount: members.length,
+        // Do not disclose identifiers of lessons the teacher cannot access.
+        memberTdfIds: inaccessible ? [] : memberTdfIds,
+        blockedReason: !fileName ? 'The uploaded package filename is unavailable.'
+          : inaccessible ? 'This package contains lessons you cannot access.'
+            : ineligible ? 'This package contains lessons that are not eligible for a progression.' : null,
+      };
+    }));
     return {
       course: {
         courseId: String(course._id),
@@ -689,6 +716,7 @@ export function createCourseMethods(deps: CourseMethodsDeps) {
         timezone: normalizeTimezone(course.timezone, true),
       },
       assignments,
+      packages,
       assignableTdfs: assignableTdfs.map(getTdfSummary)
         .filter((tdf: any) => tdf.TDFId)
         .map((tdf: any) => ({

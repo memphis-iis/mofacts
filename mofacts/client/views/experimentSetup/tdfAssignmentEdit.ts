@@ -24,6 +24,7 @@ import {
   type AsyncCommandState,
 } from '../../lib/adminUi/asyncCommandState';
 import {
+  appendProgressivePackage,
   filterAssignableTdfs,
   orderedRows,
   rowsFromAssignmentSnapshot,
@@ -57,6 +58,7 @@ type AssignmentEditorInstance = Blaze.TemplateInstance & {
   assignmentRows: ReactiveVar<AssignmentEditorRow[]>;
   assignableTdfs: ReactiveVar<AssignableTdf[]>;
   assignmentSearch: ReactiveVar<string>;
+  packages: ReactiveVar<CourseAssignmentEditorSnapshot['packages']>;
   dirty: ReactiveVar<boolean>;
   editorError: ReactiveVar<string | null>;
   saveError: ReactiveVar<string | null>;
@@ -109,6 +111,12 @@ function toDatetimeLocalValue(value: unknown, timezone?: string): string {
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
 }
 
+function editorIsBusy(instance: AssignmentEditorInstance): boolean {
+  return loadPending(instance.coursesPresentation.get())
+    || loadPending(instance.snapshotPresentation.get())
+    || instance.saveCommandState.get().status === 'pending';
+}
+
 function readRows(instance: AssignmentEditorInstance): AssignmentEditorRow[] {
   return instance.assignmentRows.get();
 }
@@ -121,6 +129,7 @@ function writeRows(instance: AssignmentEditorInstance, rows: AssignmentEditorRow
 function applySnapshot(instance: AssignmentEditorInstance, courseId: string, snapshot: CourseAssignmentEditorSnapshot): void {
   const rows = rowsFromAssignmentSnapshot(snapshot);
   instance.assignableTdfs.set(snapshot.assignableTdfs);
+  instance.packages.set(snapshot.packages);
   instance.selectedCourseId.set(courseId);
   instance.timezone.set(snapshot.course.timezone);
   writeRows(instance, rows, false);
@@ -130,6 +139,7 @@ function loadCourseSnapshot(instance: AssignmentEditorInstance, courseId: string
   if (!courseId) {
     instance.snapshotPresentation.set({ status: 'idle' });
     instance.assignableTdfs.set([]);
+    instance.packages.set([]);
     writeRows(instance, [], false);
     return;
   }
@@ -201,6 +211,7 @@ function loadCourses(instance: AssignmentEditorInstance): void {
           timezone: '',
         } });
         instance.assignableTdfs.set([]);
+        instance.packages.set([]);
         writeRows(instance, [], false);
       }
     })
@@ -241,6 +252,7 @@ Template.tdfAssignmentEdit.onCreated(function(this: AssignmentEditorInstance) {
   this.assignmentRows = new ReactiveVar<AssignmentEditorRow[]>([]);
   this.assignableTdfs = new ReactiveVar<AssignableTdf[]>([]);
   this.assignmentSearch = new ReactiveVar('');
+  this.packages = new ReactiveVar<CourseAssignmentEditorSnapshot['packages']>([]);
   this.dirty = new ReactiveVar(false);
   this.editorError = new ReactiveVar<string | null>(null);
   this.saveError = new ReactiveVar<string | null>(null);
@@ -289,10 +301,7 @@ Template.tdfAssignmentEdit.helpers({
     return (Template.instance() as AssignmentEditorInstance).saveCommandState.get().status === 'pending';
   },
   editorBusy(): boolean {
-    const instance = Template.instance() as AssignmentEditorInstance;
-    return loadPending(instance.coursesPresentation.get())
-      || loadPending(instance.snapshotPresentation.get())
-      || instance.saveCommandState.get().status === 'pending';
+    return editorIsBusy(Template.instance() as AssignmentEditorInstance);
   },
   assignmentText(key: Parameters<typeof translatePlatformString>[1]) {
     return assignmentText(key);
@@ -330,18 +339,18 @@ Template.tdfAssignmentEdit.helpers({
       ...(tdfById.get(tdfId) || { TDFId: tdfId, displayName: tdfId, fileName: '' }),
       memberIndex,
       memberPosition: memberIndex + 1,
+      isFirstMember: memberIndex === 0,
+      isLastMember: memberIndex === row.memberTdfIds.length - 1,
     }));
   },
-  progressiveEligibleTdfs() {
-    const instance = Template.instance() as AssignmentEditorInstance;
-    const row = this as AssignmentEditorRow;
-    const selectedElsewhere = new Set(readRows(instance).flatMap((candidate) => {
-      if (candidate === row) return [];
-      return candidate.assignmentType === 'lesson' ? [candidate.TDFId] : candidate.memberTdfIds;
-    }));
-    const selectedHere = new Set(row.assignmentType === 'progressive' ? row.memberTdfIds : []);
-    return instance.assignableTdfs.get().filter((tdf) =>
-      tdf.progressiveEligible && !selectedElsewhere.has(tdf.TDFId) && !selectedHere.has(tdf.TDFId));
+  progressiveMemberUpDisabled() {
+    return Boolean(this.isFirstMember) || editorIsBusy(Template.instance() as AssignmentEditorInstance);
+  },
+  progressiveMemberDownDisabled() {
+    return Boolean(this.isLastMember) || editorIsBusy(Template.instance() as AssignmentEditorInstance);
+  },
+  progressivePackages() {
+    return (Template.instance() as AssignmentEditorInstance).packages.get();
   },
 });
 
@@ -410,18 +419,27 @@ Template.tdfAssignmentEdit.events({
     writeRows(instance, rows);
   },
 
-  'click .add-progressive-member'(event: Event, instance: AssignmentEditorInstance) {
+  'click .add-progressive-package'(event: Event, instance: AssignmentEditorInstance) {
+    if (editorIsBusy(instance)) return;
     const index = rowIndexFromEvent(event);
     const rows = readRows(instance);
     const row = rows[index];
     if (!row || row.assignmentType !== 'progressive') return;
     const container = (event.currentTarget as HTMLElement).closest<HTMLElement>('[data-assignment-index]');
-    const select = container?.querySelector<HTMLSelectElement>('.progressive-member-select');
-    const tdfId = String(select?.value || '');
-    const tdf = instance.assignableTdfs.get().find((candidate) => candidate.TDFId === tdfId && candidate.progressiveEligible);
-    if (!tdf || row.memberTdfIds.includes(tdfId)) return;
-    rows[index] = { ...row, memberTdfIds: [...row.memberTdfIds, tdfId] };
-    writeRows(instance, rows);
+    const select = container?.querySelector<HTMLSelectElement>('.progressive-package-select');
+    const selectedPackage = instance.packages.get().find((item) => item.packageAssetId === select?.value);
+    if (!selectedPackage) {
+      instance.editorError.set('Choose an uploaded package.');
+      return;
+    }
+    try {
+      rows[index] = appendProgressivePackage(row, rows, selectedPackage, instance.assignableTdfs.get());
+      writeRows(instance, rows);
+      instance.editorError.set(null);
+      if (select) select.value = '';
+    } catch (error) {
+      instance.editorError.set(errorMessage(error));
+    }
   },
 
   'click .remove-progressive-member'(event: Event, instance: AssignmentEditorInstance) {
@@ -435,6 +453,7 @@ Template.tdfAssignmentEdit.events({
   },
 
   'click .move-progressive-member-up, .move-progressive-member-down'(event: Event, instance: AssignmentEditorInstance) {
+    if (editorIsBusy(instance)) return;
     const index = rowIndexFromEvent(event);
     const memberIndex = Number((event.currentTarget as HTMLElement).dataset.memberIndex);
     const rows = readRows(instance);

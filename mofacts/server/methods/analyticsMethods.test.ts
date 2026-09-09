@@ -320,10 +320,10 @@ describe('analyticsMethods', function() {
 
     expect(exportBuilderCalled).to.equal(false);
     expect(result).to.include({
-      fileName: 'mofacts_learner@example.edu_own_history_all_tdfs.tsv',
+      fileName: 'learning-data_learner@example.edu_own-history_all-lessons.tsv',
       contentType: 'text/tab-separated-values',
     });
-    expect(result.downloadUrl).to.match(/^\/data-download\/own-history\/[^/]+\/mofacts_learner%40example.edu_own_history_all_tdfs.tsv$/);
+    expect(result.downloadUrl).to.match(/^\/data-download\/own-history\/[^/]+\/learning-data_learner%40example.edu_own-history_all-lessons.tsv$/);
     expect(result.content).to.equal(undefined);
   });
 
@@ -526,7 +526,10 @@ describe('analyticsMethods', function() {
           return { fetchAsync: async () => [], countAsync: async () => 0 };
         },
         findOneAsync: async () => null,
-        insertAsync: async () => 'history-id',
+        insertAsync: async (document: Record<string, unknown>) => {
+          insertedHistory.push(document);
+          return 'history-id';
+        },
         rawCollection: () => ({ aggregate: () => ({ toArray: async () => [] }) }),
       },
       Assignments: {

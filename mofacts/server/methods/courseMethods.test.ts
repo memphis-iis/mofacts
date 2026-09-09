@@ -121,6 +121,7 @@ function createDeps(overrides: Record<string, any> = {}) {
     SectionUserMap: collection,
     Assignments: collection,
     Tdfs: collection,
+    DynamicAssets: collection,
     Histories: {
       async findOneAsync() {
         return null;
@@ -554,5 +555,24 @@ describe('course assignment metadata methods', function() {
     );
     expect(fresh.memberTdfIds).to.deep.equal(['lesson-1', 'lesson-3', 'lesson-2']);
     expect(fresh.progressiveRevisionId).not.to.equal(launch.progressiveRevisionId);
+  });
+});
+
+
+describe('course assignment package visibility', function() {
+  it('groups by package identity and blocks a partially accessible package without exposing private member IDs', async function() {
+    const methods = createCourseMethods(createDeps({
+      Courses: createMemoryCollection([{ _id: 'course-1', teacherUserId: 'teacher-1', timezone: 'America/Chicago' }]),
+      DynamicAssets: createMemoryCollection([{ _id: 'zip-1', name: 'stats.zip' }]),
+      Tdfs: createMemoryCollection([
+        { _id: 'visible', ownerId: 'teacher-1', packageAssetId: 'zip-1', content: { fileName: 'visible.json', tdfs: { tutor: { setspec: { lessonname: 'Visible' } } } } },
+        { _id: 'private', ownerId: 'someone-else', packageAssetId: 'zip-1' },
+        { _id: 'unrelated', ownerId: 'someone-else', packageAssetId: 'zip-other' },
+      ]),
+      getMethodAuthorizationDeps: () => ({ async userIsInRoleAsync(_id: string, roles: string[]) { return roles.includes('teacher'); } }),
+    }));
+    const snapshot = await methods.getCourseAssignmentEditorSnapshot.call({ userId: 'teacher-1' }, 'course-1');
+    expect(snapshot.packages).to.deep.equal([{ packageAssetId: 'zip-1', fileName: 'stats.zip', lessonCount: 2,
+      memberTdfIds: [], blockedReason: 'This package contains lessons you cannot access.' }]);
   });
 });

@@ -1,5 +1,6 @@
 import { expect } from 'chai';
 import {
+  appendProgressivePackage,
   filterAssignableTdfs,
   orderedRows,
   rowsFromAssignmentSnapshot,
@@ -37,6 +38,7 @@ function assignmentRow(
 describe('tdfAssignmentEditState', function() {
   it('shapes assignment snapshots into editable rows', function() {
     const rows = rowsFromAssignmentSnapshot({
+      packages: [],
       course: { courseId: 'course-1', timezone: 'America/Chicago' } as any,
       assignableTdfs: [{ TDFId: 'tdf-1', fileName: 'lesson.xml', tags: ['math'] }] as any,
       assignments: [{
@@ -115,5 +117,37 @@ describe('tdfAssignmentEditState', function() {
     const twoMembers = { ...progressive, memberTdfIds: ['tdf-1', 'tdf-2'] };
     expect(validateAssignmentRows([twoMembers, assignmentRow({ TDFId: 'tdf-2', title: 'Repeated' })], message))
       .to.equal('courseAssignments.duplicateLesson:Repeated');
+  });
+});
+
+
+describe('progressive package addition', function() {
+  const row = { assignmentType: 'progressive', memberTdfIds: ['existing'], title: 'Stats' } as AssignmentEditorRow;
+  const lessons = Array.from({ length: 34 }, (_, index) => ({
+    TDFId: `u${index + 1}`, displayName: `Unit ${index + 1}`, fileName: `${index + 1}.json`, progressiveEligible: true,
+  }));
+  const batch = { packageAssetId: 'zip-1', fileName: 'stats.zip', lessonCount: 34,
+    memberTdfIds: lessons.map((lesson) => lesson.TDFId).reverse(), blockedReason: null };
+
+  it('appends all 34 in natural order, preserving existing order and excluding unrelated lessons', function() {
+    const updated = appendProgressivePackage(row, [row], batch, [...lessons,
+      { TDFId: 'unrelated', displayName: 'Unit 0', fileName: 'other.json', progressiveEligible: true }] as any);
+    expect(updated.assignmentType === 'progressive' && updated.memberTdfIds)
+      .to.deep.equal(['existing', ...lessons.map((lesson) => lesson.TDFId)]);
+    expect(row.assignmentType === 'progressive' && row.memberTdfIds).to.deep.equal(['existing']);
+  });
+
+  it('rejects duplicates anywhere in the draft without changing any members', function() {
+    expect(() => appendProgressivePackage(row, [row, assignmentRow({ TDFId: 'u20' })], batch, lessons as any))
+      .to.throw('already assigned');
+    expect(row.assignmentType === 'progressive' && row.memberTdfIds).to.deep.equal(['existing']);
+  });
+
+  it('rejects inaccessible, ineligible, incomplete, and blocked packages as whole batches', function() {
+    expect(() => appendProgressivePackage(row, [row], batch, lessons.slice(1) as any)).to.throw('inaccessible');
+    expect(() => appendProgressivePackage(row, [row], batch,
+      lessons.map((lesson) => ({ ...lesson, progressiveEligible: lesson.TDFId !== 'u20' })) as any)).to.throw('ineligible');
+    expect(() => appendProgressivePackage(row, [row], { ...batch, lessonCount: 35 }, lessons as any)).to.throw('complete package');
+    expect(() => appendProgressivePackage(row, [row], { ...batch, blockedReason: 'No access' }, lessons as any)).to.throw('No access');
   });
 });
