@@ -89,6 +89,10 @@ export function composeProgressiveLesson(payload: ProgressiveAssignmentLaunchPay
   if (mergedEntries.length === 0) throw new Error('[Progressive Lesson] Progression contains no practice clusters');
   const content = clone(endpoint.content);
   const tutor = content?.tdfs?.tutor;
+  // Member-local ranges refer to the original lesson, not the concatenated
+  // progression. Keep the composed order without changing individual lessons.
+  delete tutor.setspec.shuffleclusters;
+  delete tutor.setspec.swapclusters;
   const units = requireArray(tutor?.unit, '[Progressive Lesson] Endpoint has no unit array');
   const practiceUnit = units[1];
   practiceUnit.learningsession = {

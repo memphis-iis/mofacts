@@ -1,5 +1,9 @@
 import { expect } from 'chai';
 import { composeProgressiveLesson } from './progressiveLessonComposer';
+import {
+  createStimClusterMapping,
+  isClusterMappingCompatibleWithSetSpec,
+} from '../../../learning-components/content/tdf/clusterMapping';
 
 function member(id: string, setId: string, clusterKC: string, stimulusKC: string, responseKC: string) {
   return {
@@ -35,6 +39,43 @@ function member(id: string, setId: string, clusterKC: string, stimulusKC: string
 }
 
 describe('progressive lesson composition', function() {
+  it('preserves member and stimulus order without inheriting local shuffles or swaps', function() {
+    const first = member('lesson-2', 'set-2', 'cluster-2a', 'stim-2a', 'response-2a');
+    const next = member('lesson-1', 'set-1', 'cluster-1a', 'stim-1a', 'response-1a');
+    for (const tdf of [first, next]) {
+      Object.assign(tdf.content.tdfs.tutor.setspec, {
+        shuffleclusters: '0-1', swapclusters: ['0', '1'],
+      });
+      const extra = member(`${tdf._id}-extra`, tdf.stimuliSetId, `${tdf._id}-extra`, `${tdf._id}-extra`, 'extra');
+      tdf.rawStimuliFile.setspec.clusters.push(extra.rawStimuliFile.setspec.clusters[0]!);
+      tdf.stimuli.push(extra.stimuli[0]!);
+      tdf.content.tdfs.tutor.unit[1]!.learningsession!.clusterlist = '0-1';
+    }
+    const original = JSON.parse(JSON.stringify([first, next]));
+    const payload = {
+      progressiveRevisionId: 'revision-1', assignmentId: 'progression-1', courseId: 'course-1',
+      title: 'Progression', endpointTdfId: 'lesson-1', memberTdfIds: ['lesson-2', 'lesson-1'], tdfs: [first, next],
+    };
+    const result = composeProgressiveLesson(payload);
+    const setSpec = result.content.tdfs.tutor.setspec;
+    expect(setSpec).not.to.have.property('shuffleclusters');
+    expect(setSpec).not.to.have.property('swapclusters');
+    expect(result.content.stimuli.map((stim: any) => stim.stimulusKC))
+      .to.deep.equal(['stim-2a', 'lesson-2-extra', 'stim-1a', 'lesson-1-extra']);
+    expect(result.content.stimuli.map((stim: any) => [stim.stimuliSetId, stim.progressiveSourceTdfId, stim.progressiveSourceUnitName]))
+      .to.deep.equal([
+        ['set-2', 'lesson-2', 'lesson-2 practice'], ['set-2', 'lesson-2', 'lesson-2 practice'],
+        ['set-1', 'lesson-1', 'lesson-1 practice'], ['set-1', 'lesson-1', 'lesson-1 practice'],
+      ]);
+    expect([first, next]).to.deep.equal(original);
+    expect(composeProgressiveLesson(payload)).to.deep.equal(result);
+    expect(createStimClusterMapping(4, [], [], null)).to.deep.equal([0, 1, 2, 3]);
+    expect(isClusterMappingCompatibleWithSetSpec([0, 1, 2, 3], 4, setSpec)).to.equal(true);
+    // A previous shuffled resume must be rejected, not reinterpreted against
+    // different cards. The existing resume guard leaves recorded history intact.
+    expect(isClusterMappingCompatibleWithSetSpec([1, 0, 2, 3], 4, setSpec)).to.equal(false);
+  });
+
   it('merges shared clusters while retaining distinct source-scoped stimuli and endpoint settings', function() {
     const result = composeProgressiveLesson({
       progressiveRevisionId: 'revision-1',
