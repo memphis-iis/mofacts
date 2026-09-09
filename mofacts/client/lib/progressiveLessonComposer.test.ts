@@ -39,6 +39,43 @@ function member(id: string, setId: string, clusterKC: string, stimulusKC: string
 }
 
 describe('progressive lesson composition', function() {
+  it('reverses lessons, not their items or endpoint settings, without changing source identities', function() {
+    const tdfs = ['a', 'b', 'c'].map((id) => {
+      const tdf = member(id, `set-${id}`, id, `${id}-1`, id);
+      const extra = member(id, `set-${id}`, id, `${id}-2`, id);
+      tdf.rawStimuliFile.setspec.clusters[0]!.stims.push(extra.rawStimuliFile.setspec.clusters[0]!.stims[0]!);
+      tdf.stimuli.push(extra.stimuli[0]!);
+      return tdf;
+    });
+    tdfs[2]!.content.tdfs.tutor.deliverySettings.optimalThreshold = 0.9;
+    const payload = { progressiveRevisionId: 'revision', assignmentId: 'p', courseId: 'course',
+      title: 'Group', endpointTdfId: 'c', memberTdfIds: ['a', 'b', 'c'], tdfs };
+    const original = JSON.parse(JSON.stringify(payload));
+    const reverse = composeProgressiveLesson(payload, true);
+    expect(reverse.content.stimuli.map((stim: any) => stim.stimulusKC))
+      .to.deep.equal(['c-1', 'c-2', 'b-1', 'b-2', 'a-1', 'a-2']);
+    expect(reverse.content.rawStimuliFile.setspec.clusters.flatMap((cluster: any) => cluster.stims.map((stim: any) => stim.stimulusKC)))
+      .to.deep.equal(['c-1', 'c-2', 'b-1', 'b-2', 'a-1', 'a-2']);
+    expect(reverse.content.stimuli.map((stim: any) => [stim.progressiveSourceTdfId, stim.progressiveSourceUnitName]))
+      .to.deep.equal([['c', 'c practice'], ['c', 'c practice'], ['b', 'b practice'], ['b', 'b practice'], ['a', 'a practice'], ['a', 'a practice']]);
+    expect(reverse.content.tdfs.tutor.deliverySettings.optimalThreshold).to.equal(0.9);
+    expect(reverse.content.tdfs.tutor.unit[1].unitname).to.equal('c practice');
+    expect(reverse.progressiveMemberTdfIds).to.deep.equal(['a', 'b', 'c']);
+    expect(payload).to.deep.equal(original);
+    expect(composeProgressiveLesson(payload, false)).to.deep.equal(composeProgressiveLesson(payload));
+  });
+
+  it('reorders shared-cluster items while keeping duplicate item ownership stable', function() {
+    const a = member('a', 'set-a', 'shared', 'a', 'a');
+    const b = member('b', 'set-b', 'shared', 'b', 'b');
+    const duplicate = member('c', 'set-a', 'shared', 'a', 'a');
+    const payload = { progressiveRevisionId: 'revision', assignmentId: 'p', courseId: 'course',
+      title: 'Group', endpointTdfId: 'c', memberTdfIds: ['a', 'b', 'c'], tdfs: [a, b, duplicate] };
+    const result = composeProgressiveLesson(payload, true);
+    expect(result.content.stimuli.map((stim: any) => stim.progressiveSourceTdfId)).to.deep.equal(['b', 'a']);
+    expect(result.content.rawStimuliFile.setspec.clusters[0].stims.map((stim: any) => stim.stimulusKC)).to.deep.equal(['b', 'a']);
+  });
+
   it('preserves member and stimulus order without inheriting local shuffles or swaps', function() {
     const first = member('lesson-2', 'set-2', 'cluster-2a', 'stim-2a', 'response-2a');
     const next = member('lesson-1', 'set-1', 'cluster-1a', 'stim-1a', 'response-1a');

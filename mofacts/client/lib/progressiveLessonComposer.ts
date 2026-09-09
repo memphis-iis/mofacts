@@ -19,7 +19,7 @@ function forceUnlimitedDeliverySettings(source: unknown): unknown {
   return { ...((source && typeof source === 'object') ? source : {}), practiceseconds: 0 };
 }
 
-export function composeProgressiveLesson(payload: ProgressiveAssignmentLaunchPayload): any {
+export function composeProgressiveLesson(payload: ProgressiveAssignmentLaunchPayload, reverseOrder = false): any {
   if (!payload || payload.tdfs.length !== payload.memberTdfIds.length || payload.tdfs.length < 2) {
     throw new Error('[Progressive Lesson] Launch payload does not contain the authorized progression prefix');
   }
@@ -29,6 +29,7 @@ export function composeProgressiveLesson(payload: ProgressiveAssignmentLaunchPay
   }
 
   const mergedByCluster = new Map<string, { cluster: any; flatStimuli: any[]; stimulusKeys: Set<string> }>();
+  const memberClusters: string[][] = [];
   for (const [memberIndex, tdf] of payload.tdfs.entries()) {
     const tdfId = String(tdf?._id || '');
     if (tdfId !== payload.memberTdfIds[memberIndex]) {
@@ -37,6 +38,8 @@ export function composeProgressiveLesson(payload: ProgressiveAssignmentLaunchPay
     const units = requireArray(tdf?.content?.tdfs?.tutor?.unit, `[Progressive Lesson] ${tdfId} has no unit array`);
     const practiceUnit = units[1];
     const clusterIndexes = parseProgressiveClusterList(practiceUnit?.learningsession?.clusterlist);
+    const selectedClusters: string[] = [];
+    memberClusters.push(selectedClusters);
     const rawClusters = requireArray(tdf?.rawStimuliFile?.setspec?.clusters, `[Progressive Lesson] ${tdfId} has no raw stimulus clusters`);
     const flatStimuli = requireArray(tdf?.stimuli, `[Progressive Lesson] ${tdfId} has no stimulus records`);
     const stimuliSetId = tdf?.stimuliSetId;
@@ -55,6 +58,7 @@ export function composeProgressiveLesson(payload: ProgressiveAssignmentLaunchPay
     for (const clusterIndex of clusterIndexes) {
       const sourceCluster = rawClusters[clusterIndex];
       const clusterKC = normalizeClusterKC(sourceCluster?.clusterKC);
+      selectedClusters.push(clusterKC);
       let merged = mergedByCluster.get(clusterKC);
       if (!merged) {
         merged = {
@@ -85,7 +89,21 @@ export function composeProgressiveLesson(payload: ProgressiveAssignmentLaunchPay
     }
   }
 
-  const mergedEntries = [...mergedByCluster.values()];
+  // Resolve duplicate items and their source ownership in canonical assignment
+  // order first. Reordering presentation must never change an item's owner.
+  const clusterOrder = reverseOrder
+    ? [...new Set(memberClusters.reverse().flat())]
+    : [...mergedByCluster.keys()];
+  const mergedEntries = clusterOrder.map((key) => mergedByCluster.get(key)!);
+  if (reverseOrder) {
+    const memberRank = new Map(payload.memberTdfIds.map((id, index) => [id, index]));
+    for (const entry of mergedEntries) {
+      const pairs = entry.flatStimuli.map((stim, index) => ({ stim, raw: entry.cluster.stims[index] }));
+      pairs.sort((a, b) => memberRank.get(b.stim.progressiveSourceTdfId)! - memberRank.get(a.stim.progressiveSourceTdfId)!);
+      entry.flatStimuli = pairs.map((pair) => pair.stim);
+      entry.cluster.stims = pairs.map((pair) => pair.raw);
+    }
+  }
   if (mergedEntries.length === 0) throw new Error('[Progressive Lesson] Progression contains no practice clusters');
   const content = clone(endpoint.content);
   const tutor = content?.tdfs?.tutor;

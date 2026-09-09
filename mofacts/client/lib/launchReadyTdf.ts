@@ -117,7 +117,7 @@ export async function loadLaunchReadyTdf(
       currentTdfId,
       courseAssignment.progressiveRevisionId,
     );
-    const tdfDoc = composeProgressiveLesson(payload);
+    const tdfDoc = composeProgressiveLesson(payload, courseAssignment.progressiveReverseOrder);
     const content = tdfDoc.content;
     if (!isLaunchReadyContent(content, false)) {
       throw new Error(`[${source}] ${describeLaunchReadyFailure(currentTdfId, content)}`);

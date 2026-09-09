@@ -30,6 +30,23 @@ const EXPANDED_COURSES_SESSION_KEY = 'coursesExpandedCourseIds';
 const JOINING_COURSE_SESSION_KEY = 'coursesJoiningCourseId';
 const JOIN_SECTION_SELECTIONS_SESSION_KEY = 'coursesJoinSectionSelections';
 
+function progressiveOrderKey(assignmentId: string): string {
+  return `coursesProgressiveReverseOrder:${assignmentId}`;
+}
+
+Template.courseProgressiveGroupHeading.helpers({
+  progressiveReverseOrder(this: CourseAssignmentDisplayRow) {
+    return Session.get(progressiveOrderKey(this.assignmentId)) === true;
+  },
+});
+
+Template.courseProgressiveGroupHeading.events({
+  'change .progressive-reverse-order'(event: Event) {
+    Session.set(progressiveOrderKey((this as CourseAssignmentDisplayRow).assignmentId),
+      (event.currentTarget as HTMLInputElement).checked);
+  },
+});
+
 type CoursesTemplateInstance = Blaze.TemplateInstance & {
   snapshot: ReactiveVar<LearnerCoursesSnapshot | null>;
   loading: ReactiveVar<boolean>;
@@ -339,8 +356,8 @@ const courseAssignmentDisplayHelpers = {
   actionButtonClass(this: CourseAssignmentDisplayRow) {
     return this.isUsed ? 'btn-primary' : 'btn-success';
   },
-  progressiveGroupLabel(this: CourseAssignmentDisplayRow) {
-    return this.progressiveGroupTitle || '';
+  isProgressiveGroupStart(this: CourseAssignmentDisplayRow) {
+    return this.assignmentType === 'progressive' && this.progressiveMemberIndex === 0;
   },
   hasProgressiveAction(this: CourseAssignmentDisplayRow) {
     return this.assignmentType === 'progressive' && Number(this.progressiveMemberIndex) > 0;
@@ -464,6 +481,7 @@ Template.courses.events({
   },
   'click .launch-progressive-assignment': async function(_event: Event, instance: CoursesTemplateInstance) {
     const assignment = this as CourseAssignmentDisplayRow;
+    const progressiveReverseOrder = Session.get(progressiveOrderKey(assignment.assignmentId)) === true;
     if (assignment.assignmentType !== 'progressive' || Number(assignment.progressiveMemberIndex) < 1) return;
     if (assignment.availability !== 'available') return;
     const scope = `course:launch:${assignment.assignmentId}:${assignment.TDFId}`;
@@ -482,6 +500,7 @@ Template.courses.events({
         launchMode: 'progressive' as const,
         progressiveEndpointTdfId: assignment.TDFId,
         progressiveRevisionId: launch.progressiveRevisionId,
+        progressiveReverseOrder,
       };
       const tdf = launch.tdfs[launch.tdfs.length - 1];
       const setspec = tdf?.content?.tdfs?.tutor?.setspec || {};

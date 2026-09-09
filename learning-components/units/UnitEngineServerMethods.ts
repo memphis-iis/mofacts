@@ -7,6 +7,7 @@ export type LearningHistoryReadOptions = {
     readonly launchMode: 'individual' | 'progressive';
     readonly progressiveEndpointTdfId?: string;
     readonly progressiveRevisionId?: string;
+    readonly progressiveReverseOrder?: boolean;
   } | null;
 };
 

@@ -164,6 +164,8 @@ export interface CourseAssignmentHistoryContext {
   launchMode: 'individual' | 'progressive';
   progressiveEndpointTdfId?: string;
   progressiveRevisionId?: string;
+  /** Presentation order only; omitted/false keeps the authored prefix order. */
+  progressiveReverseOrder?: boolean;
 }
 
 export interface ProgressiveAssignmentLaunchPayload {

@@ -18,6 +18,10 @@ export function readCourseAssignmentLaunchContext(value: unknown): CourseAssignm
     throw new Error('[CourseLaunch] Invalid course assignment launch context');
   }
   const record = value as Record<string, unknown>;
+  if (record.progressiveReverseOrder !== undefined
+    && (typeof record.progressiveReverseOrder !== 'boolean' || record.launchMode !== 'progressive')) {
+    throw new Error('[CourseLaunch] progressiveReverseOrder requires a boolean on a progressive launch');
+  }
   if (record.launchSource !== 'courses') {
     throw new Error('[CourseLaunch] Invalid course assignment launch context: launchSource must be courses');
   }
@@ -39,6 +43,7 @@ export function readCourseAssignmentLaunchContext(value: unknown): CourseAssignm
     ...(progressiveEndpointTdfId ? {
       progressiveEndpointTdfId,
       progressiveRevisionId: requireNonEmptyString(record.progressiveRevisionId, 'progressiveRevisionId'),
+      ...(record.progressiveReverseOrder !== undefined ? { progressiveReverseOrder: record.progressiveReverseOrder as boolean } : {}),
     } : {}),
   };
 }

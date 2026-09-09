@@ -71,6 +71,7 @@ export function buildLessonRouteLocation(
         throw new Error('[Lesson Route] Progressive endpoint does not match the route root TDF');
       }
       queryParams.progressive = '1';
+      if (descriptor.courseAssignment.progressiveReverseOrder) queryParams.progressiveReverseOrder = '1';
       queryParams.progressiveRevisionId = requireNonEmptyRouteValue(descriptor.courseAssignment.progressiveRevisionId, 'progressive revision');
     }
   }
@@ -88,6 +89,7 @@ export function resolveLessonRouteRequest(input: {
   routeAssignmentId: unknown;
   routeProgressive?: unknown;
   routeProgressiveRevisionId?: unknown;
+  routeProgressiveReverseOrder?: unknown;
   activeRootTdfId: unknown;
   activeCurrentTdfId: unknown;
   activePracticeLaunchMode: PracticeLaunchMode;
@@ -98,6 +100,10 @@ export function resolveLessonRouteRequest(input: {
   const courseId = readOptionalQueryValue(input.routeCourseId, 'course id');
   const assignmentId = readOptionalQueryValue(input.routeAssignmentId, 'assignment id');
   const progressiveValue = readOptionalQueryValue(input.routeProgressive, 'progressive');
+  const reverseOrder = readOptionalQueryValue(input.routeProgressiveReverseOrder, 'progressiveReverseOrder');
+  if (reverseOrder !== null && (reverseOrder !== '1' || progressiveValue !== '1' || !courseId || !assignmentId)) {
+    throw new Error('[Lesson Route] progressiveReverseOrder must be 1 on a progressive course launch');
+  }
   if (progressiveValue !== null && progressiveValue !== '1') {
     throw new Error('[Lesson Route] Progressive query value must be 1');
   }
@@ -116,6 +122,7 @@ export function resolveLessonRouteRequest(input: {
         ...(progressiveValue === '1' ? {
           progressiveEndpointTdfId: rootTdfId,
           progressiveRevisionId: requireNonEmptyRouteValue(input.routeProgressiveRevisionId, 'progressive revision'),
+          ...(reverseOrder === '1' ? { progressiveReverseOrder: true } : {}),
         } : {}),
       }
     : null;
@@ -135,7 +142,8 @@ export function resolveLessonRouteRequest(input: {
     if (courseAssignmentMatches) {
       courseAssignmentMatches = activeCourseAssignment!.launchMode === courseAssignment.launchMode
         && activeCourseAssignment!.progressiveEndpointTdfId === courseAssignment.progressiveEndpointTdfId
-        && activeCourseAssignment!.progressiveRevisionId === courseAssignment.progressiveRevisionId;
+        && activeCourseAssignment!.progressiveRevisionId === courseAssignment.progressiveRevisionId
+        && Boolean(activeCourseAssignment!.progressiveReverseOrder) === Boolean(courseAssignment.progressiveReverseOrder);
     }
   }
 

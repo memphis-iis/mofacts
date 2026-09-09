@@ -15,8 +15,9 @@
 
 .progressive-member-row {
   align-items: center;
-  background: var(--bs-light, #f8f9fa);
-  border: 1px solid var(--bs-border-color, #dee2e6);
+  background: var(--learning-card-surface-color);
+  color: var(--app-text-color);
+  border: 1px solid var(--border-color);
   border-radius: 0.35rem;
   display: grid;
   gap: 0.4rem;
@@ -26,9 +27,9 @@
 
 .progressive-member-position {
   align-items: center;
-  background: var(--bs-primary, #0d6efd);
+  background: var(--app-primary-action-surface-color);
   border-radius: 50%;
-  color: #fff;
+  color: var(--app-primary-action-text-color);
   display: inline-flex;
   height: 1.5rem;
   justify-content: center;
@@ -65,6 +66,7 @@
 
 .assignment-picker-row:hover,
 .assignment-picker-row:focus-visible {
+  color: var(--app-text-color);
   border-color: var(--app-accent-color);
   background: color-mix(in srgb, var(--app-accent-color) 8%, var(--learning-card-surface-color));
 }
@@ -96,6 +98,7 @@
 .assignment-editor-row {
   align-items: start;
   background: var(--learning-card-surface-color);
+  color: var(--app-text-color);
   border: 1px solid var(--border-color);
   border-radius: var(--app-border-radius-sm);
   display: grid;

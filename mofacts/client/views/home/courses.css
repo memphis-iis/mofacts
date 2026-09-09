@@ -3,6 +3,21 @@
   gap: var(--app-space-4);
 }
 
+.course-progressive-group-heading {
+  background: var(--learning-card-surface-color);
+  color: var(--app-text-color);
+  padding: var(--app-space-2) var(--app-space-3);
+}
+
+.course-progressive-group-heading p {
+  margin: 0;
+  font-size: var(--app-font-size-sm);
+}
+
+.launch-progressive-assignment {
+  white-space: nowrap;
+}
+
 .courses-table-card {
   min-width: 0;
 }

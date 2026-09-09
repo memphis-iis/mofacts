@@ -212,6 +212,7 @@ interface CourseAssignmentHistoryContext {
   launchMode: 'individual' | 'progressive';
   progressiveEndpointTdfId?: string;
   progressiveRevisionId?: string;
+  progressiveReverseOrder?: boolean;
 }
 ```
 
@@ -751,6 +752,7 @@ Assignment row fields:
 - Start/Continue action.
 - For each progressive member, its own metrics and ordinary individual launch action.
 - For progressive member 2 and later, a second action that practices the ordered prefix through that member. Member 1 has no redundant progressive action.
+- Each progressive group offers **Newest lesson first** (off by default). It reverses lesson assembly within the authorized prefix, preserving item order within each lesson, shared-cluster merging, original item ownership, and endpoint model/settings. The choice is retained in the launch URL/context across reloads; it does not change assignment membership or history scope. Adaptive selection still determines which item is practiced next.
 
 Launch behavior:
 

@@ -12,7 +12,7 @@ import {
 describe('courseAssignmentLaunchContext', function() {
   it('persists the launch revision while stamping each trial with its source lesson', function() {
     const context = { assignmentId: 'p', courseId: 'c', TDFId: 'b', launchSource: 'courses' as const,
-      launchMode: 'progressive' as const, progressiveEndpointTdfId: 'b', progressiveRevisionId: 'revision-1' };
+      launchMode: 'progressive' as const, progressiveEndpointTdfId: 'b', progressiveRevisionId: 'revision-1', progressiveReverseOrder: true };
     setCourseAssignmentLaunchContext(context);
     const row = applyCourseAssignmentLaunchContext({ TDFId: 'a', levelUnit: 1, levelUnitName: 'A practice' });
     expect(row).to.deep.include({ TDFId: 'a', levelUnit: 1, levelUnitName: 'A practice' });

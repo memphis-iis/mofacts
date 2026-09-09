@@ -216,6 +216,11 @@
 </template>
 
 <template name="courseAssignmentTableRow">
+  {{#if isProgressiveGroupStart}}
+    <tr class="course-progressive-group-row">
+      <td colspan="11">{{> courseProgressiveGroupHeading}}</td>
+    </tr>
+  {{/if}}
   <tr id="{{rowId}}" class="learning-dashboard-row course-assignment-row course-tree-assignment-row {{#if isLocked}}course-assignment-row--locked{{else if isUsed}}learning-dashboard-row--used{{else}}learning-dashboard-row--unused{{/if}}">
     <th scope="row" class="learning-dashboard-cell course-assignment-cell--course course-assignment-cell--assignment-row-header" data-label="{{t 'courses.course'}}">
       <span class="sr-only">{{title}}</span>
@@ -223,9 +228,6 @@
     <td class="learning-dashboard-cell course-assignment-cell--assignment" data-label="{{t 'courses.assignment'}}">
       <div class="learning-dashboard-cell__value course-assignment-lesson">
         <span class="course-assignment-title" title="{{title}}">{{title}}</span>
-        {{#if progressiveGroupLabel}}
-          <span class="course-assignment-subline">{{progressiveGroupLabel}}</span>
-        {{/if}}
         {{#if hasReleaseLabel}}
           <span class="course-assignment-subline">{{releaseLabel}}</span>
         {{/if}}
@@ -255,7 +257,7 @@
             data-tdfid="{{TDFId}}"
             aria-label="{{progressiveActionLabel}}"
             disabled="{{#if isLocked}}disabled{{/if}}">
-            {{progressiveActionLabel}}
+            Progressive
           </button>
         {{/if}}
       </div>
@@ -354,10 +356,12 @@
 </template>
 
 <template name="courseAssignmentCard">
+  {{#if isProgressiveGroupStart}}
+    {{> courseProgressiveGroupHeading}}
+  {{/if}}
   <div class="learning-dashboard-card course-assignment-card border rounded shadow-sm {{#if isLocked}}course-assignment-row--locked{{/if}}">
     <div class="learning-dashboard-card-title course-assignment-card-title">
       <span>{{title}}</span>
-      {{#if progressiveGroupLabel}}<span class="course-assignment-card-meta">{{progressiveGroupLabel}}</span>{{/if}}
       <span class="course-assignment-card-meta">{{statusLabel}}</span>
     </div>
     <div class="course-assignment-card-meta">
@@ -412,7 +416,7 @@
           data-tdfid="{{TDFId}}"
           aria-label="{{progressiveActionLabel}}"
           disabled="{{#if isLocked}}disabled{{/if}}">
-          {{progressiveActionLabel}}
+          Progressive
         </button>
       {{/if}}
     </div>
@@ -421,5 +425,16 @@
         {{#with launchFeedback}}{{> adminStatus id=id variant=variant text=text urgent=urgent}}{{/with}}
       </div>
     {{/if}}
+  </div>
+</template>
+
+<template name="courseProgressiveGroupHeading">
+  <div class="course-progressive-group-heading">
+    <strong>{{progressiveGroupTitle}}</strong>
+        <p>Choose Progressive to practice a lesson and all earlier lessons in this group.</p>
+        <label class="form-check form-switch">
+          <input class="form-check-input progressive-reverse-order" type="checkbox" checked="{{progressiveReverseOrder}}">
+          <span class="form-check-label">Newest lesson first</span>
+        </label>
   </div>
 </template>

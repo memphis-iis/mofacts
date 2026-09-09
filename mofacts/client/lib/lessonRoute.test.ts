@@ -6,6 +6,25 @@ import {
 } from './lessonRoute';
 
 describe('lesson route', function() {
+  it('preserves reverse assembly through both routes and rebuilds when the order changes', function() {
+    const context = { assignmentId: 'p', courseId: 'c', TDFId: 'b', launchSource: 'courses' as const,
+      launchMode: 'progressive' as const, progressiveEndpointTdfId: 'b', progressiveRevisionId: 'revision',
+      progressiveReverseOrder: true };
+    for (const surface of ['/content', '/instructions'] as const) {
+      const location = buildLessonRouteLocation(surface, { rootTdfId: 'b', practiceLaunchMode: 'normal', courseAssignment: context });
+      const input = { routeTdfId: 'b', routeMode: undefined, routeCourseId: 'c', routeAssignmentId: 'p',
+        routeProgressive: '1', routeProgressiveRevisionId: 'revision',
+        routeProgressiveReverseOrder: location.queryParams.progressiveReverseOrder,
+        activeRootTdfId: 'b', activeCurrentTdfId: 'b', activePracticeLaunchMode: 'normal' as const,
+        activeCourseAssignment: context };
+      expect(location.queryParams.progressiveReverseOrder).to.equal('1');
+      expect(resolveLessonRouteRequest(input).courseAssignment).to.deep.equal(context);
+      expect(resolveLessonRouteRequest(input).requiresBootstrap).to.equal(false);
+      expect(resolveLessonRouteRequest({ ...input, routeProgressiveReverseOrder: undefined }).requiresBootstrap).to.equal(true);
+      expect(() => resolveLessonRouteRequest({ ...input, routeProgressiveReverseOrder: 'yes' })).to.throw('progressiveReverseOrder');
+      expect(() => resolveLessonRouteRequest({ ...input, routeProgressive: undefined })).to.throw('progressiveReverseOrder');
+    }
+  });
   it('round-trips the authorized progressive revision through a page reload', function() {
     const context = { assignmentId: 'p', courseId: 'c', TDFId: 'b', launchSource: 'courses' as const,
       launchMode: 'progressive' as const, progressiveEndpointTdfId: 'b', progressiveRevisionId: 'old-order' };
