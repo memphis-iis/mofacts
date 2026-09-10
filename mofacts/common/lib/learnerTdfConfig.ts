@@ -810,6 +810,11 @@ function normalizeLearnerTdfOverridesWithErrors(tdf: unknown, overrides: unknown
   return normalized;
 }
 
+export function unitHasConfigurableRuntime(unit: unknown): boolean {
+  const unitType = detectTdfUnitType(unit);
+  return unitType === 'learning' || unitType === 'autotutor' || unitType === 'sparc';
+}
+
 export function buildLearnerTdfConfig(tdf: unknown, tdfId: string, overrides: unknown): LearnerTdfConfig {
   return {
     source: buildLearnerTdfSourceMetadata(tdf, tdfId),

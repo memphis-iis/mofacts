@@ -2,6 +2,7 @@ import {
   buildLearnerTdfConfig,
   LEARNER_TDF_FIELD_DEFINITIONS,
   learnerTdfFieldAppliesToUnit,
+  unitHasConfigurableRuntime,
   type LearnerTdfConfig,
 } from '../../common/lib/learnerTdfConfig';
 import { detectTdfUnitType } from '../../common/fieldApplicability';
@@ -289,11 +290,6 @@ function getDashboardFeatureUnitType(setspec: any, units: any[]): FirstContentUn
     return 'conditionPool';
   }
   return getFirstContentUnitType(units);
-}
-
-function unitHasConfigurableRuntime(unit: any): boolean {
-  const unitType = detectTdfUnitType(unit);
-  return unitType === 'learning' || unitType === 'autotutor' || unitType === 'sparc';
 }
 
 function unitHasLearnerConfigurableFields(unit: any): boolean {

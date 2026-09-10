@@ -242,6 +242,11 @@
     </td>
     <td class="learning-dashboard-cell learning-dashboard-cell--action" data-label="{{t 'courses.action'}}">
       <div class="learning-dashboard-cell__value learning-dashboard-action">
+        {{#if hasConfigurableSettings}}
+          <button type="button" class="btn btn-sm btn-outline-secondary configure-lesson" data-tdfid="{{TDFId}}"
+            aria-label="{{t 'dashboard.settings'}}: {{title}}" aria-expanded="{{#if learnerConfigState}}true{{else}}false{{/if}}"
+            disabled="{{#if isLocked}}disabled{{/if}}">{{t 'dashboard.settings'}}</button>
+        {{/if}}
         <button type="button" class="btn btn-sm learning-dashboard-action-button {{#if isLocked}}btn-outline-secondary{{else}}{{actionButtonClass}}{{/if}} launch-course-assignment"
           data-assignmentid="{{assignmentId}}"
           data-courseid="{{courseId}}"
@@ -297,6 +302,9 @@
     </div></td>
   </tr>
   {{/if}}
+  {{#with learnerConfigState}}
+    <tr class="learner-config-row"><td colspan="11">{{> learnerTdfConfigPanel}}</td></tr>
+  {{/with}}
 </template>
 
 <template name="courseAssignmentCards">
@@ -401,6 +409,11 @@
       </div>
     </div>
     <div class="learning-dashboard-card-actions">
+      {{#if hasConfigurableSettings}}
+        <button type="button" class="btn btn-sm btn-outline-secondary configure-lesson" data-tdfid="{{TDFId}}"
+          aria-label="{{t 'dashboard.settings'}}: {{title}}" aria-expanded="{{#if learnerConfigState}}true{{else}}false{{/if}}"
+          disabled="{{#if isLocked}}disabled{{/if}}">{{t 'dashboard.settings'}}</button>
+      {{/if}}
       <button type="button" class="btn btn-sm learning-dashboard-card-button {{#if isLocked}}btn-outline-secondary{{else}}{{actionButtonClass}}{{/if}} launch-course-assignment"
         data-assignmentid="{{assignmentId}}"
         data-courseid="{{courseId}}"
@@ -425,16 +438,18 @@
         {{#with launchFeedback}}{{> adminStatus id=id variant=variant text=text urgent=urgent}}{{/with}}
       </div>
     {{/if}}
+    {{#with learnerConfigState}}{{> learnerTdfConfigPanel}}{{/with}}
   </div>
 </template>
 
 <template name="courseProgressiveGroupHeading">
   <div class="course-progressive-group-heading">
     <strong>{{progressiveGroupTitle}}</strong>
-        <p>Choose Progressive to practice a lesson and all earlier lessons in this group.</p>
-        <label class="form-check form-switch">
-          <input class="form-check-input progressive-reverse-order" type="checkbox" checked="{{progressiveReverseOrder}}">
-          <span class="form-check-label">Newest lesson first</span>
-        </label>
+    <span>— Practice this lesson and earlier ones.</span>
+    <label class="form-check form-switch">
+      <input class="form-check-input progressive-reverse-order" type="checkbox" checked="{{progressiveReverseOrder}}">
+      <span class="form-check-label">Newest first</span>
+    </label>
+    <span>Even in reverse order, practiced items return as needed under optimal learning theory.</span>
   </div>
 </template>

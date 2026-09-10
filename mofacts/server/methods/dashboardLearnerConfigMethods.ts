@@ -13,9 +13,8 @@ import {
 
 type DashboardLearnerConfigDeps = {
   Meteor: any;
-  Tdfs: any;
   UserDashboardCache: any;
-  canViewDashboardTdf: (userId: unknown, tdf: any) => boolean;
+  getAccessibleTdf: (userId: string, tdfId: string, options: any) => Promise<any>;
 };
 
 function hasConfigurablePatchValue(value: unknown): boolean {
@@ -42,32 +41,18 @@ function getTdfConfigSource(tdf: any) {
 async function getConfigurableTdfForUser(
   deps: DashboardLearnerConfigDeps,
   userId: string,
-  tdfId: string
+  tdfId: string,
+  options: any
 ) {
   const normalizedTdfId = typeof tdfId === 'string' ? tdfId.trim() : '';
   if (!normalizedTdfId) {
     throw new deps.Meteor.Error('invalid-args', 'TDF ID is required');
   }
 
-  const tdf = await deps.Tdfs.findOneAsync(
-    { _id: normalizedTdfId },
-    {
-      fields: {
-        _id: 1,
-        ownerId: 1,
-        accessors: 1,
-        updatedAt: 1,
-        lastUpdated: 1,
-        content: 1
-      }
-    }
-  );
+  const tdf = await deps.getAccessibleTdf(userId, normalizedTdfId, options);
 
   if (!tdf) {
     throw new deps.Meteor.Error('not-found', 'TDF not found');
-  }
-  if (!deps.canViewDashboardTdf(userId, tdf)) {
-    throw new deps.Meteor.Error('not-authorized', 'Not authorized to configure this TDF');
   }
 
   return tdf;
@@ -111,7 +96,18 @@ async function writeLearnerTdfConfig(
 
 export function createDashboardLearnerConfigMethods(deps: DashboardLearnerConfigDeps) {
   return {
-    saveLearnerTdfConfig: async function(this: any, tdfId: string, configPatch: LearnerTdfOverrides) {
+    getLearnerTdfConfig: async function(this: any, tdfId: string) {
+      if (!this.userId) throw new deps.Meteor.Error('not-authorized', 'Must be logged in');
+      if (typeof tdfId !== 'string' || !tdfId.trim()) throw new deps.Meteor.Error('invalid-args', 'TDF ID is required');
+      // Only the caller's settings are read; neither histories nor other users'
+      // preferences are published. Lesson access is enforced on load/save.
+      const cache = await deps.UserDashboardCache.findOneAsync(
+        { userId: this.userId }, { fields: { learnerTdfConfigs: 1 } },
+      );
+      const configs = cache?.learnerTdfConfigs;
+      return configs && Object.prototype.hasOwnProperty.call(configs, tdfId.trim()) ? configs[tdfId.trim()] : null;
+    },
+    saveLearnerTdfConfig: async function(this: any, tdfId: string, configPatch: LearnerTdfOverrides, options: any = {}) {
       if (!this.userId) {
         throw new deps.Meteor.Error('not-authorized', 'Must be logged in');
       }
@@ -119,7 +115,7 @@ export function createDashboardLearnerConfigMethods(deps: DashboardLearnerConfig
         throw new deps.Meteor.Error('invalid-args', 'Select at least one setting to save');
       }
 
-      const tdf = await getConfigurableTdfForUser(deps, this.userId, tdfId);
+      const tdf = await getConfigurableTdfForUser(deps, this.userId, tdfId, options);
       const tdfSource = getTdfConfigSource(tdf);
       const config = buildLearnerTdfConfig(tdfSource, tdf._id, configPatch);
 
@@ -131,12 +127,12 @@ export function createDashboardLearnerConfigMethods(deps: DashboardLearnerConfig
       };
     },
 
-    resetLearnerTdfConfig: async function(this: any, tdfId: string, scope: string | null = null) {
+    resetLearnerTdfConfig: async function(this: any, tdfId: string, scope: string | null = null, options: any = {}) {
       if (!this.userId) {
         throw new deps.Meteor.Error('not-authorized', 'Must be logged in');
       }
 
-      const tdf = await getConfigurableTdfForUser(deps, this.userId, tdfId);
+      const tdf = await getConfigurableTdfForUser(deps, this.userId, tdfId, options);
       const cache = await deps.UserDashboardCache.findOneAsync({ userId: this.userId });
       const existingConfig = cache?.learnerTdfConfigs?.[tdf._id] as LearnerTdfConfig | undefined;
       if (!existingConfig?.overrides) {

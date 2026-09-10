@@ -175,6 +175,7 @@ describe('dashboardCacheMethods', function() {
       serverConsole: () => {},
       computePracticeTimeMs: (endLatency, feedbackLatency) => (endLatency ?? 0) + (feedbackLatency ?? 0),
       canViewDashboardTdf: () => true,
+      getAccessibleTdf: async () => { throw new Error('Unexpected learner settings access in dashboard cache test'); },
       redisBoundary: disabledRedisBoundary
     });
 
@@ -290,6 +291,7 @@ describe('dashboardCacheMethods', function() {
       serverConsole: () => {},
       computePracticeTimeMs: (endLatency, feedbackLatency) => (endLatency ?? 0) + (feedbackLatency ?? 0),
       canViewDashboardTdf: () => true,
+      getAccessibleTdf: async () => { throw new Error('Unexpected learner settings access in dashboard cache test'); },
       redisBoundary: disabledRedisBoundary
     });
 
@@ -441,6 +443,7 @@ describe('dashboardCacheMethods', function() {
       serverConsole: () => {},
       computePracticeTimeMs: (endLatency, feedbackLatency) => (endLatency ?? 0) + (feedbackLatency ?? 0),
       canViewDashboardTdf: () => true,
+      getAccessibleTdf: async () => { throw new Error('Unexpected learner settings access in dashboard cache test'); },
       redisBoundary: disabledRedisBoundary
     });
 
@@ -807,6 +810,7 @@ describe('dashboardCacheMethods', function() {
       serverConsole: () => undefined,
       computePracticeTimeMs: (endLatency, feedbackLatency) => (endLatency ?? 0) + (feedbackLatency ?? 0),
       canViewDashboardTdf: () => true,
+      getAccessibleTdf: async () => { throw new Error('Unexpected learner settings access in dashboard cache test'); },
       redisBoundary: {
         enabled: true,
         async withLock<T>(key: string, _ttlMs: number, work: () => Promise<T>) {
@@ -937,6 +941,7 @@ describe('dashboardCacheMethods', function() {
       serverConsole: () => undefined,
       computePracticeTimeMs: (endLatency, feedbackLatency) => (endLatency ?? 0) + (feedbackLatency ?? 0),
       canViewDashboardTdf: () => true,
+      getAccessibleTdf: async () => { throw new Error('Unexpected learner settings access in dashboard cache test'); },
       redisBoundary: {
         enabled: true,
         async withLock<T>(key: string, _ttlMs: number, work: () => Promise<T>) {
@@ -994,6 +999,7 @@ describe('dashboardCacheMethods', function() {
       serverConsole: () => undefined,
       computePracticeTimeMs: (endLatency, feedbackLatency) => (endLatency ?? 0) + (feedbackLatency ?? 0),
       canViewDashboardTdf: () => true,
+      getAccessibleTdf: async () => { throw new Error('Unexpected learner settings access in dashboard cache test'); },
       redisBoundary: {
         enabled: true,
         async withLock<T>(key: string, _ttlMs: number, work: () => Promise<T>) {
@@ -1093,6 +1099,7 @@ describe('dashboardCacheMethods', function() {
       serverConsole: () => undefined,
       computePracticeTimeMs: (endLatency, feedbackLatency) => (endLatency ?? 0) + (feedbackLatency ?? 0),
       canViewDashboardTdf: () => true,
+      getAccessibleTdf: async () => { throw new Error('Unexpected learner settings access in dashboard cache test'); },
       redisBoundary: {
         enabled: true,
         async withLock<T>(key: string, _ttlMs: number, work: () => Promise<T>) {
@@ -1205,6 +1212,7 @@ describe('dashboardCacheMethods', function() {
       serverConsole: () => undefined,
       computePracticeTimeMs: (endLatency, feedbackLatency) => (endLatency ?? 0) + (feedbackLatency ?? 0),
       canViewDashboardTdf: () => true,
+      getAccessibleTdf: async () => { throw new Error('Unexpected learner settings access in dashboard cache test'); },
       redisBoundary: disabledRedisBoundary
     });
 
@@ -1262,6 +1270,7 @@ describe('dashboardCacheMethods', function() {
       serverConsole: (...args: any[]) => { logs.push(args.join(' ')); },
       computePracticeTimeMs: (endLatency, feedbackLatency) => (endLatency ?? 0) + (feedbackLatency ?? 0),
       canViewDashboardTdf: () => true,
+      getAccessibleTdf: async () => { throw new Error('Unexpected learner settings access in dashboard cache test'); },
       redisBoundary: disabledRedisBoundary
     });
 
@@ -1410,6 +1419,7 @@ describe('dashboardCacheMethods', function() {
       serverConsole: () => undefined,
       computePracticeTimeMs: (endLatency, feedbackLatency) => (endLatency ?? 0) + (feedbackLatency ?? 0),
       canViewDashboardTdf: () => true,
+      getAccessibleTdf: async () => { throw new Error('Unexpected learner settings access in dashboard cache test'); },
       redisBoundary: disabledRedisBoundary
     });
 
@@ -1499,6 +1509,7 @@ describe('dashboardCacheMethods', function() {
       serverConsole: () => undefined,
       computePracticeTimeMs: (endLatency, feedbackLatency) => (endLatency ?? 0) + (feedbackLatency ?? 0),
       canViewDashboardTdf: () => true,
+      getAccessibleTdf: async () => { throw new Error('Unexpected learner settings access in dashboard cache test'); },
       redisBoundary: disabledRedisBoundary
     });
 
@@ -1578,6 +1589,7 @@ describe('dashboardCacheMethods', function() {
       serverConsole: () => undefined,
       computePracticeTimeMs: (endLatency, feedbackLatency) => (endLatency ?? 0) + (feedbackLatency ?? 0),
       canViewDashboardTdf: () => true,
+      getAccessibleTdf: async () => { throw new Error('Unexpected learner settings access in dashboard cache test'); },
       redisBoundary: disabledRedisBoundary
     });
 

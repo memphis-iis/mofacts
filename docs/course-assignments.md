@@ -174,7 +174,7 @@ Add a dedicated persisted cache collection for learner course browsing. Common c
 interface CourseLearnerSnapshotCacheDocument {
   _id: string;
   userId: string;
-  version: 3;
+  version: 4;
   generatedAt: Date;
   invalidatedAt: Date | null;
   assignedCourseIds: string[];
@@ -282,27 +282,27 @@ SectionUserMap.rawCollection().createIndex(
 );
 
 CourseLearnerSnapshotCache.rawCollection().createIndex(
-  { userId: 1, version: 3 },
+  { userId: 1, version: 1 },
   { name: 'course_snapshot_user_version', unique: true, background: true }
 );
 
 CourseLearnerSnapshotCache.rawCollection().createIndex(
-  { userId: 1, version: 3, invalidatedAt: 1 },
+  { userId: 1, version: 1, invalidatedAt: 1 },
   { name: 'course_snapshot_user_version_invalidated', background: true }
 );
 
 CourseLearnerSnapshotCache.rawCollection().createIndex(
-  { assignedCourseIds: 1, version: 3 },
+  { assignedCourseIds: 1, version: 1 },
   { name: 'course_snapshot_assigned_course_version', background: true }
 );
 
 CourseLearnerSnapshotCache.rawCollection().createIndex(
-  { publicCourseIds: 1, version: 3 },
+  { publicCourseIds: 1, version: 1 },
   { name: 'course_snapshot_public_course_version', background: true }
 );
 
 CourseLearnerSnapshotCache.rawCollection().createIndex(
-  { assignmentIds: 1, version: 3 },
+  { assignmentIds: 1, version: 1 },
   { name: 'course_snapshot_assignment_version', background: true }
 );
 
@@ -389,7 +389,7 @@ export interface LearnerCourseSnapshotAssignment extends CourseAssignmentSummary
 }
 
 export interface LearnerCoursesSnapshot {
-  version: 3;
+  version: 4;
   userId: string;
   generatedAt: number;
   assignedCourses: LearnerCourseSnapshotCourse[];
@@ -537,7 +537,7 @@ Cache rebuild query strategy:
 
 Snapshot response:
 
-- `version: 3`
+- `version: 4`
 - `userId`
 - `generatedAt`
 - `assignedCourses`, sorted above public courses when non-empty.
@@ -752,9 +752,12 @@ Assignment row fields:
 - Start/Continue action.
 - For each progressive member, its own metrics and ordinary individual launch action.
 - For progressive member 2 and later, a second action that practices the ordered prefix through that member. Member 1 has no redundant progressive action.
-- Each progressive group offers **Newest lesson first** (off by default). It reverses lesson assembly within the authorized prefix, preserving item order within each lesson, shared-cluster merging, original item ownership, and endpoint model/settings. The choice is retained in the launch URL/context across reloads; it does not change assignment membership or history scope. Adaptive selection still determines which item is practiced next.
+- **Settings** is available for configurable lessons in both course layouts, using the same editor as Practice. Personal settings are stored per learner and original lesson. A progressive step uses its endpoint lesson's settings, not overrides from earlier members. Starting practice waits for pending settings saves.
+- Each progressive group offers **Newest first** (off by default). It reverses lesson assembly within the authorized prefix, preserving item order within each lesson, shared-cluster merging, original item ownership, and endpoint model/settings. The choice is retained in the launch URL/context across reloads; it does not change assignment membership or history scope. The inline explanation clarifies that adaptive selection still reviews previously practiced items as needed under optimal learning theory.
 
 Launch behavior:
+
+- `loadLaunchReadyTdf` is the shared settings-loading boundary for Practice, Courses, direct routes, and resume. It refreshes only the requested learner/lesson settings through `getLearnerTdfConfig`; progressive composition applies the endpoint overrides before enforcing its open-ended session limits. The editor lives in `mofacts/client/views/shared/learnerTdfSettings.*`. Settings writes reuse the server's course-aware TDF lookup authorization. No learner-history migration is needed; course snapshot version 4 is rebuilt lazily to include settings availability.
 
 - Use the same launch runner/path as the Practice page for the assignment's `TDFId`.
 - Pass `assignmentId` and `courseId` into launch context when launching from `/courses`.

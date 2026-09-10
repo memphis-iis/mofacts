@@ -531,6 +531,11 @@ describe('course assignment metadata methods', function() {
     expect(progressive).to.include({ assignmentType: 'progressive', title: 'Cumulative sequence' });
     expect((progressive as any).memberTdfIds).to.deep.equal(['lesson-1', 'lesson-2', 'lesson-3']);
     expect((progressive as any).progress).to.equal(undefined);
+    const settingsSnapshot = await methods.getLearnerCoursesSnapshot.call({ userId: 'teacher-user' });
+    expect(settingsSnapshot.version).to.equal(4);
+    const settingsAssignment = settingsSnapshot.assignedCourses[0]?.assignments[0];
+    expect(settingsAssignment?.assignmentType).to.equal('progressive');
+    expect((settingsAssignment as any).members.map((member: any) => member.hasConfigurableSettings)).to.deep.equal([true, true, true]);
 
     const launch = await methods.getProgressiveAssignmentLaunch.call(
       { userId: 'teacher-user' },

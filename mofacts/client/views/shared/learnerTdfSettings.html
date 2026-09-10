@@ -1,0 +1,96 @@
+<template name="learnerTdfConfigPanel">
+  <div class="{{learnerConfigPanelClass}}">
+    <div class="learner-config-panel-clip">
+      <div class="learner-config-panel-card">
+        {{#if this.loading}}
+          <div class="text-muted">{{t 'dashboard.loadingSettings'}}</div>
+        {{else}}
+          {{#if this.error}}
+            <div role="alert" class="alert alert-warning learner-config-alert">{{this.error}}</div>
+          {{/if}}
+          {{#if this.resultMessage}}
+            <div class="admin-inline-feedback learner-config-alert">
+              {{> adminStatus variant="success" text=this.resultMessage}}
+            </div>
+          {{/if}}
+
+          {{#if isConfigStep "settings"}}
+            <form class="learner-config-form">
+              <div class="small text-muted learner-config-label">{{selectedConfigLabel}}</div>
+              {{#if hasSettingFields}}
+                <div class="learner-config-fields-grid">
+                {{#each settingFields}}
+                  <div class="learner-config-field">
+                    <div class="learner-config-field-label">
+                      <span>{{this.label}}</span>
+                      {{#if this.isSlider}}
+                        <span class="learner-config-current-value" data-config-value-for="{{this.id}}">{{this.displayValue}}</span>
+                      {{/if}}
+                      {{#if this.customized}}
+                        <button type="button" class="btn btn-sm btn-link learner-config-reset-field"
+                          data-fieldid="{{this.id}}"
+                          data-defaultvalue="{{this.defaultInputValue}}">
+                          {{t 'dashboard.reset'}}
+                        </button>
+                      {{/if}}
+                    </div>
+
+                    {{#if this.isToggle}}
+                      <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" data-config-field="{{this.id}}" aria-label="{{this.label}}" checked="{{#if this.checked}}checked{{/if}}">
+                      </div>
+                    {{/if}}
+
+                    {{#if this.isSelect}}
+                      <select class="form-select form-select-sm" data-config-field="{{this.id}}" aria-label="{{this.label}}">
+                        {{#each this.options}}
+                          <option value="{{this.value}}" selected="{{#if this.selected}}selected{{/if}}">{{this.label}}</option>
+                        {{/each}}
+                      </select>
+                    {{/if}}
+
+                    {{#if this.isSlider}}
+                      <input class="form-range learner-config-slider" type="range" min="{{this.inputMin}}" max="{{this.inputMax}}" step="{{this.inputStep}}" value="{{this.value}}" data-config-field="{{this.id}}" aria-label="{{this.label}}" data-value-suffix="{{this.displaySuffix}}">
+                      {{#if this.lowerLabel}}
+                        <div class="learner-config-slider-labels">
+                          <span>{{this.lowerLabel}}</span>
+                          <span>{{this.upperLabel}}</span>
+                        </div>
+                      {{/if}}
+                    {{/if}}
+
+                    {{#if this.isNumber}}
+                      <input class="form-control form-control-sm" type="number" min="{{this.inputMin}}" max="{{this.inputMax}}" step="{{this.inputStep}}" value="{{this.value}}" data-config-field="{{this.id}}" aria-label="{{this.label}}">
+                    {{/if}}
+
+                    {{#if this.isText}}
+                      <input class="form-control form-control-sm" type="text" value="{{this.value}}" data-config-field="{{this.id}}" aria-label="{{this.label}}">
+                    {{/if}}
+                  </div>
+                {{/each}}
+                </div>
+              {{/if}}
+              <div class="learner-config-footer">
+                {{#if canResetOwnProgress}}
+                  <div class="learner-config-own-progress-reset">
+                    {{#if this.resetConfirming}}
+                      <button type="button" class="btn btn-sm btn-link learner-config-reset-progress-cancel" disabled="{{#if this.resettingProgress}}disabled{{/if}}">
+                        {{t 'dashboard.cancel'}}
+                      </button>
+                    {{/if}}
+                    <button type="button" class="btn btn-sm btn-outline-danger learner-config-reset-progress" disabled="{{#if this.resettingProgress}}disabled{{/if}}">
+                      {{resetProgressButtonLabel}}
+                    </button>
+                  </div>
+                {{/if}}
+                {{#if hasSettingFields}}
+                  <span class="small text-muted">{{learnerConfigSaveStatus}}</span>
+                {{/if}}
+              </div>
+            </form>
+          {{/if}}
+        {{/if}}
+      </div>
+    </div>
+  </div>
+</template>

@@ -390,6 +390,10 @@
       "access": "public-rate-limited"
     },
     {
+      "name": "getLearnerTdfConfig",
+      "access": "authenticated-self"
+    },
+    {
       "name": "getPracticeDashboardSnapshot",
       "access": "role-checked"
     },

@@ -23,6 +23,7 @@ type CollectionLike = {
 };
 
 type TdfSummary = {
+  hasConfigurableSettings?: boolean;
   TDFId: string;
   title: string;
   displayName: string;
@@ -62,7 +63,7 @@ export type CourseLearnerSnapshotCacheDeps = {
   getTdfSummariesByIds: (tdfIds: string[]) => Promise<Map<string, TdfSummary>>;
 };
 
-export const COURSE_SNAPSHOT_VERSION = 3 as const;
+export const COURSE_SNAPSHOT_VERSION = 4 as const;
 
 function courseIsDateVisible(parseNullablePersistedDate: (value: unknown) => Date | null, course: any, now = new Date()) {
   const beginDate = parseNullablePersistedDate(course?.beginDate);
@@ -265,6 +266,7 @@ export function createCourseLearnerSnapshotCacheHelpers(deps: CourseLearnerSnaps
           tags: tdf.tags,
           ...assignmentLanguageMetadata(tdf),
           currentStimuliSetId: tdf.currentStimuliSetId,
+          hasConfigurableSettings: tdf.hasConfigurableSettings === true,
           ...buildDashboardStatsProjection(dashboardCache?.tdfStats?.[summary.TDFId], null),
         };
       }

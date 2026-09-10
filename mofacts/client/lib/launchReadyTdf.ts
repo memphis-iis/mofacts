@@ -6,6 +6,7 @@ import { getCourseAssignmentLaunchContext } from './courseAssignmentLaunchContex
 import type { CourseAssignmentHistoryContext } from '../../common/courseAssignments.contracts';
 import type { ProgressiveAssignmentLaunchPayload } from '../../common/courseAssignments.contracts';
 import { composeProgressiveLesson } from './progressiveLessonComposer';
+import { applyLearnerSettingsForLaunch } from './learnerSettings';
 import {
   hasLaunchReadyTutorUnits,
   isConditionRootWithoutUnitArray,
@@ -117,6 +118,14 @@ export async function loadLaunchReadyTdf(
       currentTdfId,
       courseAssignment.progressiveRevisionId,
     );
+    const endpointIndex = payload.tdfs.length - 1;
+    const endpoint = payload.tdfs[endpointIndex];
+    // Apply the endpoint's personal settings before composition enforces the
+    // progressive session's open-ended duration and combined cluster list.
+    payload.tdfs[endpointIndex] = {
+      ...endpoint,
+      content: await applyLearnerSettingsForLaunch(endpoint.content, currentTdfId),
+    };
     const tdfDoc = composeProgressiveLesson(payload, courseAssignment.progressiveReverseOrder);
     const content = tdfDoc.content;
     if (!isLaunchReadyContent(content, false)) {
@@ -159,9 +168,6 @@ export async function loadLaunchReadyTdf(
     throw new Error(`[${source}] Condition root TDF ${currentTdfId} cannot be used as runnable card content`);
   }
 
-  return {
-    tdfDoc,
-    content,
-    isConditionRoot,
-  };
+  if (!isConditionRoot) content = await applyLearnerSettingsForLaunch(content, currentTdfId);
+  return { tdfDoc: { ...tdfDoc, content }, content, isConditionRoot };
 }

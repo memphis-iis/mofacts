@@ -56,6 +56,7 @@ type DashboardCacheDeps = {
   serverConsole: (...args: any[]) => void;
   computePracticeTimeMs: ComputePracticeTimeMs;
   canViewDashboardTdf: (userId: unknown, tdf: any) => boolean;
+  getAccessibleTdf: (userId: string, tdfId: string, options: any) => Promise<any>;
   redisBoundary: {
     enabled: boolean;
     withLock: <T>(key: string, ttlMs: number, work: () => Promise<T>) => Promise<T>;
@@ -282,6 +283,7 @@ export function applyDashboardHistoryRecordToStats(
 export { computeSummaryStats, computeUsageSummary } from './dashboardCacheShared';
 
 export function createDashboardCacheMethods({
+  getAccessibleTdf,
   Meteor,
   Roles,
   Histories,
@@ -500,10 +502,9 @@ export function createDashboardCacheMethods({
     ...(decryptData ? { decryptData } : {})
   });
   const learnerConfigMethods = createDashboardLearnerConfigMethods({
+    getAccessibleTdf,
     Meteor,
-    Tdfs,
     UserDashboardCache,
-    canViewDashboardTdf
   });
 
   const methods = {

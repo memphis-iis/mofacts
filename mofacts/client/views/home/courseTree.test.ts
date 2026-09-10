@@ -38,7 +38,7 @@ function assignment(overrides: any): LearnerCourseSnapshotAssignment {
 
 function snapshot(): LearnerCoursesSnapshot {
   return {
-    version: 3,
+    version: 4,
     userId: 'student-1',
     generatedAt: 1,
     invalidatedAt: null,
@@ -157,6 +157,7 @@ describe('course tree rows', function() {
         fileName: member.fileName,
         tags: member.tags,
         currentStimuliSetId: member.currentStimuliSetId,
+        hasConfigurableSettings: true,
         progress: member.progress,
         isUsed: member.isUsed,
         hasBeenAttempted: member.hasBeenAttempted,
@@ -177,6 +178,7 @@ describe('course tree rows', function() {
     });
     const result = rows.find((row) => row.courseId === biology.courseId)!;
     expect(result.assignmentCount).to.equal(2);
+    expect(result.assignments.map((row) => row.hasConfigurableSettings)).to.deep.equal([true, true]);
     expect(result.assignments.map((row) => [row.title, row.progress.attempts, row.progressiveMemberIndex])).to.deep.equal([
       ['First', 4, 0],
       ['Second', 7, 1],

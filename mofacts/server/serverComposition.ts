@@ -460,6 +460,7 @@ const {
 } = packageMethods;
 
 const dashboardCacheMethods = createDashboardCacheMethods({
+  getAccessibleTdf: (userId, tdfId, options) => getTdfById.call({ userId }, tdfId, options),
   Meteor,
   Roles,
   Histories,

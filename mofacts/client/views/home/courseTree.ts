@@ -102,6 +102,7 @@ function assignmentDisplayRows(
     fileName: member.fileName,
     tags: member.tags,
     currentStimuliSetId: member.currentStimuliSetId,
+    hasConfigurableSettings: member.hasConfigurableSettings === true,
     ...(member.contentLanguage !== undefined ? { contentLanguage: member.contentLanguage } : {}),
     ...(member.recommendedUiLocales !== undefined ? { recommendedUiLocales: member.recommendedUiLocales } : {}),
     ...(member.translationStatus !== undefined ? { translationStatus: member.translationStatus } : {}),

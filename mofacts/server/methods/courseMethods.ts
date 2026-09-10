@@ -3,6 +3,7 @@ import { progressiveRevisionId, progressiveRevisionPrefix } from '../lib/progres
 import type { DueDateException } from '../../common/courseAssignments.contracts';
 import { ensurePublishedDeploymentBrandProfile } from '../lib/deploymentBrandProfileRegistry';
 import { curSemester } from '../../common/Definitions';
+import { unitHasConfigurableRuntime } from '../../common/lib/learnerTdfConfig';
 import type {
   CourseAssignmentEditorSnapshot,
   CourseAssignmentAvailability,
@@ -200,6 +201,7 @@ function getTdfSummary(tdf: any) {
     recommendedUiLocales,
     translationStatus,
     currentStimuliSetId: tdf?.stimuliSetId ?? null,
+    hasConfigurableSettings: (tdf?.content?.tdfs?.tutor?.unit || []).some(unitHasConfigurableRuntime),
     ownerId: String(tdf?.ownerId || ''),
     isMultiTdf: Boolean(tdf?.content?.isMultiTdf),
   };
@@ -388,6 +390,7 @@ export function createCourseMethods(deps: CourseMethodsDeps) {
           stimuliSetId: 1,
           'content.fileName': 1,
           'content.isMultiTdf': 1,
+          'content.tdfs.tutor.unit': 1,
           'content.tdfs.tutor.setspec.lessonname': 1,
           'content.tdfs.tutor.setspec.tags': 1,
           'content.tdfs.tutor.setspec.contentLanguage': 1,

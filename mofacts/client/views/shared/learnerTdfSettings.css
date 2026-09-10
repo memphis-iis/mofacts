@@ -1,0 +1,179 @@
+.learner-config-row td {
+    background: color-mix(in srgb, var(--app-accent-color) 5%, var(--learning-card-surface-color));
+}
+
+.learner-config-panel {
+    display: grid;
+    grid-template-rows: 1fr;
+    padding: var(--app-space-0);
+    background: transparent;
+    animation: learner-config-panel-open var(--app-transition-smooth) ease-out both;
+}
+
+.learner-config-panel.is-closing {
+    pointer-events: none;
+    animation: learner-config-panel-close var(--app-transition-smooth) ease-in both;
+}
+
+.learner-config-panel-clip {
+    min-height: 0;
+    overflow: hidden;
+}
+
+.learner-config-panel-card {
+    width: 90%;
+    max-width: 90%;
+    margin: calc(0.85rem * var(--app-density-scale)) auto var(--app-space-3);
+    padding: var(--app-space-2);
+    border-radius: var(--app-border-radius-sm);
+    background: var(--learning-card-surface-color);
+    color: var(--app-text-color);
+    box-shadow: var(--app-surface-shadow);
+}
+
+.learner-config-fields-grid {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: var(--app-space-2);
+}
+
+.learner-config-field {
+    min-width: 0;
+    padding: var(--app-space-2);
+    border: 1px solid color-mix(in srgb, var(--app-text-color) 10%, transparent);
+    border-radius: var(--app-border-radius-sm);
+}
+
+.learner-config-field-label {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--app-space-2);
+    margin-bottom: var(--app-space-1);
+    font-size: calc(var(--app-font-size-base) * 0.875);
+    font-weight: 400;
+    line-height: 1.25;
+}
+
+.learner-config-current-value {
+    flex: 0 0 auto;
+    color: var(--app-secondary-text-color);
+    font-variant-numeric: tabular-nums;
+}
+
+.learner-config-reset-field.btn {
+    min-height: 0;
+    height: auto;
+    padding: var(--app-space-0);
+    border: 0;
+    background: transparent;
+    font-size: calc(var(--app-font-size-base) * 0.75);
+    line-height: 1.15;
+    text-decoration: none;
+}
+
+.learner-config-reset-field.btn:hover,
+.learner-config-reset-field.btn:focus {
+    background: transparent;
+    text-decoration: none;
+}
+
+.learner-config-field .form-check {
+    min-height: calc(var(--app-button-height) * 0.66);
+    margin-bottom: var(--app-space-0);
+    padding-left: var(--app-space-0);
+}
+
+.learner-config-field .form-switch .form-check-input {
+    width: 2.55em;
+    height: 1.25em;
+    margin-left: var(--app-space-0);
+}
+
+.learner-config-field .form-select-sm,
+.learner-config-field .form-control-sm {
+    min-height: calc(var(--app-button-height) * 0.66);
+    padding-top: calc(0.16rem * var(--app-density-scale));
+    padding-bottom: calc(0.16rem * var(--app-density-scale));
+    font-size: calc(var(--app-font-size-base) * 0.875);
+    line-height: 1.2;
+}
+
+.learner-config-field .form-range {
+    margin: var(--app-space-1) var(--app-space-0) var(--app-space-0);
+}
+
+.learner-config-slider-labels {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--app-space-2);
+    margin-top: calc(0.1rem * var(--app-density-scale));
+    color: var(--app-secondary-text-color);
+    font-size: calc(var(--app-font-size-base) * 0.72);
+    line-height: 1.15;
+}
+
+.learner-config-slider-labels span:last-child {
+    text-align: right;
+}
+
+.learner-config-own-progress-reset {
+    display: inline-flex;
+    align-items: center;
+    gap: calc(0.4rem * var(--app-density-scale));
+    margin-right: auto;
+}
+
+.learner-config-reset-progress.btn,
+.learner-config-reset-progress-cancel.btn {
+    min-height: calc(var(--app-button-height) * 0.72);
+    line-height: 1.1;
+}
+
+.learner-config-alert {
+    padding-top: var(--app-space-2);
+    padding-bottom: var(--app-space-2);
+    margin-bottom: var(--app-space-2);
+}
+
+.learner-config-label {
+    margin-bottom: var(--app-space-2);
+}
+
+.learner-config-footer {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: var(--app-space-2);
+}
+
+@keyframes learner-config-panel-open {
+    from {
+        grid-template-rows: 0fr;
+    }
+    to {
+        grid-template-rows: 1fr;
+    }
+}
+
+@keyframes learner-config-panel-close {
+    from {
+        grid-template-rows: 1fr;
+    }
+    to {
+        grid-template-rows: 0fr;
+    }
+}
+
+
+@media (max-width: 767px) {
+  .learner-config-panel-card { width: 100%; max-width: 100%; box-sizing: border-box; }
+  .learner-config-fields-grid { grid-template-columns: 1fr; }
+}
+@media (min-width: 768px) and (max-width: 1199px) {
+  .learner-config-fields-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .learner-config-panel { animation: none; transition: none; }
+}

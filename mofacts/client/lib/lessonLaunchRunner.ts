@@ -11,6 +11,7 @@ import { prepareLessonLaunchContext } from './lessonLaunchInitializer';
 import { shouldLockMultiTdfLaunchToCurrentUnit } from './lessonLaunchLockPolicy';
 import { sessionCleanUp } from './sessionUtils';
 import { setCourseAssignmentLaunchContext } from './courseAssignmentLaunchContext';
+import { learnerConfigHasSetSpecAudioOverride } from './learnerSettings';
 import type { CourseAssignmentHistoryContext } from '../../common/courseAssignments.contracts';
 import { translatePlatformString } from './interfaceI18n';
 import { getActiveUiLocale } from './interfaceLocaleState';
@@ -111,6 +112,7 @@ export async function selectTdf(
   }
 
   const curTdfContent = preparedLaunch.content;
+  setspec = curTdfContent.tdfs.tutor.setspec;
   Session.set('showPageNumbers', setspec.showPageNumbers ? setspec.showPageNumbers : false);
   const { launchProgress, unitCount } = preparedLaunch;
 
@@ -152,12 +154,16 @@ export async function selectTdf(
     audioPromptFeedbackVolume = setspec.audioPromptFeedbackVolume || 0;
     audioPromptFeedbackVoice = setspec.audioPromptFeedbackVoice || 'en-US-Standard-A';
   } else {
-    audioPromptMode = audioSettings.audioPromptMode || 'silent';
-    audioInputEnabled = audioSettings.audioInputMode || false;
+    audioPromptMode = learnerConfigHasSetSpecAudioOverride(String(currentTdfId), 'audioPromptMode')
+      ? setspec.audioPromptMode : audioSettings.audioPromptMode || 'silent';
+    audioInputEnabled = learnerConfigHasSetSpecAudioOverride(String(currentTdfId), 'audioInputEnabled')
+      ? setspec.audioInputEnabled === true || setspec.audioInputEnabled === 'true'
+      : audioSettings.audioInputMode || false;
     audioPromptFeedbackSpeakingRate = audioSettings.audioPromptFeedbackSpeakingRate || 1;
     audioPromptQuestionSpeakingRate = audioSettings.audioPromptQuestionSpeakingRate || 1;
     audioPromptVoice = audioSettings.audioPromptVoice || 'en-US-Standard-A';
-    audioInputSensitivity = audioSettings.audioInputSensitivity;
+    audioInputSensitivity = learnerConfigHasSetSpecAudioOverride(String(currentTdfId), 'audioInputSensitivity')
+      ? setspec.audioInputSensitivity : audioSettings.audioInputSensitivity;
     audioPromptQuestionVolume = audioSettings.audioPromptQuestionVolume || 0;
     audioPromptFeedbackVolume = audioSettings.audioPromptFeedbackVolume || 0;
     audioPromptFeedbackVoice = audioSettings.audioPromptFeedbackVoice || 'en-US-Standard-A';

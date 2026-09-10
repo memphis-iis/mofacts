@@ -1,5 +1,6 @@
 import './courses.html';
 import './courses.css';
+import { initializeLearnerSettingsHost, destroyLearnerSettingsHost, learnerSettingsEvents, flushLearnerSettings, type LearnerConfigState } from '../shared/learnerTdfSettings';
 import { Meteor } from 'meteor/meteor';
 import { ReactiveVar } from 'meteor/reactive-var';
 import { Session } from 'meteor/session';
@@ -48,6 +49,7 @@ Template.courseProgressiveGroupHeading.events({
 });
 
 type CoursesTemplateInstance = Blaze.TemplateInstance & {
+  learnerConfigState: ReactiveVar<LearnerConfigState>;
   snapshot: ReactiveVar<LearnerCoursesSnapshot | null>;
   loading: ReactiveVar<boolean>;
   showLoadingFeedback: ReactiveVar<boolean>;
@@ -139,6 +141,7 @@ function setJoinSectionSelection(courseId: string, sectionId: string) {
 }
 
 function getCourseRows(snapshot: LearnerCoursesSnapshot | null, section: CourseTreeSection, instance: CoursesTemplateInstance) {
+  const settings = instance.learnerConfigState.get();
   const rows = buildCourseTreeRows(snapshot, section, {
     query: instance.search.get(),
     sort: instance.sort.get(),
@@ -150,6 +153,8 @@ function getCourseRows(snapshot: LearnerCoursesSnapshot | null, section: CourseT
     joinFeedback: courseCommandPresentation(states[`course:join:${course.courseId}`], `course-join-feedback-${course.courseId}`),
     assignments: course.assignments.map((assignment) => ({
       ...assignment,
+      learnerConfigState: settings.tdfId === assignment.TDFId
+        && settings.courseAssignment?.assignmentId === assignment.assignmentId ? settings : null,
       launchFeedback: courseCommandPresentation(
         states[`course:launch:${assignment.assignmentId}:${assignment.TDFId}`],
         `course-launch-feedback-${assignment.assignmentId}-${assignment.TDFId}`,
@@ -187,6 +192,12 @@ async function reloadCoursesSnapshot(instance: CoursesTemplateInstance) {
 }
 
 Template.courses.onCreated(function(this: CoursesTemplateInstance) {
+  initializeLearnerSettingsHost(this, {
+    courseContext: (row: CourseAssignmentDisplayRow) => ({
+      assignmentId: row.assignmentId, courseId: row.courseId, TDFId: row.TDFId,
+      launchSource: 'courses', launchMode: 'individual',
+    }),
+  });
   this.snapshot = new ReactiveVar(null);
   this.loading = new ReactiveVar(true);
   this.showLoadingFeedback = new ReactiveVar(false);
@@ -265,6 +276,7 @@ Template.courses.helpers({
 });
 
 Template.courses.onDestroyed(function(this: CoursesTemplateInstance) {
+  destroyLearnerSettingsHost(this);
   this.loadingVisibility.destroy();
   this.commandRegistry.destroy();
 });
@@ -416,6 +428,7 @@ Template.courseAssignmentCard.helpers(courseAssignmentDisplayHelpers);
 Template.courseAssignmentCourseCard.helpers(courseAssignmentDisplayHelpers);
 
 Template.courses.events({
+  ...learnerSettingsEvents,
   'input #coursesSearch': function(event: Event, instance: CoursesTemplateInstance) {
     instance.search.set(String((event.currentTarget as HTMLInputElement).value || ''));
   },
@@ -449,6 +462,7 @@ Template.courses.events({
       return;
     }
     await instance.commandRegistry.run(`course:launch:${assignment.assignmentId}:${assignment.TDFId}`, async () => {
+      await flushLearnerSettings(instance);
       const launchContext = {
         assignmentId: assignment.assignmentId,
         courseId: assignment.courseId,
@@ -491,6 +505,7 @@ Template.courses.events({
       return;
     }
     await instance.commandRegistry.run(scope, async () => {
+      await flushLearnerSettings(instance);
       const launch: any = await meteorCallAsync('getProgressiveAssignmentLaunch', assignment.assignmentId, assignment.TDFId);
       const launchContext = {
         assignmentId: assignment.assignmentId,

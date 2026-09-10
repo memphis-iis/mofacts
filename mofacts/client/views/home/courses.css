@@ -7,11 +7,22 @@
   background: var(--learning-card-surface-color);
   color: var(--app-text-color);
   padding: var(--app-space-2) var(--app-space-3);
+  font-size: var(--app-font-size-sm);
 }
 
-.course-progressive-group-heading p {
+.course-progressive-group-heading .form-check {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--app-space-2);
+  margin: 0 var(--app-space-2);
+  padding: 0;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.course-progressive-group-heading .form-check-input {
+  float: none;
   margin: 0;
-  font-size: var(--app-font-size-sm);
 }
 
 .launch-progressive-assignment {
@@ -28,11 +39,28 @@
 }
 
 .course-assignment-table {
-  min-width: 1040px;
+  min-width: 1200px;
 }
 
 .course-assignment-col-action {
-  width: 96px;
+  width: 240px;
+}
+
+.course-assignment-table .learning-dashboard-action,
+.course-assignment-card .learning-dashboard-card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--app-space-1);
+  min-width: 0;
+}
+
+.course-assignment-table .learning-dashboard-action .btn,
+.course-assignment-card .learning-dashboard-card-actions .btn {
+  flex: 0 1 auto;
+  min-width: 0;
+  max-width: 100%;
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 
 .course-assignment-col-course {

@@ -63,10 +63,6 @@ import type {
   UnitEngineLike,
 } from '../../../../../common/types';
 import { repairFormattedStimuliResponsesFromRaw } from '../../../../../common/lib/stimuliResponseRepair';
-import {
-  applyLearnerTdfConfig,
-  type LearnerTdfConfig,
-} from '../../../../../common/lib/learnerTdfConfig';
 import { ensureCurrentStimuliSetId } from './mediaResolver';
 import { isVideoResumeSession, resolveVideoResumeSource } from './videoResume';
 import {
@@ -99,9 +95,6 @@ import {
 type DeliverySettingsLike = Record<string, unknown>;
 type StimLike = Record<string, unknown>;
 
-declare const UserDashboardCache: {
-  findOne(selector: Record<string, unknown>): { learnerTdfConfigs?: Record<string, LearnerTdfConfig> } | undefined;
-};
 
 interface TdfUnitLike extends Record<string, unknown> {
   deliverySettings?: DeliverySettingsLike | DeliverySettingsLike[];
@@ -144,42 +137,6 @@ interface TdfDocumentLike extends Record<string, unknown> {
   stimuli?: StimLike[];
   stimuliSetId?: string;
   conditionCounts?: number[];
-}
-
-async function ensureDashboardCacheForLearnerConfig(): Promise<void> {
-  await new Promise<void>((resolve) => {
-    const handle = Meteor.subscribe('dashboardCache', {
-      onReady: () => resolve(),
-      onStop: () => resolve(),
-    });
-    if (handle.ready()) {
-      resolve();
-    }
-  });
-}
-
-async function applyResumeLearnerTdfConfig(tdfFile: TdfFileLike, tdfId: unknown): Promise<TdfFileLike> {
-  const normalizedTdfId = typeof tdfId === 'string' ? tdfId.trim() : '';
-  const userId = Meteor.userId();
-  if (!normalizedTdfId || !userId) {
-    return tdfFile;
-  }
-
-  await ensureDashboardCacheForLearnerConfig();
-  const learnerConfig = UserDashboardCache.findOne({ userId })?.learnerTdfConfigs?.[normalizedTdfId];
-  if (!learnerConfig) {
-    return tdfFile;
-  }
-
-  const result = applyLearnerTdfConfig(tdfFile, learnerConfig);
-  if (result.warnings.length) {
-    clientConsole(1, '[Resume Service] Learner TDF config warning:', result.warnings.join('; '));
-    Session.set('uiMessage', {
-      text: result.warnings.join(' '),
-      variant: 'warning',
-    });
-  }
-  return result.tdf as TdfFileLike;
 }
 
 interface ResumeExperimentState extends ExperimentState {
@@ -924,10 +881,6 @@ export async function resumeFromExperimentState(_initialTdfFile: unknown): Promi
 
     resolvedTdfFile = curTdf?.content ?? null;
     if (resolvedTdfFile) {
-      resolvedTdfFile = await applyResumeLearnerTdfConfig(
-        resolvedTdfFile,
-        curTdf?._id || Session.get('currentTdfId') || Session.get('currentRootTdfId')
-      );
       if (curTdf) {
         curTdf.content = resolvedTdfFile;
       }

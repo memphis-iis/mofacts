@@ -40,6 +40,7 @@ export interface SaveCourseAssignmentsInput {
 }
 
 export interface CourseAssignmentTdfSummary {
+  hasConfigurableSettings?: boolean;
   TDFId: string;
   title: string;
   fileName: string;
@@ -81,6 +82,7 @@ export interface ProgressiveCourseAssignmentSummary extends CourseAssignmentSumm
 export type CourseAssignmentSummary = LessonCourseAssignmentSummary | ProgressiveCourseAssignmentSummary;
 
 export interface LearnerCourseSnapshotLessonAssignment extends LessonCourseAssignmentSummary {
+  hasConfigurableSettings?: boolean;
   fileName: string;
   tags: string[];
   currentStimuliSetId: string | number | null;
@@ -121,7 +123,7 @@ export interface LearnerCourseSnapshotCourse {
 }
 
 export interface LearnerCoursesSnapshot {
-  version: 3;
+  version: 4;
   userId: string;
   generatedAt: number;
   assignedCourses: LearnerCourseSnapshotCourse[];

@@ -22,7 +22,6 @@ type PrepareLessonLaunchParams = {
   speechOutOfGrammarFeedback: unknown;
   source: string;
   courseAssignment?: CourseAssignmentHistoryContext | null;
-  applyContent?: (content: any) => any;
   setLaunchLoadingMessage?: LessonLaunchMessageSetter;
   markLaunchLoadingTiming?: LessonLaunchTimingLogger;
 };
@@ -40,7 +39,6 @@ export async function prepareLessonLaunchContext(params: PrepareLessonLaunchPara
     currentTdfId,
     currentStimuliSetId,
     source,
-    applyContent,
     setLaunchLoadingMessage,
     markLaunchLoadingTiming,
   } = params;
@@ -62,12 +60,9 @@ export async function prepareLessonLaunchContext(params: PrepareLessonLaunchPara
   markLaunchLoadingTiming?.('loadLaunchReadyTdf:complete', { currentTdfId });
 
   const tdfDoc = launchTdf.tdfDoc;
-  let content = launchTdf.content;
+  const content = launchTdf.content;
   if (launchTdf.isConditionRoot) {
     clientConsole(2, `[${source}] Selected root condition TDF without unit array; continuing via condition-resolve flow:`, currentTdfId);
-  }
-  if (applyContent) {
-    content = applyContent(content);
   }
 
   const setspec = content?.tdfs?.tutor?.setspec || {};
