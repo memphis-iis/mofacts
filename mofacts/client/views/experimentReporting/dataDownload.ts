@@ -223,6 +223,8 @@ function startDownloadFromUrl(url: string): void {
   const a = document.createElement('a');
   document.body.appendChild(a);
   a.style.display = 'none';
+  // Keep same-origin file links out of FlowRouter; the server names the file.
+  a.download = '';
   a.href = url;
   a.click();
   document.body.removeChild(a);

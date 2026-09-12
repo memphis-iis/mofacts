@@ -301,6 +301,11 @@
   gap: var(--app-space-2);
 }
 
+.course-assignment-card-title > .course-assignment-card-meta {
+  flex-shrink: 0;
+  max-width: 100%;
+}
+
 .course-assignment-card-assignment {
   color: var(--app-page-header-text-color);
   font-weight: 600;

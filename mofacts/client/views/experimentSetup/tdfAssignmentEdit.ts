@@ -321,7 +321,7 @@ Template.tdfAssignmentEdit.helpers({
     return toDatetimeLocalValue((this as AssignmentEditorRow).dueAt, (Template.instance() as AssignmentEditorInstance).timezone.get());
   },
   isRequiredChecked() {
-    return (this as AssignmentEditorRow).required ? 'checked' : '';
+    return (this as AssignmentEditorRow).required ? 'checked' : null;
   },
   rowControlId(prefix: string) {
     const row = this as AssignmentEditorRow;

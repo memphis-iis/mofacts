@@ -565,14 +565,14 @@ Template.audioSettings.helpers({
     return rangeProgress((Template.instance() as AudioSettingsInstance).volumeDraft.get(), -6, 6);
   },
 
-  audioPromptSpeakingRateSelected(value: string): string {
+  audioPromptSpeakingRateSelected(value: string): string | null {
     const settings = readySettings(Template.instance() as AudioSettingsInstance);
-    return settings && sharedSpeakingRate(settings) === Number.parseFloat(value) ? 'selected' : '';
+    return settings && sharedSpeakingRate(settings) === Number.parseFloat(value) ? 'selected' : null;
   },
 
-  audioPromptVoiceSelected(value: string): string {
+  audioPromptVoiceSelected(value: string): string | null {
     const settings = readySettings(Template.instance() as AudioSettingsInstance);
-    return settings && sharedVoice(settings) === value ? 'selected' : '';
+    return settings && sharedVoice(settings) === value ? 'selected' : null;
   },
 
   audioInputSensitivity(): number {

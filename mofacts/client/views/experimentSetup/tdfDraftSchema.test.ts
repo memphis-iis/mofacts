@@ -21,6 +21,11 @@ describe('prepareTutorSchemaForJsonEditor', function() {
     const prepared = prepareTutorSchemaForJsonEditor(schema);
     const conditional = prepared.allOf[0];
 
+    expect(Object.keys(conditional.properties)).to.have.members([
+      'setspec',
+      'unit',
+      'deliverySettings'
+    ]);
     expect(Object.keys(conditional.then.properties)).to.have.members([
       'setspec',
       'unit',
@@ -31,13 +36,17 @@ describe('prepareTutorSchemaForJsonEditor', function() {
       'unit',
       'deliverySettings'
     ]);
-    expect(conditional.then.not).to.deep.equal({ required: ['unit'] });
+    expect(conditional.then.not.required).to.deep.equal(['unit']);
+    expect(conditional.then.not.properties).to.have.keys('setspec', 'unit', 'deliverySettings');
+    expect(conditional.if.properties.setspec.required).to.deep.equal(['condition']);
+    expect(conditional.if.properties).to.have.keys('setspec', 'unit', 'deliverySettings');
     expect(conditional.else.properties.unit).to.deep.equal({
       type: 'array',
       items: { type: 'object' },
       minItems: 1
     });
     expect(prepared.required).to.deep.equal(['setspec']);
+    expect(schema.allOf[0]).not.to.have.property('properties');
     expect(schema.allOf[0]?.then).not.to.have.property('properties');
   });
 });

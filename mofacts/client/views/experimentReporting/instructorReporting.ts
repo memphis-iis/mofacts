@@ -397,8 +397,8 @@ Template.instructorReporting.helpers({
   dueDateFilter(): boolean {
     return (Template.instance() as InstructorReportingInstance).dueDateFilter.get();
   },
-  dueDateFilterChecked(): string {
-    return (Template.instance() as InstructorReportingInstance).dueDateFilter.get() ? 'checked' : '';
+  dueDateFilterChecked(): string | null {
+    return (Template.instance() as InstructorReportingInstance).dueDateFilter.get() ? 'checked' : null;
   },
   tdfSelectDisabled(): boolean {
     const instance = Template.instance() as InstructorReportingInstance;
